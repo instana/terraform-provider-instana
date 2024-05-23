@@ -60,8 +60,8 @@ jobs:
     - name: Run sonar
       uses: sonarsource/sonarcloud-github-action@master
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
       with:
         args: >
           -Dsonar.projectVersion=${{ steps.get_version.outputs.VERSION }}
