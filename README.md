@@ -5,7 +5,7 @@
 
 Terraform provider implementation for the Instana REST API.
 
-Terraform Registry: <https://registry.terraform.io/providers/gessnerfl/instana/latest>
+Terraform Registry : <https://registry.terraform.io/providers/gessnerfl/instana/latest>
 
 Changes Log: **[CHANGELOG.md](https://github.com/gessnerfl/terraform-provider-instana/blob/master/CHANGELOG.md)**
 
