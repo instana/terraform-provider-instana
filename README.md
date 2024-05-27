@@ -1,17 +1,14 @@
 # Terraform Provider Instana
 
-![CI/CD Build](https://github.com/gessnerfl/terraform-provider-instana/workflows/CICD/badge.svg)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=de.gessnerfl.terraform-provider-instana&metric=alert_status)](https://sonarcloud.io/dashboard?id=de.gessnerfl.terraform-provider-instana)
-
 Terraform provider implementation for the Instana REST API.
 
-Terraform Registry : <https://registry.terraform.io/providers/gessnerfl/instana/latest>
+Terraform Registry : <https://registry.terraform.io/providers/instana/instana/latest>
 
-Changes Log: **[CHANGELOG.md](https://github.com/gessnerfl/terraform-provider-instana/blob/master/CHANGELOG.md)**
+Changes Log: **[CHANGELOG.md](https://github.com/instana/terraform-provider-instana/blob/master/CHANGELOG.md)**
 
 ## Documentation
 
-The documentation of the provider can be found on the Terraform Registry Page <https://registry.terraform.io/providers/gessnerfl/instana/latest>.
+The documentation of the provider can be found on the Terraform Registry Page <https://registry.terraform.io/providers/instana/instana/latest>.
 
 ## Implementation Details
 
