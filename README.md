@@ -1,3 +1,5 @@
+> **Note** : This **terraform-provider-instana** project repository has been taken from [gessnerfl](https://github.com/gessnerfl) org and is now maintained under IBM's offical [Instana](https://github.com/instana) org since [v3.0.0](https://github.com/instana/terraform-provider-instana/releases/tag/v3.0.0).  
+
 # Terraform Provider Instana
 
 Terraform provider implementation for the Instana REST API.

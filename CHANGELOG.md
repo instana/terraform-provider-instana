@@ -1,5 +1,13 @@
 # Changelog
 
+## [v3.0.0](https://github.com/instana/terraform-provider-instana/releases/tag/v3.0.0) (2024-05-30)
+
+**Organization change:**
+
+- From this version, the **terraform-provider-instana** project repository has been move from [gessnerfl](https://github.com/gessnerfl) org to IBM's offical [Instana](https://github.com/instana) org and is available at [terraform-provider-instana](https://github.com/instana/terraform-provider-instana).
+- Also, the **Instana terraform Provider** is now published under IBM's offical Instana namespace in the Terraform registry and is available at [Instana terraform Provider](https://registry.terraform.io/providers/instana/instana/latest)
+
+
 ## [v2.3.0](https://github.com/gessnerfl/terraform-provider-instana/tree/v2.3.0) (2023-11-06)
 
 [Full Changelog](https://github.com/gessnerfl/terraform-provider-instana/compare/v2.2.1...v2.3.0)
