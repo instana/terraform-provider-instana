@@ -49,8 +49,8 @@ func (ds *syntheticLocationDataSource) CreateResource() *schema.Resource {
 			SyntheticLocationFieldLocationType: {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Description:  "Indicates if the location is public or private",
-				ValidateFunc: validation.StringInSlice([]string{"Public", "Private"}, true),
+				Description:  "Indicates if the location is public, private or managed",
+				ValidateFunc: validation.StringInSlice([]string{"Public", "Private", "Managed"}, true),
 			},
 		},
 	}
