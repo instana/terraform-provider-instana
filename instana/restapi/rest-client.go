@@ -146,7 +146,7 @@ func (client *restClientImpl) createRequest() *resty.Request {
 	terraformProviderVersion := ""
 	file, err := os.Open(basepath + "/CHANGELOG.md")
 	if err != nil {
-		log.Fatal(err)
+		log.Println("Error: couldn't open file", basepath+"/CHANGELOG.md", err)
 	}
 	defer file.Close()
 
@@ -156,13 +156,13 @@ func (client *restClientImpl) createRequest() *resty.Request {
 		scanner.Scan()
 	}
 	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
+		log.Println("Error: Couldn't scan file", err)
+	} else {
+		//Read version number from first line  of CHANGELOG.md starting with ##
+		terraformProviderVersion = scanner.Text()
+		terraformProviderVersion = strings.Split(terraformProviderVersion, "]")[0]
+		terraformProviderVersion = strings.Split(terraformProviderVersion, "[")[1]
 	}
-
-	//Read version number from first line with ##
-	terraformProviderVersion = scanner.Text()
-	terraformProviderVersion = strings.Split(terraformProviderVersion, "]")[0]
-	terraformProviderVersion = strings.Split(terraformProviderVersion, "[")[1]
 
 	//return client with headers needed for every call
 	return client.restyClient.R().SetHeader("Accept", "application/json").SetHeader("Authorization", fmt.Sprintf("apiToken %s", client.apiToken)).SetHeader("user-agent", terraformProviderVersion)
