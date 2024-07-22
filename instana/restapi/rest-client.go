@@ -147,6 +147,7 @@ func (client *restClientImpl) createRequest() *resty.Request {
 	file, err := os.Open(basepath + "/CHANGELOG.md")
 	if err != nil {
 		log.Println("Error: couldn't open file", basepath+"/CHANGELOG.md", err)
+		return client.restyClient.R().SetHeader("Accept", "application/json").SetHeader("Authorization", fmt.Sprintf("apiToken %s", client.apiToken)).SetHeader("user-agent", terraformProviderVersion)
 	}
 	defer file.Close()
 
