@@ -1,11 +1,15 @@
 package restapi
 
 import (
+	"bufio"
 	"context"
 	"crypto/tls"
 	"errors"
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -134,7 +138,34 @@ func (client *restClientImpl) PutByQuery(resourcePath string, id string, queryPa
 }
 
 func (client *restClientImpl) createRequest() *resty.Request {
-	return client.restyClient.R().SetHeader("Accept", "application/json").SetHeader("Authorization", fmt.Sprintf("apiToken %s", client.apiToken))
+	//get path to root directory from runtime executor
+	_, b, _, _ := runtime.Caller(0)
+	basepath := filepath.Join(filepath.Dir(b), "../..")
+
+	//open CHANGELOG.md from root directory (only file storing updated version number)
+	terraformProviderVersion := ""
+	file, err := os.Open(basepath + "/CHANGELOG.md")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	//read lines from CHANGELOG.md until first line starting with ##
+	scanner := bufio.NewScanner(file)
+	for !strings.Contains(scanner.Text(), "##") {
+		scanner.Scan()
+	}
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	//Read version number from first line with ##
+	terraformProviderVersion = scanner.Text()
+	terraformProviderVersion = strings.Split(terraformProviderVersion, "]")[0]
+	terraformProviderVersion = strings.Split(terraformProviderVersion, "[")[1]
+
+	//return client with headers needed for every call
+	return client.restyClient.R().SetHeader("Accept", "application/json").SetHeader("Authorization", fmt.Sprintf("apiToken %s", client.apiToken)).SetHeader("user-agent", terraformProviderVersion)
 }
 
 func (client *restClientImpl) executeRequestWithThrottling(method string, url string, req *resty.Request) ([]byte, error) {
