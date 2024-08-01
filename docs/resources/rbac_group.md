@@ -39,7 +39,6 @@ resource "instana_rbac_group" "example" {
     * `permissions` - Optional - the list of permissions granted to the given group. Allowed values
       are: 
       * `CAN_CONFIGURE_APPLICATIONS`
-      * `CAN_SEE_ON_PREM_LICENE_INFORMATION`
       * `CAN_CONFIGURE_EUM_APPLICATIONS`
       * `CAN_CONFIGURE_AGENTS`
       * `CAN_VIEW_TRACE_DETAILS`
@@ -57,7 +56,6 @@ resource "instana_rbac_group" "example" {
       * `CAN_CONFIGURE_CUSTOM_ALERTS`
       * `CAN_CONFIGURE_AGENT_RUN_MODE`
       * `CAN_CONFIGURE_SERVICE_MAPPING`
-      * `CAN_SEE_USAGE_INFORMATION`
       * `CAN_EDIT_ALL_ACCESSIBLE_CUSTOM_DASHBOARDS`
       * `CAN_CONFIGURE_USERS`
       * `CAN_INSTALL_NEW_AGENTS`

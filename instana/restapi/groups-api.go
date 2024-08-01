@@ -6,8 +6,6 @@ type InstanaPermission string
 const (
 	//PermissionCanConfigureApplications const for Instana permission CAN_CONFIGURE_APPLICATIONS
 	PermissionCanConfigureApplications = InstanaPermission("CAN_CONFIGURE_APPLICATIONS")
-	//PermissionCanSeeOnPremLiceneInformation const for Instana permission CAN_SEE_ON_PREM_LICENE_INFORMATION
-	PermissionCanSeeOnPremLiceneInformation = InstanaPermission("CAN_SEE_ON_PREM_LICENE_INFORMATION")
 	//PermissionCanConfigureEumApplications const for Instana permission CAN_CONFIGURE_EUM_APPLICATIONS
 	PermissionCanConfigureEumApplications = InstanaPermission("CAN_CONFIGURE_EUM_APPLICATIONS")
 	//PermissionCanConfigureAgents const for Instana permission CAN_CONFIGURE_AGENTS
@@ -42,8 +40,6 @@ const (
 	PermissionCanConfigureAgentRunMode = InstanaPermission("CAN_CONFIGURE_AGENT_RUN_MODE")
 	//PermissionCanConfigureServiceMapping const for Instana permission CAN_CONFIGURE_SERVICE_MAPPING
 	PermissionCanConfigureServiceMapping = InstanaPermission("CAN_CONFIGURE_SERVICE_MAPPING")
-	//PermissionCanSeeUsageInformation const for Instana permission CAN_SEE_USAGE_INFORMATION
-	PermissionCanSeeUsageInformation = InstanaPermission("CAN_SEE_USAGE_INFORMATION")
 	//PermissionCanEditAllAccessibleCustomDashboards const for Instana permission CAN_EDIT_ALL_ACCESSIBLE_CUSTOM_DASHBOARDS
 	PermissionCanEditAllAccessibleCustomDashboards = InstanaPermission("CAN_EDIT_ALL_ACCESSIBLE_CUSTOM_DASHBOARDS")
 	//PermissionCanConfigureUsers const for Instana permission CAN_CONFIGURE_USERS
@@ -75,7 +71,6 @@ func (permissions InstanaPermissions) ToStringSlice() []string {
 // SupportedInstanaPermissions slice of all supported Permissions of the Instana API
 var SupportedInstanaPermissions = InstanaPermissions{
 	PermissionCanConfigureApplications,
-	PermissionCanSeeOnPremLiceneInformation,
 	PermissionCanConfigureEumApplications,
 	PermissionCanConfigureAgents,
 	PermissionCanViewTraceDetails,
@@ -93,7 +88,6 @@ var SupportedInstanaPermissions = InstanaPermissions{
 	PermissionCanConfigureCustomAlerts,
 	PermissionCanConfigureAgentRunMode,
 	PermissionCanConfigureServiceMapping,
-	PermissionCanSeeUsageInformation,
 	PermissionCanEditAllAccessibleCustomDashboards,
 	PermissionCanConfigureUsers,
 	PermissionCanInstallNewAgents,

@@ -16,7 +16,6 @@ resource "instana_api_token" "example" {
   can_configure_mobile_app_monitoring       = true
   can_configure_users                       = true
   can_install_new_agents                    = true
-  can_see_usage_information                 = true
   can_configure_integrations                = true
   can_see_on_premise_license_information    = true
   can_configure_custom_alerts               = true
@@ -50,7 +49,6 @@ resource "instana_api_token" "example" {
 * `can_configure_mobile_app_monitoring` - Optional - default false - enables permission to configure mobile app monitoring
 * `can_configure_users` - Optional - default false - enables permission to configure users
 * `can_install_new_agents` - Optional - default false - enables permission to install new agents
-* `can_see_usage_information` - Optional - default false - enables permission to see usage information
 * `can_configure_integrations` - Optional - default false - enables permission to configure integrations
 * `can_see_on_premise_license_information` - Optional - default false - enables permission to see on premise license information
 * `can_configure_custom_alerts` - Optional - default false - enables permission to configure custom alerts

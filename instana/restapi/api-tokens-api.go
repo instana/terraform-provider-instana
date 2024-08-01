@@ -14,9 +14,7 @@ type APIToken struct {
 	CanConfigureMobileAppMonitoring      bool   `json:"canConfigureMobileAppMonitoring"` //NEW
 	CanConfigureUsers                    bool   `json:"canConfigureUsers"`
 	CanInstallNewAgents                  bool   `json:"canInstallNewAgents"`
-	CanSeeUsageInformation               bool   `json:"canSeeUsageInformation"`
 	CanConfigureIntegrations             bool   `json:"canConfigureIntegrations"`
-	CanSeeOnPremiseLicenseInformation    bool   `json:"canSeeOnPremLicenseInformation"`
 	CanConfigureCustomAlerts             bool   `json:"canConfigureCustomAlerts"`
 	CanConfigureAPITokens                bool   `json:"canConfigureApiTokens"`
 	CanConfigureAgentRunMode             bool   `json:"canConfigureAgentRunMode"`

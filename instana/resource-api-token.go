@@ -2,6 +2,7 @@ package instana
 
 import (
 	"context"
+
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/tfutils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -30,12 +31,8 @@ const (
 	APITokenFieldCanConfigureUsers = "can_configure_users"
 	//APITokenFieldCanInstallNewAgents constant value for the schema field can_install_new_agents
 	APITokenFieldCanInstallNewAgents = "can_install_new_agents"
-	//APITokenFieldCanSeeUsageInformation constant value for the schema field can_see_usage_information
-	APITokenFieldCanSeeUsageInformation = "can_see_usage_information"
 	//APITokenFieldCanConfigureIntegrations constant value for the schema field can_configure_integrations
 	APITokenFieldCanConfigureIntegrations = "can_configure_integrations"
-	//APITokenFieldCanSeeOnPremiseLicenseInformation constant value for the schema field can_see_on_premise_license_information
-	APITokenFieldCanSeeOnPremiseLicenseInformation = "can_see_on_premise_license_information"
 	//APITokenFieldCanConfigureCustomAlerts constant value for the schema field can_configure_custom_alerts
 	APITokenFieldCanConfigureCustomAlerts = "can_configure_custom_alerts"
 	//APITokenFieldCanConfigureAPITokens constant value for the schema field can_configure_api_tokens
@@ -127,23 +124,11 @@ var (
 		Default:     false,
 		Description: "Configures if the API token is allowed to install new agents",
 	}
-	apiTokenSchemaCanSeeUsageInformation = &schema.Schema{
-		Type:        schema.TypeBool,
-		Optional:    true,
-		Default:     false,
-		Description: "Configures if the API token is allowed to see usage information",
-	}
 	apiTokenSchemaCanConfigureIntegrations = &schema.Schema{
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Default:     false,
 		Description: "Configures if the API token is allowed to configure integrations",
-	}
-	apiTokenSchemaCanSeeOnPremiseLicenseInformation = &schema.Schema{
-		Type:        schema.TypeBool,
-		Optional:    true,
-		Default:     false,
-		Description: "Configures if the API token is allowed to see onPremise license information",
 	}
 	apiTokenSchemaCanConfigureCustomAlerts = &schema.Schema{
 		Type:        schema.TypeBool,
@@ -276,9 +261,7 @@ func NewAPITokenResourceHandle() ResourceHandle[*restapi.APIToken] {
 				APITokenFieldCanConfigureMobileAppMonitoring:      apiTokenSchemaCanConfigureMobileAppMonitoring,
 				APITokenFieldCanConfigureUsers:                    apiTokenSchemaCanConfigureUsers,
 				APITokenFieldCanInstallNewAgents:                  apiTokenSchemaCanInstallNewAgents,
-				APITokenFieldCanSeeUsageInformation:               apiTokenSchemaCanSeeUsageInformation,
 				APITokenFieldCanConfigureIntegrations:             apiTokenSchemaCanConfigureIntegrations,
-				APITokenFieldCanSeeOnPremiseLicenseInformation:    apiTokenSchemaCanSeeOnPremiseLicenseInformation,
 				APITokenFieldCanConfigureCustomAlerts:             apiTokenSchemaCanConfigureCustomAlerts,
 				APITokenFieldCanConfigureAPITokens:                apiTokenSchemaCanConfigureAPITokens,
 				APITokenFieldCanConfigureAgentRunMode:             apiTokenSchemaCanConfigureAgentRunMode,
@@ -346,9 +329,7 @@ func (r *apiTokenResource) UpdateState(d *schema.ResourceData, apiToken *restapi
 		APITokenFieldCanConfigureMobileAppMonitoring:      apiToken.CanConfigureMobileAppMonitoring,
 		APITokenFieldCanConfigureUsers:                    apiToken.CanConfigureUsers,
 		APITokenFieldCanInstallNewAgents:                  apiToken.CanInstallNewAgents,
-		APITokenFieldCanSeeUsageInformation:               apiToken.CanSeeUsageInformation,
 		APITokenFieldCanConfigureIntegrations:             apiToken.CanConfigureIntegrations,
-		APITokenFieldCanSeeOnPremiseLicenseInformation:    apiToken.CanSeeOnPremiseLicenseInformation,
 		APITokenFieldCanConfigureCustomAlerts:             apiToken.CanConfigureCustomAlerts,
 		APITokenFieldCanConfigureAPITokens:                apiToken.CanConfigureAPITokens,
 		APITokenFieldCanConfigureAgentRunMode:             apiToken.CanConfigureAgentRunMode,
@@ -382,9 +363,7 @@ func (r *apiTokenResource) MapStateToDataObject(d *schema.ResourceData) (*restap
 		CanConfigureMobileAppMonitoring:      d.Get(APITokenFieldCanConfigureMobileAppMonitoring).(bool),
 		CanConfigureUsers:                    d.Get(APITokenFieldCanConfigureUsers).(bool),
 		CanInstallNewAgents:                  d.Get(APITokenFieldCanInstallNewAgents).(bool),
-		CanSeeUsageInformation:               d.Get(APITokenFieldCanSeeUsageInformation).(bool),
 		CanConfigureIntegrations:             d.Get(APITokenFieldCanConfigureIntegrations).(bool),
-		CanSeeOnPremiseLicenseInformation:    d.Get(APITokenFieldCanSeeOnPremiseLicenseInformation).(bool),
 		CanConfigureCustomAlerts:             d.Get(APITokenFieldCanConfigureCustomAlerts).(bool),
 		CanConfigureAPITokens:                d.Get(APITokenFieldCanConfigureAPITokens).(bool),
 		CanConfigureAgentRunMode:             d.Get(APITokenFieldCanConfigureAgentRunMode).(bool),
@@ -427,9 +406,7 @@ func (r *apiTokenResource) schemaV0() *schema.Resource {
 			APITokenFieldCanConfigureMobileAppMonitoring:      apiTokenSchemaCanConfigureMobileAppMonitoring,
 			APITokenFieldCanConfigureUsers:                    apiTokenSchemaCanConfigureUsers,
 			APITokenFieldCanInstallNewAgents:                  apiTokenSchemaCanInstallNewAgents,
-			APITokenFieldCanSeeUsageInformation:               apiTokenSchemaCanSeeUsageInformation,
 			APITokenFieldCanConfigureIntegrations:             apiTokenSchemaCanConfigureIntegrations,
-			APITokenFieldCanSeeOnPremiseLicenseInformation:    apiTokenSchemaCanSeeOnPremiseLicenseInformation,
 			APITokenFieldCanConfigureCustomAlerts:             apiTokenSchemaCanConfigureCustomAlerts,
 			APITokenFieldCanConfigureAPITokens:                apiTokenSchemaCanConfigureAPITokens,
 			APITokenFieldCanConfigureAgentRunMode:             apiTokenSchemaCanConfigureAgentRunMode,
