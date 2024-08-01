@@ -26,7 +26,6 @@ resource "instana_api_token" "example" {
   can_configure_users = true
   can_install_new_agents = true
   can_configure_integrations = true
-  can_see_on_premise_license_information = true
   can_configure_custom_alerts = true
   can_configure_api_tokens = true
   can_configure_agent_run_mode = true
