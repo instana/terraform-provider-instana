@@ -25,9 +25,7 @@ resource "instana_api_token" "example" {
   can_configure_mobile_app_monitoring = true
   can_configure_users = true
   can_install_new_agents = true
-  can_see_usage_information = true
   can_configure_integrations = true
-  can_see_on_premise_license_information = true
   can_configure_custom_alerts = true
   can_configure_api_tokens = true
   can_configure_agent_run_mode = true
@@ -66,9 +64,7 @@ var apiTokenPermissionFields = []string{
 	APITokenFieldCanConfigureMobileAppMonitoring,
 	APITokenFieldCanConfigureUsers,
 	APITokenFieldCanInstallNewAgents,
-	APITokenFieldCanSeeUsageInformation,
 	APITokenFieldCanConfigureIntegrations,
-	APITokenFieldCanSeeOnPremiseLicenseInformation,
 	APITokenFieldCanConfigureCustomAlerts,
 	APITokenFieldCanConfigureAPITokens,
 	APITokenFieldCanConfigureAgentRunMode,
@@ -132,9 +128,7 @@ func TestCRUDOfAPITokenResourceWithMockServer(t *testing.T) {
 			"canConfigureMobileAppMonitoring" : true,
 			"canConfigureUsers" : true,
 			"canInstallNewAgents" : true,
-			"canSeeUsageInformation" : true,
 			"canConfigureIntegrations" : true,
-			"canSeeOnPremLicenseInformation" : true,
 			"canConfigureCustomAlerts" : true,
 			"canConfigureApiTokens" : true,
 			"canConfigureAgentRunMode" : true,
@@ -190,9 +184,7 @@ func createAPITokenConfigResourceTestStep(httpPort int, iteration int, id string
 			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureMobileAppMonitoring, trueAsString),
 			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureUsers, trueAsString),
 			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanInstallNewAgents, trueAsString),
-			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanSeeUsageInformation, trueAsString),
 			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureIntegrations, trueAsString),
-			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanSeeOnPremiseLicenseInformation, trueAsString),
 			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureCustomAlerts, trueAsString),
 			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureAPITokens, trueAsString),
 			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureAgentRunMode, trueAsString),
@@ -228,9 +220,7 @@ func TestAPITokenSchemaDefinitionIsValid(t *testing.T) {
 	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureMobileAppMonitoring, false)
 	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureUsers, false)
 	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanInstallNewAgents, false)
-	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanSeeUsageInformation, false)
 	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureIntegrations, false)
-	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanSeeOnPremiseLicenseInformation, false)
 	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureCustomAlerts, false)
 	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureAPITokens, false)
 	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureAgentRunMode, false)
@@ -326,9 +316,7 @@ func TestShouldUpdateBasicFieldsOfTerraformResourceStateFromModelForAPIToken(t *
 	require.False(t, resourceData.Get(APITokenFieldCanConfigureMobileAppMonitoring).(bool))
 	require.False(t, resourceData.Get(APITokenFieldCanConfigureUsers).(bool))
 	require.False(t, resourceData.Get(APITokenFieldCanInstallNewAgents).(bool))
-	require.False(t, resourceData.Get(APITokenFieldCanSeeUsageInformation).(bool))
 	require.False(t, resourceData.Get(APITokenFieldCanConfigureIntegrations).(bool))
-	require.False(t, resourceData.Get(APITokenFieldCanSeeOnPremiseLicenseInformation).(bool))
 	require.False(t, resourceData.Get(APITokenFieldCanConfigureCustomAlerts).(bool))
 	require.False(t, resourceData.Get(APITokenFieldCanConfigureAPITokens).(bool))
 	require.False(t, resourceData.Get(APITokenFieldCanConfigureAgentRunMode).(bool))
@@ -410,18 +398,6 @@ func TestShouldUpdateCanInstallNewAgentsPermissionOfTerraformResourceStateFromMo
 	testSingleAPITokenPermissionSet(t, apiToken, APITokenFieldCanInstallNewAgents)
 }
 
-func TestShouldUpdateCanSeeUsageInformationPermissionOfTerraformResourceStateFromModelForAPIToken(t *testing.T) {
-	apiToken := restapi.APIToken{
-		ID:                     apiTokenID,
-		InternalID:             apiTokenInternalID,
-		AccessGrantingToken:    apiTokenAccessGrantingToken,
-		Name:                   apiTokenNameFieldValue,
-		CanSeeUsageInformation: true,
-	}
-
-	testSingleAPITokenPermissionSet(t, apiToken, APITokenFieldCanSeeUsageInformation)
-}
-
 func TestShouldUpdateCanConfigureIntegrationsPermissionOfTerraformResourceStateFromModelForAPIToken(t *testing.T) {
 	apiToken := restapi.APIToken{
 		ID:                       apiTokenID,
@@ -432,18 +408,6 @@ func TestShouldUpdateCanConfigureIntegrationsPermissionOfTerraformResourceStateF
 	}
 
 	testSingleAPITokenPermissionSet(t, apiToken, APITokenFieldCanConfigureIntegrations)
-}
-
-func TestShouldUpdateCanSeeOnPremiseLicenseInformationPermissionOfTerraformResourceStateFromModelForAPIToken(t *testing.T) {
-	apiToken := restapi.APIToken{
-		ID:                                apiTokenID,
-		InternalID:                        apiTokenInternalID,
-		AccessGrantingToken:               apiTokenAccessGrantingToken,
-		Name:                              apiTokenNameFieldValue,
-		CanSeeOnPremiseLicenseInformation: true,
-	}
-
-	testSingleAPITokenPermissionSet(t, apiToken, APITokenFieldCanSeeOnPremiseLicenseInformation)
 }
 
 func TestShouldUpdateCanConfigureCustomAlertsPermissionOfTerraformResourceStateFromModelForAPIToken(t *testing.T) {
@@ -703,9 +667,7 @@ func TestShouldConvertStateOfAPITokenTerraformResourceToDataModel(t *testing.T) 
 	setValueOnResourceData(t, resourceData, APITokenFieldCanConfigureMobileAppMonitoring, true)
 	setValueOnResourceData(t, resourceData, APITokenFieldCanConfigureUsers, true)
 	setValueOnResourceData(t, resourceData, APITokenFieldCanInstallNewAgents, true)
-	setValueOnResourceData(t, resourceData, APITokenFieldCanSeeUsageInformation, true)
 	setValueOnResourceData(t, resourceData, APITokenFieldCanConfigureIntegrations, true)
-	setValueOnResourceData(t, resourceData, APITokenFieldCanSeeOnPremiseLicenseInformation, true)
 	setValueOnResourceData(t, resourceData, APITokenFieldCanConfigureCustomAlerts, true)
 	setValueOnResourceData(t, resourceData, APITokenFieldCanConfigureAPITokens, true)
 	setValueOnResourceData(t, resourceData, APITokenFieldCanConfigureAgentRunMode, true)
@@ -740,9 +702,7 @@ func TestShouldConvertStateOfAPITokenTerraformResourceToDataModel(t *testing.T) 
 	require.True(t, model.CanConfigureMobileAppMonitoring)
 	require.True(t, model.CanConfigureUsers)
 	require.True(t, model.CanInstallNewAgents)
-	require.True(t, model.CanSeeUsageInformation)
 	require.True(t, model.CanConfigureIntegrations)
-	require.True(t, model.CanSeeOnPremiseLicenseInformation)
 	require.True(t, model.CanConfigureCustomAlerts)
 	require.True(t, model.CanConfigureAPITokens)
 	require.True(t, model.CanConfigureAgentRunMode)
