@@ -72,3 +72,11 @@ type TimeThreshold struct {
 	Requests   *int32 `json:"requests"`
 	Violations *int32 `json:"violations"`
 }
+
+type ThresholdRule struct {
+	Type            string                `json:"type"`
+	Value           *float64              `json:"value"`
+	Seasonality     *ThresholdSeasonality `json:"seasonality"`
+	Baseline        *[][]float64          `json:"baseline"`
+	DeviationFactor *float32              `json:"deviationFactor"`
+}

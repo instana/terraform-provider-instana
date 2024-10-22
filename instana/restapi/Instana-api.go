@@ -36,6 +36,7 @@ type InstanaAPI interface {
 	SliConfigs() RestResource[*SliConfig]
 	WebsiteMonitoringConfig() RestResource[*WebsiteMonitoringConfig]
 	WebsiteAlertConfig() RestResource[*WebsiteAlertConfig]
+	InfraAlertConfig() RestResource[*InfraAlertConfig]
 	Groups() RestResource[*Group]
 	CustomDashboards() RestResource[*CustomDashboard]
 	SyntheticTest() RestResource[*SyntheticTest]
@@ -102,6 +103,10 @@ func (api *baseInstanaAPI) WebsiteMonitoringConfig() RestResource[*WebsiteMonito
 
 func (api *baseInstanaAPI) WebsiteAlertConfig() RestResource[*WebsiteAlertConfig] {
 	return NewCreatePOSTUpdatePOSTRestResource(WebsiteAlertConfigResourcePath, NewCustomPayloadFieldsUnmarshallerAdapter(NewDefaultJSONUnmarshaller(&WebsiteAlertConfig{})), api.client)
+}
+
+func (api *baseInstanaAPI) InfraAlertConfig() RestResource[*InfraAlertConfig] {
+	return NewCreatePOSTUpdatePOSTRestResource(InfraAlertConfigResourcePath, NewCustomPayloadFieldsUnmarshallerAdapter(NewDefaultJSONUnmarshaller(&InfraAlertConfig{})), api.client)
 }
 
 func (api *baseInstanaAPI) Groups() RestResource[*Group] {
