@@ -8,6 +8,7 @@ import (
 )
 
 func TestShouldReturnSupportedAggregationsAsStringSlice(t *testing.T) {
-	expected := []string{"SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99", "P99_9", "P99_99", "DISTRIBUTION", "DISTINCT_COUNT", "SUM_POSITIVE"}
+	expected := []string{"SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99", "P99_9", "P99_99",
+		"DISTRIBUTION", "DISTINCT_COUNT", "SUM_POSITIVE", "PER_SECOND", "INCREASE"}
 	require.Equal(t, expected, SupportedAggregations.ToStringSlice())
 }

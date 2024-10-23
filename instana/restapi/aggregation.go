@@ -48,7 +48,12 @@ const (
 	DistinctCountAggregation = Aggregation("DISTINCT_COUNT")
 	//SumPositiveAggregation constant value for the sum positive aggregation type
 	SumPositiveAggregation = Aggregation("SUM_POSITIVE")
+	PerSecondAggregation   = Aggregation("PER_SECOND")
+	IncreaseAggregation    = Aggregation("INCREASE")
 )
 
 // SupportedAggregations list of all supported Aggregation
-var SupportedAggregations = Aggregations{SumAggregation, MeanAggregation, MaxAggregation, MinAggregation, Percentile25Aggregation, Percentile50Aggregation, Percentile75Aggregation, Percentile90Aggregation, Percentile95Aggregation, Percentile98Aggregation, Percentile99Aggregation, Percentile99_9Aggregation, Percentile99_99Aggregation, DistributionAggregation, DistinctCountAggregation, SumPositiveAggregation}
+var SupportedAggregations = Aggregations{SumAggregation, MeanAggregation, MaxAggregation, MinAggregation, Percentile25Aggregation,
+	Percentile50Aggregation, Percentile75Aggregation, Percentile90Aggregation, Percentile95Aggregation, Percentile98Aggregation,
+	Percentile99Aggregation, Percentile99_9Aggregation, Percentile99_99Aggregation, DistributionAggregation,
+	DistinctCountAggregation, SumPositiveAggregation, PerSecondAggregation, IncreaseAggregation}
