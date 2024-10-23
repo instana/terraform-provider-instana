@@ -36,7 +36,6 @@ type InstanaAPI interface {
 	SliConfigs() RestResource[*SliConfig]
 	WebsiteMonitoringConfig() RestResource[*WebsiteMonitoringConfig]
 	WebsiteAlertConfig() RestResource[*WebsiteAlertConfig]
-	InfraAlertConfig() RestResource[*InfraAlertConfig]
 	Groups() RestResource[*Group]
 	CustomDashboards() RestResource[*CustomDashboard]
 	SyntheticTest() RestResource[*SyntheticTest]
