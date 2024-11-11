@@ -104,6 +104,10 @@ func (api *baseInstanaAPI) WebsiteAlertConfig() RestResource[*WebsiteAlertConfig
 	return NewCreatePOSTUpdatePOSTRestResource(WebsiteAlertConfigResourcePath, NewCustomPayloadFieldsUnmarshallerAdapter(NewDefaultJSONUnmarshaller(&WebsiteAlertConfig{})), api.client)
 }
 
+func (api *baseInstanaAPI) InfraAlertConfig() RestResource[*InfraAlertConfig] {
+	return NewCreatePOSTUpdatePOSTRestResource(InfraAlertConfigResourcePath, NewCustomPayloadFieldsUnmarshallerAdapter(NewDefaultJSONUnmarshaller(&InfraAlertConfig{})), api.client)
+}
+
 func (api *baseInstanaAPI) Groups() RestResource[*Group] {
 	return NewCreatePOSTUpdatePUTRestResource(GroupsResourcePath, NewDefaultJSONUnmarshaller(&Group{}), api.client)
 }
