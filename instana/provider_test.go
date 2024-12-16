@@ -29,7 +29,7 @@ func TestProviderShouldContainValidSchemaDefinition(t *testing.T) {
 func TestProviderShouldContainValidResourceDefinitions(t *testing.T) {
 	config := Provider()
 
-	assert.Equal(t, 13, len(config.ResourcesMap))
+	assert.Equal(t, 14, len(config.ResourcesMap))
 
 	assert.NotNil(t, config.ResourcesMap[ResourceInstanaAPIToken])
 	assert.NotNil(t, config.ResourcesMap[ResourceInstanaApplicationConfig])
@@ -38,6 +38,7 @@ func TestProviderShouldContainValidResourceDefinitions(t *testing.T) {
 	assert.NotNil(t, config.ResourcesMap[ResourceInstanaSliConfig])
 	assert.NotNil(t, config.ResourcesMap[ResourceInstanaWebsiteMonitoringConfig])
 	assert.NotNil(t, config.ResourcesMap[ResourceInstanaWebsiteAlertConfig])
+	assert.NotNil(t, config.ResourcesMap[ResourceInstanaInfraAlertConfig])
 	assert.NotNil(t, config.ResourcesMap[ResourceInstanaGroup])
 	assert.NotNil(t, config.ResourcesMap[ResourceInstanaCustomDashboard])
 	assert.NotNil(t, config.ResourcesMap[ResourceInstanaSyntheticTest])
@@ -54,5 +55,4 @@ func TestProviderShouldContainValidDataSourceDefinitions(t *testing.T) {
 	assert.NotNil(t, config.DataSourcesMap[DataSourceBuiltinEvent])
 	assert.NotNil(t, config.DataSourcesMap[DataSourceSyntheticLocation])
 	assert.NotNil(t, config.DataSourcesMap[DataSourceAlertingChannel])
-
 }
