@@ -1,8 +1,8 @@
 # Changelog
 
-## [Unreleased](https://github.com/instana/terraform-provider-instana/tree/HEAD)
+## [v3.0.1](https://github.com/instana/terraform-provider-instana/tree/v3.0.1) (2024-11-11)
 
-[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v3.0.0...HEAD)
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v3.0.0...v3.0.1)
 
 **Implemented enhancements:**
 
