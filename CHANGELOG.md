@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased](https://github.com/instana/terraform-provider-instana/tree/HEAD)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v3.0.1...HEAD)
+
+**Implemented enhancements:**
+
+- Add API implementation for Infra Alert Config [\#18](https://github.com/instana/terraform-provider-instana/pull/18) ([parekh-raj](https://github.com/parekh-raj))
+
+**Merged pull requests:**
+
+- Bug fix [\#16](https://github.com/instana/terraform-provider-instana/pull/16) ([rorywelch](https://github.com/rorywelch))
+
 ## [v3.0.1](https://github.com/instana/terraform-provider-instana/tree/v3.0.1) (2024-08-01)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v3.0.0...v3.0.1)
