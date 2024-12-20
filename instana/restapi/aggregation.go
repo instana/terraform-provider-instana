@@ -57,3 +57,11 @@ var SupportedAggregations = Aggregations{SumAggregation, MeanAggregation, MaxAgg
 	Percentile50Aggregation, Percentile75Aggregation, Percentile90Aggregation, Percentile95Aggregation, Percentile98Aggregation,
 	Percentile99Aggregation, Percentile99_9Aggregation, Percentile99_99Aggregation, DistributionAggregation,
 	DistinctCountAggregation, SumPositiveAggregation, PerSecondAggregation, IncreaseAggregation}
+
+var InfraExploreAggregations = Aggregations{MeanAggregation, MaxAggregation, MinAggregation, Percentile25Aggregation,
+	Percentile50Aggregation, Percentile75Aggregation, Percentile90Aggregation, Percentile95Aggregation, Percentile98Aggregation,
+	Percentile99Aggregation, SumAggregation, PerSecondAggregation}
+
+var TimeAggregations = Aggregations{MeanAggregation, MaxAggregation, MinAggregation, Percentile25Aggregation,
+	Percentile50Aggregation, Percentile75Aggregation, Percentile90Aggregation, Percentile95Aggregation, Percentile98Aggregation,
+	Percentile99Aggregation, SumAggregation}
