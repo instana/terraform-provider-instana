@@ -1,4 +1,5 @@
 bin/
+dist/
 output/
 *.test
 vendor/
