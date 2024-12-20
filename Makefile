@@ -13,7 +13,7 @@ build: clean bin/terraform-provider-instana
 
 bin/terraform-provider-instana:
 	@echo "+++++++++++  Run GO Build +++++++++++ "
-	@go build -o $@ github.com/gessnerfl/terraform-provider-instana
+	@go build -o $@ github.com/instana/terraform-provider-instana
 
 .PHONY: test
 test:
