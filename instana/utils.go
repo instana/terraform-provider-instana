@@ -45,6 +45,20 @@ func ReadStringSetParameterFromResource(d *schema.ResourceData, key string) []st
 	return nil
 }
 
+// ReadArrayParameterFromResource reads a string array parameter from a resource and returns it as a slice of strings
+func ReadArrayParameterFromResource[T any](d *schema.ResourceData, key string) []T {
+	if attr, ok := d.GetOk(key); ok {
+		var array []T
+		items := attr.([]interface{})
+		for _, x := range items {
+			item := x.(T)
+			array = append(array, item)
+		}
+		return array
+	}
+	return nil
+}
+
 // ReadSetParameterFromMap reads a set parameter from a map and returns it as a slice
 func ReadSetParameterFromMap[T any](data map[string]interface{}, key string) []T {
 	if attr, ok := data[key]; ok {

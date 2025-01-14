@@ -243,3 +243,10 @@ func (mr *MockInstanaAPIMockRecorder) WebsiteMonitoringConfig() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WebsiteMonitoringConfig", reflect.TypeOf((*MockInstanaAPI)(nil).WebsiteMonitoringConfig))
 }
+
+func (m *MockInstanaAPI) InfraAlertConfig() restapi.RestResource[*restapi.InfraAlertConfig] {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InfraAlertConfig")
+	ret0, _ := ret[0].(restapi.RestResource[*restapi.InfraAlertConfig])
+	return ret0
+}

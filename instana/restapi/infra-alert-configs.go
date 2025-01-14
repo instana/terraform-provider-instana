@@ -8,11 +8,11 @@ type InfraAlertConfig struct {
 	Description           string                              `json:"description"`
 	TagFilterExpression   *TagFilter                          `json:"tagFilterExpression"`
 	GroupBy               []string                            `json:"groupBy"`
-	AlertChannelIDs       []string                            `json:"alertChannelIds"`
 	Granularity           Granularity                         `json:"granularity"`
 	TimeThreshold         InfraTimeThreshold                  `json:"timeThreshold"`
 	CustomerPayloadFields []CustomPayloadField[any]           `json:"customPayloadFields"`
 	Rules                 []RuleWithThreshold[InfraAlertRule] `json:"rules"`
+	AlertChannels         map[AlertSeverity][]string          `json:"alertChannels"`
 }
 
 func (config *InfraAlertConfig) GetIDForResourcePath() string {
