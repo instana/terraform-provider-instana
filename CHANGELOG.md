@@ -1,6 +1,14 @@
 # Changelog
 
-## [v3.0.1](https://github.com/instana/terraform-provider-instana/tree/v3.0.1) (2024-11-11)
+## [v3.1.0](https://github.com/instana/terraform-provider-instana/tree/v3.1.0) (2025-01-14)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v3.0.1...v3.1.0)
+
+**Implemented enhancements:**
+
+- Add infra alert config resource [\#19](https://github.com/instana/terraform-provider-instana/pull/19) ([parekh-raj](https://github.com/parekh-raj))
+
+## [v3.0.1](https://github.com/instana/terraform-provider-instana/tree/v3.0.1) (2024-12-20)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v3.0.0...v3.0.1)
 
