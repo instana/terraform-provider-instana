@@ -34,6 +34,7 @@ type InstanaAPI interface {
 	AlertingChannels() RestResource[*AlertingChannel]
 	AlertingConfigurations() RestResource[*AlertingConfiguration]
 	SliConfigs() RestResource[*SliConfig]
+	SloConfigs() RestResource[*SloConfig]
 	WebsiteMonitoringConfig() RestResource[*WebsiteMonitoringConfig]
 	WebsiteAlertConfig() RestResource[*WebsiteAlertConfig]
 	InfraAlertConfig() RestResource[*InfraAlertConfig]
@@ -95,6 +96,10 @@ func (api *baseInstanaAPI) AlertingConfigurations() RestResource[*AlertingConfig
 
 func (api *baseInstanaAPI) SliConfigs() RestResource[*SliConfig] {
 	return NewCreatePOSTUpdateNotSupportedRestResource(SliConfigResourcePath, NewDefaultJSONUnmarshaller(&SliConfig{}), api.client)
+}
+
+func (api *baseInstanaAPI) SloConfigs() RestResource[*SloConfig] {
+	return NewCreatePOSTUpdatePUTRestResource(SloConfigResourcePath, NewDefaultJSONUnmarshaller(&SloConfig{}), api.client)
 }
 
 func (api *baseInstanaAPI) WebsiteMonitoringConfig() RestResource[*WebsiteMonitoringConfig] {
