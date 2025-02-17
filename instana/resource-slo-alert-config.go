@@ -62,7 +62,7 @@ var (
 	//SloAlertConfigDescription schema field definition of instana_slo_alert_config field description
 	SloAlertConfigDescription = &schema.Schema{
 		Type:        schema.TypeString,
-		Computed:    true,
+		Required:    true,
 		Description: "The full name of the SLI config. The field is computed and contains the name which is sent to instana. The computation depends on the configured default_name_prefix and default_name_suffix at provider level",
 	}
 
@@ -132,7 +132,7 @@ var (
 	}
 
 	SloAlertConfigTimeThreshold = &schema.Schema{
-		Type:        schema.TypeList,  // Represents the "time_threshold" block
+		Type:        schema.TypeList,  
 		MinItems:    1,
 		MaxItems:    1,
 		Required:    true,
@@ -152,9 +152,115 @@ var (
 			},
 		},
 	}
+
+	// SloAlertConfigCustomPayloadFields = &schema.Schema{
+	// 	Type:        schema.TypeList,  
+	// 	Optional:    true,
+	// 	Description: "Custom payload fields to include additional metadata in the alert.",
+	// 	Elem: &schema.Resource{
+	// 		Schema: map[string]*schema.Schema{
+	// 			"key": {
+	// 				Type:        schema.TypeString,
+	// 				Required:    true,
+	// 				Description: "The key name for the custom payload field.",
+	// 			},
+	// 			"value": {
+	// 				Type:        schema.TypeString,
+	// 				Required:    true,
+	// 				Description: "The value associated with the custom payload field.",
+	// 			},
+	// 		},
+	// 	},
+	// }
 	
 
+	SloAlertConfigEnabled = &schema.Schema{
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Default:     false,
+		Description: "Optional flag to indicate whether this Alert is Enabled",
+	}
 
-
-
+	SloAlertConfigBurnRateTimeWindows = &schema.Schema{
+		Type:        schema.TypeList,
+		MinItems:    1,
+		MaxItems:    1,
+		Required:    true,
+		Description: "Defines the burn rate time windows for evaluating alert conditions.",
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"long_time_window": {
+					Type:     schema.TypeList,
+					MinItems: 1,
+					MaxItems: 1,
+					Required: true,
+					Description: "Defines the long time window duration and type.",
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"duration": {
+								Type:        schema.TypeInt,
+								Required:    true,
+								Description: "The duration for the long time window.",
+							},
+							"duration_type": {
+								Type:         schema.TypeString,
+								Required:     true,
+								Description:  "The unit of time for the long time window duration (e.g., 'minute', 'hour').",
+								ValidateFunc: validation.StringInSlice([]string{"minute", "hour"}, false),
+							},
+						},
+					},
+				},
+				"short_time_window": {
+					Type:     schema.TypeList,
+					MinItems: 1,
+					MaxItems: 1,
+					Required: true,
+					Description: "Defines the short time window duration and type.",
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"duration": {
+								Type:        schema.TypeInt,
+								Required:    true,
+								Description: "The duration for the short time window.",
+							},
+							"duration_type": {
+								Type:         schema.TypeString,
+								Required:     true,
+								Description:  "The unit of time for the short time window duration (e.g., 'minute', 'hour').",
+								ValidateFunc: validation.StringInSlice([]string{"minute", "hour"}, false),
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	
 )
+
+func NewSloAlertConfigResourceHandle() ResourceHandle[*restapi.SloConfig] {
+	Resource := &sloAlertConfigResource{
+		metaData: ResourceMetaData{
+			ResourceName: ResourceInstanaSloAlertConfig,
+			Schema: map[string]*schema.Schema{
+				SloAlertConfigFieldName:          	SloAlertConfigName,
+				SloAlertConfigFieldDescription:     SloAlertConfigDescription,
+				SloAlertConfigFieldSeverity:        SloAlertConfigSeverity,
+				SloAlertConfigFieldTriggering:   	SloAlertConfigTriggering,
+				SloAlertConfigFieldAlertType:   	SloAlertConfigAlertType,
+				SloAlertConfigFieldThreshold:    	SloAlertConfigThreshold,
+				SloAlertConfigFieldSloIds:  		SloAlertConfigSloIds,
+				SloAlertConfigFieldAlertChannelIds: SloAlertConfigAlertChannelIds,
+				SloAlertConfigFieldTimeThreshold:   SloAlertConfigTimeThreshold,
+				DefaultCustomPayloadFieldsName:  	buildCustomPayloadFields(),
+				SloAlertConfigFieldEnabled: 		SloAlertConfigEnabled,
+			},
+			SchemaVersion:    1,
+			CreateOnly:       false,
+			SkipIDGeneration: true,
+		},
+	}
+
+	return Resource
+}
