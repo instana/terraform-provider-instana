@@ -1,6 +1,14 @@
 # Changelog
 
-## [v3.1.0](https://github.com/instana/terraform-provider-instana/tree/v3.1.0) (2025-01-14)
+## [v3.1.1](https://github.com/instana/terraform-provider-instana/tree/v3.1.1) (2025-02-10)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v3.1.0...v3.1.1)
+
+**Merged pull requests:**
+
+- Extend index.md with Infrastructure Alert Config [\#22](https://github.com/instana/terraform-provider-instana/pull/22) ([parekh-raj](https://github.com/parekh-raj))
+
+## [v3.1.0](https://github.com/instana/terraform-provider-instana/tree/v3.1.0) (2025-01-16)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v3.0.1...v3.1.0)
 
