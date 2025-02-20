@@ -24,5 +24,20 @@ type SloAlertConfig struct {
 	SloIds      		[]string    `json:"sloIds"`
 	AlertChannelIds 	[]string 	`json:"alertChannelIds"`
 	CustomPayloadFields []string 	`json:"customPayloadFields"`
+}
 
+type SloAlertThreshold struct {
+	Operator     string        `json:"operator"`
+	Value 		 float64 	   `json:"value"`
+}
+
+type SloAlertTimeThreshold struct {
+	Timewindow      int        `json:"timewindow"`
+	expiry			int    	   `json:"expiry"`
+}
+
+// GetIDForResourcePath implementation of the interface InstanaDataObject
+func (s *SloAlertConfig) GetIDForResourcePath() string {
+	fmt.Fprintln(os.Stderr, ">> GetIDForResourcePath: "+s.ID)
+	return s.ID
 }
