@@ -1,6 +1,7 @@
 package instana
 
 import (
+	"context"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
@@ -277,16 +278,6 @@ func (r *sloAlertConfigResource) MetaData() *ResourceMetaData {
 	return resourceData
 }
 
-// func (r *sloConfigResource) StateUpgraders() []schema.StateUpgrader {
-// 	return []schema.StateUpgrader{
-// 		{
-// 			Type:    r.sloConfigSchemaV0().CoreConfigSchema().ImpliedType(),
-// 			Upgrade: r.sloConfigStateUpgradeV0,
-// 			Version: 0,
-// 		},
-// 	}
-// }
-
 func (r *sloAlertConfigResource) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.SloAlertConfig] {
 	x := api.SloAlertConfigs()
 	return x
@@ -306,44 +297,43 @@ func (r *sloAlertConfigResource) StateUpgraders() []schema.StateUpgrader {
 	}
 }
 
+func (r *sloAlertConfigResource) sloAlertConfigStateUpgradeV0(_ context.Context, state map[string]interface{}, _ interface{}) (map[string]interface{}, error) {
+    if _, ok := state[SloAlertConfigFieldName]; ok {
+        state[SloAlertConfigFieldName] = state[SloAlertConfigFieldName]
+        delete(state, SloAlertConfigFieldName)
+    }
+
+    if _, ok := state[SloAlertConfigFieldThreshold]; ok {
+        oldThreshold, isOldFormat := state[SloAlertConfigFieldThreshold].(string)
+        if isOldFormat {
+            // Convert old threshold format (string) to new list format
+            state[SloAlertConfigFieldThreshold] = []interface{}{
+                map[string]interface{}{
+                    SloAlertConfigFieldThresholdOperator: ">=",
+                    SloAlertConfigFieldThresholdValue:    oldThreshold,
+                },
+            }
+        }
+    }
+
+    if _, ok := state[SloAlertConfigFieldTimeThreshold]; ok {
+        oldTimeThreshold, isOldFormat := state[SloAlertConfigFieldTimeThreshold].(string)
+        if isOldFormat {
+            // Convert old time threshold format (string) to new list format
+            state[SloAlertConfigFieldTimeThreshold] = []interface{}{
+                map[string]interface{}{
+                    SloAlertConfigFieldTimeThresholdExpiry:     60000,
+                    SloAlertConfigFieldTimeThresholdTimeWindow: oldTimeThreshold,
+                },
+            }
+        }
+    }
+
+    return state, nil
+}
+
+
 // tf state -> api
-// func (r *sloAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*restapi.SloAlertConfig, error) {
-// 	debug(">> MapStateToDataObject")
-// 	debug(obj2json(d))
-
-// 	sid := d.Id()
-// 	if len(sid) == 0 {
-// 		sid = RandomID()
-// 	}
-
-// 	payload := &restapi.SloAlertConfig{
-// 		ID:   				    sid,
-// 		Name: 				    d.Get(SloAlertConfigFieldName).(string),
-// 		Description:            d.Get(SloAlertConfigFieldDescription).(string),
-// 		Severity:			    d.Get(SloAlertConfigFieldSeverity).(int),
-// 		Triggering:			    d.Get(SloAlertConfigFieldTriggering).(bool),
-// 		AlertType:				d.Get(SloAlertConfigFieldAlertType).(string),
-// 		Threshold:              ,
-// 		SloIds:          		convertInterfaceSliceToStringSlice(d.Get(SloAlertConfigFieldSloIds).([]interface{})),
-// 		AlertChannelIds: 		convertInterfaceSliceToStringSlice(d.Get(SloAlertConfigFieldAlertChannelIds).([]interface{})),
-// 		TimeThreshold:          ,
-// 		CustomerPayloadFields:  customPayloadFields,
-// 		Enabled:                d.Get(SloAlertConfigFieldEnabled).(bool),
-// 	}
-// 	return payload, nil
-
-// 	func convertInterfaceSliceToStringSlice(input []interface{}) []string {
-// 		result := make([]string, len(input))
-// 		for i, v := range input {
-// 			result[i] = v.(string)
-// 		}
-// 		return result
-// 	}
-
-// }
-
-
-
 func (r *sloAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*restapi.SloAlertConfig, error) {
     debug(">> MapStateToDataObject")
     debug(obj2json(d))
@@ -421,8 +411,53 @@ func (r *sloAlertConfigResource) mapTimeThresholdToAPIModel(d *schema.ResourceDa
 func (r *sloAlertConfigResource) sloAlertConfigSchemaV0() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			SloAlertConfigFieldName:   SloConfigName,
-
+			SloAlertConfigFieldName:          	SloAlertConfigName,
+			SloAlertConfigFieldDescription:     SloAlertConfigDescription,
+			SloAlertConfigFieldSeverity:        SloAlertConfigSeverity,
+			SloAlertConfigFieldTriggering:   	SloAlertConfigTriggering,
+			SloAlertConfigFieldAlertType:   	SloAlertConfigAlertType,
+			SloAlertConfigFieldThreshold:    	SloAlertConfigThreshold,
+			SloAlertConfigFieldSloIds:  		SloAlertConfigSloIds,
+			SloAlertConfigFieldAlertChannelIds: SloAlertConfigAlertChannelIds,
+			SloAlertConfigFieldTimeThreshold:   SloAlertConfigTimeThreshold,
+			DefaultCustomPayloadFieldsName:  	buildCustomPayloadFields(),
+			SloAlertConfigFieldEnabled: 		SloAlertConfigEnabled,
 		},
 	}
+}
+
+func (r *sloAlertConfigResource) UpdateState(d *schema.ResourceData, sloAlertConfig *restapi.SloAlertConfig) error {
+    debug(">> UpdateState")
+    
+    // Convert Threshold to Terraform state
+    threshold := map[string]interface{}{
+        SloAlertConfigFieldThresholdOperator: sloAlertConfig.Threshold.Operator,
+        SloAlertConfigFieldThresholdValue:    sloAlertConfig.Threshold.Value,
+    }
+
+    // Convert TimeThreshold to Terraform state
+    timeThreshold := map[string]interface{}{
+        SloAlertConfigFieldTimeThresholdExpiry:     sloAlertConfig.TimeThreshold.Expiry,
+        SloAlertConfigFieldTimeThresholdTimeWindow: sloAlertConfig.TimeThreshold.TimeWindow,
+    }
+
+    // Prepare Terraform state data
+    tfData := map[string]interface{}{
+        SloAlertConfigFieldName:          sloAlertConfig.Name,
+        SloAlertConfigFieldDescription:   sloAlertConfig.Description,
+        SloAlertConfigFieldSeverity:      sloAlertConfig.Severity,
+        SloAlertConfigFieldTriggering:    sloAlertConfig.Triggering,
+        SloAlertConfigFieldAlertType:     sloAlertConfig.AlertType,
+        SloAlertConfigFieldThreshold:     []interface{}{threshold},
+        SloAlertConfigFieldSloIds:        sloAlertConfig.SloIds,
+        SloAlertConfigFieldAlertChannelIds: sloAlertConfig.AlertChannelIds,
+        SloAlertConfigFieldTimeThreshold: []interface{}{timeThreshold},
+        SloAlertConfigFieldEnabled:       sloAlertConfig.Enabled,
+    }
+
+    d.SetId(sloAlertConfig.ID)
+
+    debug(">> UpdateState with: " + obj2json(tfData))
+
+    return tfutils.UpdateState(d, tfData)
 }
