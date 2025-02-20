@@ -202,6 +202,20 @@ func (mr *MockInstanaAPIMockRecorder) SloConfigs() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SloConfigs", reflect.TypeOf((*MockInstanaAPI)(nil).SloConfigs))
 }
 
+// SloAlertConfigs mocks base method.
+func (m *MockInstanaAPI) SloAlertConfigs() restapi.RestResource[*restapi.SloAlertConfig] {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SloAlertConfigs")
+	ret0, _ := ret[0].(restapi.RestResource[*restapi.SloAlertConfig])
+	return ret0
+}
+
+// SloAlertConfigs indicates an expected call of SloConfigs.
+func (mr *MockInstanaAPIMockRecorder) SloAlertConfigs() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SloAlertConfigs", reflect.TypeOf((*MockInstanaAPI)(nil).SloAlertConfigs))
+}
+
 // SyntheticLocation mocks base method.
 func (m *MockInstanaAPI) SyntheticLocation() restapi.ReadOnlyRestResource[*restapi.SyntheticLocation] {
 	m.ctrl.T.Helper()
