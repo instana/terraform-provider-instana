@@ -5,14 +5,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
-
+	"github.com/gessnerfl/terraform-provider-instana/tfutils"
 )
 
 const ResourceInstanaSloAlertConfig = "instana_slo_alert_config"
 
 const (
 	//Slo Alert Config Field names for Terraform
-
 	SloAlertConfigFieldName                    = "name"
 	SloAlertConfigFieldDescription             = "description"
 	SloAlertConfigFieldSeverity 			   = "severity"
@@ -37,7 +36,6 @@ const (
 
 
 	// Slo Alert Types for Terraform
-
 	SloAlertConfigStatus            = "status"
 	SloAlertConfigErrorBudget       = "error_budget"
 	SloAlertConfigBurnRate          = "burn_rate"
@@ -91,7 +89,7 @@ var (
 	}
 
 	SloAlertConfigThreshold = &schema.Schema{
-		Type:        schema.TypeList,  // Represents the "threshold" block
+		Type:        schema.TypeList,
 		MinItems:    1,
 		MaxItems:    1,
 		Required:    true,
@@ -155,27 +153,6 @@ var (
 			},
 		},
 	}
-
-	// SloAlertConfigCustomPayloadFields = &schema.Schema{
-	// 	Type:        schema.TypeList,  
-	// 	Optional:    true,
-	// 	Description: "Custom payload fields to include additional metadata in the alert.",
-	// 	Elem: &schema.Resource{
-	// 		Schema: map[string]*schema.Schema{
-	// 			"key": {
-	// 				Type:        schema.TypeString,
-	// 				Required:    true,
-	// 				Description: "The key name for the custom payload field.",
-	// 			},
-	// 			"value": {
-	// 				Type:        schema.TypeString,
-	// 				Required:    true,
-	// 				Description: "The value associated with the custom payload field.",
-	// 			},
-	// 		},
-	// 	},
-	// }
-	
 
 	SloAlertConfigEnabled = &schema.Schema{
 		Type:        schema.TypeBool,
@@ -306,7 +283,6 @@ func (r *sloAlertConfigResource) sloAlertConfigStateUpgradeV0(_ context.Context,
     if _, ok := state[SloAlertConfigFieldThreshold]; ok {
         oldThreshold, isOldFormat := state[SloAlertConfigFieldThreshold].(string)
         if isOldFormat {
-            // Convert old threshold format (string) to new list format
             state[SloAlertConfigFieldThreshold] = []interface{}{
                 map[string]interface{}{
                     SloAlertConfigFieldThresholdOperator: ">=",
@@ -319,7 +295,6 @@ func (r *sloAlertConfigResource) sloAlertConfigStateUpgradeV0(_ context.Context,
     if _, ok := state[SloAlertConfigFieldTimeThreshold]; ok {
         oldTimeThreshold, isOldFormat := state[SloAlertConfigFieldTimeThreshold].(string)
         if isOldFormat {
-            // Convert old time threshold format (string) to new list format
             state[SloAlertConfigFieldTimeThreshold] = []interface{}{
                 map[string]interface{}{
                     SloAlertConfigFieldTimeThresholdExpiry:     60000,
@@ -332,6 +307,38 @@ func (r *sloAlertConfigResource) sloAlertConfigStateUpgradeV0(_ context.Context,
     return state, nil
 }
 
+func (r *sloAlertConfigResource) UpdateState(d *schema.ResourceData, sloAlertConfig *restapi.SloAlertConfig) error {
+    debug(">> UpdateState")
+
+    threshold := map[string]interface{}{
+        SloAlertConfigFieldThresholdOperator: sloAlertConfig.Threshold.Operator,
+        SloAlertConfigFieldThresholdValue:    sloAlertConfig.Threshold.Value,
+    }
+
+    timeThreshold := map[string]interface{}{
+        SloAlertConfigFieldTimeThresholdExpiry:     sloAlertConfig.TimeThreshold.Expiry,
+        SloAlertConfigFieldTimeThresholdTimeWindow: sloAlertConfig.TimeThreshold.Timewindow,
+    }
+
+    tfData := map[string]interface{}{
+        SloAlertConfigFieldName:          sloAlertConfig.Name,
+        SloAlertConfigFieldDescription:   sloAlertConfig.Description,
+        SloAlertConfigFieldSeverity:      sloAlertConfig.Severity,
+        SloAlertConfigFieldTriggering:    sloAlertConfig.Triggering,
+        SloAlertConfigFieldAlertType:     sloAlertConfig.AlertType,
+        SloAlertConfigFieldThreshold:     []interface{}{threshold},
+        SloAlertConfigFieldSloIds:        sloAlertConfig.SloIds,
+        SloAlertConfigFieldAlertChannelIds: sloAlertConfig.AlertChannelIds,
+        SloAlertConfigFieldTimeThreshold: []interface{}{timeThreshold},
+        SloAlertConfigFieldEnabled:       sloAlertConfig.Enabled,
+    }
+
+    d.SetId(sloAlertConfig.ID)
+
+    debug(">> UpdateState with: " + obj2json(tfData))
+
+    return tfutils.UpdateState(d, tfData)
+}
 
 // tf state -> api
 func (r *sloAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*restapi.SloAlertConfig, error) {
@@ -341,22 +348,36 @@ func (r *sloAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*
     if len(sid) == 0 {
         sid = RandomID()
     }
-    // Convert threshold
-    threshold, err := r.mapThresholdToAPIModel(d)
-    if err != nil {
-        return nil, err
-    }
-    // Convert time threshold
-    timeThreshold, err := r.mapTimeThresholdToAPIModel(d)
-    if err != nil {
-        return nil, err
+
+    // Convert threshold from Terraform state
+    thresholdStateObject := d.Get(SloAlertConfigFieldThreshold).([]interface{})
+    var threshold restapi.SloAlertThreshold
+    if len(thresholdStateObject) == 1 {
+        thresholdObject := thresholdStateObject[0].(map[string]interface{})
+        threshold = restapi.SloAlertThreshold{
+            Operator: thresholdObject[SloAlertConfigFieldThresholdOperator].(string),
+            Value:    thresholdObject[SloAlertConfigFieldThresholdValue].(float64),
+        }
     }
 
-	// customPayloadFields
-	customPayloadFields, err := mapDefaultCustomPayloadFieldsFromSchema(d)
-	if err != nil {
-		return &restapi.SloAlertConfig{}, err
-	}
+    // Convert time threshold from Terraform state
+    timeThresholdStateObject := d.Get(SloAlertConfigFieldTimeThreshold).([]interface{})
+    var timeThreshold restapi.SloAlertTimeThreshold
+    if len(timeThresholdStateObject) == 1 {
+        timeThresholdObject := timeThresholdStateObject[0].(map[string]interface{})
+        timeThreshold = restapi.SloAlertTimeThreshold{
+            Expiry:     timeThresholdObject[SloAlertConfigFieldTimeThresholdExpiry].(int),
+            Timewindow: timeThresholdObject[SloAlertConfigFieldTimeThresholdTimeWindow].(int),
+        }
+    }
+
+    // Custom Payload Fields
+    customPayloadFields, err := mapDefaultCustomPayloadFieldsFromSchema(d)
+    if err != nil {
+        return &restapi.SloAlertConfig{}, err
+    }
+
+    // Construct API payload
     payload := &restapi.SloAlertConfig{
         ID:                     sid,
         Name:                   d.Get(SloAlertConfigFieldName).(string),
@@ -374,37 +395,12 @@ func (r *sloAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*
     return payload, nil
 }
 
-// Function to convert interface slice to string slice
 func convertInterfaceSliceToStringSlice(input []interface{}) []string {
     result := make([]string, len(input))
     for i, v := range input {
         result[i] = v.(string)
     }
     return result
-}
-// Function to map threshold to API model
-func (r *sloAlertConfigResource) mapThresholdToAPIModel(d *schema.ResourceData) (*restapi.Threshold, error) {
-    thresholdStateObject := d.Get(SloAlertConfigFieldThreshold).([]interface{})
-    if len(thresholdStateObject) == 1 {
-        thresholdObject := thresholdStateObject[0].(map[string]interface{})
-        return &restapi.Threshold{
-            Operator: thresholdObject[SloAlertConfigFieldThresholdOperator].(string),
-            Value:    thresholdObject[SloAlertConfigFieldThresholdValue].(float64),
-        }, nil
-    }
-    return nil, errors.New("exactly one threshold configuration is required")
-}
-// Function to map time threshold to API model
-func (r *sloAlertConfigResource) mapTimeThresholdToAPIModel(d *schema.ResourceData) (*restapi.TimeThreshold, error) {
-    timeThresholdStateObject := d.Get(SloAlertConfigFieldTimeThreshold).([]interface{})
-    if len(timeThresholdStateObject) == 1 {
-        timeThresholdObject := timeThresholdStateObject[0].(map[string]interface{})
-        return &restapi.TimeThreshold{
-            Expiry:      timeThresholdObject[SloAlertConfigFieldTimeThresholdExpiry].(int),
-            TimeWindow:  timeThresholdObject[SloAlertConfigFieldTimeThresholdTimeWindow].(int),
-        }, nil
-    }
-    return nil, errors.New("exactly one time threshold configuration is required")
 }
 
 // root schema
@@ -424,40 +420,4 @@ func (r *sloAlertConfigResource) sloAlertConfigSchemaV0() *schema.Resource {
 			SloAlertConfigFieldEnabled: 		SloAlertConfigEnabled,
 		},
 	}
-}
-
-func (r *sloAlertConfigResource) UpdateState(d *schema.ResourceData, sloAlertConfig *restapi.SloAlertConfig) error {
-    debug(">> UpdateState")
-    
-    // Convert Threshold to Terraform state
-    threshold := map[string]interface{}{
-        SloAlertConfigFieldThresholdOperator: sloAlertConfig.Threshold.Operator,
-        SloAlertConfigFieldThresholdValue:    sloAlertConfig.Threshold.Value,
-    }
-
-    // Convert TimeThreshold to Terraform state
-    timeThreshold := map[string]interface{}{
-        SloAlertConfigFieldTimeThresholdExpiry:     sloAlertConfig.TimeThreshold.Expiry,
-        SloAlertConfigFieldTimeThresholdTimeWindow: sloAlertConfig.TimeThreshold.TimeWindow,
-    }
-
-    // Prepare Terraform state data
-    tfData := map[string]interface{}{
-        SloAlertConfigFieldName:          sloAlertConfig.Name,
-        SloAlertConfigFieldDescription:   sloAlertConfig.Description,
-        SloAlertConfigFieldSeverity:      sloAlertConfig.Severity,
-        SloAlertConfigFieldTriggering:    sloAlertConfig.Triggering,
-        SloAlertConfigFieldAlertType:     sloAlertConfig.AlertType,
-        SloAlertConfigFieldThreshold:     []interface{}{threshold},
-        SloAlertConfigFieldSloIds:        sloAlertConfig.SloIds,
-        SloAlertConfigFieldAlertChannelIds: sloAlertConfig.AlertChannelIds,
-        SloAlertConfigFieldTimeThreshold: []interface{}{timeThreshold},
-        SloAlertConfigFieldEnabled:       sloAlertConfig.Enabled,
-    }
-
-    d.SetId(sloAlertConfig.ID)
-
-    debug(">> UpdateState with: " + obj2json(tfData))
-
-    return tfutils.UpdateState(d, tfData)
 }
