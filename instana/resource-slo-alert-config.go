@@ -25,7 +25,6 @@ const (
 	SloAlertConfigFieldTimeThreshold           = "time_threshold"
 	SloAlertConfigFieldTimeThresholdTimeWindow = "time_window"
 	SloAlertConfigFieldTimeThresholdExpiry     = "expiry"
-	SloAlertConfigFieldCustomPayloadFields     = "custom_payload_fields"
 	SloAlertConfigFieldEnabled                 = "enabled"
 
 	SloAlertConfigFieldBurnRateTimeWindows      = "burn_rate_time_windows"
@@ -216,7 +215,7 @@ var (
 			},
 		},
 	}
-	
+
 )
 
 func NewSloAlertConfigResourceHandle() ResourceHandle[*restapi.SloAlertConfig] {
@@ -224,17 +223,17 @@ func NewSloAlertConfigResourceHandle() ResourceHandle[*restapi.SloAlertConfig] {
 		metaData: ResourceMetaData{
 			ResourceName: ResourceInstanaSloAlertConfig,
 			Schema: map[string]*schema.Schema{
-				SloAlertConfigFieldName:          	SloAlertConfigName,
-				SloAlertConfigFieldDescription:     SloAlertConfigDescription,
-				SloAlertConfigFieldSeverity:        SloAlertConfigSeverity,
-				SloAlertConfigFieldTriggering:   	SloAlertConfigTriggering,
-				SloAlertConfigFieldAlertType:   	SloAlertConfigAlertType,
-				SloAlertConfigFieldThreshold:    	SloAlertConfigThreshold,
-				SloAlertConfigFieldSloIds:  		SloAlertConfigSloIds,
-				SloAlertConfigFieldAlertChannelIds: SloAlertConfigAlertChannelIds,
-				SloAlertConfigFieldTimeThreshold:   SloAlertConfigTimeThreshold,
-				DefaultCustomPayloadFieldsName:  	buildCustomPayloadFields(),
-				SloAlertConfigFieldEnabled: 		SloAlertConfigEnabled,
+				SloAlertConfigFieldName:          			SloAlertConfigName,
+				SloAlertConfigFieldDescription:     		SloAlertConfigDescription,
+				SloAlertConfigFieldSeverity:        		SloAlertConfigSeverity,
+				SloAlertConfigFieldTriggering:   			SloAlertConfigTriggering,
+				SloAlertConfigFieldAlertType:   			SloAlertConfigAlertType,
+				SloAlertConfigFieldThreshold:    			SloAlertConfigThreshold,
+				SloAlertConfigFieldSloIds:  				SloAlertConfigSloIds,
+				SloAlertConfigFieldAlertChannelIds: 		SloAlertConfigAlertChannelIds,
+				SloAlertConfigFieldTimeThreshold:   		SloAlertConfigTimeThreshold,
+				DefaultCustomPayloadFieldsName: 			buildCustomPayloadFields(),
+				SloAlertConfigFieldEnabled: 				SloAlertConfigEnabled,
 			},
 			SchemaVersion:    1,
 			CreateOnly:       false,
@@ -256,8 +255,7 @@ func (r *sloAlertConfigResource) MetaData() *ResourceMetaData {
 }
 
 func (r *sloAlertConfigResource) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.SloAlertConfig] {
-	x := api.SloAlertConfigs()
-	return x
+	return api.SloAlertConfig()
 }
 
 func (r *sloAlertConfigResource) SetComputedFields(_ *schema.ResourceData) error {
@@ -330,6 +328,7 @@ func (r *sloAlertConfigResource) UpdateState(d *schema.ResourceData, sloAlertCon
         SloAlertConfigFieldSloIds:        sloAlertConfig.SloIds,
         SloAlertConfigFieldAlertChannelIds: sloAlertConfig.AlertChannelIds,
         SloAlertConfigFieldTimeThreshold: []interface{}{timeThreshold},
+		DefaultCustomPayloadFieldsName:   mapCustomPayloadFieldsToSchema(sloAlertConfig),
         SloAlertConfigFieldEnabled:       sloAlertConfig.Enabled,
     }
 
@@ -371,11 +370,11 @@ func (r *sloAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*
         }
     }
 
-    // Custom Payload Fields
-    customPayloadFields, err := mapDefaultCustomPayloadFieldsFromSchema(d)
-    if err != nil {
-        return &restapi.SloAlertConfig{}, err
-    }
+	// Custom Payload Fields
+	customPayloadFields, err := mapDefaultCustomPayloadFieldsFromSchema(d)
+	if err != nil {
+		return &restapi.SloAlertConfig{}, err
+	}
 
     // Construct API payload
     payload := &restapi.SloAlertConfig{
