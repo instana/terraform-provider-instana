@@ -35,7 +35,7 @@ type InstanaAPI interface {
 	AlertingConfigurations() RestResource[*AlertingConfiguration]
 	SliConfigs() RestResource[*SliConfig]
 	SloConfigs() RestResource[*SloConfig]
-	SloAlertConfigs() RestResource[*SloAlertConfig]
+	SloAlertConfig() RestResource[*SloAlertConfig]
 	WebsiteMonitoringConfig() RestResource[*WebsiteMonitoringConfig]
 	WebsiteAlertConfig() RestResource[*WebsiteAlertConfig]
 	InfraAlertConfig() RestResource[*InfraAlertConfig]
@@ -103,7 +103,7 @@ func (api *baseInstanaAPI) SloConfigs() RestResource[*SloConfig] {
 	return NewCreatePOSTUpdatePUTRestResource(SloConfigResourcePath, NewDefaultJSONUnmarshaller(&SloConfig{}), api.client)
 }
 
-func (api *baseInstanaAPI) SloAlertConfigs() RestResource[*SloAlertConfig] {
+func (api *baseInstanaAPI) SloAlertConfig() RestResource[*SloAlertConfig] {
 	return NewCreatePOSTUpdatePUTRestResource(SloAlertConfigResourcePath, NewDefaultJSONUnmarshaller(&SloAlertConfig{}), api.client)
 }
 
