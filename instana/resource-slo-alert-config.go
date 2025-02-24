@@ -1,6 +1,7 @@
 package instana
 
 import (
+	"fmt"
 	"context"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -18,8 +19,8 @@ const (
 	SloAlertConfigFieldTriggering 		   	   = "triggering"
 	SloAlertConfigFieldAlertType 			   = "alert_type"
 	SloAlertConfigFieldThreshold 			   = "threshold"
-	SloAlertConfigFieldThresholdOperator       = "threshold_operator"
-	SloAlertConfigFieldThresholdValue    	   = "threshold_value"
+	SloAlertConfigFieldThresholdOperator       = "operator"
+	SloAlertConfigFieldThresholdValue    	   = "value"
 	SloAlertConfigFieldSloIds                  = "slo_ids"
 	SloAlertConfigFieldAlertChannelIds         = "alert_channel_ids"
 	SloAlertConfigFieldTimeThreshold           = "time_threshold"
@@ -95,11 +96,17 @@ var (
 		Description: "Indicates the type of violation of the defined threshold.",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
+				"type": {
+					Type:         schema.TypeString,
+					Required:     true,
+					Description:  "The type of threshold (should be staticThreshold).",
+					ValidateFunc: validation.StringInSlice([]string{"staticThreshold"}, false),
+				},
 				"operator": {
 					Type:         schema.TypeString,
 					Required:     true,
 					Description:  "The operator used to evaluate this rule.",
-					ValidateFunc: validation.StringInSlice([]string{">=", "<=", ">", "<", "==", "!="}, false),
+					ValidateFunc: validation.StringInSlice(restapi.SupportedThresholdOperators.ToStringSlice(), true),
 				},
 				"value": {
 					Type:        schema.TypeFloat,
@@ -109,7 +116,6 @@ var (
 			},
 		},
 	}
-	
 
 	SloAlertConfigSloIds = &schema.Schema{
 		Type:        schema.TypeList,
@@ -244,10 +250,22 @@ func NewSloAlertConfigResourceHandle() ResourceHandle[*restapi.SloAlertConfig] {
 	return Resource
 }
 
+func mapAlertTypeToAPI(terraformAlertType string) (string, string, error) {
+    switch terraformAlertType {
+    case "status":
+        return "SERVICE_LEVELS_OBJECTIVE", "STATUS", nil
+    case "error_budget":
+        return "ERROR_BUDGET", "BURNED_PERCENTAGE", nil
+    case "burn_rate":
+        return "ERROR_BUDGET", "BURN_RATE", nil
+    default:
+        return "", "", fmt.Errorf("invalid alert_type: %s", terraformAlertType)
+    }
+}
+
 type sloAlertConfigResource struct {
 	metaData ResourceMetaData
 }
-
 
 func (r *sloAlertConfigResource) MetaData() *ResourceMetaData {
 	resourceData := &r.metaData
@@ -308,29 +326,50 @@ func (r *sloAlertConfigResource) sloAlertConfigStateUpgradeV0(_ context.Context,
 func (r *sloAlertConfigResource) UpdateState(d *schema.ResourceData, sloAlertConfig *restapi.SloAlertConfig) error {
     debug(">> UpdateState")
 
-    threshold := map[string]interface{}{
-        SloAlertConfigFieldThresholdOperator: sloAlertConfig.Threshold.Operator,
-        SloAlertConfigFieldThresholdValue:    sloAlertConfig.Threshold.Value,
-    }
-
+	threshold := map[string]interface{}{
+		"type":                             "static",
+		SloAlertConfigFieldThresholdOperator: sloAlertConfig.Threshold.Operator,
+		SloAlertConfigFieldThresholdValue:    sloAlertConfig.Threshold.Value,
+	}
+	
     timeThreshold := map[string]interface{}{
         SloAlertConfigFieldTimeThresholdExpiry:     sloAlertConfig.TimeThreshold.Expiry,
         SloAlertConfigFieldTimeThresholdTimeWindow: sloAlertConfig.TimeThreshold.Timewindow,
     }
 
-    tfData := map[string]interface{}{
-        SloAlertConfigFieldName:          sloAlertConfig.Name,
-        SloAlertConfigFieldDescription:   sloAlertConfig.Description,
-        SloAlertConfigFieldSeverity:      sloAlertConfig.Severity,
-        SloAlertConfigFieldTriggering:    sloAlertConfig.Triggering,
-        SloAlertConfigFieldAlertType:     sloAlertConfig.AlertType,
-        SloAlertConfigFieldThreshold:     []interface{}{threshold},
-        SloAlertConfigFieldSloIds:        sloAlertConfig.SloIds,
-        SloAlertConfigFieldAlertChannelIds: sloAlertConfig.AlertChannelIds,
-        SloAlertConfigFieldTimeThreshold: []interface{}{timeThreshold},
+	var terraformAlertType string
+
+	// Reverse Map API's "alertType" and "metric" to Terraform's expected values
+	switch sloAlertConfig.Rule.AlertType {
+	case "SERVICE_LEVELS_OBJECTIVE":
+		if sloAlertConfig.Rule.Metric == "STATUS" {
+			terraformAlertType = "status"
+		}
+	case "ERROR_BUDGET":
+		if sloAlertConfig.Rule.Metric == "BURNED_PERCENTAGE" {
+			terraformAlertType = "error_budget"
+		} else if sloAlertConfig.Rule.Metric == "BURN_RATE" {
+			terraformAlertType = "burn_rate"
+		}
+	}
+	
+	if terraformAlertType == "" {
+		return fmt.Errorf("unexpected alertType/metric from API: %v", sloAlertConfig.Rule)
+	}
+	
+	tfData := map[string]interface{}{
+		SloAlertConfigFieldName:          sloAlertConfig.Name,
+		SloAlertConfigFieldDescription:   sloAlertConfig.Description,
+		SloAlertConfigFieldSeverity:      sloAlertConfig.Severity,
+		SloAlertConfigFieldTriggering:    sloAlertConfig.Triggering,
+		SloAlertConfigFieldAlertType:     terraformAlertType, 
+		SloAlertConfigFieldThreshold:     []interface{}{threshold},
+		SloAlertConfigFieldSloIds:        sloAlertConfig.SloIds,
+		SloAlertConfigFieldAlertChannelIds: sloAlertConfig.AlertChannelIds,
+		SloAlertConfigFieldTimeThreshold: []interface{}{timeThreshold},
 		DefaultCustomPayloadFieldsName:   mapCustomPayloadFieldsToSchema(sloAlertConfig),
-        SloAlertConfigFieldEnabled:       sloAlertConfig.Enabled,
-    }
+		SloAlertConfigFieldEnabled:       sloAlertConfig.Enabled,
+	}	
 
     d.SetId(sloAlertConfig.ID)
 
@@ -338,6 +377,30 @@ func (r *sloAlertConfigResource) UpdateState(d *schema.ResourceData, sloAlertCon
 
     return tfutils.UpdateState(d, tfData)
 }
+
+// convertToFloat64 safely converts different numeric types to float64.
+func convertToFloat64(value interface{}) (float64, error) {
+    switch v := value.(type) {
+    case float64:
+        return v, nil
+    case float32:
+        return float64(v), nil
+    case int:
+        return float64(v), nil
+    case int64:
+        return float64(v), nil
+    case string:
+        var parsedValue float64
+        _, err := fmt.Sscanf(v, "%f", &parsedValue)
+        if err != nil {
+            return 0, fmt.Errorf("unable to parse float64 from string: %s", v)
+        }
+        return parsedValue, nil
+    default:
+        return 0, fmt.Errorf("unexpected type for float64 conversion: %T", value)
+    }
+}
+
 
 // tf state -> api
 func (r *sloAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*restapi.SloAlertConfig, error) {
@@ -347,49 +410,90 @@ func (r *sloAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*
     if len(sid) == 0 {
         sid = RandomID()
     }
+	
+// Convert threshold from Terraform state
+thresholdStateObject := d.Get(SloAlertConfigFieldThreshold).([]interface{})
+var threshold restapi.SloAlertThreshold
 
-    // Convert threshold from Terraform state
-    thresholdStateObject := d.Get(SloAlertConfigFieldThreshold).([]interface{})
-    var threshold restapi.SloAlertThreshold
-    if len(thresholdStateObject) == 1 {
-        thresholdObject := thresholdStateObject[0].(map[string]interface{})
-        threshold = restapi.SloAlertThreshold{
-            Operator: thresholdObject[SloAlertConfigFieldThresholdOperator].(string),
-            Value:    thresholdObject[SloAlertConfigFieldThresholdValue].(float64),
+if len(thresholdStateObject) > 0 {
+    thresholdObject, ok := thresholdStateObject[0].(map[string]interface{})
+    if ok {
+        operatorRaw, opOK := thresholdObject[SloAlertConfigFieldThresholdOperator]
+        valueRaw, valOK := thresholdObject[SloAlertConfigFieldThresholdValue]
+
+        if opOK && valOK {
+            operator := fmt.Sprintf("%v", operatorRaw)
+            value, err := convertToFloat64(valueRaw) 
+            if err != nil {
+                return nil, fmt.Errorf("threshold value is invalid: %v", err)
+            }
+
+            threshold = restapi.SloAlertThreshold{
+                Type:     "staticThreshold",
+                Operator: operator,
+                Value:    value,
+            }
+        } else {
+            return nil, fmt.Errorf("threshold operator or value is missing or incorrect type")
         }
     }
+}
 
-    // Convert time threshold from Terraform state
-    timeThresholdStateObject := d.Get(SloAlertConfigFieldTimeThreshold).([]interface{})
-    var timeThreshold restapi.SloAlertTimeThreshold
-    if len(timeThresholdStateObject) == 1 {
-        timeThresholdObject := timeThresholdStateObject[0].(map[string]interface{})
-        timeThreshold = restapi.SloAlertTimeThreshold{
-            Expiry:     timeThresholdObject[SloAlertConfigFieldTimeThresholdExpiry].(int),
-            Timewindow: timeThresholdObject[SloAlertConfigFieldTimeThresholdTimeWindow].(int),
-        }
-    }
+
+	// Convert time threshold from Terraform state
+	timeThresholdStateObject := d.Get(SloAlertConfigFieldTimeThreshold).([]interface{})
+	var timeThreshold restapi.SloAlertTimeThreshold
+
+	if len(timeThresholdStateObject) > 0 {
+		timeThresholdObject, ok := timeThresholdStateObject[0].(map[string]interface{})
+		if ok {
+			expiry, expiryOK := timeThresholdObject[SloAlertConfigFieldTimeThresholdExpiry].(int)
+			timewindow, timeWindowOK := timeThresholdObject[SloAlertConfigFieldTimeThresholdTimeWindow].(int)
+
+			if expiryOK && timeWindowOK {
+				timeThreshold = restapi.SloAlertTimeThreshold{
+					Expiry:     expiry,
+					Timewindow: timewindow,
+				}
+			} else {
+				return nil, fmt.Errorf("time threshold expiry or time window is missing or of incorrect type")
+			}
+		}
+	}
 
 	// Custom Payload Fields
 	customPayloadFields, err := mapDefaultCustomPayloadFieldsFromSchema(d)
 	if err != nil {
-		return &restapi.SloAlertConfig{}, err
+		return nil, fmt.Errorf("error processing custom payload fields: %w", err)
+	}	
+
+	terraformAlertType := d.Get(SloAlertConfigFieldAlertType).(string)
+	// Map Terraform alert_type to API alertType & metric
+	apiAlertType, apiMetric, err := mapAlertTypeToAPI(terraformAlertType)
+	if err != nil {
+		return nil, fmt.Errorf("invalid alert_type: %v", err)
+	}
+
+	// Construct the API-compatible Rule object
+	rule := restapi.SloAlertRule{
+		AlertType: apiAlertType,
+		Metric:    apiMetric,
 	}
 
     // Construct API payload
-    payload := &restapi.SloAlertConfig{
-        ID:                     sid,
-        Name:                   d.Get(SloAlertConfigFieldName).(string),
-        Description:            d.Get(SloAlertConfigFieldDescription).(string),
-        Severity:               d.Get(SloAlertConfigFieldSeverity).(int),
-        Triggering:             d.Get(SloAlertConfigFieldTriggering).(bool),
-        AlertType:              d.Get(SloAlertConfigFieldAlertType).(string),
-        Threshold:              threshold,
-        SloIds:                 convertInterfaceSliceToStringSlice(d.Get(SloAlertConfigFieldSloIds).([]interface{})),
-        AlertChannelIds:        convertInterfaceSliceToStringSlice(d.Get(SloAlertConfigFieldAlertChannelIds).([]interface{})),
-        TimeThreshold:          timeThreshold,
-        CustomerPayloadFields:  customPayloadFields,
-        Enabled:                d.Get(SloAlertConfigFieldEnabled).(bool),
+	payload := &restapi.SloAlertConfig{
+		ID:          sid,
+		Name:        d.Get(SloAlertConfigFieldName).(string),
+		Description: d.Get(SloAlertConfigFieldDescription).(string),
+		Severity:    d.Get(SloAlertConfigFieldSeverity).(int),
+		Triggering:  d.Get(SloAlertConfigFieldTriggering).(bool),
+		Enabled:     d.Get(SloAlertConfigFieldEnabled).(bool),
+		Rule:        rule,  
+		Threshold:   threshold,
+		SloIds:      convertInterfaceSliceToStringSlice(d.Get(SloAlertConfigFieldSloIds).([]interface{})),
+		AlertChannelIds: convertInterfaceSliceToStringSlice(d.Get(SloAlertConfigFieldAlertChannelIds).([]interface{})),
+		TimeThreshold: timeThreshold,
+		CustomerPayloadFields: customPayloadFields,
     }
     return payload, nil
 }
