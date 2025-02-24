@@ -27,8 +27,9 @@ type SloAlertConfig struct {
 }
 
 type SloAlertThreshold struct {
-	Operator string  `json:"operator"`
-	Value    float64 `json:"value"`
+    Type     string  `json:"type"`     
+    Operator string  `json:"operator"`
+    Value    float64 `json:"value"`
 }
 
 type SloAlertTimeThreshold struct {
