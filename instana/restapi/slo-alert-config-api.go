@@ -12,17 +12,17 @@ const (
 
 // SloAlertConfig represents the REST resource of SLO Alert Configuration at Instana
 type SloAlertConfig struct {
-    ID                  string                  `json:"id"`
-    Name                string                  `json:"name"`
-    Description         string                  `json:"description"`
-    Severity            int                     `json:"severity"`
-    Triggering          bool                    `json:"triggering"`
-    Enabled             bool                    `json:"enabled"`
-    Rule                SloAlertRule            `json:"rule"` 
-    Threshold           SloAlertThreshold       `json:"threshold"`
-    TimeThreshold       SloAlertTimeThreshold   `json:"timeThreshold"`
-    SloIds              []string                `json:"sloIds"`
-    AlertChannelIds     []string                `json:"alertChannelIds"`
+	ID                  string                    	`json:"id"`
+	Name                string                    	`json:"name"`
+	Description         string                    	`json:"description"`
+	Severity            int                       	`json:"severity"`
+	Triggering          bool                      	`json:"triggering"`
+	Enabled             bool                      	`json:"enabled"`
+	Rule                SloAlertRule              	`json:"rule"`
+	Threshold           SloAlertThreshold         	`json:"threshold"`
+	TimeThreshold       SloAlertTimeThreshold     	`json:"timeThreshold"`
+	SloIds              []string                 	`json:"sloIds"`
+	AlertChannelIds     []string                  	`json:"alertChannelIds"`
     CustomerPayloadFields []CustomPayloadField[any] `json:"customPayloadFields"`
 }
 

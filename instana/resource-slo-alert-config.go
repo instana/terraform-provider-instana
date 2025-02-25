@@ -224,6 +224,18 @@ var (
 
 )
 
+// wrapSloCustomPayloadFields ensures CustomerPayloadFields values are correctly typed
+func wrapSloCustomPayloadFields(fields []restapi.CustomPayloadField[any]) []restapi.CustomPayloadField[any] {
+    for i, field := range fields {
+        if field.Type != restapi.DynamicCustomPayloadType {
+            if str, ok := field.Value.(string); ok {
+                fields[i].Value = restapi.StaticStringCustomPayloadFieldValue(str)
+            }
+        }
+    }
+    return fields
+}
+
 func NewSloAlertConfigResourceHandle() ResourceHandle[*restapi.SloAlertConfig] {
 	Resource := &sloAlertConfigResource{
 		metaData: ResourceMetaData{
@@ -357,6 +369,9 @@ func (r *sloAlertConfigResource) UpdateState(d *schema.ResourceData, sloAlertCon
 		return fmt.Errorf("unexpected alertType/metric from API: %v", sloAlertConfig.Rule)
 	}
 	
+	// Preprocess CustomerPayloadFields to ensure correct type
+	sloAlertConfig.CustomerPayloadFields = wrapSloCustomPayloadFields(sloAlertConfig.CustomerPayloadFields)
+
 	tfData := map[string]interface{}{
 		SloAlertConfigFieldName:          sloAlertConfig.Name,
 		SloAlertConfigFieldDescription:   sloAlertConfig.Description,
@@ -465,11 +480,13 @@ if len(thresholdStateObject) > 0 {
 	customPayloadFields, err := mapDefaultCustomPayloadFieldsFromSchema(d)
 	if err != nil {
 		return nil, fmt.Errorf("error processing custom payload fields: %w", err)
-	}	
+	}
+
+	customPayloadFields = wrapSloCustomPayloadFields(customPayloadFields) 
 
 	terraformAlertType := d.Get(SloAlertConfigFieldAlertType).(string)
-	// Map Terraform alert_type to API alertType & metric
 	apiAlertType, apiMetric, err := mapAlertTypeToAPI(terraformAlertType)
+
 	if err != nil {
 		return nil, fmt.Errorf("invalid alert_type: %v", err)
 	}
@@ -480,7 +497,7 @@ if len(thresholdStateObject) > 0 {
 		Metric:    apiMetric,
 	}
 
-    // Construct API payload
+	// Construct API payload
 	payload := &restapi.SloAlertConfig{
 		ID:          sid,
 		Name:        d.Get(SloAlertConfigFieldName).(string),
@@ -494,9 +511,9 @@ if len(thresholdStateObject) > 0 {
 		AlertChannelIds: convertInterfaceSliceToStringSlice(d.Get(SloAlertConfigFieldAlertChannelIds).([]interface{})),
 		TimeThreshold: timeThreshold,
 		CustomerPayloadFields: customPayloadFields,
-    }
-    return payload, nil
-}
+	}
+	return payload, nil
+	}
 
 func convertInterfaceSliceToStringSlice(input []interface{}) []string {
     result := make([]string, len(input))
