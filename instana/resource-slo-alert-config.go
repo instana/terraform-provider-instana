@@ -84,7 +84,7 @@ var (
 	SloAlertConfigAlertType = &schema.Schema{
 		Type:         schema.TypeString,
 		Required:     true,
-		ValidateFunc: validation.StringInSlice([]string{"status", "errorBudget", "burnRate"}, true),
+		ValidateFunc: validation.StringInSlice([]string{"status", "error_budget", "burn_rate"}, false),
 		Description:  "What do you want to be alerted on? (Type of Smart Alert)",
 	}
 
@@ -112,6 +112,62 @@ var (
 					Type:        schema.TypeFloat,
 					Required:    true,
 					Description: "The threshold value for the alert condition.",
+				},
+			},
+		},
+	}
+
+	SloAlertConfigBurnRateTimeWindows = &schema.Schema{
+		Type:        schema.TypeList,
+		MinItems:    1,
+		MaxItems:    1,
+		Optional:    true,
+		Description: "Defines the burn rate time windows for evaluating alert conditions.",
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				SloAlertConfigFieldLongTimeWindow: {
+					Type:     schema.TypeList,
+					MinItems: 1,
+					MaxItems: 1,
+					Required: true,
+					Description: "Defines the long time window duration and type.",
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							SloAlertConfigFieldTimeWindowDuration: {
+								Type:        schema.TypeInt,
+								Required:    true,
+								Description: "The duration for the long time window.",
+							},
+							SloAlertConfigFieldTimeWindowDurationType: {
+								Type:         schema.TypeString,
+								Required:     true,
+								Description:  "The unit of time for the long time window duration (e.g., 'MINUTE', 'HOUR', 'DAY').",
+								ValidateFunc: validation.StringInSlice([]string{"MINUTE", "HOUR", "DAY"}, false), // Case-sensitive validation
+							},
+						},
+					},
+				},
+				SloAlertConfigFieldShortTimeWindow: {
+					Type:     schema.TypeList,
+					MinItems: 1,
+					MaxItems: 1,
+					Required: true,
+					Description: "Defines the short time window duration and type.",
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							SloAlertConfigFieldTimeWindowDuration: {
+								Type:        schema.TypeInt,
+								Required:    true,
+								Description: "The duration for the short time window.",
+							},
+							SloAlertConfigFieldTimeWindowDurationType: {
+								Type:         schema.TypeString,
+								Required:     true,
+								Description:  "The unit of time for the short time window duration (e.g., 'MINUTE', 'HOUR', 'DAY').",
+								ValidateFunc: validation.StringInSlice([]string{"MINUTE", "HOUR", "DAY"}, false), // Case-sensitive validation
+							},
+						},
+					},
 				},
 			},
 		},
@@ -165,63 +221,6 @@ var (
 		Default:     false,
 		Description: "Optional flag to indicate whether this Alert is Enabled",
 	}
-
-	SloAlertConfigBurnRateTimeWindows = &schema.Schema{
-		Type:        schema.TypeList,
-		MinItems:    1,
-		MaxItems:    1,
-		Required:    true,
-		Description: "Defines the burn rate time windows for evaluating alert conditions.",
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"long_time_window": {
-					Type:     schema.TypeList,
-					MinItems: 1,
-					MaxItems: 1,
-					Required: true,
-					Description: "Defines the long time window duration and type.",
-					Elem: &schema.Resource{
-						Schema: map[string]*schema.Schema{
-							"duration": {
-								Type:        schema.TypeInt,
-								Required:    true,
-								Description: "The duration for the long time window.",
-							},
-							"duration_type": {
-								Type:         schema.TypeString,
-								Required:     true,
-								Description:  "The unit of time for the long time window duration (e.g., 'minute', 'hour').",
-								ValidateFunc: validation.StringInSlice([]string{"minute", "hour"}, false),
-							},
-						},
-					},
-				},
-				"short_time_window": {
-					Type:     schema.TypeList,
-					MinItems: 1,
-					MaxItems: 1,
-					Required: true,
-					Description: "Defines the short time window duration and type.",
-					Elem: &schema.Resource{
-						Schema: map[string]*schema.Schema{
-							"duration": {
-								Type:        schema.TypeInt,
-								Required:    true,
-								Description: "The duration for the short time window.",
-							},
-							"duration_type": {
-								Type:         schema.TypeString,
-								Required:     true,
-								Description:  "The unit of time for the short time window duration (e.g., 'minute', 'hour').",
-								ValidateFunc: validation.StringInSlice([]string{"minute", "hour"}, false),
-							},
-						},
-					},
-				},
-			},
-		},
-	}
-
 )
 
 // wrapSloCustomPayloadFields ensures CustomerPayloadFields values are correctly typed
@@ -263,7 +262,9 @@ func NewSloAlertConfigResourceHandle() ResourceHandle[*restapi.SloAlertConfig] {
 }
 
 func mapAlertTypeToAPI(terraformAlertType string) (string, string, error) {
-    switch terraformAlertType {
+	normalizedType := normalizeAlertType(terraformAlertType)
+
+	switch normalizedType {
     case "status":
         return "SERVICE_LEVELS_OBJECTIVE", "STATUS", nil
     case "error_budget":
@@ -271,9 +272,25 @@ func mapAlertTypeToAPI(terraformAlertType string) (string, string, error) {
     case "burn_rate":
         return "ERROR_BUDGET", "BURN_RATE", nil
     default:
+		fmt.Printf("WARNING: Unknown alert type '%s' received from Terraform\n", terraformAlertType)
         return "", "", fmt.Errorf("invalid alert_type: %s", terraformAlertType)
     }
 }
+
+// Normalize Terraform input values
+func normalizeAlertType(alertType string) string {
+	switch alertType {
+	case "errorBudget", "ErrorBudget":
+		return "error_budget"
+	case "burnRate", "BurnRate":
+		return "burn_rate"
+	case "status", "Status":
+		return "status"
+	default:
+		return alertType
+	}
+}
+
 
 type sloAlertConfigResource struct {
 	metaData ResourceMetaData
@@ -338,8 +355,13 @@ func (r *sloAlertConfigResource) sloAlertConfigStateUpgradeV0(_ context.Context,
 func (r *sloAlertConfigResource) UpdateState(d *schema.ResourceData, sloAlertConfig *restapi.SloAlertConfig) error {
     debug(">> UpdateState")
 
+	thresholdType := sloAlertConfig.Threshold.Type
+	if thresholdType == "static" {  
+		thresholdType = "staticThreshold"
+	}
+
 	threshold := map[string]interface{}{
-		"type":                             "static",
+		"type": thresholdType,
 		SloAlertConfigFieldThresholdOperator: sloAlertConfig.Threshold.Operator,
 		SloAlertConfigFieldThresholdValue:    sloAlertConfig.Threshold.Value,
 	}
@@ -364,6 +386,9 @@ func (r *sloAlertConfigResource) UpdateState(d *schema.ResourceData, sloAlertCon
 			terraformAlertType = "burn_rate"
 		}
 	}
+	
+	// Ensure consistency before storing in state
+	terraformAlertType = normalizeAlertType(terraformAlertType)
 	
 	if terraformAlertType == "" {
 		return fmt.Errorf("unexpected alertType/metric from API: %v", sloAlertConfig.Rule)
@@ -416,7 +441,6 @@ func convertToFloat64(value interface{}) (float64, error) {
     }
 }
 
-
 // tf state -> api
 func (r *sloAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*restapi.SloAlertConfig, error) {
     debug(">> MapStateToDataObject")
@@ -454,7 +478,6 @@ if len(thresholdStateObject) > 0 {
     }
 }
 
-
 	// Convert time threshold from Terraform state
 	timeThresholdStateObject := d.Get(SloAlertConfigFieldTimeThreshold).([]interface{})
 	var timeThreshold restapi.SloAlertTimeThreshold
@@ -485,8 +508,9 @@ if len(thresholdStateObject) > 0 {
 	customPayloadFields = wrapSloCustomPayloadFields(customPayloadFields) 
 
 	terraformAlertType := d.Get(SloAlertConfigFieldAlertType).(string)
+    terraformAlertType = normalizeAlertType(terraformAlertType)
+	
 	apiAlertType, apiMetric, err := mapAlertTypeToAPI(terraformAlertType)
-
 	if err != nil {
 		return nil, fmt.Errorf("invalid alert_type: %v", err)
 	}
