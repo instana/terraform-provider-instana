@@ -24,6 +24,7 @@ type SloAlertConfig struct {
 	SloIds              []string                 	`json:"sloIds"`
 	AlertChannelIds     []string                  	`json:"alertChannelIds"`
     CustomerPayloadFields []CustomPayloadField[any] `json:"customPayloadFields"`
+	BurnRateTimeWindows *BurnRateTimeWindows `json:"burnRateTimeWindows,omitempty"`
 }
 
 type SloAlertRule struct {
@@ -40,6 +41,16 @@ type SloAlertThreshold struct {
 type SloAlertTimeThreshold struct {
 	Timewindow 	int `json:"timewindow"`
 	Expiry     	int `json:"expiry"`
+}
+
+type BurnRateTimeWindows struct {
+    LongTimeWindow  TimeWindow `json:"longTimeWindow"`
+    ShortTimeWindow TimeWindow `json:"shortTimeWindow"`
+}
+
+type TimeWindow struct {
+    TimeWindowDuration     int    `json:"duration"`
+    TimeWindowDurationType string `json:"durationType"`
 }
 
 // GetIDForResourcePath implementation of the interface InstanaDataObject
