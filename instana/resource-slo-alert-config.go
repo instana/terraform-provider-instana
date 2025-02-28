@@ -29,13 +29,11 @@ const (
 	SloAlertConfigFieldTimeThresholdTimeWindow = "time_window"
 	SloAlertConfigFieldTimeThresholdExpiry     = "expiry"
 	SloAlertConfigFieldEnabled                 = "enabled"
-
 	SloAlertConfigFieldBurnRateTimeWindows      = "burn_rate_time_windows"
 	SloAlertConfigFieldLongTimeWindow			= "long_time_window"
 	SloAlertConfigFieldShortTimeWindow			= "short_time_window"
 	SloAlertConfigFieldTimeWindowDuration		= "duration"
 	SloAlertConfigFieldTimeWindowDurationType	= "duration_type"
-
 
 	// Slo Alert Types for Terraform
 	SloAlertConfigStatus            = "status"
@@ -83,7 +81,7 @@ var (
 		Type:         schema.TypeString,
 		Required:     true,
 		ValidateFunc: validation.StringInSlice([]string{"status", "error_budget", "burn_rate"}, false),
-		Description:  "What do you want to be alerted on? (Type of Smart Alert)",
+		Description:  "What do you want to be alerted on? (Type of Smart Alert: status, error_budget, burn_rate)",
 	}
 
 	SloAlertConfigThreshold = &schema.Schema{
@@ -425,7 +423,7 @@ func (r *sloAlertConfigResource) UpdateState(d *schema.ResourceData, sloAlertCon
 		DefaultCustomPayloadFieldsName:   mapCustomPayloadFieldsToSchema(sloAlertConfig),
 		SloAlertConfigFieldEnabled:       sloAlertConfig.Enabled,
 		SloAlertConfigFieldBurnRateTimeWindows: burnRateTimeWindows,
-	}	
+	}
 
     d.SetId(sloAlertConfig.ID)
 
@@ -577,14 +575,14 @@ func (r *sloAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*
 		BurnRateTimeWindows:   burnRateTimeWindows,
 	}
 
-payloadJSON, err := json.MarshalIndent(payload, "", "  ")
-if err != nil {
-	log.Printf("Error marshalling payload to JSON: %v", err)
-} else {
-	log.Printf("Payload sent to API: %s", string(payloadJSON))
-}
+	payloadJSON, err := json.MarshalIndent(payload, "", "  ")
+	if err != nil {
+		log.Printf("Error marshalling payload to JSON: %v", err)
+	} else {
+		log.Printf("Payload sent to API: %s", string(payloadJSON))
+	}
 
-return payload, nil
+	return payload, nil
 }
 
 func convertInterfaceSliceToStringSlice(input []interface{}) []string {
