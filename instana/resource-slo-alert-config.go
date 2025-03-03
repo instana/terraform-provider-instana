@@ -15,20 +15,20 @@ const ResourceInstanaSloAlertConfig = "instana_slo_alert_config"
 
 const (
 	//Slo Alert Config Field names for Terraform
-	SloAlertConfigFieldName                    = "name"
-	SloAlertConfigFieldDescription             = "description"
-	SloAlertConfigFieldSeverity 			   = "severity"
-	SloAlertConfigFieldTriggering 		   	   = "triggering"
-	SloAlertConfigFieldAlertType 			   = "alert_type"
-	SloAlertConfigFieldThreshold 			   = "threshold"
-	SloAlertConfigFieldThresholdOperator       = "operator"
-	SloAlertConfigFieldThresholdValue    	   = "value"
-	SloAlertConfigFieldSloIds                  = "slo_ids"
-	SloAlertConfigFieldAlertChannelIds         = "alert_channel_ids"
-	SloAlertConfigFieldTimeThreshold           = "time_threshold"
-	SloAlertConfigFieldTimeThresholdTimeWindow = "time_window"
-	SloAlertConfigFieldTimeThresholdExpiry     = "expiry"
-	SloAlertConfigFieldEnabled                 = "enabled"
+	SloAlertConfigFieldName                    	= "name"
+	SloAlertConfigFieldDescription             	= "description"
+	SloAlertConfigFieldSeverity 			   	= "severity"
+	SloAlertConfigFieldTriggering 		   	   	= "triggering"
+	SloAlertConfigFieldAlertType 			   	= "alert_type"
+	SloAlertConfigFieldThreshold 			   	= "threshold"
+	SloAlertConfigFieldThresholdOperator       	= "operator"
+	SloAlertConfigFieldThresholdValue    	   	= "value"
+	SloAlertConfigFieldSloIds                  	= "slo_ids"
+	SloAlertConfigFieldAlertChannelIds         	= "alert_channel_ids"
+	SloAlertConfigFieldTimeThreshold           	= "time_threshold"
+	SloAlertConfigFieldTimeThresholdWarmUp 		= "warm_up"
+	SloAlertConfigFieldTimeThresholdCoolDown    = "cool_down"
+	SloAlertConfigFieldEnabled                  = "enabled"
 	SloAlertConfigFieldBurnRateTimeWindows      = "burn_rate_time_windows"
 	SloAlertConfigFieldLongTimeWindow			= "long_time_window"
 	SloAlertConfigFieldShortTimeWindow			= "short_time_window"
@@ -94,7 +94,8 @@ var (
 			Schema: map[string]*schema.Schema{
 				"type": {
 					Type:         schema.TypeString,
-					Required:     true,
+					Optional:     true,
+					Default:	  "staticThreshold",
 					Description:  "The type of threshold (should be staticThreshold).",
 					ValidateFunc: validation.StringInSlice([]string{"staticThreshold"}, false),
 				},
@@ -195,12 +196,12 @@ var (
 		Description: "Defines the time threshold for triggering and suppressing alerts.",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"time_window": {
+				"warm_up": {
 					Type:        schema.TypeInt,
 					Required:    true,
 					Description: "The duration for which the condition must be violated for the alert to be triggered (in ms).",
 				},
-				"expiry": {
+				"cool_down": {
 					Type:        schema.TypeInt,
 					Required:    true,
 					Description: "The duration for which the condition must remain suppressed for the alert to end (in ms).",
@@ -335,8 +336,8 @@ func (r *sloAlertConfigResource) sloAlertConfigStateUpgradeV0(_ context.Context,
         if isOldFormat {
             state[SloAlertConfigFieldTimeThreshold] = []interface{}{
                 map[string]interface{}{
-                    SloAlertConfigFieldTimeThresholdExpiry:     60000,
-                    SloAlertConfigFieldTimeThresholdTimeWindow: oldTimeThreshold,
+                    SloAlertConfigFieldTimeThresholdCoolDown:     60000,
+                    SloAlertConfigFieldTimeThresholdWarmUp: oldTimeThreshold,
                 },
             }
         }
@@ -360,8 +361,8 @@ func (r *sloAlertConfigResource) UpdateState(d *schema.ResourceData, sloAlertCon
 	}
 	
     timeThreshold := map[string]interface{}{
-        SloAlertConfigFieldTimeThresholdExpiry:     sloAlertConfig.TimeThreshold.Expiry,
-        SloAlertConfigFieldTimeThresholdTimeWindow: sloAlertConfig.TimeThreshold.Timewindow,
+        SloAlertConfigFieldTimeThresholdCoolDown:     sloAlertConfig.TimeThreshold.Expiry,
+        SloAlertConfigFieldTimeThresholdWarmUp: sloAlertConfig.TimeThreshold.TimeWindow,
     }
 
 	var terraformAlertType string
@@ -499,13 +500,13 @@ func (r *sloAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*
 	if len(timeThresholdStateObject) > 0 {
 		timeThresholdObject, ok := timeThresholdStateObject[0].(map[string]interface{})
 		if ok {
-			expiry, expiryOK := timeThresholdObject[SloAlertConfigFieldTimeThresholdExpiry].(int)
-			timewindow, timeWindowOK := timeThresholdObject[SloAlertConfigFieldTimeThresholdTimeWindow].(int)
+			cooldown, coolDownOK := timeThresholdObject[SloAlertConfigFieldTimeThresholdCoolDown].(int)
+			warmup, warmUpOK := timeThresholdObject[SloAlertConfigFieldTimeThresholdWarmUp].(int)
 
-			if expiryOK && timeWindowOK {
+			if coolDownOK && warmUpOK {
 				timeThreshold = restapi.SloAlertTimeThreshold{
-					Expiry:     expiry,
-					Timewindow: timewindow,
+					Expiry:     	cooldown,
+					TimeWindow: 	warmup,
 				}
 			} else {
 				return nil, fmt.Errorf("time threshold expiry or time window is missing or of incorrect type")
