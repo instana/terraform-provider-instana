@@ -255,7 +255,7 @@ var (
 		Type:         schema.TypeInt,
 		Optional:     true,
 		Default:      restapi.Granularity600000,
-		ValidateFunc: validation.IntInSlice(restapi.SupportedGranularities.ToIntSlice()),
+		ValidateFunc: validation.IntInSlice(restapi.SupportedSmartAlertGranularities.ToIntSlice()),
 		Description:  "The evaluation granularity used for detection of violations of the defined threshold. In other words, it defines the size of the tumbling window used",
 	}
 	applicationAlertConfigSchemaIncludeInternal = &schema.Schema{
