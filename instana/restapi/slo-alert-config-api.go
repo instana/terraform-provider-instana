@@ -39,8 +39,8 @@ type SloAlertThreshold struct {
 }
 
 type SloAlertTimeThreshold struct {
-	Timewindow 	int `json:"timewindow"`
-	Expiry     	int `json:"expiry"`
+    TimeWindow int `json:"timeWindow"` 
+    Expiry     int `json:"expiry"`     
 }
 
 type BurnRateTimeWindows struct {
