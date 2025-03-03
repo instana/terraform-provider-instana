@@ -94,7 +94,8 @@ var (
 			Schema: map[string]*schema.Schema{
 				"type": {
 					Type:         schema.TypeString,
-					Required:     true,
+					Optional:     true,
+					Default:	  "staticThreshold",
 					Description:  "The type of threshold (should be staticThreshold).",
 					ValidateFunc: validation.StringInSlice([]string{"staticThreshold"}, false),
 				},
