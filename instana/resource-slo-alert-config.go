@@ -467,99 +467,89 @@ func (r *sloAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*
 		
 	// Convert threshold from Terraform state
 	thresholdStateObject := d.Get(SloAlertConfigFieldThreshold).([]interface{})
-	var threshold restapi.SloAlertThreshold
-
-	if len(thresholdStateObject) > 0 {
-		thresholdObject, ok := thresholdStateObject[0].(map[string]interface{})
-		if ok {
-			operatorRaw, opOK := thresholdObject[SloAlertConfigFieldThresholdOperator]
-			valueRaw, valOK := thresholdObject[SloAlertConfigFieldThresholdValue]
-
-			if opOK && valOK {
-				operator := fmt.Sprintf("%v", operatorRaw)
-				value, err := convertToFloat64(valueRaw) 
-				if err != nil {
-					return nil, fmt.Errorf("threshold value is invalid: %v", err)
-				}
-
-				threshold = restapi.SloAlertThreshold{
-					Type:     "staticThreshold",
-					Operator: operator,
-					Value:    value,
-				}
-			} else {
-				return nil, fmt.Errorf("threshold operator or value is missing or incorrect type")
-			}
-		}
-	}
+    var threshold restapi.SloAlertThreshold
+    if len(thresholdStateObject) > 0 {
+        thresholdObject := thresholdStateObject[0].(map[string]interface{})
+        operatorRaw, opOK := thresholdObject[SloAlertConfigFieldThresholdOperator]
+        valueRaw, valOK := thresholdObject[SloAlertConfigFieldThresholdValue]
+        if opOK && valOK {
+            operator := fmt.Sprintf("%v", operatorRaw)
+            value, err := convertToFloat64(valueRaw)
+            if err != nil {
+                return nil, fmt.Errorf("threshold value is invalid: %v", err)
+            }
+            thresholdType := "staticThreshold"
+            if typeRaw, typeOK := thresholdObject["type"]; typeOK && typeRaw != nil {
+                thresholdType = typeRaw.(string)
+            }
+            threshold = restapi.SloAlertThreshold{
+                Type:     thresholdType,
+                Operator: operator,
+                Value:    value,
+            }
+        } else {
+            return nil, fmt.Errorf("threshold operator or value is missing or incorrect type")
+        }
+    }
 
 	// Convert time threshold from Terraform state
 	timeThresholdStateObject := d.Get(SloAlertConfigFieldTimeThreshold).([]interface{})
-	var timeThreshold restapi.SloAlertTimeThreshold
-
-	if len(timeThresholdStateObject) > 0 {
-		timeThresholdObject, ok := timeThresholdStateObject[0].(map[string]interface{})
-		if ok {
-			cooldown, coolDownOK := timeThresholdObject[SloAlertConfigFieldTimeThresholdCoolDown].(int)
-			warmup, warmUpOK := timeThresholdObject[SloAlertConfigFieldTimeThresholdWarmUp].(int)
-
-			if coolDownOK && warmUpOK {
-				timeThreshold = restapi.SloAlertTimeThreshold{
-					Expiry:     	cooldown,
-					TimeWindow: 	warmup,
-				}
-			} else {
-				return nil, fmt.Errorf("time threshold expiry or time window is missing or of incorrect type")
-			}
-		}
-	}
+    var timeThreshold restapi.SloAlertTimeThreshold
+    if len(timeThresholdStateObject) > 0 {
+        timeThresholdObject := timeThresholdStateObject[0].(map[string]interface{})
+        warmUp, warmUpOK := timeThresholdObject["warm_up"].(int)
+        coolDown, coolDownOK := timeThresholdObject["cool_down"].(int)
+        if warmUpOK && coolDownOK {
+            timeThreshold = restapi.SloAlertTimeThreshold{
+                TimeWindow: warmUp,
+                Expiry:     coolDown,
+            }
+        } else {
+            return nil, fmt.Errorf("time threshold warm_up or cool_down is missing or incorrect type")
+        }
+    }
 
 	// Custom Payload Fields
 	customPayloadFields, err := mapDefaultCustomPayloadFieldsFromSchema(d)
-	if err != nil {
-		return nil, fmt.Errorf("error processing custom payload fields: %w", err)
-	}
+    if err != nil {
+        return nil, fmt.Errorf("error processing custom payload fields: %w", err)
+    }
+    customPayloadFields = wrapSloCustomPayloadFields(customPayloadFields)
 
-	customPayloadFields = wrapSloCustomPayloadFields(customPayloadFields) 
-
-	terraformAlertType := d.Get(SloAlertConfigFieldAlertType).(string)
-    terraformAlertType = normalizeAlertType(terraformAlertType)
-	
-	apiAlertType, apiMetric, err := mapAlertTypeToAPI(terraformAlertType)
-	if err != nil {
-		return nil, fmt.Errorf("invalid alert_type: %v", err)
-	}
-
-	// Construct the Rule
-	rule := restapi.SloAlertRule{
-		AlertType: apiAlertType,
-		Metric:    apiMetric,
-	}
+    // Alert Type
+    terraformAlertType := normalizeAlertType(d.Get(SloAlertConfigFieldAlertType).(string))
+    apiAlertType, apiMetric, err := mapAlertTypeToAPI(terraformAlertType)
+    if err != nil {
+        return nil, fmt.Errorf("invalid alert_type: %v", err)
+    }
+    rule := restapi.SloAlertRule{
+        AlertType: apiAlertType,
+        Metric:    apiMetric,
+    }
 
 	// Only set BurnRateTimeWindows for burn_rate alerts
 	var burnRateTimeWindows *restapi.BurnRateTimeWindows
-	if terraformAlertType == SloAlertConfigBurnRate {
-		burnRateState := d.Get(SloAlertConfigFieldBurnRateTimeWindows).([]interface{})
-		if len(burnRateState) == 0 {
-			return nil, fmt.Errorf("burn_rate_time_windows is required for alert_type 'burn_rate'")
-		}
-		burnRateObj := burnRateState[0].(map[string]interface{})
-		
-		longWindowState := burnRateObj[SloAlertConfigFieldLongTimeWindow].([]interface{})[0].(map[string]interface{})
-		shortWindowState := burnRateObj[SloAlertConfigFieldShortTimeWindow].([]interface{})[0].(map[string]interface{})
+    if terraformAlertType == SloAlertConfigBurnRate {
+        burnRateState := d.Get(SloAlertConfigFieldBurnRateTimeWindows).([]interface{})
+        if len(burnRateState) == 0 {
+            return nil, fmt.Errorf("burn_rate_time_windows is required for alert_type 'burn_rate'")
+        }
+        burnRateObj := burnRateState[0].(map[string]interface{})
+        longWindowState := burnRateObj[SloAlertConfigFieldLongTimeWindow].([]interface{})[0].(map[string]interface{})
+        shortWindowState := burnRateObj[SloAlertConfigFieldShortTimeWindow].([]interface{})[0].(map[string]interface{})
+        burnRateTimeWindows = &restapi.BurnRateTimeWindows{
+            LongTimeWindow: restapi.TimeWindow{
+                TimeWindowDuration:     longWindowState[SloAlertConfigFieldTimeWindowDuration].(int),
+                TimeWindowDurationType: longWindowState[SloAlertConfigFieldTimeWindowDurationType].(string),
+            },
+            ShortTimeWindow: restapi.TimeWindow{
+                TimeWindowDuration:     shortWindowState[SloAlertConfigFieldTimeWindowDuration].(int),
+                TimeWindowDurationType: shortWindowState[SloAlertConfigFieldTimeWindowDurationType].(string),
+            },
+        }
+    }
 
-		burnRateTimeWindows = &restapi.BurnRateTimeWindows{
-			LongTimeWindow: restapi.TimeWindow{
-				TimeWindowDuration:     longWindowState[SloAlertConfigFieldTimeWindowDuration].(int),
-				TimeWindowDurationType: longWindowState[SloAlertConfigFieldTimeWindowDurationType].(string),
-			},
-			ShortTimeWindow: restapi.TimeWindow{
-				TimeWindowDuration:     shortWindowState[SloAlertConfigFieldTimeWindowDuration].(int),
-				TimeWindowDurationType: shortWindowState[SloAlertConfigFieldTimeWindowDurationType].(string),
-			},
-		}
-	}
-
+	// Construct payload
 	payload := &restapi.SloAlertConfig{
 		ID:                    sid,
 		Name:                  d.Get(SloAlertConfigFieldName).(string),
@@ -569,21 +559,21 @@ func (r *sloAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*
 		Enabled:               d.Get(SloAlertConfigFieldEnabled).(bool),
 		Rule:                  rule,
 		Threshold:             threshold,
+		TimeThreshold:         timeThreshold,
 		SloIds:                convertInterfaceSliceToStringSlice(d.Get(SloAlertConfigFieldSloIds).([]interface{})),
 		AlertChannelIds:       convertInterfaceSliceToStringSlice(d.Get(SloAlertConfigFieldAlertChannelIds).([]interface{})),
-		TimeThreshold:         timeThreshold,
 		CustomerPayloadFields: customPayloadFields,
 		BurnRateTimeWindows:   burnRateTimeWindows,
 	}
 
 	payloadJSON, err := json.MarshalIndent(payload, "", "  ")
-	if err != nil {
-		log.Printf("Error marshalling payload to JSON: %v", err)
-	} else {
-		log.Printf("Payload sent to API: %s", string(payloadJSON))
-	}
+    if err != nil {
+        log.Printf("Error marshalling payload to JSON: %v", err)
+    } else {
+        log.Printf("Payload sent to API: %s", string(payloadJSON))
+    }
 
-	return payload, nil
+    return payload, nil
 }
 
 func convertInterfaceSliceToStringSlice(input []interface{}) []string {
