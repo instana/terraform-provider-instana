@@ -1,19 +1,28 @@
 package instana_test
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
-	"github.com/gessnerfl/terraform-provider-instana/testutils"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/require"
-	"net/http"
 	"testing"
 
 	. "github.com/gessnerfl/terraform-provider-instana/instana"
 )
+
+
+func TestSloAlertConfig(t *testing.T) {
+	terraformResourceInstanceName := ResourceInstanaSloAlertConfig + ".example"
+	inst := &sloAlertConfigTest{
+		terraformResourceInstanceName: terraformResourceInstanceName,
+		resourceHandle:                NewSloAlertConfigResourceHandle(),
+	}
+	inst.run(t)
+}
+
+type sloAlertConfigTest struct {
+	terraformResourceInstanceName string
+	resourceHandle                ResourceHandle[*restapi.SloAlertConfig]
+}
 
 
 var sloAlertConfigTerraformTemplate = `
@@ -83,7 +92,28 @@ var sloAlertConfigServerResponseTemplate = `
 `
 
 
-func TestSliConfigTest(t *testing.T) {
-	unitTest := &sliConfigUnitTest{}
+func (test *sloAlertConfigTest) run(t *testing.T) {
+	t.Run(fmt.Sprintf("%s should have correct resouce name", ResourceInstanaSloAlertConfig), test.createTestResourceShouldHaveResourceName())
+	t.Run(fmt.Sprintf("%s should have one state upgrader", ResourceInstanaSloAlertConfig), test.createTestResourceShouldHaveOneStateUpgrader())
+	t.Run(fmt.Sprintf("%s should have schema version one", ResourceInstanaSloAlertConfig), test.createTestResourceShouldHaveSchemaVersionOne())
+	
+}
 
+
+func (test *sloAlertConfigTest) createTestResourceShouldHaveResourceName() func(t *testing.T) {
+	return func(t *testing.T) {
+		require.Equal(t, test.resourceHandle.MetaData().ResourceName, "instana_slo_alert_config")
 	}
+}
+
+func (test *sloAlertConfigTest) createTestResourceShouldHaveOneStateUpgrader() func(t *testing.T) {
+	return func(t *testing.T) {
+		require.Len(t, test.resourceHandle.StateUpgraders(), 1)
+	}
+}
+
+func (test *sloAlertConfigTest) createTestResourceShouldHaveSchemaVersionOne() func(t *testing.T) {
+	return func(t *testing.T) {
+		require.Equal(t, 1, test.resourceHandle.MetaData().SchemaVersion)
+	}
+}
