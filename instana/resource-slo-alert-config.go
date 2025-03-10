@@ -21,6 +21,7 @@ const (
 	SloAlertConfigFieldTriggering 		   	   	= "triggering"
 	SloAlertConfigFieldAlertType 			   	= "alert_type"
 	SloAlertConfigFieldThreshold 			   	= "threshold"
+	SloAlertConfigFieldThresholdType			= "type"
 	SloAlertConfigFieldThresholdOperator       	= "operator"
 	SloAlertConfigFieldThresholdValue    	   	= "value"
 	SloAlertConfigFieldSloIds                  	= "slo_ids"
@@ -92,20 +93,20 @@ var (
 		Description: "Indicates the type of violation of the defined threshold.",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"type": {
+				SloAlertConfigFieldThresholdType: {
 					Type:         schema.TypeString,
 					Optional:     true,
 					Default:	  "staticThreshold",
 					Description:  "The type of threshold (should be staticThreshold).",
 					ValidateFunc: validation.StringInSlice([]string{"staticThreshold"}, false),
 				},
-				"operator": {
+				SloAlertConfigFieldThresholdOperator: {
 					Type:         schema.TypeString,
 					Required:     true,
 					Description:  "The operator used to evaluate this rule.",
 					ValidateFunc: validation.StringInSlice(restapi.SupportedThresholdOperators.ToStringSlice(), true),
 				},
-				"value": {
+				SloAlertConfigFieldThresholdValue: {
 					Type:        schema.TypeFloat,
 					Required:    true,
 					Description: "The threshold value for the alert condition.",
@@ -355,7 +356,7 @@ func (r *sloAlertConfigResource) UpdateState(d *schema.ResourceData, sloAlertCon
 	}
 
 	threshold := map[string]interface{}{
-		"type": thresholdType,
+		SloAlertConfigFieldThresholdType: thresholdType,
 		SloAlertConfigFieldThresholdOperator: sloAlertConfig.Threshold.Operator,
 		SloAlertConfigFieldThresholdValue:    sloAlertConfig.Threshold.Value,
 	}
@@ -479,7 +480,7 @@ func (r *sloAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*
                 return nil, fmt.Errorf("threshold value is invalid: %v", err)
             }
             thresholdType := "staticThreshold"
-            if typeRaw, typeOK := thresholdObject["type"]; typeOK && typeRaw != nil {
+            if typeRaw, typeOK := thresholdObject[SloAlertConfigFieldThresholdType]; typeOK && typeRaw != nil {
                 thresholdType = typeRaw.(string)
             }
             threshold = restapi.SloAlertThreshold{
