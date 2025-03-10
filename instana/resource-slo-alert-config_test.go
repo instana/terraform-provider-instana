@@ -9,6 +9,19 @@ import (
 	. "github.com/gessnerfl/terraform-provider-instana/instana"
 )
 
+const (
+	sloAlertConfigDefinition = "instana_sli_config.example_sli_config"
+	sloAlertID                               = "id"
+	sloAlertName                             = "slo-alert-name"
+	sloAlertDescription                             = "slo-alert-description"
+	sloAlertSeverity                            = 10
+	SloAlertTriggering                           = true
+	sloAlertAlertType                             = "status"
+	sloAlertAlertEnabled                             = true
+	SloAlertThresholdType					= "staticThreshold"
+	SloAlertThresholdOperator							= ">"
+	SloAlertThresholdValue		= -1
+)
 
 func TestSloAlertConfig(t *testing.T) {
 	terraformResourceInstanceName := ResourceInstanaSloAlertConfig + ".example"
@@ -115,5 +128,31 @@ func (test *sloAlertConfigTest) createTestResourceShouldHaveOneStateUpgrader() f
 func (test *sloAlertConfigTest) createTestResourceShouldHaveSchemaVersionOne() func(t *testing.T) {
 	return func(t *testing.T) {
 		require.Equal(t, 1, test.resourceHandle.MetaData().SchemaVersion)
+	}
+}
+
+func (r *sloAlertConfigTest) shouldRequireMetricConfigurationThresholdToBeGreaterThanOrEqualToZero() func(t *testing.T) {
+	return func(t *testing.T) {
+		testHelper := NewTestHelper[*restapi.SloAlertConfig](t)
+		resourceHandle := NewSloAlertConfigResourceHandle()
+		resourceData := testHelper.CreateEmptyResourceDataForResourceHandle(resourceHandle)
+		resourceData.SetId(sloAlertID)
+		setValueOnResourceData(t, resourceData, SloAlertConfigFieldName, sloAlertName)
+		// setValueOnResourceData(t, resourceData, SliConfigFieldName, sliConfigName)
+		// setValueOnResourceData(t, resourceData, SliConfigFieldName, sliConfigName)
+		// setValueOnResourceData(t, resourceData, SliConfigFieldName, sliConfigName)
+		// setValueOnResourceData(t, resourceData, SliConfigFieldName, sliConfigName)
+
+		thresholdStateObject := []map[string]interface{}{
+			{
+				SloAlertConfigFieldThresholdType:       SloAlertThresholdType,
+				SloAlertConfigFieldThresholdOperator: 	SloAlertThresholdOperator,
+				SloAlertConfigFieldThresholdValue:    	SloAlertThresholdValue,
+			},
+		}
+		setValueOnResourceData(t, resourceData, SloAlertConfigFieldThreshold, thresholdStateObject)
+
+		_, metricThresholdIsOK := resourceData.GetOk("threshold.0.value")
+		require.False(t, metricThresholdIsOK)
 	}
 }
