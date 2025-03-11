@@ -197,12 +197,12 @@ var (
 		Description: "Defines the time threshold for triggering and suppressing alerts.",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"warm_up": {
+				SloAlertConfigFieldTimeThresholdWarmUp: {
 					Type:        schema.TypeInt,
 					Required:    true,
 					Description: "The duration for which the condition must be violated for the alert to be triggered (in ms).",
 				},
-				"cool_down": {
+				SloAlertConfigFieldTimeThresholdCoolDown: {
 					Type:        schema.TypeInt,
 					Required:    true,
 					Description: "The duration for which the condition must remain suppressed for the alert to end (in ms).",
@@ -498,8 +498,8 @@ func (r *sloAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*
     var timeThreshold restapi.SloAlertTimeThreshold
     if len(timeThresholdStateObject) > 0 {
         timeThresholdObject := timeThresholdStateObject[0].(map[string]interface{})
-        warmUp, warmUpOK := timeThresholdObject["warm_up"].(int)
-        coolDown, coolDownOK := timeThresholdObject["cool_down"].(int)
+        warmUp, warmUpOK := timeThresholdObject[SloAlertConfigFieldTimeThresholdWarmUp].(int)
+        coolDown, coolDownOK := timeThresholdObject[SloAlertConfigFieldTimeThresholdCoolDown].(int)
         if warmUpOK && coolDownOK {
             timeThreshold = restapi.SloAlertTimeThreshold{
                 TimeWindow: warmUp,
