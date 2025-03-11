@@ -10,20 +10,23 @@ import (
 )
 
 const (
-	sloAlertConfigDefinition      = "instana_sli_config.example_sli_config"
-	sloAlertID                    = "id"
-	sloAlertName                  = "slo-alert-name"
-	sloAlertDescription           = "slo-alert-description"
-	sloAlertSeverity              = 10
-	SloAlertTriggering            = true
-	sloAlertAlertType             = "status"
-	sloAlertAlertEnabled          = true
-	SloAlertThresholdType         = "staticThreshold"
-	SloAlertThresholdOperator     = ">"
-	SloAlertThresholdValue        = 0.3
-	SloAlertTimeThresholdWarmUp   = 60000
-	SloAlertTimeThresholdCoolDown = 30000
-
+ sloAlertConfigDefinition                  = "instana_sli_config.example_sli_config"
+ sloAlertID                                = "id"
+ sloAlertName                              = "slo-alert-name"
+ sloAlertDescription                       = "slo-alert-description"
+ sloAlertSeverity                          = 10
+ SloAlertTriggering                        = true
+ sloAlertAlertType                         = "status"
+ sloAlertAlertEnabled                      = true
+ SloAlertThresholdType                     = "staticThreshold"
+ SloAlertThresholdOperator                 = ">"
+ SloAlertThresholdValue                    = 0.3
+ SloAlertTimeThresholdWarmUp               = 60000
+ SloAlertTimeThresholdCoolDown             = 30000
+ SloAlertBurnRateShortDuration             = 5
+ SloAlertBurnRateShortDurationType         = "minute"
+ SloAlertBurnRateLongDuration              = 24
+ SloAlertBurnRateLongDurationType          = "hour"
 )
 
 func TestSloAlertConfig(t *testing.T) {
@@ -114,8 +117,8 @@ func (test *sloAlertConfigTest) run(t *testing.T) {
 	t.Run(fmt.Sprintf("%s should have schema version one", ResourceInstanaSloAlertConfig), test.createTestResourceShouldHaveSchemaVersionOne())
 	t.Run("Should require Threshold Values to Match the Assigned Values", test.shouldRequireThresholdMetricsToMatchTheAssignedValues())
 	t.Run("Should require Time Threshold Values to Match the Assigned Values", test.shouldRequireTimeThresholdMetricsToMatchTheAssignedValues())
-
-
+	t.Run("Should require Alert Type Value to Match the Assigned Value", test.shouldFailToMapAlertTypeWhenNoSupportedValueIsProvided())
+	t.Run("Should require Burn Rate Time Windows Values to Match the Assigned Values", test.shouldRequireBurnRateTimeWindowsToMatchAssignedValues())
 }
 
 
@@ -196,3 +199,69 @@ func (test *sloAlertConfigTest) shouldRequireTimeThresholdMetricsToMatchTheAssig
 
 	}
 }
+
+
+func (r *sloAlertConfigTest) shouldFailToMapAlertTypeWhenNoSupportedValueIsProvided() func(t *testing.T) {
+    return func(t *testing.T) {
+        testHelper := NewTestHelper[*restapi.SloAlertConfig](t)
+        resourceHandle := NewSloAlertConfigResourceHandle()
+        resourceData := testHelper.CreateEmptyResourceDataForResourceHandle(resourceHandle)
+        resourceData.SetId(sloAlertID)
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldName, sloAlertName)
+
+        // Set an invalid alert_type
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldAlertType, "unknown-type")
+
+        _, err := resourceHandle.MapStateToDataObject(resourceData)
+
+        require.Error(t, err)
+        require.Contains(t, err.Error(), "invalid alert_type: unknown-type")
+    }
+}
+
+func (test *sloAlertConfigTest) shouldRequireBurnRateTimeWindowsToMatchAssignedValues() func(t *testing.T) {
+    return func(t *testing.T) {
+        testHelper := NewTestHelper[*restapi.SloAlertConfig](t)
+        resourceHandle := NewSloAlertConfigResourceHandle()
+        resourceData := testHelper.CreateEmptyResourceDataForResourceHandle(resourceHandle)
+        resourceData.SetId(sloAlertID)
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldName, sloAlertName)
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldAlertType, "burn_rate")
+
+        // Set burn_rate_time_windows
+        burnRateTimeWindowsStateObject := []map[string]interface{}{
+            {
+                SloAlertConfigFieldShortTimeWindow: []map[string]interface{}{
+                    {
+                        SloAlertConfigFieldTimeWindowDuration:     SloAlertBurnRateShortDuration,
+                        SloAlertConfigFieldTimeWindowDurationType: SloAlertBurnRateShortDurationType,
+                    },
+                },
+                SloAlertConfigFieldLongTimeWindow: []map[string]interface{}{
+                    {
+                        SloAlertConfigFieldTimeWindowDuration:     SloAlertBurnRateLongDuration,
+                        SloAlertConfigFieldTimeWindowDurationType: SloAlertBurnRateLongDurationType,
+                    },
+                },
+            },
+        }
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldBurnRateTimeWindows, burnRateTimeWindowsStateObject)
+
+        shortDuration, shortDurOk := resourceData.GetOk("burn_rate_time_windows.0.short_time_window.0.duration")
+        shortDurationType, shortTypeOk := resourceData.GetOk("burn_rate_time_windows.0.short_time_window.0.duration_type")
+
+        longDuration, longDurOk := resourceData.GetOk("burn_rate_time_windows.0.long_time_window.0.duration")
+        longDurationType, longTypeOk := resourceData.GetOk("burn_rate_time_windows.0.long_time_window.0.duration_type")
+
+        require.True(t, shortDurOk, "burn_rate_time_windows.0.short_time_window.0.duration should exist")
+        require.True(t, shortTypeOk, "burn_rate_time_windows.0.short_time_window.0.duration_type should exist")
+        require.True(t, longDurOk, "burn_rate_time_windows.0.long_time_window.0.duration should exist")
+        require.True(t, longTypeOk, "burn_rate_time_windows.0.long_time_window.0.duration_type should exist")
+
+        require.Equal(t, SloAlertBurnRateShortDuration, shortDuration.(int), "burn_rate_time_windows.0.short_time_window.0.duration should match set value")
+        require.Equal(t, SloAlertBurnRateShortDurationType, shortDurationType.(string), "burn_rate_time_windows.0.short_time_window.0.duration_type should match set value")
+        require.Equal(t, SloAlertBurnRateLongDuration, longDuration.(int), "burn_rate_time_windows.0.long_time_window.0.duration should match set value")
+        require.Equal(t, SloAlertBurnRateLongDurationType, longDurationType.(string), "burn_rate_time_window.0.long_time_window.0.duration_type should match set value")
+    }
+}
+
