@@ -119,6 +119,7 @@ func (test *sloAlertConfigTest) run(t *testing.T) {
 	t.Run("Should require Time Threshold Values to Match the Assigned Values", test.shouldRequireTimeThresholdMetricsToMatchTheAssignedValues())
 	t.Run("Should require Alert Type Value to Match the Assigned Value", test.shouldFailToMapAlertTypeWhenNoSupportedValueIsProvided())
 	t.Run("Should require Burn Rate Time Windows Values to Match the Assigned Values", test.shouldRequireBurnRateTimeWindowsToMatchAssignedValues())
+	t.Run("Should Fail With Invalid Burn Rate Duration Type", test.shouldFailWhenBurnRateTimeWindowsHasInvalidDurationType())
 }
 
 
@@ -265,3 +266,39 @@ func (test *sloAlertConfigTest) shouldRequireBurnRateTimeWindowsToMatchAssignedV
     }
 }
 
+func (test *sloAlertConfigTest) shouldFailWhenBurnRateTimeWindowsHasInvalidDurationType() func(t *testing.T) {
+    return func(t *testing.T) {
+        testHelper := NewTestHelper[*restapi.SloAlertConfig](t)
+        resourceHandle := NewSloAlertConfigResourceHandle()
+        resourceData := testHelper.CreateEmptyResourceDataForResourceHandle(resourceHandle)
+        resourceData.SetId(sloAlertID)
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldName, sloAlertName)
+
+        // Add required fields to avoid unrelated errors
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldAlertType, "burn_rate")
+
+        // Set burn_rate_time_windows with invalid duration_type
+        burnRateTimeWindowsStateObject := []map[string]interface{}{
+            {
+                SloAlertConfigFieldShortTimeWindow: []map[string]interface{}{
+                    {
+                        SloAlertConfigFieldTimeWindowDuration:     5,
+                        SloAlertConfigFieldTimeWindowDurationType: "invalid", // Invalid value
+                    },
+                },
+                SloAlertConfigFieldLongTimeWindow: []map[string]interface{}{
+                    {
+                        SloAlertConfigFieldTimeWindowDuration:     24,
+                        SloAlertConfigFieldTimeWindowDurationType: "invalid", // Invalid value
+                    },
+                },
+            },
+        }
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldBurnRateTimeWindows, burnRateTimeWindowsStateObject)
+
+        // Attempt to map to API object, expect API rejection
+        _, err := resourceHandle.MapStateToDataObject(resourceData)
+        require.Error(t, err)
+        require.Contains(t, err.Error(), "invalid duration_type", "expected API rejection for invalid duration_type")
+    }
+}
