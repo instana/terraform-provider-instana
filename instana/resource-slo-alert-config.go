@@ -567,12 +567,13 @@ func (r *sloAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*
 		BurnRateTimeWindows:   burnRateTimeWindows,
 	}
 
-	payloadJSON, err := json.MarshalIndent(payload, "", "  ")
-    if err != nil {
-        log.Printf("Error marshalling payload to JSON: %v", err)
-    } else {
-        log.Printf("Payload sent to API: %s", string(payloadJSON))
-    }
+	// debug utils
+	// payloadJSON, err := json.MarshalIndent(payload, "", "  ")
+    // if err != nil {
+    //     log.Printf("Error marshalling payload to JSON: %v", err)
+    // } else {
+    //     log.Printf("Payload sent to API: %s", string(payloadJSON))
+    // }
 
     return payload, nil
 }
