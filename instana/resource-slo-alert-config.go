@@ -532,11 +532,16 @@ func (r *sloAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*
 	var burnRateTimeWindows *restapi.BurnRateTimeWindows
 	if terraformAlertType == SloAlertConfigBurnRate {
 		burnRateState := d.Get(SloAlertConfigFieldBurnRateTimeWindows).([]interface{})
+
+		//debug
 		debug(fmt.Sprintf("burnRateState: %+v", burnRateState))
+		
 		if len(burnRateState) == 0 {
 			return nil, fmt.Errorf("burn_rate_time_windows is required for alert_type 'burn_rate'")
 		}
 		burnRateObj := burnRateState[0].(map[string]interface{})
+
+		//debug
 		debug(fmt.Sprintf("burnRateObj: %+v", burnRateObj))
 
 		// Validate and extract long_time_window
@@ -545,7 +550,10 @@ func (r *sloAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*
 			return nil, fmt.Errorf("long_time_window is missing or empty")
 		}
 		longWindowState := longWindowStateRaw.([]interface{})[0].(map[string]interface{})
+
+		//debug
 		debug(fmt.Sprintf("longWindowState: %+v", longWindowState))
+		
 		longDurationRaw, longDurationExists := longWindowState[SloAlertConfigFieldTimeWindowDuration]
 		if !longDurationExists {
 			return nil, fmt.Errorf("duration in long_time_window must be an integer")
@@ -580,7 +588,10 @@ func (r *sloAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*
 			return nil, fmt.Errorf("duration in short_time_window must be an integer")
 		}
 		shortWindowState := shortWindowSlice[0].(map[string]interface{})
+
+		//debug
 		debug(fmt.Sprintf("shortWindowState: %+v", shortWindowState))
+
 		shortDurationRaw, shortDurationExists := shortWindowState[SloAlertConfigFieldTimeWindowDuration]
 		if !shortDurationExists || shortDurationRaw == 0 { 
 			return nil, fmt.Errorf("duration in short_time_window must be an integer")

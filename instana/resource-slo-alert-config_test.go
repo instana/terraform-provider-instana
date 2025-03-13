@@ -16,6 +16,7 @@ const (
  sloAlertDescription                       = "slo-alert-description"
  sloAlertSeverity                          = 10
  SloAlertTriggering                        = true
+ SloAlertConfigFieldRule 				   = "rule"
  sloAlertAlertType                         = "status"
  sloAlertAlertEnabled                      = true
  SloAlertThresholdType                     = "staticThreshold"
@@ -118,13 +119,11 @@ func (test *sloAlertConfigTest) run(t *testing.T) {
 	t.Run("Should require Threshold Values to Match the Assigned Values", test.shouldRequireThresholdMetricsToMatchTheAssignedValues())
 	t.Run("Should require Time Threshold Values to Match the Assigned Values", test.shouldRequireTimeThresholdMetricsToMatchTheAssignedValues())
 	t.Run("Should require Alert Type Value to Match the Assigned Value", test.shouldFailToMapAlertTypeWhenNoSupportedValueIsProvided())
+	t.Run("should map Smart Alert values correctly", test.shouldMapSmartAlertValuesCorrectly())
 	t.Run("Should require Burn Rate Time Windows Values to Match the Assigned Values", test.shouldRequireBurnRateTimeWindowsToMatchAssignedValues())
-	// t.Run("Should Fail With Invalid Burn Rate Duration Type", test.shouldFailWhenBurnRateTimeWindowsHasInvalidDurationType())
 	t.Run("Should Fail When Burn Rate Time Windows Is Missing For Burn Rate Alert", test.shouldFailWhenBurnRateTimeWindowsIsMissingForBurnRateAlert())
 	t.Run("Should Fail When Short Time Window Duration Is Missing", test.shouldFailWhenShortTimeWindowDurationIsMissing())
-
-
-	
+	t.Run("Should Fail When Long Time Window Duration Is Missing", test.shouldFailWhenLongTimeWindowDurationIsMissing())
 }
 
 
@@ -206,6 +205,65 @@ func (test *sloAlertConfigTest) shouldRequireTimeThresholdMetricsToMatchTheAssig
 	}
 }
 
+func (test *sloAlertConfigTest) shouldMapSmartAlertValuesCorrectly() func(t *testing.T) {
+    return func(t *testing.T) {
+        testHelper := NewTestHelper[*restapi.SloAlertConfig](t)
+        resourceHandle := NewSloAlertConfigResourceHandle()
+        resourceData := testHelper.CreateEmptyResourceDataForResourceHandle(resourceHandle)
+        resourceData.SetId(sloAlertID)
+
+        // Set test values for a status alert
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldName, "status-alert-test")
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldAlertType, "status")
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldDescription, "Test status alert description")
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldSeverity, 5)
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldTriggering, true)
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldEnabled, true)
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldSloIds, []interface{}{"slo-1", "slo-2"})
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldAlertChannelIds, []interface{}{"channel-1", "channel-2"})
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldThreshold, []interface{}{
+            map[string]interface{}{
+                "type":     "staticThreshold",
+                "operator": ">=",
+                "value":    95.0,
+            },
+        })
+        // Use schema field names (warm_up and cool_down) instead of API field names
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldTimeThreshold, []interface{}{
+            map[string]interface{}{
+                SloAlertConfigFieldTimeThresholdWarmUp:   300000,
+                SloAlertConfigFieldTimeThresholdCoolDown: 60000,
+            },
+        })
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldAlertType, "status")
+
+		apiObject, err := resourceHandle.MapStateToDataObject(resourceData)
+        require.NoError(t, err, "mapping status alert should not fail with valid configuration")
+
+        // Assert all assigned values are correct
+        require.Equal(t, sloAlertID, apiObject.ID, "ID should match the set value")
+        require.Equal(t, "status-alert-test", apiObject.Name, "name should match the set value")
+        require.Equal(t, "Test status alert description", apiObject.Description, "description should match the set value")
+        require.Equal(t, 5, apiObject.Severity, "severity should match the set value")
+        require.Equal(t, true, apiObject.Triggering, "triggering should match the set value")
+        require.Equal(t, true, apiObject.Enabled, "enabled should match the set value")
+        require.Equal(t, []string{"slo-1", "slo-2"}, apiObject.SloIds, "sloIds should match the set values")
+        require.Equal(t, []string{"channel-1", "channel-2"}, apiObject.AlertChannelIds, "alertChannelIds should match the set values")
+
+        require.Equal(t, "staticThreshold", apiObject.Threshold.Type, "threshold type should match")
+        require.Equal(t, ">=", apiObject.Threshold.Operator, "threshold operator should match")
+        require.Equal(t, 95.0, apiObject.Threshold.Value, "threshold value should match")
+
+        require.Equal(t, 300000, apiObject.TimeThreshold.TimeWindow, "time_threshold time_window should match")
+        require.Equal(t, 60000, apiObject.TimeThreshold.Expiry, "time_threshold expiry should match")
+
+        require.Equal(t, "SERVICE_LEVELS_OBJECTIVE", apiObject.Rule.AlertType, "rule alert_type should be 'SERVICE_LEVELS_OBJECTIVE'")
+        require.Equal(t, "STATUS", apiObject.Rule.Metric, "rule metric should match")
+
+        // Assert burn_rate_time_windows is not set for status alert
+        require.Nil(t, apiObject.BurnRateTimeWindows, "burn_rate_time_windows should be nil for status alert")
+    }
+}
 
 func (r *sloAlertConfigTest) shouldFailToMapAlertTypeWhenNoSupportedValueIsProvided() func(t *testing.T) {
     return func(t *testing.T) {
@@ -271,44 +329,6 @@ func (test *sloAlertConfigTest) shouldRequireBurnRateTimeWindowsToMatchAssignedV
     }
 }
 
-// func (test *sloAlertConfigTest) shouldFailWhenBurnRateTimeWindowsHasInvalidDurationType() func(t *testing.T) {
-//     return func(t *testing.T) {
-//         testHelper := NewTestHelper[*restapi.SloAlertConfig](t)
-//         resourceHandle := NewSloAlertConfigResourceHandle()
-//         resourceData := testHelper.CreateEmptyResourceDataForResourceHandle(resourceHandle)
-//         resourceData.SetId(sloAlertID)
-//         setValueOnResourceData(t, resourceData, SloAlertConfigFieldName, sloAlertName)
-
-//         // Add required fields to avoid unrelated errors
-//         setValueOnResourceData(t, resourceData, SloAlertConfigFieldAlertType, "burn_rate")
-
-//         // Set burn_rate_time_windows with invalid duration_type
-//         burnRateTimeWindowsStateObject := []map[string]interface{}{
-//             {
-//                 SloAlertConfigFieldShortTimeWindow: []map[string]interface{}{
-//                     {
-//                         SloAlertConfigFieldTimeWindowDuration:     5,
-//                         SloAlertConfigFieldTimeWindowDurationType: "invalid", // Invalid value
-//                     },
-//                 },
-//                 SloAlertConfigFieldLongTimeWindow: []map[string]interface{}{
-//                     {
-//                         SloAlertConfigFieldTimeWindowDuration:     24,
-//                         SloAlertConfigFieldTimeWindowDurationType: "invalid", // Invalid value
-//                     },
-//                 },
-//             },
-//         }
-//         setValueOnResourceData(t, resourceData, SloAlertConfigFieldBurnRateTimeWindows, burnRateTimeWindowsStateObject)
-
-//         // Attempt to map to API object, expect API rejection
-//         _, err := resourceHandle.MapStateToDataObject(resourceData)
-//         require.Error(t, err)
-//         require.Contains(t, err.Error(), "invalid duration_type", "expected API rejection for invalid duration_type")
-//     }
-// }
-
-
 func (test *sloAlertConfigTest) shouldFailWhenBurnRateTimeWindowsIsMissingForBurnRateAlert() func(t *testing.T) {
     return func(t *testing.T) {
         testHelper := NewTestHelper[*restapi.SloAlertConfig](t)
@@ -332,13 +352,35 @@ func (test *sloAlertConfigTest) shouldFailWhenShortTimeWindowDurationIsMissing()
         resourceData := testHelper.CreateEmptyResourceDataForResourceHandle(resourceHandle)
         resourceData.SetId(sloAlertID)
 
+        // Set required fields
         setValueOnResourceData(t, resourceData, SloAlertConfigFieldName, sloAlertName)
         setValueOnResourceData(t, resourceData, SloAlertConfigFieldAlertType, "burn_rate")
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldDescription, "Test burn rate alert")
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldSeverity, 5)
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldTriggering, true)
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldEnabled, true)
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldSloIds, []interface{}{"slo-1"})
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldAlertChannelIds, []interface{}{"channel-1"})
 
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldThreshold, []interface{}{
+            map[string]interface{}{
+                "type":     "staticThreshold",
+                "operator": ">=",
+                "value":    95.0,
+            },
+        })
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldTimeThreshold, []interface{}{
+            map[string]interface{}{
+                SloAlertConfigFieldTimeThresholdWarmUp:   300000,
+                SloAlertConfigFieldTimeThresholdCoolDown: 60000,
+            },
+        })
+
+        // Set burn_rate_time_windows with missing short_time_window duration
         burnRateTimeWindowsStateObject := []map[string]interface{}{
             {
-                SloAlertConfigFieldShortTimeWindow: []map[string]interface{}{
-                    {
+                SloAlertConfigFieldShortTimeWindow: []map[string]interface{}{ 
+                    map[string]interface{}{ 
                         SloAlertConfigFieldTimeWindowDurationType: "minute",
                     },
                 },
@@ -352,9 +394,63 @@ func (test *sloAlertConfigTest) shouldFailWhenShortTimeWindowDurationIsMissing()
         }
         setValueOnResourceData(t, resourceData, SloAlertConfigFieldBurnRateTimeWindows, burnRateTimeWindowsStateObject)
 
-        // Attempt to map to API object, expect rejection
         _, err := resourceHandle.MapStateToDataObject(resourceData)
         require.Error(t, err)
         require.Contains(t, err.Error(), "duration in short_time_window must be an integer", "expected error when short_time_window duration is missing")
+    }
+}
+
+func (test *sloAlertConfigTest) shouldFailWhenLongTimeWindowDurationIsMissing() func(t *testing.T) {
+    return func(t *testing.T) {
+        testHelper := NewTestHelper[*restapi.SloAlertConfig](t)
+        resourceHandle := NewSloAlertConfigResourceHandle()
+        resourceData := testHelper.CreateEmptyResourceDataForResourceHandle(resourceHandle)
+        resourceData.SetId(sloAlertID)
+
+        // Set required fields
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldName, sloAlertName)
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldAlertType, "burn_rate")
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldDescription, "Test burn rate alert")
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldSeverity, 5)
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldTriggering, true)
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldEnabled, true)
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldSloIds, []interface{}{"slo-1"})
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldAlertChannelIds, []interface{}{"channel-1"})
+		
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldThreshold, []interface{}{
+            map[string]interface{}{
+                "type":     "staticThreshold",
+                "operator": ">=",
+                "value":    95.0,
+            },
+        })
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldTimeThreshold, []interface{}{
+            map[string]interface{}{
+                SloAlertConfigFieldTimeThresholdWarmUp:   300000,
+                SloAlertConfigFieldTimeThresholdCoolDown: 60000,
+            },
+        })
+
+        // Set burn_rate_time_windows with missing short_time_window duration
+        burnRateTimeWindowsStateObject := []map[string]interface{}{
+            {
+                SloAlertConfigFieldShortTimeWindow: []map[string]interface{}{ 
+                    map[string]interface{}{ 
+						SloAlertConfigFieldTimeWindowDuration:     60,
+                        SloAlertConfigFieldTimeWindowDurationType: "minute",
+                    },
+                },
+                SloAlertConfigFieldLongTimeWindow: []map[string]interface{}{
+                    {
+                        SloAlertConfigFieldTimeWindowDurationType: "hour",
+                    },
+                },
+            },
+        }
+        setValueOnResourceData(t, resourceData, SloAlertConfigFieldBurnRateTimeWindows, burnRateTimeWindowsStateObject)
+
+        _, err := resourceHandle.MapStateToDataObject(resourceData)
+        require.Error(t, err)
+        require.Contains(t, err.Error(), "duration in long_time_window must be an integer", "expected error when long_time_window duration is missing")
     }
 }
