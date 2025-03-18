@@ -2,8 +2,8 @@ package instana
 
 import (
 	"fmt"
-	"log"
-	"encoding/json"
+	// "log"
+	// "encoding/json"
 	"context"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -21,6 +21,7 @@ const (
 	SloAlertConfigFieldTriggering 		   	   	= "triggering"
 	SloAlertConfigFieldAlertType 			   	= "alert_type"
 	SloAlertConfigFieldThreshold 			   	= "threshold"
+	SloAlertConfigFieldThresholdType			= "type"
 	SloAlertConfigFieldThresholdOperator       	= "operator"
 	SloAlertConfigFieldThresholdValue    	   	= "value"
 	SloAlertConfigFieldSloIds                  	= "slo_ids"
@@ -92,20 +93,20 @@ var (
 		Description: "Indicates the type of violation of the defined threshold.",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"type": {
+				SloAlertConfigFieldThresholdType: {
 					Type:         schema.TypeString,
 					Optional:     true,
 					Default:	  "staticThreshold",
 					Description:  "The type of threshold (should be staticThreshold).",
 					ValidateFunc: validation.StringInSlice([]string{"staticThreshold"}, false),
 				},
-				"operator": {
+				SloAlertConfigFieldThresholdOperator: {
 					Type:         schema.TypeString,
 					Required:     true,
 					Description:  "The operator used to evaluate this rule.",
 					ValidateFunc: validation.StringInSlice(restapi.SupportedThresholdOperators.ToStringSlice(), true),
 				},
-				"value": {
+				SloAlertConfigFieldThresholdValue: {
 					Type:        schema.TypeFloat,
 					Required:    true,
 					Description: "The threshold value for the alert condition.",
@@ -196,12 +197,12 @@ var (
 		Description: "Defines the time threshold for triggering and suppressing alerts.",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"warm_up": {
+				SloAlertConfigFieldTimeThresholdWarmUp: {
 					Type:        schema.TypeInt,
 					Required:    true,
 					Description: "The duration for which the condition must be violated for the alert to be triggered (in ms).",
 				},
-				"cool_down": {
+				SloAlertConfigFieldTimeThresholdCoolDown: {
 					Type:        schema.TypeInt,
 					Required:    true,
 					Description: "The duration for which the condition must remain suppressed for the alert to end (in ms).",
@@ -355,7 +356,7 @@ func (r *sloAlertConfigResource) UpdateState(d *schema.ResourceData, sloAlertCon
 	}
 
 	threshold := map[string]interface{}{
-		"type": thresholdType,
+		SloAlertConfigFieldThresholdType: thresholdType,
 		SloAlertConfigFieldThresholdOperator: sloAlertConfig.Threshold.Operator,
 		SloAlertConfigFieldThresholdValue:    sloAlertConfig.Threshold.Value,
 	}
@@ -479,7 +480,7 @@ func (r *sloAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*
                 return nil, fmt.Errorf("threshold value is invalid: %v", err)
             }
             thresholdType := "staticThreshold"
-            if typeRaw, typeOK := thresholdObject["type"]; typeOK && typeRaw != nil {
+            if typeRaw, typeOK := thresholdObject[SloAlertConfigFieldThresholdType]; typeOK && typeRaw != nil {
                 thresholdType = typeRaw.(string)
             }
             threshold = restapi.SloAlertThreshold{
@@ -497,8 +498,8 @@ func (r *sloAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*
     var timeThreshold restapi.SloAlertTimeThreshold
     if len(timeThresholdStateObject) > 0 {
         timeThresholdObject := timeThresholdStateObject[0].(map[string]interface{})
-        warmUp, warmUpOK := timeThresholdObject["warm_up"].(int)
-        coolDown, coolDownOK := timeThresholdObject["cool_down"].(int)
+        warmUp, warmUpOK := timeThresholdObject[SloAlertConfigFieldTimeThresholdWarmUp].(int)
+        coolDown, coolDownOK := timeThresholdObject[SloAlertConfigFieldTimeThresholdCoolDown].(int)
         if warmUpOK && coolDownOK {
             timeThreshold = restapi.SloAlertTimeThreshold{
                 TimeWindow: warmUp,
@@ -526,28 +527,102 @@ func (r *sloAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*
         AlertType: apiAlertType,
         Metric:    apiMetric,
     }
-
-	// Only set BurnRateTimeWindows for burn_rate alerts
+				
+	// Only set BurnRateTimeWindows for burn_rate alerts with validation
 	var burnRateTimeWindows *restapi.BurnRateTimeWindows
-    if terraformAlertType == SloAlertConfigBurnRate {
-        burnRateState := d.Get(SloAlertConfigFieldBurnRateTimeWindows).([]interface{})
-        if len(burnRateState) == 0 {
-            return nil, fmt.Errorf("burn_rate_time_windows is required for alert_type 'burn_rate'")
-        }
-        burnRateObj := burnRateState[0].(map[string]interface{})
-        longWindowState := burnRateObj[SloAlertConfigFieldLongTimeWindow].([]interface{})[0].(map[string]interface{})
-        shortWindowState := burnRateObj[SloAlertConfigFieldShortTimeWindow].([]interface{})[0].(map[string]interface{})
-        burnRateTimeWindows = &restapi.BurnRateTimeWindows{
-            LongTimeWindow: restapi.TimeWindow{
-                TimeWindowDuration:     longWindowState[SloAlertConfigFieldTimeWindowDuration].(int),
-                TimeWindowDurationType: longWindowState[SloAlertConfigFieldTimeWindowDurationType].(string),
-            },
-            ShortTimeWindow: restapi.TimeWindow{
-                TimeWindowDuration:     shortWindowState[SloAlertConfigFieldTimeWindowDuration].(int),
-                TimeWindowDurationType: shortWindowState[SloAlertConfigFieldTimeWindowDurationType].(string),
-            },
-        }
-    }
+	if terraformAlertType == SloAlertConfigBurnRate {
+		burnRateState := d.Get(SloAlertConfigFieldBurnRateTimeWindows).([]interface{})
+
+		//debug
+		debug(fmt.Sprintf("burnRateState: %+v", burnRateState))
+		
+		if len(burnRateState) == 0 {
+			return nil, fmt.Errorf("burn_rate_time_windows is required for alert_type 'burn_rate'")
+		}
+		burnRateObj := burnRateState[0].(map[string]interface{})
+
+		//debug
+		debug(fmt.Sprintf("burnRateObj: %+v", burnRateObj))
+
+		// Validate and extract long_time_window
+		longWindowStateRaw, longWindowExists := burnRateObj[SloAlertConfigFieldLongTimeWindow]
+		if !longWindowExists || len(longWindowStateRaw.([]interface{})) == 0 {
+			return nil, fmt.Errorf("long_time_window is missing or empty")
+		}
+		longWindowState := longWindowStateRaw.([]interface{})[0].(map[string]interface{})
+
+		//debug
+		debug(fmt.Sprintf("longWindowState: %+v", longWindowState))
+		
+		longDurationRaw, longDurationExists := longWindowState[SloAlertConfigFieldTimeWindowDuration]
+		if !longDurationExists {
+			return nil, fmt.Errorf("duration in long_time_window must be an integer")
+		}
+		longDuration, longDurationOK := longDurationRaw.(int)
+		if !longDurationOK {
+			return nil, fmt.Errorf("duration in long_time_window must be an integer")
+		}
+		if longDuration <= 0 {
+			return nil, fmt.Errorf("duration in long_time_window must be an integer")
+		}
+		longDurationTypeRaw, longDurationTypeExists := longWindowState[SloAlertConfigFieldTimeWindowDurationType]
+		if !longDurationTypeExists {
+			return nil, fmt.Errorf("duration_type in long_time_window is missing")
+		}
+		longDurationType, longDurationTypeOK := longDurationTypeRaw.(string)
+		if !longDurationTypeOK {
+			return nil, fmt.Errorf("duration_type in long_time_window must be a string")
+		}
+		validDurationTypes := []string{"minute", "hour", "day"}
+		if !contains(validDurationTypes, longDurationType) {
+			return nil, fmt.Errorf("invalid duration_type in long_time_window: %s, must be one of %v", longDurationType, validDurationTypes)
+		}
+
+		// Validate and extract short_time_window
+		shortWindowStateRaw, shortWindowExists := burnRateObj[SloAlertConfigFieldShortTimeWindow]
+		if !shortWindowExists || len(shortWindowStateRaw.([]interface{})) == 0 {
+			return nil, fmt.Errorf("short_time_window is missing or empty")
+		}
+		shortWindowSlice := shortWindowStateRaw.([]interface{})
+		if len(shortWindowSlice) == 0 || shortWindowSlice[0] == nil {
+			return nil, fmt.Errorf("duration in short_time_window must be an integer")
+		}
+		shortWindowState := shortWindowSlice[0].(map[string]interface{})
+
+		//debug
+		debug(fmt.Sprintf("shortWindowState: %+v", shortWindowState))
+
+		shortDurationRaw, shortDurationExists := shortWindowState[SloAlertConfigFieldTimeWindowDuration]
+		if !shortDurationExists || shortDurationRaw == 0 { 
+			return nil, fmt.Errorf("duration in short_time_window must be an integer")
+		}
+		shortDuration, shortDurationOK := shortDurationRaw.(int)
+		if !shortDurationOK {
+			return nil, fmt.Errorf("duration in short_time_window must be an integer")
+		}
+		shortDurationTypeRaw, shortDurationTypeExists := shortWindowState[SloAlertConfigFieldTimeWindowDurationType]
+		if !shortDurationTypeExists {
+			return nil, fmt.Errorf("duration_type in short_time_window is missing")
+		}
+		shortDurationType, shortDurationTypeOK := shortDurationTypeRaw.(string)
+		if !shortDurationTypeOK {
+			return nil, fmt.Errorf("duration_type in short_time_window must be a string")
+		}
+		if !contains(validDurationTypes, shortDurationType) {
+			return nil, fmt.Errorf("invalid duration_type in short_time_window: %s, must be one of %v", shortDurationType, validDurationTypes)
+		}
+
+		burnRateTimeWindows = &restapi.BurnRateTimeWindows{
+			LongTimeWindow: restapi.TimeWindow{
+				TimeWindowDuration:     longDuration,
+				TimeWindowDurationType: longDurationType,
+			},
+			ShortTimeWindow: restapi.TimeWindow{
+				TimeWindowDuration:     shortDuration,
+				TimeWindowDurationType: shortDurationType,
+			},
+		}
+	}
 
 	// Construct payload
 	payload := &restapi.SloAlertConfig{
@@ -566,14 +641,25 @@ func (r *sloAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*
 		BurnRateTimeWindows:   burnRateTimeWindows,
 	}
 
-	payloadJSON, err := json.MarshalIndent(payload, "", "  ")
-    if err != nil {
-        log.Printf("Error marshalling payload to JSON: %v", err)
-    } else {
-        log.Printf("Payload sent to API: %s", string(payloadJSON))
-    }
+	// debug utils
+	// payloadJSON, err := json.MarshalIndent(payload, "", "  ")
+    // if err != nil {
+    //     log.Printf("Error marshalling payload to JSON: %v", err)
+    // } else {
+    //     log.Printf("Payload sent to API: %s", string(payloadJSON))
+    // }
 
     return payload, nil
+}
+
+// contains checks if a string is present in a slice of strings
+func contains(slice []string, item string) bool {
+    for _, s := range slice {
+        if s == item {
+            return true
+        }
+    }
+    return false
 }
 
 func convertInterfaceSliceToStringSlice(input []interface{}) []string {
