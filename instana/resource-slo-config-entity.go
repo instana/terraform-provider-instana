@@ -93,7 +93,7 @@ func (r *sloConfigResource) mapSloEntityToState(sloConfig *restapi.SloConfig) (m
 
 		return nil, fmt.Errorf("unsupported sli entity type: %s", entity["type"])
 	}
-	return nil, fmt.Errorf("the \"type\" attribute is missed from entity definition.", nil)
+	return nil, fmt.Errorf("the \"type: %s\" attribute is missed from entity definition.", "type")
 }
 
 // tf state -> api
