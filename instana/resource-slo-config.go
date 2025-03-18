@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	// "log"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/tagfilter"
 	"github.com/gessnerfl/terraform-provider-instana/tfutils"
@@ -210,6 +211,15 @@ func (r *sloConfigResource) MapStateToDataObject(d *schema.ResourceData) (*resta
 		Indicator:  sloIndicator,
 		TimeWindow: sloTimeWindow,
 	}
+
+	// debug utils
+	// payloadJSON, err := json.MarshalIndent(payload, "", "  ")
+    // if err != nil {
+    //     log.Printf("Error marshalling payload to JSON: %v", err)
+    // } else {
+    //     log.Printf("Payload sent to API: %s", string(payloadJSON))
+    // }
+
 	return payload, nil
 }
 
