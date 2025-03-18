@@ -10,7 +10,7 @@ import (
 )
 
 const (
- sloAlertConfigDefinition                  = "instana_sli_config.example_sli_config"
+ sloAlertConfigDefinition                  = "instana_slo_alert_config.example_slo_alert_config"
  sloAlertID                                = "id"
  sloAlertName                              = "slo-alert-name"
  sloAlertDescription                       = "slo-alert-description"
