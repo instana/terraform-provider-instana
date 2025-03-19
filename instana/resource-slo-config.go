@@ -67,7 +67,7 @@ func NewSloConfigResourceHandle() ResourceHandle[*restapi.SloConfig] {
 			ResourceName: ResourceInstanaSloConfig,
 			Schema: map[string]*schema.Schema{
 				SloConfigFieldName:          SloConfigName,
-				SloConfigFieldFullName:		 SloConfigFullName
+				SloConfigFieldFullName:		 SloConfigFullName,
 				SloConfigFieldTarget:        SloConfigTarget,
 				SloConfigFieldTags:          SloConfigTags,
 				SloConfigFieldLastUpdated:   SloConfigLastUpdated,
