@@ -67,6 +67,7 @@ func NewSloConfigResourceHandle() ResourceHandle[*restapi.SloConfig] {
 			ResourceName: ResourceInstanaSloConfig,
 			Schema: map[string]*schema.Schema{
 				SloConfigFieldName:          SloConfigName,
+				SloConfigFieldFullName:		 SloConfigFullName
 				SloConfigFieldTarget:        SloConfigTarget,
 				SloConfigFieldTags:          SloConfigTags,
 				SloConfigFieldLastUpdated:   SloConfigLastUpdated,
@@ -224,9 +225,9 @@ func (r *sloConfigResource) MapStateToDataObject(d *schema.ResourceData) (*resta
 }
 
 func (r *sloConfigResource) sloConfigStateUpgradeV0(_ context.Context, state map[string]interface{}, _ interface{}) (map[string]interface{}, error) {
-	if _, ok := state[SloConfigFieldName]; ok {
-		state[SloConfigFieldName] = state[SloConfigFieldName]
-		delete(state, SloConfigFieldName)
+	if _, ok := state[SloConfigFieldFullName]; ok {
+		state[SloConfigFieldName] = state[SloConfigFieldFullName]
+		delete(state, SloConfigFieldFullName)
 	}
 	return state, nil
 }

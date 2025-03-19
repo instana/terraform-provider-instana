@@ -16,6 +16,7 @@ const ResourceInstanaSloAlertConfig = "instana_slo_alert_config"
 const (
 	//Slo Alert Config Field names for Terraform
 	SloAlertConfigFieldName                    	= "name"
+	SloAlertConfigFieldFullName					= "full_name"
 	SloAlertConfigFieldDescription             	= "description"
 	SloAlertConfigFieldSeverity 			   	= "severity"
 	SloAlertConfigFieldTriggering 		   	   	= "triggering"
@@ -42,11 +43,6 @@ const (
 	SloAlertConfigBurnRate          = "burn_rate"
 )
 
-var sloAlertConfigAlertTypeKeys = []string{
-	"alert.0." + SloAlertConfigStatus,
-	"alert.0." + SloAlertConfigErrorBudget,
-	"alert.0." + SloAlertConfigBurnRate,
-}
 
 var (
 	//SloAlertConfigName schema field definition of instana_slo_alert_config field name
@@ -55,6 +51,13 @@ var (
 		Required:     true,
 		ValidateFunc: validation.StringLenBetween(0, 256),
 		Description:  "The name of the SLO Alert config",
+	}
+
+	//SloAlertConfigFullName schema field definition of instana_slo_alert_config field full_name
+	SloAlertConfigFullName = &schema.Schema{
+		Type:        schema.TypeString,
+		Computed:    true,
+		Description: "The full name of the SLO Alert config. The field is computed and contains the name which is sent to instana. The computation depends on the configured default_name_prefix and default_name_suffix at provider level",
 	}
 
 	//SloAlertConfigDescription schema field definition of instana_slo_alert_config field description
@@ -315,9 +318,9 @@ func (r *sloAlertConfigResource) StateUpgraders() []schema.StateUpgrader {
 }
 
 func (r *sloAlertConfigResource) sloAlertConfigStateUpgradeV0(_ context.Context, state map[string]interface{}, _ interface{}) (map[string]interface{}, error) {
-    if _, ok := state[SloAlertConfigFieldName]; ok {
-        state[SloAlertConfigFieldName] = state[SloAlertConfigFieldName]
-        delete(state, SloAlertConfigFieldName)
+    if _, ok := state[SloAlertConfigFieldFullName]; ok {
+        state[SloAlertConfigFieldName] = state[SloAlertConfigFieldFullName]
+        delete(state, SloAlertConfigFieldFullName)
     }
 
     if _, ok := state[SloAlertConfigFieldThreshold]; ok {
@@ -675,6 +678,7 @@ func (r *sloAlertConfigResource) sloAlertConfigSchemaV0() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			SloAlertConfigFieldName:          	SloAlertConfigName,
+			SloAlertConfigFieldFullName:		SloAlertConfigFullName,
 			SloAlertConfigFieldDescription:     SloAlertConfigDescription,
 			SloAlertConfigFieldSeverity:        SloAlertConfigSeverity,
 			SloAlertConfigFieldTriggering:   	SloAlertConfigTriggering,
