@@ -14,6 +14,7 @@ const SloConfigFromTerraformIdPrefix = "SLOTF"
 const (
 	//SloConfigField names for terraform
 	SloConfigFieldName                      = "name"
+	SloConfigFieldFullName					= "full_name"
 	SloConfigFieldTarget                    = "target"
 	SloConfigFieldTags                      = "tags"
 	SloConfigFieldLastUpdated               = "last_updated"
@@ -125,13 +126,13 @@ var (
 		Type:     schema.TypeFloat,
 		Required: true,
 		//	Computed:    true,
-		Description: "The full name of the SLI config. The field is computed and contains the name which is sent to instana. The computation depends on the configured default_name_prefix and default_name_suffix at provider level",
+		Description: "The Target of the SLI config.",
 	}
 
 	SloConfigTags = &schema.Schema{
 		Type:        schema.TypeList,
 		Optional:    true,
-		Description: "The full name of the SLI config. The field is computed and contains the name which is sent to instana. The computation depends on the configured default_name_prefix and default_name_suffix at provider level",
+		Description: "The Tags of the SLI config.",
 		MinItems:    1,
 		Elem: &schema.Schema{
 			Type: schema.TypeString,

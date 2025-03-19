@@ -16,6 +16,7 @@ const ResourceInstanaSloAlertConfig = "instana_slo_alert_config"
 const (
 	//Slo Alert Config Field names for Terraform
 	SloAlertConfigFieldName                    	= "name"
+	SloAlertConfigFieldFullName					= "full_name"
 	SloAlertConfigFieldDescription             	= "description"
 	SloAlertConfigFieldSeverity 			   	= "severity"
 	SloAlertConfigFieldTriggering 		   	   	= "triggering"
@@ -42,11 +43,6 @@ const (
 	SloAlertConfigBurnRate          = "burn_rate"
 )
 
-var sloAlertConfigAlertTypeKeys = []string{
-	"alert.0." + SloAlertConfigStatus,
-	"alert.0." + SloAlertConfigErrorBudget,
-	"alert.0." + SloAlertConfigBurnRate,
-}
 
 var (
 	//SloAlertConfigName schema field definition of instana_slo_alert_config field name
@@ -55,6 +51,13 @@ var (
 		Required:     true,
 		ValidateFunc: validation.StringLenBetween(0, 256),
 		Description:  "The name of the SLO Alert config",
+	}
+
+	//SloAlertConfigFullName schema field definition of instana_slo_alert_config field full_name
+	SloAlertConfigFullName = &schema.Schema{
+		Type:        schema.TypeString,
+		Computed:    true,
+		Description: "The full name of the SLO Alert config. The field is computed and contains the name which is sent to instana. The computation depends on the configured default_name_prefix and default_name_suffix at provider level",
 	}
 
 	//SloAlertConfigDescription schema field definition of instana_slo_alert_config field description
@@ -170,7 +173,7 @@ var (
 	}
 	
 	SloAlertConfigSloIds = &schema.Schema{
-		Type:        schema.TypeList,
+		Type:        schema.TypeSet,
 		Required:    true,
 		Description: "The SLO IDs that are monitored",
 		MinItems:    1,
@@ -180,10 +183,9 @@ var (
 	}
 
 	SloAlertConfigAlertChannelIds = &schema.Schema{
-		Type:        schema.TypeList,
+		Type:        schema.TypeSet,
 		Required:    true,
 		Description: "The IDs of the Alert Channels",
-		MinItems:    1,
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
@@ -315,9 +317,9 @@ func (r *sloAlertConfigResource) StateUpgraders() []schema.StateUpgrader {
 }
 
 func (r *sloAlertConfigResource) sloAlertConfigStateUpgradeV0(_ context.Context, state map[string]interface{}, _ interface{}) (map[string]interface{}, error) {
-    if _, ok := state[SloAlertConfigFieldName]; ok {
-        state[SloAlertConfigFieldName] = state[SloAlertConfigFieldName]
-        delete(state, SloAlertConfigFieldName)
+    if _, ok := state[SloAlertConfigFieldFullName]; ok {
+        state[SloAlertConfigFieldName] = state[SloAlertConfigFieldFullName]
+        delete(state, SloAlertConfigFieldFullName)
     }
 
     if _, ok := state[SloAlertConfigFieldThreshold]; ok {
@@ -419,8 +421,8 @@ func (r *sloAlertConfigResource) UpdateState(d *schema.ResourceData, sloAlertCon
 		SloAlertConfigFieldTriggering:    sloAlertConfig.Triggering,
 		SloAlertConfigFieldAlertType:     terraformAlertType, 
 		SloAlertConfigFieldThreshold:     []interface{}{threshold},
-		SloAlertConfigFieldSloIds:        sloAlertConfig.SloIds,
-		SloAlertConfigFieldAlertChannelIds: sloAlertConfig.AlertChannelIds,
+		SloAlertConfigFieldSloIds:        convertSetToStringSlice(d.Get(SloAlertConfigFieldSloIds).(*schema.Set)),
+		SloAlertConfigFieldAlertChannelIds: convertSetToStringSlice(d.Get(SloAlertConfigFieldAlertChannelIds).(*schema.Set)),		
 		SloAlertConfigFieldTimeThreshold: []interface{}{timeThreshold},
 		DefaultCustomPayloadFieldsName:   mapCustomPayloadFieldsToSchema(sloAlertConfig),
 		SloAlertConfigFieldEnabled:       sloAlertConfig.Enabled,
@@ -432,6 +434,14 @@ func (r *sloAlertConfigResource) UpdateState(d *schema.ResourceData, sloAlertCon
     debug(">> UpdateState with: " + obj2json(tfData))
 
     return tfutils.UpdateState(d, tfData)
+}
+
+func convertSetToStringSlice(set *schema.Set) []string {
+    var result []string
+    for _, v := range set.List() {
+        result = append(result, v.(string))
+    }
+    return result
 }
 
 //  convert different numeric types to float64.
@@ -626,19 +636,19 @@ func (r *sloAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*
 
 	// Construct payload
 	payload := &restapi.SloAlertConfig{
-		ID:                    sid,
-		Name:                  d.Get(SloAlertConfigFieldName).(string),
-		Description:           d.Get(SloAlertConfigFieldDescription).(string),
-		Severity:              d.Get(SloAlertConfigFieldSeverity).(int),
-		Triggering:            d.Get(SloAlertConfigFieldTriggering).(bool),
-		Enabled:               d.Get(SloAlertConfigFieldEnabled).(bool),
-		Rule:                  rule,
-		Threshold:             threshold,
-		TimeThreshold:         timeThreshold,
-		SloIds:                convertInterfaceSliceToStringSlice(d.Get(SloAlertConfigFieldSloIds).([]interface{})),
-		AlertChannelIds:       convertInterfaceSliceToStringSlice(d.Get(SloAlertConfigFieldAlertChannelIds).([]interface{})),
+		ID                   : sid,
+		Name                 : d.Get(SloAlertConfigFieldName).(string),
+		Description          : d.Get(SloAlertConfigFieldDescription).(string),
+		Severity             : d.Get(SloAlertConfigFieldSeverity).(int),
+		Triggering           : d.Get(SloAlertConfigFieldTriggering).(bool),
+		Enabled              : d.Get(SloAlertConfigFieldEnabled).(bool),
+		Rule                 : rule,
+		Threshold            : threshold,
+		TimeThreshold        : timeThreshold,
+		SloIds               : convertSetToStringSlice(d.Get(SloAlertConfigFieldSloIds).(*schema.Set)),
+		AlertChannelIds      : convertSetToStringSlice(d.Get(SloAlertConfigFieldAlertChannelIds).(*schema.Set)),
 		CustomerPayloadFields: customPayloadFields,
-		BurnRateTimeWindows:   burnRateTimeWindows,
+		BurnRateTimeWindows  : burnRateTimeWindows,
 	}
 
 	// debug utils
@@ -662,19 +672,12 @@ func contains(slice []string, item string) bool {
     return false
 }
 
-func convertInterfaceSliceToStringSlice(input []interface{}) []string {
-    result := make([]string, len(input))
-    for i, v := range input {
-        result[i] = v.(string)
-    }
-    return result
-}
-
 // Schema
 func (r *sloAlertConfigResource) sloAlertConfigSchemaV0() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			SloAlertConfigFieldName:          	SloAlertConfigName,
+			SloAlertConfigFieldFullName:		SloAlertConfigFullName,
 			SloAlertConfigFieldDescription:     SloAlertConfigDescription,
 			SloAlertConfigFieldSeverity:        SloAlertConfigSeverity,
 			SloAlertConfigFieldTriggering:   	SloAlertConfigTriggering,
