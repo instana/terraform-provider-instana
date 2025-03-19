@@ -67,7 +67,6 @@ func NewSloConfigResourceHandle() ResourceHandle[*restapi.SloConfig] {
 			ResourceName: ResourceInstanaSloConfig,
 			Schema: map[string]*schema.Schema{
 				SloConfigFieldName:          SloConfigName,
-				SloConfigFieldFullName:		 SloConfigFullName,
 				SloConfigFieldTarget:        SloConfigTarget,
 				SloConfigFieldTags:          SloConfigTags,
 				SloConfigFieldLastUpdated:   SloConfigLastUpdated,
@@ -236,13 +235,14 @@ func (r *sloConfigResource) sloConfigStateUpgradeV0(_ context.Context, state map
 func (r *sloConfigResource) sloConfigSchemaV0() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			SloConfigFieldName:   SloConfigName,
-			SloConfigFieldTarget: SloConfigTarget,
-			SloConfigFieldTags:   SloConfigTags,
-			// SloConfigFieldLastUpdated:   SloConfigLastUpdated,
-			// SloConfigFieldCreatedDate:   SloConfigCreatedDate,
-			SloConfigFieldSloEntity:     SloConfigSliEntity,
-			SloConfigFieldSloIndicator:  SloConfigIndicator,
+			SloConfigFieldName    : SloConfigName,
+			SloConfigFieldFullName: SloConfigFullName,
+			SloConfigFieldTarget  : SloConfigTarget,
+			SloConfigFieldTags    : SloConfigTags,
+			  // SloConfigFieldLastUpdated:   SloConfigLastUpdated,
+			  // SloConfigFieldCreatedDate:   SloConfigCreatedDate,
+			SloConfigFieldSloEntity    : SloConfigSliEntity,
+			SloConfigFieldSloIndicator : SloConfigIndicator,
 			SloConfigFieldSloTimeWindow: SloConfigTimeWindow,
 		},
 	}
