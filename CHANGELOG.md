@@ -1,6 +1,24 @@
 # Changelog
 
-## [v3.1.0](https://github.com/instana/terraform-provider-instana/tree/v3.1.0) (2025-01-14)
+## [v3.1.2](https://github.com/instana/terraform-provider-instana/tree/v3.1.2) (2025-03-03)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v3.1.1...v3.1.2)
+
+**Merged pull requests:**
+
+- Allow 1m granularity for smart alert resources [\#28](https://github.com/instana/terraform-provider-instana/pull/28) ([parekh-raj](https://github.com/parekh-raj))
+- Set up GPG in .github/workflows/release.yml [\#27](https://github.com/instana/terraform-provider-instana/pull/27) ([parekh-raj](https://github.com/parekh-raj))
+- Change release --rm-dist with --clean in release.yml [\#26](https://github.com/instana/terraform-provider-instana/pull/26) ([parekh-raj](https://github.com/parekh-raj))
+
+## [v3.1.1](https://github.com/instana/terraform-provider-instana/tree/v3.1.1) (2025-02-10)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v3.1.0...v3.1.1)
+
+**Merged pull requests:**
+
+- Extend index.md with Infrastructure Alert Config [\#22](https://github.com/instana/terraform-provider-instana/pull/22) ([parekh-raj](https://github.com/parekh-raj))
+
+## [v3.1.0](https://github.com/instana/terraform-provider-instana/tree/v3.1.0) (2025-01-16)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v3.0.1...v3.1.0)
 

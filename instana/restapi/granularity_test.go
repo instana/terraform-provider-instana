@@ -8,6 +8,6 @@ import (
 )
 
 func TestShouldReturnSupportedGranularitiesAsIntSlice(t *testing.T) {
-	expected := []int{300000, 600000, 900000, 1200000, 1800000}
-	require.Equal(t, expected, SupportedGranularities.ToIntSlice())
+	expected := []int{60000, 300000, 600000, 900000, 1200000, 1800000}
+	require.Equal(t, expected, SupportedSmartAlertGranularities.ToIntSlice())
 }
