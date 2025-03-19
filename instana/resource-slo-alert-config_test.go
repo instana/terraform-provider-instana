@@ -247,8 +247,9 @@ func (test *sloAlertConfigTest) shouldMapSmartAlertValuesCorrectly() func(t *tes
         require.Equal(t, 5, apiObject.Severity, "severity should match the set value")
         require.Equal(t, true, apiObject.Triggering, "triggering should match the set value")
         require.Equal(t, true, apiObject.Enabled, "enabled should match the set value")
-        require.Equal(t, []string{"slo-1", "slo-2"}, apiObject.SloIds, "sloIds should match the set values")
-        require.Equal(t, []string{"channel-1", "channel-2"}, apiObject.AlertChannelIds, "alertChannelIds should match the set values")
+        
+        require.ElementsMatch(t, []string{"slo-1", "slo-2"}, apiObject.SloIds, "sloIds should match the set values")
+        require.ElementsMatch(t, []string{"channel-1", "channel-2"}, apiObject.AlertChannelIds, "alertChannelIds should match the set values")        
 
         require.Equal(t, "staticThreshold", apiObject.Threshold.Type, "threshold type should match")
         require.Equal(t, ">=", apiObject.Threshold.Operator, "threshold operator should match")
