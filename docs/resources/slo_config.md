@@ -152,7 +152,7 @@ Exactly one of the elements below must be configured:
 #### Time-based Latency Indicator Reference
 
 * `threshold` - Required - The threshold for the metric. Must be a float greater than 0.
-* `aggregation` - Required - The aggregation type for the metric. Allowed values: `SUM`, `MEAN`, `MAX`, `MIN`, `P25`, `P50`, `P75`, `P90`, `P95`, `P98`, `P99`, `P99_9`, `P99_99`, `DISTRIBUTION`, `DISTINCT_COUNT`, `SUM_POSITIVE`, `PER_SECOND`.
+* `aggregation` - Required - The aggregation type for the metric. Allowed values: `MEAN`, `MAX`, `MIN`, `P25`, `P50`, `P75`, `P90`, `P95`, `P98`, `P99`.
 
 #### Event-based Latency Indicator Reference
 
@@ -161,7 +161,7 @@ Exactly one of the elements below must be configured:
 #### Time-based Availability Indicator Reference
 
 * `threshold` - Required - The threshold for the metric. Must be a float greater than 0.
-* `aggregation` - Required - The aggregation type for the metric. Allowed values: `SUM`, `MEAN`, `MAX`, `MIN`, `P25`, `P50`, `P75`, `P90`, `P95`, `P98`, `P99`, `P99_9`, `P99_99`, `DISTRIBUTION`, `DISTINCT_COUNT`, `SUM_POSITIVE`, `PER_SECOND`.
+* `aggregation` - Required - The aggregation type for the metric. Allowed value: `MEAN`
 
 #### Event-based Availability Indicator Reference
 
@@ -171,7 +171,6 @@ No additional arguments are required for this indicator type.
 
 * `traffic_type` - Required - The type of traffic to measure. Allowed values: `all`, `erroneous`.
 * `threshold` - Required - The threshold for the metric. Must be a float greater than 0.
-* `aggregation` - Required - The aggregation type for the metric. Allowed values: `SUM`, `MEAN`, `MAX`, `MIN`, `P25`, `P50`, `P75`, `P90`, `P95`, `P98`, `P99`, `P99_9`, `P99_99`, `DISTRIBUTION`, `DISTINCT_COUNT`, `SUM_POSITIVE`, `PER_SECOND`.
 
 #### Custom Indicator Reference
 
@@ -182,13 +181,19 @@ No additional arguments are required for this indicator type.
 
 Exactly one of the elements below must be configured:
 
-* `rolling` - Optional - Rolling time window configuration. [Details](#rolling-time-window-reference)
-* `fixed` - Optional - Fixed time window configuration. [Details](#fixed-time-window-reference)
+* `rolling` - Rolling time window configuration. [Details](#rolling-time-window-reference)
+* `fixed` - Fixed time window configuration. [Details](#fixed-time-window-reference)
 
-#### Rolling / Fixed Time Window Reference
+#### Rolling Time Window Reference
 
 * `duration` - Required - The duration of the time window. Must be an integer.
 * `duration_unit` - Required - The unit of the duration. Allowed values: `day`, `week`.
+
+Fixed Time Window Reference
+
+* `duration` - Required - The duration of the time window. Must be an integer.
+* `duration_unit` - Required - The unit of the duration. Allowed values: `day`, `week`.
+* `initial_evaluation_timestamp` - Required - the initial evaluation timestamp for the Fixed Time Window SLO configuration
 
 ### Tag Filter Expression Reference
 
