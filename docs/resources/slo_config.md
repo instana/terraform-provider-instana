@@ -105,9 +105,6 @@ resource "instana_slo_config" "synthetic_r_6" {
 * `name` - Required - The name of the SLO configuration. Must be a string
 * `target` - Required - The target SLO value (e.g., 0.99 for 99% availability). Must be a float.
 * `tags` - Optional - A list of tags associated with the SLO configuration. Must contain at least one tag if specified
-* `initial_evaluation_timestamp` - Optional - the initial evaluation timestamp for the SLO configuration
-* `last_updated` - Optional - The timestamp of the last update to the SLO configuration
-* `created_date` - Optional - The creation timestamp of the SLO configuration
 * `entity` - Required - A resource block describing the entity the SLO configuration is based on. [Details](#entity-reference)
 * `indicator` - Required - A resource block describing the indicator (metric) the SLO configuration is based on. [Details](#indicator-reference)
 * `time_window` - Required - A resource block describing the time window for the SLO configuration. [Details](#time-window-reference)
