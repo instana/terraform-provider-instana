@@ -1,6 +1,6 @@
 # SLO Configuration
 
-An SLO, or Service Level Objective, is a specific, measurable target that defines the expected level of performance, 
+An SLO(Service Level Objective) is a specific, measurable target that defines the expected level of performance, 
 reliability, or availability of a service, agreed upon between a service provider and its users or customers.
 For instance, an SLO could state that a specific SLI (Service Level Indicator), such as availability, must reach 99.9% 
 over a set period.
@@ -10,7 +10,7 @@ API Documentation: <https://instana.github.io/openapi/#operation/createSloConfig
 The ID of the resource which is also used as unique identifier in Instana is auto generated!
 
 ## Example Usage
-Creating an application SLO with timebased latency indicator and rolling time window 
+Creating an `application` SLO with a `timebased latency` indicator and a `rolling` time window 
 
 ```hcl
 resource "instana_slo_config" "slo_1" {
@@ -41,7 +41,7 @@ resource "instana_slo_config" "slo_1" {
 }
 ```
 
-Creating a website SLO with timebased availability indicator and fixed time window 
+Creating a `website` SLO with a `timebased availability` indicator and a `fixed` time window 
 
 ```hcl
 resource "instana_slo_config" "website_3" {
@@ -71,7 +71,7 @@ resource "instana_slo_config" "website_3" {
 }
 ```
 
-Creating a synthetic SLO with all traffic indicator and rolling time window 
+Creating a `synthetic` monitoring SLO with the `all traffic` indicator and a `rolling` time window 
 
 ```hcl
 resource "instana_slo_config" "synthetic_r_6" {
@@ -104,18 +104,18 @@ resource "instana_slo_config" "synthetic_r_6" {
 
 * `name` - Required - The name of the SLO configuration. Must be a string
 * `target` - Required - The target SLO value (e.g., 0.99 for 99% availability). Must be a float.
-* `tags` - Optional - A list of tags associated with the SLO configuration. Must contain at least one tag if specified
-* `entity` - Required - A resource block describing the entity the SLO configuration is based on. [Details](#entity-reference)
-* `indicator` - Required - A resource block describing the indicator (metric) the SLO configuration is based on. [Details](#indicator-reference)
-* `time_window` - Required - A resource block describing the time window for the SLO configuration. [Details](#time-window-reference)
+* `tags` - Optional - A list of tags associated with the SLO configuration. 
+* `entity` element - Required - A resource block describing the entity the SLO configuration is based on. [Details](#entity-reference)
+* `indicator` element - Required - A resource block describing the indicator (metric) the SLO configuration is based on. [Details](#indicator-reference)
+* `time_window` element - Required - A resource block describing the time window for the SLO configuration. [Details](#time-window-reference)
 
-### Entity Reference
+### Entity element Reference
 
-Exactly one of the elements below must be configured:
+One of the elements below must be configured:
 
-* `application` - Optional - Application-based SLO entity configuration. [Details](#application-slo-entity-reference)
-* `website` - Optional - Website-based SLO entity configuration. [Details](#website-slo-entity-reference)
-* `synthetic` - Optional - Synthetic-based SLO entity configuration. [Details](#synthetic-slo-entity-reference)
+* `application` - Application-based SLO entity configuration. [Details](#application-slo-entity-reference)
+* `website` - Website-based SLO entity configuration. [Details](#website-slo-entity-reference)
+* `synthetic` - Synthetic-based SLO entity configuration. [Details](#synthetic-slo-entity-reference)
 
 #### Application SLO Entity Reference
 
@@ -138,7 +138,7 @@ Exactly one of the elements below must be configured:
 * `synthetic_test_ids` - Required - A list of synthetic test IDs for the entity. Must contain at least one ID.
 * `filter_expression` - Optional - Tag filter expression to match events/calls. [Details](#tag-filter-expression-reference)
 
-### Indicator Reference
+### Indicator element Reference
 
 Exactly one of the elements below must be configured:
 
@@ -175,11 +175,11 @@ No additional arguments are required for this indicator type.
 #### Custom Indicator Reference
 
 * `good_event_filter_expression` - Required - Tag filter expression to match good events/calls. [Details](#tag-filter-expression-reference)
-* `bad_event_filter_expression` - Optional - Tag filter expression to match bad events/calls. [Details](#tag-filter-expression-reference)
+* `bad_event_filter_expression` - Optional - Tag filter expression to match bad events/calls. If this field is empty the opposit value of the good event is used as bad event filter. [Details](#tag-filter-expression-reference)
 
-### Time Window Reference
+### Time Window element Reference
 
-Exactly one of the elements below must be configured:
+One of the elements below must be configured:
 
 * `rolling` - Rolling time window configuration. [Details](#rolling-time-window-reference)
 * `fixed` - Fixed time window configuration. [Details](#fixed-time-window-reference)
@@ -193,7 +193,7 @@ Fixed Time Window Reference
 
 * `duration` - Required - The duration of the time window. Must be an integer.
 * `duration_unit` - Required - The unit of the duration. Allowed values: `day`, `week`.
-* `initial_evaluation_timestamp` - Required - the initial evaluation timestamp for the Fixed Time Window SLO configuration
+* `initial_evaluation_timestamp` - Required - the starting timestamp for the Fixed Time Window.
 
 ### Tag Filter Expression Reference
 
