@@ -117,13 +117,13 @@ resource "instana_slo_alert_config" "burn_rate_alert" {
 * `severity` - Required - The severity of the alert when triggered. Must be set to `5` for a warning alert level or `10` for a critical alert level.
 * `triggering` - Optional - Flag to indicate whether an incident is also triggered. Must be a boolean. Defaults to `false`.
 * `alert_type` - Required - The type of Smart Alert. Allowed values: `status`, `error_budget`, `burn_rate`. Defines what to alert on (e.g., SLO status, error budget percentage, or burn rate).
-* `threshold` - Required - A resource block defining the threshold for the alert condition. [Details](#threshold-reference)
 * `slo_ids` - Required - A set of SLO IDs to monitor. Must contain at least one ID.
 * `alert_channel_ids` - Required - A set of alert channel IDs to send notifications to.
-* `time_threshold` - Required - A resource block defining the time threshold for triggering and suppressing alerts. [Details](#time-threshold-reference)
 * `enabled` - Optional - Flag to indicate whether the alert is enabled. Must be a boolean. Defaults to `false`.
-* `burn_rate_time_windows` - Optional - A resource block defining the burn rate time windows for evaluating alert conditions. Required for `alert_type` set to `burn_rate`. [Details](#burn-rate-time-windows-reference)
 * `custom_payload_fields` - Optional - A list of custom payload fields to include in the alert notification.
+* `threshold` - Required - A resource block defining the threshold for the alert condition. [Details](#threshold-reference)
+* `time_threshold` - Required - A resource block defining the time threshold for triggering and suppressing alerts. [Details](#time-threshold-reference)
+* `burn_rate_time_windows` - Optional - A resource block defining the burn rate time windows for evaluating alert conditions. Required for `alert_type` set to `burn_rate`. [Details](#burn-rate-time-windows-reference)
 
 ### Threshold Reference
 
