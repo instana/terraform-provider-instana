@@ -2,8 +2,9 @@ package instana
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -67,6 +68,8 @@ func providerResources() map[string]*schema.Resource {
 	bindResourceHandle(resources, NewAlertingChannelResourceHandle())
 	bindResourceHandle(resources, NewAlertingConfigResourceHandle())
 	bindResourceHandle(resources, NewSliConfigResourceHandle())
+	bindResourceHandle(resources, NewSloConfigResourceHandle())
+	bindResourceHandle(resources, NewSloAlertConfigResourceHandle())
 	bindResourceHandle(resources, NewWebsiteMonitoringConfigResourceHandle())
 	bindResourceHandle(resources, NewInfraAlertConfigResourceHandle())
 	bindResourceHandle(resources, NewWebsiteAlertConfigResourceHandle())
