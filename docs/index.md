@@ -29,6 +29,9 @@ resource.
 * Custom Dashboard - `instana_custom_dashboard`
 * Infrastructure Monitoring
   * Infrastructure Alert Config - `instana_infra_alert_config`
+* Service Levels
+  * Service Level Objective Config - `instana_slo_config`
+  * Service Level Objective (SLO) Alert Config - `instana_slo_alert_config`
 
 ## Supported Data Source:
 
