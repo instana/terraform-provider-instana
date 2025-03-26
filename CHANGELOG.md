@@ -1,5 +1,13 @@
 # Changelog
 
+## [v3.2.0](https://github.com/instana/terraform-provider-instana/tree/v3.2.0) (2025-03-21)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v3.1.2...v3.2.0)
+
+**Merged pull requests:**
+
+- Created SLO configuration and SLO smart alert resources [\#29](https://github.com/instana/terraform-provider-instana/pull/29) ([dhinesh-sr](https://github.com/dhinesh-sr))
+
 ## [v3.1.2](https://github.com/instana/terraform-provider-instana/tree/v3.1.2) (2025-03-03)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v3.1.1...v3.1.2)
