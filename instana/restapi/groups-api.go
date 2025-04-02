@@ -18,8 +18,14 @@ const (
 	PermissionCanConfigureSessionSettings = InstanaPermission("CAN_CONFIGURE_SESSION_SETTINGS")
 	//PermissionCanConfigureIntegrations const for Instana permission CAN_CONFIGURE_INTEGRATIONS
 	PermissionCanConfigureIntegrations = InstanaPermission("CAN_CONFIGURE_INTEGRATIONS")
-	//PermissionCanConfigureGlobalAlertConfigs const for Instana permission CAN_CONFIGURE_GLOBAL_ALERT_CONFIGS
-	PermissionCanConfigureGlobalAlertConfigs = InstanaPermission("CAN_CONFIGURE_GLOBAL_ALERT_CONFIGS")
+	// PermissionCanConfigureGlobalApplicationSmartAlerts Permission to configure Global Application Smart Alerts
+	PermissionCanConfigureGlobalApplicationSmartAlerts = InstanaPermission("CAN_CONFIGURE_GLOBAL_APPLICATION_SMART_ALERTS")
+	// PermissionCanConfigureGlobalSyntheticSmartAlerts Permission to configure Global Synthetic Smart Alerts
+	PermissionCanConfigureGlobalSyntheticSmartAlerts = InstanaPermission("CAN_CONFIGURE_GLOBAL_SYNTHETIC_SMART_ALERTS")
+	// PermissionCanConfigureGlobalInfraSmartAlerts Permission to configure Global Infrastructure Smart Alerts
+	PermissionCanConfigureGlobalInfraSmartAlerts = InstanaPermission("CAN_CONFIGURE_GLOBAL_INFRA_SMART_ALERTS")
+	// PermissionCanConfigureGlobalLogSmartAlerts Permission to configure Global Log Smart Alerts
+	PermissionCanConfigureGlobalLogSmartAlerts = InstanaPermission("CAN_CONFIGURE_GLOBAL_LOG_SMART_ALERTS")
 	//PermissionCanConfigureGlobalAlertPayload const for Instana permission CAN_CONFIGURE_GLOBAL_ALERT_PAYLOAD
 	PermissionCanConfigureGlobalAlertPayload = InstanaPermission("CAN_CONFIGURE_GLOBAL_ALERT_PAYLOAD")
 	//PermissionCanConfigureMobileAppMonitoring const for Instana permission CAN_CONFIGURE_MOBILE_APP_MONITORING
@@ -34,8 +40,16 @@ const (
 	PermissionCanConfigureReleases = InstanaPermission("CAN_CONFIGURE_RELEASES")
 	//PermissionCanViewAuditLog const for Instana permission CAN_VIEW_AUDIT_LOG
 	PermissionCanViewAuditLog = InstanaPermission("CAN_VIEW_AUDIT_LOG")
-	//PermissionCanConfigureCustomAlerts const for Instana permission CAN_CONFIGURE_CUSTOM_ALERTS
-	PermissionCanConfigureCustomAlerts = InstanaPermission("CAN_CONFIGURE_CUSTOM_ALERTS")
+	// PermissionCanConfigureEventsAndAlerts Permission to configure Instana Events and Alerts
+	PermissionCanConfigureEventsAndAlerts = InstanaPermission("CAN_CONFIGURE_EVENTS_AND_ALERTS")
+	// PermissionCanConfigureMaintenanceWindows Permission to configure Instana Maintenance Windows
+	PermissionCanConfigureMaintenanceWindows = InstanaPermission("CAN_CONFIGURE_MAINTENANCE_WINDOWS")
+	// PermissionCanConfigureApplicationSmartAlerts Permission to configure Instana Application Smart Alerts
+	PermissionCanConfigureApplicationSmartAlerts = InstanaPermission("CAN_CONFIGURE_APPLICATION_SMART_ALERTS")
+	// PermissionCanConfigureWebsiteSmartAlerts Permission to configure Instana Website Smart Alerts
+	PermissionCanConfigureWebsiteSmartAlerts = InstanaPermission("CAN_CONFIGURE_WEBSITE_SMART_ALERTS")
+	// PermissionCanConfigureMobileAppSmartAlerts Permission to configure Instana MobileApp Smart Alerts
+	PermissionCanConfigureMobileAppSmartAlerts = InstanaPermission("CAN_CONFIGURE_MOBILE_APP_SMART_ALERTS")
 	//PermissionCanConfigureAgentRunMode const for Instana permission CAN_CONFIGURE_AGENT_RUN_MODE
 	PermissionCanConfigureAgentRunMode = InstanaPermission("CAN_CONFIGURE_AGENT_RUN_MODE")
 	//PermissionCanConfigureServiceMapping const for Instana permission CAN_CONFIGURE_SERVICE_MAPPING
@@ -77,7 +91,10 @@ var SupportedInstanaPermissions = InstanaPermissions{
 	PermissionCanViewLogs,
 	PermissionCanConfigureSessionSettings,
 	PermissionCanConfigureIntegrations,
-	PermissionCanConfigureGlobalAlertConfigs,
+	PermissionCanConfigureGlobalApplicationSmartAlerts,
+	PermissionCanConfigureGlobalSyntheticSmartAlerts,
+	PermissionCanConfigureGlobalInfraSmartAlerts,
+	PermissionCanConfigureGlobalLogSmartAlerts,
 	PermissionCanConfigureGlobalAlertPayload,
 	PermissionCanConfigureMobileAppMonitoring,
 	PermissionCanConfigureAPITokens,
@@ -85,7 +102,11 @@ var SupportedInstanaPermissions = InstanaPermissions{
 	PermissionCanConfigureAuthenticationMethods,
 	PermissionCanConfigureReleases,
 	PermissionCanViewAuditLog,
-	PermissionCanConfigureCustomAlerts,
+	PermissionCanConfigureEventsAndAlerts,
+	PermissionCanConfigureMaintenanceWindows,
+	PermissionCanConfigureApplicationSmartAlerts,
+	PermissionCanConfigureWebsiteSmartAlerts,
+	PermissionCanConfigureMobileAppSmartAlerts,
 	PermissionCanConfigureAgentRunMode,
 	PermissionCanConfigureServiceMapping,
 	PermissionCanEditAllAccessibleCustomDashboards,
