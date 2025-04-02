@@ -26,7 +26,11 @@ resource "instana_api_token" "example" {
   can_configure_users = true
   can_install_new_agents = true
   can_configure_integrations = true
-  can_configure_custom_alerts = true
+  can_configure_events_and_alerts = true
+  can_configure_maintenance_windows = true
+  can_configure_application_smart_alerts = true
+  can_configure_website_smart_alerts = true
+  can_configure_mobile_app_smart_alerts = true
   can_configure_api_tokens = true
   can_configure_agent_run_mode = true
   can_view_audit_log = true
@@ -42,7 +46,10 @@ resource "instana_api_token" "example" {
   can_configure_session_settings = true
   can_configure_service_level_indicators = true
   can_configure_global_alert_payload = true
-  can_configure_global_alert_configs = true
+  can_configure_global_application_smart_alerts = true
+  can_configure_global_synthetic_smart_alerts = true
+  can_configure_global_infra_smart_alerts = true
+  can_configure_global_log_smart_alerts = true
   can_view_account_and_billing_information = true
   can_edit_all_accessible_custom_dashboards = true
 }
@@ -65,7 +72,11 @@ var apiTokenPermissionFields = []string{
 	APITokenFieldCanConfigureUsers,
 	APITokenFieldCanInstallNewAgents,
 	APITokenFieldCanConfigureIntegrations,
-	APITokenFieldCanConfigureCustomAlerts,
+	APITokenFieldCanConfigureEventsAndAlerts,
+	APITokenFieldCanConfigureMaintenanceWindows,
+	APITokenFieldCanConfigureApplicationSmartAlerts,
+	APITokenFieldCanConfigureWebsiteSmartAlerts,
+	APITokenFieldCanConfigureMobileAppSmartAlerts,
 	APITokenFieldCanConfigureAPITokens,
 	APITokenFieldCanConfigureAgentRunMode,
 	APITokenFieldCanViewAuditLog,
@@ -81,7 +92,10 @@ var apiTokenPermissionFields = []string{
 	APITokenFieldCanConfigureSessionSettings,
 	APITokenFieldCanConfigureServiceLevelIndicators,
 	APITokenFieldCanConfigureGlobalAlertPayload,
-	APITokenFieldCanConfigureGlobalAlertConfigs,
+	APITokenFieldCanConfigureGlobalApplicationSmartAlerts,
+	APITokenFieldCanConfigureGlobalSyntheticSmartAlerts,
+	APITokenFieldCanConfigureGlobalInfraSmartAlerts,
+	APITokenFieldCanConfigureGlobalLogSmartAlerts,
 	APITokenFieldCanViewAccountAndBillingInformation,
 	APITokenFieldCanEditAllAccessibleCustomDashboards,
 }
@@ -129,7 +143,11 @@ func TestCRUDOfAPITokenResourceWithMockServer(t *testing.T) {
 			"canConfigureUsers" : true,
 			"canInstallNewAgents" : true,
 			"canConfigureIntegrations" : true,
-			"canConfigureCustomAlerts" : true,
+			"canConfigureEventsAndAlerts" : true,
+			"canConfigureMaintenanceWindows" : true,
+			"canConfigureApplicationSmartAlerts" : true,
+			"canConfigureWebsiteSmartAlerts" : true,
+			"canConfigureMobileAppSmartAlerts" : true,
 			"canConfigureApiTokens" : true,
 			"canConfigureAgentRunMode" : true,
 			"canViewAuditLog" : true,
@@ -145,7 +163,10 @@ func TestCRUDOfAPITokenResourceWithMockServer(t *testing.T) {
 			"canConfigureSessionSettings" : true,
 			"canConfigureServiceLevelIndicators" : true,
 			"canConfigureGlobalAlertPayload" : true,
-			"canConfigureGlobalAlertConfigs" : true,
+			"canConfigureGlobalApplicationSmartAlerts" : true,
+			"canConfigureGlobalSyntheticSmartAlerts" : true,
+			"canConfigureGlobalInfraSmartAlerts" : true,
+			"canConfigureGlobalLogSmartAlerts" : true,
 			"canViewAccountAndBillingInformation" : true,
 			"canEditAllAccessibleCustomDashboards" : true
 		}
@@ -185,7 +206,11 @@ func createAPITokenConfigResourceTestStep(httpPort int, iteration int, id string
 			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureUsers, trueAsString),
 			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanInstallNewAgents, trueAsString),
 			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureIntegrations, trueAsString),
-			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureCustomAlerts, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureEventsAndAlerts, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureMaintenanceWindows, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureApplicationSmartAlerts, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureWebsiteSmartAlerts, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureMobileAppSmartAlerts, trueAsString),
 			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureAPITokens, trueAsString),
 			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureAgentRunMode, trueAsString),
 			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanViewAuditLog, trueAsString),
@@ -201,7 +226,10 @@ func createAPITokenConfigResourceTestStep(httpPort int, iteration int, id string
 			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureSessionSettings, trueAsString),
 			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureServiceLevelIndicators, trueAsString),
 			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureGlobalAlertPayload, trueAsString),
-			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureGlobalAlertConfigs, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureGlobalApplicationSmartAlerts, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureGlobalSyntheticSmartAlerts, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureGlobalInfraSmartAlerts, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureGlobalLogSmartAlerts, trueAsString),
 			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanViewAccountAndBillingInformation, trueAsString),
 			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanEditAllAccessibleCustomDashboards, trueAsString),
 		),
@@ -221,7 +249,11 @@ func TestAPITokenSchemaDefinitionIsValid(t *testing.T) {
 	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureUsers, false)
 	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanInstallNewAgents, false)
 	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureIntegrations, false)
-	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureCustomAlerts, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureEventsAndAlerts, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureMaintenanceWindows, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureApplicationSmartAlerts, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureWebsiteSmartAlerts, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureMobileAppSmartAlerts, false)
 	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureAPITokens, false)
 	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureAgentRunMode, false)
 	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanViewAuditLog, false)
@@ -237,7 +269,10 @@ func TestAPITokenSchemaDefinitionIsValid(t *testing.T) {
 	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureSessionSettings, false)
 	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureServiceLevelIndicators, false)
 	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureGlobalAlertPayload, false)
-	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureGlobalAlertConfigs, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureGlobalApplicationSmartAlerts, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureGlobalSyntheticSmartAlerts, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureGlobalInfraSmartAlerts, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureGlobalLogSmartAlerts, false)
 	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanViewAccountAndBillingInformation, false)
 	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanEditAllAccessibleCustomDashboards, false)
 }
@@ -317,7 +352,11 @@ func TestShouldUpdateBasicFieldsOfTerraformResourceStateFromModelForAPIToken(t *
 	require.False(t, resourceData.Get(APITokenFieldCanConfigureUsers).(bool))
 	require.False(t, resourceData.Get(APITokenFieldCanInstallNewAgents).(bool))
 	require.False(t, resourceData.Get(APITokenFieldCanConfigureIntegrations).(bool))
-	require.False(t, resourceData.Get(APITokenFieldCanConfigureCustomAlerts).(bool))
+	require.False(t, resourceData.Get(APITokenFieldCanConfigureEventsAndAlerts).(bool))
+	require.False(t, resourceData.Get(APITokenFieldCanConfigureMaintenanceWindows).(bool))
+	require.False(t, resourceData.Get(APITokenFieldCanConfigureApplicationSmartAlerts).(bool))
+	require.False(t, resourceData.Get(APITokenFieldCanConfigureWebsiteSmartAlerts).(bool))
+	require.False(t, resourceData.Get(APITokenFieldCanConfigureMobileAppSmartAlerts).(bool))
 	require.False(t, resourceData.Get(APITokenFieldCanConfigureAPITokens).(bool))
 	require.False(t, resourceData.Get(APITokenFieldCanConfigureAgentRunMode).(bool))
 	require.False(t, resourceData.Get(APITokenFieldCanViewAuditLog).(bool))
@@ -333,7 +372,10 @@ func TestShouldUpdateBasicFieldsOfTerraformResourceStateFromModelForAPIToken(t *
 	require.False(t, resourceData.Get(APITokenFieldCanConfigureSessionSettings).(bool))
 	require.False(t, resourceData.Get(APITokenFieldCanConfigureServiceLevelIndicators).(bool))
 	require.False(t, resourceData.Get(APITokenFieldCanConfigureGlobalAlertPayload).(bool))
-	require.False(t, resourceData.Get(APITokenFieldCanConfigureGlobalAlertConfigs).(bool))
+	require.False(t, resourceData.Get(APITokenFieldCanConfigureGlobalApplicationSmartAlerts).(bool))
+	require.False(t, resourceData.Get(APITokenFieldCanConfigureGlobalSyntheticSmartAlerts).(bool))
+	require.False(t, resourceData.Get(APITokenFieldCanConfigureGlobalInfraSmartAlerts).(bool))
+	require.False(t, resourceData.Get(APITokenFieldCanConfigureGlobalLogSmartAlerts).(bool))
 	require.False(t, resourceData.Get(APITokenFieldCanViewAccountAndBillingInformation).(bool))
 	require.False(t, resourceData.Get(APITokenFieldCanEditAllAccessibleCustomDashboards).(bool))
 }
@@ -410,16 +452,64 @@ func TestShouldUpdateCanConfigureIntegrationsPermissionOfTerraformResourceStateF
 	testSingleAPITokenPermissionSet(t, apiToken, APITokenFieldCanConfigureIntegrations)
 }
 
-func TestShouldUpdateCanConfigureCustomAlertsPermissionOfTerraformResourceStateFromModelForAPIToken(t *testing.T) {
+func TestShouldUpdateCanConfigureEventsAndAlertsPermissionOfTerraformResourceStateFromModelForAPIToken(t *testing.T) {
 	apiToken := restapi.APIToken{
-		ID:                       apiTokenID,
-		InternalID:               apiTokenInternalID,
-		AccessGrantingToken:      apiTokenAccessGrantingToken,
-		Name:                     apiTokenNameFieldValue,
-		CanConfigureCustomAlerts: true,
+		ID:                          apiTokenID,
+		InternalID:                  apiTokenInternalID,
+		AccessGrantingToken:         apiTokenAccessGrantingToken,
+		Name:                        apiTokenNameFieldValue,
+		CanConfigureEventsAndAlerts: true,
 	}
 
-	testSingleAPITokenPermissionSet(t, apiToken, APITokenFieldCanConfigureCustomAlerts)
+	testSingleAPITokenPermissionSet(t, apiToken, APITokenFieldCanConfigureEventsAndAlerts)
+}
+
+func TestShouldUpdateCanConfigureMaintenanceWindowsPermissionOfTerraformResourceStateFromModelForAPIToken(t *testing.T) {
+	apiToken := restapi.APIToken{
+		ID:                             apiTokenID,
+		InternalID:                     apiTokenInternalID,
+		AccessGrantingToken:            apiTokenAccessGrantingToken,
+		Name:                           apiTokenNameFieldValue,
+		CanConfigureMaintenanceWindows: true,
+	}
+
+	testSingleAPITokenPermissionSet(t, apiToken, APITokenFieldCanConfigureMaintenanceWindows)
+}
+
+func TestShouldUpdateCanConfigureApplicationSmartAlertsPermissionOfTerraformResourceStateFromModelForAPIToken(t *testing.T) {
+	apiToken := restapi.APIToken{
+		ID:                                 apiTokenID,
+		InternalID:                         apiTokenInternalID,
+		AccessGrantingToken:                apiTokenAccessGrantingToken,
+		Name:                               apiTokenNameFieldValue,
+		CanConfigureApplicationSmartAlerts: true,
+	}
+
+	testSingleAPITokenPermissionSet(t, apiToken, APITokenFieldCanConfigureApplicationSmartAlerts)
+}
+
+func TestShouldUpdateCanConfigureWebsiteSmartAlertsPermissionOfTerraformResourceStateFromModelForAPIToken(t *testing.T) {
+	apiToken := restapi.APIToken{
+		ID:                             apiTokenID,
+		InternalID:                     apiTokenInternalID,
+		AccessGrantingToken:            apiTokenAccessGrantingToken,
+		Name:                           apiTokenNameFieldValue,
+		CanConfigureWebsiteSmartAlerts: true,
+	}
+
+	testSingleAPITokenPermissionSet(t, apiToken, APITokenFieldCanConfigureWebsiteSmartAlerts)
+}
+
+func TestShouldUpdateCanConfigureMobileAppSmartAlertsPermissionOfTerraformResourceStateFromModelForAPIToken(t *testing.T) {
+	apiToken := restapi.APIToken{
+		ID:                               apiTokenID,
+		InternalID:                       apiTokenInternalID,
+		AccessGrantingToken:              apiTokenAccessGrantingToken,
+		Name:                             apiTokenNameFieldValue,
+		CanConfigureMobileAppSmartAlerts: true,
+	}
+
+	testSingleAPITokenPermissionSet(t, apiToken, APITokenFieldCanConfigureMobileAppSmartAlerts)
 }
 
 func TestShouldUpdateCanConfigureAPITokensPermissionOfTerraformResourceStateFromModelForAPIToken(t *testing.T) {
@@ -600,16 +690,52 @@ func TestShouldUpdateCanConfigureGlobalAlertPayloadPermissionOfTerraformResource
 	testSingleAPITokenPermissionSet(t, apiToken, APITokenFieldCanConfigureGlobalAlertPayload)
 }
 
-func TestShouldUpdateCanConfigureGlobalAlertConfigsPermissionOfTerraformResourceStateFromModelForAPIToken(t *testing.T) {
+func TestShouldUpdateCanConfigureGlobalApplicationSmartAlertsPermissionOfTerraformResourceStateFromModelForAPIToken(t *testing.T) {
 	apiToken := restapi.APIToken{
-		ID:                             apiTokenID,
-		InternalID:                     apiTokenInternalID,
-		AccessGrantingToken:            apiTokenAccessGrantingToken,
-		Name:                           apiTokenNameFieldValue,
-		CanConfigureGlobalAlertConfigs: true,
+		ID:                                       apiTokenID,
+		InternalID:                               apiTokenInternalID,
+		AccessGrantingToken:                      apiTokenAccessGrantingToken,
+		Name:                                     apiTokenNameFieldValue,
+		CanConfigureGlobalApplicationSmartAlerts: true,
 	}
 
-	testSingleAPITokenPermissionSet(t, apiToken, APITokenFieldCanConfigureGlobalAlertConfigs)
+	testSingleAPITokenPermissionSet(t, apiToken, APITokenFieldCanConfigureGlobalApplicationSmartAlerts)
+}
+
+func TestShouldUpdateCanConfigureGlobalSyntheticSmartAlertsPermissionOfTerraformResourceStateFromModelForAPIToken(t *testing.T) {
+	apiToken := restapi.APIToken{
+		ID:                                     apiTokenID,
+		InternalID:                             apiTokenInternalID,
+		AccessGrantingToken:                    apiTokenAccessGrantingToken,
+		Name:                                   apiTokenNameFieldValue,
+		CanConfigureGlobalSyntheticSmartAlerts: true,
+	}
+
+	testSingleAPITokenPermissionSet(t, apiToken, APITokenFieldCanConfigureGlobalSyntheticSmartAlerts)
+}
+
+func TestShouldUpdateCanConfigureGlobalInfraSmartAlertsPermissionOfTerraformResourceStateFromModelForAPIToken(t *testing.T) {
+	apiToken := restapi.APIToken{
+		ID:                                 apiTokenID,
+		InternalID:                         apiTokenInternalID,
+		AccessGrantingToken:                apiTokenAccessGrantingToken,
+		Name:                               apiTokenNameFieldValue,
+		CanConfigureGlobalInfraSmartAlerts: true,
+	}
+
+	testSingleAPITokenPermissionSet(t, apiToken, APITokenFieldCanConfigureGlobalInfraSmartAlerts)
+}
+
+func TestShouldUpdateCanConfigureGlobalLogSmartAlertsPermissionOfTerraformResourceStateFromModelForAPIToken(t *testing.T) {
+	apiToken := restapi.APIToken{
+		ID:                               apiTokenID,
+		InternalID:                       apiTokenInternalID,
+		AccessGrantingToken:              apiTokenAccessGrantingToken,
+		Name:                             apiTokenNameFieldValue,
+		CanConfigureGlobalLogSmartAlerts: true,
+	}
+
+	testSingleAPITokenPermissionSet(t, apiToken, APITokenFieldCanConfigureGlobalLogSmartAlerts)
 }
 
 func TestShouldUpdateCanViewAccountAndBillingInformationPermissionOfTerraformResourceStateFromModelForAPIToken(t *testing.T) {
@@ -668,7 +794,11 @@ func TestShouldConvertStateOfAPITokenTerraformResourceToDataModel(t *testing.T) 
 	setValueOnResourceData(t, resourceData, APITokenFieldCanConfigureUsers, true)
 	setValueOnResourceData(t, resourceData, APITokenFieldCanInstallNewAgents, true)
 	setValueOnResourceData(t, resourceData, APITokenFieldCanConfigureIntegrations, true)
-	setValueOnResourceData(t, resourceData, APITokenFieldCanConfigureCustomAlerts, true)
+	setValueOnResourceData(t, resourceData, APITokenFieldCanConfigureEventsAndAlerts, true)
+	setValueOnResourceData(t, resourceData, APITokenFieldCanConfigureMaintenanceWindows, true)
+	setValueOnResourceData(t, resourceData, APITokenFieldCanConfigureApplicationSmartAlerts, true)
+	setValueOnResourceData(t, resourceData, APITokenFieldCanConfigureWebsiteSmartAlerts, true)
+	setValueOnResourceData(t, resourceData, APITokenFieldCanConfigureMobileAppSmartAlerts, true)
 	setValueOnResourceData(t, resourceData, APITokenFieldCanConfigureAPITokens, true)
 	setValueOnResourceData(t, resourceData, APITokenFieldCanConfigureAgentRunMode, true)
 	setValueOnResourceData(t, resourceData, APITokenFieldCanViewAuditLog, true)
@@ -684,7 +814,10 @@ func TestShouldConvertStateOfAPITokenTerraformResourceToDataModel(t *testing.T) 
 	setValueOnResourceData(t, resourceData, APITokenFieldCanConfigureSessionSettings, true)
 	setValueOnResourceData(t, resourceData, APITokenFieldCanConfigureServiceLevelIndicators, true)
 	setValueOnResourceData(t, resourceData, APITokenFieldCanConfigureGlobalAlertPayload, true)
-	setValueOnResourceData(t, resourceData, APITokenFieldCanConfigureGlobalAlertConfigs, true)
+	setValueOnResourceData(t, resourceData, APITokenFieldCanConfigureGlobalApplicationSmartAlerts, true)
+	setValueOnResourceData(t, resourceData, APITokenFieldCanConfigureGlobalSyntheticSmartAlerts, true)
+	setValueOnResourceData(t, resourceData, APITokenFieldCanConfigureGlobalInfraSmartAlerts, true)
+	setValueOnResourceData(t, resourceData, APITokenFieldCanConfigureGlobalLogSmartAlerts, true)
 	setValueOnResourceData(t, resourceData, APITokenFieldCanViewAccountAndBillingInformation, true)
 	setValueOnResourceData(t, resourceData, APITokenFieldCanEditAllAccessibleCustomDashboards, true)
 
@@ -703,7 +836,11 @@ func TestShouldConvertStateOfAPITokenTerraformResourceToDataModel(t *testing.T) 
 	require.True(t, model.CanConfigureUsers)
 	require.True(t, model.CanInstallNewAgents)
 	require.True(t, model.CanConfigureIntegrations)
-	require.True(t, model.CanConfigureCustomAlerts)
+	require.True(t, model.CanConfigureEventsAndAlerts)
+	require.True(t, model.CanConfigureMaintenanceWindows)
+	require.True(t, model.CanConfigureApplicationSmartAlerts)
+	require.True(t, model.CanConfigureWebsiteSmartAlerts)
+	require.True(t, model.CanConfigureMobileAppSmartAlerts)
 	require.True(t, model.CanConfigureAPITokens)
 	require.True(t, model.CanConfigureAgentRunMode)
 	require.True(t, model.CanViewAuditLog)
@@ -719,7 +856,10 @@ func TestShouldConvertStateOfAPITokenTerraformResourceToDataModel(t *testing.T) 
 	require.True(t, model.CanConfigureSessionSettings)
 	require.True(t, model.CanConfigureServiceLevelIndicators)
 	require.True(t, model.CanConfigureGlobalAlertPayload)
-	require.True(t, model.CanConfigureGlobalAlertConfigs)
+	require.True(t, model.CanConfigureGlobalApplicationSmartAlerts)
+	require.True(t, model.CanConfigureGlobalSyntheticSmartAlerts)
+	require.True(t, model.CanConfigureGlobalInfraSmartAlerts)
+	require.True(t, model.CanConfigureGlobalLogSmartAlerts)
 	require.True(t, model.CanViewAccountAndBillingInformation)
 	require.True(t, model.CanEditAllAccessibleCustomDashboards)
 }
