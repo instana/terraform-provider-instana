@@ -278,7 +278,7 @@ func TestAPITokenSchemaDefinitionIsValid(t *testing.T) {
 }
 
 func TestAPITokenResourceShouldHaveSchemaVersionOne(t *testing.T) {
-	require.Equal(t, 1, NewAPITokenResourceHandle().MetaData().SchemaVersion)
+	require.Equal(t, 2, NewAPITokenResourceHandle().MetaData().SchemaVersion)
 }
 
 func TestAPITokenResourceShouldHaveOneStateMigrators(t *testing.T) {
