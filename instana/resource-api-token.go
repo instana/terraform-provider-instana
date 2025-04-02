@@ -32,9 +32,12 @@ const (
 	//APITokenFieldCanInstallNewAgents constant value for the schema field can_install_new_agents
 	APITokenFieldCanInstallNewAgents = "can_install_new_agents"
 	//APITokenFieldCanConfigureIntegrations constant value for the schema field can_configure_integrations
-	APITokenFieldCanConfigureIntegrations = "can_configure_integrations"
-	//APITokenFieldCanConfigureCustomAlerts constant value for the schema field can_configure_custom_alerts
-	APITokenFieldCanConfigureCustomAlerts = "can_configure_custom_alerts"
+	APITokenFieldCanConfigureIntegrations           = "can_configure_integrations"
+	APITokenFieldCanConfigureEventsAndAlerts        = "can_configure_events_and_alerts"
+	APITokenFieldCanConfigureMaintenanceWindows     = "can_configure_maintenance_windows"
+	APITokenFieldCanConfigureApplicationSmartAlerts = "can_configure_application_smart_alerts"
+	APITokenFieldCanConfigureWebsiteSmartAlerts     = "can_configure_website_smart_alerts"
+	APITokenFieldCanConfigureMobileAppSmartAlerts   = "can_configure_mobile_app_smart_alerts"
 	//APITokenFieldCanConfigureAPITokens constant value for the schema field can_configure_api_tokens
 	APITokenFieldCanConfigureAPITokens = "can_configure_api_tokens"
 	//APITokenFieldCanConfigureAgentRunMode constant value for the schema field can_configure_agent_run_mode
@@ -64,9 +67,11 @@ const (
 	//APITokenFieldCanConfigureServiceLevelIndicators constant value for the schema field can_configure_service_level_indicators
 	APITokenFieldCanConfigureServiceLevelIndicators = "can_configure_service_level_indicators"
 	//APITokenFieldCanConfigureGlobalAlertPayload constant value for the schema field can_configure_global_alert_payload
-	APITokenFieldCanConfigureGlobalAlertPayload = "can_configure_global_alert_payload"
-	//APITokenFieldCanConfigureGlobalAlertConfigs constant value for the schema field can_configure_global_alert_configs
-	APITokenFieldCanConfigureGlobalAlertConfigs = "can_configure_global_alert_configs"
+	APITokenFieldCanConfigureGlobalAlertPayload           = "can_configure_global_alert_payload"
+	APITokenFieldCanConfigureGlobalApplicationSmartAlerts = "can_configure_global_application_smart_alerts"
+	APITokenFieldCanConfigureGlobalSyntheticSmartAlerts   = "can_configure_global_synthetic_smart_alerts"
+	APITokenFieldCanConfigureGlobalInfraSmartAlerts       = "can_configure_global_infra_smart_alerts"
+	APITokenFieldCanConfigureGlobalLogSmartAlerts         = "can_configure_global_log_smart_alerts"
 	//APITokenFieldCanViewAccountAndBillingInformation constant value for the schema field can_view_account_and_billing_information
 	APITokenFieldCanViewAccountAndBillingInformation = "can_view_account_and_billing_information"
 	//APITokenFieldCanEditAllAccessibleCustomDashboards constant value for the schema field can_edit_all_accessible_custom_dashboards
@@ -130,11 +135,35 @@ var (
 		Default:     false,
 		Description: "Configures if the API token is allowed to configure integrations",
 	}
-	apiTokenSchemaCanConfigureCustomAlerts = &schema.Schema{
+	apiTokenSchemaCanConfigureEventsAndAlerts = &schema.Schema{
 		Type:        schema.TypeBool,
 		Optional:    true,
 		Default:     false,
-		Description: "Configures if the API token is allowed to configure custom alerts",
+		Description: "Configures if the API token is allowed to configure Instana Events and Alerts",
+	}
+	apiTokenSchemaCanConfigureMaintenanceWindows = &schema.Schema{
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Default:     false,
+		Description: "Configures if the API token is allowed to configure Instana Maintenance Windows",
+	}
+	apiTokenSchemaCanConfigureApplicationSmartAlerts = &schema.Schema{
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Default:     false,
+		Description: "Configures if the API token is allowed to configure Instana Application Smart Alerts",
+	}
+	apiTokenSchemaCanConfigureWebsiteSmartAlerts = &schema.Schema{
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Default:     false,
+		Description: "Configures if the API token is allowed to configure Instana Website Smart Alerts",
+	}
+	apiTokenSchemaCanConfigureMobileAppSmartAlerts = &schema.Schema{
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Default:     false,
+		Description: "Configures if the API token is allowed to configure Instana MobileApp Smart Alerts",
 	}
 	apiTokenSchemaCanConfigureAPITokens = &schema.Schema{
 		Type:        schema.TypeBool,
@@ -232,6 +261,30 @@ var (
 		Default:     false,
 		Description: "Configures if the API token is allowed to configure global alert configs",
 	}
+	apiTokenSchemaCanConfigureGlobalApplicationSmartAlerts = &schema.Schema{
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Default:     false,
+		Description: "Configures if the API token is allowed to configure Global Application Smart Alerts",
+	}
+	apiTokenSchemaCanConfigureGlobalSyntheticSmartAlerts = &schema.Schema{
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Default:     false,
+		Description: "Configures if the API token is allowed to configure Global Synthetic Smart Alerts",
+	}
+	apiTokenSchemaCanConfigureGlobalInfraSmartAlerts = &schema.Schema{
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Default:     false,
+		Description: "Configures if the API token is allowed to configure Global Infra Smart Alerts",
+	}
+	apiTokenSchemaCanConfigureGlobalLogSmartAlerts = &schema.Schema{
+		Type:        schema.TypeBool,
+		Optional:    true,
+		Default:     false,
+		Description: "Configures if the API token is allowed to configure Global Log Smart Alerts",
+	}
 	apiTokenSchemaCanViewAccountAndBillingInformation = &schema.Schema{
 		Type:        schema.TypeBool,
 		Optional:    true,
@@ -253,36 +306,43 @@ func NewAPITokenResourceHandle() ResourceHandle[*restapi.APIToken] {
 		metaData: ResourceMetaData{
 			ResourceName: ResourceInstanaAPIToken,
 			Schema: map[string]*schema.Schema{
-				APITokenFieldAccessGrantingToken:                  apiTokenSchemaAccessGrantingToken,
-				APITokenFieldInternalID:                           apiTokenSchemaInternalID,
-				APITokenFieldName:                                 apiTokenSchemaName,
-				APITokenFieldCanConfigureServiceMapping:           apiTokenSchemaCanConfigureServiceMapping,
-				APITokenFieldCanConfigureEumApplications:          apiTokenSchemaCanConfigureEumApplications,
-				APITokenFieldCanConfigureMobileAppMonitoring:      apiTokenSchemaCanConfigureMobileAppMonitoring,
-				APITokenFieldCanConfigureUsers:                    apiTokenSchemaCanConfigureUsers,
-				APITokenFieldCanInstallNewAgents:                  apiTokenSchemaCanInstallNewAgents,
-				APITokenFieldCanConfigureIntegrations:             apiTokenSchemaCanConfigureIntegrations,
-				APITokenFieldCanConfigureCustomAlerts:             apiTokenSchemaCanConfigureCustomAlerts,
-				APITokenFieldCanConfigureAPITokens:                apiTokenSchemaCanConfigureAPITokens,
-				APITokenFieldCanConfigureAgentRunMode:             apiTokenSchemaCanConfigureAgentRunMode,
-				APITokenFieldCanViewAuditLog:                      apiTokenSchemaCanViewAuditLog,
-				APITokenFieldCanConfigureAgents:                   apiTokenSchemaCanConfigureAgents,
-				APITokenFieldCanConfigureAuthenticationMethods:    apiTokenSchemaCanConfigureAuthenticationMethods,
-				APITokenFieldCanConfigureApplications:             apiTokenSchemaCanConfigureApplications,
-				APITokenFieldCanConfigureTeams:                    apiTokenSchemaCanConfigureTeams,
-				APITokenFieldCanConfigureReleases:                 apiTokenSchemaCanConfigureReleases,
-				APITokenFieldCanConfigureLogManagement:            apiTokenSchemaCanConfigureLogManagement,
-				APITokenFieldCanCreatePublicCustomDashboards:      apiTokenSchemaCanCreatePublicCustomDashboards,
-				APITokenFieldCanViewLogs:                          apiTokenSchemaCanViewLogs,
-				APITokenFieldCanViewTraceDetails:                  apiTokenSchemaCanViewTraceDetails,
-				APITokenFieldCanConfigureSessionSettings:          apiTokenSchemaCanConfigureSessionSettings,
-				APITokenFieldCanConfigureServiceLevelIndicators:   apiTokenSchemaCanConfigureServiceLevelIndicators,
-				APITokenFieldCanConfigureGlobalAlertPayload:       apiTokenSchemaCanConfigureGlobalAlertPayload,
-				APITokenFieldCanConfigureGlobalAlertConfigs:       apiTokenSchemaCanConfigureGlobalAlertConfigs,
-				APITokenFieldCanViewAccountAndBillingInformation:  apiTokenSchemaCanViewAccountAndBillingInformation,
-				APITokenFieldCanEditAllAccessibleCustomDashboards: apiTokenSchemaCanEditAllAccessibleCustomDashboards,
+				APITokenFieldAccessGrantingToken:                      apiTokenSchemaAccessGrantingToken,
+				APITokenFieldInternalID:                               apiTokenSchemaInternalID,
+				APITokenFieldName:                                     apiTokenSchemaName,
+				APITokenFieldCanConfigureServiceMapping:               apiTokenSchemaCanConfigureServiceMapping,
+				APITokenFieldCanConfigureEumApplications:              apiTokenSchemaCanConfigureEumApplications,
+				APITokenFieldCanConfigureMobileAppMonitoring:          apiTokenSchemaCanConfigureMobileAppMonitoring,
+				APITokenFieldCanConfigureUsers:                        apiTokenSchemaCanConfigureUsers,
+				APITokenFieldCanInstallNewAgents:                      apiTokenSchemaCanInstallNewAgents,
+				APITokenFieldCanConfigureIntegrations:                 apiTokenSchemaCanConfigureIntegrations,
+				APITokenFieldCanConfigureEventsAndAlerts:              apiTokenSchemaCanConfigureEventsAndAlerts,
+				APITokenFieldCanConfigureMaintenanceWindows:           apiTokenSchemaCanConfigureMaintenanceWindows,
+				APITokenFieldCanConfigureApplicationSmartAlerts:       apiTokenSchemaCanConfigureApplicationSmartAlerts,
+				APITokenFieldCanConfigureWebsiteSmartAlerts:           apiTokenSchemaCanConfigureWebsiteSmartAlerts,
+				APITokenFieldCanConfigureMobileAppSmartAlerts:         apiTokenSchemaCanConfigureMobileAppSmartAlerts,
+				APITokenFieldCanConfigureAPITokens:                    apiTokenSchemaCanConfigureAPITokens,
+				APITokenFieldCanConfigureAgentRunMode:                 apiTokenSchemaCanConfigureAgentRunMode,
+				APITokenFieldCanViewAuditLog:                          apiTokenSchemaCanViewAuditLog,
+				APITokenFieldCanConfigureAgents:                       apiTokenSchemaCanConfigureAgents,
+				APITokenFieldCanConfigureAuthenticationMethods:        apiTokenSchemaCanConfigureAuthenticationMethods,
+				APITokenFieldCanConfigureApplications:                 apiTokenSchemaCanConfigureApplications,
+				APITokenFieldCanConfigureTeams:                        apiTokenSchemaCanConfigureTeams,
+				APITokenFieldCanConfigureReleases:                     apiTokenSchemaCanConfigureReleases,
+				APITokenFieldCanConfigureLogManagement:                apiTokenSchemaCanConfigureLogManagement,
+				APITokenFieldCanCreatePublicCustomDashboards:          apiTokenSchemaCanCreatePublicCustomDashboards,
+				APITokenFieldCanViewLogs:                              apiTokenSchemaCanViewLogs,
+				APITokenFieldCanViewTraceDetails:                      apiTokenSchemaCanViewTraceDetails,
+				APITokenFieldCanConfigureSessionSettings:              apiTokenSchemaCanConfigureSessionSettings,
+				APITokenFieldCanConfigureServiceLevelIndicators:       apiTokenSchemaCanConfigureServiceLevelIndicators,
+				APITokenFieldCanConfigureGlobalAlertPayload:           apiTokenSchemaCanConfigureGlobalAlertPayload,
+				APITokenFieldCanConfigureGlobalApplicationSmartAlerts: apiTokenSchemaCanConfigureGlobalApplicationSmartAlerts,
+				APITokenFieldCanConfigureGlobalSyntheticSmartAlerts:   apiTokenSchemaCanConfigureGlobalSyntheticSmartAlerts,
+				APITokenFieldCanConfigureGlobalInfraSmartAlerts:       apiTokenSchemaCanConfigureGlobalInfraSmartAlerts,
+				APITokenFieldCanConfigureGlobalLogSmartAlerts:         apiTokenSchemaCanConfigureGlobalLogSmartAlerts,
+				APITokenFieldCanViewAccountAndBillingInformation:      apiTokenSchemaCanViewAccountAndBillingInformation,
+				APITokenFieldCanEditAllAccessibleCustomDashboards:     apiTokenSchemaCanEditAllAccessibleCustomDashboards,
 			},
-			SchemaVersion:    1,
+			SchemaVersion:    2,
 			SkipIDGeneration: true,
 			ResourceIDField:  &internalIDFieldName,
 		},
@@ -300,9 +360,9 @@ func (r *apiTokenResource) MetaData() *ResourceMetaData {
 func (r *apiTokenResource) StateUpgraders() []schema.StateUpgrader {
 	return []schema.StateUpgrader{
 		{
-			Type:    r.schemaV0().CoreConfigSchema().ImpliedType(),
-			Upgrade: r.stateUpgradeV0,
-			Version: 0,
+			Type:    r.schemaV1().CoreConfigSchema().ImpliedType(),
+			Upgrade: r.stateUpgradeV1,
+			Version: 1,
 		},
 	}
 }
@@ -321,72 +381,86 @@ func (r *apiTokenResource) SetComputedFields(d *schema.ResourceData) error {
 func (r *apiTokenResource) UpdateState(d *schema.ResourceData, apiToken *restapi.APIToken) error {
 	d.SetId(apiToken.ID)
 	return tfutils.UpdateState(d, map[string]interface{}{
-		APITokenFieldAccessGrantingToken:                  apiToken.AccessGrantingToken,
-		APITokenFieldInternalID:                           apiToken.InternalID,
-		APITokenFieldName:                                 apiToken.Name,
-		APITokenFieldCanConfigureServiceMapping:           apiToken.CanConfigureServiceMapping,
-		APITokenFieldCanConfigureEumApplications:          apiToken.CanConfigureEumApplications,
-		APITokenFieldCanConfigureMobileAppMonitoring:      apiToken.CanConfigureMobileAppMonitoring,
-		APITokenFieldCanConfigureUsers:                    apiToken.CanConfigureUsers,
-		APITokenFieldCanInstallNewAgents:                  apiToken.CanInstallNewAgents,
-		APITokenFieldCanConfigureIntegrations:             apiToken.CanConfigureIntegrations,
-		APITokenFieldCanConfigureCustomAlerts:             apiToken.CanConfigureCustomAlerts,
-		APITokenFieldCanConfigureAPITokens:                apiToken.CanConfigureAPITokens,
-		APITokenFieldCanConfigureAgentRunMode:             apiToken.CanConfigureAgentRunMode,
-		APITokenFieldCanViewAuditLog:                      apiToken.CanViewAuditLog,
-		APITokenFieldCanConfigureAgents:                   apiToken.CanConfigureAgents,
-		APITokenFieldCanConfigureAuthenticationMethods:    apiToken.CanConfigureAuthenticationMethods,
-		APITokenFieldCanConfigureApplications:             apiToken.CanConfigureApplications,
-		APITokenFieldCanConfigureTeams:                    apiToken.CanConfigureTeams,
-		APITokenFieldCanConfigureReleases:                 apiToken.CanConfigureReleases,
-		APITokenFieldCanConfigureLogManagement:            apiToken.CanConfigureLogManagement,
-		APITokenFieldCanCreatePublicCustomDashboards:      apiToken.CanCreatePublicCustomDashboards,
-		APITokenFieldCanViewLogs:                          apiToken.CanViewLogs,
-		APITokenFieldCanViewTraceDetails:                  apiToken.CanViewTraceDetails,
-		APITokenFieldCanConfigureSessionSettings:          apiToken.CanConfigureSessionSettings,
-		APITokenFieldCanConfigureServiceLevelIndicators:   apiToken.CanConfigureServiceLevelIndicators,
-		APITokenFieldCanConfigureGlobalAlertPayload:       apiToken.CanConfigureGlobalAlertPayload,
-		APITokenFieldCanConfigureGlobalAlertConfigs:       apiToken.CanConfigureGlobalAlertConfigs,
-		APITokenFieldCanViewAccountAndBillingInformation:  apiToken.CanViewAccountAndBillingInformation,
-		APITokenFieldCanEditAllAccessibleCustomDashboards: apiToken.CanEditAllAccessibleCustomDashboards,
+		APITokenFieldAccessGrantingToken:                      apiToken.AccessGrantingToken,
+		APITokenFieldInternalID:                               apiToken.InternalID,
+		APITokenFieldName:                                     apiToken.Name,
+		APITokenFieldCanConfigureServiceMapping:               apiToken.CanConfigureServiceMapping,
+		APITokenFieldCanConfigureEumApplications:              apiToken.CanConfigureEumApplications,
+		APITokenFieldCanConfigureMobileAppMonitoring:          apiToken.CanConfigureMobileAppMonitoring,
+		APITokenFieldCanConfigureUsers:                        apiToken.CanConfigureUsers,
+		APITokenFieldCanInstallNewAgents:                      apiToken.CanInstallNewAgents,
+		APITokenFieldCanConfigureIntegrations:                 apiToken.CanConfigureIntegrations,
+		APITokenFieldCanConfigureEventsAndAlerts:              apiToken.CanConfigureEventsAndAlerts,
+		APITokenFieldCanConfigureMaintenanceWindows:           apiToken.CanConfigureMaintenanceWindows,
+		APITokenFieldCanConfigureApplicationSmartAlerts:       apiToken.CanConfigureApplicationSmartAlerts,
+		APITokenFieldCanConfigureWebsiteSmartAlerts:           apiToken.CanConfigureWebsiteSmartAlerts,
+		APITokenFieldCanConfigureMobileAppSmartAlerts:         apiToken.CanConfigureMobileAppSmartAlerts,
+		APITokenFieldCanConfigureAPITokens:                    apiToken.CanConfigureAPITokens,
+		APITokenFieldCanConfigureAgentRunMode:                 apiToken.CanConfigureAgentRunMode,
+		APITokenFieldCanViewAuditLog:                          apiToken.CanViewAuditLog,
+		APITokenFieldCanConfigureAgents:                       apiToken.CanConfigureAgents,
+		APITokenFieldCanConfigureAuthenticationMethods:        apiToken.CanConfigureAuthenticationMethods,
+		APITokenFieldCanConfigureApplications:                 apiToken.CanConfigureApplications,
+		APITokenFieldCanConfigureTeams:                        apiToken.CanConfigureTeams,
+		APITokenFieldCanConfigureReleases:                     apiToken.CanConfigureReleases,
+		APITokenFieldCanConfigureLogManagement:                apiToken.CanConfigureLogManagement,
+		APITokenFieldCanCreatePublicCustomDashboards:          apiToken.CanCreatePublicCustomDashboards,
+		APITokenFieldCanViewLogs:                              apiToken.CanViewLogs,
+		APITokenFieldCanViewTraceDetails:                      apiToken.CanViewTraceDetails,
+		APITokenFieldCanConfigureSessionSettings:              apiToken.CanConfigureSessionSettings,
+		APITokenFieldCanConfigureServiceLevelIndicators:       apiToken.CanConfigureServiceLevelIndicators,
+		APITokenFieldCanConfigureGlobalAlertPayload:           apiToken.CanConfigureGlobalAlertPayload,
+		APITokenFieldCanConfigureGlobalApplicationSmartAlerts: apiToken.CanConfigureGlobalApplicationSmartAlerts,
+		APITokenFieldCanConfigureGlobalSyntheticSmartAlerts:   apiToken.CanConfigureGlobalSyntheticSmartAlerts,
+		APITokenFieldCanConfigureGlobalInfraSmartAlerts:       apiToken.CanConfigureGlobalInfraSmartAlerts,
+		APITokenFieldCanConfigureGlobalLogSmartAlerts:         apiToken.CanConfigureGlobalLogSmartAlerts,
+		APITokenFieldCanViewAccountAndBillingInformation:      apiToken.CanViewAccountAndBillingInformation,
+		APITokenFieldCanEditAllAccessibleCustomDashboards:     apiToken.CanEditAllAccessibleCustomDashboards,
 	})
 }
 
 func (r *apiTokenResource) MapStateToDataObject(d *schema.ResourceData) (*restapi.APIToken, error) {
 	return &restapi.APIToken{
-		ID:                                   d.Id(),
-		AccessGrantingToken:                  d.Get(APITokenFieldAccessGrantingToken).(string),
-		InternalID:                           d.Get(APITokenFieldInternalID).(string),
-		Name:                                 d.Get(AlertingChannelFieldName).(string),
-		CanConfigureServiceMapping:           d.Get(APITokenFieldCanConfigureServiceMapping).(bool),
-		CanConfigureEumApplications:          d.Get(APITokenFieldCanConfigureEumApplications).(bool),
-		CanConfigureMobileAppMonitoring:      d.Get(APITokenFieldCanConfigureMobileAppMonitoring).(bool),
-		CanConfigureUsers:                    d.Get(APITokenFieldCanConfigureUsers).(bool),
-		CanInstallNewAgents:                  d.Get(APITokenFieldCanInstallNewAgents).(bool),
-		CanConfigureIntegrations:             d.Get(APITokenFieldCanConfigureIntegrations).(bool),
-		CanConfigureCustomAlerts:             d.Get(APITokenFieldCanConfigureCustomAlerts).(bool),
-		CanConfigureAPITokens:                d.Get(APITokenFieldCanConfigureAPITokens).(bool),
-		CanConfigureAgentRunMode:             d.Get(APITokenFieldCanConfigureAgentRunMode).(bool),
-		CanViewAuditLog:                      d.Get(APITokenFieldCanViewAuditLog).(bool),
-		CanConfigureAgents:                   d.Get(APITokenFieldCanConfigureAgents).(bool),
-		CanConfigureAuthenticationMethods:    d.Get(APITokenFieldCanConfigureAuthenticationMethods).(bool),
-		CanConfigureApplications:             d.Get(APITokenFieldCanConfigureApplications).(bool),
-		CanConfigureTeams:                    d.Get(APITokenFieldCanConfigureTeams).(bool),
-		CanConfigureReleases:                 d.Get(APITokenFieldCanConfigureReleases).(bool),
-		CanConfigureLogManagement:            d.Get(APITokenFieldCanConfigureLogManagement).(bool),
-		CanCreatePublicCustomDashboards:      d.Get(APITokenFieldCanCreatePublicCustomDashboards).(bool),
-		CanViewLogs:                          d.Get(APITokenFieldCanViewLogs).(bool),
-		CanViewTraceDetails:                  d.Get(APITokenFieldCanViewTraceDetails).(bool),
-		CanConfigureSessionSettings:          d.Get(APITokenFieldCanConfigureSessionSettings).(bool),
-		CanConfigureServiceLevelIndicators:   d.Get(APITokenFieldCanConfigureServiceLevelIndicators).(bool),
-		CanConfigureGlobalAlertPayload:       d.Get(APITokenFieldCanConfigureGlobalAlertPayload).(bool),
-		CanConfigureGlobalAlertConfigs:       d.Get(APITokenFieldCanConfigureGlobalAlertConfigs).(bool),
-		CanViewAccountAndBillingInformation:  d.Get(APITokenFieldCanViewAccountAndBillingInformation).(bool),
-		CanEditAllAccessibleCustomDashboards: d.Get(APITokenFieldCanEditAllAccessibleCustomDashboards).(bool),
+		ID:                                       d.Id(),
+		AccessGrantingToken:                      d.Get(APITokenFieldAccessGrantingToken).(string),
+		InternalID:                               d.Get(APITokenFieldInternalID).(string),
+		Name:                                     d.Get(AlertingChannelFieldName).(string),
+		CanConfigureServiceMapping:               d.Get(APITokenFieldCanConfigureServiceMapping).(bool),
+		CanConfigureEumApplications:              d.Get(APITokenFieldCanConfigureEumApplications).(bool),
+		CanConfigureMobileAppMonitoring:          d.Get(APITokenFieldCanConfigureMobileAppMonitoring).(bool),
+		CanConfigureUsers:                        d.Get(APITokenFieldCanConfigureUsers).(bool),
+		CanInstallNewAgents:                      d.Get(APITokenFieldCanInstallNewAgents).(bool),
+		CanConfigureIntegrations:                 d.Get(APITokenFieldCanConfigureIntegrations).(bool),
+		CanConfigureEventsAndAlerts:              d.Get(APITokenFieldCanConfigureEventsAndAlerts).(bool),
+		CanConfigureMaintenanceWindows:           d.Get(APITokenFieldCanConfigureMaintenanceWindows).(bool),
+		CanConfigureApplicationSmartAlerts:       d.Get(APITokenFieldCanConfigureApplicationSmartAlerts).(bool),
+		CanConfigureWebsiteSmartAlerts:           d.Get(APITokenFieldCanConfigureWebsiteSmartAlerts).(bool),
+		CanConfigureMobileAppSmartAlerts:         d.Get(APITokenFieldCanConfigureMobileAppSmartAlerts).(bool),
+		CanConfigureAPITokens:                    d.Get(APITokenFieldCanConfigureAPITokens).(bool),
+		CanConfigureAgentRunMode:                 d.Get(APITokenFieldCanConfigureAgentRunMode).(bool),
+		CanViewAuditLog:                          d.Get(APITokenFieldCanViewAuditLog).(bool),
+		CanConfigureAgents:                       d.Get(APITokenFieldCanConfigureAgents).(bool),
+		CanConfigureAuthenticationMethods:        d.Get(APITokenFieldCanConfigureAuthenticationMethods).(bool),
+		CanConfigureApplications:                 d.Get(APITokenFieldCanConfigureApplications).(bool),
+		CanConfigureTeams:                        d.Get(APITokenFieldCanConfigureTeams).(bool),
+		CanConfigureReleases:                     d.Get(APITokenFieldCanConfigureReleases).(bool),
+		CanConfigureLogManagement:                d.Get(APITokenFieldCanConfigureLogManagement).(bool),
+		CanCreatePublicCustomDashboards:          d.Get(APITokenFieldCanCreatePublicCustomDashboards).(bool),
+		CanViewLogs:                              d.Get(APITokenFieldCanViewLogs).(bool),
+		CanViewTraceDetails:                      d.Get(APITokenFieldCanViewTraceDetails).(bool),
+		CanConfigureSessionSettings:              d.Get(APITokenFieldCanConfigureSessionSettings).(bool),
+		CanConfigureServiceLevelIndicators:       d.Get(APITokenFieldCanConfigureServiceLevelIndicators).(bool),
+		CanConfigureGlobalAlertPayload:           d.Get(APITokenFieldCanConfigureGlobalAlertPayload).(bool),
+		CanConfigureGlobalApplicationSmartAlerts: d.Get(APITokenFieldCanConfigureGlobalApplicationSmartAlerts).(bool),
+		CanConfigureGlobalSyntheticSmartAlerts:   d.Get(APITokenFieldCanConfigureGlobalSyntheticSmartAlerts).(bool),
+		CanConfigureGlobalInfraSmartAlerts:       d.Get(APITokenFieldCanConfigureGlobalInfraSmartAlerts).(bool),
+		CanConfigureGlobalLogSmartAlerts:         d.Get(APITokenFieldCanConfigureGlobalLogSmartAlerts).(bool),
+		CanViewAccountAndBillingInformation:      d.Get(APITokenFieldCanViewAccountAndBillingInformation).(bool),
+		CanEditAllAccessibleCustomDashboards:     d.Get(APITokenFieldCanEditAllAccessibleCustomDashboards).(bool),
 	}, nil
 }
 
-func (r *apiTokenResource) stateUpgradeV0(_ context.Context, state map[string]interface{}, _ interface{}) (map[string]interface{}, error) {
+func (r *apiTokenResource) stateUpgradeV1(_ context.Context, state map[string]interface{}, _ interface{}) (map[string]interface{}, error) {
 	if _, ok := state[APITokenFieldFullName]; ok {
 		state[APITokenFieldName] = state[APITokenFieldFullName]
 		delete(state, APITokenFieldFullName)
@@ -394,38 +468,45 @@ func (r *apiTokenResource) stateUpgradeV0(_ context.Context, state map[string]in
 	return state, nil
 }
 
-func (r *apiTokenResource) schemaV0() *schema.Resource {
+func (r *apiTokenResource) schemaV1() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			APITokenFieldAccessGrantingToken:                  apiTokenSchemaAccessGrantingToken,
-			APITokenFieldInternalID:                           apiTokenSchemaInternalID,
-			APITokenFieldName:                                 apiTokenSchemaName,
-			APITokenFieldFullName:                             apiTokenSchemaFullName,
-			APITokenFieldCanConfigureServiceMapping:           apiTokenSchemaCanConfigureServiceMapping,
-			APITokenFieldCanConfigureEumApplications:          apiTokenSchemaCanConfigureEumApplications,
-			APITokenFieldCanConfigureMobileAppMonitoring:      apiTokenSchemaCanConfigureMobileAppMonitoring,
-			APITokenFieldCanConfigureUsers:                    apiTokenSchemaCanConfigureUsers,
-			APITokenFieldCanInstallNewAgents:                  apiTokenSchemaCanInstallNewAgents,
-			APITokenFieldCanConfigureIntegrations:             apiTokenSchemaCanConfigureIntegrations,
-			APITokenFieldCanConfigureCustomAlerts:             apiTokenSchemaCanConfigureCustomAlerts,
-			APITokenFieldCanConfigureAPITokens:                apiTokenSchemaCanConfigureAPITokens,
-			APITokenFieldCanConfigureAgentRunMode:             apiTokenSchemaCanConfigureAgentRunMode,
-			APITokenFieldCanViewAuditLog:                      apiTokenSchemaCanViewAuditLog,
-			APITokenFieldCanConfigureAgents:                   apiTokenSchemaCanConfigureAgents,
-			APITokenFieldCanConfigureAuthenticationMethods:    apiTokenSchemaCanConfigureAuthenticationMethods,
-			APITokenFieldCanConfigureApplications:             apiTokenSchemaCanConfigureApplications,
-			APITokenFieldCanConfigureTeams:                    apiTokenSchemaCanConfigureTeams,
-			APITokenFieldCanConfigureReleases:                 apiTokenSchemaCanConfigureReleases,
-			APITokenFieldCanConfigureLogManagement:            apiTokenSchemaCanConfigureLogManagement,
-			APITokenFieldCanCreatePublicCustomDashboards:      apiTokenSchemaCanCreatePublicCustomDashboards,
-			APITokenFieldCanViewLogs:                          apiTokenSchemaCanViewLogs,
-			APITokenFieldCanViewTraceDetails:                  apiTokenSchemaCanViewTraceDetails,
-			APITokenFieldCanConfigureSessionSettings:          apiTokenSchemaCanConfigureSessionSettings,
-			APITokenFieldCanConfigureServiceLevelIndicators:   apiTokenSchemaCanConfigureServiceLevelIndicators,
-			APITokenFieldCanConfigureGlobalAlertPayload:       apiTokenSchemaCanConfigureGlobalAlertPayload,
-			APITokenFieldCanConfigureGlobalAlertConfigs:       apiTokenSchemaCanConfigureGlobalAlertConfigs,
-			APITokenFieldCanViewAccountAndBillingInformation:  apiTokenSchemaCanViewAccountAndBillingInformation,
-			APITokenFieldCanEditAllAccessibleCustomDashboards: apiTokenSchemaCanEditAllAccessibleCustomDashboards,
+			APITokenFieldAccessGrantingToken:                      apiTokenSchemaAccessGrantingToken,
+			APITokenFieldInternalID:                               apiTokenSchemaInternalID,
+			APITokenFieldName:                                     apiTokenSchemaName,
+			APITokenFieldFullName:                                 apiTokenSchemaFullName,
+			APITokenFieldCanConfigureServiceMapping:               apiTokenSchemaCanConfigureServiceMapping,
+			APITokenFieldCanConfigureEumApplications:              apiTokenSchemaCanConfigureEumApplications,
+			APITokenFieldCanConfigureMobileAppMonitoring:          apiTokenSchemaCanConfigureMobileAppMonitoring,
+			APITokenFieldCanConfigureUsers:                        apiTokenSchemaCanConfigureUsers,
+			APITokenFieldCanInstallNewAgents:                      apiTokenSchemaCanInstallNewAgents,
+			APITokenFieldCanConfigureIntegrations:                 apiTokenSchemaCanConfigureIntegrations,
+			APITokenFieldCanConfigureEventsAndAlerts:              apiTokenSchemaCanConfigureEventsAndAlerts,
+			APITokenFieldCanConfigureMaintenanceWindows:           apiTokenSchemaCanConfigureMaintenanceWindows,
+			APITokenFieldCanConfigureApplicationSmartAlerts:       apiTokenSchemaCanConfigureApplicationSmartAlerts,
+			APITokenFieldCanConfigureWebsiteSmartAlerts:           apiTokenSchemaCanConfigureWebsiteSmartAlerts,
+			APITokenFieldCanConfigureMobileAppSmartAlerts:         apiTokenSchemaCanConfigureMobileAppSmartAlerts,
+			APITokenFieldCanConfigureAPITokens:                    apiTokenSchemaCanConfigureAPITokens,
+			APITokenFieldCanConfigureAgentRunMode:                 apiTokenSchemaCanConfigureAgentRunMode,
+			APITokenFieldCanViewAuditLog:                          apiTokenSchemaCanViewAuditLog,
+			APITokenFieldCanConfigureAgents:                       apiTokenSchemaCanConfigureAgents,
+			APITokenFieldCanConfigureAuthenticationMethods:        apiTokenSchemaCanConfigureAuthenticationMethods,
+			APITokenFieldCanConfigureApplications:                 apiTokenSchemaCanConfigureApplications,
+			APITokenFieldCanConfigureTeams:                        apiTokenSchemaCanConfigureTeams,
+			APITokenFieldCanConfigureReleases:                     apiTokenSchemaCanConfigureReleases,
+			APITokenFieldCanConfigureLogManagement:                apiTokenSchemaCanConfigureLogManagement,
+			APITokenFieldCanCreatePublicCustomDashboards:          apiTokenSchemaCanCreatePublicCustomDashboards,
+			APITokenFieldCanViewLogs:                              apiTokenSchemaCanViewLogs,
+			APITokenFieldCanViewTraceDetails:                      apiTokenSchemaCanViewTraceDetails,
+			APITokenFieldCanConfigureSessionSettings:              apiTokenSchemaCanConfigureSessionSettings,
+			APITokenFieldCanConfigureServiceLevelIndicators:       apiTokenSchemaCanConfigureServiceLevelIndicators,
+			APITokenFieldCanConfigureGlobalAlertPayload:           apiTokenSchemaCanConfigureGlobalAlertPayload,
+			APITokenFieldCanConfigureGlobalApplicationSmartAlerts: apiTokenSchemaCanConfigureGlobalApplicationSmartAlerts,
+			APITokenFieldCanConfigureGlobalSyntheticSmartAlerts:   apiTokenSchemaCanConfigureGlobalSyntheticSmartAlerts,
+			APITokenFieldCanConfigureGlobalInfraSmartAlerts:       apiTokenSchemaCanConfigureGlobalInfraSmartAlerts,
+			APITokenFieldCanConfigureGlobalLogSmartAlerts:         apiTokenSchemaCanConfigureGlobalLogSmartAlerts,
+			APITokenFieldCanViewAccountAndBillingInformation:      apiTokenSchemaCanViewAccountAndBillingInformation,
+			APITokenFieldCanEditAllAccessibleCustomDashboards:     apiTokenSchemaCanEditAllAccessibleCustomDashboards,
 		},
 	}
 }
