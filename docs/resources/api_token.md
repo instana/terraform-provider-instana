@@ -10,32 +10,39 @@ The ID of the resource which is also used as unique identifier in Instana is aut
 
 ```hcl
 resource "instana_api_token" "example" {
-  name                                      = "name"
-  can_configure_service_mapping             = true
-  can_configure_eum_applications            = true
-  can_configure_mobile_app_monitoring       = true
-  can_configure_users                       = true
-  can_install_new_agents                    = true
-  can_configure_integrations                = true
-  can_configure_custom_alerts               = true
-  can_configure_api_tokens                  = true
-  can_configure_agent_run_mode              = true
-  can_view_audit_log                        = true
-  can_configure_agents                      = true
-  can_configure_authentication_methods      = true
-  can_configure_applications                = true
-  can_configure_teams                       = true
-  can_configure_releases                    = true
-  can_configure_log_management              = true
-  can_create_public_custom_dashboards       = true
-  can_view_logs                             = true
-  can_view_trace_details                    = true
-  can_configure_session_settings            = true
-  can_configure_service_level_indicators    = true
-  can_configure_global_alert_payload        = true
-  can_configure_global_alert_configs        = true
-  can_view_account_and_billing_information  = true
-  can_edit_all_accessible_custom_dashboards = true
+  name                                           = "name"
+  can_configure_service_mapping                  = true
+  can_configure_eum_applications                 = true
+  can_configure_mobile_app_monitoring            = true
+  can_configure_users                            = true
+  can_install_new_agents                         = true
+  can_configure_integrations                     = true
+  can_configure_events_and_alerts                = true
+  can_configure_maintenance_windows              = true
+  can_configure_application_smart_alerts         = true
+  can_configure_website_smart_alerts             = true
+  can_configure_mobile_app_smart_alerts          = true
+  can_configure_api_tokens                       = true
+  can_configure_agent_run_mode                   = true
+  can_view_audit_log                             = true
+  can_configure_agents                           = true
+  can_configure_authentication_methods           = true
+  can_configure_applications                     = true
+  can_configure_teams                            = true
+  can_configure_releases                         = true
+  can_configure_log_management                   = true
+  can_create_public_custom_dashboards            = true
+  can_view_logs                                  = true
+  can_view_trace_details                         = true
+  can_configure_session_settings                 = true
+  can_configure_service_level_indicators         = true
+  can_configure_global_alert_payload             = true
+  can_configure_global_application_smart_alerts  = true
+  can_configure_global_synthetic_smart_alerts    = true
+  can_configure_global_infra_smart_alerts        = true
+  can_configure_global_log_smart_alerts          = true
+  can_view_account_and_billing_information       = true
+  can_edit_all_accessible_custom_dashboards      = true
 }
 ```
 
@@ -49,7 +56,11 @@ resource "instana_api_token" "example" {
 * `can_configure_users` - Optional - default false - enables permission to configure users
 * `can_install_new_agents` - Optional - default false - enables permission to install new agents
 * `can_configure_integrations` - Optional - default false - enables permission to configure integrations
-* `can_configure_custom_alerts` - Optional - default false - enables permission to configure custom alerts
+* `can_configure_events_and_alerts` - Optional - default false - enables permission to configure Events and Alerts
+* `can_configure_maintenance_windows` - Optional - default false - enables permission to configure Maintenance Windows
+* `can_configure_application_smart_alerts` - Optional - default false - enables permission to configure Application Smart Alerts
+* `can_configure_website_smart_alerts` - Optional - default false - enables permission to configure Website Smart Alerts
+* `can_configure_mobile_app_smart_alerts` - Optional - default false - enables permission to configure MobileApp Smart Alerts
 * `can_configure_api_tokens` - Optional - default false - enables permission to configure api tokes
 * `can_configure_agent_run_mode` - Optional - default false - enables permission to configure agent run mode
 * `can_view_audit_log` - Optional - default false - enables permission to view audit logs
@@ -65,7 +76,10 @@ resource "instana_api_token" "example" {
 * `can_configure_session_settings` - Optional - default false - enables permission to configure session settings
 * `can_configure_service_level_indicators` - Optional - default false - enables permission to configure service level indicators
 * `can_configure_global_alert_payload` - Optional - default false - enables permission to configure global alert payload
-* `can_configure_global_alert_configs` - Optional - default false - enables permission to configure global alert configs
+* `can_configure_global_application_smart_alerts` - Optional - default false - enables permission to configure global Application Smart Alerts
+* `can_configure_global_synthetic_smart_alerts` - Optional - default false - enables permission to configure global Synthetic Smart Alerts
+* `can_configure_global_infra_smart_alerts` - Optional - default false - enables permission to configure global Infrastructure Smart Alerts
+* `can_configure_global_log_smart_alerts` - Optional - default false - enables permission to configure global Log Smart Alerts
 * `can_view_account_and_billing_information` - Optional - default false - enables permission to view account and billing information
 * `can_edit_all_accessible_custom_dashboards` - Optional - default false - enables permission to edit all accessible custom dashboards
 
