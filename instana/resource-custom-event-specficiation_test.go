@@ -20,6 +20,7 @@ func TestCustomEventSpecificationResource(t *testing.T) {
 	t.Run("CRUD integration test of with Entity Count Verification Rule", customerEventSpecificationIntegrationTestWithEntityCountVerificationRule().testCrud)
 	t.Run("CRUD integration test of with Entity Verification Rule", customerEventSpecificationIntegrationTestWithEntityVerificationRule().testCrud)
 	t.Run("CRUD integration test of with Host Availability Rule", customerEventSpecificationIntegrationTestWithHostAvailabilityRule().testCrud)
+	t.Run("CRUD integration test of with Host Availability Rule Without Tag Filter", customerEventSpecificationIntegrationTestWithHostAvailabilityRuleWithoutTagFilter().testCrud)
 	t.Run("CRUD integration test of with System Rule", customerEventSpecificationIntegrationTestWithSystemRule().testCrud)
 	t.Run("CRUD integration test of with Threshold Rule and Metric Name and Rollup", customerEventSpecificationIntegrationTestWithThresholdRuleAndMetricNameAndRollup().testCrud)
 	t.Run("CRUD integration test of with Threshold Rule and Metric Pattern", customerEventSpecificationIntegrationTestWithThresholdRuleAndMetricPattern().testCrud)
@@ -31,6 +32,7 @@ func TestCustomEventSpecificationResource(t *testing.T) {
 	t.Run("should map entity count verification rule to state", unitTest.shouldMapEntityCountVerificationRuleToState)
 	t.Run("should map entity verification rule to state", unitTest.shouldMapEntityVerificationRuleToState)
 	t.Run("should map host availability rule to state", unitTest.shouldMapHostAvailabilityRuleToState)
+	t.Run("should map host availability rule without tag filter to state", unitTest.shouldMapHostAvailabilityRuleWithoutTagFilterToState)
 	t.Run("should fail to map host availability rule to when tag filter is not valid", unitTest.shouldFailToMapHostAvailabilityRuleWhenTagFilterIsNotValid)
 	t.Run("should map system rule to state", unitTest.shouldMapSystemRuleToState)
 	t.Run("should map threshold rule and metric name to state", unitTest.shouldMapThresholdRuleAndMetricNameToState)
@@ -46,6 +48,7 @@ func TestCustomEventSpecificationResource(t *testing.T) {
 	t.Run("should map state of entity verification rule to data model", unitTest.shouldMapStateOfEntityVerificationRuleToDataModel)
 	t.Run("should fail to map state of entity verification rule when severity is not valid", unitTest.shouldFailToMapStateOfEntityVerificationRuleToDataModelWhenSeverityIsNotValid)
 	t.Run("should map state of host availability rule to data model", unitTest.shouldMapStateOfHostAvailabilityRuleToDataModel)
+	t.Run("should map state of host availability rule without tag filter to data model", unitTest.shouldMapStateOfHostAvailabilityRuleWithoutTagFilterToDataModel)
 	t.Run("should fail to map state of host availability rule when severity is not valid", unitTest.shouldFailToMapStateOfHostAvailabilityRuleToDataModelWhenSeverityIsNotValid)
 	t.Run("should fail to map state of host availability rule when tag filter is not valid", unitTest.shouldFailToMapStateOfHostAvailabilityRuleToDataModelWhenTagFilterIsNotValid)
 	t.Run("should map state of system rule to data model", unitTest.shouldMapStateOfSystemRuleToDataModel)
@@ -86,7 +89,6 @@ func customerEventSpecificationIntegrationTestWithEntityCountRule() *customerEve
 resource "instana_custom_event_specification" "example" {
   name = "name %d"
   entity_type = "instanaAgent"
-  query = "query"
   enabled = true
   triggering = true
   description = "description"
@@ -105,7 +107,6 @@ resource "instana_custom_event_specification" "example" {
 	"id" : "%s",
 	"name" : "name %d",
 	"entityType" : "instanaAgent",
-	"query" : "query",
 	"enabled" : true,
 	"triggering" : true,
 	"description" : "description",
@@ -182,6 +183,7 @@ resource "instana_custom_event_specification" "example" {
 		customEventSpecificationConfigResourceName,
 		httpServerResponseTemplate,
 		[]resource.TestCheckFunc{
+			resource.TestCheckResourceAttr(customEventSpecificationConfigResourceName, CustomEventSpecificationFieldQuery, customEventSpecificationWithThresholdRuleQuery),
 			resource.TestCheckResourceAttr(customEventSpecificationConfigResourceName, fmt.Sprintf(customEventSpecificationRuleFieldPattern, CustomEventSpecificationFieldRules, CustomEventSpecificationFieldEntityCountVerificationRule, CustomEventSpecificationRuleFieldSeverity), customEventSpecificationWithThresholdRuleSeverity),
 			resource.TestCheckResourceAttr(customEventSpecificationConfigResourceName, fmt.Sprintf(customEventSpecificationRuleFieldPattern, CustomEventSpecificationFieldRules, CustomEventSpecificationFieldEntityCountVerificationRule, CustomEventSpecificationRuleFieldMatchingEntityLabel), "matching-entity-label"),
 			resource.TestCheckResourceAttr(customEventSpecificationConfigResourceName, fmt.Sprintf(customEventSpecificationRuleFieldPattern, CustomEventSpecificationFieldRules, CustomEventSpecificationFieldEntityCountVerificationRule, CustomEventSpecificationRuleFieldMatchingEntityType), "matching-entity-type"),
@@ -240,6 +242,7 @@ resource "instana_custom_event_specification" "example" {
 		customEventSpecificationConfigResourceName,
 		httpServerResponseTemplate,
 		[]resource.TestCheckFunc{
+			resource.TestCheckResourceAttr(customEventSpecificationConfigResourceName, CustomEventSpecificationFieldQuery, customEventSpecificationWithThresholdRuleQuery),
 			resource.TestCheckResourceAttr(customEventSpecificationConfigResourceName, fmt.Sprintf(customEventSpecificationRuleFieldPattern, CustomEventSpecificationFieldRules, CustomEventSpecificationFieldEntityVerificationRule, CustomEventSpecificationRuleFieldSeverity), customEventSpecificationWithThresholdRuleSeverity),
 			resource.TestCheckResourceAttr(customEventSpecificationConfigResourceName, fmt.Sprintf(customEventSpecificationRuleFieldPattern, CustomEventSpecificationFieldRules, CustomEventSpecificationFieldEntityVerificationRule, CustomEventSpecificationRuleFieldMatchingEntityLabel), "matching-entity-label"),
 			resource.TestCheckResourceAttr(customEventSpecificationConfigResourceName, fmt.Sprintf(customEventSpecificationRuleFieldPattern, CustomEventSpecificationFieldRules, CustomEventSpecificationFieldEntityVerificationRule, CustomEventSpecificationRuleFieldMatchingEntityType), "matching-entity-type"),
@@ -254,7 +257,6 @@ func customerEventSpecificationIntegrationTestWithHostAvailabilityRule() *custom
 resource "instana_custom_event_specification" "example" {
   name = "name %d"
   entity_type = "host"
-  query = "query"
   enabled = true
   triggering = true
   description = "description"
@@ -274,7 +276,6 @@ resource "instana_custom_event_specification" "example" {
 	"id" : "%s",
 	"name" : "name %d",
 	"entityType" : "host",
-	"query" : "query",
 	"enabled" : true,
 	"triggering" : true,
 	"description" : "description",
@@ -307,6 +308,56 @@ resource "instana_custom_event_specification" "example" {
 		[]resource.TestCheckFunc{
 			resource.TestCheckResourceAttr(customEventSpecificationConfigResourceName, fmt.Sprintf(customEventSpecificationRuleFieldPattern, CustomEventSpecificationFieldRules, CustomEventSpecificationFieldHostAvailabilityRule, CustomEventSpecificationRuleFieldSeverity), customEventSpecificationWithThresholdRuleSeverity),
 			resource.TestCheckResourceAttr(customEventSpecificationConfigResourceName, fmt.Sprintf(customEventSpecificationRuleFieldPattern, CustomEventSpecificationFieldRules, CustomEventSpecificationFieldHostAvailabilityRule, CustomEventSpecificationHostAvailabilityRuleFieldTagFilter), "entity.type@dest EQUALS 'foo'"),
+			resource.TestCheckResourceAttr(customEventSpecificationConfigResourceName, fmt.Sprintf(customEventSpecificationRuleFieldPattern, CustomEventSpecificationFieldRules, CustomEventSpecificationFieldHostAvailabilityRule, CustomEventSpecificationHostAvailabilityRuleFieldMetricCloseAfter), "10000"),
+			resource.TestCheckResourceAttr(customEventSpecificationConfigResourceName, fmt.Sprintf(customEventSpecificationRuleFieldPattern, CustomEventSpecificationFieldRules, CustomEventSpecificationFieldHostAvailabilityRule, CustomEventSpecificationRuleFieldOfflineDuration), "60000"),
+		},
+	)
+}
+
+func customerEventSpecificationIntegrationTestWithHostAvailabilityRuleWithoutTagFilter() *customerEventSpecificationIntegrationTest {
+	resourceTemplate := `
+resource "instana_custom_event_specification" "example" {
+  name = "name %d"
+  entity_type = "host"
+  enabled = true
+  triggering = true
+  description = "description"
+  expiration_time = "60000"
+  rules {
+    host_availability {
+      severity = "warning"
+	  offline_duration = 60000
+	  close_after = 10000
+    }
+  }
+}`
+
+	httpServerResponseTemplate := `
+{
+	"id" : "%s",
+	"name" : "name %d",
+	"entityType" : "host",
+	"enabled" : true,
+	"triggering" : true,
+	"description" : "description",
+	"expirationTime" : 60000,
+    "ruleLogicalOperator": "AND",
+	"rules" : [{ 
+		"ruleType" : "host_availability", 
+		"severity" : 5, 
+		"closeAfter" : 10000, 
+		"offlineDuration" : 60000
+	}]
+}`
+
+	return newCustomerEventSpecificationIntegrationTest(
+		"host",
+		resourceTemplate,
+		customEventSpecificationConfigResourceName,
+		httpServerResponseTemplate,
+		[]resource.TestCheckFunc{
+			resource.TestCheckResourceAttr(customEventSpecificationConfigResourceName, fmt.Sprintf(customEventSpecificationRuleFieldPattern, CustomEventSpecificationFieldRules, CustomEventSpecificationFieldHostAvailabilityRule, CustomEventSpecificationRuleFieldSeverity), customEventSpecificationWithThresholdRuleSeverity),
+			resource.TestCheckResourceAttr(customEventSpecificationConfigResourceName, fmt.Sprintf(customEventSpecificationRuleFieldPattern, CustomEventSpecificationFieldRules, CustomEventSpecificationFieldHostAvailabilityRule, CustomEventSpecificationHostAvailabilityRuleFieldTagFilter), ""),
 			resource.TestCheckResourceAttr(customEventSpecificationConfigResourceName, fmt.Sprintf(customEventSpecificationRuleFieldPattern, CustomEventSpecificationFieldRules, CustomEventSpecificationFieldHostAvailabilityRule, CustomEventSpecificationHostAvailabilityRuleFieldMetricCloseAfter), "10000"),
 			resource.TestCheckResourceAttr(customEventSpecificationConfigResourceName, fmt.Sprintf(customEventSpecificationRuleFieldPattern, CustomEventSpecificationFieldRules, CustomEventSpecificationFieldHostAvailabilityRule, CustomEventSpecificationRuleFieldOfflineDuration), "60000"),
 		},
@@ -355,6 +406,7 @@ resource "instana_custom_event_specification" "example" {
 		customEventSpecificationConfigResourceName,
 		httpServerResponseTemplate,
 		[]resource.TestCheckFunc{
+			resource.TestCheckResourceAttr(customEventSpecificationConfigResourceName, CustomEventSpecificationFieldQuery, customEventSpecificationWithThresholdRuleQuery),
 			resource.TestCheckResourceAttr(customEventSpecificationConfigResourceName, fmt.Sprintf(customEventSpecificationRuleFieldPattern, CustomEventSpecificationFieldRules, CustomEventSpecificationFieldSystemRule, CustomEventSpecificationRuleFieldSeverity), customEventSpecificationWithThresholdRuleSeverity),
 			resource.TestCheckResourceAttr(customEventSpecificationConfigResourceName, fmt.Sprintf(customEventSpecificationRuleFieldPattern, CustomEventSpecificationFieldRules, CustomEventSpecificationFieldSystemRule, CustomEventSpecificationSystemRuleFieldSystemRuleId), "system_rule_id"),
 		},
@@ -413,6 +465,7 @@ resource "instana_custom_event_specification" "example" {
 		customEventSpecificationConfigResourceName,
 		httpServerResponseTemplate,
 		[]resource.TestCheckFunc{
+			resource.TestCheckResourceAttr(customEventSpecificationConfigResourceName, CustomEventSpecificationFieldQuery, customEventSpecificationWithThresholdRuleQuery),
 			resource.TestCheckResourceAttr(customEventSpecificationConfigResourceName, fmt.Sprintf(customEventSpecificationRuleFieldPattern, CustomEventSpecificationFieldRules, CustomEventSpecificationFieldThresholdRule, CustomEventSpecificationRuleFieldSeverity), customEventSpecificationWithThresholdRuleSeverity),
 			resource.TestCheckResourceAttr(customEventSpecificationConfigResourceName, fmt.Sprintf(customEventSpecificationRuleFieldPattern, CustomEventSpecificationFieldRules, CustomEventSpecificationFieldThresholdRule, CustomEventSpecificationThresholdRuleFieldMetricName), customEventSpecificationWithThresholdRuleMetricName),
 			resource.TestCheckResourceAttr(customEventSpecificationConfigResourceName, fmt.Sprintf(customEventSpecificationRuleFieldPattern, CustomEventSpecificationFieldRules, CustomEventSpecificationFieldThresholdRule, CustomEventSpecificationThresholdRuleFieldAggregation), string(customEventSpecificationWithThresholdRuleAggregation)),
@@ -486,6 +539,7 @@ resource "instana_custom_event_specification" "example" {
 		customEventSpecificationConfigResourceName,
 		httpServerResponseTemplate,
 		[]resource.TestCheckFunc{
+			resource.TestCheckResourceAttr(customEventSpecificationConfigResourceName, CustomEventSpecificationFieldQuery, customEventSpecificationWithThresholdRuleQuery),
 			resource.TestCheckResourceAttr(customEventSpecificationConfigResourceName, fmt.Sprintf(customEventSpecificationRuleFieldPattern, CustomEventSpecificationFieldRules, CustomEventSpecificationFieldThresholdRule, CustomEventSpecificationRuleFieldSeverity), customEventSpecificationWithThresholdRuleSeverity),
 			resource.TestCheckResourceAttr(customEventSpecificationConfigResourceName, fmt.Sprintf(customEventSpecificationRuleMetricPatternFieldPattern, CustomEventSpecificationFieldRules, CustomEventSpecificationFieldThresholdRule, CustomEventSpecificationThresholdRuleFieldMetricPattern, CustomEventSpecificationThresholdRuleFieldMetricPatternPrefix), "prefix"),
 			resource.TestCheckResourceAttr(customEventSpecificationConfigResourceName, fmt.Sprintf(customEventSpecificationRuleMetricPatternFieldPattern, CustomEventSpecificationFieldRules, CustomEventSpecificationFieldThresholdRule, CustomEventSpecificationThresholdRuleFieldMetricPattern, CustomEventSpecificationThresholdRuleFieldMetricPatternPostfix), "postfix"),
@@ -545,7 +599,6 @@ func (r *customerEventSpecificationIntegrationTest) createTestCheckFunctions(ite
 		resource.TestCheckResourceAttrSet(r.resourceName, "id"),
 		resource.TestCheckResourceAttr(r.resourceName, CustomEventSpecificationFieldName, formatResourceName(iteration)),
 		resource.TestCheckResourceAttr(r.resourceName, CustomEventSpecificationFieldEntityType, r.entityType),
-		resource.TestCheckResourceAttr(r.resourceName, CustomEventSpecificationFieldQuery, customEventSpecificationWithThresholdRuleQuery),
 		resource.TestCheckResourceAttr(r.resourceName, CustomEventSpecificationFieldTriggering, trueAsString),
 		resource.TestCheckResourceAttr(r.resourceName, CustomEventSpecificationFieldDescription, customEventSpecificationWithThresholdRuleDescription),
 		resource.TestCheckResourceAttr(r.resourceName, CustomEventSpecificationFieldExpirationTime, strconv.Itoa(customEventSpecificationWithThresholdRuleExpirationTime)),
@@ -628,7 +681,7 @@ func (r *customerEventSpecificationUnitTest) validateHostAvailabilityRuleSchema(
 	schemaAssert.AssertSchemaIsRequiredAndOfTypeString(CustomEventSpecificationRuleFieldSeverity)
 	schemaAssert.AssertSchemaIsRequiredAndOfTypeInt(CustomEventSpecificationRuleFieldOfflineDuration)
 	schemaAssert.AssertSchemaIsRequiredAndOfTypeInt(CustomEventSpecificationHostAvailabilityRuleFieldMetricCloseAfter)
-	schemaAssert.AssertSchemaIsRequiredAndOfTypeString(CustomEventSpecificationHostAvailabilityRuleFieldTagFilter)
+	schemaAssert.AssertSchemaIsOptionalAndOfTypeString(CustomEventSpecificationHostAvailabilityRuleFieldTagFilter)
 }
 
 func (r *customerEventSpecificationUnitTest) validateSystemRuleSchema(t *testing.T, ruleSchema map[string]*schema.Schema) {
@@ -867,33 +920,10 @@ func (r *customerEventSpecificationUnitTest) shouldMapEntityVerificationRuleToSt
 }
 
 func (r *customerEventSpecificationUnitTest) shouldMapHostAvailabilityRuleToState(t *testing.T) {
-	description := customEventSpecificationWithThresholdRuleDescription
-	expirationTime := customEventSpecificationWithThresholdRuleExpirationTime
-	query := customEventSpecificationWithThresholdRuleQuery
-	tagFilter := restapi.NewStringTagFilter(restapi.TagFilterEntityDestination, "entity.type", restapi.EqualsOperator, "foo")
-	closeAfter := 4567
-	offlineDuration := 1234
 
-	spec := &restapi.CustomEventSpecification{
-		ID:                  customEventSpecificationWithRuleID,
-		Name:                resourceName,
-		EntityType:          entityVerificationRuleEntityType,
-		Query:               &query,
-		Description:         &description,
-		ExpirationTime:      &expirationTime,
-		Triggering:          true,
-		Enabled:             true,
-		RuleLogicalOperator: customEventSpecificationRuleLogicalOperatorAnd,
-		Rules: []restapi.RuleSpecification{
-			{
-				DType:           restapi.HostAvailabilityRuleType,
-				Severity:        restapi.SeverityWarning.GetAPIRepresentation(),
-				CloseAfter:      &closeAfter,
-				OfflineDuration: &offlineDuration,
-				TagFilter:       tagFilter,
-			},
-		},
-	}
+	tagFilter := restapi.NewStringTagFilter(restapi.TagFilterEntityDestination, "entity.type", restapi.EqualsOperator, "foo")
+
+	spec := getCustomEventSpecification(tagFilter)
 
 	testHelper := NewTestHelper[*restapi.CustomEventSpecification](t)
 	sut := NewCustomEventSpecificationResourceHandle()
@@ -905,8 +935,8 @@ func (r *customerEventSpecificationUnitTest) shouldMapHostAvailabilityRuleToStat
 	require.Equal(t, customEventSpecificationWithRuleID, resourceData.Id())
 	require.Equal(t, resourceName, resourceData.Get(CustomEventSpecificationFieldName))
 	require.Equal(t, entityVerificationRuleEntityType, resourceData.Get(CustomEventSpecificationFieldEntityType))
-	require.Equal(t, customEventSpecificationWithThresholdRuleQuery, resourceData.Get(CustomEventSpecificationFieldQuery))
-	require.Equal(t, description, resourceData.Get(CustomEventSpecificationFieldDescription))
+	require.Equal(t, "", resourceData.Get(CustomEventSpecificationFieldQuery))
+	require.Equal(t, customEventSpecificationWithThresholdRuleDescription, resourceData.Get(CustomEventSpecificationFieldDescription))
 	require.True(t, resourceData.Get(CustomEventSpecificationFieldTriggering).(bool))
 	require.True(t, resourceData.Get(CustomEventSpecificationFieldEnabled).(bool))
 	require.Equal(t, customEventSpecificationRuleLogicalOperatorAnd, resourceData.Get(CustomEventSpecificationFieldRuleLogicalOperator))
@@ -925,6 +955,50 @@ func (r *customerEventSpecificationUnitTest) shouldMapHostAvailabilityRuleToStat
 	require.Equal(t, closeAfter, rule[CustomEventSpecificationHostAvailabilityRuleFieldMetricCloseAfter])
 	require.Equal(t, offlineDuration, rule[CustomEventSpecificationRuleFieldOfflineDuration])
 	require.Equal(t, "entity.type@dest EQUALS 'foo'", rule[CustomEventSpecificationHostAvailabilityRuleFieldTagFilter])
+}
+
+func (r *customerEventSpecificationUnitTest) shouldMapHostAvailabilityRuleWithoutTagFilterToState(t *testing.T) {
+
+	spec := getCustomEventSpecification(nil)
+
+	testHelper := NewTestHelper[*restapi.CustomEventSpecification](t)
+	sut := NewCustomEventSpecificationResourceHandle()
+	resourceData := testHelper.CreateEmptyResourceDataForResourceHandle(sut)
+
+	err := sut.UpdateState(resourceData, spec)
+
+	require.Nil(t, err)
+	rules := resourceData.Get(CustomEventSpecificationFieldRules).([]interface{})[0].(map[string]interface{})
+	r.verifyExpectedRuleSet(t, rules, CustomEventSpecificationFieldHostAvailabilityRule)
+
+	rule := rules[CustomEventSpecificationFieldHostAvailabilityRule].([]interface{})[0].(map[string]interface{})
+	require.Equal(t, "", rule[CustomEventSpecificationHostAvailabilityRuleFieldTagFilter])
+}
+
+func getCustomEventSpecification(tagFilter *restapi.TagFilter) *restapi.CustomEventSpecification {
+	description := customEventSpecificationWithThresholdRuleDescription
+	expirationTime := customEventSpecificationWithThresholdRuleExpirationTime
+
+	spec := &restapi.CustomEventSpecification{
+		ID:                  customEventSpecificationWithRuleID,
+		Name:                resourceName,
+		EntityType:          entityVerificationRuleEntityType,
+		Description:         &description,
+		ExpirationTime:      &expirationTime,
+		Triggering:          true,
+		Enabled:             true,
+		RuleLogicalOperator: customEventSpecificationRuleLogicalOperatorAnd,
+		Rules: []restapi.RuleSpecification{
+			{
+				DType:           restapi.HostAvailabilityRuleType,
+				Severity:        restapi.SeverityWarning.GetAPIRepresentation(),
+				CloseAfter:      &closeAfter,
+				OfflineDuration: &offlineDuration,
+				TagFilter:       tagFilter,
+			},
+		},
+	}
+	return spec
 }
 
 func (r *customerEventSpecificationUnitTest) shouldFailToMapHostAvailabilityRuleWhenTagFilterIsNotValid(t *testing.T) {
@@ -1666,35 +1740,9 @@ func (r *customerEventSpecificationUnitTest) shouldFailToMapStateOfEntityVerific
 func (r *customerEventSpecificationUnitTest) shouldMapStateOfHostAvailabilityRuleToDataModel(t *testing.T) {
 	testHelper := NewTestHelper[*restapi.CustomEventSpecification](t)
 	resourceHandle := NewCustomEventSpecificationResourceHandle()
-
 	resourceData := testHelper.CreateEmptyResourceDataForResourceHandle(resourceHandle)
-	closeAfter := 5678
-	offlineDuration := 1234
 
-	resourceData.SetId(customEventSpecificationWithRuleID)
-	setValueOnResourceData(t, resourceData, CustomEventSpecificationFieldName, resourceName)
-	setValueOnResourceData(t, resourceData, CustomEventSpecificationFieldEntityType, customEventSpecificationWithThresholdRuleEntityType)
-	setValueOnResourceData(t, resourceData, CustomEventSpecificationFieldQuery, customEventSpecificationWithThresholdRuleQuery)
-	setValueOnResourceData(t, resourceData, CustomEventSpecificationFieldTriggering, true)
-	setValueOnResourceData(t, resourceData, CustomEventSpecificationFieldDescription, customEventSpecificationWithThresholdRuleDescription)
-	setValueOnResourceData(t, resourceData, CustomEventSpecificationFieldExpirationTime, customEventSpecificationWithThresholdRuleExpirationTime)
-	setValueOnResourceData(t, resourceData, CustomEventSpecificationFieldEnabled, true)
-	setValueOnResourceData(t, resourceData, CustomEventSpecificationFieldRuleLogicalOperator, customEventSpecificationRuleLogicalOperatorOr)
-	setValueOnResourceData(t, resourceData, CustomEventSpecificationFieldRules, []interface{}{
-		map[string]interface{}{
-			CustomEventSpecificationFieldEntityCountRule:        []interface{}{},
-			CustomEventSpecificationFieldEntityVerificationRule: []interface{}{},
-			CustomEventSpecificationFieldHostAvailabilityRule: []interface{}{
-				map[string]interface{}{
-					CustomEventSpecificationRuleFieldSeverity:                         restapi.SeverityWarning.GetTerraformRepresentation(),
-					CustomEventSpecificationHostAvailabilityRuleFieldMetricCloseAfter: closeAfter,
-					CustomEventSpecificationRuleFieldOfflineDuration:                  offlineDuration,
-					CustomEventSpecificationHostAvailabilityRuleFieldTagFilter:        tagFilterExpression,
-				}},
-			CustomEventSpecificationFieldSystemRule:    []interface{}{},
-			CustomEventSpecificationFieldThresholdRule: []interface{}{},
-		},
-	})
+	updateResourceData(t, resourceData, tagFilterExpression)
 
 	customEventSpec, err := resourceHandle.MapStateToDataObject(resourceData)
 
@@ -1702,7 +1750,7 @@ func (r *customerEventSpecificationUnitTest) shouldMapStateOfHostAvailabilityRul
 	require.Equal(t, customEventSpecificationWithRuleID, customEventSpec.GetIDForResourcePath())
 	require.Equal(t, resourceName, customEventSpec.Name)
 	require.Equal(t, customEventSpecificationWithThresholdRuleEntityType, customEventSpec.EntityType)
-	require.Equal(t, customEventSpecificationWithThresholdRuleQuery, *customEventSpec.Query)
+	require.Nil(t, customEventSpec.Query)
 	require.Equal(t, customEventSpecificationWithThresholdRuleDescription, *customEventSpec.Description)
 	require.Equal(t, customEventSpecificationWithThresholdRuleExpirationTime, *customEventSpec.ExpirationTime)
 	require.True(t, customEventSpec.Triggering)
@@ -1714,6 +1762,51 @@ func (r *customerEventSpecificationUnitTest) shouldMapStateOfHostAvailabilityRul
 	require.Equal(t, closeAfter, *customEventSpec.Rules[0].CloseAfter)
 	require.Equal(t, offlineDuration, *customEventSpec.Rules[0].OfflineDuration)
 	require.Equal(t, restapi.NewStringTagFilter(restapi.TagFilterEntityDestination, "entity.type", restapi.EqualsOperator, "foo"), customEventSpec.Rules[0].TagFilter)
+}
+
+func (r *customerEventSpecificationUnitTest) shouldMapStateOfHostAvailabilityRuleWithoutTagFilterToDataModel(t *testing.T) {
+	testHelper := NewTestHelper[*restapi.CustomEventSpecification](t)
+	resourceHandle := NewCustomEventSpecificationResourceHandle()
+	resourceData := testHelper.CreateEmptyResourceDataForResourceHandle(resourceHandle)
+
+	updateResourceData(t, resourceData, "")
+
+	customEventSpec, err := resourceHandle.MapStateToDataObject(resourceData)
+
+	require.Nil(t, err)
+	require.Nil(t, customEventSpec.Rules[0].TagFilter)
+}
+
+func updateResourceData(t *testing.T, resourceData *schema.ResourceData, tagFilter string) {
+	resourceData.SetId(customEventSpecificationWithRuleID)
+
+	setValueOnResourceData(t, resourceData, CustomEventSpecificationFieldName, resourceName)
+	setValueOnResourceData(t, resourceData, CustomEventSpecificationFieldEntityType, customEventSpecificationWithThresholdRuleEntityType)
+	setValueOnResourceData(t, resourceData, CustomEventSpecificationFieldTriggering, true)
+	setValueOnResourceData(t, resourceData, CustomEventSpecificationFieldDescription, customEventSpecificationWithThresholdRuleDescription)
+	setValueOnResourceData(t, resourceData, CustomEventSpecificationFieldExpirationTime, customEventSpecificationWithThresholdRuleExpirationTime)
+	setValueOnResourceData(t, resourceData, CustomEventSpecificationFieldEnabled, true)
+	setValueOnResourceData(t, resourceData, CustomEventSpecificationFieldRuleLogicalOperator, customEventSpecificationRuleLogicalOperatorOr)
+
+	hostAvailabilityRule := make(map[string]interface{})
+
+	hostAvailabilityRule[CustomEventSpecificationRuleFieldSeverity] = restapi.SeverityWarning.GetTerraformRepresentation()
+	hostAvailabilityRule[CustomEventSpecificationHostAvailabilityRuleFieldMetricCloseAfter] = closeAfter
+	hostAvailabilityRule[CustomEventSpecificationRuleFieldOfflineDuration] = offlineDuration
+
+	if tagFilter != "" {
+		hostAvailabilityRule[CustomEventSpecificationHostAvailabilityRuleFieldTagFilter] = tagFilter
+	}
+
+	setValueOnResourceData(t, resourceData, CustomEventSpecificationFieldRules, []interface{}{
+		map[string]interface{}{
+			CustomEventSpecificationFieldEntityCountRule:        []interface{}{},
+			CustomEventSpecificationFieldEntityVerificationRule: []interface{}{},
+			CustomEventSpecificationFieldHostAvailabilityRule:   []interface{}{hostAvailabilityRule},
+			CustomEventSpecificationFieldSystemRule:             []interface{}{},
+			CustomEventSpecificationFieldThresholdRule:          []interface{}{},
+		},
+	})
 }
 
 func (r *customerEventSpecificationUnitTest) shouldFailToMapStateOfHostAvailabilityRuleToDataModelWhenSeverityIsNotValid(t *testing.T) {

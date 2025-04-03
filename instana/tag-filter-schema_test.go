@@ -8,6 +8,9 @@ import (
 	"testing"
 )
 
+var closeAfter = 300000
+var offlineDuration = 60000
+
 const tagFilterExpression = "entity.type EQUALS 'foo'"
 const validTagFilterExpressionString = "entity.type EQUALS 'foo'"
 const invalidTagFilterExpressionString = "entity.type bla bla bla"
