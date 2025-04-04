@@ -83,6 +83,8 @@ resource "instana_custom_event_specification" "example" {
 
 ### Host Availability Rule
 
+#### To scope hosts by Tag, set tag_filter like following. 
+
 ```hcl
 resource "instana_custom_event_specification" "example" {
   name            = "name"
@@ -97,7 +99,28 @@ resource "instana_custom_event_specification" "example" {
       severity         = "warning"
       offline_duration = 60000
       close_after      = 120000
-      tag_filter       = "tag:my_tag EQUALS 'foo'"
+      tag_filter       = "tag@na EQUALS 'foo_bar'"
+    }
+  } 
+}
+```
+
+#### To scope all hosts (All available entities), skip passing tag_filter. 
+
+```hcl
+resource "instana_custom_event_specification" "example" {
+  name            = "Host offline"
+  description     = "Host offline"
+  enabled         = true
+  triggering      = true
+  expiration_time = 60000
+  entity_type     = "host"
+
+  rules {  
+    host_availability {
+      severity         = "critical"
+      offline_duration = 60000
+      close_after      = 120000
     }
   } 
 }
