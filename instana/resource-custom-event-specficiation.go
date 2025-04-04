@@ -241,7 +241,7 @@ func NewCustomEventSpecificationResourceHandle() ResourceHandle[*restapi.CustomE
 											Required:    true,
 											Description: "if a host is offline for longer than the defined period, Instana does not expect the host to reappear anymore, and the event will be closed after the grace period",
 										},
-										CustomEventSpecificationHostAvailabilityRuleFieldTagFilter: RequiredTagFilterExpressionSchema,
+										CustomEventSpecificationHostAvailabilityRuleFieldTagFilter: OptionalTagFilterExpressionSchema,
 									},
 								},
 								ExactlyOneOf: customEventSpecificationRuleTypeKeys,
@@ -628,8 +628,9 @@ func (c *customEventSpecificationResource) mapHostAvailabilityRuleFromState(rule
 	if err != nil {
 		return []restapi.RuleSpecification{}, err
 	}
+
 	var tagFilter *restapi.TagFilter
-	if tagFilterString, ok := rule[CustomEventSpecificationHostAvailabilityRuleFieldTagFilter]; ok {
+	if tagFilterString, ok := rule[CustomEventSpecificationHostAvailabilityRuleFieldTagFilter]; ok && tagFilterString != "" {
 		tagFilter, err = c.mapTagFilterStringToAPIModel(tagFilterString.(string))
 		if err != nil {
 			return []restapi.RuleSpecification{}, err
