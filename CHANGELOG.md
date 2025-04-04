@@ -1,5 +1,13 @@
 # Changelog
 
+## [v3.3.0](https://github.com/instana/terraform-provider-instana/tree/v3.3.0) (2025-04-04)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v3.2.1...v3.3.0)
+
+**Implemented enhancements:**
+
+- Make tag\_filter optional in host availability rule [\#31](https://github.com/instana/terraform-provider-instana/pull/31) ([parekh-raj](https://github.com/parekh-raj))
+
 ## [v3.2.1](https://github.com/instana/terraform-provider-instana/tree/v3.2.1) (2025-03-26)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v3.2.0...v3.2.1)
