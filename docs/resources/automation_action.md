@@ -1,9 +1,8 @@
 # Automation Action Resource
 
-Synthetic test configuration used to manage synthetic tests in Instana API. Right now, only `HTTPActionConfiguration` 
-and `HTTPScriptConfiguration` are supported.
+Management of Automation Actions.
 
-API Documentation: <https://instana.github.io/openapi/#operation/getSyntheticTests> FIXME EUGEN
+API Documentation: <https://instana.github.io/openapi/#tag/Action-Catalog>
 
 ## Example Usage
 
@@ -15,26 +14,26 @@ resource "instana_automation_action" "hello_world" {
   description     = "Script action for test"
   tags            = ["test", "hello"]
   timeout         = "10"
+  type            = "script"
 
-  script {
-    interpreter   = "bash"
-    content       = <<EOF
-        echo "Hello world @@test@@"
-    EOF
+  interpreter     = "bash"
+  content         = <<EOF
+    echo "Hello world!"
+  EOF
+
+  input_parameter {
+      name        = "test"
+      label       = "test parameter"
+      description = "parameter for test"
+      type        = "static"
+      required    = true
+      hidden      = false
+      secured     = false
+      value       = ""
   }
-
-  input_parameters = [
-    {
-      name      = "test"
-      type      = "static"
-      required  = true
-      hidden    = false
-      secured   = false
-      value     = ""
-    }
-  ]
 }
 ```
+
 
 ### Create a HTTP action
 ```hcl
@@ -48,19 +47,18 @@ resource "instana_automation_action" "http_sample" {
     host                = "@@instana_api_host@@/api/instana/health"
     method              = "GET"
     ignoreCertErrors    = true
-
   }
 
-  input_parameters = [
-    {
-      name      = "instana_api_host"
-      type      = "static"
-      required  = true
-      hidden    = false
-      secured   = false
-      value     = ""
-    }
-  ]
+  input_parameter {
+      name        = "test"
+      label       = "test parameter"
+      description = "parameter for test"
+      type        = "static"
+      required    = true
+      hidden      = false
+      secured     = false
+      value       = ""
+  }
 }
 ```
 

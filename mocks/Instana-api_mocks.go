@@ -278,3 +278,17 @@ func (m *MockInstanaAPI) InfraAlertConfig() restapi.RestResource[*restapi.InfraA
 	ret0, _ := ret[0].(restapi.RestResource[*restapi.InfraAlertConfig])
 	return ret0
 }
+
+// AutomationActions mocks base method.
+func (m *MockInstanaAPI) AutomationActions() restapi.RestResource[*restapi.AutomationAction] {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AutomationAction")
+	ret0, _ := ret[0].(restapi.RestResource[*restapi.AutomationAction])
+	return ret0
+}
+
+// AutomationActions indicates an expected call of AutomationActions.
+func (mr *MockInstanaAPIMockRecorder) AutomationActions() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AutomationAction", reflect.TypeOf((*MockInstanaAPI)(nil).AutomationActions))
+}

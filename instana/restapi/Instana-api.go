@@ -21,6 +21,8 @@ const (
 	SyntheticTestResourcePath = SyntheticSettingsBasePath + "/tests"
 	//SyntheticLocationResourcePath path to synthetic monitoring tests
 	SyntheticLocationResourcePath = SyntheticSettingsBasePath + "/locations"
+	// AutomationBasePath path to Automation resources of Instana RESTful API
+	AutomationBasePath = InstanaAPIBasePath + "/automation"
 )
 
 // InstanaAPI is the interface to all resources of the Instana Rest API
@@ -43,6 +45,7 @@ type InstanaAPI interface {
 	CustomDashboards() RestResource[*CustomDashboard]
 	SyntheticTest() RestResource[*SyntheticTest]
 	SyntheticLocation() ReadOnlyRestResource[*SyntheticLocation]
+	AutomationActions() RestResource[*AutomationAction]
 }
 
 // NewInstanaAPI creates a new instance of the instana API
@@ -134,4 +137,8 @@ func (api *baseInstanaAPI) SyntheticTest() RestResource[*SyntheticTest] {
 // SyntheticLocation implementation of InstanaAPI interface
 func (api *baseInstanaAPI) SyntheticLocation() ReadOnlyRestResource[*SyntheticLocation] {
 	return NewReadOnlyRestResource(SyntheticLocationResourcePath, NewDefaultJSONUnmarshaller(&SyntheticLocation{}), api.client)
+}
+
+func (api *baseInstanaAPI) AutomationActions() RestResource[*AutomationAction] {
+	return NewCreatePOSTUpdatePUTRestResource(AutomationActionResourcePath, NewDefaultJSONUnmarshaller(&AutomationAction{}), api.client)
 }

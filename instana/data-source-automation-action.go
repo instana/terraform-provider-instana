@@ -11,24 +11,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+const DataSourceAutomationAction = "instana_automation_action"
+
 // NewAutomationActionDataSource creates a new DataSource for Automation Action
 func NewAutomationActionDataSource() DataSource {
 	return &automationActionDataSource{}
 }
-
-const (
-	//AutomationActionFieldName constant value for the schema field name
-	AutomationActionFieldName = "name"
-	//AutomationActionFieldDescription constant value for the schema field description
-	AutomationActionFieldDescription = "description"
-	//AutomationActionFieldType constant value for the schema field type
-	AutomationActionFieldType = "type"
-	//AutomationActionFieldTags constant value for the schema field tags
-	AutomationActionFieldTags = "tags"
-
-	//DataSourceAutomationAction the name of the terraform-provider-instana data source for automation action
-	DataSourceAutomationAction = "instana_automation_action"
-)
 
 type automationActionDataSource struct{}
 
@@ -77,7 +65,6 @@ func (ds *automationActionDataSource) read(_ context.Context, d *schema.Resource
 	}
 
 	action, err := ds.findActionByNameAndType(name, actionType, data)
-
 	if err != nil {
 		return diag.FromErr(err)
 	}
