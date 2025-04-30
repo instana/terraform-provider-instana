@@ -136,12 +136,33 @@ func (r *AutomationActionResource) UpdateState(d *schema.ResourceData, automatio
 		AutomationActionFieldTags:					automationAction.Tags,
 		AutomationActionFieldTimeout:				automationAction.Timeout,
 		AutomationActionFieldType:					automationAction.Type,
+		AutomationActionFieldInputParameter:		r.mapInputParametersToSchema(automationAction),
 	})
 }
 
-func (r *AutomationActionResource) MapStateToDataObject(d *schema.ResourceData) (*restapi.AutomationAction, error) {
-	log.Printf("INFO: MapStateToDataObject \n")
+func (r *AutomationActionResource) mapInputParametersToSchema(action *restapi.AutomationAction) []interface{} {
+	result := make([]interface{}, len(action.InputParameters))
 
+	i := 0
+	for _, v := range action.InputParameters {
+		val := v
+
+		item := make(map[string]interface{})
+		item[AutomationActionParameterFieldName] = val.Name
+		item[AutomationActionParameterFieldDescription] = val.Description
+		item[AutomationActionParameterFieldLabel] = val.Label
+		item[AutomationActionParameterFieldHidden] = val.Hidden
+		item[AutomationActionParameterFieldSecured] = val.Secured
+		item[AutomationActionParameterFieldType] = val.Type
+		item[AutomationActionParameterFieldValue] = val.Value
+		
+		result[i] = item
+		i++
+	}
+	return result
+}
+
+func (r *AutomationActionResource) MapStateToDataObject(d *schema.ResourceData) (*restapi.AutomationAction, error) {
 	return &restapi.AutomationAction {
 		ID:            		d.Id(),
 		Name:          		d.Get(AutomationActionFieldName).(string),
@@ -149,5 +170,35 @@ func (r *AutomationActionResource) MapStateToDataObject(d *schema.ResourceData) 
 		Type:          		d.Get(AutomationActionFieldType).(string),
 		Tags:          		d.Get(AutomationActionFieldTags),
 		Timeout:	   		d.Get(AutomationActionFieldTimeout).(int),
+		InputParameters:	r.mapInputParametersFromSchema(d),
 	}, nil
+}
+
+func (r *AutomationActionResource) mapInputParametersFromSchema(d *schema.ResourceData) []restapi.Parameter {
+	val, ok := d.GetOk(AutomationActionFieldInputParameter)
+
+	if ok && val != nil {
+		schemaParameters := val.(*schema.Set).List()
+		result := make([]restapi.Parameter, len(schemaParameters))
+		
+		i := 0
+		for _, v := range schemaParameters {
+			param := v.(map[string]interface{})
+			
+			result[i] = restapi.Parameter {
+				Name: 			param[AutomationActionParameterFieldName].(string),
+				Description: 	param[AutomationActionParameterFieldDescription].(string),
+				Label: 			param[AutomationActionParameterFieldLabel].(string),
+				Required: 		param[AutomationActionParameterFieldRequired].(bool),
+				Hidden:			param[AutomationActionParameterFieldHidden].(bool),
+				Secured: 		param[AutomationActionParameterFieldSecured].(bool),
+				Type: 			param[AutomationActionParameterFieldType].(string),
+				Value: 			param[AutomationActionParameterFieldValue].(string),
+			}
+			i++
+		}
+		return result
+	}
+
+	return []restapi.Parameter{}
 }
