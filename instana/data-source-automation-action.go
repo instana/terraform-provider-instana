@@ -22,9 +22,9 @@ type automationActionDataSource struct{}
 
 // CreateResource creates the terraform Resource for the data source for Instana automation actions
 func (ds *automationActionDataSource) CreateResource() *schema.Resource {
-	return &schema.Resource{
+	return &schema.Resource {
 		ReadContext: ds.read,
-		Schema: map[string]*schema.Schema{
+		Schema: map[string]*schema.Schema {
 			AutomationActionFieldName: {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -78,7 +78,7 @@ func (ds *automationActionDataSource) read(_ context.Context, d *schema.Resource
 
 func (ds *automationActionDataSource) findActionByNameAndType(name string, actionType string, data *[]*restapi.AutomationAction) (*restapi.AutomationAction, error) {
 	for _, action := range *data {
-		if action.Name == name && strings.ToLower(action.Type) == strings.ToLower(actionType) {
+		if action.Name == name && strings.EqualFold(action.Type, actionType) {
 			return action, nil
 		}
 	}
@@ -87,7 +87,7 @@ func (ds *automationActionDataSource) findActionByNameAndType(name string, actio
 
 func (ds *automationActionDataSource) updateState(d *schema.ResourceData, automationAction *restapi.AutomationAction) error {
 	d.SetId(automationAction.ID)
-	return tfutils.UpdateState(d, map[string]interface{}{
+	return tfutils.UpdateState(d, map[string]interface{} {
 		AutomationActionFieldName:        	automationAction.Name,
 	    AutomationActionFieldDescription:  	automationAction.Description,
 		AutomationActionFieldType: 			automationAction.Type,
