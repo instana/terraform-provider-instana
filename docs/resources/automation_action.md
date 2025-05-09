@@ -6,20 +6,18 @@ API Documentation: <https://instana.github.io/openapi/#tag/Action-Catalog>
 
 ## Example Usage
 
-
 ### Create a script action
 ```hcl
 resource "instana_automation_action" "hello_world" {
   name            = "Hello world"
   description     = "Script action for test"
   tags            = ["test", "hello"]
-  timeout         = "10"
-  type            = "script"
 
-  interpreter     = "bash"
-  content         = <<EOF
-    echo "Hello world!"
-  EOF
+  script {
+    interpreter     = "bash"
+    content         = filebase64("test.sh")
+    timeout         = "10"
+  }
 
   input_parameter {
       name        = "test"
@@ -41,12 +39,20 @@ resource "instana_automation_action" "http_sample" {
   name            = "Instana health"
   description     = "Instana health status check"
   tags            = ["test"]
-  timeout         = "10"
 
   http { 
-    host                = "@@instana_api_host@@/api/instana/health"
-    method              = "GET"
-    ignoreCertErrors    = true
+    host                      = "@@instana_api_host@@/api/instana/health"
+    method                    = "POST"
+    ignore_certificate_errors = true
+    timeout                   = "10"
+
+    headers = {
+      "Authentication"  = "Bearer <token>"
+      "Accept-Language" = "application/json"
+      "Content-Type"    = "application/json"
+    } 
+    body    = "{}"
+
   }
 
   input_parameter {
@@ -62,26 +68,39 @@ resource "instana_automation_action" "http_sample" {
 }
 ```
 
-
 ## Argument Reference
 
-* `label` - Required - The name of the synthetic monitor
-* `description` - Optional - The name of the synthetic monitor
-* `active` - Optional - Enables/disables the synthetic monitor (defaults to true)
-* `application_id` - Optional - Unique identifier of the Application Perspective.
-* `custom_properties` - Optional - A map of key/values which are used as tags
-* `locations` - Required - A list of strings with location IDs 
-* `playback_mode` - Optional - Defines how the Synthetic test should be executed across multiple PoPs (defaults to Simultaneous)
-* `test_frequency` - Optional - how often the playback for a synthetic monitor is scheduled (defaults to 15 seconds)
+* `name` - Required - The name of the automation action.
+* `description` - Required - The description of the automation action.
+* `tags` - Optional - A list of tags for the automation action.
+* `input_parameter` - Optional - A list of input parameters [Details](#input-parameter-argument-reference)
 
-Exactly on of the following configuration blocks must be provided:
-* `http_action` - Optional - Http Action Configuration block [Details](#http-action-configuration)
-* `http_script` - Optional - HTTP Script Configuration block [Details](#http-script-configuration)
+Exactly on of the following blocks must be provided:
+* `script` - Optional - Http Action Configuration block [Details](#script-argument-reference)
+* `http` - Optional - HTTP Script Configuration block [Details](#http-argument-reference)
 
-## Import
+### Input Parameter Argument Reference
 
-Automation actions can be imported using the `id`, e.g.:
+* `name` - Required - The name of the input parameter.
+* `label` - Optional - The label of the input parameter.
+* `description` - Optional - The description of the input parameter.
+* `type` - Required - The type of the input parameter. It can be static or dynamic.
+* `required` - Required - Indicates if the input parameter is required.
+* `hidden` - Optional - Indicates if the input parameter is hidden. By default it is false.
+* `secured` - Optional - Indicates if the input parameter is secured. By default it is false.
+* `value` - Required - The value of the input parameter.
 
-```
-$ terraform import instana_automation_action.script_action cl1g4qrmo26x930s17i2
-```
+### Script Argument Reference
+
+* `content` - Required - Base64 encoded script content.
+* `interpreter` - Optional - The interpreter for script execution.
+* `timeout` - Optional - The timeout of the automation action.
+
+### Http Argument Reference
+
+* `host` - Required - The host for the http request.
+* `method` - Required - The method for http request.
+* `ignore_certificate_errors` - Optional - Indicates if the http request ignores the certificate errors.
+* `headers` - Optional - The headers of the http request.
+* `body` - Optional - The body content for the http request.
+* `timeout` - Optional - The timeout of the automation action.
