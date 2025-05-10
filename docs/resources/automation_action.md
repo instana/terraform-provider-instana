@@ -32,7 +32,6 @@ resource "instana_automation_action" "hello_world" {
 }
 ```
 
-
 ### Create a HTTP action
 ```hcl
 resource "instana_automation_action" "http_sample" {
