@@ -94,6 +94,7 @@ var (
 				AutomationActionFieldIgnoreCertErrors: {
 					Type:        schema.TypeBool,
 					Optional:    true,
+					Default:     false,
 					Description: "Indicates if the http request ignores the certificate errors.",
 				},
 				AutomationActionFieldHeaders: {
@@ -145,17 +146,20 @@ var (
 				},
 				AutomationActionParameterFieldRequired: {
 					Type:        schema.TypeBool,
-					Required:    true,
+					Optional:    true,
+					Default:     true,
 					Description: "Indicates if the input parameter is required.",
 				},
 				AutomationActionParameterFieldHidden: {
 					Type:        schema.TypeBool,
 					Optional:    true,
+					Default:     false,
 					Description: "Indicates if the input parameter is hidden.",
 				},
 				AutomationActionParameterFieldSecured: {
 					Type:        schema.TypeBool,
 					Optional:    true,
+					Default:     false,
 					Description: "Indicates if the input parameter is secured.",
 				},
 				AutomationActionParameterFieldValue: {

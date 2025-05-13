@@ -22,7 +22,6 @@ func TestAutomationActionDataSource(t *testing.T) {
 	t.Run("should successfully automation action", unitTest.shouldSuccessfullyReadAction)
 	t.Run("should fail to read automation action when api call fails", unitTest.shouldFailToReadActionWhenApiCallFails)
 	t.Run("should fail to read automation action when no action found for name and type", unitTest.shouldFailToReadActionWhenNoActionIsFound)
-
 }
 
 func (r *dataSourceAutomationActionUnitTest) schemaShouldBeValid(t *testing.T) {

@@ -116,6 +116,7 @@ func (r *AutomationActionResource) mapInputParametersToSchema(action *restapi.Au
 		item[AutomationActionParameterFieldName] = val.Name
 		item[AutomationActionParameterFieldDescription] = val.Description
 		item[AutomationActionParameterFieldLabel] = val.Label
+		item[AutomationActionParameterFieldRequired] = val.Required
 		item[AutomationActionParameterFieldHidden] = val.Hidden
 		item[AutomationActionParameterFieldSecured] = val.Secured
 		item[AutomationActionParameterFieldType] = val.Type
@@ -372,7 +373,6 @@ func (r *AutomationActionResource) mapHttpFieldsFromSchema(httpData map[string]i
 		i++
 	}
 
-	fmt.Printf(">>>>>>>> HTTP fields are: %v\n", result)
 	return result, nil
 }
 
