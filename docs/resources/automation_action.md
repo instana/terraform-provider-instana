@@ -26,7 +26,6 @@ resource "instana_automation_action" "hello_world" {
       type        = "static"
       required    = true
       hidden      = false
-      secured     = false
       value       = ""
   }
 }
@@ -51,7 +50,6 @@ resource "instana_automation_action" "http_sample" {
       "Content-Type"    = "application/json"
     } 
     body    = "{}"
-
   }
 
   input_parameter {
@@ -61,7 +59,6 @@ resource "instana_automation_action" "http_sample" {
       type        = "static"
       required    = true
       hidden      = false
-      secured     = false
       value       = ""
   }
 }
@@ -86,7 +83,6 @@ Exactly on of the following blocks must be provided:
 * `type` - Required - The type of the input parameter. It can be static or dynamic.
 * `required` - Required - Indicates if the input parameter is required.
 * `hidden` - Optional - Indicates if the input parameter is hidden. By default it is false.
-* `secured` - Optional - Indicates if the input parameter is secured. By default it is false.
 * `value` - Required - The value of the input parameter.
 
 ### Script Argument Reference
