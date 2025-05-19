@@ -101,5 +101,6 @@ func providerDataSources() map[string]*schema.Resource {
 	dataSources[DataSourceSyntheticLocation] = NewSyntheticLocationDataSource().CreateResource()
 	dataSources[DataSourceAlertingChannel] = NewAlertingChannelDataSource().CreateResource()
 	dataSources[DataSourceAutomationAction] = NewAutomationActionDataSource().CreateResource()
+	dataSources[DataSourceCustomEventSpec] = NewCustomEventSpecificationDataSource().CreateResource()
 	return dataSources
 }

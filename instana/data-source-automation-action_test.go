@@ -19,7 +19,7 @@ func TestAutomationActionDataSource(t *testing.T) {
 	unitTest := &dataSourceAutomationActionUnitTest{}
 	t.Run("schema should be valid", unitTest.schemaShouldBeValid)
 	t.Run("schema version should be 0", unitTest.schemaShouldHaveVersion0)
-	t.Run("should successfully automation action", unitTest.shouldSuccessfullyReadAction)
+	t.Run("should successfully read automation action", unitTest.shouldSuccessfullyReadAction)
 	t.Run("should fail to read automation action when api call fails", unitTest.shouldFailToReadActionWhenApiCallFails)
 	t.Run("should fail to read automation action when no action found for name and type", unitTest.shouldFailToReadActionWhenNoActionIsFound)
 }
@@ -78,7 +78,7 @@ func (r *dataSourceAutomationActionUnitTest) shouldSuccessfullyReadAction(t *tes
 }
 
 func (r *dataSourceAutomationActionUnitTest) shouldFailToReadActionWhenApiCallFails(t *testing.T) {
-	testHelper := NewTestHelper[*restapi.AlertingChannel](t)
+	testHelper := NewTestHelper[*restapi.AutomationAction](t)
 	testHelper.WithMocking(t, func(ctrl *gomock.Controller, meta *ProviderMeta, mockInstanaApi *mocks.MockInstanaAPI) {
 		expectedError := errors.New("test")
 
