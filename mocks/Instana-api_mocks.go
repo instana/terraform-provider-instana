@@ -287,8 +287,22 @@ func (m *MockInstanaAPI) AutomationActions() restapi.RestResource[*restapi.Autom
 	return ret0
 }
 
+// AutomationPolicies mocks base method.
+func (m *MockInstanaAPI) AutomationPolicies() restapi.RestResource[*restapi.AutomationPolicy] {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AutomationPolicy")
+	ret0, _ := ret[0].(restapi.RestResource[*restapi.AutomationPolicy])
+	return ret0
+}
+
 // AutomationActions indicates an expected call of AutomationActions.
 func (mr *MockInstanaAPIMockRecorder) AutomationActions() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AutomationAction", reflect.TypeOf((*MockInstanaAPI)(nil).AutomationActions))
+}
+
+// AutomationPolicies indicates an expected call of AutomationPolicies.
+func (mr *MockInstanaAPIMockRecorder) AutomationPolicies() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AutomationPolicy", reflect.TypeOf((*MockInstanaAPI)(nil).AutomationPolicies))
 }

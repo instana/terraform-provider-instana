@@ -34,7 +34,6 @@ const (
 	actionParamLabel       = "Parameter test"
 	actionParamDescription = "Parameter for unit test"
 	actionParamRequired    = true
-	actionParamSecured     = true
 	actionParamHidden      = false
 	actionParamValue       = "testValue"
 	actionParamType        = "static"
@@ -74,7 +73,7 @@ func (r *automationActionResourceUnitTest) schemaShouldHaveVersion0(t *testing.T
 }
 
 func (r *automationActionResourceUnitTest) shouldHaveNoStateUpgraders(t *testing.T) {
-	resourceHandler := NewAlertingChannelResourceHandle()
+	resourceHandler := NewAutomationActionResourceHandle()
 
 	require.Equal(t, 0, len(resourceHandler.StateUpgraders()))
 }
@@ -101,7 +100,7 @@ func (r *automationActionResourceUnitTest) validateHttpSchema(t *testing.T, http
 }
 
 func (r *automationActionResourceUnitTest) validateInputParameterSchema(t *testing.T, inputParamSchema map[string]*schema.Schema) {
-	require.Len(t, inputParamSchema, 8)
+	require.Len(t, inputParamSchema, 7)
 
 	schemaAssert := testutils.NewTerraformSchemaAssert(inputParamSchema, t)
 	schemaAssert.AssertSchemaIsRequiredAndOfTypeString(AutomationActionParameterFieldName)
@@ -109,7 +108,6 @@ func (r *automationActionResourceUnitTest) validateInputParameterSchema(t *testi
 	schemaAssert.AssertSchemaIsRequiredAndOfTypeString(AutomationActionParameterFieldValue)
 	schemaAssert.AssertSchemaIsOptionalAndOfTypeString(AutomationActionParameterFieldDescription)
 	schemaAssert.AssertSchemaIsOptionalAndOfTypeString(AutomationActionParameterFieldLabel)
-	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(AutomationActionParameterFieldSecured, false)
 	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(AutomationActionParameterFieldHidden, false)
 	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(AutomationActionParameterFieldRequired, true)
 }
@@ -129,18 +127,18 @@ func (r *automationActionResourceUnitTest) shouldMapScriptActionToState(t *testi
 		Type:        "SCRIPT",
 		Fields: []restapi.Field{
 			{
-				Name:        restapi.SCRIPT_SSH_FIELD_NAME,
-				Description: restapi.SCRIPT_SSH_FIELD_NAME,
+				Name:        restapi.ScriptSshFieldName,
+				Description: restapi.ScriptSshFieldName,
 				Value:       actionScriptContent,
 			},
 			{
-				Name:        restapi.SUBTYPE_FIELD_NAME,
-				Description: restapi.SUBTYPE_FIELD_DESCRIPTION,
+				Name:        restapi.SubtypeFieldName,
+				Description: restapi.SubtypeFieldDescription,
 				Value:       actionScriptInterpreter,
 			},
 			{
-				Name:        restapi.TIMEOUT_FIELD_NAME,
-				Description: restapi.TIMEOUT_FIELD_DESCRIPTION,
+				Name:        restapi.TimeoutFieldName,
+				Description: restapi.TimeoutFieldDescription,
 				Value:       actionTimeout,
 			},
 		},
@@ -150,7 +148,6 @@ func (r *automationActionResourceUnitTest) shouldMapScriptActionToState(t *testi
 				Value:       actionParamValue,
 				Description: actionParamDescription,
 				Label:       actionParamLabel,
-				Secured:     actionParamSecured,
 				Hidden:      actionParamHidden,
 				Required:    actionParamRequired,
 				Type:        actionParamType,
@@ -182,33 +179,33 @@ func (r *automationActionResourceUnitTest) shouldMapHttpActionToState(t *testing
 		Type:        "HTTP",
 		Fields: []restapi.Field{
 			{
-				Name:        restapi.HTTP_HOST_FIELD_NAME,
-				Description: restapi.HTTP_HOST_FIELD_DESCRIPTION,
+				Name:        restapi.HttpHostFieldName,
+				Description: restapi.HttpHostFieldDescription,
 				Value:       actionHttpHost,
 			},
 			{
-				Name:        restapi.HTTP_METHOD_FIELD_NAME,
-				Description: restapi.HTTP_METHOD_FIELD_DESCRIPTION,
+				Name:        restapi.HttpMethodFieldName,
+				Description: restapi.HttpMethodFieldDescription,
 				Value:       actionHttpMethod,
 			},
 			{
-				Name:        restapi.HTTP_BODY_FIELD_NAME,
-				Description: restapi.HTTP_BODY_FIELD_DESCRIPTION,
+				Name:        restapi.HttpBodyFieldName,
+				Description: restapi.HttpBodyFieldDescription,
 				Value:       actionHttpBody,
 			},
 			{
-				Name:        restapi.HTTP_IGNORE_CERT_ERRORS_FIELD_NAME,
-				Description: restapi.HTTP_IGNORE_CERT_ERRORS_FIELD_DESCRIPTION,
+				Name:        restapi.HttpIgnoreCertErrorsFieldName,
+				Description: restapi.HttpIgnoreCertErrorsFieldDescription,
 				Value:       actionHttpIgnoreCertErrors,
 			},
 			{
-				Name:        restapi.HTTP_HEADER_FIELD_NAME,
-				Description: restapi.HTTP_HEADER_FIELD_DESCRIPTION,
+				Name:        restapi.HttpHeaderFieldName,
+				Description: restapi.HttpHeaderFieldDescription,
 				Value:       r.buildHeadersString(),
 			},
 			{
-				Name:        restapi.TIMEOUT_FIELD_NAME,
-				Description: restapi.TIMEOUT_FIELD_DESCRIPTION,
+				Name:        restapi.TimeoutFieldName,
+				Description: restapi.TimeoutFieldDescription,
 				Value:       actionTimeout,
 			},
 		},
@@ -218,7 +215,6 @@ func (r *automationActionResourceUnitTest) shouldMapHttpActionToState(t *testing
 				Value:       actionParamValue,
 				Description: actionParamDescription,
 				Label:       actionParamLabel,
-				Secured:     actionParamSecured,
 				Hidden:      actionParamHidden,
 				Required:    actionParamRequired,
 				Type:        actionParamType,
@@ -263,7 +259,6 @@ func (r *automationActionResourceUnitTest) shouldMapScriptActionFromState(t *tes
 			AutomationActionParameterFieldType:        actionParamType,
 			AutomationActionParameterFieldDescription: actionParamDescription,
 			AutomationActionParameterFieldLabel:       actionParamLabel,
-			AutomationActionParameterFieldSecured:     actionParamSecured,
 			AutomationActionParameterFieldHidden:      actionParamHidden,
 			AutomationActionParameterFieldRequired:    actionParamRequired,
 			AutomationActionParameterFieldValue:       actionParamValue,
@@ -308,7 +303,6 @@ func (r *automationActionResourceUnitTest) shouldMapHttpActionFromState(t *testi
 			AutomationActionParameterFieldType:        actionParamType,
 			AutomationActionParameterFieldDescription: actionParamDescription,
 			AutomationActionParameterFieldLabel:       actionParamLabel,
-			AutomationActionParameterFieldSecured:     actionParamSecured,
 			AutomationActionParameterFieldHidden:      actionParamHidden,
 			AutomationActionParameterFieldRequired:    actionParamRequired,
 			AutomationActionParameterFieldValue:       actionParamValue,
@@ -369,12 +363,11 @@ func (r *automationActionResourceUnitTest) assertHttpResourceData(t *testing.T, 
 func (r *automationActionResourceUnitTest) assertInputParameterResourceData(t *testing.T, resourceData *schema.ResourceData) {
 	inputParameter := resourceData.Get(AutomationActionFieldInputParameter).(*schema.Set).List()[0].(map[string]interface{})
 
-	require.Len(t, inputParameter, 8)
+	require.Len(t, inputParameter, 7)
 	require.Equal(t, actionParamName, inputParameter[AutomationActionParameterFieldName])
 	require.Equal(t, actionParamDescription, inputParameter[AutomationActionParameterFieldDescription])
 	require.Equal(t, actionParamLabel, inputParameter[AutomationActionParameterFieldLabel])
 	require.Equal(t, actionParamValue, inputParameter[AutomationActionParameterFieldValue])
-	require.Equal(t, actionParamSecured, inputParameter[AutomationActionParameterFieldSecured])
 	require.Equal(t, actionParamRequired, inputParameter[AutomationActionParameterFieldRequired])
 	require.Equal(t, actionParamHidden, inputParameter[AutomationActionParameterFieldHidden])
 	require.Equal(t, actionParamType, inputParameter[AutomationActionParameterFieldType])
@@ -393,28 +386,28 @@ func (r *automationActionResourceUnitTest) assertActionDataModel(t *testing.T, d
 func (r *automationActionResourceUnitTest) assertScriptActionDataModelFields(t *testing.T, dataModel *restapi.AutomationAction) {
 	require.Len(t, dataModel.Fields, 3)
 	r.assertFieldsContains(t, dataModel.Fields,
-		restapi.SCRIPT_SSH_FIELD_NAME, restapi.SCRIPT_SSH_FIELD_DESCRIPTION, actionScriptContent, "base64")
+		restapi.ScriptSshFieldName, restapi.ScriptSshFieldDescription, actionScriptContent, "base64")
 	r.assertFieldsContains(t, dataModel.Fields,
-		restapi.SUBTYPE_FIELD_NAME, restapi.SUBTYPE_FIELD_DESCRIPTION, actionScriptInterpreter, "ascii")
+		restapi.SubtypeFieldName, restapi.SubtypeFieldDescription, actionScriptInterpreter, "ascii")
 	r.assertFieldsContains(t, dataModel.Fields,
-		restapi.TIMEOUT_FIELD_NAME, restapi.TIMEOUT_FIELD_DESCRIPTION, actionTimeout, "ascii")
+		restapi.TimeoutFieldName, restapi.TimeoutFieldDescription, actionTimeout, "ascii")
 
 }
 
 func (r *automationActionResourceUnitTest) assertHttpActionDataModelFields(t *testing.T, dataModel *restapi.AutomationAction) {
 	require.Len(t, dataModel.Fields, 6)
 	r.assertFieldsContains(t, dataModel.Fields,
-		restapi.HTTP_HOST_FIELD_NAME, restapi.HTTP_HOST_FIELD_DESCRIPTION, actionHttpHost, "ascii")
+		restapi.HttpHostFieldName, restapi.HttpHostFieldDescription, actionHttpHost, "ascii")
 	r.assertFieldsContains(t, dataModel.Fields,
-		restapi.HTTP_METHOD_FIELD_NAME, restapi.HTTP_METHOD_FIELD_DESCRIPTION, actionHttpMethod, "ascii")
+		restapi.HttpMethodFieldName, restapi.HttpMethodFieldDescription, actionHttpMethod, "ascii")
 	r.assertFieldsContains(t, dataModel.Fields,
-		restapi.HTTP_BODY_FIELD_NAME, restapi.HTTP_BODY_FIELD_DESCRIPTION, actionHttpBody, "ascii")
+		restapi.HttpBodyFieldName, restapi.HttpBodyFieldDescription, actionHttpBody, "ascii")
 	r.assertFieldsContains(t, dataModel.Fields,
-		restapi.HTTP_HEADER_FIELD_NAME, restapi.HTTP_HEADER_FIELD_DESCRIPTION, r.buildHeadersString(), "ascii")
+		restapi.HttpHeaderFieldName, restapi.HttpHeaderFieldDescription, r.buildHeadersString(), "ascii")
 	r.assertFieldsContains(t, dataModel.Fields,
-		restapi.HTTP_IGNORE_CERT_ERRORS_FIELD_NAME, restapi.HTTP_IGNORE_CERT_ERRORS_FIELD_DESCRIPTION, actionHttpIgnoreCertErrors, "ascii")
+		restapi.HttpIgnoreCertErrorsFieldName, restapi.HttpIgnoreCertErrorsFieldDescription, actionHttpIgnoreCertErrors, "ascii")
 	r.assertFieldsContains(t, dataModel.Fields,
-		restapi.TIMEOUT_FIELD_NAME, restapi.TIMEOUT_FIELD_DESCRIPTION, actionTimeout, "ascii")
+		restapi.TimeoutFieldName, restapi.TimeoutFieldDescription, actionTimeout, "ascii")
 }
 
 func (r *automationActionResourceUnitTest) assertDataModelInputParameters(t *testing.T, dataModel *restapi.AutomationAction) {
@@ -423,7 +416,6 @@ func (r *automationActionResourceUnitTest) assertDataModelInputParameters(t *tes
 	require.Equal(t, actionParamName, inputParam.Name)
 	require.Equal(t, actionParamDescription, inputParam.Description)
 	require.Equal(t, actionParamLabel, inputParam.Label)
-	require.Equal(t, actionParamSecured, inputParam.Secured)
 	require.Equal(t, actionParamHidden, inputParam.Hidden)
 	require.Equal(t, actionParamRequired, inputParam.Required)
 	require.Equal(t, actionParamValue, inputParam.Value)

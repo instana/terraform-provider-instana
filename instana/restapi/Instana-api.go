@@ -46,6 +46,7 @@ type InstanaAPI interface {
 	SyntheticTest() RestResource[*SyntheticTest]
 	SyntheticLocation() ReadOnlyRestResource[*SyntheticLocation]
 	AutomationActions() RestResource[*AutomationAction]
+	AutomationPolicies() RestResource[*AutomationPolicy]
 }
 
 // NewInstanaAPI creates a new instance of the instana API
@@ -141,4 +142,8 @@ func (api *baseInstanaAPI) SyntheticLocation() ReadOnlyRestResource[*SyntheticLo
 
 func (api *baseInstanaAPI) AutomationActions() RestResource[*AutomationAction] {
 	return NewCreatePOSTUpdatePUTRestResource(AutomationActionResourcePath, NewDefaultJSONUnmarshaller(&AutomationAction{}), api.client)
+}
+
+func (api *baseInstanaAPI) AutomationPolicies() RestResource[*AutomationPolicy] {
+	return NewCreatePOSTUpdatePUTRestResource(AutomationPolicyResourcePath, NewDefaultJSONUnmarshaller(&AutomationPolicy{}), api.client)
 }

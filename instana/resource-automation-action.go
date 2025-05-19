@@ -15,12 +15,12 @@ import (
 const ResourceInstanaAutomationAction = "instana_automation_action"
 
 // action types
-const ACTION_TYPE_SCRIPT = "SCRIPT"
-const ACTION_TYPE_HTTP = "HTTP"
+const ActionTypeScript = "SCRIPT"
+const ActionTypeHttp = "HTTP"
 
 // encodings
-const ASCII_ENCODING = "ascii"
-const BASE64_ENCODING = "base64"
+const AsciiEncoding = "ascii"
+const Base64Encoding = "base64"
 
 // NewAutomationActionResourceHandle creates the resource handle for Automation Actions
 func NewAutomationActionResourceHandle() ResourceHandle[*restapi.AutomationAction] {
@@ -31,12 +31,12 @@ func NewAutomationActionResourceHandle() ResourceHandle[*restapi.AutomationActio
 				AutomationActionFieldName: {
 					Type:        schema.TypeString,
 					Required:    true,
-					Description: "The name of the automation action",
+					Description: "The name of the automation action.",
 				},
 				AutomationActionFieldDescription: {
 					Type:        schema.TypeString,
 					Required:    true,
-					Description: "The description of the automation action",
+					Description: "The description of the automation action.",
 				},
 				AutomationActionFieldTags: {
 					Type: schema.TypeList,
@@ -118,7 +118,6 @@ func (r *AutomationActionResource) mapInputParametersToSchema(action *restapi.Au
 		item[AutomationActionParameterFieldLabel] = val.Label
 		item[AutomationActionParameterFieldRequired] = val.Required
 		item[AutomationActionParameterFieldHidden] = val.Hidden
-		item[AutomationActionParameterFieldSecured] = val.Secured
 		item[AutomationActionParameterFieldType] = val.Type
 		item[AutomationActionParameterFieldValue] = val.Value
 
@@ -129,18 +128,18 @@ func (r *AutomationActionResource) mapInputParametersToSchema(action *restapi.Au
 }
 
 func (r *AutomationActionResource) mapScriptFieldsToSchema(action *restapi.AutomationAction) ([]interface{}, error) {
-	if action.Type == ACTION_TYPE_SCRIPT {
+	if action.Type == ActionTypeScript {
 		result := make(map[string]interface{})
 
 		// script content is required field
-		result[AutomationActionFieldContent] = r.getFieldValue(action, restapi.SCRIPT_SSH_FIELD_NAME)
+		result[AutomationActionFieldContent] = r.getFieldValue(action, restapi.ScriptSshFieldName)
 		// interpreter is optional field
-		interpreter := r.getFieldValue(action, restapi.SUBTYPE_FIELD_NAME)
+		interpreter := r.getFieldValue(action, restapi.SubtypeFieldName)
 		if len(interpreter) > 0 {
 			result[AutomationActionFieldInterpreter] = interpreter
 		}
 		// timeout is optional field
-		timeout := r.getFieldValue(action, restapi.TIMEOUT_FIELD_NAME)
+		timeout := r.getFieldValue(action, restapi.TimeoutFieldName)
 		if len(timeout) > 0 {
 			result[AutomationActionFieldTimeout] = timeout
 		}
@@ -176,29 +175,29 @@ func (r *AutomationActionResource) getBoolFieldValueOrDefault(action *restapi.Au
 }
 
 func (r *AutomationActionResource) mapHttpFieldsToSchema(action *restapi.AutomationAction) ([]interface{}, error) {
-	if action.Type == ACTION_TYPE_HTTP {
+	if action.Type == ActionTypeHttp {
 		result := make(map[string]interface{})
 
 		// required fields
-		result[AutomationActionFieldHost] = r.getFieldValue(action, restapi.HTTP_HOST_FIELD_NAME)
-		result[AutomationActionFieldMethod] = r.getFieldValue(action, restapi.HTTP_METHOD_FIELD_NAME)
+		result[AutomationActionFieldHost] = r.getFieldValue(action, restapi.HttpHostFieldName)
+		result[AutomationActionFieldMethod] = r.getFieldValue(action, restapi.HttpMethodFieldName)
 
 		// optional fields
-		body := r.getFieldValue(action, restapi.HTTP_BODY_FIELD_NAME)
+		body := r.getFieldValue(action, restapi.HttpBodyFieldName)
 		if len(body) > 0 {
 			result[AutomationActionFieldBody] = body
 		}
-		ignoreCertErrors := r.getBoolFieldValueOrDefault(action, restapi.HTTP_IGNORE_CERT_ERRORS_FIELD_NAME, false)
+		ignoreCertErrors := r.getBoolFieldValueOrDefault(action, restapi.HttpIgnoreCertErrorsFieldName, false)
 		result[AutomationActionFieldIgnoreCertErrors] = ignoreCertErrors
 
-		headersData := r.getFieldValue(action, restapi.HTTP_HEADER_FIELD_NAME)
+		headersData := r.getFieldValue(action, restapi.HttpHeaderFieldName)
 		headers, err := r.mapHttpHeadersToSchema(headersData)
 		if err != nil {
 			return nil, err
 		}
 		result[AutomationActionFieldHeaders] = headers
 
-		timeout := r.getFieldValue(action, restapi.TIMEOUT_FIELD_NAME)
+		timeout := r.getFieldValue(action, restapi.TimeoutFieldName)
 		if len(timeout) > 0 {
 			result[AutomationActionFieldTimeout] = timeout
 		}
@@ -238,12 +237,12 @@ func (r *AutomationActionResource) MapStateToDataObject(d *schema.ResourceData) 
 func (r *AutomationActionResource) mapActionTypeFromSchema(d *schema.ResourceData) (string, error) {
 	val, ok := d.GetOk(AutomationActionFieldScript)
 	if ok && val != nil {
-		return ACTION_TYPE_SCRIPT, nil
+		return ActionTypeScript, nil
 	}
 
 	val, ok = d.GetOk(AutomationActionFieldHttp)
 	if ok && val != nil {
-		return ACTION_TYPE_HTTP, nil
+		return ActionTypeHttp, nil
 	}
 
 	return "", errors.New("cannot determine the action type, invalid action configuration")
@@ -266,7 +265,6 @@ func (r *AutomationActionResource) mapInputParametersFromSchema(d *schema.Resour
 				Label:       param[AutomationActionParameterFieldLabel].(string),
 				Required:    param[AutomationActionParameterFieldRequired].(bool),
 				Hidden:      param[AutomationActionParameterFieldHidden].(bool),
-				Secured:     param[AutomationActionParameterFieldSecured].(bool),
 				Type:        param[AutomationActionParameterFieldType].(string),
 				Value:       param[AutomationActionParameterFieldValue].(string),
 			}
@@ -301,17 +299,17 @@ func (r *AutomationActionResource) mapScriptFieldsFromSchema(scriptData map[stri
 	for k, v := range scriptData {
 		var fieldName, fieldDescription, encoding string
 		if k == AutomationActionFieldContent {
-			fieldName = restapi.SCRIPT_SSH_FIELD_NAME
-			fieldDescription = restapi.SCRIPT_SSH_FIELD_DESCRIPTION
-			encoding = BASE64_ENCODING
+			fieldName = restapi.ScriptSshFieldName
+			fieldDescription = restapi.ScriptSshFieldDescription
+			encoding = Base64Encoding
 		} else if k == AutomationActionFieldInterpreter {
-			fieldName = restapi.SUBTYPE_FIELD_NAME
-			fieldDescription = restapi.SUBTYPE_FIELD_DESCRIPTION
-			encoding = ASCII_ENCODING
+			fieldName = restapi.SubtypeFieldName
+			fieldDescription = restapi.SubtypeFieldDescription
+			encoding = AsciiEncoding
 		} else if k == AutomationActionFieldTimeout {
-			fieldName = restapi.TIMEOUT_FIELD_NAME
-			fieldDescription = restapi.TIMEOUT_FIELD_DESCRIPTION
-			encoding = ASCII_ENCODING
+			fieldName = restapi.TimeoutFieldName
+			fieldDescription = restapi.TimeoutFieldDescription
+			encoding = AsciiEncoding
 		}
 
 		result[i] = restapi.Field{
@@ -333,24 +331,24 @@ func (r *AutomationActionResource) mapHttpFieldsFromSchema(httpData map[string]i
 	for k, v := range httpData {
 		var fieldName, fieldDescription, fieldValue string
 		if k == AutomationActionFieldHost {
-			fieldName = restapi.HTTP_HOST_FIELD_NAME
-			fieldDescription = restapi.HTTP_HOST_FIELD_DESCRIPTION
+			fieldName = restapi.HttpHostFieldName
+			fieldDescription = restapi.HttpHostFieldDescription
 			fieldValue = v.(string)
 		} else if k == AutomationActionFieldMethod {
-			fieldName = restapi.HTTP_METHOD_FIELD_NAME
-			fieldDescription = restapi.HTTP_METHOD_FIELD_DESCRIPTION
+			fieldName = restapi.HttpMethodFieldName
+			fieldDescription = restapi.HttpMethodFieldDescription
 			fieldValue = v.(string)
 		} else if k == AutomationActionFieldBody {
-			fieldName = restapi.HTTP_BODY_FIELD_NAME
-			fieldDescription = restapi.HTTP_BODY_FIELD_DESCRIPTION
+			fieldName = restapi.HttpBodyFieldName
+			fieldDescription = restapi.HttpBodyFieldDescription
 			fieldValue = v.(string)
 		} else if k == AutomationActionFieldIgnoreCertErrors {
-			fieldName = restapi.HTTP_IGNORE_CERT_ERRORS_FIELD_NAME
-			fieldDescription = restapi.HTTP_IGNORE_CERT_ERRORS_FIELD_DESCRIPTION
+			fieldName = restapi.HttpIgnoreCertErrorsFieldName
+			fieldDescription = restapi.HttpIgnoreCertErrorsFieldDescription
 			fieldValue = strconv.FormatBool(v.(bool))
 		} else if k == AutomationActionFieldTimeout {
-			fieldName = restapi.TIMEOUT_FIELD_NAME
-			fieldDescription = restapi.TIMEOUT_FIELD_DESCRIPTION
+			fieldName = restapi.TimeoutFieldName
+			fieldDescription = restapi.TimeoutFieldDescription
 			fieldValue = v.(string)
 		} else if k == AutomationActionFieldHeaders {
 			headers, err := r.mapHttpHeadersFromSchema(v.(map[string]interface{}))
@@ -358,8 +356,8 @@ func (r *AutomationActionResource) mapHttpFieldsFromSchema(httpData map[string]i
 				return nil, err
 			}
 
-			fieldName = restapi.HTTP_HEADER_FIELD_NAME
-			fieldDescription = restapi.HTTP_HEADER_FIELD_DESCRIPTION
+			fieldName = restapi.HttpHeaderFieldName
+			fieldDescription = restapi.HttpHeaderFieldDescription
 			fieldValue = headers
 		}
 
@@ -367,7 +365,7 @@ func (r *AutomationActionResource) mapHttpFieldsFromSchema(httpData map[string]i
 			Name:        fieldName,
 			Description: fieldDescription,
 			Value:       fieldValue,
-			Encoding:    ASCII_ENCODING,
+			Encoding:    AsciiEncoding,
 			Secured:     false,
 		}
 		i++

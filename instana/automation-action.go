@@ -34,7 +34,6 @@ const (
 	AutomationActionParameterFieldValue       = "value"
 	AutomationActionParameterFieldRequired    = "required"
 	AutomationActionParameterFieldHidden      = "hidden"
-	AutomationActionParameterFieldSecured     = "secured"
 )
 
 var supportedActionTypes = []string{
@@ -142,7 +141,7 @@ var (
 					Type:         schema.TypeString,
 					Required:     true,
 					Description:  "The type of the input parameter.",
-					ValidateFunc: validation.StringInSlice([]string{"static", "dynamic"}, false),
+					ValidateFunc: validation.StringInSlice([]string{"static", "dynamic", "vault"}, false),
 				},
 				AutomationActionParameterFieldRequired: {
 					Type:        schema.TypeBool,
@@ -155,12 +154,6 @@ var (
 					Optional:    true,
 					Default:     false,
 					Description: "Indicates if the input parameter is hidden.",
-				},
-				AutomationActionParameterFieldSecured: {
-					Type:        schema.TypeBool,
-					Optional:    true,
-					Default:     false,
-					Description: "Indicates if the input parameter is secured.",
 				},
 				AutomationActionParameterFieldValue: {
 					Type:        schema.TypeString,

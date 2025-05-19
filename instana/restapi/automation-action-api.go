@@ -23,7 +23,6 @@ type Parameter struct {
 	Value       string `json:"value"`
 	Required    bool   `json:"required"`
 	Hidden      bool   `json:"hidden"`
-	Secured     bool   `json:"secured"`
 }
 
 type Field struct {
@@ -36,29 +35,29 @@ type Field struct {
 
 // constants for field names and descriptions
 const (
-	SUBTYPE_FIELD_NAME        = "subtype"
-	SUBTYPE_FIELD_DESCRIPTION = "script subtype"
+	SubtypeFieldName        = "subtype"
+	SubtypeFieldDescription = "script subtype"
 
-	SCRIPT_SSH_FIELD_NAME        = "script_ssh"
-	SCRIPT_SSH_FIELD_DESCRIPTION = "script content"
+	ScriptSshFieldName        = "script_ssh"
+	ScriptSshFieldDescription = "script content"
 
-	TIMEOUT_FIELD_NAME        = "timeout"
-	TIMEOUT_FIELD_DESCRIPTION = "timeout of the action execution in seconds"
+	TimeoutFieldName        = "timeout"
+	TimeoutFieldDescription = "timeout of the action execution in seconds"
 
-	HTTP_HOST_FIELD_NAME        = "host"
-	HTTP_HOST_FIELD_DESCRIPTION = "url of the https request"
+	HttpHostFieldName        = "host"
+	HttpHostFieldDescription = "url of the https request"
 
-	HTTP_BODY_FIELD_NAME        = "body"
-	HTTP_BODY_FIELD_DESCRIPTION = "body of the https request"
+	HttpBodyFieldName        = "body"
+	HttpBodyFieldDescription = "body of the https request"
 
-	HTTP_METHOD_FIELD_NAME        = "method"
-	HTTP_METHOD_FIELD_DESCRIPTION = "HTTP method"
+	HttpMethodFieldName        = "method"
+	HttpMethodFieldDescription = "HTTP method"
 
-	HTTP_HEADER_FIELD_NAME        = "header"
-	HTTP_HEADER_FIELD_DESCRIPTION = "header of the https request"
+	HttpHeaderFieldName        = "header"
+	HttpHeaderFieldDescription = "header of the https request"
 
-	HTTP_IGNORE_CERT_ERRORS_FIELD_NAME        = "ignoreCertErrors"
-	HTTP_IGNORE_CERT_ERRORS_FIELD_DESCRIPTION = "ignore certificate errors for request"
+	HttpIgnoreCertErrorsFieldName        = "ignoreCertErrors"
+	HttpIgnoreCertErrorsFieldDescription = "ignore certificate errors for request"
 )
 
 // GetIDForResourcePath implemention of the interface InstanaDataObject
