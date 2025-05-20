@@ -16,5 +16,15 @@ data "instana_custom_event_spec" "host_system_load_too_high" {
 
 ## Argument Reference
 
-* `name` - Required - the name of the custom event.
-* `entity_type` - Required - the entity type of the custom event.
+* `name` - Required - Name of the custom event.
+* `entity_type` - Required - Entity type of the custom event.
+
+## Attribute Reference
+
+This data source exports the following attributes in addition to the arguments above:
+
+* `description` - The description text of the custom event specification.
+* `query` - The dynamic filter query for which the rule should be applied to
+* `enabled` - Boolean flag if the rule should be enabled. Default is true.
+* `triggering` - Boolean flag if the rule should trigger an incident. Default is false.
+* `expiration_time` - The grace period in milliseconds until the issue is closed.

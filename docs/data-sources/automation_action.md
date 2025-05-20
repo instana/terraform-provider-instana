@@ -16,5 +16,13 @@ data "instana_automation_action" "hello_world" {
 
 ## Argument Reference
 
-* `name` - Required - the name of the automation action
-* `type` - Required - the type of the automation action
+* `name` - Required - Name of the automation action.
+* `type` - Required - Type of the automation action.
+
+## Attribute Reference
+
+This data source exports the following attributes in addition to the arguments above:
+
+* `id` - The automation action identifier.
+* `description` - The automation action description.
+* `tags` - List of automation actions tags.
