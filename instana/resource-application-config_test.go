@@ -2,8 +2,11 @@ package instana_test
 
 import (
 	"fmt"
+	"log"
+	"net/http"
 	"testing"
 
+	"github.com/gorilla/mux"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/stretchr/testify/require"
 
@@ -89,7 +92,7 @@ var defaultTagFilterModel = restapi.NewLogicalOrTagFilter([]*restapi.TagFilter{
 const applicationConfigID = "application-config-id"
 
 func TestCRUDOfApplicationConfigWithTagFilterResourceWithMockServer(t *testing.T) {
-	httpServer := createMockHttpServerForResource(restapi.ApplicationConfigsResourcePath, serverResponseWithTagFilterTemplate)
+	httpServer := createMockHttpServerForApplicationConfig(restapi.ApplicationConfigsResourcePath, serverResponseWithTagFilterTemplate)
 	httpServer.Start()
 	defer httpServer.Close()
 
@@ -116,6 +119,51 @@ func createApplicationConfigWithTagFilterResourceTestStep(httpPort int, iteratio
 			resource.TestCheckResourceAttr(testApplicationConfigDefinition, ApplicationConfigFieldTagFilter, defaultNormalizedTagFilter),
 		),
 	}
+}
+
+func createMockHttpServerForApplicationConfig(resourcePath string, responseTemplate string, templateVars ...interface{}) testutils.TestHTTPServer {
+	pathTemplate := resourcePath + "/{id}"
+	httpServer := testutils.NewTestHTTPServer()
+	//handles getting, deleting and updating existing application configs
+	responseHandler := func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		path := resourcePath + "/" + vars["id"]
+		callCount := httpServer.GetCallCount(http.MethodPut, path)
+		var json string
+		if templateVars != nil {
+			json = formatResponseTemplate(responseTemplate, vars["id"], callCount, templateVars...)
+		} else {
+			json = formatResponseTemplate(responseTemplate, vars["id"], callCount)
+		}
+		w.Header().Set(contentType, r.Header.Get(contentType))
+		w.WriteHeader(http.StatusOK)
+		_, err := w.Write([]byte(json))
+		if err != nil {
+			log.Fatalf("failed to write response: %s", err)
+		}
+	}
+
+	//handles creating applications configs
+	postHandler := func(w http.ResponseWriter, r *http.Request) {
+		callCount := getZeroBasedCallCount(httpServer, http.MethodPost, resourcePath)
+		var json string
+		if templateVars != nil {
+			json = formatResponseTemplate(responseTemplate, "UdkQGmswQ8W05YSdYqysNQ", callCount, templateVars...)
+		} else {
+			json = formatResponseTemplate(responseTemplate, "UdkQGmswQ8W05YSdYqysNQ", callCount)
+		}
+		w.Header().Set(contentType, r.Header.Get(contentType))
+		w.WriteHeader(http.StatusOK)
+		_, err := w.Write([]byte(json))
+		if err != nil {
+			log.Fatalf("failed to write response: %s", err)
+		}
+	}
+	httpServer.AddRoute(http.MethodPut, pathTemplate, responseHandler)
+	httpServer.AddRoute(http.MethodPost, resourcePath, postHandler)
+	httpServer.AddRoute(http.MethodDelete, pathTemplate, responseHandler)
+	httpServer.AddRoute(http.MethodGet, pathTemplate, responseHandler)
+	return httpServer
 }
 
 func TestApplicationConfigSchemaDefinitionIsValid(t *testing.T) {

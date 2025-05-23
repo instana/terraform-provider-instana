@@ -72,7 +72,7 @@ func (api *baseInstanaAPI) APITokens() RestResource[*APIToken] {
 
 // ApplicationConfigs implementation of InstanaAPI interface
 func (api *baseInstanaAPI) ApplicationConfigs() RestResource[*ApplicationConfig] {
-	return NewCreatePUTUpdatePUTRestResource(ApplicationConfigsResourcePath, NewDefaultJSONUnmarshaller(&ApplicationConfig{}), api.client)
+	return NewCreatePOSTUpdatePUTRestResource(ApplicationConfigsResourcePath, NewDefaultJSONUnmarshaller(&ApplicationConfig{}), api.client)
 }
 
 // ApplicationAlertConfigs implementation of InstanaAPI interface
