@@ -108,7 +108,7 @@ Creating a `Burn Rate alert with multiple alerting windows and respective thresh
 ```hcl
 resource "instana_slo_alert_config"
 "burn_rate_alert" {
-    name = "terraform_burn_rate_v2_alert_nikhil_slo"
+    name = "terraform_burn_rate_v2_alert_slo"
     description = "Burn rate is exceeded"
     severity = 10
     triggering = true
