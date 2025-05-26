@@ -54,10 +54,11 @@ func TestProviderShouldContainValidResourceDefinitions(t *testing.T) {
 func TestProviderShouldContainValidDataSourceDefinitions(t *testing.T) {
 	config := Provider()
 
-	assert.Equal(t, 5, len(config.DataSourcesMap))
+	assert.Equal(t, 6, len(config.DataSourcesMap))
 
 	assert.NotNil(t, config.DataSourcesMap[DataSourceBuiltinEvent])
 	assert.NotNil(t, config.DataSourcesMap[DataSourceSyntheticLocation])
 	assert.NotNil(t, config.DataSourcesMap[DataSourceAlertingChannel])
 	assert.NotNil(t, config.DataSourcesMap[DataSourceAutomationAction])
+	assert.NotNil(t, config.DataSourcesMap[DataSourceHostAgents])
 }
