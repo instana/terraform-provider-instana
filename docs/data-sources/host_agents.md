@@ -21,6 +21,9 @@ data "instana_host_agents" "sample" {
 
 This data source exports the following attributes in addition to the arguments above:
 
-* `id` - The automation action identifier.
-* `description` - The automation action description.
-* `tags` - List of automation actions tags.
+* `items` - List of available host agents.
+    * `snapshot_id` - The snapshot ID of the host agent.
+    * `label` - The label of the host agent.
+    * `host` - The host identifier of the host agent.
+    * `plugin` - The plugin name.
+    * `tags` - List of host agent tags.
