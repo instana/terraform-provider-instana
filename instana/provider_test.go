@@ -57,6 +57,7 @@ func TestProviderShouldContainValidDataSourceDefinitions(t *testing.T) {
 	assert.Equal(t, 6, len(config.DataSourcesMap))
 
 	assert.NotNil(t, config.DataSourcesMap[DataSourceBuiltinEvent])
+	assert.NotNil(t, config.DataSourcesMap[DataSourceCustomEventSpec])
 	assert.NotNil(t, config.DataSourcesMap[DataSourceSyntheticLocation])
 	assert.NotNil(t, config.DataSourcesMap[DataSourceAlertingChannel])
 	assert.NotNil(t, config.DataSourcesMap[DataSourceAutomationAction])
