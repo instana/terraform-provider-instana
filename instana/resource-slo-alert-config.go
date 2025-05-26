@@ -5,44 +5,47 @@ import (
 	// "log"
 	// "encoding/json"
 	"context"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/tfutils"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 const ResourceInstanaSloAlertConfig = "instana_slo_alert_config"
 
 const (
 	//Slo Alert Config Field names for Terraform
-	SloAlertConfigFieldName                    	= "name"
-	SloAlertConfigFieldFullName					= "full_name"
-	SloAlertConfigFieldDescription             	= "description"
-	SloAlertConfigFieldSeverity 			   	= "severity"
-	SloAlertConfigFieldTriggering 		   	   	= "triggering"
-	SloAlertConfigFieldAlertType 			   	= "alert_type"
-	SloAlertConfigFieldThreshold 			   	= "threshold"
-	SloAlertConfigFieldThresholdType			= "type"
-	SloAlertConfigFieldThresholdOperator       	= "operator"
-	SloAlertConfigFieldThresholdValue    	   	= "value"
-	SloAlertConfigFieldSloIds                  	= "slo_ids"
-	SloAlertConfigFieldAlertChannelIds         	= "alert_channel_ids"
-	SloAlertConfigFieldTimeThreshold           	= "time_threshold"
-	SloAlertConfigFieldTimeThresholdWarmUp 		= "warm_up"
-	SloAlertConfigFieldTimeThresholdCoolDown    = "cool_down"
-	SloAlertConfigFieldEnabled                  = "enabled"
-	SloAlertConfigFieldBurnRateTimeWindows      = "burn_rate_time_windows"
-	SloAlertConfigFieldLongTimeWindow			= "long_time_window"
-	SloAlertConfigFieldShortTimeWindow			= "short_time_window"
-	SloAlertConfigFieldTimeWindowDuration		= "duration"
-	SloAlertConfigFieldTimeWindowDurationType	= "duration_type"
+	SloAlertConfigFieldName                           = "name"
+	SloAlertConfigFieldFullName                       = "full_name"
+	SloAlertConfigFieldDescription                    = "description"
+	SloAlertConfigFieldSeverity                       = "severity"
+	SloAlertConfigFieldTriggering                     = "triggering"
+	SloAlertConfigFieldAlertType                      = "alert_type"
+	SloAlertConfigFieldThreshold                      = "threshold"
+	SloAlertConfigFieldThresholdType                  = "type"
+	SloAlertConfigFieldThresholdOperator              = "operator"
+	SloAlertConfigFieldThresholdValue                 = "value"
+	SloAlertConfigFieldSloIds                         = "slo_ids"
+	SloAlertConfigFieldAlertChannelIds                = "alert_channel_ids"
+	SloAlertConfigFieldTimeThreshold                  = "time_threshold"
+	SloAlertConfigFieldTimeThresholdWarmUp            = "warm_up"
+	SloAlertConfigFieldTimeThresholdCoolDown          = "cool_down"
+	SloAlertConfigFieldEnabled                        = "enabled"
+	SloAlertConfigFieldBurnRateConfig                 = "burn_rate_config"
+	SloAlertConfigFieldBurnRateConfigDuration         = "duration"
+	SloAlertConfigFieldBurnRateConfigThreshold        = "threshold"
+	SloAlertConfigFieldBurnRateConfigValue            = "value"
+	SloAlertConfigFieldBurnRateConfigOperator         = "operator"
+	SloAlertConfigFieldBurnRateConfigLastUpdated      = "last_updated"
+	SloAlertConfigFieldBurnRateConfigDurationUnitType = "duration_unit_type"
+	SloAlertConfigFieldBurnRateConfigAlertWindowType  = "alert_window_type"
 
 	// Slo Alert Types for Terraform
-	SloAlertConfigStatus            = "status"
-	SloAlertConfigErrorBudget       = "error_budget"
-	SloAlertConfigBurnRate          = "burn_rate"
+	SloAlertConfigStatus      = "status"
+	SloAlertConfigErrorBudget = "error_budget"
+	SloAlertConfigBurnRateV2  = "burn_rate_v2"
 )
-
 
 var (
 	//SloAlertConfigName schema field definition of instana_slo_alert_config field name
@@ -70,7 +73,7 @@ var (
 	//SloAlertConfigSeverity schema field definition of instana_slo_alert_config field severity
 	SloAlertConfigSeverity = &schema.Schema{
 		Type:        schema.TypeInt,
-		Required:     true,
+		Required:    true,
 		Description: "The severity of the alert when triggered",
 	}
 
@@ -84,22 +87,20 @@ var (
 	SloAlertConfigAlertType = &schema.Schema{
 		Type:         schema.TypeString,
 		Required:     true,
-		ValidateFunc: validation.StringInSlice([]string{"status", "error_budget", "burn_rate"}, false),
-		Description:  "What do you want to be alerted on? (Type of Smart Alert: status, error_budget, burn_rate)",
+		ValidateFunc: validation.StringInSlice([]string{"status", "error_budget", "burn_rate_v2"}, false),
+		Description:  "What do you want to be alerted on? (Type of Smart Alert: status, error_budget, burn_rate_v2)",
 	}
 
 	SloAlertConfigThreshold = &schema.Schema{
 		Type:        schema.TypeList,
-		MinItems:    1,
-		MaxItems:    1,
-		Required:    true,
+		Optional:    true,
 		Description: "Indicates the type of violation of the defined threshold.",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				SloAlertConfigFieldThresholdType: {
 					Type:         schema.TypeString,
 					Optional:     true,
-					Default:	  "staticThreshold",
+					Default:      "staticThreshold",
 					Description:  "The type of threshold (should be staticThreshold).",
 					ValidateFunc: validation.StringInSlice([]string{"staticThreshold"}, false),
 				},
@@ -118,60 +119,56 @@ var (
 		},
 	}
 
-	SloAlertConfigBurnRateTimeWindows = &schema.Schema{
-		Type:        schema.TypeList,
+	SloAlertConfigBurnRateConfig = &schema.Schema{
+		Type:        schema.TypeSet,
 		Optional:    true,
-		Description: "Defines the burn rate time windows for evaluating alert conditions.",
+		Description: "Defines burn rate alerting configuration.",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				SloAlertConfigFieldLongTimeWindow: {
-					Type:     schema.TypeList,
-					MinItems: 1,
-					MaxItems: 1,
-					Optional: true,
-					Description: "Defines the long time window duration and type.",
-					Elem: &schema.Resource{
-						Schema: map[string]*schema.Schema{
-							SloAlertConfigFieldTimeWindowDuration: {
-								Type:        schema.TypeInt,
-								Required:    true,
-								Description: "The duration for the long time window.",
-							},
-							SloAlertConfigFieldTimeWindowDurationType: {
-								Type:         schema.TypeString,
-								Required:     true,
-								Description:  "The unit of time for the long time window duration (e.g., 'minute', 'hour', 'day').",
-								ValidateFunc: validation.StringInSlice([]string{"minute", "hour", "day"}, false),
-							},
-						},
-					},
+				SloAlertConfigFieldBurnRateConfigDuration: {
+					Type:        schema.TypeInt,
+					Required:    true,
+					Description: "The duration of the burn rate window.",
 				},
-				SloAlertConfigFieldShortTimeWindow: {
-					Type:     schema.TypeList,
-					MinItems: 1,
-					MaxItems: 1,
-					Optional: true,
-					Description: "Defines the short time window duration and type.",
+				SloAlertConfigFieldBurnRateConfigDurationUnitType: {
+					Type:        schema.TypeString,
+					Required:    true,
+					Description: "The unit of duration (e.g., hour, minute, day).",
+				},
+				SloAlertConfigFieldBurnRateConfigAlertWindowType: {
+					Type:        schema.TypeString,
+					Required:    true,
+					Description: "The type of alert window (e.g., SINGLE, LONG, SHORT).",
+				},
+				SloAlertConfigFieldBurnRateConfigThreshold: {
+					Type:        schema.TypeList, // keep as TypeList with MaxItems=1 (Terraform way to represent a single nested object)
+					Required:    true,
+					MaxItems:    1,
+					Description: "Threshold configuration for the burn rate alert.",
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
-							SloAlertConfigFieldTimeWindowDuration: {
-								Type:        schema.TypeInt,
+							SloAlertConfigFieldBurnRateConfigValue: {
+								Type:        schema.TypeFloat,
 								Required:    true,
-								Description: "The duration for the short time window.",
+								Description: "Threshold value for the alert.",
 							},
-							SloAlertConfigFieldTimeWindowDurationType: {
-								Type:         schema.TypeString,
-								Required:     true,
-								Description:  "The unit of time for the short time window duration (e.g., 'minute', 'hour', 'day').",
-								ValidateFunc: validation.StringInSlice([]string{"minute", "hour", "day"}, false),
+							SloAlertConfigFieldBurnRateConfigOperator: {
+								Type:        schema.TypeString,
+								Required:    true,
+								Description: "Comparison operator for threshold (e.g., >=).",
 							},
+							// Optionally include lastUpdated if you want to expose it
+							// "lastUpdated": {
+							//     Type:     schema.TypeInt,
+							//     Optional: true,
+							// },
 						},
 					},
 				},
 			},
 		},
 	}
-	
+
 	SloAlertConfigSloIds = &schema.Schema{
 		Type:        schema.TypeSet,
 		Required:    true,
@@ -192,7 +189,7 @@ var (
 	}
 
 	SloAlertConfigTimeThreshold = &schema.Schema{
-		Type:        schema.TypeList,  
+		Type:        schema.TypeList,
 		MinItems:    1,
 		MaxItems:    1,
 		Required:    true,
@@ -222,57 +219,57 @@ var (
 )
 
 func NewSloAlertConfigResourceHandle() ResourceHandle[*restapi.SloAlertConfig] {
-    Resource := &sloAlertConfigResource{
-        metaData: ResourceMetaData{
-            ResourceName: ResourceInstanaSloAlertConfig,
-            Schema: map[string]*schema.Schema{
-                SloAlertConfigFieldName:            SloAlertConfigName,
-                SloAlertConfigFieldDescription:     SloAlertConfigDescription,
-                SloAlertConfigFieldSeverity:        SloAlertConfigSeverity,
-                SloAlertConfigFieldTriggering:      SloAlertConfigTriggering,
-                SloAlertConfigFieldAlertType:       SloAlertConfigAlertType,
-                SloAlertConfigFieldThreshold:       SloAlertConfigThreshold,
-                SloAlertConfigFieldSloIds:          SloAlertConfigSloIds,
-                SloAlertConfigFieldAlertChannelIds: SloAlertConfigAlertChannelIds,
-                SloAlertConfigFieldTimeThreshold:   SloAlertConfigTimeThreshold,
-                DefaultCustomPayloadFieldsName:     buildCustomPayloadFields(),
-                SloAlertConfigFieldEnabled:         SloAlertConfigEnabled,
-				SloAlertConfigFieldBurnRateTimeWindows: SloAlertConfigBurnRateTimeWindows,
-            },
-            SchemaVersion:    1,
-            CreateOnly:       false,
-            SkipIDGeneration: true,
-        },
-    }
-    return Resource
+	Resource := &sloAlertConfigResource{
+		metaData: ResourceMetaData{
+			ResourceName: ResourceInstanaSloAlertConfig,
+			Schema: map[string]*schema.Schema{
+				SloAlertConfigFieldName:            SloAlertConfigName,
+				SloAlertConfigFieldDescription:     SloAlertConfigDescription,
+				SloAlertConfigFieldSeverity:        SloAlertConfigSeverity,
+				SloAlertConfigFieldTriggering:      SloAlertConfigTriggering,
+				SloAlertConfigFieldAlertType:       SloAlertConfigAlertType,
+				SloAlertConfigFieldThreshold:       SloAlertConfigThreshold,
+				SloAlertConfigFieldSloIds:          SloAlertConfigSloIds,
+				SloAlertConfigFieldAlertChannelIds: SloAlertConfigAlertChannelIds,
+				SloAlertConfigFieldTimeThreshold:   SloAlertConfigTimeThreshold,
+				DefaultCustomPayloadFieldsName:     buildCustomPayloadFields(),
+				SloAlertConfigFieldEnabled:         SloAlertConfigEnabled,
+				SloAlertConfigFieldBurnRateConfig:  SloAlertConfigBurnRateConfig,
+			},
+			SchemaVersion:    1,
+			CreateOnly:       false,
+			SkipIDGeneration: true,
+		},
+	}
+	return Resource
 }
 
 // wrapSloCustomPayloadFields ensures CustomerPayloadFields values are correctly typed
 func wrapSloCustomPayloadFields(fields []restapi.CustomPayloadField[any]) []restapi.CustomPayloadField[any] {
-    for i, field := range fields {
-        if field.Type != restapi.DynamicCustomPayloadType {
-            if str, ok := field.Value.(string); ok {
-                fields[i].Value = restapi.StaticStringCustomPayloadFieldValue(str)
-            }
-        }
-    }
-    return fields
+	for i, field := range fields {
+		if field.Type != restapi.DynamicCustomPayloadType {
+			if str, ok := field.Value.(string); ok {
+				fields[i].Value = restapi.StaticStringCustomPayloadFieldValue(str)
+			}
+		}
+	}
+	return fields
 }
 
 func mapAlertTypeToAPI(terraformAlertType string) (string, string, error) {
 	normalizedType := normalizeAlertType(terraformAlertType)
 
 	switch normalizedType {
-    case "status":
-        return "SERVICE_LEVELS_OBJECTIVE", "STATUS", nil
-    case "error_budget":
-        return "ERROR_BUDGET", "BURNED_PERCENTAGE", nil
-    case "burn_rate":
-        return "ERROR_BUDGET", "BURN_RATE", nil
-    default:
+	case "status":
+		return "SERVICE_LEVELS_OBJECTIVE", "STATUS", nil
+	case "error_budget":
+		return "ERROR_BUDGET", "BURNED_PERCENTAGE", nil
+	case "burn_rate_v2":
+		return "ERROR_BUDGET", "BURN_RATE_V2", nil
+	default:
 		fmt.Printf("WARNING: Unknown alert type '%s' received from Terraform\n", terraformAlertType)
-        return "", "", fmt.Errorf("invalid alert_type: %s", terraformAlertType)
-    }
+		return "", "", fmt.Errorf("invalid alert_type: %s", terraformAlertType)
+	}
 }
 
 // Normalize Terraform input values
@@ -280,10 +277,10 @@ func normalizeAlertType(alertType string) string {
 	switch alertType {
 	case "errorBudget", "ErrorBudget":
 		return "error_budget"
-	case "burnRate", "BurnRate":
-		return "burn_rate"
 	case "status", "Status":
 		return "status"
+	case "burnRateV2", "BurnRateV2":
+		return "burn_rate_v2"
 	default:
 		return alertType
 	}
@@ -317,56 +314,78 @@ func (r *sloAlertConfigResource) StateUpgraders() []schema.StateUpgrader {
 }
 
 func (r *sloAlertConfigResource) sloAlertConfigStateUpgradeV0(_ context.Context, state map[string]interface{}, _ interface{}) (map[string]interface{}, error) {
-    if _, ok := state[SloAlertConfigFieldFullName]; ok {
-        state[SloAlertConfigFieldName] = state[SloAlertConfigFieldFullName]
-        delete(state, SloAlertConfigFieldFullName)
-    }
+	if _, ok := state[SloAlertConfigFieldFullName]; ok {
+		state[SloAlertConfigFieldName] = state[SloAlertConfigFieldFullName]
+		delete(state, SloAlertConfigFieldFullName)
+	}
 
-    if _, ok := state[SloAlertConfigFieldThreshold]; ok {
-        oldThreshold, isOldFormat := state[SloAlertConfigFieldThreshold].(string)
-        if isOldFormat {
-            state[SloAlertConfigFieldThreshold] = []interface{}{
-                map[string]interface{}{
-                    SloAlertConfigFieldThresholdOperator: ">=",
-                    SloAlertConfigFieldThresholdValue:    oldThreshold,
-                },
-            }
-        }
-    }
+	if _, ok := state[SloAlertConfigFieldThreshold]; ok {
+		oldThreshold, isOldFormat := state[SloAlertConfigFieldThreshold].(string)
+		if isOldFormat {
+			state[SloAlertConfigFieldThreshold] = []interface{}{
+				map[string]interface{}{
+					SloAlertConfigFieldThresholdOperator: ">=",
+					SloAlertConfigFieldThresholdValue:    oldThreshold,
+				},
+			}
+		}
+	}
 
-    if _, ok := state[SloAlertConfigFieldTimeThreshold]; ok {
-        oldTimeThreshold, isOldFormat := state[SloAlertConfigFieldTimeThreshold].(string)
-        if isOldFormat {
-            state[SloAlertConfigFieldTimeThreshold] = []interface{}{
-                map[string]interface{}{
-                    SloAlertConfigFieldTimeThresholdCoolDown:     60000,
-                    SloAlertConfigFieldTimeThresholdWarmUp: oldTimeThreshold,
-                },
-            }
-        }
-    }
+	if _, ok := state[SloAlertConfigFieldTimeThreshold]; ok {
+		oldTimeThreshold, isOldFormat := state[SloAlertConfigFieldTimeThreshold].(string)
+		if isOldFormat {
+			state[SloAlertConfigFieldTimeThreshold] = []interface{}{
+				map[string]interface{}{
+					SloAlertConfigFieldTimeThresholdCoolDown: 60000,
+					SloAlertConfigFieldTimeThresholdWarmUp:   oldTimeThreshold,
+				},
+			}
+		}
+	}
 
-    return state, nil
+	return state, nil
 }
 
 func (r *sloAlertConfigResource) UpdateState(d *schema.ResourceData, sloAlertConfig *restapi.SloAlertConfig) error {
-    debug(">> UpdateState")
+	debug(">> UpdateState")
 
-	thresholdType := sloAlertConfig.Threshold.Type
-	if thresholdType == "static" {  
-		thresholdType = "staticThreshold"
+	var thresholdType, thresholdOperator string
+
+	var thresholdValue float64
+
+	if sloAlertConfig.Threshold != nil {
+
+		thresholdType = sloAlertConfig.Threshold.Type
+
+		if thresholdType == "static" {
+
+			thresholdType = "staticThreshold"
+
+		}
+
+		thresholdOperator = sloAlertConfig.Threshold.Operator
+
+		thresholdValue = sloAlertConfig.Threshold.Value
+
+	} else {
+
+		thresholdType = ""
+
+		thresholdOperator = ""
+
+		thresholdValue = 0
 	}
 
 	threshold := map[string]interface{}{
-		SloAlertConfigFieldThresholdType: thresholdType,
-		SloAlertConfigFieldThresholdOperator: sloAlertConfig.Threshold.Operator,
-		SloAlertConfigFieldThresholdValue:    sloAlertConfig.Threshold.Value,
+		SloAlertConfigFieldThresholdType:     thresholdType,
+		SloAlertConfigFieldThresholdOperator: thresholdOperator,
+		SloAlertConfigFieldThresholdValue:    thresholdValue,
 	}
-	
-    timeThreshold := map[string]interface{}{
-        SloAlertConfigFieldTimeThresholdCoolDown:     sloAlertConfig.TimeThreshold.Expiry,
-        SloAlertConfigFieldTimeThresholdWarmUp: sloAlertConfig.TimeThreshold.TimeWindow,
-    }
+
+	timeThreshold := map[string]interface{}{
+		SloAlertConfigFieldTimeThresholdCoolDown: sloAlertConfig.TimeThreshold.Expiry,
+		SloAlertConfigFieldTimeThresholdWarmUp:   sloAlertConfig.TimeThreshold.TimeWindow,
+	}
 
 	var terraformAlertType string
 
@@ -379,316 +398,328 @@ func (r *sloAlertConfigResource) UpdateState(d *schema.ResourceData, sloAlertCon
 	case "ERROR_BUDGET":
 		if sloAlertConfig.Rule.Metric == "BURNED_PERCENTAGE" {
 			terraformAlertType = "error_budget"
-		} else if sloAlertConfig.Rule.Metric == "BURN_RATE" {
-			terraformAlertType = "burn_rate"
+		} else if sloAlertConfig.Rule.Metric == "BURN_RATE_V2" {
+			terraformAlertType = "burn_rate_v2"
 		}
 	}
-	
+
 	terraformAlertType = normalizeAlertType(terraformAlertType)
-	
+
 	if terraformAlertType == "" {
 		return fmt.Errorf("unexpected alertType/metric from API: %v", sloAlertConfig.Rule)
 	}
-	
+
 	// Preprocess CustomerPayloadFields to ensure correct type
 	sloAlertConfig.CustomerPayloadFields = wrapSloCustomPayloadFields(sloAlertConfig.CustomerPayloadFields)
 
-    // Handle burn_rate_time_windows
-    var burnRateTimeWindows []interface{}
-    if sloAlertConfig.BurnRateTimeWindows != nil {
-        burnRateTimeWindows = []interface{}{
-            map[string]interface{}{
-                SloAlertConfigFieldLongTimeWindow: []interface{}{
-                    map[string]interface{}{
-                        SloAlertConfigFieldTimeWindowDuration:     sloAlertConfig.BurnRateTimeWindows.LongTimeWindow.TimeWindowDuration,
-                        SloAlertConfigFieldTimeWindowDurationType: sloAlertConfig.BurnRateTimeWindows.LongTimeWindow.TimeWindowDurationType,
-                    },
-                },
-                SloAlertConfigFieldShortTimeWindow: []interface{}{
-                    map[string]interface{}{
-                        SloAlertConfigFieldTimeWindowDuration:     sloAlertConfig.BurnRateTimeWindows.ShortTimeWindow.TimeWindowDuration,
-                        SloAlertConfigFieldTimeWindowDurationType: sloAlertConfig.BurnRateTimeWindows.ShortTimeWindow.TimeWindowDurationType,
-                    },
-                },
-            },
-        }
-    }
+	// Handle burn_rate_config
+	var burnRateConfigs []interface{}
+	if sloAlertConfig.BurnRateConfigs != nil {
+		for _, cfg := range *sloAlertConfig.BurnRateConfigs {
+			thresholdList := []interface{}{
+				map[string]interface{}{
+					"operator": cfg.Threshold.Operator,
+					"value":    cfg.Threshold.Value,
+					// optionally "lastUpdated": cfg.Threshold.LastUpdated,
+				},
+			}
 
-	tfData := map[string]interface{}{
-		SloAlertConfigFieldName:          sloAlertConfig.Name,
-		SloAlertConfigFieldDescription:   sloAlertConfig.Description,
-		SloAlertConfigFieldSeverity:      sloAlertConfig.Severity,
-		SloAlertConfigFieldTriggering:    sloAlertConfig.Triggering,
-		SloAlertConfigFieldAlertType:     terraformAlertType, 
-		SloAlertConfigFieldThreshold:     []interface{}{threshold},
-		SloAlertConfigFieldSloIds:        convertSetToStringSlice(d.Get(SloAlertConfigFieldSloIds).(*schema.Set)),
-		SloAlertConfigFieldAlertChannelIds: convertSetToStringSlice(d.Get(SloAlertConfigFieldAlertChannelIds).(*schema.Set)),		
-		SloAlertConfigFieldTimeThreshold: []interface{}{timeThreshold},
-		DefaultCustomPayloadFieldsName:   mapCustomPayloadFieldsToSchema(sloAlertConfig),
-		SloAlertConfigFieldEnabled:       sloAlertConfig.Enabled,
-		SloAlertConfigFieldBurnRateTimeWindows: burnRateTimeWindows,
+			burnRateConfigs = append(burnRateConfigs, map[string]interface{}{
+				SloAlertConfigFieldBurnRateConfigAlertWindowType:  cfg.AlertWindowType,
+				SloAlertConfigFieldBurnRateConfigDuration:         cfg.Duration,
+				SloAlertConfigFieldBurnRateConfigDurationUnitType: cfg.DurationUnitType,
+				SloAlertConfigFieldBurnRateConfigThreshold:        thresholdList,
+			})
+		}
 	}
 
-    d.SetId(sloAlertConfig.ID)
+	tfData := map[string]interface{}{
+		SloAlertConfigFieldName:            sloAlertConfig.Name,
+		SloAlertConfigFieldDescription:     sloAlertConfig.Description,
+		SloAlertConfigFieldSeverity:        sloAlertConfig.Severity,
+		SloAlertConfigFieldTriggering:      sloAlertConfig.Triggering,
+		SloAlertConfigFieldAlertType:       terraformAlertType,
+		SloAlertConfigFieldThreshold:       []interface{}{threshold},
+		SloAlertConfigFieldSloIds:          convertSetToStringSlice(d.Get(SloAlertConfigFieldSloIds).(*schema.Set)),
+		SloAlertConfigFieldAlertChannelIds: convertSetToStringSlice(d.Get(SloAlertConfigFieldAlertChannelIds).(*schema.Set)),
+		SloAlertConfigFieldTimeThreshold:   []interface{}{timeThreshold},
+		DefaultCustomPayloadFieldsName:     mapCustomPayloadFieldsToSchema(sloAlertConfig),
+		SloAlertConfigFieldEnabled:         sloAlertConfig.Enabled,
+		SloAlertConfigFieldBurnRateConfig:  burnRateConfigs,
+	}
 
-    debug(">> UpdateState with: " + obj2json(tfData))
+	d.SetId(sloAlertConfig.ID)
 
-    return tfutils.UpdateState(d, tfData)
+	debug(">> UpdateState with: " + obj2json(tfData))
+
+	return tfutils.UpdateState(d, tfData)
 }
 
 func convertSetToStringSlice(set *schema.Set) []string {
-    var result []string
-    for _, v := range set.List() {
-        result = append(result, v.(string))
-    }
-    return result
+	var result []string
+	for _, v := range set.List() {
+		result = append(result, v.(string))
+	}
+	return result
 }
 
-//  convert different numeric types to float64.
+// convert different numeric types to float64.
 func convertToFloat64(value interface{}) (float64, error) {
-    switch v := value.(type) {
-    case float64:
-        return v, nil
-    case float32:
-        return float64(v), nil
-    case int:
-        return float64(v), nil
-    case int64:
-        return float64(v), nil
-    case string:
-        var parsedValue float64
-        _, err := fmt.Sscanf(v, "%f", &parsedValue)
-        if err != nil {
-            return 0, fmt.Errorf("unable to parse float64 from string: %s", v)
-        }
-        return parsedValue, nil
-    default:
-        return 0, fmt.Errorf("unexpected type for float64 conversion: %T", value)
-    }
+	switch v := value.(type) {
+	case float64:
+		return v, nil
+	case float32:
+		return float64(v), nil
+	case int:
+		return float64(v), nil
+	case int64:
+		return float64(v), nil
+	case string:
+		var parsedValue float64
+		_, err := fmt.Sscanf(v, "%f", &parsedValue)
+		if err != nil {
+			return 0, fmt.Errorf("unable to parse float64 from string: %s", v)
+		}
+		return parsedValue, nil
+	default:
+		return 0, fmt.Errorf("unexpected type for float64 conversion: %T", value)
+	}
 }
 
 // tf state -> api
 func (r *sloAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*restapi.SloAlertConfig, error) {
-    debug(">> MapStateToDataObject")
-    debug(obj2json(d))
-    sid := d.Id()
-    if len(sid) == 0 {
-        sid = RandomID()
-    }
-		
+	debug(">> MapStateToDataObject")
+	debug(obj2json(d))
+	sid := d.Id()
+	if len(sid) == 0 {
+		sid = RandomID()
+	}
+
+	terraformAlertType := normalizeAlertType(d.Get(SloAlertConfigFieldAlertType).(string))
+	var threshold *restapi.SloAlertThreshold
 	// Convert threshold from Terraform state
-	thresholdStateObject := d.Get(SloAlertConfigFieldThreshold).([]interface{})
-    var threshold restapi.SloAlertThreshold
-    if len(thresholdStateObject) > 0 {
-        thresholdObject := thresholdStateObject[0].(map[string]interface{})
-        operatorRaw, opOK := thresholdObject[SloAlertConfigFieldThresholdOperator]
-        valueRaw, valOK := thresholdObject[SloAlertConfigFieldThresholdValue]
-        if opOK && valOK {
-            operator := fmt.Sprintf("%v", operatorRaw)
-            value, err := convertToFloat64(valueRaw)
-            if err != nil {
-                return nil, fmt.Errorf("threshold value is invalid: %v", err)
-            }
-            thresholdType := "staticThreshold"
-            if typeRaw, typeOK := thresholdObject[SloAlertConfigFieldThresholdType]; typeOK && typeRaw != nil {
-                thresholdType = typeRaw.(string)
-            }
-            threshold = restapi.SloAlertThreshold{
-                Type:     thresholdType,
-                Operator: operator,
-                Value:    value,
-            }
-        } else {
-            return nil, fmt.Errorf("threshold operator or value is missing or incorrect type")
-        }
-    }
+	if terraformAlertType != SloAlertConfigBurnRateV2 {
+		thresholdStateObject := d.Get(SloAlertConfigFieldThreshold).([]interface{})
+		if len(thresholdStateObject) > 0 {
+			thresholdObject := thresholdStateObject[0].(map[string]interface{})
+			operatorRaw, opOK := thresholdObject[SloAlertConfigFieldThresholdOperator]
+			valueRaw, valOK := thresholdObject[SloAlertConfigFieldThresholdValue]
+			if opOK && valOK {
+				operator := fmt.Sprintf("%v", operatorRaw)
+				value, err := convertToFloat64(valueRaw)
+				if err != nil {
+					return nil, fmt.Errorf("threshold value is invalid: %v", err)
+				}
+				thresholdType := "staticThreshold"
+				if typeRaw, typeOK := thresholdObject[SloAlertConfigFieldThresholdType]; typeOK && typeRaw != nil {
+					thresholdType = typeRaw.(string)
+				}
+				threshold = &restapi.SloAlertThreshold{
+					Type:     thresholdType,
+					Operator: operator,
+					Value:    value,
+				}
+			} else {
+				return nil, fmt.Errorf("threshold operator or value is missing or incorrect type")
+			}
+		}
+	}
 
 	// Convert time threshold from Terraform state
 	timeThresholdStateObject := d.Get(SloAlertConfigFieldTimeThreshold).([]interface{})
-    var timeThreshold restapi.SloAlertTimeThreshold
-    if len(timeThresholdStateObject) > 0 {
-        timeThresholdObject := timeThresholdStateObject[0].(map[string]interface{})
-        warmUp, warmUpOK := timeThresholdObject[SloAlertConfigFieldTimeThresholdWarmUp].(int)
-        coolDown, coolDownOK := timeThresholdObject[SloAlertConfigFieldTimeThresholdCoolDown].(int)
-        if warmUpOK && coolDownOK {
-            timeThreshold = restapi.SloAlertTimeThreshold{
-                TimeWindow: warmUp,
-                Expiry:     coolDown,
-            }
-        } else {
-            return nil, fmt.Errorf("time threshold warm_up or cool_down is missing or incorrect type")
-        }
-    }
+	var timeThreshold restapi.SloAlertTimeThreshold
+	if len(timeThresholdStateObject) > 0 {
+		timeThresholdObject := timeThresholdStateObject[0].(map[string]interface{})
+		warmUp, warmUpOK := timeThresholdObject[SloAlertConfigFieldTimeThresholdWarmUp].(int)
+		coolDown, coolDownOK := timeThresholdObject[SloAlertConfigFieldTimeThresholdCoolDown].(int)
+		if warmUpOK && coolDownOK {
+			timeThreshold = restapi.SloAlertTimeThreshold{
+				TimeWindow: warmUp,
+				Expiry:     coolDown,
+			}
+		} else {
+			return nil, fmt.Errorf("time threshold warm_up or cool_down is missing or incorrect type")
+		}
+	}
 
 	// Custom Payload Fields
 	customPayloadFields, err := mapDefaultCustomPayloadFieldsFromSchema(d)
-    if err != nil {
-        return nil, fmt.Errorf("error processing custom payload fields: %w", err)
-    }
-    customPayloadFields = wrapSloCustomPayloadFields(customPayloadFields)
+	if err != nil {
+		return nil, fmt.Errorf("error processing custom payload fields: %w", err)
+	}
+	customPayloadFields = wrapSloCustomPayloadFields(customPayloadFields)
 
-    // Alert Type
-    terraformAlertType := normalizeAlertType(d.Get(SloAlertConfigFieldAlertType).(string))
-    apiAlertType, apiMetric, err := mapAlertTypeToAPI(terraformAlertType)
-    if err != nil {
-        return nil, fmt.Errorf("invalid alert_type: %v", err)
-    }
-    rule := restapi.SloAlertRule{
-        AlertType: apiAlertType,
-        Metric:    apiMetric,
-    }
-				
-	// Only set BurnRateTimeWindows for burn_rate alerts with validation
-	var burnRateTimeWindows *restapi.BurnRateTimeWindows
-	if terraformAlertType == SloAlertConfigBurnRate {
-		burnRateState := d.Get(SloAlertConfigFieldBurnRateTimeWindows).([]interface{})
+	// Alert Type
+	apiAlertType, apiMetric, err := mapAlertTypeToAPI(terraformAlertType)
+	if err != nil {
+		return nil, fmt.Errorf("invalid alert_type: %v", err)
+	}
+	rule := restapi.SloAlertRule{
+		AlertType: apiAlertType,
+		Metric:    apiMetric,
+	}
 
-		//debug
-		debug(fmt.Sprintf("burnRateState: %+v", burnRateState))
-		
+	// Only set BurnRateConfig for burn_rate_v2 alerts with validation
+	var burnRateConfigs []restapi.BurnRateConfig
+
+	if terraformAlertType == SloAlertConfigBurnRateV2 {
+		raw, ok := d.GetOk(SloAlertConfigFieldBurnRateConfig)
+		if !ok || raw == nil {
+			return nil, fmt.Errorf("burn_rate_config is required for alert_type 'burn_rate_v2'")
+		}
+
+		burnRateSet, ok := raw.(*schema.Set)
+		if !ok || burnRateSet == nil {
+			return nil, fmt.Errorf("burn_rate_config is not a valid set")
+		}
+
+		burnRateState := burnRateSet.List()
+
 		if len(burnRateState) == 0 {
-			return nil, fmt.Errorf("burn_rate_time_windows is required for alert_type 'burn_rate'")
-		}
-		burnRateObj := burnRateState[0].(map[string]interface{})
-
-		//debug
-		debug(fmt.Sprintf("burnRateObj: %+v", burnRateObj))
-
-		// Validate and extract long_time_window
-		longWindowStateRaw, longWindowExists := burnRateObj[SloAlertConfigFieldLongTimeWindow]
-		if !longWindowExists || len(longWindowStateRaw.([]interface{})) == 0 {
-			return nil, fmt.Errorf("long_time_window is missing or empty")
-		}
-		longWindowState := longWindowStateRaw.([]interface{})[0].(map[string]interface{})
-
-		//debug
-		debug(fmt.Sprintf("longWindowState: %+v", longWindowState))
-		
-		longDurationRaw, longDurationExists := longWindowState[SloAlertConfigFieldTimeWindowDuration]
-		if !longDurationExists {
-			return nil, fmt.Errorf("duration in long_time_window must be an integer")
-		}
-		longDuration, longDurationOK := longDurationRaw.(int)
-		if !longDurationOK {
-			return nil, fmt.Errorf("duration in long_time_window must be an integer")
-		}
-		if longDuration <= 0 {
-			return nil, fmt.Errorf("duration in long_time_window must be an integer")
-		}
-		longDurationTypeRaw, longDurationTypeExists := longWindowState[SloAlertConfigFieldTimeWindowDurationType]
-		if !longDurationTypeExists {
-			return nil, fmt.Errorf("duration_type in long_time_window is missing")
-		}
-		longDurationType, longDurationTypeOK := longDurationTypeRaw.(string)
-		if !longDurationTypeOK {
-			return nil, fmt.Errorf("duration_type in long_time_window must be a string")
-		}
-		validDurationTypes := []string{"minute", "hour", "day"}
-		if !contains(validDurationTypes, longDurationType) {
-			return nil, fmt.Errorf("invalid duration_type in long_time_window: %s, must be one of %v", longDurationType, validDurationTypes)
+			return nil, fmt.Errorf("burn_rate_config cannot be empty")
 		}
 
-		// Validate and extract short_time_window
-		shortWindowStateRaw, shortWindowExists := burnRateObj[SloAlertConfigFieldShortTimeWindow]
-		if !shortWindowExists || len(shortWindowStateRaw.([]interface{})) == 0 {
-			return nil, fmt.Errorf("short_time_window is missing or empty")
-		}
-		shortWindowSlice := shortWindowStateRaw.([]interface{})
-		if len(shortWindowSlice) == 0 || shortWindowSlice[0] == nil {
-			return nil, fmt.Errorf("duration in short_time_window must be an integer")
-		}
-		shortWindowState := shortWindowSlice[0].(map[string]interface{})
+		for _, item := range burnRateState {
+			burnRateObj, ok := item.(map[string]interface{})
+			if !ok {
+				return nil, fmt.Errorf("invalid format for burn_rate_config item")
+			}
 
-		//debug
-		debug(fmt.Sprintf("shortWindowState: %+v", shortWindowState))
+			// Extract and validate duration
+			durationRaw, durationExists := burnRateObj[SloAlertConfigFieldBurnRateConfigDuration]
+			if !durationExists {
+				return nil, fmt.Errorf("duration in burn_rate_config is missing")
+			}
+			duration, durationOK := durationRaw.(int)
+			if !durationOK || duration <= 0 {
+				return nil, fmt.Errorf("duration in burn_rate_config must be a positive integer")
+			}
 
-		shortDurationRaw, shortDurationExists := shortWindowState[SloAlertConfigFieldTimeWindowDuration]
-		if !shortDurationExists || shortDurationRaw == 0 { 
-			return nil, fmt.Errorf("duration in short_time_window must be an integer")
-		}
-		shortDuration, shortDurationOK := shortDurationRaw.(int)
-		if !shortDurationOK {
-			return nil, fmt.Errorf("duration in short_time_window must be an integer")
-		}
-		shortDurationTypeRaw, shortDurationTypeExists := shortWindowState[SloAlertConfigFieldTimeWindowDurationType]
-		if !shortDurationTypeExists {
-			return nil, fmt.Errorf("duration_type in short_time_window is missing")
-		}
-		shortDurationType, shortDurationTypeOK := shortDurationTypeRaw.(string)
-		if !shortDurationTypeOK {
-			return nil, fmt.Errorf("duration_type in short_time_window must be a string")
-		}
-		if !contains(validDurationTypes, shortDurationType) {
-			return nil, fmt.Errorf("invalid duration_type in short_time_window: %s, must be one of %v", shortDurationType, validDurationTypes)
-		}
+			// Extract and validate duration_unit_type
+			durationUnitTypeRaw, durationUnitTypeExists := burnRateObj[SloAlertConfigFieldBurnRateConfigDurationUnitType]
+			if !durationUnitTypeExists {
+				return nil, fmt.Errorf("duration_unit_type in burn_rate_config is missing")
+			}
+			durationUnitType, durationUnitTypeOK := durationUnitTypeRaw.(string)
+			if !durationUnitTypeOK {
+				return nil, fmt.Errorf("duration_unit_type in burn_rate_config must be a string")
+			}
+			validDurationTypes := []string{"minute", "hour", "day"}
+			if !contains(validDurationTypes, durationUnitType) {
+				return nil, fmt.Errorf("invalid duration_unit_type in burn_rate_config: %s, must be one of %v", durationUnitType, validDurationTypes)
+			}
 
-		burnRateTimeWindows = &restapi.BurnRateTimeWindows{
-			LongTimeWindow: restapi.TimeWindow{
-				TimeWindowDuration:     longDuration,
-				TimeWindowDurationType: longDurationType,
-			},
-			ShortTimeWindow: restapi.TimeWindow{
-				TimeWindowDuration:     shortDuration,
-				TimeWindowDurationType: shortDurationType,
-			},
+			// Extract and validate alert_window_type
+			alertWindowTypeRaw, alertWindowTypeExists := burnRateObj[SloAlertConfigFieldBurnRateConfigAlertWindowType]
+			if !alertWindowTypeExists {
+				return nil, fmt.Errorf("alert_window_type in burn_rate_config is missing")
+			}
+			alertWindowType, alertWindowTypeOK := alertWindowTypeRaw.(string)
+			if !alertWindowTypeOK {
+				return nil, fmt.Errorf("alert_window_type in burn_rate_config must be a string")
+			}
+
+			// Extract and validate threshold
+			thresholdRaw, thresholdExists := burnRateObj[SloAlertConfigFieldBurnRateConfigThreshold]
+			if !thresholdExists {
+				return nil, fmt.Errorf("threshold in burn_rate_config is missing")
+			}
+			thresholdList, ok := thresholdRaw.([]interface{})
+			if !ok || len(thresholdList) == 0 {
+				return nil, fmt.Errorf("threshold in burn_rate_config must be a non-empty list")
+			}
+			thresholdObj, ok := thresholdList[0].(map[string]interface{})
+			if !ok {
+				return nil, fmt.Errorf("invalid threshold structure in burn_rate_config")
+			}
+
+			// Validate threshold value
+			valueRaw, valueExists := thresholdObj[SloAlertConfigFieldBurnRateConfigValue]
+			if !valueExists {
+				return nil, fmt.Errorf("value in burn_rate_config.threshold is missing")
+			}
+			value, valueOK := valueRaw.(float64)
+			if !valueOK {
+				return nil, fmt.Errorf("value in burn_rate_config.threshold must be a float")
+			}
+
+			// Validate threshold operator
+			operatorRaw, operatorExists := thresholdObj[SloAlertConfigFieldBurnRateConfigOperator]
+			if !operatorExists {
+				return nil, fmt.Errorf("operator in burn_rate_config.threshold is missing")
+			}
+			operator, operatorOK := operatorRaw.(string)
+			if !operatorOK {
+				return nil, fmt.Errorf("operator in burn_rate_config.threshold must be a string")
+			}
+
+			// Append to the slice of burnRateConfigs
+			burnRateConfigs = append(burnRateConfigs, restapi.BurnRateConfig{
+				AlertWindowType:  alertWindowType,
+				Duration:         duration,
+				DurationUnitType: durationUnitType,
+				Threshold: restapi.ServiceLevelsStaticThresholdConfig{
+					Operator: operator,
+					Value:    value,
+				},
+			})
 		}
 	}
 
 	// Construct payload
 	payload := &restapi.SloAlertConfig{
-		ID                   : sid,
-		Name                 : d.Get(SloAlertConfigFieldName).(string),
-		Description          : d.Get(SloAlertConfigFieldDescription).(string),
-		Severity             : d.Get(SloAlertConfigFieldSeverity).(int),
-		Triggering           : d.Get(SloAlertConfigFieldTriggering).(bool),
-		Enabled              : d.Get(SloAlertConfigFieldEnabled).(bool),
-		Rule                 : rule,
-		Threshold            : threshold,
-		TimeThreshold        : timeThreshold,
-		SloIds               : convertSetToStringSlice(d.Get(SloAlertConfigFieldSloIds).(*schema.Set)),
-		AlertChannelIds      : convertSetToStringSlice(d.Get(SloAlertConfigFieldAlertChannelIds).(*schema.Set)),
+		ID:                    sid,
+		Name:                  d.Get(SloAlertConfigFieldName).(string),
+		Description:           d.Get(SloAlertConfigFieldDescription).(string),
+		Severity:              d.Get(SloAlertConfigFieldSeverity).(int),
+		Triggering:            d.Get(SloAlertConfigFieldTriggering).(bool),
+		Enabled:               d.Get(SloAlertConfigFieldEnabled).(bool),
+		Rule:                  rule,
+		Threshold:             threshold,
+		TimeThreshold:         timeThreshold,
+		SloIds:                convertSetToStringSlice(d.Get(SloAlertConfigFieldSloIds).(*schema.Set)),
+		AlertChannelIds:       convertSetToStringSlice(d.Get(SloAlertConfigFieldAlertChannelIds).(*schema.Set)),
 		CustomerPayloadFields: customPayloadFields,
-		BurnRateTimeWindows  : burnRateTimeWindows,
+		BurnRateConfigs:       &burnRateConfigs,
 	}
 
 	// debug utils
 	// payloadJSON, err := json.MarshalIndent(payload, "", "  ")
-    // if err != nil {
-    //     log.Printf("Error marshalling payload to JSON: %v", err)
-    // } else {
-    //     log.Printf("Payload sent to API: %s", string(payloadJSON))
-    // }
+	// if err != nil {
+	//     log.Printf("Error marshalling payload to JSON: %v", err)
+	// } else {
+	//     log.Printf("Payload sent to API: %s", string(payloadJSON))
+	// }
 
-    return payload, nil
+	return payload, nil
 }
 
 // contains checks if a string is present in a slice of strings
 func contains(slice []string, item string) bool {
-    for _, s := range slice {
-        if s == item {
-            return true
-        }
-    }
-    return false
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
 }
 
 // Schema
 func (r *sloAlertConfigResource) sloAlertConfigSchemaV0() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			SloAlertConfigFieldName:          	SloAlertConfigName,
-			SloAlertConfigFieldFullName:		SloAlertConfigFullName,
+			SloAlertConfigFieldName:            SloAlertConfigName,
+			SloAlertConfigFieldFullName:        SloAlertConfigFullName,
 			SloAlertConfigFieldDescription:     SloAlertConfigDescription,
 			SloAlertConfigFieldSeverity:        SloAlertConfigSeverity,
-			SloAlertConfigFieldTriggering:   	SloAlertConfigTriggering,
-			SloAlertConfigFieldAlertType:   	SloAlertConfigAlertType,
-			SloAlertConfigFieldThreshold:    	SloAlertConfigThreshold,
-			SloAlertConfigFieldSloIds:  		SloAlertConfigSloIds,
+			SloAlertConfigFieldTriggering:      SloAlertConfigTriggering,
+			SloAlertConfigFieldAlertType:       SloAlertConfigAlertType,
+			SloAlertConfigFieldThreshold:       SloAlertConfigThreshold,
+			SloAlertConfigFieldSloIds:          SloAlertConfigSloIds,
 			SloAlertConfigFieldAlertChannelIds: SloAlertConfigAlertChannelIds,
 			SloAlertConfigFieldTimeThreshold:   SloAlertConfigTimeThreshold,
-			DefaultCustomPayloadFieldsName:  	buildCustomPayloadFields(),
-			SloAlertConfigFieldEnabled: 		SloAlertConfigEnabled,
-			
+			DefaultCustomPayloadFieldsName:     buildCustomPayloadFields(),
+			SloAlertConfigFieldEnabled:         SloAlertConfigEnabled,
 		},
 	}
 }
