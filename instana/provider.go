@@ -102,5 +102,6 @@ func providerDataSources() map[string]*schema.Resource {
 	dataSources[DataSourceAlertingChannel] = NewAlertingChannelDataSource().CreateResource()
 	dataSources[DataSourceAutomationAction] = NewAutomationActionDataSource().CreateResource()
 	dataSources[DataSourceCustomEventSpec] = NewCustomEventSpecificationDataSource().CreateResource()
+	dataSources[DataSourceHostAgents] = NewHostAgentsDataSource().CreateResource()
 	return dataSources
 }

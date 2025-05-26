@@ -295,6 +295,14 @@ func (m *MockInstanaAPI) AutomationPolicies() restapi.RestResource[*restapi.Auto
 	return ret0
 }
 
+// HostAgents mocks base method.
+func (m *MockInstanaAPI) HostAgents() restapi.ReadOnlyRestResource[*restapi.HostAgent] {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "HostAgent")
+	ret0, _ := ret[0].(restapi.ReadOnlyRestResource[*restapi.HostAgent])
+	return ret0
+}
+
 // AutomationActions indicates an expected call of AutomationActions.
 func (mr *MockInstanaAPIMockRecorder) AutomationActions() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
@@ -305,4 +313,10 @@ func (mr *MockInstanaAPIMockRecorder) AutomationActions() *gomock.Call {
 func (mr *MockInstanaAPIMockRecorder) AutomationPolicies() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AutomationPolicy", reflect.TypeOf((*MockInstanaAPI)(nil).AutomationPolicies))
+}
+
+// HostAgents indicates an expected call of AutomationPolicies.
+func (mr *MockInstanaAPIMockRecorder) HostAgents() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HostAgent", reflect.TypeOf((*MockInstanaAPI)(nil).HostAgents))
 }

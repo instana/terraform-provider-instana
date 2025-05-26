@@ -23,6 +23,8 @@ const (
 	SyntheticLocationResourcePath = SyntheticSettingsBasePath + "/locations"
 	// AutomationBasePath path to Automation resources of Instana RESTful API
 	AutomationBasePath = InstanaAPIBasePath + "/automation"
+	// AutomationBasePath path to Automation resources of Instana RESTful API
+	HostAgentResourcePath = InstanaAPIBasePath + "/host-agent"
 )
 
 // InstanaAPI is the interface to all resources of the Instana Rest API
@@ -47,6 +49,7 @@ type InstanaAPI interface {
 	SyntheticLocation() ReadOnlyRestResource[*SyntheticLocation]
 	AutomationActions() RestResource[*AutomationAction]
 	AutomationPolicies() RestResource[*AutomationPolicy]
+	HostAgents() ReadOnlyRestResource[*HostAgent]
 }
 
 // NewInstanaAPI creates a new instance of the instana API
@@ -146,4 +149,8 @@ func (api *baseInstanaAPI) AutomationActions() RestResource[*AutomationAction] {
 
 func (api *baseInstanaAPI) AutomationPolicies() RestResource[*AutomationPolicy] {
 	return NewCreatePOSTUpdatePUTRestResource(AutomationPolicyResourcePath, NewDefaultJSONUnmarshaller(&AutomationPolicy{}), api.client)
+}
+
+func (api *baseInstanaAPI) HostAgents() ReadOnlyRestResource[*HostAgent] {
+	return NewReadOnlyRestResource(HostAgentResourcePath, NewHostAgentJSONUnmarshaller(&HostAgent{}), api.client)
 }
