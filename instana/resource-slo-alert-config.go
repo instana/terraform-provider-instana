@@ -141,7 +141,7 @@ var (
 					Description: "The type of alert window (e.g., SINGLE, LONG, SHORT).",
 				},
 				SloAlertConfigFieldBurnRateConfigThreshold: {
-					Type:        schema.TypeList, // keep as TypeList with MaxItems=1 (Terraform way to represent a single nested object)
+					Type:        schema.TypeList,
 					Required:    true,
 					MaxItems:    1,
 					Description: "Threshold configuration for the burn rate alert.",
@@ -157,11 +157,6 @@ var (
 								Required:    true,
 								Description: "Comparison operator for threshold (e.g., >=).",
 							},
-							// Optionally include lastUpdated if you want to expose it
-							// "lastUpdated": {
-							//     Type:     schema.TypeInt,
-							//     Optional: true,
-							// },
 						},
 					},
 				},
@@ -682,14 +677,6 @@ func (r *sloAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*
 		CustomerPayloadFields: customPayloadFields,
 		BurnRateConfigs:       &burnRateConfigs,
 	}
-
-	// debug utils
-	// payloadJSON, err := json.MarshalIndent(payload, "", "  ")
-	// if err != nil {
-	//     log.Printf("Error marshalling payload to JSON: %v", err)
-	// } else {
-	//     log.Printf("Payload sent to API: %s", string(payloadJSON))
-	// }
 
 	return payload, nil
 }
