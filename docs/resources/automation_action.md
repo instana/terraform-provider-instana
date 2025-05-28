@@ -71,7 +71,7 @@ resource "instana_automation_action" "http_sample" {
 * `tags` - Optional - A list of tags for the automation action.
 * `input_parameter` - Optional - A list of input parameters [Details](#input-parameter-argument-reference)
 
-Exactly on of the following blocks must be provided:
+Exactly one of the following blocks must be provided:
 * `script` - Optional - Http Action Configuration block [Details](#script-argument-reference)
 * `http` - Optional - HTTP Script Configuration block [Details](#http-argument-reference)
 
