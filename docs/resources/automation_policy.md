@@ -65,5 +65,5 @@ resource "instana_automation_policy" "hello_world_policy" {
 ### Action Argument Reference
 
 * `action_id` - Required - The identifier for the automation action.
-* `agent_id` - Optional - The identifier for the agent host.
+* `agent_id` - The identifier for the agent host. Optional if the type configuration is manual. For automatic type configuration, the argument is required.
 * `input_parameters` - Optional - Map with input parameters name and value.
