@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/require"
 
 	. "github.com/gessnerfl/terraform-provider-instana/instana"
@@ -294,48 +293,31 @@ func (test *sloAlertConfigTest) shouldRequireBurnRateConfigToMatchAssignedValues
 		setValueOnResourceData(t, resourceData, SloAlertConfigFieldName, sloAlertName)
 		setValueOnResourceData(t, resourceData, SloAlertConfigFieldAlertType, SloAlertBurnRateV2)
 
-		// Set burn_rate_config
 		burnRateConfig := []map[string]interface{}{
 			{
-				SloAlertConfigFieldBurnRateConfigAlertWindowType:  SloAlertBurnRateConfigAlertWindowType,
-				SloAlertConfigFieldBurnRateConfigDuration:         SloAlertBurnRateConfigDuration,
-				SloAlertConfigFieldBurnRateConfigDurationUnitType: SloAlertBurnRateConfigDurationUnitType,
-				SloAlertConfigFieldBurnRateConfigThreshold: []map[string]interface{}{
-					{
-						SloAlertConfigFieldBurnRateConfigOperator: SloAlertBurnRateConfigOperator,
-						SloAlertConfigFieldBurnRateConfigValue:    SloAlertBurnRateConfigValue,
-					},
-				},
+				"duration":           "1",
+				"duration_unit_type": "hour",
+				"alert_window_type":  "SINGLE",
+				"threshold_operator": ">=",
+				"threshold_value":    "1.0",
 			},
 		}
-
 		setValueOnResourceData(t, resourceData, SloAlertConfigFieldBurnRateConfig, burnRateConfig)
 
 		raw, ok := resourceData.GetOk(SloAlertConfigFieldBurnRateConfig)
 		require.True(t, ok, "burn_rate_config should exist")
 
-		burnRateSet, ok := raw.(*schema.Set)
-		require.True(t, ok, "burn_rate_config should be a Set")
-
-		burnRateList := burnRateSet.List()
+		burnRateList := raw.([]interface{})
 		require.Equal(t, 1, len(burnRateList), "burn_rate_config should contain 1 item")
 
 		burnRateObj, ok := burnRateList[0].(map[string]interface{})
 		require.True(t, ok, "burn_rate_config[0] should be a map")
 
-		require.Equal(t, 1, burnRateObj[SloAlertConfigFieldBurnRateConfigDuration], "duration should match")
-		require.Equal(t, "hour", burnRateObj[SloAlertConfigFieldBurnRateConfigDurationUnitType], "duration_unit_type should match")
-		require.Equal(t, "SINGLE", burnRateObj[SloAlertConfigFieldBurnRateConfigAlertWindowType], "alert_window_type should match")
-
-		thresholdList, ok := burnRateObj[SloAlertConfigFieldBurnRateConfigThreshold].([]interface{})
-		require.True(t, ok, "threshold should be a list")
-		require.Equal(t, 1, len(thresholdList), "threshold should contain 1 item")
-
-		thresholdObj, ok := thresholdList[0].(map[string]interface{})
-		require.True(t, ok, "threshold[0] should be a map")
-
-		require.Equal(t, 1.0, thresholdObj[SloAlertConfigFieldBurnRateConfigValue], "threshold.value should match")
-		require.Equal(t, ">=", thresholdObj[SloAlertConfigFieldBurnRateConfigOperator], "threshold.operator should match")
+		require.Equal(t, "1", burnRateObj["duration"], "duration should match")
+		require.Equal(t, "hour", burnRateObj["duration_unit_type"], "duration_unit_type should match")
+		require.Equal(t, "SINGLE", burnRateObj["alert_window_type"], "alert_window_type should match")
+		require.Equal(t, ">=", burnRateObj["threshold_operator"], "threshold_operator should match")
+		require.Equal(t, "1.0", burnRateObj["threshold_value"], "threshold_value should match")
 	}
 }
 

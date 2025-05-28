@@ -69,27 +69,25 @@ resource "instana_slo_alert_config" "error_budget_alert" {
 }
 ```
 
-Creating a `Burn Rate alert with single alerting window and threshold`
+Creating a `Burn Rate alert with single alerting window`
 
 ```hcl
-resource "instana_slo_alert_config"
-"burn_rate_alert" {
+resource "instana_slo_alert_config" "burn_rate_alert" {
     name = "terraform_burn_rate_v2_alert_slo"
     description = "Burn rate is exceeded"
     severity = 10
     triggering = true
     alert_type = "burn_rate_v2"
 
-    burn_rate_config {
-        alert_window_type = "SINGLE"
-        duration = 12
-        duration_unit_type = "hour"
-
-        threshold {
-            operator = ">="
-            value = 1
-        }
-    }
+    burn_rate_config = [
+      {
+        alert_window_type   = "SINGLE"
+        duration            = "6"
+        duration_unit_type  = "hour"
+        threshold_operator  = ">="
+        threshold_value     = "1"
+      }
+    ]
 
     slo_ids = ["SLOjRzdfwyLQ6KDWoq1pTvoeA", "SLOXj71OScUQ9GZWGTInq15Pg "]
     alert_channel_ids = ["orhurggugksjfgh "]
@@ -103,38 +101,32 @@ resource "instana_slo_alert_config"
 }
 ``` 
 
-Creating a `Burn Rate alert with multiple alerting windows and respective thresholds`
+Creating a `Burn Rate alert with multiple alerting windows`
 
 ```hcl
-resource "instana_slo_alert_config"
-"burn_rate_alert" {
+resource "instana_slo_alert_config" "burn_rate_alert" {
     name = "terraform_burn_rate_v2_alert_slo"
     description = "Burn rate is exceeded"
     severity = 10
     triggering = true
     alert_type = "burn_rate_v2"
 
-    burn_rate_config {
-        alert_window_type = "LONG"
-        duration = 12
-        duration_unit_type = "hour"
-
-        threshold {
-            operator = ">="
-            value = 1
-        }
-    }
-
-    burn_rate_config {
-        alert_window_type = "SHORT"
-        duration = 6
-        duration_unit_type = "hour"
-
-        threshold {
-            operator = ">="
-            value = 1
-        }
-    }
+    burn_rate_config = [
+      {
+        alert_window_type   = "LONG"
+        duration            = "6"
+        duration_unit_type  = "hour"
+        threshold_operator  = ">="
+        threshold_value     = "1"
+      }, 
+    {
+        alert_window_type   = "SHORT"
+        duration            = "1"
+        duration_unit_type  = "hour"
+        threshold_operator  = ">="
+        threshold_value     = "4"
+      }
+    ]
 
     slo_ids = ["SLOjRzdfwyLQ6KDWoq1pTvoeA", "SLOXj71OScUQ9GZWGTInq15Pg "]
     alert_channel_ids = ["orhurggugksjfgh "]
@@ -188,13 +180,8 @@ Currently, two types of burn rate alert configurations are supported:
 
 - `duration` – Required – Duration of the alerting window in integer format. Must be greater than 0.
 - `duration_unit_type` – Required – The unit of time for the duration. Allowed values: `minute`, `hour`, `day`.
-- `threshold` - Required - Threshold value of the alerting window with operator [Details](#burn-rate-config-threshold-reference)
+- `threshold_value` - Required - Numeric threshold value of the alerting window.
+- `threshold_operator` - Required – Comparison operator. E.g., `>=`, `>`, `<` and `<=`.
 
-### Burn Rate Config Threshold Reference
-
-Each time window must define at least one `threshold` block with the following fields:
-
-- `operator` – Required – Comparison operator. E.g., `>=`, `>`, `<` and `<=`.
-- `value` – Required – Numeric threshold value.
 
 

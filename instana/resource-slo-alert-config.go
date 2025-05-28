@@ -2,6 +2,8 @@ package instana
 
 import (
 	"fmt"
+	"strconv"
+
 	// "log"
 	// "encoding/json"
 	"context"
@@ -16,30 +18,28 @@ const ResourceInstanaSloAlertConfig = "instana_slo_alert_config"
 
 const (
 	//Slo Alert Config Field names for Terraform
-	SloAlertConfigFieldName                           = "name"
-	SloAlertConfigFieldFullName                       = "full_name"
-	SloAlertConfigFieldDescription                    = "description"
-	SloAlertConfigFieldSeverity                       = "severity"
-	SloAlertConfigFieldTriggering                     = "triggering"
-	SloAlertConfigFieldAlertType                      = "alert_type"
-	SloAlertConfigFieldThreshold                      = "threshold"
-	SloAlertConfigFieldThresholdType                  = "type"
-	SloAlertConfigFieldThresholdOperator              = "operator"
-	SloAlertConfigFieldThresholdValue                 = "value"
-	SloAlertConfigFieldSloIds                         = "slo_ids"
-	SloAlertConfigFieldAlertChannelIds                = "alert_channel_ids"
-	SloAlertConfigFieldTimeThreshold                  = "time_threshold"
-	SloAlertConfigFieldTimeThresholdWarmUp            = "warm_up"
-	SloAlertConfigFieldTimeThresholdCoolDown          = "cool_down"
-	SloAlertConfigFieldEnabled                        = "enabled"
-	SloAlertConfigFieldBurnRateConfig                 = "burn_rate_config"
-	SloAlertConfigFieldBurnRateConfigDuration         = "duration"
-	SloAlertConfigFieldBurnRateConfigThreshold        = "threshold"
-	SloAlertConfigFieldBurnRateConfigValue            = "value"
-	SloAlertConfigFieldBurnRateConfigOperator         = "operator"
-	SloAlertConfigFieldBurnRateConfigLastUpdated      = "last_updated"
-	SloAlertConfigFieldBurnRateConfigDurationUnitType = "duration_unit_type"
-	SloAlertConfigFieldBurnRateConfigAlertWindowType  = "alert_window_type"
+	SloAlertConfigFieldName                            = "name"
+	SloAlertConfigFieldFullName                        = "full_name"
+	SloAlertConfigFieldDescription                     = "description"
+	SloAlertConfigFieldSeverity                        = "severity"
+	SloAlertConfigFieldTriggering                      = "triggering"
+	SloAlertConfigFieldAlertType                       = "alert_type"
+	SloAlertConfigFieldThreshold                       = "threshold"
+	SloAlertConfigFieldThresholdType                   = "type"
+	SloAlertConfigFieldThresholdOperator               = "operator"
+	SloAlertConfigFieldThresholdValue                  = "value"
+	SloAlertConfigFieldSloIds                          = "slo_ids"
+	SloAlertConfigFieldAlertChannelIds                 = "alert_channel_ids"
+	SloAlertConfigFieldTimeThreshold                   = "time_threshold"
+	SloAlertConfigFieldTimeThresholdWarmUp             = "warm_up"
+	SloAlertConfigFieldTimeThresholdCoolDown           = "cool_down"
+	SloAlertConfigFieldEnabled                         = "enabled"
+	SloAlertConfigFieldBurnRateConfig                  = "burn_rate_config"
+	SloAlertConfigFieldBurnRateConfigDuration          = "duration"
+	SloAlertConfigFieldBurnRateConfigThresholdValue    = "threshold_value"
+	SloAlertConfigFieldBurnRateConfigThresholdOperator = "threshold_operator"
+	SloAlertConfigFieldBurnRateConfigDurationUnitType  = "duration_unit_type"
+	SloAlertConfigFieldBurnRateConfigAlertWindowType   = "alert_window_type"
 
 	// Slo Alert Types for Terraform
 	SloAlertConfigStatus      = "status"
@@ -120,46 +120,13 @@ var (
 	}
 
 	SloAlertConfigBurnRateConfig = &schema.Schema{
-		Type:        schema.TypeSet,
+		Type:        schema.TypeList,
 		Optional:    true,
-		Description: "Defines burn rate alerting configuration.",
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				SloAlertConfigFieldBurnRateConfigDuration: {
-					Type:        schema.TypeInt,
-					Required:    true,
-					Description: "The duration of the burn rate window.",
-				},
-				SloAlertConfigFieldBurnRateConfigDurationUnitType: {
-					Type:        schema.TypeString,
-					Required:    true,
-					Description: "The unit of duration (e.g., hour, minute, day).",
-				},
-				SloAlertConfigFieldBurnRateConfigAlertWindowType: {
-					Type:        schema.TypeString,
-					Required:    true,
-					Description: "The type of alert window (e.g., SINGLE, LONG, SHORT).",
-				},
-				SloAlertConfigFieldBurnRateConfigThreshold: {
-					Type:        schema.TypeList,
-					Required:    true,
-					MaxItems:    1,
-					Description: "Threshold configuration for the burn rate alert.",
-					Elem: &schema.Resource{
-						Schema: map[string]*schema.Schema{
-							SloAlertConfigFieldBurnRateConfigValue: {
-								Type:        schema.TypeFloat,
-								Required:    true,
-								Description: "Threshold value for the alert.",
-							},
-							SloAlertConfigFieldBurnRateConfigOperator: {
-								Type:        schema.TypeString,
-								Required:    true,
-								Description: "Comparison operator for threshold (e.g., >=).",
-							},
-						},
-					},
-				},
+		Description: "List of burn rate configs fields.",
+		Elem: &schema.Schema{
+			Type: schema.TypeMap,
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
 			},
 		},
 	}
@@ -411,19 +378,12 @@ func (r *sloAlertConfigResource) UpdateState(d *schema.ResourceData, sloAlertCon
 	var burnRateConfigs []interface{}
 	if sloAlertConfig.BurnRateConfigs != nil {
 		for _, cfg := range *sloAlertConfig.BurnRateConfigs {
-			thresholdList := []interface{}{
-				map[string]interface{}{
-					"operator": cfg.Threshold.Operator,
-					"value":    cfg.Threshold.Value,
-					// optionally "lastUpdated": cfg.Threshold.LastUpdated,
-				},
-			}
-
 			burnRateConfigs = append(burnRateConfigs, map[string]interface{}{
-				SloAlertConfigFieldBurnRateConfigAlertWindowType:  cfg.AlertWindowType,
-				SloAlertConfigFieldBurnRateConfigDuration:         cfg.Duration,
-				SloAlertConfigFieldBurnRateConfigDurationUnitType: cfg.DurationUnitType,
-				SloAlertConfigFieldBurnRateConfigThreshold:        thresholdList,
+				SloAlertConfigFieldBurnRateConfigAlertWindowType:   cfg.AlertWindowType,
+				SloAlertConfigFieldBurnRateConfigDuration:          fmt.Sprintf("%d", cfg.Duration),
+				SloAlertConfigFieldBurnRateConfigDurationUnitType:  cfg.DurationUnitType,
+				SloAlertConfigFieldBurnRateConfigThresholdOperator: cfg.Threshold.Operator,
+				SloAlertConfigFieldBurnRateConfigThresholdValue:    fmt.Sprintf("%.2f", cfg.Threshold.Value),
 			})
 		}
 	}
@@ -554,101 +514,32 @@ func (r *sloAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*
 		Metric:    apiMetric,
 	}
 
-	// Only set BurnRateConfig for burn_rate_v2 alerts with validation
+	//Burn Rate Config
 	var burnRateConfigs []restapi.BurnRateConfig
-
 	if terraformAlertType == SloAlertConfigBurnRateV2 {
 		raw, ok := d.GetOk(SloAlertConfigFieldBurnRateConfig)
 		if !ok || raw == nil {
 			return nil, fmt.Errorf("burn_rate_config is required for alert_type 'burn_rate_v2'")
 		}
 
-		burnRateSet, ok := raw.(*schema.Set)
-		if !ok || burnRateSet == nil {
-			return nil, fmt.Errorf("burn_rate_config is not a valid set")
+		rawList := raw.([]interface{})
+		if len(rawList) == 0 {
+			return nil, fmt.Errorf("burn_rate_config must contain at least one item for alert_type 'burn_rate_v2'")
 		}
 
-		burnRateState := burnRateSet.List()
-
-		if len(burnRateState) == 0 {
-			return nil, fmt.Errorf("burn_rate_config cannot be empty")
-		}
-
-		for _, item := range burnRateState {
-			burnRateObj, ok := item.(map[string]interface{})
-			if !ok {
-				return nil, fmt.Errorf("invalid format for burn_rate_config item")
+		for _, item := range rawList {
+			obj := item.(map[string]interface{})
+			duration, err := strconv.Atoi(obj["duration"].(string))
+			if err != nil {
+				return nil, fmt.Errorf("invalid duration: %v", err)
 			}
-
-			// Extract and validate duration
-			durationRaw, durationExists := burnRateObj[SloAlertConfigFieldBurnRateConfigDuration]
-			if !durationExists {
-				return nil, fmt.Errorf("duration in burn_rate_config is missing")
+			alertWindowType := obj["alert_window_type"].(string)
+			durationUnitType := obj["duration_unit_type"].(string)
+			operator := obj["threshold_operator"].(string)
+			value, err := strconv.ParseFloat(obj["threshold_value"].(string), 64)
+			if err != nil {
+				return nil, fmt.Errorf("invalid threshold_value: %v", err)
 			}
-			duration, durationOK := durationRaw.(int)
-			if !durationOK || duration <= 0 {
-				return nil, fmt.Errorf("duration in burn_rate_config must be a positive integer")
-			}
-
-			// Extract and validate duration_unit_type
-			durationUnitTypeRaw, durationUnitTypeExists := burnRateObj[SloAlertConfigFieldBurnRateConfigDurationUnitType]
-			if !durationUnitTypeExists {
-				return nil, fmt.Errorf("duration_unit_type in burn_rate_config is missing")
-			}
-			durationUnitType, durationUnitTypeOK := durationUnitTypeRaw.(string)
-			if !durationUnitTypeOK {
-				return nil, fmt.Errorf("duration_unit_type in burn_rate_config must be a string")
-			}
-			validDurationTypes := []string{"minute", "hour", "day"}
-			if !contains(validDurationTypes, durationUnitType) {
-				return nil, fmt.Errorf("invalid duration_unit_type in burn_rate_config: %s, must be one of %v", durationUnitType, validDurationTypes)
-			}
-
-			// Extract and validate alert_window_type
-			alertWindowTypeRaw, alertWindowTypeExists := burnRateObj[SloAlertConfigFieldBurnRateConfigAlertWindowType]
-			if !alertWindowTypeExists {
-				return nil, fmt.Errorf("alert_window_type in burn_rate_config is missing")
-			}
-			alertWindowType, alertWindowTypeOK := alertWindowTypeRaw.(string)
-			if !alertWindowTypeOK {
-				return nil, fmt.Errorf("alert_window_type in burn_rate_config must be a string")
-			}
-
-			// Extract and validate threshold
-			thresholdRaw, thresholdExists := burnRateObj[SloAlertConfigFieldBurnRateConfigThreshold]
-			if !thresholdExists {
-				return nil, fmt.Errorf("threshold in burn_rate_config is missing")
-			}
-			thresholdList, ok := thresholdRaw.([]interface{})
-			if !ok || len(thresholdList) == 0 {
-				return nil, fmt.Errorf("threshold in burn_rate_config must be a non-empty list")
-			}
-			thresholdObj, ok := thresholdList[0].(map[string]interface{})
-			if !ok {
-				return nil, fmt.Errorf("invalid threshold structure in burn_rate_config")
-			}
-
-			// Validate threshold value
-			valueRaw, valueExists := thresholdObj[SloAlertConfigFieldBurnRateConfigValue]
-			if !valueExists {
-				return nil, fmt.Errorf("value in burn_rate_config.threshold is missing")
-			}
-			value, valueOK := valueRaw.(float64)
-			if !valueOK {
-				return nil, fmt.Errorf("value in burn_rate_config.threshold must be a float")
-			}
-
-			// Validate threshold operator
-			operatorRaw, operatorExists := thresholdObj[SloAlertConfigFieldBurnRateConfigOperator]
-			if !operatorExists {
-				return nil, fmt.Errorf("operator in burn_rate_config.threshold is missing")
-			}
-			operator, operatorOK := operatorRaw.(string)
-			if !operatorOK {
-				return nil, fmt.Errorf("operator in burn_rate_config.threshold must be a string")
-			}
-
-			// Append to the slice of burnRateConfigs
 			burnRateConfigs = append(burnRateConfigs, restapi.BurnRateConfig{
 				AlertWindowType:  alertWindowType,
 				Duration:         duration,
@@ -706,6 +597,7 @@ func (r *sloAlertConfigResource) sloAlertConfigSchemaV0() *schema.Resource {
 			SloAlertConfigFieldAlertChannelIds: SloAlertConfigAlertChannelIds,
 			SloAlertConfigFieldTimeThreshold:   SloAlertConfigTimeThreshold,
 			DefaultCustomPayloadFieldsName:     buildCustomPayloadFields(),
+			SloAlertConfigFieldBurnRateConfig:  SloAlertConfigBurnRateConfig,
 			SloAlertConfigFieldEnabled:         SloAlertConfigEnabled,
 		},
 	}
