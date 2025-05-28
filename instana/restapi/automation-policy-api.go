@@ -19,9 +19,9 @@ type Trigger struct {
 }
 
 type TypeConfiguration struct {
-	Name      string    `json:"name"`
-	Condition Condition `json:"condition"`
-	Runnable  Runnable  `json:"runnable"`
+	Name      string     `json:"name"`
+	Condition *Condition `json:"condition"`
+	Runnable  Runnable   `json:"runnable"`
 }
 
 type Condition struct {

@@ -117,7 +117,7 @@ func (ut *automationPolicyResourceUnitTest) shouldMapPolicyToState(t *testing.T)
 		TypeConfigurations: []restapi.TypeConfiguration{
 			{
 				Name: typeConfigurationName,
-				Condition: restapi.Condition{
+				Condition: &restapi.Condition{
 					Query: queryTest,
 				},
 				Runnable: restapi.Runnable{

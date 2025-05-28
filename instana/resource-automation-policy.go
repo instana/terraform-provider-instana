@@ -126,10 +126,14 @@ func (r *AutomationPolicyResource) mapParameterValuesToSchema(ac *restapi.Action
 }
 
 func (r *AutomationPolicyResource) mapConditionToSchema(typeConfiguration *restapi.TypeConfiguration) []interface{} {
-	// FIXME: should we check if the condition is set?
-	return []interface{}{map[string]interface{}{
-		AutomationPolicyFieldQuery: typeConfiguration.Condition.Query,
-	}}
+	// Check if the condition is set
+	if typeConfiguration.Condition != nil {
+		return []interface{}{map[string]interface{}{
+			AutomationPolicyFieldQuery: typeConfiguration.Condition.Query,
+		}}
+	}
+
+	return []interface{}{}
 }
 
 func (r *AutomationPolicyResource) MapStateToDataObject(d *schema.ResourceData) (*restapi.AutomationPolicy, error) {
@@ -164,7 +168,6 @@ func (r *AutomationPolicyResource) mapTriggerFromSchema(d *schema.ResourceData) 
 		}, nil
 	}
 
-	// FIXME: raise an error here, no trigger specified
 	return restapi.Trigger{}, nil
 }
 
@@ -191,11 +194,10 @@ func (r *AutomationPolicyResource) mapTypeConfigurationsFromSchema(d *schema.Res
 		return result, nil
 	}
 
-	// FIXME: raise an error here, no type configuration specified
 	return []restapi.TypeConfiguration{}, nil
 }
 
-func (r *AutomationPolicyResource) getConditionFromTypeConfigurationSchema(typeConfiguration map[string]interface{}) restapi.Condition {
+func (r *AutomationPolicyResource) getConditionFromTypeConfigurationSchema(typeConfiguration map[string]interface{}) *restapi.Condition {
 	var query string
 
 	// retrieve the condition from the type configuration
@@ -204,7 +206,7 @@ func (r *AutomationPolicyResource) getConditionFromTypeConfigurationSchema(typeC
 		// extract the query from the condition
 		query = conditions[0].(map[string]interface{})[AutomationPolicyFieldQuery].(string)
 	}
-	return restapi.Condition{
+	return &restapi.Condition{
 		Query: query,
 	}
 }
@@ -212,8 +214,6 @@ func (r *AutomationPolicyResource) getConditionFromTypeConfigurationSchema(typeC
 func (r *AutomationPolicyResource) getRunnableFromTypeConfigurationSchema(typeConfiguration map[string]interface{}) restapi.Runnable {
 	// retrieve the actions list from type configuration
 	actions := typeConfiguration[AutomationPolicyFieldAction].([]interface{})
-
-	// FIXME: if no actions raise an error
 
 	// currently we only support one action
 	action := actions[0].(map[string]interface{})
