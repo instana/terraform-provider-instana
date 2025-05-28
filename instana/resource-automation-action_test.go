@@ -361,7 +361,7 @@ func (r *automationActionResourceUnitTest) assertHttpResourceData(t *testing.T, 
 }
 
 func (r *automationActionResourceUnitTest) assertInputParameterResourceData(t *testing.T, resourceData *schema.ResourceData) {
-	inputParameter := resourceData.Get(AutomationActionFieldInputParameter).(*schema.Set).List()[0].(map[string]interface{})
+	inputParameter := resourceData.Get(AutomationActionFieldInputParameter).([]interface{})[0].(map[string]interface{})
 
 	require.Len(t, inputParameter, 7)
 	require.Equal(t, actionParamName, inputParameter[AutomationActionParameterFieldName])

@@ -114,12 +114,8 @@ var (
 		},
 	}
 	automationActionInputParameterSchema = &schema.Schema{
-		Type: schema.TypeSet,
-		Set: func(i interface{}) int {
-			return schema.HashString(i.(map[string]interface{})[AutomationActionParameterFieldName])
-		},
+		Type:     schema.TypeList,
 		Optional: true,
-		MinItems: 0,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				AutomationActionParameterFieldName: {

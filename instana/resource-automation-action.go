@@ -252,7 +252,7 @@ func (r *AutomationActionResource) mapInputParametersFromSchema(d *schema.Resour
 	val, ok := d.GetOk(AutomationActionFieldInputParameter)
 
 	if ok && val != nil {
-		schemaParameters := val.(*schema.Set).List()
+		schemaParameters := val.([]interface{})
 		result := make([]restapi.Parameter, len(schemaParameters))
 
 		i := 0
