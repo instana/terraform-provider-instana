@@ -23,6 +23,7 @@ data "instana_custom_event_spec" "host_system_load_too_high" {
 
 This data source exports the following attributes in addition to the arguments above:
 
+* `id` - The custom event specification identifier.
 * `description` - The description text of the custom event specification.
 * `query` - The dynamic filter query for which the rule should be applied to
 * `enabled` - Boolean flag if the rule should be enabled. Default is true.
