@@ -83,7 +83,7 @@ Exactly one of the following blocks must be provided:
 * `type` - Required - The type of the input parameter. It can be static or dynamic.
 * `required` - Required - Indicates if the input parameter is required.
 * `hidden` - Optional - Indicates if the input parameter is hidden. By default it is false.
-* `value` - Required - The value of the input parameter.
+* `value` - Optional - The value of the input parameter.
 
 ### Script Argument Reference
 

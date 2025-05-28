@@ -153,7 +153,7 @@ var (
 				},
 				AutomationActionParameterFieldValue: {
 					Type:        schema.TypeString,
-					Required:    true,
+					Optional:    true,
 					Description: "The value of the input parameter.",
 				},
 			},
