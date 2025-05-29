@@ -29,6 +29,18 @@ func (r *readOnlyRestResource[T]) GetAll() (*[]T, error) {
 	return objects, nil
 }
 
+func (r *readOnlyRestResource[T]) GetByQuery(queryParams map[string]string) (*[]T, error) {
+	data, err := r.client.GetByQuery(r.resourcePath, queryParams)
+	if err != nil {
+		return nil, err
+	}
+	objects, err := r.unmarshaller.UnmarshalArray(data)
+	if err != nil {
+		return nil, err
+	}
+	return objects, nil
+}
+
 func (r *readOnlyRestResource[T]) GetOne(id string) (T, error) {
 	data, err := r.client.GetOne(id, r.resourcePath)
 	if err != nil {

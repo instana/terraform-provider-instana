@@ -30,6 +30,7 @@ type RestClient interface {
 	PostWithID(data InstanaDataObject, resourcePath string) ([]byte, error)
 	Put(data InstanaDataObject, resourcePath string) ([]byte, error)
 	Delete(resourceID string, resourceBasePath string) error
+	GetByQuery(resourcePath string, queryParams map[string]string) ([]byte, error)
 	PostByQuery(resourcePath string, queryParams map[string]string) ([]byte, error)
 	PutByQuery(resourcePath string, is string, queryParams map[string]string) ([]byte, error)
 }
@@ -82,6 +83,14 @@ var emptyResponse = make([]byte, 0)
 func (client *restClientImpl) Get(resourcePath string) ([]byte, error) {
 	url := client.buildURL(resourcePath)
 	req := client.createRequest()
+	return client.executeRequest(resty.MethodGet, url, req)
+}
+
+// Get request data via HTTP GET for the given resourcePath and query parameters
+func (client *restClientImpl) GetByQuery(resourcePath string, queryParams map[string]string) ([]byte, error) {
+	url := client.buildURL(resourcePath)
+	req := client.createRequest()
+	client.appendQueryParameters(req, queryParams)
 	return client.executeRequest(resty.MethodGet, url, req)
 }
 

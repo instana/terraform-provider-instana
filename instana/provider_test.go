@@ -29,7 +29,7 @@ func TestProviderShouldContainValidSchemaDefinition(t *testing.T) {
 func TestProviderShouldContainValidResourceDefinitions(t *testing.T) {
 	config := Provider()
 
-	assert.Equal(t, 16, len(config.ResourcesMap))
+	assert.Equal(t, 18, len(config.ResourcesMap))
 
 	assert.NotNil(t, config.ResourcesMap[ResourceInstanaAPIToken])
 	assert.NotNil(t, config.ResourcesMap[ResourceInstanaApplicationConfig])
@@ -47,14 +47,19 @@ func TestProviderShouldContainValidResourceDefinitions(t *testing.T) {
 	assert.NotNil(t, config.ResourcesMap[ResourceInstanaCustomEventSpecification])
 	assert.NotNil(t, config.ResourcesMap[ResourceInstanaAlertingChannel])
 	assert.NotNil(t, config.ResourcesMap[ResourceInstanaAlertingConfig])
+	assert.NotNil(t, config.ResourcesMap[ResourceInstanaAutomationAction])
+	assert.NotNil(t, config.ResourcesMap[ResourceInstanaAutomationPolicy])
 }
 
 func TestProviderShouldContainValidDataSourceDefinitions(t *testing.T) {
 	config := Provider()
 
-	assert.Equal(t, 3, len(config.DataSourcesMap))
+	assert.Equal(t, 6, len(config.DataSourcesMap))
 
 	assert.NotNil(t, config.DataSourcesMap[DataSourceBuiltinEvent])
+	assert.NotNil(t, config.DataSourcesMap[DataSourceCustomEventSpec])
 	assert.NotNil(t, config.DataSourcesMap[DataSourceSyntheticLocation])
 	assert.NotNil(t, config.DataSourcesMap[DataSourceAlertingChannel])
+	assert.NotNil(t, config.DataSourcesMap[DataSourceAutomationAction])
+	assert.NotNil(t, config.DataSourcesMap[DataSourceHostAgents])
 }

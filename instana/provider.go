@@ -76,6 +76,8 @@ func providerResources() map[string]*schema.Resource {
 	bindResourceHandle(resources, NewGroupResourceHandle())
 	bindResourceHandle(resources, NewCustomDashboardResourceHandle())
 	bindResourceHandle(resources, NewSyntheticTestResourceHandle())
+	bindResourceHandle(resources, NewAutomationActionResourceHandle())
+	bindResourceHandle(resources, NewAutomationPolicyResourceHandle())
 	return resources
 }
 
@@ -98,5 +100,8 @@ func providerDataSources() map[string]*schema.Resource {
 	dataSources[DataSourceBuiltinEvent] = NewBuiltinEventDataSource().CreateResource()
 	dataSources[DataSourceSyntheticLocation] = NewSyntheticLocationDataSource().CreateResource()
 	dataSources[DataSourceAlertingChannel] = NewAlertingChannelDataSource().CreateResource()
+	dataSources[DataSourceAutomationAction] = NewAutomationActionDataSource().CreateResource()
+	dataSources[DataSourceCustomEventSpec] = NewCustomEventSpecificationDataSource().CreateResource()
+	dataSources[DataSourceHostAgents] = NewHostAgentsDataSource().CreateResource()
 	return dataSources
 }

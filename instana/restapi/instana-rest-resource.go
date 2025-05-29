@@ -22,6 +22,7 @@ type DataFilterFunc func(o InstanaDataObject) bool
 // implement more methods but the implementation of the provider is limited to read only.
 type ReadOnlyRestResource[T InstanaDataObject] interface {
 	GetAll() (*[]T, error)
+	GetByQuery(queryParams map[string]string) (*[]T, error)
 	GetOne(id string) (T, error)
 }
 

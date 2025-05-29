@@ -2,6 +2,7 @@ package restapi
 
 import (
 	"fmt"
+
 	"github.com/gessnerfl/terraform-provider-instana/utils"
 )
 

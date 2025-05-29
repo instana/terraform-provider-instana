@@ -63,6 +63,21 @@ func (mr *MockRestClientMockRecorder) Get(resourcePath interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockRestClient)(nil).Get), resourcePath)
 }
 
+// GetByQuery mocks base method.
+func (m *MockRestClient) GetByQuery(resourcePath string, queryParams map[string]string) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByQuery", resourcePath, queryParams)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Get indicates an expected call of Get.
+func (mr *MockRestClientMockRecorder) GetByQuery(resourcePath, queryParams interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByQuery", reflect.TypeOf((*MockRestClient)(nil).Get), resourcePath, queryParams)
+}
+
 // GetOne mocks base method.
 func (m *MockRestClient) GetOne(id, resourcePath string) ([]byte, error) {
 	m.ctrl.T.Helper()
