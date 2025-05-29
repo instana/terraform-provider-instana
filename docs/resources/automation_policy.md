@@ -42,7 +42,7 @@ resource "instana_automation_policy" "hello_world_policy" {
 ## Argument Reference
 
 * `name` - Required - The name of the automation policy.
-* `description` - Optional - The description of the automation policy.
+* `description` - Required - The description of the automation policy.
 * `tags` - Optional - A list of tags for the automation policy.
 * `trigger` - Required - The trigger for the automation policy [Details](#trigger-argument-reference)
 * `type_configuration` - Required - A list of configurations with the list of actions to run and the mode (automatic or manual) in which the policy is run. [Details](#type-configuration-argument-reference)
@@ -56,7 +56,7 @@ resource "instana_automation_policy" "hello_world_policy" {
 
 * `name` - Required - The policy type (manual or automatic).
 * `condition` - Optional - The condition that selects the list of entities on which the policy is run. Only for automatic policy type. [Details](#condition-argument-reference)
-* `action` - Optional - The description of the input parameter.
+* `action` - Required - The configuration for the automation action.
 
 ### Condition Argument Reference
 
