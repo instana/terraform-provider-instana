@@ -169,7 +169,7 @@ If the alert is triggered, after the warm up period, a notification will be gene
 The burn_rate_config block is applicable only for burn rate alerts (i.e., when `alert_type` = `burn_rate_v2`). This setting is required in such cases.
 Currently, two types of burn rate alert configurations are supported:
 - **Single Window, Single Threshold**: Uses a single threshold and a single alerting window. [Details](#burn-rate-config-fields-reference)
-- **Multiple Windows, Muttiple Thresholds**: Uses both short and long alerting windows with respective thresholds. An alert is triggered if *both* threshold is breached (AND condition).[Details](#burn-rate-config-fields-reference)
+- **Multiple Windows, Multiple Thresholds**: Uses both short and long alerting windows with respective thresholds. An alert is triggered if *both* threshold is breached (AND condition).[Details](#burn-rate-config-fields-reference)
   
 ### Burn Rate Config Fields Reference
 
