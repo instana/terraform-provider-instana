@@ -68,45 +68,75 @@ resource "instana_slo_alert_config" "error_budget_alert" {
   enabled  = true
 }
 ```
-Creating a `Burn Rate Alert`
+
+Creating a `Burn Rate alert with single alerting window`
 
 ```hcl
 resource "instana_slo_alert_config" "burn_rate_alert" {
-  name        = "terraform"
-  description = "3% of of the error budget."
-  severity    = 5
-  triggering  = true   
-  slo_ids           = ["SLOjRzdfwyLQ6KDWoq1pTvoeA", "SLOXj71OScUQ9GZWGTInq15Pg"]
-  alert_channel_ids = ["orhurggugksjfgh"]
+    name = "terraform_burn_rate_v2_alert_slo"
+    description = "Burn rate is exceeded"
+    severity = 10
+    triggering = true
+    alert_type = "burn_rate_v2"
 
-  alert_type  = "burn_rate"
-  threshold {
-    operator = ">"
-    value    = 1
-  }
-  time_threshold {
-    warm_up     = 60000
-    cool_down   = 60000
-  }
+    burn_rate_config = [
+      {
+        alert_window_type   = "SINGLE"
+        duration            = "6"
+        duration_unit_type  = "hour"
+        threshold_operator  = ">="
+        threshold_value     = "1"
+      }
+    ]
 
-  burn_rate_time_windows {
-    long_time_window {
-      duration     = 1
-      duration_type = "day"
+    slo_ids = ["SLOjRzdfwyLQ6KDWoq1pTvoeA", "SLOXj71OScUQ9GZWGTInq15Pg "]
+    alert_channel_ids = ["orhurggugksjfgh "]
+
+    time_threshold {
+        warm_up = 60000
+        cool_down = 60000
     }
 
-    short_time_window {
-      duration     = 30
-      duration_type = "minute"
+    enabled = true
+}
+``` 
+
+Creating a `Burn Rate alert with multiple alerting windows`
+
+```hcl
+resource "instana_slo_alert_config" "burn_rate_alert" {
+    name = "terraform_burn_rate_v2_alert_slo"
+    description = "Burn rate is exceeded"
+    severity = 10
+    triggering = true
+    alert_type = "burn_rate_v2"
+
+    burn_rate_config = [
+      {
+        alert_window_type   = "LONG"
+        duration            = "6"
+        duration_unit_type  = "hour"
+        threshold_operator  = ">="
+        threshold_value     = "1"
+      }, 
+    {
+        alert_window_type   = "SHORT"
+        duration            = "1"
+        duration_unit_type  = "hour"
+        threshold_operator  = ">="
+        threshold_value     = "4"
+      }
+    ]
+
+    slo_ids = ["SLOjRzdfwyLQ6KDWoq1pTvoeA", "SLOXj71OScUQ9GZWGTInq15Pg "]
+    alert_channel_ids = ["orhurggugksjfgh "]
+
+    time_threshold {
+        warm_up = 60000
+        cool_down = 60000
     }
-  }
 
-  custom_payload_field {
-    key    = "test"
-    value  = "foo"
-  }
-
-  enabled = true
+    enabled = true
 }
 ``` 
 
@@ -123,7 +153,7 @@ Ths SLO smart alert could be configured with the following arguments:
 * `custom_payload_fields` - Optional - A list of custom payload fields to include in the alert notification.
 * `threshold` - Required - A resource block defining the threshold for the alert condition. [Details](#threshold-reference)
 * `time_threshold` - Required - A resource block defining the time threshold for triggering and suppressing alerts. [Details](#time-threshold-reference)
-* `burn_rate_time_windows` - Optional - A resource block defining the burn rate time windows for evaluating alert conditions. Required for `alert_type` set to `burn_rate`. [Details](#burn-rate-time-windows-reference)
+* `burn_rate_config` - Optional - A resource block defining the burn rate config and alerting windows for evaluating alert conditions. Required for `alert_type` set to `burn_rate_v2`. [Details](#burn-rate-config-reference)
 
 ### Threshold Reference
 The alert is triggered when the threshold is evaluated by the value and operator. 
@@ -135,18 +165,23 @@ If the alert is triggered, after the warm up period, a notification will be gene
 * `warm_up` - Required - The duration (in milliseconds) for which the condition must be violated before the alert is triggered.
 * `cool_down` - Required - The duration (in milliseconds) for which the condition must remain suppressed before the alert ends.
 
-### Burn Rate Time Windows Reference
-The burn rate time window is affective only for burn rate alerts. For now, single threshold and single burn rate time window is supported. This setting is required if `alert_type` is `burn_rate`.
-* `long_time_window` - A resource block defining the long time window duration and type.  [Details](#long-time-window-reference)
-* `short_time_window` - A resource block defining the short time window duration and type. [Details](#short-time-window-reference)
+### Burn Rate Config Reference
+The burn_rate_config block is applicable only for burn rate alerts (i.e., when `alert_type` = `burn_rate_v2`). This setting is required in such cases.
+Currently, two types of burn rate alert configurations are supported:
+- **Single Window, Single Threshold**: Uses a single threshold and a single alerting window. [Details](#burn-rate-config-fields-reference)
+- **Multiple Windows, Multiple Thresholds**: Uses both short and long alerting windows with respective thresholds. An alert is triggered if *both* threshold is breached (AND condition).[Details](#burn-rate-config-fields-reference)
+  
+### Burn Rate Config Fields Reference
 
-#### Long Time Window Reference
+- `alert_window_type` – Required – Determines the type of burn rate alert. Allowed values:
+  - `SINGLE`: Defines single alerting window.
+  - `SHORT`: Defines short alerting window.
+  - `LONG`: Defines long alerting window. 
 
-* `duration` - Required - The duration for the long time window. Must be an integer greater than 0.
-* `duration_type` - Required - The unit of time for the long time window duration. Allowed values: `minute`, `hour`, `day`.
+- `duration` – Required – Duration of the alerting window in integer format. Must be greater than 0.
+- `duration_unit_type` – Required – The unit of time for the duration. Allowed values: `minute`, `hour`, `day`.
+- `threshold_value` - Required - Numeric threshold value of the alerting window.
+- `threshold_operator` - Required – Comparison operator. E.g., `>=`, `>`, `<` and `<=`.
 
-#### Short Time Window Reference
 
-* `duration` - Required - The duration for the short time window. Must be an integer greater than 0. If this field is empty, 1/12 of long window duration is used.
-* `duration_type` - Required - The unit of time for the short time window duration. Allowed values: `minute`, `hour`, `day`.
 
