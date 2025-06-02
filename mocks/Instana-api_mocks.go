@@ -278,3 +278,45 @@ func (m *MockInstanaAPI) InfraAlertConfig() restapi.RestResource[*restapi.InfraA
 	ret0, _ := ret[0].(restapi.RestResource[*restapi.InfraAlertConfig])
 	return ret0
 }
+
+// AutomationActions mocks base method.
+func (m *MockInstanaAPI) AutomationActions() restapi.RestResource[*restapi.AutomationAction] {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AutomationAction")
+	ret0, _ := ret[0].(restapi.RestResource[*restapi.AutomationAction])
+	return ret0
+}
+
+// AutomationPolicies mocks base method.
+func (m *MockInstanaAPI) AutomationPolicies() restapi.RestResource[*restapi.AutomationPolicy] {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AutomationPolicy")
+	ret0, _ := ret[0].(restapi.RestResource[*restapi.AutomationPolicy])
+	return ret0
+}
+
+// HostAgents mocks base method.
+func (m *MockInstanaAPI) HostAgents() restapi.ReadOnlyRestResource[*restapi.HostAgent] {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "HostAgent")
+	ret0, _ := ret[0].(restapi.ReadOnlyRestResource[*restapi.HostAgent])
+	return ret0
+}
+
+// AutomationActions indicates an expected call of AutomationActions.
+func (mr *MockInstanaAPIMockRecorder) AutomationActions() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AutomationAction", reflect.TypeOf((*MockInstanaAPI)(nil).AutomationActions))
+}
+
+// AutomationPolicies indicates an expected call of AutomationPolicies.
+func (mr *MockInstanaAPIMockRecorder) AutomationPolicies() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AutomationPolicy", reflect.TypeOf((*MockInstanaAPI)(nil).AutomationPolicies))
+}
+
+// HostAgents indicates an expected call of AutomationPolicies.
+func (mr *MockInstanaAPIMockRecorder) HostAgents() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HostAgent", reflect.TypeOf((*MockInstanaAPI)(nil).HostAgents))
+}

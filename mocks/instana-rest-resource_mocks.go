@@ -197,6 +197,21 @@ func (mr *MockReadOnlyRestResourceMockRecorder[T]) GetAll() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockReadOnlyRestResource[T])(nil).GetAll))
 }
 
+// GetByQuery mocks base method.
+func (m *MockReadOnlyRestResource[T]) GetByQuery(queryParams map[string]string) (*[]T, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByQuery", queryParams)
+	ret0, _ := ret[0].(*[]T)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByQuery indicates an expected call of GetAll.
+func (mr *MockReadOnlyRestResourceMockRecorder[T]) GetByQuery(queryParams map[string]string) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByQuery", reflect.TypeOf((*MockReadOnlyRestResource[T])(nil).GetByQuery), queryParams)
+}
+
 // GetOne mocks base method.
 func (m *MockReadOnlyRestResource[T]) GetOne(id string) (T, error) {
 	m.ctrl.T.Helper()
