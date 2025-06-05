@@ -12,10 +12,19 @@ resource.
   * Application Configuration - `instana_application_config`
   * Application Alert Configuration - `instana_application_alert_config`
   * Global Application Alert Configuration - `instana_global_application_alert_config`
+* Automation
+  * Automation Action - `instana_automation_action`
+  * Automation Policy - `instana_automation_policy`
+* Custom Dashboard - `instana_custom_dashboard`
 * Event Settings
   * Custom Event Specification - `instana_custom_event_specification`
   * Alerting Channels - `instana_alerting_channel`
   * Alerting Config - `instana_alerting_config`
+* Infrastructure Monitoring
+  * Infrastructure Alert Config - `instana_infra_alert_config`
+* Service Levels
+  * Service Level Objective Config - `instana_slo_config`
+  * Service Level Objective (SLO) Alert Config - `instana_slo_alert_config`
 * Settings
   * API Tokens - `instana_api_token`
   * Groups - `instana_rbac_group`
@@ -26,18 +35,16 @@ resource.
 * Website Monitoring
   * Website Monitoring Config - `instana_website_monitoring_config`
   * Website Alert Config - `instana_website_alert_config`
-* Custom Dashboard - `instana_custom_dashboard`
-* Infrastructure Monitoring
-  * Infrastructure Alert Config - `instana_infra_alert_config`
-* Service Levels
-  * Service Level Objective Config - `instana_slo_config`
-  * Service Level Objective (SLO) Alert Config - `instana_slo_alert_config`
 
 ## Supported Data Source:
 
+* Automation
+  * Automation Action - `instana_automation_action`
 * Event Settings
   * Alerting Channel - `instana_alerting_channel`
   * Builtin Event Specifications - `instana_builtin_event_spec`
+  * Custom Event Specifications - `instana_custom_event_spec`
+* Host Agent - `instana_host_agents`
 * Synthetic Settings
   * Synthetic Location - `instana_synthetic_location`
 
