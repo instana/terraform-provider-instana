@@ -1,5 +1,30 @@
 # Changelog
 
+## [v4.0.2](https://github.com/instana/terraform-provider-instana/tree/v4.0.2) (2025-06-02)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v4.0.1...v4.0.2)
+
+**Merged pull requests:**
+
+- Implement the automation framework resources [\#38](https://github.com/instana/terraform-provider-instana/pull/38) ([epostea](https://github.com/epostea))
+- Update SLO Burn Rate Smart Alert with v2 [\#37](https://github.com/instana/terraform-provider-instana/pull/37) ([nikhilgowda123](https://github.com/nikhilgowda123))
+
+## [v4.0.1](https://github.com/instana/terraform-provider-instana/tree/v4.0.1) (2025-05-26)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v4.0.0...v4.0.1)
+
+**Merged pull requests:**
+
+- Fix call to Instana API always recieving a http 500 status response code for application configs [\#36](https://github.com/instana/terraform-provider-instana/pull/36) ([rorywelch](https://github.com/rorywelch))
+
+## [v4.0.0](https://github.com/instana/terraform-provider-instana/tree/v4.0.0) (2025-04-10)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v3.3.0...v4.0.0)
+
+**Merged pull requests:**
+
+- Update alerting permissions [\#30](https://github.com/instana/terraform-provider-instana/pull/30) ([parekh-raj](https://github.com/parekh-raj))
+
 ## [v3.3.0](https://github.com/instana/terraform-provider-instana/tree/v3.3.0) (2025-04-04)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v3.2.1...v3.3.0)
