@@ -20,6 +20,14 @@ Full documentation is available on the Terraform Registry page:
 
 ---
 
+## Migration Guide
+
+If you are migrating from the deprecated `gessnerfl/instana` provider to the new official `instana/instana` provider, please refer to the detailed migration guide here:
+
+[INSTANA-PROVIDER-MIGRATION.md](./INSTANA-PROVIDER-MIGRATION.md)
+
+---
+
 ## Implementation Details
 
 ### Testing
