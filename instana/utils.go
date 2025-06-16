@@ -56,7 +56,7 @@ func ReadArrayParameterFromResource[T any](d *schema.ResourceData, key string) [
 		}
 		return array
 	}
-	return nil
+	return []T{}
 }
 
 // ReadSetParameterFromMap reads a set parameter from a map and returns it as a slice

@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/require"
+	"log"
 	"net/http"
 	"testing"
 
@@ -156,6 +157,7 @@ func (test *infraAlertConfigTest) run(t *testing.T) {
 	t.Run(fmt.Sprintf("%s should have correct resouce name", ResourceInstanaInfraAlertConfig), test.createTestResourceShouldHaveCorrectResourceName())
 	test.createTestCasesForUpdatesOfTerraformResourceStateFromModel(t)
 	t.Run(fmt.Sprintf("%s should fail to update state from model when tag filter expression is invalid", ResourceInstanaInfraAlertConfig), test.createTestCasesShouldFailToUpdateTerraformResourceStateFromModeWhenTagFilterExpressionIsNotValid())
+	t.Run(fmt.Sprintf("%s should convert JSON payload to update state followed by MapStateToDataObject", ResourceInstanaInfraAlertConfig), test.shouldConvertJsonPayloadToUpdateStateAndMapStateToDataObject())
 	test.createTestCasesForMappingOfTerraformResourceStateToModel(t)
 	t.Run(fmt.Sprintf("%s should fail to map state to model when tag filter expression is invalid", ResourceInstanaInfraAlertConfig), test.createTestCaseShouldFailToMapTerraformResourceStateToModelWhenTagFilterIsNotValid())
 	t.Run(fmt.Sprintf("%s should return errr when converting state to data model and custom field is not valid", ResourceInstanaInfraAlertConfig), test.shouldReturnErrorWhenConvertingStateToDataModelAndCustomFieldIsNotValid)
@@ -793,5 +795,73 @@ func (test *infraAlertConfigTest) createTestWithNoAlertChannelsShouldMapTerrafor
 
 		require.NoError(t, err)
 		require.Equal(t, &expectedInfraConfig, result)
+	}
+}
+
+func (test *infraAlertConfigTest) shouldConvertJsonPayloadToUpdateStateAndMapStateToDataObject() func(t *testing.T) {
+	return func(t *testing.T) {
+		jsonPayload := `{
+			"name": "[SRESLO] - Synthetics Reader External Storage Read Errors [TF]",
+			"description": "This indicates problems with the Synthetics Reader retrieving data from the External Storage.\n",
+			"tagFilterExpression": {
+				"type": "TAG_FILTER",
+				"name": "kubernetes.deployment.name",
+				"stringValue": "synthetics-reader",
+				"numberValue": null,
+				"booleanValue": null,
+				"floatValue": null,
+				"key": null,
+				"value": "synthetics-reader",
+				"operator": "EQUALS",
+				"entity": "NOT_APPLICABLE"
+			},
+			"groupBy": [],
+			"granularity": 300000,
+			"timeThreshold": {
+				"type": "violationsInSequence",
+				"timeWindow": 600000
+			},
+			"id": "JaJ9PTv-ScS-kAKcSwJGNw",
+			"created": 1750064627607,
+			"initialCreated": 1750064627607,
+			"readOnly": false,
+			"enabled": true,
+			"customPayloadFields": [],
+			"rules": [
+				{
+					"thresholdOperator": ">=",
+					"rule": {
+						"alertType": "genericRule",
+						"metricName": "metrics.gauges.KPI.foo.s3.get.error_rate",
+						"entityType": "dropwizardApplicationContainer",
+						"aggregation": "MEAN",
+						"crossSeriesAggregation": "MEAN",
+						"regex": false
+					},
+					"thresholds": {
+						"CRITICAL": {
+							"type": "staticThreshold",
+							"value": 0.05
+						}
+					}
+				}
+			],
+			"alertChannels": {}
+		}`
+
+		var config restapi.InfraAlertConfig
+		if err := json.Unmarshal([]byte(jsonPayload), &config); err != nil {
+			log.Fatal(err)
+		}
+
+		testHelper := NewTestHelper[*restapi.InfraAlertConfig](t)
+		sut := test.resourceHandle
+		resourceData := testHelper.CreateEmptyResourceDataForResourceHandle(sut)
+
+		_ = sut.UpdateState(resourceData, &config)
+
+		result, err := sut.MapStateToDataObject(resourceData)
+		require.NoError(t, err)
+		require.Equal(t, &config, result)
 	}
 }
