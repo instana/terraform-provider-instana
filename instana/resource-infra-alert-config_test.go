@@ -285,6 +285,10 @@ func (test *infraAlertConfigTest) createTestCasesForMappingOfTerraformResourceSt
 		for _, timeThreshold := range timeThresholds {
 			t.Run(fmt.Sprintf("Should update terraform state of %s from REST response with %s and %s", ResourceInstanaInfraAlertConfig, rule.name, timeThreshold.name),
 				test.createTestShouldMapTerraformResourceStateToModelCase(rule, timeThreshold))
+			t.Run(fmt.Sprintf("Should update terraform state of %s from REST response with %s and %s", ResourceInstanaInfraAlertConfig, rule.name, timeThreshold.name),
+				test.createTestWithSingleSeverityAlertChannelsShouldMapTerraformResourceStateToModelCase(rule, timeThreshold))
+			t.Run(fmt.Sprintf("Should update terraform state of %s from REST response with %s and %s", ResourceInstanaInfraAlertConfig, rule.name, timeThreshold.name),
+				test.createTestWithNoAlertChannelsShouldMapTerraformResourceStateToModelCase(rule, timeThreshold))
 		}
 	}
 }
@@ -698,5 +702,96 @@ func (test *infraAlertConfigTest) createTestInfraAlertConfigShouldDoNothingWhenE
 func (test *infraAlertConfigTest) createTestResourceShouldHaveCorrectResourceName() func(t *testing.T) {
 	return func(t *testing.T) {
 		require.Equal(t, test.resourceHandle.MetaData().ResourceName, "instana_infra_alert_config")
+	}
+}
+
+func (test *infraAlertConfigTest) createTestWithSingleSeverityAlertChannelsShouldMapTerraformResourceStateToModelCase(
+	ruleTestPair testPair[[]map[string]interface{}, restapi.RuleWithThreshold[restapi.InfraAlertRule]],
+	timeThresholdTestPair testPair[[]map[string]interface{}, restapi.InfraTimeThreshold]) func(t *testing.T) {
+
+	return func(t *testing.T) {
+		infraAlertConfigID := "infra-alert-config-id"
+		name := "infra-alert-config-name"
+		expectedInfraConfig := restapi.InfraAlertConfig{
+			ID:                  infraAlertConfigID,
+			Name:                name,
+			Description:         "infra-alert-config-description",
+			TagFilterExpression: restapi.NewStringTagFilter(restapi.TagFilterEntityNotApplicable, "host.fqdn", restapi.EqualsOperator, "fooBar"),
+			GroupBy:             []string{"metricId"},
+			AlertChannels: map[restapi.AlertSeverity][]string{
+				restapi.WarningSeverity: {"channel-1"},
+			},
+			Granularity:   restapi.Granularity300000,
+			TimeThreshold: timeThresholdTestPair.expected,
+			Rules: []restapi.RuleWithThreshold[restapi.InfraAlertRule]{
+				ruleTestPair.expected,
+			},
+			CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
+		}
+
+		testHelper := NewTestHelper[*restapi.InfraAlertConfig](t)
+		sut := test.resourceHandle
+		resourceData := testHelper.CreateEmptyResourceDataForResourceHandle(sut)
+		setValueOnResourceData(t, resourceData, InfraAlertConfigFieldName, "infra-alert-config-name")
+		setValueOnResourceData(t, resourceData, InfraAlertConfigFieldDescription, "infra-alert-config-description")
+		setValueOnResourceData(t, resourceData, InfraAlertConfigFieldAlertChannels, []interface{}{
+			map[string]interface{}{
+				ResourceFieldThresholdRuleWarningSeverity: []interface{}{"channel-1"},
+			},
+		})
+		setValueOnResourceData(t, resourceData, InfraAlertConfigFieldGroupBy, []interface{}{"metricId"})
+		setValueOnResourceData(t, resourceData, InfraAlertConfigFieldGranularity, restapi.Granularity300000)
+		setValueOnResourceData(t, resourceData, InfraAlertConfigFieldTagFilter, "host.fqdn@na EQUALS 'fooBar'")
+		setValueOnResourceData(t, resourceData, InfraAlertConfigFieldRules, ruleTestPair.input)
+		setValueOnResourceData(t, resourceData, InfraAlertConfigFieldTimeThreshold, timeThresholdTestPair.input)
+
+		resourceData.SetId(infraAlertConfigID)
+
+		result, err := sut.MapStateToDataObject(resourceData)
+
+		require.NoError(t, err)
+		require.Equal(t, &expectedInfraConfig, result)
+	}
+}
+
+func (test *infraAlertConfigTest) createTestWithNoAlertChannelsShouldMapTerraformResourceStateToModelCase(
+	ruleTestPair testPair[[]map[string]interface{}, restapi.RuleWithThreshold[restapi.InfraAlertRule]],
+	timeThresholdTestPair testPair[[]map[string]interface{}, restapi.InfraTimeThreshold]) func(t *testing.T) {
+
+	return func(t *testing.T) {
+		infraAlertConfigID := "infra-alert-config-id"
+		name := "infra-alert-config-name"
+		expectedInfraConfig := restapi.InfraAlertConfig{
+			ID:                  infraAlertConfigID,
+			Name:                name,
+			Description:         "infra-alert-config-description",
+			TagFilterExpression: restapi.NewStringTagFilter(restapi.TagFilterEntityNotApplicable, "host.fqdn", restapi.EqualsOperator, "fooBar"),
+			GroupBy:             []string{"metricId"},
+			AlertChannels:       map[restapi.AlertSeverity][]string{},
+			Granularity:         restapi.Granularity300000,
+			TimeThreshold:       timeThresholdTestPair.expected,
+			Rules: []restapi.RuleWithThreshold[restapi.InfraAlertRule]{
+				ruleTestPair.expected,
+			},
+			CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
+		}
+
+		testHelper := NewTestHelper[*restapi.InfraAlertConfig](t)
+		sut := test.resourceHandle
+		resourceData := testHelper.CreateEmptyResourceDataForResourceHandle(sut)
+		setValueOnResourceData(t, resourceData, InfraAlertConfigFieldName, "infra-alert-config-name")
+		setValueOnResourceData(t, resourceData, InfraAlertConfigFieldDescription, "infra-alert-config-description")
+		setValueOnResourceData(t, resourceData, InfraAlertConfigFieldGroupBy, []interface{}{"metricId"})
+		setValueOnResourceData(t, resourceData, InfraAlertConfigFieldGranularity, restapi.Granularity300000)
+		setValueOnResourceData(t, resourceData, InfraAlertConfigFieldTagFilter, "host.fqdn@na EQUALS 'fooBar'")
+		setValueOnResourceData(t, resourceData, InfraAlertConfigFieldRules, ruleTestPair.input)
+		setValueOnResourceData(t, resourceData, InfraAlertConfigFieldTimeThreshold, timeThresholdTestPair.input)
+
+		resourceData.SetId(infraAlertConfigID)
+
+		result, err := sut.MapStateToDataObject(resourceData)
+
+		require.NoError(t, err)
+		require.Equal(t, &expectedInfraConfig, result)
 	}
 }

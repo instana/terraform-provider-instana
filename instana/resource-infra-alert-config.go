@@ -459,16 +459,24 @@ func (c *infraAlertConfigResource) mapRuleFromSchema(d *schema.ResourceData) []r
 }
 
 func (c *infraAlertConfigResource) mapAlertChannelsFromSchema(d *schema.ResourceData) map[restapi.AlertSeverity][]string {
-	alertChannelsSlice := d.Get(InfraAlertConfigFieldAlertChannels).([]interface{})
-	alertChannels := alertChannelsSlice[0].(map[string]interface{})
-
 	alertChannelsMap := make(map[restapi.AlertSeverity][]string)
+	alertChannelsSlice, ok := d.Get(InfraAlertConfigFieldAlertChannels).([]interface{})
 
-	if _, ok := alertChannels[ResourceFieldThresholdRuleWarningSeverity]; ok {
-		alertChannelsMap[restapi.WarningSeverity] = ReadArrayParameterFromMap[string](alertChannels, ResourceFieldThresholdRuleWarningSeverity)
+	if !ok || len(alertChannelsSlice) == 0 {
+		// no alert channels defined
+		return alertChannelsMap
 	}
-	if _, ok := alertChannels[ResourceFieldThresholdRuleCriticalSeverity]; ok {
-		alertChannelsMap[restapi.CriticalSeverity] = ReadArrayParameterFromMap[string](alertChannels, ResourceFieldThresholdRuleCriticalSeverity)
+
+	alertChannels := alertChannelsSlice[0].(map[string]interface{})
+	if val, ok := alertChannels[ResourceFieldThresholdRuleWarningSeverity]; ok && val != nil {
+		if arr, ok := val.([]interface{}); ok && len(arr) > 0 {
+			alertChannelsMap[restapi.WarningSeverity] = ReadArrayParameterFromMap[string](alertChannels, ResourceFieldThresholdRuleWarningSeverity)
+		}
+	}
+	if val, ok := alertChannels[ResourceFieldThresholdRuleCriticalSeverity]; ok && val != nil {
+		if arr, ok := val.([]interface{}); ok && len(arr) > 0 {
+			alertChannelsMap[restapi.CriticalSeverity] = ReadArrayParameterFromMap[string](alertChannels, ResourceFieldThresholdRuleCriticalSeverity)
+		}
 	}
 
 	return alertChannelsMap
