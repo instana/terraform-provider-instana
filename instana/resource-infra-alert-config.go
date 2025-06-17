@@ -285,8 +285,6 @@ func (c *infraAlertConfigResource) UpdateState(d *schema.ResourceData, config *r
 
 func (c *infraAlertConfigResource) mapAlertChannelsToSchema(config *restapi.InfraAlertConfig) []map[string]interface{} {
 	alertChannels := config.AlertChannels
-
-	result := make([]map[string]interface{}, 1)
 	alertChannelsMap := make(map[string]interface{})
 
 	if v, ok := alertChannels[restapi.WarningSeverity]; ok {
@@ -297,9 +295,13 @@ func (c *infraAlertConfigResource) mapAlertChannelsToSchema(config *restapi.Infr
 		alertChannelsMap[ResourceFieldThresholdRuleCriticalSeverity] = v
 	}
 
-	result[0] = alertChannelsMap
+	// Only add to result if we have something
+	if len(alertChannelsMap) > 0 {
+		return []map[string]interface{}{alertChannelsMap}
+	}
 
-	return result
+	// Otherwise, return an empty slice
+	return []map[string]interface{}{}
 }
 
 func (c *infraAlertConfigResource) mapTimeThresholdToSchema(config *restapi.InfraAlertConfig) []map[string]interface{} {
