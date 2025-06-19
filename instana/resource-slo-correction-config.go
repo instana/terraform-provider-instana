@@ -1,8 +1,6 @@
 package instana
 
 import (
-	// "fmt"
-	// "strconv"
 	"context"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
@@ -65,7 +63,7 @@ var (
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				SloCorrectionConfigFieldSchedulingStartTime: {
-					Type:        schema.TypeString,
+					Type:        schema.TypeInt,
 					Required:    true,
 					Description: "The start time of the scheduling in Unix timestamp in milliseconds.",
 				},
@@ -110,6 +108,11 @@ var (
 	}
 )
 
+// sloCorrectionConfigResource is a struct that implements ResourceHandle for SLO Correction Config
+type sloCorrectionConfigResource struct {
+	metaData ResourceMetaData
+}
+
 // NewSloCorrectionConfigResourceHandle creates a new ResourceHandle for SLO Correction Config
 func NewSloCorrectionConfigResourceHandle() ResourceHandle[*restapi.SloCorrectionConfig] {
 	resource := &sloCorrectionConfigResource{
@@ -131,7 +134,28 @@ func NewSloCorrectionConfigResourceHandle() ResourceHandle[*restapi.SloCorrectio
 	return resource
 }
 
-// Schema
+func (r *sloCorrectionConfigResource) MetaData() *ResourceMetaData {
+	return &r.metaData
+}
+
+func (r *sloCorrectionConfigResource) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.SloCorrectionConfig] {
+	return api.SloCorrectionConfig()
+}
+
+func (r *sloCorrectionConfigResource) SetComputedFields(_ *schema.ResourceData) error {
+	return nil
+}
+
+func (r *sloCorrectionConfigResource) StateUpgraders() []schema.StateUpgrader {
+	return []schema.StateUpgrader{
+		{
+			Type:    r.sloCorrectionConfigSchemaV0().CoreConfigSchema().ImpliedType(),
+			Upgrade: r.sloCorrectionConfigStateUpgradeV0,
+			Version: 0,
+		},
+	}
+}
+
 func (r *sloCorrectionConfigResource) sloCorrectionConfigSchemaV0() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
@@ -143,4 +167,97 @@ func (r *sloCorrectionConfigResource) sloCorrectionConfigSchemaV0() *schema.Reso
 			SloCorrectionConfigFieldTags:        SloCorrectionConfigTags,
 		},
 	}
+}
+
+func (r *sloCorrectionConfigResource) sloCorrectionConfigStateUpgradeV0(_ context.Context, state map[string]interface{}, _ interface{}) (map[string]interface{}, error) {
+	if _, ok := state[SloCorrectionConfigFieldFullName]; ok {
+		state[SloCorrectionConfigFieldName] = state[SloCorrectionConfigFieldFullName]
+		delete(state, SloCorrectionConfigFieldFullName)
+	}
+	return state, nil
+}
+
+// MapStateToDataObject maps the Terraform state to the SloCorrectionConfig data object.
+func (r *sloCorrectionConfigResource) MapStateToDataObject(d *schema.ResourceData) (*restapi.SloCorrectionConfig, error) {
+	debug(">> MapStateToDataObject")
+	debug(obj2json(d))
+	sid := d.Id()
+	if len(sid) == 0 {
+		sid = RandomID()
+	}
+
+	// Construct payload for SLO Correction Config
+	schedulingData := d.Get(SloCorrectionConfigFieldScheduling).([]interface{})
+	var scheduling restapi.Scheduling
+	data := schedulingData[0].(map[string]interface{})
+	startTimeRaw := data[SloCorrectionConfigFieldSchedulingStartTime]
+	var startTime int64
+	switch v := startTimeRaw.(type) {
+	case int64:
+		startTime = v
+	case int:
+		startTime = int64(v)
+	}
+	duration := data[SloCorrectionConfigFieldSchedulingDuration].(int)
+	durationUnit := restapi.DurationUnit(data[SloCorrectionConfigFieldSchedulingDurationUnit].(string))
+	recurrentRule := ""
+	if v, ok := data[SloCorrectionConfigFieldSchedulingRecurrentRule]; ok && v != nil {
+		recurrentRule = v.(string)
+	}
+	scheduling = restapi.Scheduling{
+		StartTime:     startTime,
+		Duration:      duration,
+		DurationUnit:  durationUnit,
+		RecurrentRule: recurrentRule,
+	}
+
+	var tags []string
+	rawTags := d.Get(SloCorrectionConfigFieldTags)
+	if rawTags != nil {
+		tags = convertSetToStringSlice(rawTags.(*schema.Set))
+	} else {
+		tags = []string{}
+	}
+
+	payload := &restapi.SloCorrectionConfig{
+		ID:          sid,
+		Name:        d.Get(SloCorrectionConfigFieldName).(string),
+		Description: d.Get(SloCorrectionConfigFieldDescription).(string),
+		Active:      d.Get(SloCorrectionConfigFieldActive).(bool),
+		Scheduling:  scheduling,
+		SloIds:      convertSetToStringSlice(d.Get(SloCorrectionConfigFieldSloIds).(*schema.Set)),
+		Tags:        tags,
+	}
+
+	return payload, nil
+}
+
+// UpdateState updates the Terraform state from the SloCorrectionConfig data object.
+func (r *sloCorrectionConfigResource) UpdateState(d *schema.ResourceData, obj *restapi.SloCorrectionConfig) error {
+	d.SetId(obj.ID)
+	if err := d.Set(SloCorrectionConfigFieldName, obj.Name); err != nil {
+		return err
+	}
+	if err := d.Set(SloCorrectionConfigFieldDescription, obj.Description); err != nil {
+		return err
+	}
+	if err := d.Set(SloCorrectionConfigFieldActive, obj.Active); err != nil {
+		return err
+	}
+	scheduling := map[string]interface{}{
+		SloCorrectionConfigFieldSchedulingStartTime:     obj.Scheduling.StartTime,
+		SloCorrectionConfigFieldSchedulingDuration:      obj.Scheduling.Duration,
+		SloCorrectionConfigFieldSchedulingDurationUnit:  string(obj.Scheduling.DurationUnit),
+		SloCorrectionConfigFieldSchedulingRecurrentRule: obj.Scheduling.RecurrentRule,
+	}
+	if err := d.Set(SloCorrectionConfigFieldScheduling, []interface{}{scheduling}); err != nil {
+		return err
+	}
+	if err := d.Set(SloCorrectionConfigFieldSloIds, obj.SloIds); err != nil {
+		return err
+	}
+	if err := d.Set(SloCorrectionConfigFieldTags, obj.Tags); err != nil {
+		return err
+	}
+	return nil
 }
