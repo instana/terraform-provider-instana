@@ -3,7 +3,8 @@ package instana
 import (
 	// "fmt"
 	// "strconv"
-	// "context"
+	"context"
+
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -14,6 +15,7 @@ const ResourceInstanaSloCorrectionConfig = "instana_slo_correction_config"
 const (
 	// Slo Correction Config Field names for Terraform
 	SloCorrectionConfigFieldName                    = "name"
+	SloCorrectionConfigFieldFullName                = "full_name"
 	SloCorrectionConfigFieldDescription             = "description"
 	SloCorrectionConfigFieldActive                  = "active"
 	SloCorrectionConfigFieldScheduling              = "scheduling"
@@ -127,4 +129,18 @@ func NewSloCorrectionConfigResourceHandle() ResourceHandle[*restapi.SloCorrectio
 		},
 	}
 	return resource
+}
+
+// Schema
+func (r *sloCorrectionConfigResource) sloCorrectionConfigSchemaV0() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			SloCorrectionConfigFieldName:        SloCorrectionConfigName,
+			SloCorrectionConfigFieldDescription: SloCorrectionConfigDescription,
+			SloCorrectionConfigFieldActive:      SloCorrectionConfigActive,
+			SloCorrectionConfigFieldScheduling:  SloCorrectionConfigScheduling,
+			SloCorrectionConfigFieldSloIds:      SloCorrectionConfigSloIds,
+			SloCorrectionConfigFieldTags:        SloCorrectionConfigTags,
+		},
+	}
 }
