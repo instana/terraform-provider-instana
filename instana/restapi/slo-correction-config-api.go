@@ -12,13 +12,13 @@ const (
 
 // SloCorrectionConfig represents the REST resource of SLO Correction Configuration at Instana
 type SloCorrectionConfig struct {
-	ID          string      `json:"id"`
-	Name        string      `json:"name"`
-	Description string      `json:"description"`
-	Active      bool        `json:"active"`
-	Scheduling  Scheduling  `json:"scheduling"`
-	SloIds      []string    `json:"sloIds"`
-	Tags        []string    `json:"tags"`
+	ID          string     `json:"id"`
+	Name        string     `json:"name"`
+	Description string     `json:"description"`
+	Active      bool       `json:"active"`
+	Scheduling  Scheduling `json:"scheduling"`
+	SloIds      []string   `json:"sloIds"`
+	Tags        []string   `json:"tags"`
 }
 
 type DurationUnit string
@@ -30,10 +30,10 @@ const (
 )
 
 type Scheduling struct {
-	StartTime     int64       `json:"startTime"` // Unix timestamp in milliseconds
-	Duration      int         `json:"duration"`
+	StartTime     int64        `json:"startTime"` // Unix timestamp in milliseconds
+	Duration      int          `json:"duration"`
 	DurationUnit  DurationUnit `json:"durationUnit"`
-	RecurrentRule string      `json:"recurrentRule,omitempty"`
+	RecurrentRule string       `json:"recurrentRule,omitempty"`
 }
 
 // GetIDForResourcePath implementation of the interface InstanaDataObject

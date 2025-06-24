@@ -2,6 +2,7 @@ package instana
 
 import (
 	"context"
+	"strings"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -199,7 +200,7 @@ func (r *sloCorrectionConfigResource) MapStateToDataObject(d *schema.ResourceDat
 		startTime = int64(v)
 	}
 	duration := data[SloCorrectionConfigFieldSchedulingDuration].(int)
-	durationUnit := restapi.DurationUnit(data[SloCorrectionConfigFieldSchedulingDurationUnit].(string))
+	durationUnit := restapi.DurationUnit(strings.ToUpper(data[SloCorrectionConfigFieldSchedulingDurationUnit].(string)))
 	recurrentRule := ""
 	if v, ok := data[SloCorrectionConfigFieldSchedulingRecurrentRule]; ok && v != nil {
 		recurrentRule = v.(string)
@@ -247,7 +248,7 @@ func (r *sloCorrectionConfigResource) UpdateState(d *schema.ResourceData, obj *r
 	scheduling := map[string]interface{}{
 		SloCorrectionConfigFieldSchedulingStartTime:     obj.Scheduling.StartTime,
 		SloCorrectionConfigFieldSchedulingDuration:      obj.Scheduling.Duration,
-		SloCorrectionConfigFieldSchedulingDurationUnit:  string(obj.Scheduling.DurationUnit),
+		SloCorrectionConfigFieldSchedulingDurationUnit:  strings.ToUpper(string(obj.Scheduling.DurationUnit)),
 		SloCorrectionConfigFieldSchedulingRecurrentRule: obj.Scheduling.RecurrentRule,
 	}
 	if err := d.Set(SloCorrectionConfigFieldScheduling, []interface{}{scheduling}); err != nil {

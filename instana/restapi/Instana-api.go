@@ -116,7 +116,7 @@ func (api *baseInstanaAPI) SloAlertConfig() RestResource[*SloAlertConfig] {
 }
 
 func (api *baseInstanaAPI) SloCorrectionConfig() RestResource[*SloCorrectionConfig] {
-	return NewCreatePOSTUpdatePOSTRestResource(string(SloCorrectionConfigResourcePath), NewDefaultJSONUnmarshaller(&SloCorrectionConfig{}), api.client)
+	return NewCreatePOSTUpdatePUTRestResource(SloCorrectionConfigResourcePath, NewDefaultJSONUnmarshaller(&SloCorrectionConfig{}), api.client)
 }
 
 func (api *baseInstanaAPI) WebsiteMonitoringConfig() RestResource[*WebsiteMonitoringConfig] {
