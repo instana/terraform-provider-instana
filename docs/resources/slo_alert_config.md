@@ -145,7 +145,7 @@ Ths SLO smart alert could be configured with the following arguments:
 * `name` - Required - The name of the SLO Alert configuration.
 * `description` - Required - The description of the SLO Alert configuration.
 * `severity` - Required - The severity of the alert when triggered. Must be set to `5` for a warning alert level or `10` for a critical alert level.
-* `alert_type` - Required - The type of Smart Alert. Allowed values: `status`, `error_budget`, `burn_rate`. Defines what to alert on (e.g., SLO status, error budget percentage, or burn rate).
+* `alert_type` - Required - The type of Smart Alert. Allowed values: `status`, `error_budget`, `burn_rate_v2`. Defines what to alert on (e.g., SLO status, error budget percentage, or burn rate).
 * `slo_ids` - Required - A set of SLO IDs to monitor. Must contain at least one ID.
 * `triggering` - Optional - Flag to indicate whether an incident. Must be a boolean. Defaults to `false`.
 * `enabled` - Optional - Flag to indicate whether the alert is enabled. Must be a boolean. Defaults to `false`.
