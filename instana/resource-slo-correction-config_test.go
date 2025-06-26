@@ -29,13 +29,36 @@ func (test *sloCorrectionConfigTest) run(t *testing.T) {
 	t.Run(fmt.Sprintf("%s_HasOneStateUpgrader", ResourceInstanaSloCorrectionConfig), test.createTestResourceShouldHaveOneStateUpgrader())
 	t.Run(fmt.Sprintf("%s_HasSchemaVersionOne", ResourceInstanaSloCorrectionConfig), test.createTestResourceShouldHaveSchemaVersionOne())
 	t.Run("MapStateToDataObject_MapsAllFieldsCorrectly", test.testMapStateToDataObject())
-	// t.Run("UpdateState_SetsAllFieldsCorrectly", test.testUpdateState())
+	t.Run("UpdateState_SetsAllFieldsCorrectly", test.testUpdateState())
 	t.Run("StateUpgradeV0_MigratesFullNameToName", test.testSloCorrectionConfigStateUpgradeV0())
 	t.Run("SetComputedFields_ReturnsNil", test.testSetComputedFieldsReturnsNil())
 	t.Run("StateUpgraders_ReturnsOneUpgraderWithVersionZero", test.testStateUpgraders())
-	// t.Run("MapStateToDataObject_NoTags_EmptyTagsSlice", test.testMapStateToDataObjectWithNoTags())
+	t.Run("MapStateToDataObject_NoTags_EmptyTagsSlice", test.testMapStateToDataObjectWithNoTags())
 	t.Run("UpdateState_NoTags_EmptyTagsSlice", test.testUpdateStateWithNoTags())
 	t.Run("MapStateToDataObject_IntStartTime_HandlesIntType", test.testMapStateToDataObjectWithIntStartTime())
+}
+
+// creating a test SLO Correction Config.
+func testResourceDataForSloCorrectionConfig(t *testing.T) *schema.ResourceData {
+	r := NewSloCorrectionConfigResourceHandle()
+	resource := r.MetaData().Schema
+	d := schema.TestResourceDataRaw(t, resource, map[string]interface{}{
+		SloCorrectionConfigFieldName:        "test-correction",
+		SloCorrectionConfigFieldDescription: "desc",
+		SloCorrectionConfigFieldActive:      true,
+		SloCorrectionConfigFieldScheduling: []interface{}{
+			map[string]interface{}{
+				SloCorrectionConfigFieldSchedulingStartTime:     1741600800000,
+				SloCorrectionConfigFieldSchedulingDuration:      60,
+				SloCorrectionConfigFieldSchedulingDurationUnit:  "MINUTE",
+				SloCorrectionConfigFieldSchedulingRecurrentRule: "FREQ=DAILY",
+			},
+		},
+		SloCorrectionConfigFieldSloIds: []interface{}{"slo-1", "slo-2"},
+		SloCorrectionConfigFieldTags:   []interface{}{"tag1", "tag2"},
+	})
+	d.SetId("test-id")
+	return d
 }
 
 func (test *sloCorrectionConfigTest) createTestResourceShouldHaveResourceName() func(t *testing.T) {
@@ -100,12 +123,12 @@ func (test *sloCorrectionConfigTest) testUpdateState() func(t *testing.T) {
 		require.Equal(t, "desc-1", d.Get(SloCorrectionConfigFieldDescription))
 		require.Equal(t, false, d.Get(SloCorrectionConfigFieldActive))
 		scheduling := d.Get(SloCorrectionConfigFieldScheduling).([]interface{})[0].(map[string]interface{})
-		require.Equal(t, int64(1741600800000), scheduling[SloCorrectionConfigFieldSchedulingStartTime])
+		require.Equal(t, 1741600800000, scheduling[SloCorrectionConfigFieldSchedulingStartTime])
 		require.Equal(t, 30, scheduling[SloCorrectionConfigFieldSchedulingDuration])
 		require.Equal(t, "HOUR", scheduling[SloCorrectionConfigFieldSchedulingDurationUnit])
 		require.Equal(t, "FREQ=WEEKLY", scheduling[SloCorrectionConfigFieldSchedulingRecurrentRule])
-		require.Contains(t, d.Get(SloCorrectionConfigFieldSloIds).([]interface{}), "slo-x")
-		require.Contains(t, d.Get(SloCorrectionConfigFieldTags).([]interface{}), "tag-x")
+		require.Contains(t, d.Get(SloCorrectionConfigFieldSloIds).(*schema.Set).List(), "slo-x")
+		require.Contains(t, d.Get(SloCorrectionConfigFieldTags).(*schema.Set).List(), "tag-x")
 	}
 }
 
@@ -139,29 +162,6 @@ func (test *sloCorrectionConfigTest) testStateUpgraders() func(t *testing.T) {
 	}
 }
 
-// testResourceDataForSloCorrectionConfig creates a *schema.ResourceData with test values for SLO Correction Config.
-func testResourceDataForSloCorrectionConfig(t *testing.T) *schema.ResourceData {
-	r := NewSloCorrectionConfigResourceHandle()
-	resource := r.MetaData().Schema
-	d := schema.TestResourceDataRaw(t, resource, map[string]interface{}{
-		SloCorrectionConfigFieldName:        "test-correction",
-		SloCorrectionConfigFieldDescription: "desc",
-		SloCorrectionConfigFieldActive:      true,
-		SloCorrectionConfigFieldScheduling: []interface{}{
-			map[string]interface{}{
-				SloCorrectionConfigFieldSchedulingStartTime:     1741600800000,
-				SloCorrectionConfigFieldSchedulingDuration:      60,
-				SloCorrectionConfigFieldSchedulingDurationUnit:  "MINUTE",
-				SloCorrectionConfigFieldSchedulingRecurrentRule: "FREQ=DAILY",
-			},
-		},
-		SloCorrectionConfigFieldSloIds: []interface{}{"slo-1", "slo-2"},
-		SloCorrectionConfigFieldTags:   []interface{}{"tag1", "tag2"},
-	})
-	d.SetId("test-id")
-	return d
-}
-
 func (test *sloCorrectionConfigTest) testMapStateToDataObjectWithNoTags() func(t *testing.T) {
 	return func(t *testing.T) {
 		r := NewSloCorrectionConfigResourceHandle()
@@ -182,7 +182,6 @@ func (test *sloCorrectionConfigTest) testMapStateToDataObjectWithNoTags() func(t
 		})
 		d.SetId("id-no-tags")
 		obj, err := r.MapStateToDataObject(d)
-		fmt.Printf("obj: %+v, err: %v\n", obj, err) // Print output for debugging
 		require.NoError(t, err)
 		require.Equal(t, "id-no-tags", obj.ID)
 		require.Equal(t, "no-tags", obj.Name)
@@ -213,7 +212,6 @@ func (test *sloCorrectionConfigTest) testUpdateStateWithNoTags() func(t *testing
 				RecurrentRule: "",
 			},
 			SloIds: []string{"slo-y"},
-			Tags:   nil,
 		}
 		err := r.UpdateState(d, obj)
 		require.NoError(t, err)
@@ -227,7 +225,7 @@ func (test *sloCorrectionConfigTest) testUpdateStateWithNoTags() func(t *testing
 		require.Equal(t, "DAY", scheduling[SloCorrectionConfigFieldSchedulingDurationUnit])
 		require.Equal(t, "", scheduling[SloCorrectionConfigFieldSchedulingRecurrentRule])
 		require.Contains(t, d.Get(SloCorrectionConfigFieldSloIds).(*schema.Set).List(), "slo-y")
-		require.Empty(t, d.Get(SloCorrectionConfigFieldTags))
+		require.Empty(t, d.Get(SloCorrectionConfigFieldTags).(*schema.Set).List())
 	}
 }
 
