@@ -67,7 +67,7 @@ var (
 	SloAlertConfigDescription = &schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
-		Description: "The full name of the SLI config. The field is computed and contains the name which is sent to instana. The computation depends on the configured default_name_prefix and default_name_suffix at provider level",
+		Description: "The description of the SLI config",
 	}
 
 	//SloAlertConfigSeverity schema field definition of instana_slo_alert_config field severity
