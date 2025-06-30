@@ -1,5 +1,30 @@
 # Changelog
 
+## [v4.0.5](https://github.com/instana/terraform-provider-instana/tree/v4.0.5) (2025-06-30)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v4.0.4...v4.0.5)
+
+**Implemented enhancements:**
+
+- Use correct tag filter as part of examples in the application\_config.md [\#43](https://github.com/instana/terraform-provider-instana/pull/43) ([parekh-raj](https://github.com/parekh-raj))
+
+## [v4.0.4](https://github.com/instana/terraform-provider-instana/tree/v4.0.4) (2025-06-17)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v4.0.3...v4.0.4)
+
+**Merged pull requests:**
+
+- Fix mapAlertChannelsToSchema [\#41](https://github.com/instana/terraform-provider-instana/pull/41) ([parekh-raj](https://github.com/parekh-raj))
+
+## [v4.0.3](https://github.com/instana/terraform-provider-instana/tree/v4.0.3) (2025-06-16)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v4.0.2...v4.0.3)
+
+**Merged pull requests:**
+
+- Fix alert\_channels issue in Infra Smart Alert [\#40](https://github.com/instana/terraform-provider-instana/pull/40) ([parekh-raj](https://github.com/parekh-raj))
+- Include the automation framework resources to the doc [\#39](https://github.com/instana/terraform-provider-instana/pull/39) ([epostea](https://github.com/epostea))
+
 ## [v4.0.2](https://github.com/instana/terraform-provider-instana/tree/v4.0.2) (2025-06-02)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v4.0.1...v4.0.2)
