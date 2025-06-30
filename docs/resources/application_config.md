@@ -58,13 +58,13 @@ identifier                := [a-zA-Z_][\.a-zA-Z0-9_\-/]*
 **Basic**
 
 ```plain
-entity.service.name EQUALS 'my-service' AND entity.tag:stage EQUALS 'PROD' AND call.http.status EQUALS 404
+service.name EQUALS 'my-service' AND agent.tag:stage EQUALS 'PROD' AND call.http.status@na EQUALS 404
 ```
 
 **Calls filtered on source**
 
 ```plain
-entity.service.name@src EQUALS 'my-service' AND entity.tag:stage@src EQUALS PROD
+service.name@src EQUALS 'my-service' AND agent.tag:stage@src EQUALS 'PROD'
 ```
 
 ## Import
