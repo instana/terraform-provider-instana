@@ -70,6 +70,7 @@ func providerResources() map[string]*schema.Resource {
 	bindResourceHandle(resources, NewSliConfigResourceHandle())
 	bindResourceHandle(resources, NewSloConfigResourceHandle())
 	bindResourceHandle(resources, NewSloAlertConfigResourceHandle())
+	bindResourceHandle(resources, NewSloCorrectionConfigResourceHandle())
 	bindResourceHandle(resources, NewWebsiteMonitoringConfigResourceHandle())
 	bindResourceHandle(resources, NewInfraAlertConfigResourceHandle())
 	bindResourceHandle(resources, NewWebsiteAlertConfigResourceHandle())
