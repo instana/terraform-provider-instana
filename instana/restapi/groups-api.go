@@ -68,6 +68,34 @@ const (
 	PermissionCanConfigureLogManagement = InstanaPermission("CAN_CONFIGURE_LOG_MANAGEMENT")
 	//PermissionCanViewAccountAndBillingInformation const for Instana permission CAN_VIEW_ACCOUNT_AND_BILLING_INFORMATION
 	PermissionCanViewAccountAndBillingInformation = InstanaPermission("CAN_VIEW_ACCOUNT_AND_BILLING_INFORMATION")
+	//PermissionCanViewSyntheticTests const for Instana permission CAN_VIEW_SYNTHETIC_TESTS
+	PermissionCanViewSyntheticTests = InstanaPermission("CAN_VIEW_SYNTHETIC_TESTS")
+	//PermissionCanViewSyntheticLocations const for Instana permission CAN_VIEW_SYNTHETIC_LOCATIONS
+	PermissionCanViewSyntheticLocations = InstanaPermission("CAN_VIEW_SYNTHETIC_LOCATIONS")
+	//PermissionCanCreateThreadDump const for Instana permission CAN_CREATE_THREAD_DUMP
+	PermissionCanCreateThreadDump = InstanaPermission("CAN_CREATE_THREAD_DUMP")
+	//PermissionCanCreateHeapDump const for Instana permission CAN_CREATE_HEAP_DUMP
+	PermissionCanCreateHeapDump = InstanaPermission("CAN_CREATE_HEAP_DUMP")
+	//PermissionCanConfigureDatabaseManagement const for Instana permission CAN_CONFIGURE_DATABASE_MANAGEMENT
+	PermissionCanConfigureDatabaseManagement = InstanaPermission("CAN_CONFIGURE_DATABASE_MANAGEMENT")
+	//PermissionCanConfigureLogRetentionPeriod const for Instana permission CAN_CONFIGURE_LOG_RETENTION_PERIOD
+	PermissionCanConfigureLogRetentionPeriod = InstanaPermission("CAN_CONFIGURE_LOG_RETENTION_PERIOD")
+	//PermissionCanConfigurePersonalAPITokens const for Instana permission CAN_CONFIGURE_PERSONAL_API_TOKENS
+	PermissionCanConfigurePersonalAPITokens = InstanaPermission("CAN_CONFIGURE_PERSONAL_API_TOKENS")
+	//PermissionAccessInfrastructureAnalyze const for Instana permission ACCESS_INFRASTRUCTURE_ANALYZE
+	PermissionAccessInfrastructureAnalyze = InstanaPermission("ACCESS_INFRASTRUCTURE_ANALYZE")
+	//PermissionCanViewLogVolume const for Instana permission CAN_VIEW_LOG_VOLUME
+	PermissionCanViewLogVolume = InstanaPermission("CAN_VIEW_LOG_VOLUME")
+	//PermissionCanRunAutomationActions const for Instana permission CAN_RUN_AUTOMATION_ACTIONS
+	PermissionCanRunAutomationActions = InstanaPermission("CAN_RUN_AUTOMATION_ACTIONS")
+	//PermissionCanViewSyntheticTestResults const for Instana permission CAN_VIEW_SYNTHETIC_TEST_RESULTS
+	PermissionCanViewSyntheticTestResults = InstanaPermission("CAN_VIEW_SYNTHETIC_TEST_RESULTS")
+	//PermissionCanInvokeAlertChannel const for Instana permission CAN_INVOKE_ALERT_CHANNEL
+	PermissionCanInvokeAlertChannel = InstanaPermission("CAN_INVOKE_ALERT_CHANNEL")
+	//PermissionCanManuallyCloseIssue const for Instana permission CAN_MANUALLY_CLOSE_ISSUE
+	PermissionCanManuallyCloseIssue = InstanaPermission("CAN_MANUALLY_CLOSE_ISSUE")
+	//PermissionCanDeleteLogs const for Instana permission CAN_DELETE_LOGS
+	PermissionCanDeleteLogs = InstanaPermission("CAN_DELETE_LOGS")
 )
 
 // InstanaPermissions data type representing a slice of Instana permissions
@@ -116,6 +144,20 @@ var SupportedInstanaPermissions = InstanaPermissions{
 	PermissionCanCreatePublicCustomDashboards,
 	PermissionCanConfigureLogManagement,
 	PermissionCanViewAccountAndBillingInformation,
+	PermissionCanViewSyntheticTests,
+	PermissionCanViewSyntheticLocations,
+	PermissionCanCreateThreadDump,
+	PermissionCanCreateHeapDump,
+	PermissionCanConfigureDatabaseManagement,
+	PermissionCanConfigureLogRetentionPeriod,
+	PermissionCanConfigurePersonalAPITokens,
+	PermissionAccessInfrastructureAnalyze,
+	PermissionCanViewLogVolume,
+	PermissionCanRunAutomationActions,
+	PermissionCanViewSyntheticTestResults,
+	PermissionCanInvokeAlertChannel,
+	PermissionCanManuallyCloseIssue,
+	PermissionCanDeleteLogs,
 }
 
 // GroupsResourcePath path to Group resource of Instana RESTful API

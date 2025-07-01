@@ -37,7 +37,7 @@ resource "instana_rbac_group" "example" {
     * `infra_dfq_filter` - Optional - a dynamic focus query to restrict access to a limited set of infrastructure
       resources
     * `permissions` - Optional - the list of permissions granted to the given group. Allowed values
-      are: 
+      are:
       * `CAN_CONFIGURE_APPLICATIONS`
       * `CAN_CONFIGURE_EUM_APPLICATIONS`
       * `CAN_CONFIGURE_AGENTS`
@@ -70,6 +70,20 @@ resource "instana_rbac_group" "example" {
       * `CAN_CREATE_PUBLIC_CUSTOM_DASHBOARDS`
       * `CAN_CONFIGURE_LOG_MANAGEMENT`
       * `CAN_VIEW_ACCOUNT_AND_BILLING_INFORMATION`
+      * `CAN_VIEW_SYNTHETIC_TESTS`
+      * `CAN_VIEW_SYNTHETIC_LOCATIONS`
+      * `CAN_CREATE_THREAD_DUMP`
+      * `CAN_CREATE_HEAP_DUMP`
+      * `CAN_CONFIGURE_DATABASE_MANAGEMENT`
+      * `CAN_CONFIGURE_LOG_RETENTION_PERIOD`
+      * `CAN_CONFIGURE_PERSONAL_API_TOKENS`
+      * `ACCESS_INFRASTRUCTURE_ANALYZE`
+      * `CAN_VIEW_LOG_VOLUME`
+      * `CAN_RUN_AUTOMATION_ACTIONS`
+      * `CAN_VIEW_SYNTHETIC_TEST_RESULTS`
+      * `CAN_INVOKE_ALERT_CHANNEL`
+      * `CAN_MANUALLY_CLOSE_ISSUE`
+      * `CAN_DELETE_LOGS`
 
 ## Import
 
