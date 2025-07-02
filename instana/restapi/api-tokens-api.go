@@ -87,7 +87,7 @@ type APIToken struct {
 	CanConfigureLogRetentionPeriod           bool   `json:"canConfigureLogRetentionPeriod"`
 	CanConfigureSubtraces                    bool   `json:"canConfigureSubtraces"`
 	CanInvokeAlertChannel                    bool   `json:"canInvokeAlertChannel"`
-	CanConfigureLlm                          bool   `json:"canConfigureLlm"`
+	CanConfigureLlm                          bool   `json:"canConfigureLLM"`
 }
 
 // GetIDForResourcePath implemention of the interface InstanaDataObject
