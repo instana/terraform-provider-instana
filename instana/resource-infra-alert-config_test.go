@@ -87,6 +87,7 @@ var infraAlertConfigServerResponseTemplate = `
 		"id": "%s",
 		"name": "name %d",
 		"description": "test-alert-description",
+  		"evaluationType": "CUSTOM",
 		"alertChannels": {
 			"WARNING": ["alert-channel-id-1"],
 			"CRITICAL": ["alert-channel-id-2"]
@@ -331,6 +332,7 @@ func (test *infraAlertConfigTest) createTestShouldMapTerraformResourceStateToMod
 			Rules: []restapi.RuleWithThreshold[restapi.InfraAlertRule]{
 				ruleTestPair.expected,
 			},
+			EvaluationType: restapi.EvaluationTypeCustom,
 		}
 
 		testHelper := NewTestHelper[*restapi.InfraAlertConfig](t)
@@ -524,6 +526,7 @@ func (test *infraAlertConfigTest) createTestShouldUpdateTerraformResourceStateFr
 			Rules: []restapi.RuleWithThreshold[restapi.InfraAlertRule]{
 				ruleTestPair.input,
 			},
+			EvaluationType: restapi.EvaluationTypePerEntity,
 		}
 
 		testHelper := NewTestHelper[*restapi.InfraAlertConfig](t)
@@ -536,6 +539,7 @@ func (test *infraAlertConfigTest) createTestShouldUpdateTerraformResourceStateFr
 
 		require.Equal(t, "infra-alert-config-name", resourceData.Get(InfraAlertConfigFieldName))
 		require.Equal(t, "infra-alert-config-description", resourceData.Get(InfraAlertConfigFieldDescription))
+		require.Equal(t, "PER_ENTITY", resourceData.Get(InfraAlertConfigFieldEvaluationType))
 		require.Equal(t, []interface{}{
 			map[string]interface{}{
 				ResourceFieldThresholdRuleWarningSeverity:  []interface{}{"channel-1"},
@@ -640,6 +644,7 @@ func (test *infraAlertConfigTest) createIntegrationTestStep(httpPort int, iterat
 			resource.TestCheckResourceAttr(test.terraformResourceInstanceName, "id", id),
 			resource.TestCheckResourceAttr(test.terraformResourceInstanceName, InfraAlertConfigFieldName, formatResourceName(iteration)),
 			resource.TestCheckResourceAttr(test.terraformResourceInstanceName, InfraAlertConfigFieldDescription, "test-alert-description"),
+			resource.TestCheckResourceAttr(test.terraformResourceInstanceName, InfraAlertConfigFieldEvaluationType, "CUSTOM"),
 			resource.TestCheckResourceAttr(test.terraformResourceInstanceName, InfraAlertConfigFieldAlertChannels+".0."+ResourceFieldThresholdRuleWarningSeverity+".0", "alert-channel-id-1"),
 			resource.TestCheckResourceAttr(test.terraformResourceInstanceName, InfraAlertConfigFieldAlertChannels+".0."+ResourceFieldThresholdRuleCriticalSeverity+".0", "alert-channel-id-2"),
 			resource.TestCheckResourceAttr(test.terraformResourceInstanceName, InfraAlertConfigFieldGroupBy+".0", "metricId"),
@@ -729,12 +734,14 @@ func (test *infraAlertConfigTest) createTestWithSingleSeverityAlertChannelsShoul
 				ruleTestPair.expected,
 			},
 			CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
+			EvaluationType:        restapi.EvaluationTypePerEntity,
 		}
 
 		testHelper := NewTestHelper[*restapi.InfraAlertConfig](t)
 		sut := test.resourceHandle
 		resourceData := testHelper.CreateEmptyResourceDataForResourceHandle(sut)
 		setValueOnResourceData(t, resourceData, InfraAlertConfigFieldName, "infra-alert-config-name")
+		setValueOnResourceData(t, resourceData, InfraAlertConfigFieldEvaluationType, "PER_ENTITY")
 		setValueOnResourceData(t, resourceData, InfraAlertConfigFieldDescription, "infra-alert-config-description")
 		setValueOnResourceData(t, resourceData, InfraAlertConfigFieldAlertChannels, []interface{}{
 			map[string]interface{}{
@@ -776,6 +783,7 @@ func (test *infraAlertConfigTest) createTestWithNoAlertChannelsShouldMapTerrafor
 				ruleTestPair.expected,
 			},
 			CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
+			EvaluationType:        restapi.EvaluationTypeCustom,
 		}
 
 		testHelper := NewTestHelper[*restapi.InfraAlertConfig](t)
@@ -846,6 +854,7 @@ func (test *infraAlertConfigTest) shouldConvertJsonPayloadToUpdateStateAndMapSta
 					}
 				}
 			],
+			"evaluationType": "CUSTOM",
 			"alertChannels": {}
 		}`
 
