@@ -43,6 +43,57 @@ resource "instana_api_token" "example" {
   can_configure_global_log_smart_alerts          = true
   can_view_account_and_billing_information       = true
   can_edit_all_accessible_custom_dashboards      = true
+  
+  # Scope limitations
+  limited_applications_scope                     = true
+  limited_biz_ops_scope                          = true
+  limited_websites_scope                         = true
+  limited_kubernetes_scope                       = true
+  limited_mobile_apps_scope                      = true
+  limited_infrastructure_scope                   = true
+  limited_synthetics_scope                       = true
+  limited_vsphere_scope                          = true
+  limited_phmc_scope                             = true
+  limited_pvc_scope                              = true
+  limited_zhmc_scope                             = true
+  limited_pcf_scope                              = true
+  limited_openstack_scope                        = true
+  limited_automation_scope                       = true
+  limited_logs_scope                             = true
+  limited_nutanix_scope                          = true
+  limited_xen_server_scope                       = true
+  limited_windows_hypervisor_scope               = true
+  limited_alert_channels_scope                   = true
+  limited_linux_kvm_hypervisor_scope             = true
+  
+  # Additional permissions
+  can_configure_personal_api_tokens              = true
+  can_configure_database_management              = true
+  can_configure_automation_actions               = true
+  can_configure_automation_policies              = true
+  can_run_automation_actions                     = true
+  can_delete_automation_action_history           = true
+  can_configure_synthetic_tests                  = true
+  can_configure_synthetic_locations              = true
+  can_configure_synthetic_credentials            = true
+  can_view_synthetic_tests                       = true
+  can_view_synthetic_locations                   = true
+  can_view_synthetic_test_results                = true
+  can_use_synthetic_credentials                  = true
+  can_configure_bizops                           = true
+  can_view_business_processes                    = true
+  can_view_business_process_details              = true
+  can_view_business_activities                   = true
+  can_view_biz_alerts                            = true
+  can_delete_logs                                = true
+  can_create_heap_dump                           = true
+  can_create_thread_dump                         = true
+  can_manually_close_issue                       = true
+  can_view_log_volume                            = true
+  can_configure_log_retention_period             = true
+  can_configure_subtraces                        = true
+  can_invoke_alert_channel                       = true
+  can_configure_llm                              = true
 }
 ```
 
@@ -70,9 +121,9 @@ resource "instana_api_token" "example" {
 * `can_configure_teams` - Optional - default false - enables permission to configure teams (groups)
 * `can_configure_releases` - Optional - default false - enables permission to configure releases
 * `can_configure_log_management` - Optional - default false - enables permission to configure log management
-* `can_create_public_custom_dashboards` - Optional - default false - enables permission to create public custom dashboards 
-* `can_view_logs` - Optional - default false - enables permission to view logs 
-* `can_view_trace_details` - Optional - default false - enables permission to view trace details 
+* `can_create_public_custom_dashboards` - Optional - default false - enables permission to create public custom dashboards
+* `can_view_logs` - Optional - default false - enables permission to view logs
+* `can_view_trace_details` - Optional - default false - enables permission to view trace details
 * `can_configure_session_settings` - Optional - default false - enables permission to configure session settings
 * `can_configure_service_level_indicators` - Optional - default false - enables permission to configure service level indicators
 * `can_configure_global_alert_payload` - Optional - default false - enables permission to configure global alert payload
@@ -82,6 +133,57 @@ resource "instana_api_token" "example" {
 * `can_configure_global_log_smart_alerts` - Optional - default false - enables permission to configure global Log Smart Alerts
 * `can_view_account_and_billing_information` - Optional - default false - enables permission to view account and billing information
 * `can_edit_all_accessible_custom_dashboards` - Optional - default false - enables permission to edit all accessible custom dashboards
+
+### Scope Limitations
+* `limited_applications_scope` - Optional - default false - limits the scope to applications
+* `limited_biz_ops_scope` - Optional - default false - limits the scope to business operations
+* `limited_websites_scope` - Optional - default false - limits the scope to websites
+* `limited_kubernetes_scope` - Optional - default false - limits the scope to kubernetes
+* `limited_mobile_apps_scope` - Optional - default false - limits the scope to mobile apps
+* `limited_infrastructure_scope` - Optional - default false - limits the scope to infrastructure
+* `limited_synthetics_scope` - Optional - default false - limits the scope to synthetics
+* `limited_vsphere_scope` - Optional - default false - limits the scope to vsphere
+* `limited_phmc_scope` - Optional - default false - limits the scope to phmc
+* `limited_pvc_scope` - Optional - default false - limits the scope to pvc
+* `limited_zhmc_scope` - Optional - default false - limits the scope to zhmc
+* `limited_pcf_scope` - Optional - default false - limits the scope to pcf
+* `limited_openstack_scope` - Optional - default false - limits the scope to openstack
+* `limited_automation_scope` - Optional - default false - limits the scope to automation
+* `limited_logs_scope` - Optional - default false - limits the scope to logs
+* `limited_nutanix_scope` - Optional - default false - limits the scope to nutanix
+* `limited_xen_server_scope` - Optional - default false - limits the scope to xen server
+* `limited_windows_hypervisor_scope` - Optional - default false - limits the scope to windows hypervisor
+* `limited_alert_channels_scope` - Optional - default false - limits the scope to alert channels
+* `limited_linux_kvm_hypervisor_scope` - Optional - default false - limits the scope to linux kvm hypervisor
+
+### Additional Permissions
+* `can_configure_personal_api_tokens` - Optional - default false - enables permission to configure personal API tokens
+* `can_configure_database_management` - Optional - default false - enables permission to configure database management
+* `can_configure_automation_actions` - Optional - default false - enables permission to configure automation actions
+* `can_configure_automation_policies` - Optional - default false - enables permission to configure automation policies
+* `can_run_automation_actions` - Optional - default false - enables permission to run automation actions
+* `can_delete_automation_action_history` - Optional - default false - enables permission to delete automation action history
+* `can_configure_synthetic_tests` - Optional - default false - enables permission to configure synthetic tests
+* `can_configure_synthetic_locations` - Optional - default false - enables permission to configure synthetic locations
+* `can_configure_synthetic_credentials` - Optional - default false - enables permission to configure synthetic credentials
+* `can_view_synthetic_tests` - Optional - default false - enables permission to view synthetic tests
+* `can_view_synthetic_locations` - Optional - default false - enables permission to view synthetic locations
+* `can_view_synthetic_test_results` - Optional - default false - enables permission to view synthetic test results
+* `can_use_synthetic_credentials` - Optional - default false - enables permission to use synthetic credentials
+* `can_configure_bizops` - Optional - default false - enables permission to configure business operations
+* `can_view_business_processes` - Optional - default false - enables permission to view business processes
+* `can_view_business_process_details` - Optional - default false - enables permission to view business process details
+* `can_view_business_activities` - Optional - default false - enables permission to view business activities
+* `can_view_biz_alerts` - Optional - default false - enables permission to view business alerts
+* `can_delete_logs` - Optional - default false - enables permission to delete logs
+* `can_create_heap_dump` - Optional - default false - enables permission to create heap dumps
+* `can_create_thread_dump` - Optional - default false - enables permission to create thread dumps
+* `can_manually_close_issue` - Optional - default false - enables permission to manually close issues
+* `can_view_log_volume` - Optional - default false - enables permission to view log volume
+* `can_configure_log_retention_period` - Optional - default false - enables permission to configure log retention period
+* `can_configure_subtraces` - Optional - default false - enables permission to configure subtraces
+* `can_invoke_alert_channel` - Optional - default false - enables permission to invoke alert channels
+* `can_configure_llm` - Optional - default false - enables permission to configure LLM
 
 ## Import
 

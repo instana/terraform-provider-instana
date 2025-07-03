@@ -52,6 +52,57 @@ resource "instana_api_token" "example" {
   can_configure_global_log_smart_alerts = true
   can_view_account_and_billing_information = true
   can_edit_all_accessible_custom_dashboards = true
+  
+  # Scope limitations
+  limited_applications_scope = true
+  limited_biz_ops_scope = true
+  limited_websites_scope = true
+  limited_kubernetes_scope = true
+  limited_mobile_apps_scope = true
+  limited_infrastructure_scope = true
+  limited_synthetics_scope = true
+  limited_vsphere_scope = true
+  limited_phmc_scope = true
+  limited_pvc_scope = true
+  limited_zhmc_scope = true
+  limited_pcf_scope = true
+  limited_openstack_scope = true
+  limited_automation_scope = true
+  limited_logs_scope = true
+  limited_nutanix_scope = true
+  limited_xen_server_scope = true
+  limited_windows_hypervisor_scope = true
+  limited_alert_channels_scope = true
+  limited_linux_kvm_hypervisor_scope = true
+  
+  # Additional permissions
+  can_configure_personal_api_tokens = true
+  can_configure_database_management = true
+  can_configure_automation_actions = true
+  can_configure_automation_policies = true
+  can_run_automation_actions = true
+  can_delete_automation_action_history = true
+  can_configure_synthetic_tests = true
+  can_configure_synthetic_locations = true
+  can_configure_synthetic_credentials = true
+  can_view_synthetic_tests = true
+  can_view_synthetic_locations = true
+  can_view_synthetic_test_results = true
+  can_use_synthetic_credentials = true
+  can_configure_bizops = true
+  can_view_business_processes = true
+  can_view_business_process_details = true
+  can_view_business_activities = true
+  can_view_biz_alerts = true
+  can_delete_logs = true
+  can_create_heap_dump = true
+  can_create_thread_dump = true
+  can_manually_close_issue = true
+  can_view_log_volume = true
+  can_configure_log_retention_period = true
+  can_configure_subtraces = true
+  can_invoke_alert_channel = true
+  can_configure_llm = true
 }
 `
 
@@ -98,6 +149,57 @@ var apiTokenPermissionFields = []string{
 	APITokenFieldCanConfigureGlobalLogSmartAlerts,
 	APITokenFieldCanViewAccountAndBillingInformation,
 	APITokenFieldCanEditAllAccessibleCustomDashboards,
+	
+	// Scope limitations
+	APITokenFieldLimitedApplicationsScope,
+	APITokenFieldLimitedBizOpsScope,
+	APITokenFieldLimitedWebsitesScope,
+	APITokenFieldLimitedKubernetesScope,
+	APITokenFieldLimitedMobileAppsScope,
+	APITokenFieldLimitedInfrastructureScope,
+	APITokenFieldLimitedSyntheticsScope,
+	APITokenFieldLimitedVsphereScope,
+	APITokenFieldLimitedPhmcScope,
+	APITokenFieldLimitedPvcScope,
+	APITokenFieldLimitedZhmcScope,
+	APITokenFieldLimitedPcfScope,
+	APITokenFieldLimitedOpenstackScope,
+	APITokenFieldLimitedAutomationScope,
+	APITokenFieldLimitedLogsScope,
+	APITokenFieldLimitedNutanixScope,
+	APITokenFieldLimitedXenServerScope,
+	APITokenFieldLimitedWindowsHypervisorScope,
+	APITokenFieldLimitedAlertChannelsScope,
+	APITokenFieldLimitedLinuxKvmHypervisorScope,
+	
+	// Additional permissions
+	APITokenFieldCanConfigurePersonalAPITokens,
+	APITokenFieldCanConfigureDatabaseManagement,
+	APITokenFieldCanConfigureAutomationActions,
+	APITokenFieldCanConfigureAutomationPolicies,
+	APITokenFieldCanRunAutomationActions,
+	APITokenFieldCanDeleteAutomationActionHistory,
+	APITokenFieldCanConfigureSyntheticTests,
+	APITokenFieldCanConfigureSyntheticLocations,
+	APITokenFieldCanConfigureSyntheticCredentials,
+	APITokenFieldCanViewSyntheticTests,
+	APITokenFieldCanViewSyntheticLocations,
+	APITokenFieldCanViewSyntheticTestResults,
+	APITokenFieldCanUseSyntheticCredentials,
+	APITokenFieldCanConfigureBizops,
+	APITokenFieldCanViewBusinessProcesses,
+	APITokenFieldCanViewBusinessProcessDetails,
+	APITokenFieldCanViewBusinessActivities,
+	APITokenFieldCanViewBizAlerts,
+	APITokenFieldCanDeleteLogs,
+	APITokenFieldCanCreateHeapDump,
+	APITokenFieldCanCreateThreadDump,
+	APITokenFieldCanManuallyCloseIssue,
+	APITokenFieldCanViewLogVolume,
+	APITokenFieldCanConfigureLogRetentionPeriod,
+	APITokenFieldCanConfigureSubtraces,
+	APITokenFieldCanInvokeAlertChannel,
+	APITokenFieldCanConfigureLlm,
 }
 
 func TestCRUDOfAPITokenResourceWithMockServer(t *testing.T) {
@@ -168,7 +270,56 @@ func TestCRUDOfAPITokenResourceWithMockServer(t *testing.T) {
 			"canConfigureGlobalInfraSmartAlerts" : true,
 			"canConfigureGlobalLogSmartAlerts" : true,
 			"canViewAccountAndBillingInformation" : true,
-			"canEditAllAccessibleCustomDashboards" : true
+			"canEditAllAccessibleCustomDashboards" : true,
+			
+			"limitedApplicationsScope" : true,
+			"limitedBizOpsScope" : true,
+			"limitedWebsitesScope" : true,
+			"limitedKubernetesScope" : true,
+			"limitedMobileAppsScope" : true,
+			"limitedInfrastructureScope" : true,
+			"limitedSyntheticsScope" : true,
+			"limitedVsphereScope" : true,
+			"limitedPhmcScope" : true,
+			"limitedPvcScope" : true,
+			"limitedZhmcScope" : true,
+			"limitedPcfScope" : true,
+			"limitedOpenstackScope" : true,
+			"limitedAutomationScope" : true,
+			"limitedLogsScope" : true,
+			"limitedNutanixScope" : true,
+			"limitedXenServerScope" : true,
+			"limitedWindowsHypervisorScope" : true,
+			"limitedAlertChannelsScope" : true,
+			"limitedLinuxKvmHypervisorScope" : true,
+			
+			"canConfigurePersonalApiTokens" : true,
+			"canConfigureDatabaseManagement" : true,
+			"canConfigureAutomationActions" : true,
+			"canConfigureAutomationPolicies" : true,
+			"canRunAutomationActions" : true,
+			"canDeleteAutomationActionHistory" : true,
+			"canConfigureSyntheticTests" : true,
+			"canConfigureSyntheticLocations" : true,
+			"canConfigureSyntheticCredentials" : true,
+			"canViewSyntheticTests" : true,
+			"canViewSyntheticLocations" : true,
+			"canViewSyntheticTestResults" : true,
+			"canUseSyntheticCredentials" : true,
+			"canConfigureBizops" : true,
+			"canViewBusinessProcesses" : true,
+			"canViewBusinessProcessDetails" : true,
+			"canViewBusinessActivities" : true,
+			"canViewBizAlerts" : true,
+			"canDeleteLogs" : true,
+			"canCreateHeapDump" : true,
+			"canCreateThreadDump" : true,
+			"canManuallyCloseIssue" : true,
+			"canViewLogVolume" : true,
+			"canConfigureLogRetentionPeriod" : true,
+			"canConfigureSubtraces" : true,
+			"canInvokeAlertChannel" : true,
+			"canConfigureLlm" : true
 		}
 		`, id, accessGrantingToken, vars["internal-id"], modCount)
 		w.Header().Set(contentType, r.Header.Get(contentType))
@@ -232,6 +383,57 @@ func createAPITokenConfigResourceTestStep(httpPort int, iteration int, id string
 			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureGlobalLogSmartAlerts, trueAsString),
 			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanViewAccountAndBillingInformation, trueAsString),
 			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanEditAllAccessibleCustomDashboards, trueAsString),
+			
+			// Scope limitations
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldLimitedApplicationsScope, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldLimitedBizOpsScope, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldLimitedWebsitesScope, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldLimitedKubernetesScope, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldLimitedMobileAppsScope, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldLimitedInfrastructureScope, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldLimitedSyntheticsScope, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldLimitedVsphereScope, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldLimitedPhmcScope, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldLimitedPvcScope, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldLimitedZhmcScope, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldLimitedPcfScope, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldLimitedOpenstackScope, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldLimitedAutomationScope, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldLimitedLogsScope, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldLimitedNutanixScope, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldLimitedXenServerScope, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldLimitedWindowsHypervisorScope, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldLimitedAlertChannelsScope, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldLimitedLinuxKvmHypervisorScope, trueAsString),
+			
+			// Additional permissions
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigurePersonalAPITokens, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureDatabaseManagement, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureAutomationActions, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureAutomationPolicies, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanRunAutomationActions, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanDeleteAutomationActionHistory, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureSyntheticTests, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureSyntheticLocations, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureSyntheticCredentials, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanViewSyntheticTests, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanViewSyntheticLocations, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanViewSyntheticTestResults, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanUseSyntheticCredentials, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureBizops, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanViewBusinessProcesses, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanViewBusinessProcessDetails, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanViewBusinessActivities, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanViewBizAlerts, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanDeleteLogs, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanCreateHeapDump, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanCreateThreadDump, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanManuallyCloseIssue, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanViewLogVolume, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureLogRetentionPeriod, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureSubtraces, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanInvokeAlertChannel, trueAsString),
+			resource.TestCheckResourceAttr(testAPITokenDefinition, APITokenFieldCanConfigureLlm, trueAsString),
 		),
 	}
 }
@@ -275,6 +477,57 @@ func TestAPITokenSchemaDefinitionIsValid(t *testing.T) {
 	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureGlobalLogSmartAlerts, false)
 	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanViewAccountAndBillingInformation, false)
 	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanEditAllAccessibleCustomDashboards, false)
+	
+	// Scope limitations
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldLimitedApplicationsScope, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldLimitedBizOpsScope, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldLimitedWebsitesScope, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldLimitedKubernetesScope, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldLimitedMobileAppsScope, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldLimitedInfrastructureScope, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldLimitedSyntheticsScope, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldLimitedVsphereScope, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldLimitedPhmcScope, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldLimitedPvcScope, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldLimitedZhmcScope, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldLimitedPcfScope, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldLimitedOpenstackScope, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldLimitedAutomationScope, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldLimitedLogsScope, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldLimitedNutanixScope, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldLimitedXenServerScope, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldLimitedWindowsHypervisorScope, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldLimitedAlertChannelsScope, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldLimitedLinuxKvmHypervisorScope, false)
+	
+	// Additional permissions
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigurePersonalAPITokens, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureDatabaseManagement, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureAutomationActions, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureAutomationPolicies, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanRunAutomationActions, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanDeleteAutomationActionHistory, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureSyntheticTests, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureSyntheticLocations, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureSyntheticCredentials, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanViewSyntheticTests, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanViewSyntheticLocations, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanViewSyntheticTestResults, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanUseSyntheticCredentials, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureBizops, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanViewBusinessProcesses, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanViewBusinessProcessDetails, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanViewBusinessActivities, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanViewBizAlerts, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanDeleteLogs, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanCreateHeapDump, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanCreateThreadDump, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanManuallyCloseIssue, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanViewLogVolume, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureLogRetentionPeriod, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureSubtraces, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanInvokeAlertChannel, false)
+	schemaAssert.AssertSchemaIsOfTypeBooleanWithDefault(APITokenFieldCanConfigureLlm, false)
 }
 
 func TestAPITokenResourceShouldHaveSchemaVersionOne(t *testing.T) {
