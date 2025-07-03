@@ -21,6 +21,7 @@ const (
 	InfraAlertConfigFieldGroupBy               = "group_by"
 	InfraAlertConfigFieldGranularity           = "granularity"
 	InfraAlertConfigFieldTagFilter             = "tag_filter"
+	InfraAlertConfigFieldEvaluationType        = "evaluation_type"
 
 	InfraAlertConfigFieldRules       = "rules"
 	InfraAlertConfigFieldGenericRule = "generic_rule"
@@ -78,6 +79,15 @@ var (
 		},
 		Optional:    true,
 		Description: "The grouping tags used to group the metric results.",
+	}
+	infraAlertConfigSchemaEvaluationType = &schema.Schema{
+		Type:     schema.TypeString,
+		Optional: true,
+		Default:  string(restapi.EvaluationTypeCustom),
+		ValidateFunc: validation.StringInSlice(
+			restapi.SupportedInfraAlertEvaluationTypes.ToStringSlice(), false,
+		),
+		Description: "Defines how the alert is evaluated. Possible values: 'PER_ENTITY', 'CUSTOM'. Default is 'CUSTOM'.",
 	}
 	infraAlertConfigSchemaRules = &schema.Schema{
 		Type:        schema.TypeList,
@@ -194,15 +204,16 @@ var (
 )
 
 var infraAlertConfigResourceSchema = map[string]*schema.Schema{
-	InfraAlertConfigFieldName:          infraAlertConfigSchemaName,
-	InfraAlertConfigFieldDescription:   infraAlertConfigSchemaDescription,
-	InfraAlertConfigFieldAlertChannels: infraAlertConfigSchemaAlertChannels,
-	InfraAlertConfigFieldGroupBy:       infraAlertConfigSchemaGroupBy,
-	InfraAlertConfigFieldGranularity:   infraAlertConfigSchemaGranularity,
-	InfraAlertConfigFieldTagFilter:     OptionalTagFilterExpressionSchema,
-	InfraAlertConfigFieldRules:         infraAlertConfigSchemaRules,
-	DefaultCustomPayloadFieldsName:     buildCustomPayloadFields(),
-	InfraAlertConfigFieldTimeThreshold: infraAlertConfigSchemaTimeThreshold,
+	InfraAlertConfigFieldName:           infraAlertConfigSchemaName,
+	InfraAlertConfigFieldDescription:    infraAlertConfigSchemaDescription,
+	InfraAlertConfigFieldAlertChannels:  infraAlertConfigSchemaAlertChannels,
+	InfraAlertConfigFieldGroupBy:        infraAlertConfigSchemaGroupBy,
+	InfraAlertConfigFieldGranularity:    infraAlertConfigSchemaGranularity,
+	InfraAlertConfigFieldTagFilter:      OptionalTagFilterExpressionSchema,
+	InfraAlertConfigFieldRules:          infraAlertConfigSchemaRules,
+	DefaultCustomPayloadFieldsName:      buildCustomPayloadFields(),
+	InfraAlertConfigFieldTimeThreshold:  infraAlertConfigSchemaTimeThreshold,
+	InfraAlertConfigFieldEvaluationType: infraAlertConfigSchemaEvaluationType,
 }
 
 func (c *infraAlertConfigResource) stateUpgradeV0(_ context.Context, state map[string]interface{}, _ interface{}) (map[string]interface{}, error) {
@@ -271,15 +282,16 @@ func (c *infraAlertConfigResource) UpdateState(d *schema.ResourceData, config *r
 	d.SetId(config.ID)
 
 	return tfutils.UpdateState(d, map[string]interface{}{
-		InfraAlertConfigFieldName:          config.Name,
-		InfraAlertConfigFieldDescription:   config.Description,
-		InfraAlertConfigFieldTagFilter:     normalizedTagFilterString,
-		InfraAlertConfigFieldGroupBy:       config.GroupBy,
-		InfraAlertConfigFieldAlertChannels: c.mapAlertChannelsToSchema(config),
-		InfraAlertConfigFieldGranularity:   config.Granularity,
-		InfraAlertConfigFieldTimeThreshold: c.mapTimeThresholdToSchema(config),
-		DefaultCustomPayloadFieldsName:     mapCustomPayloadFieldsToSchema(config),
-		InfraAlertConfigFieldRules:         c.mapRulesToSchema(config),
+		InfraAlertConfigFieldName:           config.Name,
+		InfraAlertConfigFieldDescription:    config.Description,
+		InfraAlertConfigFieldTagFilter:      normalizedTagFilterString,
+		InfraAlertConfigFieldGroupBy:        config.GroupBy,
+		InfraAlertConfigFieldAlertChannels:  c.mapAlertChannelsToSchema(config),
+		InfraAlertConfigFieldGranularity:    config.Granularity,
+		InfraAlertConfigFieldTimeThreshold:  c.mapTimeThresholdToSchema(config),
+		DefaultCustomPayloadFieldsName:      mapCustomPayloadFieldsToSchema(config),
+		InfraAlertConfigFieldRules:          c.mapRulesToSchema(config),
+		InfraAlertConfigFieldEvaluationType: string(config.EvaluationType),
 	})
 }
 
@@ -393,6 +405,11 @@ func (c *infraAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) 
 		return &restapi.InfraAlertConfig{}, err
 	}
 
+	evaluationTypeStr, ok := d.Get(InfraAlertConfigFieldEvaluationType).(string)
+	if !ok || evaluationTypeStr == "" {
+		evaluationTypeStr = "CUSTOM"
+	}
+
 	return &restapi.InfraAlertConfig{
 		ID:                    d.Id(),
 		Name:                  d.Get(InfraAlertConfigFieldName).(string),
@@ -404,6 +421,7 @@ func (c *infraAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) 
 		TimeThreshold:         c.mapTimeThresholdFromSchema(d),
 		CustomerPayloadFields: customPayloadFields,
 		Rules:                 c.mapRuleFromSchema(d),
+		EvaluationType:        restapi.InfraAlertEvaluationType(evaluationTypeStr),
 	}, nil
 }
 
