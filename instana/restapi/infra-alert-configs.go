@@ -13,6 +13,7 @@ type InfraAlertConfig struct {
 	CustomerPayloadFields []CustomPayloadField[any]           `json:"customPayloadFields"`
 	Rules                 []RuleWithThreshold[InfraAlertRule] `json:"rules"`
 	AlertChannels         map[AlertSeverity][]string          `json:"alertChannels"`
+	EvaluationType        InfraAlertEvaluationType            `json:"evaluationType"`
 }
 
 func (config *InfraAlertConfig) GetIDForResourcePath() string {
