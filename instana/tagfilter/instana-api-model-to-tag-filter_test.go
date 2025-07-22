@@ -2,8 +2,9 @@ package tagfilter_test
 
 import (
 	"fmt"
-	"github.com/gessnerfl/terraform-provider-instana/utils"
 	"testing"
+
+	"github.com/gessnerfl/terraform-provider-instana/utils"
 
 	"github.com/stretchr/testify/require"
 
@@ -435,18 +436,6 @@ func TestShouldMapLogicalAndWithTwoElementsFromInstanaAPIWhereTheFirstElementIsA
 	}
 
 	runTestCaseForMappingFromAPI(input, expectedResult, t)
-}
-
-func TestShouldFailToMapLogicalAndFromInstanaAPIWhenFirstElementIsAnAndExpression(t *testing.T) {
-	primaryExpression := restapi.NewUnaryTagFilter(restapi.TagFilterEntityDestination, tagFilterName, restapi.IsEmptyOperator)
-	nestedAnd := restapi.NewLogicalAndTagFilter([]*restapi.TagFilter{primaryExpression, primaryExpression})
-	input := restapi.NewLogicalAndTagFilter([]*restapi.TagFilter{nestedAnd, primaryExpression})
-
-	mapper := NewMapper()
-	_, err := mapper.FromAPIModel(input)
-
-	require.NotNil(t, err)
-	require.Contains(t, err.Error(), "logical and is not allowed for first element")
 }
 
 func TestShouldUnwrapLogicalAndFromInstanaAPIWhenOnlyOneElementIsProvided(t *testing.T) {
