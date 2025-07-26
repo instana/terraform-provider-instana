@@ -12,6 +12,10 @@ The ID of the resource which is also used as unique identifier in Instana is aut
 ## Example Usage
 
 ```hcl
+locals {
+  widgets = jsondecode(file("${path.module}/widgets.json"))
+}
+
 resource "instana_custom_dashboard" "example" {
   title = "Example Dashboard"
 
@@ -32,7 +36,7 @@ resource "instana_custom_dashboard" "example" {
     relation_type = "GLOBAL"
   }
 
-  widgets = file("${path.module}/widgets.json")
+  widgets = jsonencode(local.widgets)
 }
 ``` 
 
