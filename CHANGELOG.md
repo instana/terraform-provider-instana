@@ -1,5 +1,34 @@
 # Changelog
 
+## [v5.1.0](https://github.com/instana/terraform-provider-instana/tree/v5.1.0) (2025-07-24)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v5.0.0...v5.1.0)
+
+**Implemented enhancements:**
+
+- Extend instana\_infra\_alert\_config schema with evaluation\_type [\#46](https://github.com/instana/terraform-provider-instana/pull/46) ([parekh-raj](https://github.com/parekh-raj))
+
+**Merged pull requests:**
+
+- Importing an Application config fix [\#48](https://github.com/instana/terraform-provider-instana/pull/48) ([rorywelch](https://github.com/rorywelch))
+
+## [v5.0.0](https://github.com/instana/terraform-provider-instana/tree/v5.0.0) (2025-07-03)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v4.0.5...v5.0.0)
+
+**Implemented enhancements:**
+
+- API Token Permission Support Update [\#45](https://github.com/instana/terraform-provider-instana/pull/45) ([ChinmayGitHub](https://github.com/ChinmayGitHub))
+- Update group permissions  [\#44](https://github.com/instana/terraform-provider-instana/pull/44) ([ChinmayGitHub](https://github.com/ChinmayGitHub))
+
+**Closed issues:**
+
+- Newer permissions should be added to the list of allowed permissions. [\#20](https://github.com/instana/terraform-provider-instana/issues/20)
+
+**Merged pull requests:**
+
+- Created SLO correction configuration resources [\#42](https://github.com/instana/terraform-provider-instana/pull/42) ([dhinesh-sr](https://github.com/dhinesh-sr))
+
 ## [v4.0.5](https://github.com/instana/terraform-provider-instana/tree/v4.0.5) (2025-06-30)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v4.0.4...v4.0.5)
