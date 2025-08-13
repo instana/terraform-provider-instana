@@ -18,6 +18,7 @@ resource "instana_infra_alert_config" "example" {
   }
   group_by = ["metricId"]
   granularity = 600000
+  evaluation_type = "CUSTOM"
   tag_filter = "host.fqdn@na STARTS_WITH 'fooBar'"
 
   rules {
@@ -75,6 +76,7 @@ resource "instana_infra_alert_config" "example" {
 * `alert_channels` - Optional - Set of alert channel IDs associated with the severity. [Details](#alert-channels-reference)
 * `group_by` - Optional - The grouping tags used to group the metric results.
 * `granularity` - Optional - default `600000` - The evaluation granularity used for detection of violations of the defined threshold. In other words, it defines the size of the tumbling window used. Allowed values: `300000`, `600000`, `900000`, `1200000`, `800000`
+* `evaluation_type` - Optional - default `CUSTOM` - The evaluation type of the infrastructure alert config. Allowed values: `CUSTOM`, `PER_ENTITY`. [Details](#evaluation-type-reference)
 * `tag_filter` - Optional - The tag filter of the global application alert config. [Details](#tag-filter-argument-reference)
 * `rules` - Required - A list of rules where each rule is associated with multiple thresholds and their corresponding severity levels. This enables more complex alert configurations with validations to ensure consistent and logical threshold-severity combinations. [Details](#rules-argument-reference)
 * `time_threshold` - Required - Indicates the type of violation of the defined threshold.  [Details](#time-threshold-argument-reference)
@@ -84,6 +86,11 @@ resource "instana_infra_alert_config" "example" {
 
 * `warning` - Optional - List of alert channel IDs associated with the warning severity 
 * `critical` - Optional - List of alert channel IDs associated with the critical severity
+
+### Evaluation Type Reference
+
+* `CUSTOM`: This is a default option. With this, you can combine all metrics in scope into a single metric per group.
+* `PER_ENTITY`: To monitor each metric individually and trigger alerts for each individual entity.
 
 ### Tag Filter Argument Reference
 The **tag_filter** defines which entities should be included into the application. It supports:
