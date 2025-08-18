@@ -29,7 +29,7 @@ func (r *sloConfigResource) mapSliTimeWindowListFromState(stateObject map[string
 				Duration:     *GetPointerFromMap[int](data, SloConfigFieldDuration),
 				DurationUnit: *GetPointerFromMap[string](data, SloConfigFieldDurationUnit),
 				Timezone:     *GetPointerFromMap[string](data, SloConfigFieldTimezone),
-				StartTime: *GetPointerFromMap[float64](data, SloConfigFieldStartTimestamp),
+				StartTime:    *GetPointerFromMap[float64](data, SloConfigFieldStartTimestamp),
 			}, nil
 
 		}
