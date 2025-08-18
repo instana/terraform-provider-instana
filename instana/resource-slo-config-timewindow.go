@@ -19,6 +19,7 @@ func (r *sloConfigResource) mapSliTimeWindowListFromState(stateObject map[string
 				Type:         SloConfigRollingTimeWindow,
 				Duration:     *GetPointerFromMap[int](data, SloConfigFieldDuration),
 				DurationUnit: *GetPointerFromMap[string](data, SloConfigFieldDurationUnit),
+				Timezone:     *GetPointerFromMap[string](data, SloConfigFieldTimezone),
 			}, nil
 		}
 		if details, ok := stateObject[SloConfigFixedTimeWindow]; ok && r.isSet(details) {
@@ -27,7 +28,8 @@ func (r *sloConfigResource) mapSliTimeWindowListFromState(stateObject map[string
 				Type:         SloConfigFixedTimeWindow,
 				Duration:     *GetPointerFromMap[int](data, SloConfigFieldDuration),
 				DurationUnit: *GetPointerFromMap[string](data, SloConfigFieldDurationUnit),
-				StartTime:    *GetPointerFromMap[float64](data, SloConfigFieldStartTimestamp),
+				Timezone:     *GetPointerFromMap[string](data, SloConfigFieldTimezone),
+				StartTime: *GetPointerFromMap[float64](data, SloConfigFieldStartTimestamp),
 			}, nil
 
 		}
@@ -48,6 +50,7 @@ func (r *sloConfigResource) mapSloTimeWindowToState(sloConfig *restapi.SloConfig
 					map[string]interface{}{
 						SloConfigFieldDuration:     timeWindow[SloConfigAPIFieldDuration],
 						SloConfigFieldDurationUnit: timeWindow[SloConfigAPIFieldDurationUnit].(string),
+						SloConfigFieldTimezone:     timeWindow[SloConfigAPIFieldTimezone].(string),
 					},
 				},
 			}
@@ -58,6 +61,7 @@ func (r *sloConfigResource) mapSloTimeWindowToState(sloConfig *restapi.SloConfig
 					map[string]interface{}{
 						SloConfigFieldDuration:       timeWindow[SloConfigAPIFieldDuration],
 						SloConfigFieldDurationUnit:   timeWindow[SloConfigAPIFieldDurationUnit].(string),
+						SloConfigFieldTimezone:       timeWindow[SloConfigAPIFieldTimezone].(string),
 						SloConfigFieldStartTimestamp: timeWindow[SloConfigAPIFieldStartTimestamp].(float64),
 					},
 				},

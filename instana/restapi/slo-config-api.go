@@ -94,12 +94,14 @@ type SloRollingTimeWindow struct {
 	Type         string `json:"type"`
 	Duration     int    `json:"duration"`
 	DurationUnit string `json:"durationUnit"`
+	Timezone     string `json:"timezone"`
 }
 
 type SloFixedTimeWindow struct {
 	Type         string  `json:"type"`
 	Duration     int     `json:"duration"`
 	DurationUnit string  `json:"durationUnit"`
+	Timezone     string  `json:"timezone"`
 	StartTime    float64 `json:"startTimestamp"`
 }
 

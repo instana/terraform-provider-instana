@@ -14,7 +14,7 @@ const SloConfigFromTerraformIdPrefix = "SLOTF"
 const (
 	//SloConfigField names for terraform
 	SloConfigFieldName                      = "name"
-	SloConfigFieldFullName					= "full_name"
+	SloConfigFieldFullName                  = "full_name"
 	SloConfigFieldTarget                    = "target"
 	SloConfigFieldTags                      = "tags"
 	SloConfigFieldLastUpdated               = "last_updated"
@@ -39,6 +39,7 @@ const (
 	SloConfigFieldTrafficType               = "traffic_type"
 	SloConfigFieldDuration                  = "duration"
 	SloConfigFieldDurationUnit              = "duration_unit"
+	SloConfigFieldTimezone                  = "timezone"
 	SloConfigFieldStartTimestamp            = "start_timestamp"
 
 	// Slo entity types for terraform
@@ -65,6 +66,7 @@ const (
 	SloConfigAPIFieldAggregation     = "aggregation"
 	SloConfigAPIFieldDuration        = "duration"
 	SloConfigAPIFieldDurationUnit    = "durationUnit"
+	SloConfigAPIFieldTimezone        = "timezone"
 	SloConfigAPIFieldStartTimestamp  = "startTimestamp"
 	SloConfigAPIFieldTrafficType     = "trafficType"
 	SloConfigAPIFieldGoodEventFilter = "goodEventFilterExpression"
@@ -273,6 +275,12 @@ var (
 		Description:  "The boundary scope for the entity configuration (ALL, INBOUND)",
 	}
 
+	SloConfigSchemaTimezone = &schema.Schema{
+		Type:        schema.TypeString,
+		Optional:    true,
+		Description: "The Timezone for the SLO configuration. If not set, UTC is used by default.",
+	}
+
 	SloConfigSchemaStartTime = &schema.Schema{
 		Type:        schema.TypeFloat,
 		Required:    true,
@@ -464,6 +472,7 @@ var (
 						Schema: map[string]*schema.Schema{
 							"duration":      SloConfigSchemaDuration,
 							"duration_unit": SloConfigSchemaDurationUnit,
+							"timezone":      SloConfigSchemaTimezone,
 						},
 					},
 					ExactlyOneOf: sloConfigTimeWindowTypeKeys,
@@ -477,6 +486,7 @@ var (
 						Schema: map[string]*schema.Schema{
 							"duration":        SloConfigSchemaDuration,
 							"duration_unit":   SloConfigSchemaDurationUnit,
+							"timezone":        SloConfigSchemaTimezone,
 							"start_timestamp": SloConfigSchemaStartTime,
 						},
 					},
