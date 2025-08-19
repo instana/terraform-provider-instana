@@ -19,7 +19,7 @@ func (r *sloConfigResource) mapSliTimeWindowListFromState(stateObject map[string
 				Type:         SloConfigRollingTimeWindow,
 				Duration:     *GetPointerFromMap[int](data, SloConfigFieldDuration),
 				DurationUnit: *GetPointerFromMap[string](data, SloConfigFieldDurationUnit),
-				Timezone:     *GetPointerFromMap[string](data, SloConfigFieldTimezone),
+				Timezone:     GetStringOrEmpty(data, SloConfigFieldTimezone),
 			}, nil
 		}
 		if details, ok := stateObject[SloConfigFixedTimeWindow]; ok && r.isSet(details) {
@@ -28,7 +28,7 @@ func (r *sloConfigResource) mapSliTimeWindowListFromState(stateObject map[string
 				Type:         SloConfigFixedTimeWindow,
 				Duration:     *GetPointerFromMap[int](data, SloConfigFieldDuration),
 				DurationUnit: *GetPointerFromMap[string](data, SloConfigFieldDurationUnit),
-				Timezone:     *GetPointerFromMap[string](data, SloConfigFieldTimezone),
+				Timezone:     GetStringOrEmpty(data, SloConfigFieldTimezone),
 				StartTime:    *GetPointerFromMap[float64](data, SloConfigFieldStartTimestamp),
 			}, nil
 
@@ -71,4 +71,13 @@ func (r *sloConfigResource) mapSloTimeWindowToState(sloConfig *restapi.SloConfig
 	}
 
 	return nil, fmt.Errorf("unsupported time window type %s", reflect.TypeOf(sloTimeWindow).Name())
+}
+
+func GetStringOrEmpty(m map[string]interface{}, key string) string {
+	if v, ok := m[key]; ok && v != nil {
+		if s, ok := v.(string); ok {
+			return s
+		}
+	}
+	return ""
 }
