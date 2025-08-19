@@ -2,10 +2,11 @@ package instana_test
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/gessnerfl/terraform-provider-instana/instana"
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/stretchr/testify/require"
-	"testing"
 
 	. "github.com/gessnerfl/terraform-provider-instana/instana"
 )
@@ -17,7 +18,7 @@ const (
 	sloTarget           = 0.90
 	sloThreshold        = 20
 	sloAggregation      = "MEAN"
-   )
+)
 
 func TestSloConfig(t *testing.T) {
 	terraformResourceInstanceName := ResourceInstanaSloConfig + ".example"
@@ -32,7 +33,6 @@ type sloConfigTest struct {
 	terraformResourceInstanceName string
 	resourceHandle                ResourceHandle[*restapi.SloConfig]
 }
-
 
 var sloConfigTerraformTemplate = `
 resource "instana_slo_config" "app_1" {
@@ -58,6 +58,7 @@ resource "instana_slo_config" "app_1" {
 	  fixed {
 		duration = 1
 		duration_unit = "day"
+        timezone = "Europe/Dublin"
 		start_timestamp = var.fixed_timewindow_start_timestamp
 	  }
 	}
@@ -96,6 +97,7 @@ var sloConfigServerResponseTemplate = `
     "type": "fixed",
     "duration": 1,
     "durationUnit": "day",
+    "timezone": "Europe/Dublin",
     "startTimestamp": 1698552000000
   }
 }
@@ -143,7 +145,7 @@ func (r *sloConfigTest) thresholdShouldBeGreaterThanZero() func(t *testing.T) {
 			map[string]interface{}{
 				SloConfigTimeBasedLatencyIndicator: []interface{}{
 					map[string]interface{}{
-						SloConfigFieldThreshold  : 0,
+						SloConfigFieldThreshold:   0,
 						SloConfigFieldAggregation: sloAggregation,
 					},
 				},
@@ -152,7 +154,7 @@ func (r *sloConfigTest) thresholdShouldBeGreaterThanZero() func(t *testing.T) {
 
 		setValueOnResourceData(t, resourceData, SloConfigFieldSloIndicator, sloConfigIndicatorStateObject)
 
-		_, metricThresholdIsOK:= resourceData.GetOk("indicator.0.time_based_latency.0.threshold")
+		_, metricThresholdIsOK := resourceData.GetOk("indicator.0.time_based_latency.0.threshold")
 		require.False(t, metricThresholdIsOK)
 	}
 }
@@ -187,66 +189,67 @@ func (r *sloConfigTest) applicationIDShouldBeRequiredForApplicationEntity() func
 }
 
 func (r *sloConfigTest) shouldMapApplicationSloConfigToAPIObject() func(t *testing.T) {
-    return func(t *testing.T) {
-        testHelper := NewTestHelper[*restapi.SloConfig](t)
-        resourceHandle := NewSloConfigResourceHandle()
-        resourceData := testHelper.CreateEmptyResourceDataForResourceHandle(resourceHandle)
-        resourceData.SetId("test-slo-id")
+	return func(t *testing.T) {
+		testHelper := NewTestHelper[*restapi.SloConfig](t)
+		resourceHandle := NewSloConfigResourceHandle()
+		resourceData := testHelper.CreateEmptyResourceDataForResourceHandle(resourceHandle)
+		resourceData.SetId("test-slo-id")
 
-        setValueOnResourceData(t, resourceData, instana.SloConfigFieldName, "Test SLO Config")
-        setValueOnResourceData(t, resourceData, instana.SloConfigFieldTarget, 99.9)
-        setValueOnResourceData(t, resourceData, instana.SloConfigFieldTags, []interface{}{"tag1", "tag2"})
+		setValueOnResourceData(t, resourceData, instana.SloConfigFieldName, "Test SLO Config")
+		setValueOnResourceData(t, resourceData, instana.SloConfigFieldTarget, 99.9)
+		setValueOnResourceData(t, resourceData, instana.SloConfigFieldTags, []interface{}{"tag1", "tag2"})
 
-        setValueOnResourceData(t, resourceData, instana.SloConfigFieldSloEntity, []interface{}{
-            map[string]interface{}{
-                instana.SloConfigApplicationEntity: []interface{}{
-                    map[string]interface{}{
-                        instana.SloConfigFieldApplicationID:       "app-123",
-                        instana.SloConfigFieldBoundaryScope:       "ALL",
-                        instana.SloConfigFieldFilterExpression:    "tag:env=prod",
-                        instana.SloConfigFieldIncludeInternal:     false,
-                        instana.SloConfigFieldIncludeSynthetic:    true,
-                        instana.SloConfigFieldServiceID:           "service-id",
-                        instana.SloConfigFieldEndpointID:          "endpoint-id",
-                    },
-                },
-            },
-        })
+		setValueOnResourceData(t, resourceData, instana.SloConfigFieldSloEntity, []interface{}{
+			map[string]interface{}{
+				instana.SloConfigApplicationEntity: []interface{}{
+					map[string]interface{}{
+						instana.SloConfigFieldApplicationID:    "app-123",
+						instana.SloConfigFieldBoundaryScope:    "ALL",
+						instana.SloConfigFieldFilterExpression: "tag:env=prod",
+						instana.SloConfigFieldIncludeInternal:  false,
+						instana.SloConfigFieldIncludeSynthetic: true,
+						instana.SloConfigFieldServiceID:        "service-id",
+						instana.SloConfigFieldEndpointID:       "endpoint-id",
+					},
+				},
+			},
+		})
 
-        // Indicator (time_based_latency)
-        setValueOnResourceData(t, resourceData, instana.SloConfigFieldSloIndicator, []interface{}{
-            map[string]interface{}{
-                instana.SloConfigTimeBasedLatencyIndicator: []interface{}{
-                    map[string]interface{}{
-                        "threshold":   20.0,
-                        "aggregation": "MEAN",
-                    },
-                },
-            },
-        })
+		// Indicator (time_based_latency)
+		setValueOnResourceData(t, resourceData, instana.SloConfigFieldSloIndicator, []interface{}{
+			map[string]interface{}{
+				instana.SloConfigTimeBasedLatencyIndicator: []interface{}{
+					map[string]interface{}{
+						"threshold":   20.0,
+						"aggregation": "MEAN",
+					},
+				},
+			},
+		})
 
-        // Time window (rolling)
-        setValueOnResourceData(t, resourceData, instana.SloConfigFieldSloTimeWindow, []interface{}{
-            map[string]interface{}{
-                "rolling": []interface{}{
-                    map[string]interface{}{
-                        "duration":      7,
-                        "duration_unit": "day",
-                    },
-                },
-            },
-        })
+		// Time window (rolling)
+		setValueOnResourceData(t, resourceData, instana.SloConfigFieldSloTimeWindow, []interface{}{
+			map[string]interface{}{
+				"rolling": []interface{}{
+					map[string]interface{}{
+						"duration":      7,
+						"duration_unit": "day",
+						"timezone":      "Europe/Dublin",
+					},
+				},
+			},
+		})
 
-        apiObject, err := resourceHandle.MapStateToDataObject(resourceData)
-        require.NoError(t, err, "MapStateToDataObject should not return an error for valid input")
+		apiObject, err := resourceHandle.MapStateToDataObject(resourceData)
+		require.NoError(t, err, "MapStateToDataObject should not return an error for valid input")
 
-        // Log for debugging
-        // t.Log("API Object", apiObject)
+		// Log for debugging
+		// t.Log("API Object", apiObject)
 
-        require.Equal(t, "test-slo-id", apiObject.ID, "ID should match")
-        require.Equal(t, "Test SLO Config", apiObject.Name, "Name should match")
-        require.Equal(t, 99.9, apiObject.Target, "Target should match")
-        require.Equal(t, []interface{}{"tag1", "tag2"}, apiObject.Tags, "Tags should match")
+		require.Equal(t, "test-slo-id", apiObject.ID, "ID should match")
+		require.Equal(t, "Test SLO Config", apiObject.Name, "Name should match")
+		require.Equal(t, 99.9, apiObject.Target, "Target should match")
+		require.Equal(t, []interface{}{"tag1", "tag2"}, apiObject.Tags, "Tags should match")
 
 		// Validate entity
 		require.NotNil(t, apiObject.Entity, "Entity should not be nil")
@@ -262,84 +265,86 @@ func (r *sloConfigTest) shouldMapApplicationSloConfigToAPIObject() func(t *testi
 		require.NotNil(t, entity.EndpointID, "EndpointID should not be nil")
 		require.Equal(t, "endpoint-id", *entity.EndpointID, "EndpointID should match")
 
-        // Validate indicator
-        require.NotNil(t, apiObject.Indicator, "Indicator should not be nil")
-        indicator, ok := apiObject.Indicator.(restapi.SloTimeBasedLatencyIndicator)
-        require.True(t, ok, "Indicator should be a SloTimeBasedLatencyIndicator")
-        require.Equal(t, instana.SloConfigAPIIndicatorBlueprintLatency, indicator.Blueprint, "Blueprint should match")
-        require.Equal(t, instana.SloConfigAPIIndicatorMeasurementTypeTimeBased, indicator.Type, "Type should match")
-        require.Equal(t, 20.0, indicator.Threshold, "Threshold should match")
-        require.Equal(t, "MEAN", indicator.Aggregation, "Aggregation should match")
+		// Validate indicator
+		require.NotNil(t, apiObject.Indicator, "Indicator should not be nil")
+		indicator, ok := apiObject.Indicator.(restapi.SloTimeBasedLatencyIndicator)
+		require.True(t, ok, "Indicator should be a SloTimeBasedLatencyIndicator")
+		require.Equal(t, instana.SloConfigAPIIndicatorBlueprintLatency, indicator.Blueprint, "Blueprint should match")
+		require.Equal(t, instana.SloConfigAPIIndicatorMeasurementTypeTimeBased, indicator.Type, "Type should match")
+		require.Equal(t, 20.0, indicator.Threshold, "Threshold should match")
+		require.Equal(t, "MEAN", indicator.Aggregation, "Aggregation should match")
 
-        // Validate time window
-        require.NotNil(t, apiObject.TimeWindow, "TimeWindow should not be nil")
-        timeWindow, ok := apiObject.TimeWindow.(restapi.SloRollingTimeWindow)
-        require.True(t, ok, "TimeWindow should be a SloRollingTimeWindow")
-        require.Equal(t, instana.SloConfigRollingTimeWindow, timeWindow.Type, "Type should match")
-        require.Equal(t, 7, timeWindow.Duration, "Duration should match")
-        require.Equal(t, "day", timeWindow.DurationUnit, "DurationUnit should match")
-    }
+		// Validate time window
+		require.NotNil(t, apiObject.TimeWindow, "TimeWindow should not be nil")
+		timeWindow, ok := apiObject.TimeWindow.(restapi.SloRollingTimeWindow)
+		require.True(t, ok, "TimeWindow should be a SloRollingTimeWindow")
+		require.Equal(t, instana.SloConfigRollingTimeWindow, timeWindow.Type, "Type should match")
+		require.Equal(t, 7, timeWindow.Duration, "Duration should match")
+		require.Equal(t, "day", timeWindow.DurationUnit, "DurationUnit should match")
+		require.Equal(t, "Europe/Dublin", timeWindow.Timezone, "Timezone should match")
+	}
 }
 
 func (r *sloConfigTest) shouldMapWebsiteSloConfigToAPIObject() func(t *testing.T) {
-    return func(t *testing.T) {
-        testHelper := NewTestHelper[*restapi.SloConfig](t)
-        resourceHandle := NewSloConfigResourceHandle()
-        resourceData := testHelper.CreateEmptyResourceDataForResourceHandle(resourceHandle)
-        resourceData.SetId("test-slo-id")
+	return func(t *testing.T) {
+		testHelper := NewTestHelper[*restapi.SloConfig](t)
+		resourceHandle := NewSloConfigResourceHandle()
+		resourceData := testHelper.CreateEmptyResourceDataForResourceHandle(resourceHandle)
+		resourceData.SetId("test-slo-id")
 
-        setValueOnResourceData(t, resourceData, instana.SloConfigFieldName, "Test SLO Config")
-        setValueOnResourceData(t, resourceData, instana.SloConfigFieldTarget, 99.9)
-        setValueOnResourceData(t, resourceData, instana.SloConfigFieldTags, []interface{}{"tag1", "tag2"})
+		setValueOnResourceData(t, resourceData, instana.SloConfigFieldName, "Test SLO Config")
+		setValueOnResourceData(t, resourceData, instana.SloConfigFieldTarget, 99.9)
+		setValueOnResourceData(t, resourceData, instana.SloConfigFieldTags, []interface{}{"tag1", "tag2"})
 
 		// website entity
-        setValueOnResourceData(t, resourceData, instana.SloConfigFieldSloEntity, []interface{}{
-            map[string]interface{}{
-                instana.SloConfigWebsiteEntity: []interface{}{
-                    map[string]interface{}{
+		setValueOnResourceData(t, resourceData, instana.SloConfigFieldSloEntity, []interface{}{
+			map[string]interface{}{
+				instana.SloConfigWebsiteEntity: []interface{}{
+					map[string]interface{}{
 
 						instana.SloConfigFieldWebsiteID:        "web-123",
 						instana.SloConfigFieldFilterExpression: "AND",
 						instana.SloConfigFieldBeaconType:       "httpRequest",
-                    },
-                },
-            },
-        })
+					},
+				},
+			},
+		})
 
-        // Indicator (time_based_latency)
-        setValueOnResourceData(t, resourceData, instana.SloConfigFieldSloIndicator, []interface{}{
-            map[string]interface{}{
-                instana.SloConfigTimeBasedLatencyIndicator: []interface{}{
-                    map[string]interface{}{
-                        "threshold":   20.0,
-                        "aggregation": "MEAN",
-                    },
-                },
-            },
-        })
+		// Indicator (time_based_latency)
+		setValueOnResourceData(t, resourceData, instana.SloConfigFieldSloIndicator, []interface{}{
+			map[string]interface{}{
+				instana.SloConfigTimeBasedLatencyIndicator: []interface{}{
+					map[string]interface{}{
+						"threshold":   20.0,
+						"aggregation": "MEAN",
+					},
+				},
+			},
+		})
 
-        // Time window (rolling)
-        setValueOnResourceData(t, resourceData, instana.SloConfigFieldSloTimeWindow, []interface{}{
-            map[string]interface{}{
-                "rolling": []interface{}{
-                    map[string]interface{}{
-                        "duration":      7,
-                        "duration_unit": "day",
-                    },
-                },
-            },
-        })
+		// Time window (rolling)
+		setValueOnResourceData(t, resourceData, instana.SloConfigFieldSloTimeWindow, []interface{}{
+			map[string]interface{}{
+				"rolling": []interface{}{
+					map[string]interface{}{
+						"duration":      7,
+						"duration_unit": "day",
+						"timezone":      "",
+					},
+				},
+			},
+		})
 
-        apiObject, err := resourceHandle.MapStateToDataObject(resourceData)
-        require.NoError(t, err, "MapStateToDataObject should not return an error for valid input")
+		apiObject, err := resourceHandle.MapStateToDataObject(resourceData)
+		require.NoError(t, err, "MapStateToDataObject should not return an error for valid input")
 
-        // Log for debugging
-        // t.Log("API Object", apiObject)
+		// Log for debugging
+		// t.Log("API Object", apiObject)
 
-        require.Equal(t, "test-slo-id", apiObject.ID, "ID should match")
-        require.Equal(t, "Test SLO Config", apiObject.Name, "Name should match")
-        require.Equal(t, 99.9, apiObject.Target, "Target should match")
-        require.Equal(t, []interface{}{"tag1", "tag2"}, apiObject.Tags, "Tags should match")
+		require.Equal(t, "test-slo-id", apiObject.ID, "ID should match")
+		require.Equal(t, "Test SLO Config", apiObject.Name, "Name should match")
+		require.Equal(t, 99.9, apiObject.Target, "Target should match")
+		require.Equal(t, []interface{}{"tag1", "tag2"}, apiObject.Tags, "Tags should match")
 
 		// Validate entity
 		require.NotNil(t, apiObject.Entity, "Entity should not be nil")
@@ -351,83 +356,84 @@ func (r *sloConfigTest) shouldMapWebsiteSloConfigToAPIObject() func(t *testing.T
 		require.NotNil(t, entity.BeaconType, "BeaconType should not be nil")
 		require.Equal(t, "httpRequest", *entity.BeaconType, "BeaconType should match")
 
-        // Validate indicator
-        require.NotNil(t, apiObject.Indicator, "Indicator should not be nil")
-        indicator, ok := apiObject.Indicator.(restapi.SloTimeBasedLatencyIndicator)
-        require.True(t, ok, "Indicator should be a SloTimeBasedLatencyIndicator")
-        require.Equal(t, instana.SloConfigAPIIndicatorBlueprintLatency, indicator.Blueprint, "Blueprint should match")
-        require.Equal(t, instana.SloConfigAPIIndicatorMeasurementTypeTimeBased, indicator.Type, "Type should match")
-        require.Equal(t, 20.0, indicator.Threshold, "Threshold should match")
-        require.Equal(t, "MEAN", indicator.Aggregation, "Aggregation should match")
+		// Validate indicator
+		require.NotNil(t, apiObject.Indicator, "Indicator should not be nil")
+		indicator, ok := apiObject.Indicator.(restapi.SloTimeBasedLatencyIndicator)
+		require.True(t, ok, "Indicator should be a SloTimeBasedLatencyIndicator")
+		require.Equal(t, instana.SloConfigAPIIndicatorBlueprintLatency, indicator.Blueprint, "Blueprint should match")
+		require.Equal(t, instana.SloConfigAPIIndicatorMeasurementTypeTimeBased, indicator.Type, "Type should match")
+		require.Equal(t, 20.0, indicator.Threshold, "Threshold should match")
+		require.Equal(t, "MEAN", indicator.Aggregation, "Aggregation should match")
 
-        // Validate time window
-        require.NotNil(t, apiObject.TimeWindow, "TimeWindow should not be nil")
-        timeWindow, ok := apiObject.TimeWindow.(restapi.SloRollingTimeWindow)
-        require.True(t, ok, "TimeWindow should be a SloRollingTimeWindow")
-        require.Equal(t, instana.SloConfigRollingTimeWindow, timeWindow.Type, "Type should match")
-        require.Equal(t, 7, timeWindow.Duration, "Duration should match")
-        require.Equal(t, "day", timeWindow.DurationUnit, "DurationUnit should match")
-    }
+		// Validate time window
+		require.NotNil(t, apiObject.TimeWindow, "TimeWindow should not be nil")
+		timeWindow, ok := apiObject.TimeWindow.(restapi.SloRollingTimeWindow)
+		require.True(t, ok, "TimeWindow should be a SloRollingTimeWindow")
+		require.Equal(t, instana.SloConfigRollingTimeWindow, timeWindow.Type, "Type should match")
+		require.Equal(t, 7, timeWindow.Duration, "Duration should match")
+		require.Equal(t, "day", timeWindow.DurationUnit, "DurationUnit should match")
+		require.Empty(t, timeWindow.Timezone, "Timezone should be Empty")
+	}
 }
 
 func (r *sloConfigTest) shouldMapSyntheticSloConfigToAPIObject() func(t *testing.T) {
-    return func(t *testing.T) {
-        testHelper := NewTestHelper[*restapi.SloConfig](t)
-        resourceHandle := NewSloConfigResourceHandle()
-        resourceData := testHelper.CreateEmptyResourceDataForResourceHandle(resourceHandle)
-        resourceData.SetId("test-slo-id")
+	return func(t *testing.T) {
+		testHelper := NewTestHelper[*restapi.SloConfig](t)
+		resourceHandle := NewSloConfigResourceHandle()
+		resourceData := testHelper.CreateEmptyResourceDataForResourceHandle(resourceHandle)
+		resourceData.SetId("test-slo-id")
 
-        setValueOnResourceData(t, resourceData, instana.SloConfigFieldName, "Test SLO Config")
-        setValueOnResourceData(t, resourceData, instana.SloConfigFieldTarget, 99.9)
-        setValueOnResourceData(t, resourceData, instana.SloConfigFieldTags, []interface{}{"tag1", "tag2"})
+		setValueOnResourceData(t, resourceData, instana.SloConfigFieldName, "Test SLO Config")
+		setValueOnResourceData(t, resourceData, instana.SloConfigFieldTarget, 99.9)
+		setValueOnResourceData(t, resourceData, instana.SloConfigFieldTags, []interface{}{"tag1", "tag2"})
 
 		// entity
-        setValueOnResourceData(t, resourceData, instana.SloConfigFieldSloEntity, []interface{}{
-            map[string]interface{}{
-                instana.SloConfigSyntheticEntity: []interface{}{
-                    map[string]interface{}{
+		setValueOnResourceData(t, resourceData, instana.SloConfigFieldSloEntity, []interface{}{
+			map[string]interface{}{
+				instana.SloConfigSyntheticEntity: []interface{}{
+					map[string]interface{}{
 						instana.SloConfigFieldSyntheticTestIDs: []interface{}{"test-id-1", "test-id-2"},
-						SloConfigFieldFilterExpression        : "AND",
+						SloConfigFieldFilterExpression:         "AND",
+					},
+				},
+			},
+		})
 
-                    },
-                },
-            },
-        })
+		// Indicator (time_based_latency)
+		setValueOnResourceData(t, resourceData, instana.SloConfigFieldSloIndicator, []interface{}{
+			map[string]interface{}{
+				instana.SloConfigTimeBasedLatencyIndicator: []interface{}{
+					map[string]interface{}{
+						"threshold":   20.0,
+						"aggregation": "MEAN",
+					},
+				},
+			},
+		})
 
-        // Indicator (time_based_latency)
-        setValueOnResourceData(t, resourceData, instana.SloConfigFieldSloIndicator, []interface{}{
-            map[string]interface{}{
-                instana.SloConfigTimeBasedLatencyIndicator: []interface{}{
-                    map[string]interface{}{
-                        "threshold":   20.0,
-                        "aggregation": "MEAN",
-                    },
-                },
-            },
-        })
+		// Time window (rolling)
+		setValueOnResourceData(t, resourceData, instana.SloConfigFieldSloTimeWindow, []interface{}{
+			map[string]interface{}{
+				"rolling": []interface{}{
+					map[string]interface{}{
+						"duration":      7,
+						"duration_unit": "day",
+						"timezone":      "UTC",
+					},
+				},
+			},
+		})
 
-        // Time window (rolling)
-        setValueOnResourceData(t, resourceData, instana.SloConfigFieldSloTimeWindow, []interface{}{
-            map[string]interface{}{
-                "rolling": []interface{}{
-                    map[string]interface{}{
-                        "duration":      7,
-                        "duration_unit": "day",
-                    },
-                },
-            },
-        })
+		apiObject, err := resourceHandle.MapStateToDataObject(resourceData)
+		require.NoError(t, err, "MapStateToDataObject should not return an error for valid input")
 
-        apiObject, err := resourceHandle.MapStateToDataObject(resourceData)
-        require.NoError(t, err, "MapStateToDataObject should not return an error for valid input")
+		// Log for debugging
+		// t.Log("API Object", apiObject)
 
-        // Log for debugging
-        // t.Log("API Object", apiObject)
-
-        require.Equal(t, "test-slo-id", apiObject.ID, "ID should match")
-        require.Equal(t, "Test SLO Config", apiObject.Name, "Name should match")
-        require.Equal(t, 99.9, apiObject.Target, "Target should match")
-        require.Equal(t, []interface{}{"tag1", "tag2"}, apiObject.Tags, "Tags should match")
+		require.Equal(t, "test-slo-id", apiObject.ID, "ID should match")
+		require.Equal(t, "Test SLO Config", apiObject.Name, "Name should match")
+		require.Equal(t, 99.9, apiObject.Target, "Target should match")
+		require.Equal(t, []interface{}{"tag1", "tag2"}, apiObject.Tags, "Tags should match")
 
 		// Validate entity
 		require.NotNil(t, apiObject.Entity, "Entity should not be nil")
@@ -437,21 +443,22 @@ func (r *sloConfigTest) shouldMapSyntheticSloConfigToAPIObject() func(t *testing
 		require.NotNil(t, entity.SyntheticTestIDs, "SyntheticTestIDs should not be nil")
 		require.Equal(t, []interface{}{"test-id-1", "test-id-2"}, entity.SyntheticTestIDs, "SyntheticTestIDs should match expected values")
 
-        // Validate indicator
-        require.NotNil(t, apiObject.Indicator, "Indicator should not be nil")
-        indicator, ok := apiObject.Indicator.(restapi.SloTimeBasedLatencyIndicator)
-        require.True(t, ok, "Indicator should be a SloTimeBasedLatencyIndicator")
-        require.Equal(t, instana.SloConfigAPIIndicatorBlueprintLatency, indicator.Blueprint, "Blueprint should match")
-        require.Equal(t, instana.SloConfigAPIIndicatorMeasurementTypeTimeBased, indicator.Type, "Type should match")
-        require.Equal(t, 20.0, indicator.Threshold, "Threshold should match")
-        require.Equal(t, "MEAN", indicator.Aggregation, "Aggregation should match")
+		// Validate indicator
+		require.NotNil(t, apiObject.Indicator, "Indicator should not be nil")
+		indicator, ok := apiObject.Indicator.(restapi.SloTimeBasedLatencyIndicator)
+		require.True(t, ok, "Indicator should be a SloTimeBasedLatencyIndicator")
+		require.Equal(t, instana.SloConfigAPIIndicatorBlueprintLatency, indicator.Blueprint, "Blueprint should match")
+		require.Equal(t, instana.SloConfigAPIIndicatorMeasurementTypeTimeBased, indicator.Type, "Type should match")
+		require.Equal(t, 20.0, indicator.Threshold, "Threshold should match")
+		require.Equal(t, "MEAN", indicator.Aggregation, "Aggregation should match")
 
-        // Validate time window
-        require.NotNil(t, apiObject.TimeWindow, "TimeWindow should not be nil")
-        timeWindow, ok := apiObject.TimeWindow.(restapi.SloRollingTimeWindow)
-        require.True(t, ok, "TimeWindow should be a SloRollingTimeWindow")
-        require.Equal(t, instana.SloConfigRollingTimeWindow, timeWindow.Type, "Type should match")
-        require.Equal(t, 7, timeWindow.Duration, "Duration should match")
-        require.Equal(t, "day", timeWindow.DurationUnit, "DurationUnit should match")
-    }
+		// Validate time window
+		require.NotNil(t, apiObject.TimeWindow, "TimeWindow should not be nil")
+		timeWindow, ok := apiObject.TimeWindow.(restapi.SloRollingTimeWindow)
+		require.True(t, ok, "TimeWindow should be a SloRollingTimeWindow")
+		require.Equal(t, instana.SloConfigRollingTimeWindow, timeWindow.Type, "Type should match")
+		require.Equal(t, 7, timeWindow.Duration, "Duration should match")
+		require.Equal(t, "day", timeWindow.DurationUnit, "DurationUnit should match")
+		require.Equal(t, "UTC", timeWindow.Timezone, "Timezone should match for synthetic SLO")
+	}
 }
