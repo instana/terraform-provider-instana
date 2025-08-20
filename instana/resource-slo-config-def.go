@@ -278,6 +278,7 @@ var (
 	SloConfigSchemaTimezone = &schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
+		Default:     "UTC",
 		Description: "The Timezone for the SLO configuration. If not set, UTC is used by default.",
 	}
 

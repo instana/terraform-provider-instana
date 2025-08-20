@@ -50,7 +50,7 @@ func (r *sloConfigResource) mapSloTimeWindowToState(sloConfig *restapi.SloConfig
 					map[string]interface{}{
 						SloConfigFieldDuration:     timeWindow[SloConfigAPIFieldDuration],
 						SloConfigFieldDurationUnit: timeWindow[SloConfigAPIFieldDurationUnit].(string),
-						SloConfigFieldTimezone:     timeWindow[SloConfigAPIFieldTimezone].(string),
+						SloConfigFieldTimezone:     GetStringOrEmpty(timeWindow, SloConfigAPIFieldTimezone),
 					},
 				},
 			}
@@ -61,7 +61,7 @@ func (r *sloConfigResource) mapSloTimeWindowToState(sloConfig *restapi.SloConfig
 					map[string]interface{}{
 						SloConfigFieldDuration:       timeWindow[SloConfigAPIFieldDuration],
 						SloConfigFieldDurationUnit:   timeWindow[SloConfigAPIFieldDurationUnit].(string),
-						SloConfigFieldTimezone:       timeWindow[SloConfigAPIFieldTimezone].(string),
+						SloConfigFieldTimezone:       GetStringOrEmpty(timeWindow, SloConfigAPIFieldTimezone),
 						SloConfigFieldStartTimestamp: timeWindow[SloConfigAPIFieldStartTimestamp].(float64),
 					},
 				},
