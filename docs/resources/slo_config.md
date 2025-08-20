@@ -191,13 +191,13 @@ One of the elements below must be configured:
 
 * `duration` - Required - The duration of the time window. Must be an integer.
 * `duration_unit` - Required - The unit of the duration. Allowed values: `day`, `week`.
-* `timezone` - Optional - The timezone the SLO config is bound with. Defaults to `UTC` if not defined.
+* `timezone` - Optional - The timezone associated with the SLO configuration. Defaults to `UTC` when not specified.
 
 Fixed Time Window Reference
 
 * `duration` - Required - The duration of the time window. Must be an integer.
 * `duration_unit` - Required - The unit of the duration. Allowed values: `day`, `week`.
-* `timezone` - Optional - The timezone the SLO config is bound with. Defaults to `UTC` if not defined.
+* `timezone` - Optional - The timezone associated with the SLO configuration. Defaults to `UTC` when not specified.
 * `initial_evaluation_timestamp` - Required - the starting timestamp for the Fixed Time Window.
 
 ### Tag Filter Expression Reference
