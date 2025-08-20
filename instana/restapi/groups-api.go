@@ -96,6 +96,30 @@ const (
 	PermissionCanManuallyCloseIssue = InstanaPermission("CAN_MANUALLY_CLOSE_ISSUE")
 	//PermissionCanDeleteLogs const for Instana permission CAN_DELETE_LOGS
 	PermissionCanDeleteLogs = InstanaPermission("CAN_DELETE_LOGS")
+	//PermissionCanConfigureSyntheticTests const for Instana permission CAN_CONFIGURE_SYNTHETIC_TESTS
+	PermissionCanConfigureSyntheticTests = InstanaPermission("CAN_CONFIGURE_SYNTHETIC_TESTS")
+	//PermissionCanViewBusinessProcessDetails const for Instana permission CAN_VIEW_BUSINESS_PROCESS_DETAILS
+	PermissionCanViewBusinessProcessDetails = InstanaPermission("CAN_VIEW_BUSINESS_PROCESS_DETAILS")
+	//PermissionCanViewBizOpsAlerts const for Instana permission CAN_VIEW_BIZOPS_ALERTS
+	PermissionCanViewBizOpsAlerts = InstanaPermission("CAN_VIEW_BIZOPS_ALERTS")
+	//PermissionCanUseSyntheticCredentials const for Instana permission CAN_USE_SYNTHETIC_CREDENTIALS
+	PermissionCanUseSyntheticCredentials = InstanaPermission("CAN_USE_SYNTHETIC_CREDENTIALS")
+	//PermissionCanDeleteAutomationActionHistory const for Instana permission CAN_DELETE_AUTOMATION_ACTION_HISTORY
+	PermissionCanDeleteAutomationActionHistory = InstanaPermission("CAN_DELETE_AUTOMATION_ACTION_HISTORY")
+	//PermissionCanConfigureSyntheticLocations const for Instana permission CAN_CONFIGURE_SYNTHETIC_LOCATIONS
+	PermissionCanConfigureSyntheticLocations = InstanaPermission("CAN_CONFIGURE_SYNTHETIC_LOCATIONS")
+	//PermissionCanConfigureSyntheticCredentials const for Instana permission CAN_CONFIGURE_SYNTHETIC_CREDENTIALS
+	PermissionCanConfigureSyntheticCredentials = InstanaPermission("CAN_CONFIGURE_SYNTHETIC_CREDENTIALS")
+	//PermissionCanConfigureSubtraces const for Instana permission CAN_CONFIGURE_SUBTRACES
+	PermissionCanConfigureSubtraces = InstanaPermission("CAN_CONFIGURE_SUBTRACES")
+	//PermissionCanConfigureLLM const for Instana permission CAN_CONFIGURE_LLM
+	PermissionCanConfigureLLM = InstanaPermission("CAN_CONFIGURE_LLM")
+	//PermissionCanConfigureBizOps const for Instana permission CAN_CONFIGURE_BIZOPS
+	PermissionCanConfigureBizOps = InstanaPermission("CAN_CONFIGURE_BIZOPS")
+	//PermissionCanConfigureAutomationPolicies const for Instana permission CAN_CONFIGURE_AUTOMATION_POLICIES
+	PermissionCanConfigureAutomationPolicies = InstanaPermission("CAN_CONFIGURE_AUTOMATION_POLICIES")
+	//PermissionCanConfigureAutomationActions const for Instana permission CAN_CONFIGURE_AUTOMATION_ACTIONS
+	PermissionCanConfigureAutomationActions = InstanaPermission("CAN_CONFIGURE_AUTOMATION_ACTIONS")
 )
 
 // InstanaPermissions data type representing a slice of Instana permissions
@@ -158,6 +182,18 @@ var SupportedInstanaPermissions = InstanaPermissions{
 	PermissionCanInvokeAlertChannel,
 	PermissionCanManuallyCloseIssue,
 	PermissionCanDeleteLogs,
+	PermissionCanConfigureSyntheticTests,
+	PermissionCanViewBusinessProcessDetails,
+	PermissionCanViewBizOpsAlerts,
+	PermissionCanUseSyntheticCredentials,
+	PermissionCanDeleteAutomationActionHistory,
+	PermissionCanConfigureSyntheticLocations,
+	PermissionCanConfigureSyntheticCredentials,
+	PermissionCanConfigureSubtraces,
+	PermissionCanConfigureLLM,
+	PermissionCanConfigureBizOps,
+	PermissionCanConfigureAutomationPolicies,
+	PermissionCanConfigureAutomationActions,
 }
 
 // GroupsResourcePath path to Group resource of Instana RESTful API
