@@ -36,6 +36,7 @@ resource "instana_slo_config" "slo_1" {
     rolling {
       duration = 1
       duration_unit = "day"
+      timezone = "UTC"
     }
   }
 }
@@ -65,6 +66,7 @@ resource "instana_slo_config" "website_3" {
      fixed {
        duration = 1
        duration_unit = "day"
+       timezone = "Europe/Dublin"
        start_timestamp = var.fixed_timewindow_start_timestamp
      }
    }
@@ -95,6 +97,7 @@ resource "instana_slo_config" "synthetic_r_6" {
      rolling {
        duration = 1
        duration_unit = "day"
+       timezone = ""
      }
    }
 }
@@ -188,11 +191,13 @@ One of the elements below must be configured:
 
 * `duration` - Required - The duration of the time window. Must be an integer.
 * `duration_unit` - Required - The unit of the duration. Allowed values: `day`, `week`.
+* `timezone` - Optional - The timezone associated with the SLO configuration. Defaults to `UTC` when not specified.
 
 Fixed Time Window Reference
 
 * `duration` - Required - The duration of the time window. Must be an integer.
 * `duration_unit` - Required - The unit of the duration. Allowed values: `day`, `week`.
+* `timezone` - Optional - The timezone associated with the SLO configuration. Defaults to `UTC` when not specified.
 * `initial_evaluation_timestamp` - Required - the starting timestamp for the Fixed Time Window.
 
 ### Tag Filter Expression Reference
