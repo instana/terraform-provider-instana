@@ -38,13 +38,13 @@ func (r *sloConfigResource) mapSliIndicatorListFromState(stateObject map[string]
 				Aggregation: *GetPointerFromMap[string](data, SloConfigFieldAggregation),
 			}, nil
 		}
-		if _, ok := stateObject["event_based_availability"]; ok {
+		if details, ok := stateObject["event_based_availability"]; ok && r.isSet(details) {
 			return restapi.SloEventBasedLatencyIndicator{
 				Type:      SloConfigAPIIndicatorMeasurementTypeEventBased,
 				Blueprint: SloConfigAPIIndicatorBlueprintAvailability,
 			}, nil
 		}
-		if details, ok := stateObject["custom"]; ok && r.isSet(details) {
+		if details, ok := stateObject["traffic"]; ok && r.isSet(details) {
 			data := details.([]interface{})[0].(map[string]interface{})
 			return restapi.SloTrafficIndicator{
 				Blueprint:   SloConfigAPIIndicatorBlueprintTraffic,
@@ -53,7 +53,7 @@ func (r *sloConfigResource) mapSliIndicatorListFromState(stateObject map[string]
 				Aggregation: *GetPointerFromMap[string](data, SloConfigFieldAggregation),
 			}, nil
 		}
-		if details, ok := stateObject["traffic"]; ok && r.isSet(details) {
+		if details, ok := stateObject["custom"]; ok && r.isSet(details) {
 			data := details.([]interface{})[0].(map[string]interface{})
 			var goodEventFilterExpression *restapi.TagFilter
 			var badEventFilterExpression *restapi.TagFilter
