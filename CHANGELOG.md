@@ -1,5 +1,22 @@
 # Changelog
 
+## [v5.2.0](https://github.com/instana/terraform-provider-instana/tree/v5.2.0) (2025-08-21)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v5.1.1...v5.2.0)
+
+**Implemented enhancements:**
+
+- Extend instana\_infra\_alert\_config resource doc for evaluation\_type field [\#50](https://github.com/instana/terraform-provider-instana/pull/50) ([parekh-raj](https://github.com/parekh-raj))
+
+**Merged pull requests:**
+
+- Group permissions update [\#53](https://github.com/instana/terraform-provider-instana/pull/53) ([rorywelch](https://github.com/rorywelch))
+- Adding Timezone to the SLO payload [\#52](https://github.com/instana/terraform-provider-instana/pull/52) ([dhinesh-sr](https://github.com/dhinesh-sr))
+
+## [v5.1.1](https://github.com/instana/terraform-provider-instana/tree/v5.1.1) (2025-07-28)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v5.1.0...v5.1.1)
+
 ## [v5.1.0](https://github.com/instana/terraform-provider-instana/tree/v5.1.0) (2025-07-24)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v5.0.0...v5.1.0)
