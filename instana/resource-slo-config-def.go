@@ -165,6 +165,7 @@ var (
 
 	SloConfigSchemaAggregation = &schema.Schema{
 		Type:         schema.TypeString,
+		ForceNew:     true,
 		Required:     true,
 		ValidateFunc: validation.StringInSlice([]string{"SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99", "P99_9", "P99_99", "DISTRIBUTION", "DISTINCT_COUNT", "SUM_POSITIVE", "PER_SECOND"}, true),
 		Description:  "The aggregation type for the metric configuration (SUM, MEAN, MAX, MIN, P25, P50, P75, P90, P95, P98, P99, P99_9, P99_99, DISTRIBUTION, DISTINCT_COUNT, SUM_POSITIVE, PER_SECOND)",
@@ -172,6 +173,7 @@ var (
 
 	SloConfigSchemaThreshold = &schema.Schema{
 		Type:        schema.TypeFloat,
+		ForceNew:    true,
 		Required:    true,
 		Description: "The threshold for the metric configuration",
 		ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
@@ -304,6 +306,7 @@ var (
 
 	SloConfigSchemaTrafficType = &schema.Schema{
 		Type:         schema.TypeString,
+		ForceNew:     true,
 		Required:     true,
 		ValidateFunc: validation.StringInSlice([]string{"all", "erroneous"}, true),
 		Description:  "The boundary scope for the entity configuration (ALL, INBOUND)",
@@ -372,6 +375,7 @@ var (
 		Type:        schema.TypeList,
 		MinItems:    1,
 		MaxItems:    1,
+		ForceNew:    true,
 		Required:    true,
 		Description: "The entity to use for the SLI config.",
 		Elem: &schema.Resource{
