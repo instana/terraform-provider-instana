@@ -145,20 +145,30 @@ func (r *sloConfigResource) mapSloIndicatorToState(sloConfig *restapi.SloConfig)
 			return result, nil
 		}
 		if indicator[SloConfigAPIFieldType] == SloConfigAPIIndicatorMeasurementTypeEventBased && indicator[SloConfigAPIFieldBlueprint] == SloConfigAPIIndicatorBlueprintCustom {
-			goodEventFilterExp, validExp1, err1 := fiterExpFromAPIModel(indicator[SloConfigAPIFieldGoodEventFilter])
-			if validExp1 {
-				return nil, err1
+			var err error
+			goodTagFilter, err := getTagFilterFromAPIModel(indicator[SloConfigAPIFieldGoodEventFilter])
+			if err != nil {
+				return nil, err
 			}
-			badEventFilterExp, validExp2, err2 := fiterExpFromAPIModel(indicator[SloConfigAPIFieldBadEventFilter])
-			if validExp2 {
-				return nil, err2
+			mappedTagFilter, err := tagfilter.MapTagFilterToNormalizedString(goodTagFilter)
+			if err != nil {
+				return nil, err
+			}
+
+			badTagFilter, err := getTagFilterFromAPIModel(indicator[SloConfigAPIFieldBadEventFilter])
+			if err != nil {
+				return nil, err
+			}
+			mappedBadTagFilter, err := tagfilter.MapTagFilterToNormalizedString(badTagFilter)
+			if err != nil {
+				return nil, err
 			}
 
 			result := map[string]interface{}{
 				"custom": []interface{}{
 					map[string]interface{}{
-						SloConfigFieldGoodEventFilterExpression: goodEventFilterExp,
-						SloConfigFieldBadEventFilterExpression:  badEventFilterExp,
+						SloConfigFieldGoodEventFilterExpression: mappedTagFilter,
+						SloConfigFieldBadEventFilterExpression:  mappedBadTagFilter,
 					},
 				},
 			}

@@ -44,6 +44,23 @@ func fiterExpFromAPIModel(filter interface{}) (*tagfilter.FilterExpression, bool
 	return t, false, nil
 }
 
+// helper function to convert a map[string]interface{} from the API response to a *restapi.TagFilter
+func getTagFilterFromAPIModel(input interface{}) (*restapi.TagFilter, error) {
+	m, ok := input.(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("failed to convert tag filter from API model: got %T", input)
+	}
+	b, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	var tagFilter restapi.TagFilter
+	if err := json.Unmarshal(b, &tagFilter); err != nil {
+		return nil, err
+	}
+	return &tagFilter, nil
+}
+
 func (r *sloConfigResource) mapTagFilterStringToAPIModel(input string) (*restapi.TagFilter, error) {
 	parser := tagfilter.NewParser()
 	expr, err := parser.Parse(input)

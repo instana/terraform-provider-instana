@@ -69,8 +69,8 @@ const (
 	SloConfigAPIFieldTimezone        = "timezone"
 	SloConfigAPIFieldStartTimestamp  = "startTimestamp"
 	SloConfigAPIFieldTrafficType     = "trafficType"
-	SloConfigAPIFieldGoodEventFilter = "goodEventFilterExpression"
-	SloConfigAPIFieldBadEventFilter  = "badEventFilterExpression"
+	SloConfigAPIFieldGoodEventFilter = "goodEventsFilter"
+	SloConfigAPIFieldBadEventFilter  = "badEventsFilter"
 
 	SloConfigAPIFieldFilter = "tagFilterExpression"
 
