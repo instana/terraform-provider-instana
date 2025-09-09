@@ -114,7 +114,7 @@ func (r *sloConfigResource) mapSloIndicatorToState(sloConfig *restapi.SloConfig)
 
 		if indicator[SloConfigAPIFieldType] == SloConfigAPIIndicatorMeasurementTypeTimeBased && indicator[SloConfigAPIFieldBlueprint] == SloConfigAPIIndicatorBlueprintAvailability {
 			result := map[string]interface{}{
-				"time_based_latency": []interface{}{
+				"time_based_availability": []interface{}{
 					map[string]interface{}{
 						SloConfigFieldThreshold:   indicator[SloConfigAPIFieldThreshold].(float64),
 						SloConfigFieldAggregation: indicator[SloConfigAPIFieldAggregation].(string),
