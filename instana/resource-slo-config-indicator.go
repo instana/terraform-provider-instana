@@ -5,6 +5,7 @@ import (
 	"reflect"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
+	"github.com/gessnerfl/terraform-provider-instana/instana/tagfilter"
 )
 
 // state -> api
