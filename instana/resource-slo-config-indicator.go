@@ -125,7 +125,9 @@ func (r *sloConfigResource) mapSloIndicatorToState(sloConfig *restapi.SloConfig)
 		}
 		if indicator[SloConfigAPIFieldType] == SloConfigAPIIndicatorMeasurementTypeEventBased && indicator[SloConfigAPIFieldBlueprint] == SloConfigAPIIndicatorBlueprintAvailability {
 			result := map[string]interface{}{
-				"event_based_availability": []interface{}{},
+				"event_based_availability": []interface{}{
+					map[string]interface{}{},
+				},
 			}
 			return result, nil
 		}
