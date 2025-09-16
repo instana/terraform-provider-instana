@@ -48,6 +48,7 @@ type InstanaAPI interface {
 	CustomDashboards() RestResource[*CustomDashboard]
 	SyntheticTest() RestResource[*SyntheticTest]
 	SyntheticLocation() ReadOnlyRestResource[*SyntheticLocation]
+	SyntheticAlertConfigs() RestResource[*SyntheticAlertConfig]
 	AutomationActions() RestResource[*AutomationAction]
 	AutomationPolicies() RestResource[*AutomationPolicy]
 	HostAgents() ReadOnlyRestResource[*HostAgent]
@@ -146,6 +147,11 @@ func (api *baseInstanaAPI) SyntheticTest() RestResource[*SyntheticTest] {
 // SyntheticLocation implementation of InstanaAPI interface
 func (api *baseInstanaAPI) SyntheticLocation() ReadOnlyRestResource[*SyntheticLocation] {
 	return NewReadOnlyRestResource(SyntheticLocationResourcePath, NewDefaultJSONUnmarshaller(&SyntheticLocation{}), api.client)
+}
+
+// SyntheticAlertConfigs implementation of InstanaAPI interface
+func (api *baseInstanaAPI) SyntheticAlertConfigs() RestResource[*SyntheticAlertConfig] {
+	return NewCreatePOSTUpdatePOSTRestResource(SyntheticAlertConfigsResourcePath, NewCustomPayloadFieldsUnmarshallerAdapter(NewDefaultJSONUnmarshaller(&SyntheticAlertConfig{})), api.client)
 }
 
 func (api *baseInstanaAPI) AutomationActions() RestResource[*AutomationAction] {

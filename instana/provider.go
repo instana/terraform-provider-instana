@@ -77,6 +77,7 @@ func providerResources() map[string]*schema.Resource {
 	bindResourceHandle(resources, NewGroupResourceHandle())
 	bindResourceHandle(resources, NewCustomDashboardResourceHandle())
 	bindResourceHandle(resources, NewSyntheticTestResourceHandle())
+	bindResourceHandle(resources, NewSyntheticAlertConfigResourceHandle())
 	bindResourceHandle(resources, NewAutomationActionResourceHandle())
 	bindResourceHandle(resources, NewAutomationPolicyResourceHandle())
 	return resources
