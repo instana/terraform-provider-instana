@@ -52,6 +52,7 @@ type InstanaAPI interface {
 	AutomationActions() RestResource[*AutomationAction]
 	AutomationPolicies() RestResource[*AutomationPolicy]
 	HostAgents() ReadOnlyRestResource[*HostAgent]
+	LogAlertConfig() RestResource[*LogAlertConfig]
 }
 
 // NewInstanaAPI creates a new instance of the instana API

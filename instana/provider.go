@@ -73,6 +73,7 @@ func providerResources() map[string]*schema.Resource {
 	bindResourceHandle(resources, NewSloCorrectionConfigResourceHandle())
 	bindResourceHandle(resources, NewWebsiteMonitoringConfigResourceHandle())
 	bindResourceHandle(resources, NewInfraAlertConfigResourceHandle())
+	bindResourceHandle(resources, NewLogAlertConfigResourceHandle())
 	bindResourceHandle(resources, NewWebsiteAlertConfigResourceHandle())
 	bindResourceHandle(resources, NewGroupResourceHandle())
 	bindResourceHandle(resources, NewCustomDashboardResourceHandle())

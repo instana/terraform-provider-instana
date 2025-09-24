@@ -51,6 +51,7 @@ func TestProviderShouldContainValidResourceDefinitions(t *testing.T) {
 	assert.NotNil(t, config.ResourcesMap[ResourceInstanaAlertingConfig])
 	assert.NotNil(t, config.ResourcesMap[ResourceInstanaAutomationAction])
 	assert.NotNil(t, config.ResourcesMap[ResourceInstanaAutomationPolicy])
+	assert.NotNil(t, config.ResourcesMap[ResourceInstanaLogAlertConfig])
 }
 
 func TestProviderShouldContainValidDataSourceDefinitions(t *testing.T) {

@@ -4,14 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
+	"net/http"
+	"testing"
+
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/testutils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/require"
-	"log"
-	"net/http"
-	"testing"
 
 	. "github.com/gessnerfl/terraform-provider-instana/instana"
 )
@@ -449,6 +450,7 @@ func (test *infraAlertConfigTest) createTestCasesForUpdatesOfTerraformResourceSt
 													ResourceFieldThresholdRuleStaticValue: thresholdValue,
 												},
 											},
+											ResourceFieldThresholdRuleAdaptiveBaseline: []interface{}{},
 										},
 									},
 									ResourceFieldThresholdRuleCriticalSeverity: []interface{}{},
