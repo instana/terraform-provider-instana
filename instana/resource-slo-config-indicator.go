@@ -5,6 +5,7 @@ import (
 	"reflect"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
+	"github.com/gessnerfl/terraform-provider-instana/instana/tagfilter"
 )
 
 // state -> api
@@ -38,13 +39,13 @@ func (r *sloConfigResource) mapSliIndicatorListFromState(stateObject map[string]
 				Aggregation: *GetPointerFromMap[string](data, SloConfigFieldAggregation),
 			}, nil
 		}
-		if _, ok := stateObject["event_based_availability"]; ok {
+		if details, ok := stateObject["event_based_availability"]; ok && r.isSet(details) {
 			return restapi.SloEventBasedLatencyIndicator{
 				Type:      SloConfigAPIIndicatorMeasurementTypeEventBased,
 				Blueprint: SloConfigAPIIndicatorBlueprintAvailability,
 			}, nil
 		}
-		if details, ok := stateObject["custom"]; ok && r.isSet(details) {
+		if details, ok := stateObject["traffic"]; ok && r.isSet(details) {
 			data := details.([]interface{})[0].(map[string]interface{})
 			return restapi.SloTrafficIndicator{
 				Blueprint:   SloConfigAPIIndicatorBlueprintTraffic,
@@ -53,7 +54,7 @@ func (r *sloConfigResource) mapSliIndicatorListFromState(stateObject map[string]
 				Aggregation: *GetPointerFromMap[string](data, SloConfigFieldAggregation),
 			}, nil
 		}
-		if details, ok := stateObject["traffic"]; ok && r.isSet(details) {
+		if details, ok := stateObject["custom"]; ok && r.isSet(details) {
 			data := details.([]interface{})[0].(map[string]interface{})
 			var goodEventFilterExpression *restapi.TagFilter
 			var badEventFilterExpression *restapi.TagFilter
@@ -114,7 +115,7 @@ func (r *sloConfigResource) mapSloIndicatorToState(sloConfig *restapi.SloConfig)
 
 		if indicator[SloConfigAPIFieldType] == SloConfigAPIIndicatorMeasurementTypeTimeBased && indicator[SloConfigAPIFieldBlueprint] == SloConfigAPIIndicatorBlueprintAvailability {
 			result := map[string]interface{}{
-				"time_based_latency": []interface{}{
+				"time_based_availability": []interface{}{
 					map[string]interface{}{
 						SloConfigFieldThreshold:   indicator[SloConfigAPIFieldThreshold].(float64),
 						SloConfigFieldAggregation: indicator[SloConfigAPIFieldAggregation].(string),
@@ -125,7 +126,9 @@ func (r *sloConfigResource) mapSloIndicatorToState(sloConfig *restapi.SloConfig)
 		}
 		if indicator[SloConfigAPIFieldType] == SloConfigAPIIndicatorMeasurementTypeEventBased && indicator[SloConfigAPIFieldBlueprint] == SloConfigAPIIndicatorBlueprintAvailability {
 			result := map[string]interface{}{
-				"event_based_latency": []interface{}{},
+				"event_based_availability": []interface{}{
+					map[string]interface{}{},
+				},
 			}
 			return result, nil
 		}
@@ -143,20 +146,30 @@ func (r *sloConfigResource) mapSloIndicatorToState(sloConfig *restapi.SloConfig)
 			return result, nil
 		}
 		if indicator[SloConfigAPIFieldType] == SloConfigAPIIndicatorMeasurementTypeEventBased && indicator[SloConfigAPIFieldBlueprint] == SloConfigAPIIndicatorBlueprintCustom {
-			goodEventFilterExp, validExp1, err1 := fiterExpFromAPIModel(indicator[SloConfigAPIFieldGoodEventFilter])
-			if validExp1 {
-				return nil, err1
+			var err error
+			goodTagFilter, err := getTagFilterFromAPIModel(indicator[SloConfigAPIFieldGoodEventFilter])
+			if err != nil {
+				return nil, err
 			}
-			badEventFilterExp, validExp2, err2 := fiterExpFromAPIModel(indicator[SloConfigAPIFieldBadEventFilter])
-			if validExp2 {
-				return nil, err2
+			mappedTagFilter, err := tagfilter.MapTagFilterToNormalizedString(goodTagFilter)
+			if err != nil {
+				return nil, err
+			}
+
+			badTagFilter, err := getTagFilterFromAPIModel(indicator[SloConfigAPIFieldBadEventFilter])
+			if err != nil {
+				return nil, err
+			}
+			mappedBadTagFilter, err := tagfilter.MapTagFilterToNormalizedString(badTagFilter)
+			if err != nil {
+				return nil, err
 			}
 
 			result := map[string]interface{}{
 				"custom": []interface{}{
 					map[string]interface{}{
-						SloConfigFieldGoodEventFilterExpression: goodEventFilterExp,
-						SloConfigFieldBadEventFilterExpression:  badEventFilterExp,
+						SloConfigFieldGoodEventFilterExpression: mappedTagFilter,
+						SloConfigFieldBadEventFilterExpression:  mappedBadTagFilter,
 					},
 				},
 			}
