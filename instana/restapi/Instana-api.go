@@ -166,3 +166,8 @@ func (api *baseInstanaAPI) AutomationPolicies() RestResource[*AutomationPolicy] 
 func (api *baseInstanaAPI) HostAgents() ReadOnlyRestResource[*HostAgent] {
 	return NewReadOnlyRestResource(HostAgentResourcePath, NewHostAgentJSONUnmarshaller(&HostAgent{}), api.client)
 }
+
+// LogAlertConfig implementation of InstanaAPI interface
+func (api *baseInstanaAPI) LogAlertConfig() RestResource[*LogAlertConfig] {
+	return NewCreatePOSTUpdatePOSTRestResource(LogAlertConfigResourcePath, NewCustomPayloadFieldsUnmarshallerAdapter(NewDefaultJSONUnmarshaller(&LogAlertConfig{})), api.client)
+}

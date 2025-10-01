@@ -22,6 +22,8 @@ resource.
   * Alerting Config - `instana_alerting_config`
 * Infrastructure Monitoring
   * Infrastructure Alert Config - `instana_infra_alert_config`
+* Log monitoring
+  * Log Alert Config - `instana_log_alert_config`
 * Service Levels
   * Service Level Objective Config - `instana_slo_config`
   * Service Level Objective (SLO) Alert Config - `instana_slo_alert_config`

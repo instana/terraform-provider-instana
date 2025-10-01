@@ -31,18 +31,12 @@ type LogAlertConfig struct {
 	Description           string                            `json:"description"`
 	TagFilterExpression   *TagFilter                        `json:"tagFilterExpression"`
 	AlertChannels         map[AlertSeverity][]string        `json:"alertChannels,omitempty"`
-	AlertChannelIds       []string                          `json:"alertChannelIds,omitempty"`
-	Severity              int32                             `json:"severity,omitempty"`
 	Granularity           Granularity                       `json:"granularity"`
 	TimeThreshold         *LogTimeThreshold                 `json:"timeThreshold"`
-	Threshold             *Threshold                        `json:"threshold,omitempty"`
 	GracePeriod           int64                             `json:"gracePeriod,omitempty"`
 	CustomerPayloadFields []CustomPayloadField[any]         `json:"customPayloadFields,omitempty"`
 	Rules                 []RuleWithThreshold[LogAlertRule] `json:"rules"`
 	GroupBy               []GroupByTag                      `json:"groupBy,omitempty"`
-	Enabled               bool                              `json:"enabled,omitempty"`
-	Created               int64                             `json:"created,omitempty"`
-	ReadOnly              bool                              `json:"readOnly,omitempty"`
 }
 
 // GetIDForResourcePath implementation of the InstanaDataObject interface
@@ -59,5 +53,3 @@ func (r *LogAlertConfig) GetCustomerPayloadFields() []CustomPayloadField[any] {
 func (r *LogAlertConfig) SetCustomerPayloadFields(fields []CustomPayloadField[any]) {
 	r.CustomerPayloadFields = fields
 }
-
-// Made with Bob

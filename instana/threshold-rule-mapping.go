@@ -21,14 +21,6 @@ const (
 	ResourceFieldThresholdRuleStatic = "static"
 	//ResourceFieldThresholdRuleStaticValue constant value for field threshold.static.value
 	ResourceFieldThresholdRuleStaticValue = "value"
-	//ResourceFieldThresholdRuleAdaptiveBaseline constant value for field threshold.adaptive_baseline
-	ResourceFieldThresholdRuleAdaptiveBaseline = "adaptive_baseline"
-	//ResourceFieldThresholdRuleAdaptiveBaselineDeviationFactor constant value for field threshold.adaptive_baseline.deviation_factor
-	ResourceFieldThresholdRuleAdaptiveBaselineDeviationFactor = "deviation_factor"
-	//ResourceFieldThresholdRuleAdaptiveBaselineSeasonality constant value for field threshold.adaptive_baseline.seasonality
-	ResourceFieldThresholdRuleAdaptiveBaselineSeasonality = "seasonality"
-	//ResourceFieldThresholdRuleAdaptiveBaselineAdaptability constant value for field threshold.adaptive_baseline.adaptability
-	ResourceFieldThresholdRuleAdaptiveBaselineAdaptability = "adaptability"
 )
 
 var thresholdRuleSchema = &schema.Schema{
@@ -90,38 +82,6 @@ var thresholdRuleSchema = &schema.Schema{
 					},
 				},
 			},
-			// Adaptive baseline schema.
-			ResourceFieldThresholdRuleAdaptiveBaseline: {
-				Type:        schema.TypeList,
-				MinItems:    0,
-				MaxItems:    1,
-				Optional:    true,
-				Description: "Threshold based on an adaptive baseline.",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						ResourceFieldThresholdRuleAdaptiveBaselineDeviationFactor: {
-							Type:         schema.TypeFloat,
-							Required:     true,
-							ValidateFunc: validation.FloatBetween(0.5, 16),
-							Description:  "The deviation factor of the adaptive baseline threshold",
-						},
-						ResourceFieldThresholdRuleAdaptiveBaselineSeasonality: {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Default:      "AUTO",
-							ValidateFunc: validation.StringInSlice(append(restapi.SupportedThresholdSeasonalities.ToStringSlice(), "AUTO"), false),
-							Description:  "The seasonality of the adaptive baseline threshold",
-						},
-						ResourceFieldThresholdRuleAdaptiveBaselineAdaptability: {
-							Type:         schema.TypeFloat,
-							Optional:     true,
-							Default:      1.0,
-							ValidateFunc: validation.FloatBetween(0.1, 5.0),
-							Description:  "The adaptability of the adaptive baseline threshold",
-						},
-					},
-				},
-			},
 		},
 	},
 }
@@ -166,22 +126,6 @@ func (t thresholdRuleMapperImpl) toState(threshold *restapi.ThresholdRule) []map
 		thresholdRule[ResourceFieldThresholdRuleHistoricBaseline] = []interface{}{historicConfig}
 		// Add empty static threshold for compatibility with tests
 		thresholdRule[ResourceFieldThresholdRuleStatic] = []interface{}{}
-	} else if threshold.Type == "adaptiveBaseline" {
-		// For adaptive baseline (not active in production)
-		adaptiveConfig := make(map[string]interface{})
-		if threshold.DeviationFactor != nil {
-			adaptiveConfig[ResourceFieldThresholdRuleAdaptiveBaselineDeviationFactor] = float64(*threshold.DeviationFactor)
-		}
-		if threshold.Seasonality != nil {
-			adaptiveConfig[ResourceFieldThresholdRuleAdaptiveBaselineSeasonality] = *threshold.Seasonality
-		}
-		if threshold.Adaptability != nil {
-			adaptiveConfig[ResourceFieldThresholdRuleAdaptiveBaselineAdaptability] = float64(*threshold.Adaptability)
-		}
-		thresholdRule[ResourceFieldThresholdRuleAdaptiveBaseline] = []interface{}{adaptiveConfig}
-		// Add empty arrays for other threshold types for compatibility with tests
-		thresholdRule[ResourceFieldThresholdRuleHistoricBaseline] = []interface{}{}
-		thresholdRule[ResourceFieldThresholdRuleStatic] = []interface{}{}
 	}
 
 	return result
@@ -192,8 +136,6 @@ func (t *thresholdRuleMapperImpl) mapThresholdTypeToSchema(input string) string 
 		return ResourceFieldThresholdRuleHistoricBaseline
 	} else if input == "staticThreshold" {
 		return ResourceFieldThresholdRuleStatic
-	} else if input == "adaptiveBaseline" {
-		return ResourceFieldThresholdRuleAdaptiveBaseline
 	}
 	return input
 }
@@ -203,8 +145,6 @@ func (t *thresholdRuleMapperImpl) mapThresholdTypeFromSchema(input string) strin
 		return "historicBaseline"
 	} else if input == ResourceFieldThresholdRuleStatic {
 		return "staticThreshold"
-	} else if input == ResourceFieldThresholdRuleAdaptiveBaseline {
-		return "adaptiveBaseline"
 	}
 	return input
 }
@@ -228,7 +168,6 @@ func (t *thresholdRuleMapperImpl) mapThresholdConfigFromSchema(config map[string
 	var valuePtr *float64
 	var deviationFactorPtr *float32
 	var baselinePtr *[][]float64
-	var adaptabilityPtr *float32
 
 	// Handle static threshold
 	if v, ok := config[ResourceFieldThresholdRuleStaticValue]; ok {
@@ -256,28 +195,11 @@ func (t *thresholdRuleMapperImpl) mapThresholdConfigFromSchema(config map[string
 		}
 	}
 
-	// Handle adaptive baseline (not active in production)
-	if v, ok := config[ResourceFieldThresholdRuleAdaptiveBaselineSeasonality]; ok {
-		seasonality := restapi.ThresholdSeasonality(v.(string))
-		seasonalityPtr = &seasonality
-	}
-	if v, ok := config[ResourceFieldThresholdRuleAdaptiveBaselineDeviationFactor]; ok {
-		deviationFactor := float32(v.(float64))
-		deviationFactorPtr = &deviationFactor
-	}
-	if v, ok := config[ResourceFieldThresholdRuleAdaptiveBaselineAdaptability]; ok {
-		adaptability := float32(v.(float64))
-		adaptabilityPtr = &adaptability
-	}
-
 	return &restapi.ThresholdRule{
 		Type:            t.mapThresholdTypeFromSchema(thresholdType),
 		Value:           valuePtr,
 		DeviationFactor: deviationFactorPtr,
 		Baseline:        baselinePtr,
 		Seasonality:     seasonalityPtr,
-		Adaptability:    adaptabilityPtr,
 	}
 }
-
-// Made with Bob

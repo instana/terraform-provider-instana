@@ -186,7 +186,7 @@ func TestLogAlertConfigResource(t *testing.T) {
 }
 
 func TestLogAlertConfigSchemaDefinition(t *testing.T) {
-	resourceHandle := NewLogAlertConfigResourceHandle()
+	resourceHandle := LogAlertConfigResourceHandle()
 
 	schemaMap := resourceHandle.MetaData().Schema
 
@@ -200,5 +200,3 @@ func TestLogAlertConfigSchemaDefinition(t *testing.T) {
 	assert.NotNil(t, schemaMap[LogAlertConfigFieldGroupBy])
 	assert.NotNil(t, schemaMap[DefaultCustomPayloadFieldsName])
 }
-
-// Made with Bob

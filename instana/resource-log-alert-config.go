@@ -32,6 +32,9 @@ const (
 	LogAlertConfigFieldType              = "type"
 	LogAlertConfigFieldValue             = "value"
 
+	// LogAlertTypeLogCount is the constant for the log count alert type
+	LogAlertTypeLogCount = "log.count"
+
 	LogAlertConfigFieldTimeThreshold                     = "time_threshold"
 	LogAlertConfigFieldTimeThresholdTimeWindow           = "time_window"
 	LogAlertConfigFieldTimeThresholdViolationsInSequence = "violations_in_sequence"
@@ -92,7 +95,6 @@ var (
 		Description: "The grouping tags used to group the metric results.",
 	}
 
-	// New simplified rules schema
 	logAlertConfigSchemaRules = &schema.Schema{
 		Type:        schema.TypeList,
 		MinItems:    1,
@@ -109,8 +111,8 @@ var (
 				LogAlertConfigFieldAlertType: {
 					Type:         schema.TypeString,
 					Optional:     true,
-					Default:      "log.count",
-					ValidateFunc: validation.StringInSlice([]string{"log.count"}, false),
+					Default:      LogAlertTypeLogCount,
+					ValidateFunc: validation.StringInSlice([]string{LogAlertTypeLogCount}, false),
 					Description:  "The type of the log alert rule (only 'log.count' is supported)",
 				},
 				LogAlertConfigFieldAggregation: {
@@ -245,22 +247,6 @@ var (
 	}
 )
 
-var thresholdRuleStaticThresholdSchema = &schema.Schema{
-	Type:        schema.TypeList,
-	Optional:    true,
-	MaxItems:    1,
-	Description: "Configuration of a static threshold",
-	Elem: &schema.Resource{
-		Schema: map[string]*schema.Schema{
-			ResourceFieldThresholdRuleStaticValue: {
-				Type:        schema.TypeFloat,
-				Required:    true,
-				Description: "The static threshold value to compare against",
-			},
-		},
-	},
-}
-
 var (
 	logAlertConfigSchemaGracePeriod = &schema.Schema{
 		Type:        schema.TypeInt,
@@ -276,14 +262,14 @@ var logAlertConfigResourceSchema = map[string]*schema.Schema{
 	LogAlertConfigFieldGracePeriod:   logAlertConfigSchemaGracePeriod,
 	LogAlertConfigFieldGroupBy:       logAlertConfigSchemaGroupBy,
 	LogAlertConfigFieldGranularity:   logAlertConfigSchemaGranularity,
-	LogAlertConfigFieldTagFilter:     OptionalTagFilterExpressionSchema,
+	LogAlertConfigFieldTagFilter:     RequiredTagFilterExpressionSchema,
 	LogAlertConfigFieldRules:         logAlertConfigSchemaRules,
 	DefaultCustomPayloadFieldsName:   buildCustomPayloadFields(),
 	LogAlertConfigFieldTimeThreshold: logAlertConfigSchemaTimeThreshold,
 }
 
-// NewLogAlertConfigResourceHandle creates the resource handle for Log Alert Configs
-func NewLogAlertConfigResourceHandle() ResourceHandle[*restapi.LogAlertConfig] {
+// LogAlertConfigResourceHandle creates the resource handle for Log Alert Configs
+func LogAlertConfigResourceHandle() ResourceHandle[*restapi.LogAlertConfig] {
 	return &logAlertConfigResource{
 		metaData: ResourceMetaData{
 			ResourceName:     ResourceInstanaLogAlertConfig,
@@ -326,7 +312,7 @@ func (c *logAlertConfigResource) UpdateState(d *schema.ResourceData, config *res
 		LogAlertConfigFieldGranularity:   config.Granularity,
 		LogAlertConfigFieldTimeThreshold: c.mapTimeThresholdToSchema(config),
 		DefaultCustomPayloadFieldsName:   mapCustomPayloadFieldsToSchema(config),
-		LogAlertConfigFieldRules:         c.mapSimplifiedRulesToSchema(config),
+		LogAlertConfigFieldRules:         c.mapRulesToSchema(config),
 	}
 
 	if config.GracePeriod > 0 {
@@ -338,14 +324,16 @@ func (c *logAlertConfigResource) UpdateState(d *schema.ResourceData, config *res
 
 func (c *logAlertConfigResource) mapGroupByToSchema(config *restapi.LogAlertConfig) []map[string]interface{} {
 	if len(config.GroupBy) > 0 {
-		groupBy := config.GroupBy[0]
-		result := make([]map[string]interface{}, 1)
-		groupByMap := make(map[string]interface{})
-		groupByMap[LogAlertConfigFieldGroupByTagName] = groupBy.TagName
-		if groupBy.Key != "" {
-			groupByMap[LogAlertConfigFieldGroupByKey] = groupBy.Key
+		result := make([]map[string]interface{}, len(config.GroupBy))
+
+		for i, groupBy := range config.GroupBy {
+			groupByMap := make(map[string]interface{})
+			groupByMap[LogAlertConfigFieldGroupByTagName] = groupBy.TagName
+			if groupBy.Key != "" {
+				groupByMap[LogAlertConfigFieldGroupByKey] = groupBy.Key
+			}
+			result[i] = groupByMap
 		}
-		result[0] = groupByMap
 		return result
 	}
 	return []map[string]interface{}{}
@@ -393,8 +381,8 @@ func (c *logAlertConfigResource) mapTimeThresholdTypeToSchema(input string) stri
 	return input
 }
 
-// New simplified rules mapping function
-func (c *logAlertConfigResource) mapSimplifiedRulesToSchema(config *restapi.LogAlertConfig) []map[string]interface{} {
+// rules mapping function
+func (c *logAlertConfigResource) mapRulesToSchema(config *restapi.LogAlertConfig) []map[string]interface{} {
 	if len(config.Rules) > 0 {
 		ruleWithThreshold := config.Rules[0]
 		rule := ruleWithThreshold.Rule
@@ -402,7 +390,7 @@ func (c *logAlertConfigResource) mapSimplifiedRulesToSchema(config *restapi.LogA
 		// Convert "logCount" to "log.count" for the schema
 		alertType := rule.AlertType
 		if alertType == "logCount" {
-			alertType = "log.count"
+			alertType = LogAlertTypeLogCount
 		}
 
 		ruleMap := map[string]interface{}{
@@ -421,7 +409,7 @@ func (c *logAlertConfigResource) mapSimplifiedRulesToSchema(config *restapi.LogA
 		criticalThreshold, isCriticalThresholdPresent := ruleWithThreshold.Thresholds[restapi.CriticalSeverity]
 
 		if isWarningThresholdPresent {
-			// Create a simplified static threshold structure for warning
+			// Create a static threshold structure for warning
 			if warningThreshold.Type == "staticThreshold" && warningThreshold.Value != nil {
 				warningMap := []map[string]interface{}{
 					{
@@ -437,7 +425,7 @@ func (c *logAlertConfigResource) mapSimplifiedRulesToSchema(config *restapi.LogA
 		}
 
 		if isCriticalThresholdPresent {
-			// Create a simplified static threshold structure for critical
+			// Create a static threshold structure for critical
 			if criticalThreshold.Type == "staticThreshold" && criticalThreshold.Value != nil {
 				criticalMap := []map[string]interface{}{
 					{
@@ -486,7 +474,7 @@ func (c *logAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*
 		Granularity:           restapi.Granularity(d.Get(LogAlertConfigFieldGranularity).(int)),
 		TimeThreshold:         c.mapTimeThresholdFromSchema(d),
 		CustomerPayloadFields: customPayloadFields,
-		Rules:                 c.mapSimplifiedRuleFromSchema(d),
+		Rules:                 c.mapRuleFromSchema(d),
 	}
 
 	if v, ok := d.GetOk(LogAlertConfigFieldGracePeriod); ok {
@@ -502,19 +490,22 @@ func (c *logAlertConfigResource) mapGroupByFromSchema(d *schema.ResourceData) []
 		return []restapi.GroupByTag{}
 	}
 
-	groupBy := groupBySlice[0].(map[string]interface{})
-	result := make([]restapi.GroupByTag, 1)
+	result := make([]restapi.GroupByTag, len(groupBySlice))
 
-	tagName := groupBy[LogAlertConfigFieldGroupByTagName].(string)
-	groupByTag := restapi.GroupByTag{
-		TagName: tagName,
+	for i, groupByItem := range groupBySlice {
+		groupBy := groupByItem.(map[string]interface{})
+		tagName := groupBy[LogAlertConfigFieldGroupByTagName].(string)
+		groupByTag := restapi.GroupByTag{
+			TagName: tagName,
+		}
+
+		if key, ok := groupBy[LogAlertConfigFieldGroupByKey]; ok && key != nil {
+			groupByTag.Key = key.(string)
+		}
+
+		result[i] = groupByTag
 	}
 
-	if key, ok := groupBy[LogAlertConfigFieldGroupByKey]; ok && key != nil {
-		groupByTag.Key = key.(string)
-	}
-
-	result[0] = groupByTag
 	return result
 }
 
@@ -555,8 +546,8 @@ func (c *logAlertConfigResource) mapTimeThresholdTypeFromSchema(input string) st
 	return input
 }
 
-// New simplified rule mapping function
-func (c *logAlertConfigResource) mapSimplifiedRuleFromSchema(d *schema.ResourceData) []restapi.RuleWithThreshold[restapi.LogAlertRule] {
+// Rule mapping function
+func (c *logAlertConfigResource) mapRuleFromSchema(d *schema.ResourceData) []restapi.RuleWithThreshold[restapi.LogAlertRule] {
 	ruleSlice := d.Get(LogAlertConfigFieldRules).([]interface{})
 	if len(ruleSlice) == 0 {
 		return []restapi.RuleWithThreshold[restapi.LogAlertRule]{}
@@ -569,7 +560,7 @@ func (c *logAlertConfigResource) mapSimplifiedRuleFromSchema(d *schema.ResourceD
 	alertType := ruleConfig[LogAlertConfigFieldAlertType].(string)
 
 	// Convert "log.count" to "logCount" for the API
-	if alertType == "log.count" {
+	if alertType == LogAlertTypeLogCount {
 		alertType = "logCount"
 	}
 
@@ -663,5 +654,3 @@ func (c *logAlertConfigResource) SetComputedFields(d *schema.ResourceData) error
 func (c *logAlertConfigResource) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.LogAlertConfig] {
 	return api.LogAlertConfig()
 }
-
-// Made with Bob

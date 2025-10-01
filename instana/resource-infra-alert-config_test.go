@@ -450,7 +450,6 @@ func (test *infraAlertConfigTest) createTestCasesForUpdatesOfTerraformResourceSt
 													ResourceFieldThresholdRuleStaticValue: thresholdValue,
 												},
 											},
-											ResourceFieldThresholdRuleAdaptiveBaseline: []interface{}{},
 										},
 									},
 									ResourceFieldThresholdRuleCriticalSeverity: []interface{}{},
