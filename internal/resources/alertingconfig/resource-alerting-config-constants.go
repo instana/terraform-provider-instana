@@ -2,13 +2,16 @@ package alertingconfig
 
 // Resource name constants
 const (
-	// ResourceInstanaAlertingConfig the name of the terraform-provider-instana resource to manage alerting configurations
-	ResourceInstanaAlertingConfig = "alerting_config"
+	// ResourceInstanaAlertingConfigFramework the name of the terraform-provider-instana resource to manage alerting configurations
+	ResourceInstanaAlertingConfigFramework = "alerting_config"
+)
 
-	// Field name constants for alerting config
-
+// Field name constants for alerting config
+const (
 	// AlertingConfigFieldAlertName constant value for the schema field alert_name
 	AlertingConfigFieldAlertName = "alert_name"
+	// AlertingConfigFieldFullAlertName constant value for the schema field full_alert_name
+	AlertingConfigFieldFullAlertName = "full_alert_name"
 	// AlertingConfigFieldIntegrationIds constant value for the schema field integration_ids
 	AlertingConfigFieldIntegrationIds = "integration_ids"
 	// AlertingConfigFieldEventFilterQuery constant value for the schema field event_filter_query
@@ -17,13 +20,12 @@ const (
 	AlertingConfigFieldEventFilterEventTypes = "event_filter_event_types"
 	// AlertingConfigFieldEventFilterRuleIDs constant value for the schema field event_filter_rule_ids
 	AlertingConfigFieldEventFilterRuleIDs = "event_filter_rule_ids"
-	// AlertingConfigFieldEventFilterApplicationAlertIDs constant value for the schema field event_filter_application_alert_ids
-	AlertingConfigFieldEventFilterApplicationAlertIDs = "event_filter_application_alert_ids"
 	// AlertingConfigFieldID constant value for the schema field id
 	AlertingConfigFieldID = "id"
+)
 
-	// Description constants
-
+// Description constants
+const (
 	// AlertingConfigDescResource description for the resource
 	AlertingConfigDescResource = "This resource manages alerting configurations in Instana."
 	// AlertingConfigDescID description for the ID field
@@ -38,6 +40,4 @@ const (
 	AlertingConfigDescEventFilterEventTypes = "Configures the list of Event Types IDs which should trigger an alert."
 	// AlertingConfigDescEventFilterRuleIDs description for the event_filter_rule_ids field
 	AlertingConfigDescEventFilterRuleIDs = "Configures the list of Rule IDs which should trigger an alert."
-	// AlertingConfigDescEventFilterApplicationAlertIDs description for the event_filter_application_alert_ids field
-	AlertingConfigDescEventFilterApplicationAlertIDs = "Configures the list of Application Alert Config IDs which should trigger an alert."
 )

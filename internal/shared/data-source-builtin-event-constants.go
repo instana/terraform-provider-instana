@@ -15,8 +15,8 @@ const (
 	// BuiltinEventSpecificationFieldTriggering constant value for the schema field triggering
 	BuiltinEventSpecificationFieldTriggering = "triggering"
 	// BuiltinEventSpecificationFieldEnabled constant value for the schema field enabled
-	BuiltinEventSpecificationFieldEnabled = "enabled"
-	DataSourceInstanaBuiltinEvent         = "builtin_event_spec"
+	BuiltinEventSpecificationFieldEnabled  = "enabled"
+	DataSourceInstanaBuiltinEventFramework = "builtin_event_spec"
 )
 
 // Field ID constant

@@ -2,8 +2,8 @@ package datasources
 
 // Data source name constants
 const (
-	// DataSourceInstanaCustomEventSpecification the name of the terraform-provider-instana data source to read custom event specifications
-	DataSourceInstanaCustomEventSpecification = "custom_event_spec"
+	// DataSourceInstanaCustomEventSpecificationFramework the name of the terraform-provider-instana data source to read custom event specifications
+	DataSourceInstanaCustomEventSpecificationFramework = "custom_event_spec"
 )
 
 // Field name constants for custom event specification datasource (field constants are shared with resource-custom-event-specification-framework.go)

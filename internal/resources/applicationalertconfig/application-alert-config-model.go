@@ -1,13 +1,14 @@
 package applicationalertconfig
 
 import (
+	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/terraform-provider-instana/internal/shared"
 )
 
 // ApplicationAlertConfigModel represents the data model for the application alert configuration resource
 type ApplicationAlertConfigModel struct {
 	ID                  types.String                `tfsdk:"id"`
+	AlertChannelIDs     []types.String              `tfsdk:"alert_channel_ids"`
 	AlertChannels       types.Map                   `tfsdk:"alert_channels"`
 	Applications        []ApplicationModel          `tfsdk:"application"`
 	BoundaryScope       types.String                `tfsdk:"boundary_scope"`
@@ -20,6 +21,7 @@ type ApplicationAlertConfigModel struct {
 	IncludeSynthetic    types.Bool                  `tfsdk:"include_synthetic"`
 	Name                types.String                `tfsdk:"name"`
 	Rules               []RuleWithThresholdModel    `tfsdk:"rules"`
+	Severity            types.String                `tfsdk:"severity"`
 	TagFilter           types.String                `tfsdk:"tag_filter"`
 	TimeThreshold       *AppAlertTimeThresholdModel `tfsdk:"time_threshold"`
 	Triggering          types.Bool                  `tfsdk:"triggering"`
@@ -34,15 +36,8 @@ type ApplicationModel struct {
 
 // ApplicationThresholdModel represents a threshold in the application alert config
 type ApplicationThresholdModel struct {
-	Warning  *ThresholdLevelModel `tfsdk:"warning"`
-	Critical *ThresholdLevelModel `tfsdk:"critical"`
-}
-
-// ThresholdLevelModel represents a threshold level (warning or critical) configuration
-type ThresholdLevelModel struct {
 	Static           *shared.StaticTypeModel       `tfsdk:"static"`
 	AdaptiveBaseline *shared.AdaptiveBaselineModel `tfsdk:"adaptive_baseline"`
-	HistoricBaseline *shared.HistoricBaselineModel `tfsdk:"historic_baseline"`
 }
 
 // ServiceModel represents a service in the application alert config
@@ -119,4 +114,9 @@ type RuleWithThresholdModel struct {
 	Rule              *RuleModel                 `tfsdk:"rule"`
 	ThresholdOperator types.String               `tfsdk:"threshold_operator"`
 	Thresholds        *ApplicationThresholdModel `tfsdk:"threshold"`
+}
+
+// ThresholdConfigRuleModel represents a threshold configuration for a rule
+type ThresholdConfigRuleModel struct {
+	Value types.Float64 `tfsdk:"value"`
 }

@@ -1,11 +1,13 @@
 package sliconfig
 
-// ResourceInstanaSliConfig the name of the terraform-provider-instana resource to manage SLI configurations
-const ResourceInstanaSliConfig = "sli_config"
+// ResourceInstanaSliConfigFramework the name of the terraform-provider-instana resource to manage SLI configurations
+const ResourceInstanaSliConfigFramework = "sli_config"
 
 const (
 	//SliConfigFieldName constant value for the schema field name
 	SliConfigFieldName = "name"
+	//SliConfigFieldFullName constant value for schema field full_name
+	SliConfigFieldFullName = "full_name"
 	//SliConfigFieldInitialEvaluationTimestamp constant value for the schema field initial_evaluation_timestamp
 	SliConfigFieldInitialEvaluationTimestamp = "initial_evaluation_timestamp"
 	//SliConfigFieldMetricConfiguration constant value for the schema field metric_configuration
@@ -48,9 +50,10 @@ const (
 	SliConfigFieldIncludeInternal = "include_internal"
 	//SliConfigFieldIncludeSynthetic constant value for the schema field sli_entity.*.good_event_filter_expression
 	SliConfigFieldIncludeSynthetic = "include_synthetic"
+)
 
-	// Resource description constants
-
+// Resource description constants
+const (
 	// SliConfigDescResource is the description for the SLI config resource
 	SliConfigDescResource = "This resource manages SLI configurations in Instana."
 	// SliConfigDescID is the description for the ID field
@@ -103,9 +106,10 @@ const (
 	SliConfigDescWebsiteTimeBased = "The SLI entity of type websiteTimeBased to use for the SLI config"
 	// SliConfigDescFilterExpression is the description for the filter_expression field
 	SliConfigDescFilterExpression = "The tag filter expression"
+)
 
-	// Error message constants
-
+// Error message constants
+const (
 	// SliConfigErrUnsupportedEntityType is the error title for unsupported SLI entity type
 	SliConfigErrUnsupportedEntityType = "Unsupported SLI entity type"
 	// SliConfigErrUnsupportedEntityTypeMsg is the error message for unsupported SLI entity type
@@ -126,148 +130,4 @@ const (
 	SliConfigErrMappingSliEntity = "Error mapping SLI entity"
 	// SliConfigErrMappingSliEntityMsg is the error message for mapping SLI entity
 	SliConfigErrMappingSliEntityMsg = "Failed to map SLI entity: %s"
-	// SLI entity type constants
-
-	// SliEntityTypeApplication represents the application time-based SLI entity type
-	SliEntityTypeApplication = "application"
-	// SliEntityTypeAvailability represents the application event-based SLI entity type
-	SliEntityTypeAvailability = "availability"
-	// SliEntityTypeWebsiteEventBased represents the website event-based SLI entity type
-	SliEntityTypeWebsiteEventBased = "websiteEventBased"
-	// SliEntityTypeWebsiteTimeBased represents the website time-based SLI entity type
-	SliEntityTypeWebsiteTimeBased = "websiteTimeBased"
-
-	// Aggregation type constants
-
-	// AggregationTypeSum represents the SUM aggregation type
-	AggregationTypeSum = "SUM"
-	// AggregationTypeMean represents the MEAN aggregation type
-	AggregationTypeMean = "MEAN"
-	// AggregationTypeMax represents the MAX aggregation type
-	AggregationTypeMax = "MAX"
-	// AggregationTypeMin represents the MIN aggregation type
-	AggregationTypeMin = "MIN"
-	// AggregationTypeP25 represents the P25 percentile aggregation type
-	AggregationTypeP25 = "P25"
-	// AggregationTypeP50 represents the P50 percentile aggregation type
-	AggregationTypeP50 = "P50"
-	// AggregationTypeP75 represents the P75 percentile aggregation type
-	AggregationTypeP75 = "P75"
-	// AggregationTypeP90 represents the P90 percentile aggregation type
-	AggregationTypeP90 = "P90"
-	// AggregationTypeP95 represents the P95 percentile aggregation type
-	AggregationTypeP95 = "P95"
-	// AggregationTypeP98 represents the P98 percentile aggregation type
-	AggregationTypeP98 = "P98"
-	// AggregationTypeP99 represents the P99 percentile aggregation type
-	AggregationTypeP99 = "P99"
-	// AggregationTypeP99_9 represents the P99.9 percentile aggregation type
-	AggregationTypeP99_9 = "P99_9"
-	// AggregationTypeP99_99 represents the P99.99 percentile aggregation type
-	AggregationTypeP99_99 = "P99_99"
-	// AggregationTypeDistribution represents the DISTRIBUTION aggregation type
-	AggregationTypeDistribution = "DISTRIBUTION"
-	// AggregationTypeDistinctCount represents the DISTINCT_COUNT aggregation type
-	AggregationTypeDistinctCount = "DISTINCT_COUNT"
-	// AggregationTypeSumPositive represents the SUM_POSITIVE aggregation type
-	AggregationTypeSumPositive = "SUM_POSITIVE"
-	// AggregationTypePerSecond represents the PER_SECOND aggregation type
-	AggregationTypePerSecond = "PER_SECOND"
-
-	// Beacon type constants
-
-	// BeaconTypePageLoad represents the pageLoad beacon type
-	BeaconTypePageLoad = "pageLoad"
-	// BeaconTypeResourceLoad represents the resourceLoad beacon type
-	BeaconTypeResourceLoad = "resourceLoad"
-	// BeaconTypeHttpRequest represents the httpRequest beacon type
-	BeaconTypeHttpRequest = "httpRequest"
-	// BeaconTypeError represents the error beacon type
-	BeaconTypeError = "error"
-	// BeaconTypeCustom represents the custom beacon type
-	BeaconTypeCustom = "custom"
-	// BeaconTypePageChange represents the pageChange beacon type
-	BeaconTypePageChange = "pageChange"
-
-	// Boundary scope constants
-
-	// BoundaryScopeAll represents the ALL boundary scope
-	BoundaryScopeAll = "ALL"
-	// BoundaryScopeInbound represents the INBOUND boundary scope
-	BoundaryScopeInbound = "INBOUND"
-
-	// Schema field identifier constants
-
-	// SchemaFieldID represents the id field identifier
-	SchemaFieldID = "id"
-	// SchemaFieldName represents the name field identifier
-	SchemaFieldName = "name"
-	// SchemaFieldInitialEvaluationTimestamp represents the initial_evaluation_timestamp field identifier
-	SchemaFieldInitialEvaluationTimestamp = "initial_evaluation_timestamp"
-	// SchemaFieldMetricConfiguration represents the metric_configuration field identifier
-	SchemaFieldMetricConfiguration = "metric_configuration"
-	// SchemaFieldMetricName represents the metric_name field identifier
-	SchemaFieldMetricName = "metric_name"
-	// SchemaFieldAggregation represents the aggregation field identifier
-	SchemaFieldAggregation = "aggregation"
-	// SchemaFieldThreshold represents the threshold field identifier
-	SchemaFieldThreshold = "threshold"
-	// SchemaFieldSliEntity represents the sli_entity field identifier
-	SchemaFieldSliEntity = "sli_entity"
-	// SchemaFieldApplicationTimeBased represents the application_time_based field identifier
-	SchemaFieldApplicationTimeBased = "application_time_based"
-	// SchemaFieldApplicationEventBased represents the application_event_based field identifier
-	SchemaFieldApplicationEventBased = "application_event_based"
-	// SchemaFieldWebsiteEventBased represents the website_event_based field identifier
-	SchemaFieldWebsiteEventBased = "website_event_based"
-	// SchemaFieldWebsiteTimeBased represents the website_time_based field identifier
-	SchemaFieldWebsiteTimeBased = "website_time_based"
-	// SchemaFieldApplicationID represents the application_id field identifier
-	SchemaFieldApplicationID = "application_id"
-	// SchemaFieldServiceID represents the service_id field identifier
-	SchemaFieldServiceID = "service_id"
-	// SchemaFieldEndpointID represents the endpoint_id field identifier
-	SchemaFieldEndpointID = "endpoint_id"
-	// SchemaFieldBoundaryScope represents the boundary_scope field identifier
-	SchemaFieldBoundaryScope = "boundary_scope"
-	// SchemaFieldBadEventFilterExpression represents the bad_event_filter_expression field identifier
-	SchemaFieldBadEventFilterExpression = "bad_event_filter_expression"
-	// SchemaFieldGoodEventFilterExpression represents the good_event_filter_expression field identifier
-	SchemaFieldGoodEventFilterExpression = "good_event_filter_expression"
-	// SchemaFieldIncludeInternal represents the include_internal field identifier
-	SchemaFieldIncludeInternal = "include_internal"
-	// SchemaFieldIncludeSynthetic represents the include_synthetic field identifier
-	SchemaFieldIncludeSynthetic = "include_synthetic"
-	// SchemaFieldWebsiteID represents the website_id field identifier
-	SchemaFieldWebsiteID = "website_id"
-	// SchemaFieldBeaconType represents the beacon_type field identifier
-	SchemaFieldBeaconType = "beacon_type"
-	// SchemaFieldFilterExpression represents the filter_expression field identifier
-	SchemaFieldFilterExpression = "filter_expression"
-
-	// Validation constants
-
-	// NameMaxLength represents the maximum length for the name field
-	NameMaxLength = 256
-	// NameMinLength represents the minimum length for the name field
-	NameMinLength = 0
-	// ThresholdMinValue represents the minimum value for the threshold field
-	ThresholdMinValue = 0.000001
-	// DefaultInitialEvaluationTimestamp represents the default value for initial evaluation timestamp
-	DefaultInitialEvaluationTimestamp = 0
-	// DefaultIncludeInternalValue represents the default value for include_internal flag
-	DefaultIncludeInternalValue = false
-	// DefaultIncludeSyntheticValue represents the default value for include_synthetic flag
-	DefaultIncludeSyntheticValue = false
-
-	// Error message format constants
-
-	// ErrMsgFailedToParseFilterExpression is the error message format for filter expression parsing failures
-	ErrMsgFailedToParseFilterExpression = "failed to parse %s: %v"
-	// ErrMsgBadEventFilterContext is the context identifier for bad event filter errors
-	ErrMsgBadEventFilterContext = "bad event filter expression"
-	// ErrMsgGoodEventFilterContext is the context identifier for good event filter errors
-	ErrMsgGoodEventFilterContext = "good event filter expression"
-	// ErrMsgFilterExpressionContext is the context identifier for filter expression errors
-	ErrMsgFilterExpressionContext = "filter expression"
 )

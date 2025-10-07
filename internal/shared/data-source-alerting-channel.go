@@ -3,8 +3,8 @@ package shared
 // import (
 // 	"context"
 // 	"fmt"
-// 	"github.com/instana/terraform-provider-instana/instana/restapi"
-// 	"github.com/instana/terraform-provider-instana/tfutils"
+// 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
+// 	"github.com/gessnerfl/terraform-provider-instana/tfutils"
 // 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 // 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 // 	"reflect"

@@ -1,12 +1,12 @@
 package slocorrectionconfig
 
-// ResourceInstanaSloCorrectionConfig the name of the terraform-provider-instana resource to manage SLO correction configurations
-const ResourceInstanaSloCorrectionConfig = "slo_correction_config"
+// ResourceInstanaSloCorrectionConfigFramework the name of the terraform-provider-instana resource to manage SLO correction configurations
+const ResourceInstanaSloCorrectionConfigFramework = "slo_correction_config"
 
 const (
 	// Slo Correction Config Field names for Terraform
-	SloCorrectionConfigFieldID                      = "id"
 	SloCorrectionConfigFieldName                    = "name"
+	SloCorrectionConfigFieldFullName                = "full_name"
 	SloCorrectionConfigFieldDescription             = "description"
 	SloCorrectionConfigFieldActive                  = "active"
 	SloCorrectionConfigFieldScheduling              = "scheduling"
@@ -16,17 +16,9 @@ const (
 	SloCorrectionConfigFieldSchedulingDuration      = "duration"
 	SloCorrectionConfigFieldSchedulingDurationUnit  = "duration_unit"
 	SloCorrectionConfigFieldSchedulingRecurrentRule = "recurrent_rule"
-	SloCorrectionConfigFieldSchedulingRecurrent     = "recurrent"
+)
 
-	// Duration unit constants
-	DurationUnitMillisecond = "millisecond"
-	DurationUnitSecond      = "second"
-	DurationUnitMinute      = "minute"
-	DurationUnitHour        = "hour"
-	DurationUnitDay         = "day"
-	DurationUnitWeek        = "week"
-	DurationUnitMonth       = "month"
-
+const (
 	// Resource description constants
 	SloCorrectionConfigDescResource      = "This resource manages SLO Correction Configurations in Instana."
 	SloCorrectionConfigDescID            = "The ID of the SLO Correction Config."
@@ -40,5 +32,5 @@ const (
 	SloCorrectionConfigDescDuration      = "The duration of the scheduling in the specified unit."
 	SloCorrectionConfigDescDurationUnit  = "The unit of the duration (e.g.,'minute' 'hour', 'day')."
 	SloCorrectionConfigDescRecurrentRule = "Recurrent rule for scheduling, if applicable."
-	SloCorrectionConfigDescRecurrent     = "Indicates whether the Rule is recurrent"
+	SloCorrectionConfigDescRecurrent     = "Indicates whether the Rule is reccurrent"
 )

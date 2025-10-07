@@ -1,7 +1,7 @@
 package sloconfig
 
-// ResourceInstanaSloConfig the name of the terraform-provider-instana resource to manage SLO configurations
-const ResourceInstanaSloConfig = "slo_config"
+// ResourceInstanaSloConfigFramework the name of the terraform-provider-instana resource to manage SLO configurations
+const ResourceInstanaSloConfigFramework = "slo_config"
 
 // SloConfigFieldRbacTags is the field name for RBAC tags
 const SloConfigFieldRbacTags = "rbac_tags"
@@ -52,10 +52,6 @@ const (
 	SloConfigDescSyntheticEntity = "Synthetic entity of SLO"
 	// SloConfigDescSyntheticTestIDs is the description for the synthetic_test_ids field
 	SloConfigDescSyntheticTestIDs = "The synthetics ID of the entity"
-	// SloConfigDescInfrastructureEntity is the description for the infrastructure entity block
-	SloConfigDescInfrastructureEntity = "Infrastructure entity of SLO"
-	// SloConfigDescInfraType is the description for the infra_type field
-	SloConfigDescInfraType = "The infrastructure type (e.g., kubernetesCluster)"
 	// SloConfigDescIndicator is the description for the indicator block
 	SloConfigDescIndicator = "The indicator to use for the SLO configuration"
 	// SloConfigDescTimeBasedLatency is the description for the time_based_latency indicator
@@ -70,10 +66,6 @@ const (
 	SloConfigDescTraffic = "Traffic indicator"
 	// SloConfigDescCustom is the description for the custom indicator
 	SloConfigDescCustom = "Custom indicator"
-	// SloConfigDescSaturation is the description for the saturation indicator
-	SloConfigDescSaturation = "Saturation indicator"
-	// SloConfigDescMetricName is the description for the metric_name field
-	SloConfigDescMetricName = "The metric name for saturation indicator"
 	// SloConfigDescThreshold is the description for the threshold field
 	SloConfigDescThreshold = "The threshold for the metric configuration"
 	// SloConfigDescAggregation is the description for the aggregation field
@@ -100,9 +92,10 @@ const (
 	SloConfigDescTimezone = "The timezone for the SLO configuration"
 	// SloConfigDescStartTimestamp is the description for the start_timestamp field
 	SloConfigDescStartTimestamp = "Time window start time"
+)
 
-	// Error message constants
-
+// Error message constants
+const (
 	// SloConfigErrMappingState is the error title for mapping state to data object
 	SloConfigErrMappingState = "Error mapping state to data object"
 	// SloConfigErrBothPlanStateNil is the error message when both plan and state are nil
@@ -128,7 +121,7 @@ const (
 	// SloConfigErrTimeBasedAvailabilityRequired is the error message for missing time_based_availability fields
 	SloConfigErrTimeBasedAvailabilityRequired = "threshold and  aggregation are required for time_based_availability indicator"
 	// SloConfigErrTrafficRequired is the error message for missing traffic fields
-	SloConfigErrTrafficRequired = "threshold is required for time_based_latency traffic indicator"
+	SloConfigErrTrafficRequired = "threshold and  operator are required for time_based_latency indicator"
 	// SloConfigErrCustomRequired is the error message for missing custom indicator fields
 	SloConfigErrCustomRequired = "good_event_filter_expression is required for custom indicator"
 	// SloConfigErrMissingIndicator is the error title for missing indicator configuration
@@ -167,141 +160,4 @@ const (
 	SloConfigErrMappingTimeWindowToState = "Error mapping time window to state"
 	// SloConfigErrUnsupportedTimeWindowType is the error message for unsupported time window type
 	SloConfigErrUnsupportedTimeWindowType = "Unsupported time window type: %s"
-	// SloConfigErrInfraTypeRequired is the error title for missing infrastructure type
-	SloConfigErrInfraTypeRequired = "Infrastructure type required"
-	// SloConfigErrInfraTypeRequiredMsg is the error message for missing infrastructure type
-	SloConfigErrInfraTypeRequiredMsg = "infra_type is required for infrastructure entity"
-	// SloConfigErrSaturationRequired is the error title for missing saturation indicator fields
-	SloConfigErrSaturationRequired = "Saturation indicator fields required"
-	// SloConfigErrSaturationRequiredMsg is the error message for missing saturation indicator fields
-	SloConfigErrSaturationRequiredMsg = "threshold and operator are required for saturation indicator"
-
-	SloConfigFromTerraformIdPrefix = "SLOTF"
-
-	//SloConfigField names for terraform
-	SloConfigFieldName                      = "name"
-	SloConfigFieldTarget                    = "target"
-	SloConfigFieldTags                      = "tags"
-	SloConfigFieldLastUpdated               = "last_updated"
-	SloConfigFieldCreatedDate               = "created_date"
-	SloConfigFieldSloEntity                 = "entity"
-	SloConfigFieldSloIndicator              = "indicator"
-	SloConfigFieldSloTimeWindow             = "time_window"
-	SloConfigFieldApplicationID             = "application_id"
-	SloConfigFieldWebsiteID                 = "website_id"
-	SloConfigFieldSyntheticTestIDs          = "synthetic_test_ids"
-	SloConfigFieldInfraType                 = "infra_type"
-	SloConfigFieldFilterExpression          = "filter_expression"
-	SloConfigFieldServiceID                 = "service_id"
-	SloConfigFieldEndpointID                = "endpoint_id"
-	SloConfigFieldIncludeInternal           = "include_internal"
-	SloConfigFieldIncludeSynthetic          = "include_synthetic"
-	SloConfigFieldBeaconType                = "beacon_type"
-	SloConfigFieldBoundaryScope             = "boundary_scope"
-	SloConfigFieldThreshold                 = "threshold"
-	SloConfigFieldAggregation               = "aggregation"
-	SloConfigFieldBadEventFilterExpression  = "bad_event_filter_expression"
-	SloConfigFieldGoodEventFilterExpression = "good_event_filter_expression"
-	SloConfigFieldTrafficType               = "traffic_type"
-	SloConfigFieldMetricName                = "metric_name"
-	SloConfigFieldDuration                  = "duration"
-	SloConfigFieldDurationUnit              = "duration_unit"
-	SloConfigFieldTimezone                  = "timezone"
-	SloConfigFieldStartTimestamp            = "start_timestamp"
-
-	// Slo entity types for terraform
-	SloConfigApplicationEntity    = "application"
-	SloConfigWebsiteEntity        = "website"
-	SloConfigSyntheticEntity      = "synthetic"
-	SloConfigInfrastructureEntity = "infrastructure"
-
-	// Slo time windows types
-	SloConfigRollingTimeWindow = "rolling"
-	SloConfigFixedTimeWindow   = "fixed"
-
-	// Slo indicator types for terraform
-	SloConfigTimeBasedLatencyIndicator       = "time_based_latency"
-	SloConfigEventBasedLatencyIndicator      = "event_based_latency"
-	SloConfigTimeBasedAvailabilityIndicator  = "time_based_availability"
-	SloConfigEventBasedAvailabilityIndicator = "event_based_availability"
-	SloConfigTrafficIndicator                = "traffic"
-	SloConfigCustomIndicator                 = "custom"
-
-	// SloConfigFieldNames and values for API
-	SloConfigAPIFieldThreshold       = "threshold"
-	SloConfigAPIFieldAggregation     = "aggregation"
-	SloConfigAPIFieldDuration        = "duration"
-	SloConfigAPIFieldDurationUnit    = "durationUnit"
-	SloConfigAPIFieldTimezone        = "timezone"
-	SloConfigAPIFieldStartTimestamp  = "startTimestamp"
-	SloConfigAPIFieldTrafficType     = "trafficType"
-	SloConfigAPIFieldGoodEventFilter = "goodEventFilterExpression"
-	SloConfigAPIFieldBadEventFilter  = "badEventFilterExpression"
-
-	SloConfigAPIFieldFilter = "tagFilterExpression"
-
-	SloConfigAPIIndicatorBlueprintLatency      = "latency"
-	SloConfigAPIIndicatorBlueprintAvailability = "availability"
-	SloConfigAPIIndicatorBlueprintTraffic      = "traffic"
-	SloConfigAPIIndicatorBlueprintCustom       = "custom"
-	SloConfigAPIIndicatorBlueprintSaturation   = "saturation"
-
-	SloConfigAPIFieldBlueprint = "blueprint"
-	SloConfigAPIFieldType      = "type"
-
-	SloConfigAPIIndicatorMeasurementTypeTimeBased  = "timeBased"
-	SloConfigAPIIndicatorMeasurementTypeEventBased = "eventBased"
-	SloConfigAPITrafficIndicatorTypeAll            = "all"
-	SloConfigAPITrafficIndicatorTypeErroneous      = "erroneous"
-	// Schema field identifier constants
-
-	// SchemaFieldID represents the id field identifier
-	SchemaFieldID = "id"
-	// SchemaFieldDisplayName represents the display_name field identifier
-	SchemaFieldDisplayName = "display_name"
-	// SchemaFieldRolling represents the rolling field identifier
-	SchemaFieldRolling = "rolling"
-	// SchemaFieldFixed represents the fixed field identifier
-	SchemaFieldFixed = "fixed"
-	// SchemaFieldTimeBasedLatency represents the time_based_latency field identifier
-	SchemaFieldTimeBasedLatency = "time_based_latency"
-	// SchemaFieldEventBasedLatency represents the event_based_latency field identifier
-	SchemaFieldEventBasedLatency = "event_based_latency"
-	// SchemaFieldTimeBasedAvailability represents the time_based_availability field identifier
-	SchemaFieldTimeBasedAvailability = "time_based_availability"
-	// SchemaFieldEventBasedAvailability represents the event_based_availability field identifier
-	SchemaFieldEventBasedAvailability = "event_based_availability"
-	// SchemaFieldTraffic represents the traffic field identifier
-	SchemaFieldTraffic = "traffic"
-	// SchemaFieldCustom represents the custom field identifier
-	SchemaFieldCustom = "custom"
-	// SchemaFieldSaturation represents the saturation field identifier
-	SchemaFieldSaturation = "saturation"
-	// SchemaFieldOperator represents the operator field identifier
-	SchemaFieldOperator = "operator"
-
-	// Operator constants
-
-	// OperatorGreaterThan represents the > operator
-	OperatorGreaterThan = ">"
-	// OperatorGreaterThanOrEqual represents the >= operator
-	OperatorGreaterThanOrEqual = ">="
-	// OperatorLessThan represents the < operator
-	OperatorLessThan = "<"
-	// OperatorLessThanOrEqual represents the <= operator
-	OperatorLessThanOrEqual = "<="
-
-	// Tag filter constants
-
-	// TagFilterTypeExpression represents the EXPRESSION tag filter type
-	TagFilterTypeExpression = "EXPRESSION"
-	// LogicalOperatorAnd represents the AND logical operator
-	LogicalOperatorAnd = "AND"
-
-	// Default values
-
-	// DefaultAggregation represents the default aggregation type
-	DefaultAggregation = "MEAN"
-	// EmptyString represents an empty string constant
-	EmptyString = ""
 )

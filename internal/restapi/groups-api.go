@@ -149,15 +149,6 @@ const (
 	PermissionLimitedAiGatewayScope           = InstanaPermission("LIMITED_AI_GATEWAY_SCOPE")
 	PermissionLimitedMObileAppsScope          = InstanaPermission("LIMITED_MOBILE_APPS_SCOPE")
 	PermissionLimitedWebsitesScope            = InstanaPermission("LIMITED_WEBSITES_SCOPE")
-
-	//PermissionAccessApplications const for Instana permission ACCESS_APPLICATIONS
-	PermissionAccessApplications = InstanaPermission("ACCESS_APPLICATIONS")
-	// PermissionAccessMobileApps const for Instana permission ACCESS_MOBILE_APPS
-	PermissionAccessMobileApps = InstanaPermission("ACCESS_MOBILE_APPS")
-	// PermissionAccessSynthetics const for Instana permission ACCESS_SYNTHETICS
-	PermissionAccessSynthetics = InstanaPermission("ACCESS_SYNTHETICS")
-	// PermissionAccessWebsites const for Instana permission ACCESS_WEBSITES
-	PermissionAccessWebsites = InstanaPermission("ACCESS_WEBSITES")
 )
 
 // InstanaPermissions data type representing a slice of Instana permissions
@@ -259,10 +250,6 @@ var SupportedInstanaPermissions = InstanaPermissions{
 	PermissionCanConfigureServiceLevels,
 	PermissionCanConfigureServiceLevelCorrectionWindows,
 	PermissionCanConfigureServiceLevelSmartAlerts,
-	PermissionAccessApplications,
-	PermissionAccessMobileApps,
-	PermissionAccessSynthetics,
-	PermissionAccessWebsites,
 }
 
 // GroupsResourcePath path to Group resource of Instana RESTful API

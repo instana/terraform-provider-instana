@@ -1,8 +1,8 @@
 package automationpolicy
 
 import (
+	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/terraform-provider-instana/internal/shared"
 )
 
 // AutomationPolicyModel represents the data model for the automation policy resource
@@ -11,7 +11,7 @@ type AutomationPolicyModel struct {
 	Name              types.String             `tfsdk:"name"`
 	Description       types.String             `tfsdk:"description"`
 	Tags              types.List               `tfsdk:"tags"`
-	Trigger           *TriggerModel            `tfsdk:"trigger"`
+	Trigger           TriggerModel             `tfsdk:"trigger"`
 	TypeConfiguration []TypeConfigurationModel `tfsdk:"type_configuration"`
 }
 

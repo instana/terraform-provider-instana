@@ -32,8 +32,4 @@ const (
 	WebexTeamsWebhookChannelType = AlertingChannelType("WEBEX_TEAMS_WEBHOOK")
 	//WatsonAIOpsWebhookChannelType constant value for alerting channel type WATSON_AIOPS_WEBHOOK
 	WatsonAIOpsWebhookChannelType = AlertingChannelType("WATSON_AIOPS_WEBHOOK")
-	//SlackAppChannelType constant value for alerting channel type BIDIRECTIONAL_SLACK
-	SlackAppChannelType = AlertingChannelType("BIDIRECTIONAL_SLACK")
-	//MsTeamsAppChannelType constant value for alerting channel type BIDIRECTIONAL_MS_TEAMS
-	MsTeamsAppChannelType = AlertingChannelType("BIDIRECTIONAL_MS_TEAMS")
 )

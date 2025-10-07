@@ -1,14 +1,14 @@
 package applicationalertconfig
 
-// ResourceInstanaApplicationAlertConfig the name of the terraform-provider-instana resource to manage application alert configs
-const ResourceInstanaApplicationAlertConfig = "application_alert_config"
+// ResourceInstanaApplicationAlertConfigFramework the name of the terraform-provider-instana resource to manage application alert configs
+const ResourceInstanaApplicationAlertConfigFramework = "application_alert_config"
 
-// ResourceInstanaGlobalApplicationAlertConfig the name of the terraform-provider-instana resource to manage global application alert configs
-const ResourceInstanaGlobalApplicationAlertConfig = "global_application_alert_config"
+// ResourceInstanaGlobalApplicationAlertConfigFramework the name of the terraform-provider-instana resource to manage global application alert configs
+const ResourceInstanaGlobalApplicationAlertConfigFramework = "global_application_alert_config"
 
 const (
-	//ApplicationAlertConfigFieldID constant value for field id of resource instana_application_alert_config
-	ApplicationAlertConfigFieldID = "id"
+	//ApplicationAlertConfigFieldAlertChannelIDs constant value for field alerting_channel_ids of resource instana_application_alert_config
+	ApplicationAlertConfigFieldAlertChannelIDs = "alert_channel_ids"
 	//ApplicationAlertConfigFieldBoundaryScope constant value for field boundary_scope of resource instana_application_alert_config
 	ApplicationAlertConfigFieldBoundaryScope = "boundary_scope"
 	//ApplicationAlertConfigFieldDescription constant value for field description of resource instana_application_alert_config
@@ -23,6 +23,8 @@ const (
 	ApplicationAlertConfigFieldIncludeSynthetic = "include_synthetic"
 	//ApplicationAlertConfigFieldName constant value for field name of resource instana_application_alert_config
 	ApplicationAlertConfigFieldName = "name"
+	//ApplicationAlertConfigFieldFullName constant value for field full_name of resource instana_application_alert_config
+	ApplicationAlertConfigFieldFullName = "full_name"
 	//ApplicationAlertConfigFieldRule constant value for field rule of resource instana_application_alert_config
 	ApplicationAlertConfigFieldRule = "rule"
 	//ApplicationAlertConfigFieldRuleMetricName constant value for field rule.*.metric_name of resource instana_application_alert_config
@@ -51,6 +53,8 @@ const (
 	ApplicationAlertConfigFieldRuleStatusCodeEnd = "status_code_end"
 	//ApplicationAlertConfigFieldRuleThroughput constant value for field rule.throughput of resource instana_application_alert_config
 	ApplicationAlertConfigFieldRuleThroughput = "throughput"
+	//ApplicationAlertConfigFieldSeverity constant value for field severity of resource instana_application_alert_config
+	ApplicationAlertConfigFieldSeverity = "severity"
 	//ApplicationAlertConfigFieldTagFilter constant value for field tag_filter of resource instana_application_alert_config
 	ApplicationAlertConfigFieldTagFilter = "tag_filter"
 	//ApplicationAlertConfigFieldTimeThreshold constant value for field time_threshold of resource instana_application_alert_config
@@ -69,14 +73,17 @@ const (
 	ApplicationAlertConfigFieldTimeThresholdViolationsInSequence = "violations_in_sequence"
 	//ApplicationAlertConfigFieldTriggering constant value for field triggering of resource instana_application_alert_config
 	ApplicationAlertConfigFieldTriggering = "triggering"
+)
 
-	// Additional application alert config field names
-
+// Additional application alert config field names
+const (
 	ApplicationAlertConfigFieldRules             = "rules"
 	ApplicationAlertConfigFieldThreshold         = "threshold"
 	ApplicationAlertConfigFieldThresholdOperator = "threshold_operator"
 	ApplicationAlertConfigFieldGracePeriod       = "grace_period"
 	ApplicationAlertConfigFieldAlertChannels     = "alert_channels"
+	ApplicationAlertConfigFieldRuleConfig        = "rule_config"
+	ApplicationAlertConfigFieldValue             = "value"
 
 	// Re-define constants from resource-application-alert-config.go for compatibility
 	ApplicationAlertConfigFieldApplications                            = "application"
@@ -86,41 +93,4 @@ const (
 	ApplicationAlertConfigFieldApplicationsServicesServiceID           = "service_id"
 	ApplicationAlertConfigFieldApplicationsServicesEndpoints           = "endpoint"
 	ApplicationAlertConfigFieldApplicationsServicesEndpointsEndpointID = "endpoint_id"
-)
-
-// Error messages
-const (
-	ErrorMessageFailedToParseTagFilter      = "Failed to parse tag filter expression"
-	ErrorMessageInvalidTagFilter            = "Invalid tag filter expression: %s"
-	ErrorMessageFailedToMapCustomPayload    = "failed to map custom payload fields"
-	ErrorMessageMetricNameRequired          = "MetricName is required for %s rules"
-	ErrorMessageMissingMetricName           = "missing metric name"
-	ErrorMessageLogsFieldsRequired          = "MetricName, log level, and log operator are required for log rules"
-	ErrorMessageMissingRequiredFields       = "missing required fields"
-	ErrorMessageTagFilterNormalizationError = "Tag Filter Normalization Error"
-	ErrorMessageFailedToNormalizeTagFilter  = "Failed to normalize tag filter expression: %s"
-	ErrorMessageValidationError             = "Validation Error"
-)
-
-// Threshold type constants
-const (
-	ThresholdTypeStatic           = "staticThreshold"
-	ThresholdTypeAdaptiveBaseline = "adaptiveBaseline"
-)
-
-// Time threshold type constants
-const (
-	TimeThresholdTypeRequestImpact        = "requestImpact"
-	TimeThresholdTypeViolationsInPeriod   = "violationsInPeriod"
-	TimeThresholdTypeViolationsInSequence = "violationsInSequence"
-)
-
-// API Alert Type constants (what the API expects)
-const (
-	APIAlertTypeErrorRate  = "errorRate"
-	APIAlertTypeErrors     = "errors"
-	APIAlertTypeLogs       = "logs"
-	APIAlertTypeSlowness   = "slowness"
-	APIAlertTypeStatusCode = "statusCode"
-	APIAlertTypeThroughput = "throughput"
 )

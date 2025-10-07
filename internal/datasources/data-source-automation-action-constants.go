@@ -2,8 +2,8 @@ package datasources
 
 // Data source name constants
 const (
-	// DataSourceInstanaAutomationAction the name of the terraform-provider-instana data source to read automation actions
-	DataSourceInstanaAutomationAction = "automation_action"
+	// DataSourceInstanaAutomationActionFramework the name of the terraform-provider-instana data source to read automation actions
+	DataSourceInstanaAutomationActionFramework = "automation_action"
 )
 
 // Field name constants for automation action datasource (field constants are shared with automation-action.go)

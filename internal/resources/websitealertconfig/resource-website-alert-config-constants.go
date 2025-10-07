@@ -1,7 +1,7 @@
 package websitealertconfig
 
-// ResourceInstanaWebsiteAlertConfig the name of the terraform-provider-instana resource to manage website alert configs
-const ResourceInstanaWebsiteAlertConfig = "website_alert_config"
+// ResourceInstanaWebsiteAlertConfigFramework the name of the terraform-provider-instana resource to manage website alert configs
+const ResourceInstanaWebsiteAlertConfigFramework = "website_alert_config"
 
 const (
 	//WebsiteAlertConfigFieldAlertChannelIDs constant value for field alerting_channel_ids of resource instana_website_alert_config
@@ -14,6 +14,8 @@ const (
 	WebsiteAlertConfigFieldGranularity = "granularity"
 	//WebsiteAlertConfigFieldName constant value for field name of resource instana_website_alert_config
 	WebsiteAlertConfigFieldName = "name"
+	//WebsiteAlertConfigFieldFullName constant value for field full_name of resource instana_website_alert_config
+	WebsiteAlertConfigFieldFullName = "full_name"
 
 	//WebsiteAlertConfigFieldRule constant value for field rule of resource instana_website_alert_config
 	WebsiteAlertConfigFieldRule = "rule"
@@ -34,6 +36,8 @@ const (
 	//WebsiteAlertConfigFieldRuleSpecificJsError constant value for field rule.specific_js_error of resource instana_website_alert_config
 	WebsiteAlertConfigFieldRuleSpecificJsError = "specific_js_error"
 
+	//WebsiteAlertConfigFieldSeverity constant value for field severity of resource instana_website_alert_config
+	WebsiteAlertConfigFieldSeverity = "severity"
 	//WebsiteAlertConfigFieldTagFilter constant value for field tag_filter of resource instana_website_alert_config
 	WebsiteAlertConfigFieldTagFilter = "tag_filter"
 
@@ -59,12 +63,14 @@ const (
 	WebsiteAlertConfigFieldTriggering = "triggering"
 	WebsiteAlertConfigFieldRules      = "rules"
 	WebsiteAlertConfigFieldThreshold  = "threshold"
-
+)
+const (
 	// Resource description constants
 	WebsiteAlertConfigDescResource        = "This resource manages Website Alert Configurations in Instana."
 	WebsiteAlertConfigDescID              = "The ID of the Website Alert Configuration."
 	WebsiteAlertConfigDescName            = "The name of the Website Alert Configuration."
 	WebsiteAlertConfigDescDescription     = "The description of the Website Alert Configuration."
+	WebsiteAlertConfigDescSeverity        = "The severity of the alert when triggered."
 	WebsiteAlertConfigDescTriggering      = "Flag to indicate whether also an Incident is triggered or not."
 	WebsiteAlertConfigDescWebsiteID       = "Unique ID of the website."
 	WebsiteAlertConfigDescTagFilter       = "The tag filter expression for the Website Alert Configuration."
@@ -107,6 +113,7 @@ const (
 	WebsiteAlertConfigDescTimeThresholdViolationsInSequence = "Time threshold base on violations in sequence."
 
 	// Error message constants
+	WebsiteAlertConfigErrConvertSeverity               = "Error converting severity"
 	WebsiteAlertConfigErrParseTagFilter                = "Error parsing tag filter"
 	WebsiteAlertConfigErrMapFilterExpression           = "Error mapping filter expression"
 	WebsiteAlertConfigErrMapFilterExpressionMsg        = "Failed to map filter expression: %s"
@@ -116,90 +123,4 @@ const (
 	WebsiteAlertConfigErrInvalidRuleConfigMsg          = "Exactly one rule type configuration is required"
 	WebsiteAlertConfigErrInvalidTimeThresholdConfig    = "Invalid time threshold configuration"
 	WebsiteAlertConfigErrInvalidTimeThresholdConfigMsg = "Exactly one time threshold type configuration is required"
-)
-
-// Field name constants
-const (
-	WebsiteAlertConfigFieldID                  = "id"
-	WebsiteAlertConfigFieldStatic              = "static"
-	WebsiteAlertConfigFieldAdaptiveBaseline    = "adaptive_baseline"
-	WebsiteAlertConfigFieldHistoricBaseline    = "historic_baseline"
-	WebsiteAlertConfigFieldDeviationFactor     = "deviation_factor"
-	WebsiteAlertConfigFieldAdaptability        = "adaptability"
-	WebsiteAlertConfigFieldSeasonality         = "seasonality"
-	WebsiteAlertConfigFieldCustomPayloadFields = "custom_payload_fields"
-)
-
-// Operator value constants
-const (
-	WebsiteAlertConfigOperatorGreaterThan       = ">"
-	WebsiteAlertConfigOperatorGreaterThanEquals = ">="
-	WebsiteAlertConfigOperatorLessThan          = "<"
-	WebsiteAlertConfigOperatorLessThanEquals    = "<="
-	WebsiteAlertConfigOperatorEquals            = "=="
-)
-
-// Aggregation value constants
-const (
-	WebsiteAlertConfigAggregationSUM  = "SUM"
-	WebsiteAlertConfigAggregationMEAN = "MEAN"
-	WebsiteAlertConfigAggregationMAX  = "MAX"
-	WebsiteAlertConfigAggregationMIN  = "MIN"
-	WebsiteAlertConfigAggregationP25  = "P25"
-	WebsiteAlertConfigAggregationP50  = "P50"
-	WebsiteAlertConfigAggregationP75  = "P75"
-	WebsiteAlertConfigAggregationP90  = "P90"
-	WebsiteAlertConfigAggregationP95  = "P95"
-	WebsiteAlertConfigAggregationP98  = "P98"
-	WebsiteAlertConfigAggregationP99  = "P99"
-)
-
-// Impact measurement method constants
-const (
-	WebsiteAlertConfigImpactMethodAggregated = "AGGREGATED"
-	WebsiteAlertConfigImpactMethodPerWindow  = "PER_WINDOW"
-)
-
-// Alert type constants
-const (
-	WebsiteAlertConfigAlertTypeThroughput      = "throughput"
-	WebsiteAlertConfigAlertTypeSlowness        = "slowness"
-	WebsiteAlertConfigAlertTypeStatusCode      = "statusCode"
-	WebsiteAlertConfigAlertTypeSpecificJsError = "specificJsError"
-)
-
-// Threshold type constants
-const (
-	WebsiteAlertConfigThresholdTypeStatic   = "staticThreshold"
-	WebsiteAlertConfigThresholdTypeAdaptive = "adaptiveBaseline"
-	WebsiteAlertConfigThresholdTypeHistoric = "historicBaseline"
-)
-
-// Time threshold type constants
-const (
-	WebsiteAlertConfigTimeThresholdTypeViolationsInSequence = "violationsInSequence"
-	WebsiteAlertConfigTimeThresholdTypeUserImpact           = "userImpactOfViolationsInSequence"
-	WebsiteAlertConfigTimeThresholdTypeViolationsInPeriod   = "violationsInPeriod"
-)
-
-// Tag filter constants
-const (
-	WebsiteAlertConfigTagFilterTypeExpression = "EXPRESSION"
-	WebsiteAlertConfigLogicalOperatorAND      = "AND"
-)
-
-// Default value constants
-const (
-	WebsiteAlertConfigDefaultTriggering  = false
-	WebsiteAlertConfigDefaultGranularity = 600000
-)
-
-// Validation limit constants
-const (
-	WebsiteAlertConfigMinNameLength        = 0
-	WebsiteAlertConfigMaxNameLength        = 256
-	WebsiteAlertConfigMinDescriptionLength = 0
-	WebsiteAlertConfigMaxDescriptionLength = 65536
-	WebsiteAlertConfigMinWebsiteIDLength   = 0
-	WebsiteAlertConfigMaxWebsiteIDLength   = 64
 )

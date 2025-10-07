@@ -2,12 +2,6 @@ package apitoken
 
 // Description constants for API Token resource
 const (
-	// ResourceInstanaAPIToken the name of the terraform-provider-instana resource to manage API tokens
-	ResourceInstanaAPIToken = "api_token"
-
-	// Common field names
-	APITokenFieldID = "id"
-
 	APITokenDescResource                                  = "This resource manages API tokens in Instana."
 	APITokenDescID                                        = "The ID of the API token."
 	APITokenDescAccessGrantingToken                       = "The token used for the api Client used in the Authorization header to authenticate the client"
@@ -98,6 +92,14 @@ const (
 	APITokenDescCanConfigureServiceLevelCorrectionWindows = "Configures if the API token is allowed to configure service level Correction Windows"
 	APITokenDescCanConfigureServiceLevelSmartAlerts       = "Configures if the API token is allowed to configure service level smart alerts"
 	APITokenDescCanConfigureServiceLevels                 = "Configures if the API token is allowed to configure service levels"
+)
+
+// ResourceInstanaAPITokenFramework the name of the terraform-provider-instana resource to manage API tokens
+const ResourceInstanaAPITokenFramework = "api_token"
+
+const (
+	// ResourceInstanaAPIToken the name of the terraform-provider-instana resource to manage API tokens
+	ResourceInstanaAPIToken = "instana_api_token"
 
 	//APITokenFieldAccessGrantingToken constant value for the schema field access_granting_token
 	APITokenFieldAccessGrantingToken = "access_granting_token"
@@ -105,6 +107,8 @@ const (
 	APITokenFieldInternalID = "internal_id"
 	//APITokenFieldName constant value for the schema field name
 	APITokenFieldName = "name"
+	//APITokenFieldFullName constant value for the schema field full_name
+	APITokenFieldFullName = "full_name"
 	//APITokenFieldCanConfigureServiceMapping constant value for the schema field can_configure_service_mapping
 	APITokenFieldCanConfigureServiceMapping = "can_configure_service_mapping"
 	//APITokenFieldCanConfigureEumApplications constant value for the schema field can_configure_eum_applications

@@ -1,7 +1,7 @@
 package automationpolicy
 
-// ResourceInstanaAutomationPolicy the name of the terraform-provider-instana resource to manage automation policies
-const ResourceInstanaAutomationPolicy = "automation_policy"
+// ResourceInstanaAutomationPolicyFramework the name of the terraform-provider-instana resource to manage automation policies
+const ResourceInstanaAutomationPolicyFramework = "automation_policy"
 
 // runnable types
 const actionRunnable = "action"
@@ -40,25 +40,6 @@ const AutomationPolicyDescConditionQuery = "Dynamic Focus Query string that sele
 const AutomationPolicyDescAction = "The configuration for the automation action."
 const AutomationPolicyDescActionAction = "The automation action configuration."
 const AutomationPolicyDescActionAgentID = "The identifier of the agent host."
-
-// Field names
-const (
-	AutomationPolicyFieldID            = "id"
-	AutomationPolicyFieldScheduling    = "scheduling"
-	AutomationPolicyFieldStartTime     = "start_time"
-	AutomationPolicyFieldDuration      = "duration"
-	AutomationPolicyFieldDurationUnit  = "duration_unit"
-	AutomationPolicyFieldRecurrentRule = "recurrent_rule"
-	AutomationPolicyFieldRecurrent     = "recurrent"
-	AutomationPolicyFieldAction        = "action"
-)
-
-// Duration unit values
-const (
-	DurationUnitMinute = "MINUTE"
-	DurationUnitHour   = "HOUR"
-	DurationUnitDay    = "DAY"
-)
 
 // Error messages
 const AutomationPolicyErrMappingTags = "Error mapping tags"

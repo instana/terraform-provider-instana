@@ -1,8 +1,8 @@
 package alertingchannel
 
 import (
+	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/terraform-provider-instana/internal/shared"
 )
 
 // AlertingChannelModel represents the data model for the alerting channel resource
@@ -23,6 +23,4 @@ type AlertingChannelModel struct {
 	PrometheusWebhook     *shared.PrometheusWebhookModel     `tfsdk:"prometheus_webhook"`
 	WebexTeamsWebhook     *shared.WebhookBasedModel          `tfsdk:"webex_teams_webhook"`
 	WatsonAIOpsWebhook    *shared.WatsonAIOpsWebhookModel    `tfsdk:"watson_aiops_webhook"`
-	SlackApp              *shared.SlackAppModel              `tfsdk:"slack_app"`
-	MsTeamsApp            *shared.MsTeamsAppModel            `tfsdk:"ms_teams_app"`
 }

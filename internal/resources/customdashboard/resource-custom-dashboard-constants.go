@@ -1,13 +1,13 @@
 package customdashboard
 
-// ResourceInstanaCustomDashboard the name of the terraform-provider-instana resource to manage custom dashboards
-const ResourceInstanaCustomDashboard = "custom_dashboard"
+// ResourceInstanaCustomDashboardFramework the name of the terraform-provider-instana resource to manage custom dashboards
+const ResourceInstanaCustomDashboardFramework = "custom_dashboard"
 
 const (
-	//CustomDashboardFieldID constant value for the schema field id
-	CustomDashboardFieldID = "id"
 	//CustomDashboardFieldTitle constant value for the schema field title
 	CustomDashboardFieldTitle = "title"
+	//CustomDashboardFieldFullTitle constant value for the computed schema field full_title
+	CustomDashboardFieldFullTitle = "full_title"
 	//CustomDashboardFieldAccessRule constant value for the schema field access_rule
 	CustomDashboardFieldAccessRule = "access_rule"
 	//CustomDashboardFieldAccessRuleAccessType constant value for the schema field access_rule.access_type

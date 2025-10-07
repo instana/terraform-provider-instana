@@ -26,10 +26,9 @@ type TimeWindowModel struct {
 	RollingTimeWindowModel *RollingTimeWindowModel `tfsdk:"rolling"`
 }
 type EntityModel struct {
-	ApplicationEntityModel   *ApplicationEntityModel   `tfsdk:"application"`
-	WebsiteEntityModel       *WebsiteEntityModel       `tfsdk:"website"`
-	SyntheticEntityModel     *SyntheticEntityModel     `tfsdk:"synthetic"`
-	InfrastructureEntityModel *InfrastructureEntityModel `tfsdk:"infrastructure"`
+	ApplicationEntityModel *ApplicationEntityModel `tfsdk:"application"`
+	WebsiteEntityModel     *WebsiteEntityModel     `tfsdk:"website"`
+	SyntheticEntityModel   *SyntheticEntityModel   `tfsdk:"synthetic"`
 }
 type IndicatorModel struct {
 	TimeBasedLatencyIndicatorModel       *TimeBasedLatencyIndicatorModel       `tfsdk:"time_based_latency"`
@@ -38,7 +37,6 @@ type IndicatorModel struct {
 	EventBasedAvailabilityIndicatorModel *EventBasedAvailabilityIndicatorModel `tfsdk:"event_based_availability"`
 	TrafficIndicatorModel                *TrafficIndicatorModel                `tfsdk:"traffic"`
 	CustomIndicatorModel                 *CustomIndicatorModel                 `tfsdk:"custom"`
-	SaturationIndicatorModel             *SaturationIndicatorModel             `tfsdk:"saturation"`
 }
 
 // ApplicationEntityModel represents an application entity in the Terraform model
@@ -63,12 +61,6 @@ type WebsiteEntityModel struct {
 type SyntheticEntityModel struct {
 	SyntheticTestIDs []types.String `tfsdk:"synthetic_test_ids"`
 	FilterExpression types.String   `tfsdk:"filter_expression"`
-}
-
-// InfrastructureEntityModel represents an infrastructure entity in the Terraform model
-type InfrastructureEntityModel struct {
-	InfraType        types.String `tfsdk:"infra_type"`
-	FilterExpression types.String `tfsdk:"filter_expression"`
 }
 
 // TimeBasedLatencyIndicatorModel represents a time-based latency indicator in the Terraform model
@@ -97,6 +89,7 @@ type EventBasedAvailabilityIndicatorModel struct {
 type TrafficIndicatorModel struct {
 	TrafficType types.String  `tfsdk:"traffic_type"`
 	Threshold   types.Float64 `tfsdk:"threshold"`
+	Aggregation types.String  `tfsdk:"aggregation"`
 	Operator    types.String  `tfsdk:"operator"`
 }
 
@@ -104,14 +97,6 @@ type TrafficIndicatorModel struct {
 type CustomIndicatorModel struct {
 	GoodEventFilterExpression types.String `tfsdk:"good_event_filter_expression"`
 	BadEventFilterExpression  types.String `tfsdk:"bad_event_filter_expression"`
-}
-
-// SaturationIndicatorModel represents a saturation indicator in the Terraform model
-type SaturationIndicatorModel struct {
-	MetricName  types.String  `tfsdk:"metric_name"`
-	Threshold   types.Float64 `tfsdk:"threshold"`
-	Aggregation types.String  `tfsdk:"aggregation"`
-	Operator    types.String  `tfsdk:"operator"`
 }
 
 // RollingTimeWindowModel represents a rolling time window in the Terraform model

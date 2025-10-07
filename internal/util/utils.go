@@ -194,28 +194,13 @@ func NormalizeJSONString(jsonString string) string {
 	return string(bytes)
 }
 
-// NormalizeJSONObjectString normalizes a JSON object string (not an array)
-// This is useful for webpage scripts and other single JSON objects
-func NormalizeJSONObjectString(jsonString string) string {
-	var raw map[string]interface{}
-	err := json.Unmarshal([]byte(jsonString), &raw)
-	if err != nil {
-		return jsonString
-	}
-	bytes, err := json.Marshal(raw)
-	if err != nil {
-		return jsonString
-	}
-	return string(bytes)
-}
-
 // this interface to handle the conversion of differnt numeric types
 type numericPtr interface {
 	~*int32 | ~*int64 | ~*float32 | ~*float64 | ~*int
 }
 
 func SetStringPointerToState(i *string) types.String {
-	if i == nil || *i == "" {
+	if i == nil {
 		return types.StringNull()
 	} else {
 		return types.StringValue(*i)
@@ -319,26 +304,4 @@ func SetStringPointerFromState(s types.String) *string {
 	}
 	v := s.ValueString()
 	return &v
-}
-
-// SetInt32PointerToInt64State converts an int32 pointer to types.Int64
-func SetInt32PointerToInt64State(i *int32) types.Int64 {
-	if i == nil {
-		return types.Int64Null()
-	}
-	return types.Int64Value(int64(*i))
-}
-
-// canonicalizeJSON returns a compact, deterministic JSON string or an error.
-func CanonicalizeJSON(input string) (string, error) {
-	var v interface{}
-	if err := json.Unmarshal([]byte(input), &v); err != nil {
-		return "", err
-	}
-	// json.Marshal produces deterministic ordering for map keys in Go
-	b, err := json.Marshal(v)
-	if err != nil {
-		return "", err
-	}
-	return string(b), nil
 }

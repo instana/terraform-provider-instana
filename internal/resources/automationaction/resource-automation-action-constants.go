@@ -1,7 +1,7 @@
 package automationaction
 
-// ResourceInstanaAutomationAction the name of the terraform-provider-instana resource to manage automation actions
-const ResourceInstanaAutomationAction = "automation_action"
+// ResourceInstanaAutomationActionFramework the name of the terraform-provider-instana resource to manage automation actions
+const ResourceInstanaAutomationActionFramework = "automation_action"
 
 // Resource description
 const AutomationActionDescResource = "This resource manages automation actions in Instana."
@@ -186,25 +186,6 @@ const AutomationActionAuthTypeBearerToken = "bearerToken"
 const AutomationActionAuthTypeApiKey = "apiKey"
 const AutomationActionAuthTypeNoAuth = "noAuth"
 
-// HTTP method constants
-const (
-	HTTPMethodGET    = "GET"
-	HTTPMethodPOST   = "POST"
-	HTTPMethodPUT    = "PUT"
-	HTTPMethodDELETE = "DELETE"
-)
-
-// JSON field constants for authentication
-const (
-	AuthJSONFieldType        = "type"
-	AuthJSONFieldUsername    = "username"
-	AuthJSONFieldPassword    = "password"
-	AuthJSONFieldBearerToken = "bearerToken"
-	AuthJSONFieldAPIKey      = "apiKey"
-	AuthJSONFieldAPIKeyValue = "apiKeyValue"
-	AuthJSONFieldAPIKeyAddTo = "apiKeyAddTo"
-)
-
 // Field descriptions for API fields
 const AutomationActionDescAPIFieldContent = "Content for manual action"
 const AutomationActionDescAPIFieldProject = "jira project"
@@ -237,7 +218,6 @@ const AutomationActionDescAPIFieldPlaybookId = "The playbook ID"
 const AutomationActionDescAPIFieldPlaybookFileName = "The playbook filename"
 
 const (
-	AutomationActionFieldID             = "id"
 	AutomationActionFieldName           = "name"
 	AutomationActionFieldDescription    = "description"
 	AutomationActionFieldTags           = "tags"
@@ -266,11 +246,6 @@ const (
 	AutomationActionParameterFieldValue       = "value"
 	AutomationActionParameterFieldRequired    = "required"
 	AutomationActionParameterFieldHidden      = "hidden"
-
-	// Parameter type constants
-	AutomationActionParameterTypeStatic  = "static"
-	AutomationActionParameterTypeDynamic = "dynamic"
-	AutomationActionParameterTypeVault   = "vault"
 )
 
 // Description constants for automation action fields
