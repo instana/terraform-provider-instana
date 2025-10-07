@@ -5,19 +5,26 @@ const WebsiteAlertConfigResourcePath = EventSettingsBasePath + "/website-alert-c
 
 // WebsiteAlertConfig is the representation of an website alert configuration in Instana
 type WebsiteAlertConfig struct {
-	ID                    string                    `json:"id"`
-	Name                  string                    `json:"name"`
-	Description           string                    `json:"description"`
-	Severity              int                       `json:"severity"`
-	Triggering            bool                      `json:"triggering"`
-	WebsiteID             string                    `json:"websiteId"`
-	TagFilterExpression   *TagFilter                `json:"tagFilterExpression"`
-	AlertChannelIDs       []string                  `json:"alertChannelIds"`
-	Granularity           Granularity               `json:"granularity"`
-	CustomerPayloadFields []CustomPayloadField[any] `json:"customPayloadFields"`
-	Rule                  WebsiteAlertRule          `json:"rule"`
-	Threshold             Threshold                 `json:"threshold"`
-	TimeThreshold         WebsiteTimeThreshold      `json:"timeThreshold"`
+	ID                    string                           `json:"id"`
+	Name                  string                           `json:"name"`
+	Description           string                           `json:"description"`
+	Severity              *int                             `json:"severity"`
+	Triggering            bool                             `json:"triggering"`
+	WebsiteID             string                           `json:"websiteId"`
+	TagFilterExpression   *TagFilter                       `json:"tagFilterExpression"`
+	AlertChannelIDs       []string                         `json:"alertChannelIds"`
+	Granularity           Granularity                      `json:"granularity"`
+	CustomerPayloadFields []CustomPayloadField[any]        `json:"customPayloadFields"`
+	Rule                  *WebsiteAlertRule                `json:"rule"`
+	Threshold             *Threshold                       `json:"threshold"`
+	TimeThreshold         WebsiteTimeThreshold             `json:"timeThreshold"`
+	Rules                 []WebsiteAlertRuleWithThresholds `json:"rules"`
+}
+
+type WebsiteAlertRuleWithThresholds struct {
+	Rule              *WebsiteAlertRule               `json:"rule"`
+	ThresholdOperator string                          `json:"thresholdOperator"`
+	Thresholds        map[AlertSeverity]ThresholdRule `json:"thresholds"`
 }
 
 // GetIDForResourcePath implementation of the interface InstanaDataObject

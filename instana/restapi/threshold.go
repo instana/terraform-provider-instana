@@ -63,6 +63,7 @@ type Threshold struct {
 	LastUpdated     *int64                `json:"lastUpdated"`
 	Seasonality     *ThresholdSeasonality `json:"seasonality"`
 	Value           *float64              `json:"value"`
+	Adaptability    *float32              `json:"adaptability"`
 }
 
 // TimeThreshold custom data structure representing the time threshold type of the instana API
@@ -79,4 +80,6 @@ type ThresholdRule struct {
 	Seasonality     *ThresholdSeasonality `json:"seasonality"`
 	Baseline        *[][]float64          `json:"baseline"`
 	DeviationFactor *float32              `json:"deviationFactor"`
+	Adaptability    *float32              `json:"adaptability"`
+	Operator        *string               `json:"operator"`
 }

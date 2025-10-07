@@ -22,4 +22,14 @@ const (
 	VictorOpsChannelType = AlertingChannelType("VICTOR_OPS")
 	//WebhookChannelType constant value for alerting channel type WEB_HOOK
 	WebhookChannelType = AlertingChannelType("WEB_HOOK")
+	//ServiceNowChannelType constant value for alerting channel type SERVICE_NOW_WEBHOOK
+	ServiceNowChannelType = AlertingChannelType("SERVICE_NOW_WEBHOOK")
+	//ServiceNowEnhancedChannelType constant value for alerting channel type SERVICE_NOW_APPLICATION
+	ServiceNowApplicationChannelType = AlertingChannelType("SERVICE_NOW_APPLICATION")
+	//PrometheusWebhookChannelType constant value for alerting channel type PROMETHEUS_WEBHOOK
+	PrometheusWebhookChannelType = AlertingChannelType("PROMETHEUS_WEBHOOK")
+	//WebexTeamsWebhookChannelType constant value for alerting channel type WEBEX_TEAMS_WEBHOOK
+	WebexTeamsWebhookChannelType = AlertingChannelType("WEBEX_TEAMS_WEBHOOK")
+	//WatsonAIOpsWebhookChannelType constant value for alerting channel type WATSON_AIOPS_WEBHOOK
+	WatsonAIOpsWebhookChannelType = AlertingChannelType("WATSON_AIOPS_WEBHOOK")
 )

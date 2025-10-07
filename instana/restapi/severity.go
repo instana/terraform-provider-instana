@@ -41,3 +41,13 @@ func (severities Severities) APIRepresentations() []int {
 
 // SupportedSeverities slice of all supported severities of the Instana REST API
 var SupportedSeverities = Severities{SeverityWarning, SeverityCritical}
+
+// SeverityFromTerraformRepresentation converts the string representation to the Severity
+func SeverityFromTerraformRepresentation(representation string) int {
+	if representation == SeverityWarning.GetTerraformRepresentation() {
+		return SeverityWarning.GetAPIRepresentation()
+	} else if representation == SeverityCritical.GetTerraformRepresentation() {
+		return SeverityCritical.GetAPIRepresentation()
+	}
+	return -1
+}

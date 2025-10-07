@@ -12,16 +12,38 @@ const (
 
 // SloConfig represents the REST resource of slo configuration at Instana
 type SloConfig struct {
-	ID         string      `json:"id"`
-	Name       string      `json:"name"`
-	Target     float64     `json:"target"`
-	Tags       interface{} `json:"tags"`
-	Entity     interface{} `json:"entity"`
-	Indicator  interface{} `json:"indicator"`
-	TimeWindow interface{} `json:"timeWindow"`
+	ID         string        `json:"id"`
+	Name       string        `json:"name"`
+	Target     float64       `json:"target"`
+	Tags       []string      `json:"tags"`
+	Entity     SloEntity     `json:"entity"`
+	Indicator  SloIndicator  `json:"indicator"`
+	TimeWindow SloTimeWindow `json:"timeWindow"`
+	RbacTags   []RbacTag     `json:"rbacTags,omitempty"`
 
 	// CreatedDate int         `json:"createdDate"`
 	// LastUpdated int         `json:"lastUpdated"`
+}
+
+// RbacTag represents a RBAC tag in the SLO configuration
+type RbacTag struct {
+	DisplayName string `json:"displayName"`
+	ID          string `json:"id"`
+}
+
+type SloEntity struct {
+	Type             string        `json:"type"`
+	ApplicationID    *string       `json:"applicationId"`
+	ServiceID        *string       `json:"serviceId"`
+	EndpointID       *string       `json:"endpointId"`
+	BoundaryScope    *string       `json:"boundaryScope"`
+	IncludeSynthetic *bool         `json:"includeSynthetic"`
+	IncludeInternal  *bool         `json:"includeInternal"`
+	FilterExpression *TagFilter    `json:"tagFilterExpression"`
+	WebsiteId        *string       `json:"websiteId"`
+	BeaconType       *string       `json:"beaconType"`
+	SyntheticTestIDs []interface{} `json:"syntheticTestIds"`
+	InfraType        *string       `json:"infraType"`
 }
 
 // SloEntity represents the nested object sli entity of the sli config REST resource at Instana
@@ -43,10 +65,26 @@ type SloWebsiteEntity struct {
 	FilterExpression *TagFilter `json:"tagFilterExpression"`
 }
 
+type SloInfraEntity struct {
+	Type      string `json:"type"`
+	InfraType string `json:"infraType"`
+}
+
 type SloSyntheticEntity struct {
 	Type             string        `json:"type"`
 	SyntheticTestIDs []interface{} `json:"syntheticTestIds"`
 	FilterExpression *TagFilter    `json:"tagFilterExpression"`
+}
+
+type SloIndicator struct {
+	Blueprint                 string     `json:"blueprint"`
+	Type                      string     `json:"type"`
+	Threshold                 float64    `json:"threshold"`
+	Aggregation               *string    `json:"aggregation"`
+	Operator                  *string    `json:"operator"`
+	TrafficType               *string    `json:"trafficType"`
+	GoodEventFilterExpression *TagFilter `json:"goodEventsFilter"`
+	BadEventFilterExpression  *TagFilter `json:"badEventsFilter"`
 }
 
 // Blueprints
@@ -87,6 +125,14 @@ type SloCustomIndicator struct {
 	Blueprint                 string     `json:"blueprint"`
 	GoodEventFilterExpression *TagFilter `json:"goodEventsFilter"`
 	BadEventFilterExpression  *TagFilter `json:"badEventsFilter"`
+}
+
+type SloTimeWindow struct {
+	Type         string  `json:"type"`
+	Duration     int     `json:"duration"`
+	DurationUnit string  `json:"durationUnit"`
+	Timezone     string  `json:"timezone,omitempty"`
+	StartTime    float64 `json:"startTimestamp"`
 }
 
 // time windows

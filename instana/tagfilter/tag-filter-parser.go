@@ -179,7 +179,7 @@ func (e *PrimaryExpression) Render() string {
 // ComparisonExpression representation of a comparison expression.
 type ComparisonExpression struct {
 	Entity       *EntitySpec `parser:"@@"`
-	Operator     Operator    `parser:"@( \"EQUALS\" | \"NOT_EQUAL\" | \"CONTAINS\" | \"NOT_CONTAIN\" | \"STARTS_WITH\" | \"ENDS_WITH\" | \"NOT_STARTS_WITH\" | \"NOT_ENDS_WITH\" | \"GREATER_OR_EQUAL_THAN\" | \"LESS_OR_EQUAL_THAN\" | \"LESS_THAN\" | \"GREATER_THAN\" )"`
+	Operator     Operator    `parser:"@( \"EQUALS\" | \"REGEX_MATCH\" | \"NOT_EQUAL\" | \"CONTAINS\" | \"NOT_CONTAIN\" | \"STARTS_WITH\" | \"ENDS_WITH\" | \"NOT_STARTS_WITH\" | \"NOT_ENDS_WITH\" | \"GREATER_OR_EQUAL_THAN\" | \"LESS_OR_EQUAL_THAN\" | \"LESS_THAN\" | \"GREATER_THAN\" )"`
 	NumberValue  *int64      `parser:"( @Number"`
 	BooleanValue *bool       `parser:"| @( \"FALSE\" | \"TRUE\" )"`
 	StringValue  *string     `parser:"| @String )"`
@@ -265,4 +265,35 @@ func (f *parserImpl) Parse(expression string) (*FilterExpression, error) {
 		return &FilterExpression{}, err
 	}
 	return parsedExpression, nil
+}
+
+// ParseExpression parses the given expression string and returns the tag filter model
+func ParseExpression(expression string) (*restapi.TagFilter, error) {
+	parser := NewParser()
+	mapper := NewMapper()
+
+	parsed, err := parser.Parse(expression)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapper.ToAPIModel(parsed), nil
+}
+
+// RenderExpression renders the given tag filter model as a string
+func RenderExpression(filter *restapi.TagFilter) string {
+	if filter == nil {
+		return ""
+	}
+	if filter.Elements == nil {
+		return ""
+	}
+
+	mapper := NewMapper()
+	expr, err := mapper.FromAPIModel(filter)
+	if err != nil {
+		return ""
+	}
+
+	return expr.Render()
 }

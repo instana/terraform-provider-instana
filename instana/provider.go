@@ -24,16 +24,6 @@ type ProviderMeta struct {
 	InstanaAPI restapi.InstanaAPI
 }
 
-// Provider interface implementation of hashicorp terraform provider
-func Provider() *schema.Provider {
-	return &schema.Provider{
-		Schema:               providerSchema(),
-		ResourcesMap:         providerResources(),
-		DataSourcesMap:       providerDataSources(),
-		ConfigureContextFunc: providerConfigure,
-	}
-}
-
 func providerSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		SchemaFieldAPIToken: {
@@ -60,27 +50,27 @@ func providerSchema() map[string]*schema.Schema {
 
 func providerResources() map[string]*schema.Resource {
 	resources := make(map[string]*schema.Resource)
-	bindResourceHandle(resources, NewAPITokenResourceHandle())
-	bindResourceHandle(resources, NewApplicationConfigResourceHandle())
-	bindResourceHandle(resources, NewApplicationAlertConfigResourceHandle())
-	bindResourceHandle(resources, NewGlobalApplicationAlertConfigResourceHandle())
-	bindResourceHandle(resources, NewCustomEventSpecificationResourceHandle())
-	bindResourceHandle(resources, NewAlertingChannelResourceHandle())
-	bindResourceHandle(resources, NewAlertingConfigResourceHandle())
-	bindResourceHandle(resources, NewSliConfigResourceHandle())
-	bindResourceHandle(resources, NewSloConfigResourceHandle())
-	bindResourceHandle(resources, NewSloAlertConfigResourceHandle())
-	bindResourceHandle(resources, NewSloCorrectionConfigResourceHandle())
-	bindResourceHandle(resources, NewWebsiteMonitoringConfigResourceHandle())
-	bindResourceHandle(resources, NewInfraAlertConfigResourceHandle())
-	bindResourceHandle(resources, LogAlertConfigResourceHandle())
-	bindResourceHandle(resources, NewWebsiteAlertConfigResourceHandle())
-	bindResourceHandle(resources, NewGroupResourceHandle())
-	bindResourceHandle(resources, NewCustomDashboardResourceHandle())
-	bindResourceHandle(resources, NewSyntheticTestResourceHandle())
-	bindResourceHandle(resources, NewSyntheticAlertConfigResourceHandle())
-	bindResourceHandle(resources, NewAutomationActionResourceHandle())
-	bindResourceHandle(resources, NewAutomationPolicyResourceHandle())
+	// bindResourceHandle(resources, NewAPITokenResourceHandle())
+	// bindResourceHandle(resources, NewApplicationConfigResourceHandle())
+	// //bindResourceHandle(resources, NewApplicationAlertConfigResourceHandle())
+	// //bindResourceHandle(resources, NewGlobalApplicationAlertConfigResourceHandle())
+	// bindResourceHandle(resources, NewCustomEventSpecificationResourceHandle())
+	// bindResourceHandle(resources, NewAlertingChannelResourceHandle())
+	// bindResourceHandle(resources, NewAlertingConfigResourceHandle())
+	// bindResourceHandle(resources, NewSliConfigResourceHandle())
+	// //bindResourceHandle(resources, NewSloConfigResourceHandle())
+	// bindResourceHandle(resources, NewSloAlertConfigResourceHandle())
+	// bindResourceHandle(resources, NewSloCorrectionConfigResourceHandle())
+	// bindResourceHandle(resources, NewWebsiteMonitoringConfigResourceHandle())
+	// bindResourceHandle(resources, NewInfraAlertConfigResourceHandle())
+	// bindResourceHandle(resources, LogAlertConfigResourceHandle())
+	// bindResourceHandle(resources, NewWebsiteAlertConfigResourceHandle())
+	// bindResourceHandle(resources, NewGroupResourceHandle())
+	// bindResourceHandle(resources, NewCustomDashboardResourceHandle())
+	// bindResourceHandle(resources, NewSyntheticTestResourceHandle())
+	// bindResourceHandle(resources, NewSyntheticAlertConfigResourceHandle())
+	// bindResourceHandle(resources, NewAutomationActionResourceHandle())
+	// bindResourceHandle(resources, NewAutomationPolicyResourceHandle())
 	return resources
 }
 
@@ -100,11 +90,11 @@ func providerConfigure(_ context.Context, d *schema.ResourceData) (interface{}, 
 
 func providerDataSources() map[string]*schema.Resource {
 	dataSources := make(map[string]*schema.Resource)
-	dataSources[DataSourceBuiltinEvent] = NewBuiltinEventDataSource().CreateResource()
-	dataSources[DataSourceSyntheticLocation] = NewSyntheticLocationDataSource().CreateResource()
-	dataSources[DataSourceAlertingChannel] = NewAlertingChannelDataSource().CreateResource()
-	dataSources[DataSourceAutomationAction] = NewAutomationActionDataSource().CreateResource()
-	dataSources[DataSourceCustomEventSpec] = NewCustomEventSpecificationDataSource().CreateResource()
-	dataSources[DataSourceHostAgents] = NewHostAgentsDataSource().CreateResource()
+	// dataSources[DataSourceBuiltinEvent] = NewBuiltinEventDataSource().CreateResource()
+	// dataSources[DataSourceSyntheticLocation] = NewSyntheticLocationDataSource().CreateResource()
+	// dataSources[DataSourceAlertingChannel] = NewAlertingChannelDataSource().CreateResource()
+	// dataSources[DataSourceAutomationAction] = NewAutomationActionDataSource().CreateResource()
+	// dataSources[DataSourceCustomEventSpec] = NewCustomEventSpecificationDataSource().CreateResource()
+	// dataSources[DataSourceHostAgents] = NewHostAgentsDataSource().CreateResource()
 	return dataSources
 }

@@ -14,8 +14,11 @@ type AutomationPolicy struct {
 }
 
 type Trigger struct {
-	Id   string `json:"id"`
-	Type string `json:"type"`
+	Id          string     `json:"id"`
+	Type        string     `json:"type"`
+	Name        string     `json:"name"`
+	Description string     `json:"description"`
+	Scheduling  Scheduling `json:"scheduling,omitempty"`
 }
 
 type TypeConfiguration struct {
@@ -35,13 +38,18 @@ type Runnable struct {
 }
 
 type RunConfiguration struct {
-	Actions []ActionConfiguration `json:"actions"`
+	Actions []AutomationActionPolicy `json:"actions"`
+}
+
+type AutomationActionPolicy struct {
+	Action  AutomationAction `json:"action"`
+	AgentId string           `json:"agentId"`
 }
 
 type ActionConfiguration struct {
-	Action               Action                `json:"action"`
-	AgentId              string                `json:"agentId"`
-	InputParameterValues []InputParameterValue `json:"inputParameterValues"`
+	Action          Action      `json:"action"`
+	AgentId         string      `json:"agentId"`
+	InputParameters []Parameter `json:"inputParameters"`
 }
 
 type Action struct {

@@ -24,6 +24,7 @@ type ApplicationConfig struct {
 	TagFilterExpression *TagFilter             `json:"tagFilterExpression"`
 	Scope               ApplicationConfigScope `json:"scope"`
 	BoundaryScope       BoundaryScope          `json:"boundaryScope"`
+	AccessRules         []AccessRule           `json:"accessRules"`
 }
 
 // GetIDForResourcePath implementation of the interface InstanaDataObject
