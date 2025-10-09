@@ -334,3 +334,17 @@ func (mr *MockInstanaAPIMockRecorder) HostAgents() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HostAgent", reflect.TypeOf((*MockInstanaAPI)(nil).HostAgents))
 }
+
+// LogAlertConfig mocks base method.
+func (m *MockInstanaAPI) LogAlertConfig() restapi.RestResource[*restapi.LogAlertConfig] {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "LogAlertConfig")
+	ret0, _ := ret[0].(restapi.RestResource[*restapi.LogAlertConfig])
+	return ret0
+}
+
+// LogAlertConfig indicates an expected call of LogAlertConfig.
+func (mr *MockInstanaAPIMockRecorder) LogAlertConfig() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LogAlertConfig", reflect.TypeOf((*MockInstanaAPI)(nil).LogAlertConfig))
+}

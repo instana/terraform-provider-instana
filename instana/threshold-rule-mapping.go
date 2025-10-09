@@ -98,43 +98,39 @@ type thresholdRuleMapper interface {
 type thresholdRuleMapperImpl struct{}
 
 func (t thresholdRuleMapperImpl) toState(threshold *restapi.ThresholdRule) []map[string]interface{} {
-	thresholdConfig := make(map[string]interface{})
-
-	if threshold.Value != nil {
-		thresholdConfig[ResourceFieldThresholdRuleStaticValue] = *threshold.Value
-	}
-	if threshold.Baseline != nil {
-		thresholdConfig[ResourceFieldThresholdRuleHistoricBaselineBaseline] = *threshold.Baseline
-	}
-	if threshold.DeviationFactor != nil {
-		thresholdConfig[ResourceFieldThresholdRuleHistoricBaselineDeviationFactor] = float64(*threshold.DeviationFactor)
-	}
-	if threshold.Seasonality != nil {
-		thresholdConfig[ResourceFieldThresholdRuleHistoricBaselineSeasonality] = *threshold.Seasonality
-	}
-
-	thresholdType := t.mapThresholdTypeToSchema(threshold.Type)
-	thresholdRule := make(map[string]interface{})
-	thresholdRule[thresholdType] = []interface{}{thresholdConfig}
 	result := make([]map[string]interface{}, 1)
+	thresholdRule := make(map[string]interface{})
 	result[0] = thresholdRule
+
+	switch threshold.Type {
+	case "staticThreshold":
+		staticConfig := make(map[string]interface{})
+		if threshold.Value != nil {
+			staticConfig[ResourceFieldThresholdRuleStaticValue] = *threshold.Value
+		}
+		thresholdRule[ResourceFieldThresholdRuleStatic] = []interface{}{staticConfig}
+	case "historicBaseline":
+		historicConfig := make(map[string]interface{})
+		if threshold.Baseline != nil {
+			historicConfig[ResourceFieldThresholdRuleHistoricBaselineBaseline] = *threshold.Baseline
+		}
+		if threshold.DeviationFactor != nil {
+			historicConfig[ResourceFieldThresholdRuleHistoricBaselineDeviationFactor] = float64(*threshold.DeviationFactor)
+		}
+		if threshold.Seasonality != nil {
+			historicConfig[ResourceFieldThresholdRuleHistoricBaselineSeasonality] = *threshold.Seasonality
+		}
+		thresholdRule[ResourceFieldThresholdRuleHistoricBaseline] = []interface{}{historicConfig}
+	}
 
 	return result
 }
 
-func (t *thresholdRuleMapperImpl) mapThresholdTypeToSchema(input string) string {
-	if input == "historicBaseline" {
-		return ResourceFieldThresholdRuleHistoricBaseline
-	} else if input == "staticThreshold" {
-		return ResourceFieldThresholdRuleStatic
-	}
-	return input
-}
-
 func (t *thresholdRuleMapperImpl) mapThresholdTypeFromSchema(input string) string {
-	if input == ResourceFieldThresholdRuleHistoricBaseline {
+	switch input {
+	case ResourceFieldThresholdRuleHistoricBaseline:
 		return "historicBaseline"
-	} else if input == ResourceFieldThresholdRuleStatic {
+	case ResourceFieldThresholdRuleStatic:
 		return "staticThreshold"
 	}
 	return input
@@ -156,22 +152,26 @@ func (t *thresholdRuleMapperImpl) fromState(thresholdSlice []interface{}) *resta
 
 func (t *thresholdRuleMapperImpl) mapThresholdConfigFromSchema(config map[string]interface{}, thresholdType string) *restapi.ThresholdRule {
 	var seasonalityPtr *restapi.ThresholdSeasonality
-	if v, ok := config[ResourceFieldThresholdHistoricBaselineSeasonality]; ok {
-		seasonality := restapi.ThresholdSeasonality(v.(string))
-		seasonalityPtr = &seasonality
-	}
 	var valuePtr *float64
-	if v, ok := config[ResourceFieldThresholdStaticValue]; ok {
+	var deviationFactorPtr *float32
+	var baselinePtr *[][]float64
+
+	// Handle static threshold
+	if v, ok := config[ResourceFieldThresholdRuleStaticValue]; ok {
 		value := v.(float64)
 		valuePtr = &value
 	}
-	var deviationFactorPtr *float32
-	if v, ok := config[ResourceFieldThresholdHistoricBaselineDeviationFactor]; ok {
+
+	// Handle historic baseline
+	if v, ok := config[ResourceFieldThresholdRuleHistoricBaselineSeasonality]; ok {
+		seasonality := restapi.ThresholdSeasonality(v.(string))
+		seasonalityPtr = &seasonality
+	}
+	if v, ok := config[ResourceFieldThresholdRuleHistoricBaselineDeviationFactor]; ok {
 		deviationFactor := float32(v.(float64))
 		deviationFactorPtr = &deviationFactor
 	}
-	var baselinePtr *[][]float64
-	if v, ok := config[ResourceFieldThresholdHistoricBaselineBaseline]; ok {
+	if v, ok := config[ResourceFieldThresholdRuleHistoricBaselineBaseline]; ok {
 		baselineSet := v.(*schema.Set)
 		if baselineSet.Len() > 0 {
 			baseline := make([][]float64, baselineSet.Len())
@@ -181,6 +181,7 @@ func (t *thresholdRuleMapperImpl) mapThresholdConfigFromSchema(config map[string
 			baselinePtr = &baseline
 		}
 	}
+
 	return &restapi.ThresholdRule{
 		Type:            t.mapThresholdTypeFromSchema(thresholdType),
 		Value:           valuePtr,

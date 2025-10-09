@@ -1,6 +1,6 @@
 package restapi
 
-type RuleWithThreshold[R InfraAlertRule | ApplicationAlertRule | WebsiteAlertRule] struct {
+type RuleWithThreshold[R InfraAlertRule | ApplicationAlertRule | WebsiteAlertRule | LogAlertRule] struct {
 	ThresholdOperator ThresholdOperator               `json:"thresholdOperator"`
 	Rule              R                               `json:"rule"`
 	Thresholds        map[AlertSeverity]ThresholdRule `json:"thresholds"`
