@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
+	"github.com/gessnerfl/terraform-provider-instana/tfutils"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -29,6 +30,19 @@ type AlertingConfigModel struct {
 	EventFilterEventTypes types.Set    `tfsdk:"event_filter_event_types"`
 	EventFilterRuleIDs    types.Set    `tfsdk:"event_filter_rule_ids"`
 	CustomPayloadFields   types.List   `tfsdk:"custom_payload_field"`
+}
+
+// CustomPayloadFieldModel represents a custom payload field in the Terraform model
+type CustomPayloadFieldModel struct {
+	Key          types.String `tfsdk:"key"`
+	Value        types.String `tfsdk:"value"`
+	DynamicValue types.List   `tfsdk:"dynamic_value"`
+}
+
+// DynamicValueModel represents a dynamic value in the Terraform model
+type DynamicValueModel struct {
+	Key     types.String `tfsdk:"key"`
+	TagName types.String `tfsdk:"tag_name"`
 }
 
 // NewAlertingConfigResourceHandleFramework creates the resource handle for Alerting Configuration
@@ -149,11 +163,13 @@ func (r *alertingConfigResourceFramework) SetComputedFields(_ context.Context, _
 }
 
 func (r *alertingConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, config *restapi.AlertingConfiguration) diag.Diagnostics {
-
 	var diags diag.Diagnostics
-	var model AlertingConfigModel
 
-	diags.Append(state.Get(ctx, &model)...)
+	// Create a model and populate it with values from the config
+	model := AlertingConfigModel{
+		ID:        types.StringValue(config.ID),
+		AlertName: types.StringValue(config.AlertName),
+	}
 
 	// Set integration IDs
 	integrationIDs, diags := types.SetValueFrom(ctx, types.StringType, config.IntegrationIDs)
@@ -184,7 +200,14 @@ func (r *alertingConfigResourceFramework) UpdateState(ctx context.Context, state
 	}
 	model.EventFilterRuleIDs = ruleIDsSet
 
-	model.CustomPayloadFields = types.ListNull(types.ObjectType{})
+	// Convert custom payload fields to the appropriate Terraform types
+	// Using the utility function from tfutils package for better maintainability and reusability
+	// This handles both static string and dynamic custom payload field types
+	customPayloadFieldsList, payloadDiags := tfutils.CustomPayloadFieldsToTerraform(ctx, config.CustomerPayloadFields)
+	if payloadDiags.HasError() {
+		return payloadDiags
+	}
+	model.CustomPayloadFields = customPayloadFieldsList
 
 	// Set the entire model to state
 	diags = state.Set(ctx, model)
