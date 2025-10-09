@@ -149,11 +149,11 @@ func (r *alertingConfigResourceFramework) SetComputedFields(_ context.Context, _
 }
 
 func (r *alertingConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, config *restapi.AlertingConfiguration) diag.Diagnostics {
-	// Create a model and populate it with values from the config
-	model := AlertingConfigModel{
-		ID:        types.StringValue(config.ID),
-		AlertName: types.StringValue(config.AlertName),
-	}
+
+	var diags diag.Diagnostics
+	var model AlertingConfigModel
+
+	diags.Append(state.Get(ctx, &model)...)
 
 	// Set integration IDs
 	integrationIDs, diags := types.SetValueFrom(ctx, types.StringType, config.IntegrationIDs)
@@ -184,11 +184,6 @@ func (r *alertingConfigResourceFramework) UpdateState(ctx context.Context, state
 	}
 	model.EventFilterRuleIDs = ruleIDsSet
 
-	// Set custom payload fields
-	customPayloadFields := mapCustomPayloadFieldsToSchema(config)
-	// Convert to the appropriate type for the model
-	// This depends on the exact structure expected by the framework
-	// For now, we'll leave it as null since we need to determine the correct approach
 	model.CustomPayloadFields = types.ListNull(types.ObjectType{})
 
 	// Set the entire model to state
