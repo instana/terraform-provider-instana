@@ -187,18 +187,26 @@ func (r *alertingConfigResourceFramework) UpdateState(ctx context.Context, state
 
 	// Set event filter event types
 	eventTypes := r.convertEventTypesToHarmonizedStringRepresentation(config.EventFilteringConfiguration.EventTypes)
-	eventTypesSet, diags := types.SetValueFrom(ctx, types.StringType, eventTypes)
-	if diags.HasError() {
-		return diags
+	if len(eventTypes) > 0 {
+		eventTypesSet, diags := types.SetValueFrom(ctx, types.StringType, eventTypes)
+		if diags.HasError() {
+			return diags
+		}
+		model.EventFilterEventTypes = eventTypesSet
+	} else {
+		model.EventFilterEventTypes = types.SetNull(types.StringType)
 	}
-	model.EventFilterEventTypes = eventTypesSet
 
 	// Set event filter rule IDs
-	ruleIDsSet, diags := types.SetValueFrom(ctx, types.StringType, config.EventFilteringConfiguration.RuleIDs)
-	if diags.HasError() {
-		return diags
+	if len(config.EventFilteringConfiguration.RuleIDs) > 0 {
+		ruleIDsSet, diags := types.SetValueFrom(ctx, types.StringType, config.EventFilteringConfiguration.RuleIDs)
+		if diags.HasError() {
+			return diags
+		}
+		model.EventFilterRuleIDs = ruleIDsSet
+	} else {
+		model.EventFilterRuleIDs = types.SetNull(types.StringType)
 	}
-	model.EventFilterRuleIDs = ruleIDsSet
 
 	// Convert custom payload fields to the appropriate Terraform types
 	// Using the utility function from tfutils package for better maintainability and reusability
