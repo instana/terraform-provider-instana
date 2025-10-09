@@ -38,10 +38,10 @@ type ResourceHandleFramework[T restapi.InstanaDataObject] interface {
 	UpdateState(ctx context.Context, state *tfsdk.State, obj T) diag.Diagnostics
 
 	// MapStateToDataObject maps the current state to the API model of the Instana API
-	MapStateToDataObject(ctx context.Context, state *tfsdk.Plan) (T, diag.Diagnostics)
+	MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (T, diag.Diagnostics)
 
 	// SetComputedFields calculate and set the calculated value of computed fields of the given resource
-	SetComputedFields(ctx context.Context, state *tfsdk.Plan) diag.Diagnostics
+	SetComputedFields(ctx context.Context, plan *tfsdk.Plan) diag.Diagnostics
 }
 
 // NewTerraformResourceFramework creates a new terraform resource for the given handle
@@ -107,21 +107,21 @@ func (r *terraformResourceImplFramework[T]) Create(ctx context.Context, req reso
 	if !r.resourceHandle.MetaData().SkipIDGeneration {
 		// Set ID in state
 		id := RandomID()
-		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), types.StringValue(id))...)
+		resp.Diagnostics.Append(req.Plan.SetAttribute(ctx, path.Root("id"), types.StringValue(id))...)
 		if resp.Diagnostics.HasError() {
 			return
 		}
 	}
 
 	// Set computed fields
-	diags := r.resourceHandle.SetComputedFields(ctx, &resp.State)
+	diags := r.resourceHandle.SetComputedFields(ctx, &req.Plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Map state to data object
-	createRequest, diags := r.resourceHandle.MapStateToDataObject(ctx, &req.State)
+	createRequest, diags := r.resourceHandle.MapStateToDataObject(ctx, &req.Plan, nil)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -209,7 +209,7 @@ func (r *terraformResourceImplFramework[T]) Update(ctx context.Context, req reso
 	}
 
 	// Map state to data object
-	obj, diags := r.resourceHandle.MapStateToDataObject(ctx, &resp.State)
+	obj, diags := r.resourceHandle.MapStateToDataObject(ctx, &req.Plan, nil)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -241,7 +241,7 @@ func (r *terraformResourceImplFramework[T]) Delete(ctx context.Context, req reso
 	}
 
 	// Map state to data object
-	object, diags := r.resourceHandle.MapStateToDataObject(ctx, &req.State)
+	object, diags := r.resourceHandle.MapStateToDataObject(ctx, nil, &req.State)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

@@ -2,6 +2,7 @@ package instana
 
 import (
 	"fmt"
+
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )

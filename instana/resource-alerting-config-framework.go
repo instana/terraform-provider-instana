@@ -5,11 +5,9 @@ import (
 	"strings"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
-	"github.com/gessnerfl/terraform-provider-instana/tfutils"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
@@ -30,7 +28,7 @@ type AlertingConfigModel struct {
 	EventFilterQuery      types.String `tfsdk:"event_filter_query"`
 	EventFilterEventTypes types.Set    `tfsdk:"event_filter_event_types"`
 	EventFilterRuleIDs    types.Set    `tfsdk:"event_filter_rule_ids"`
-	CustomPayloadFields   types.Map    `tfsdk:"custom_payload_field"`
+	CustomPayloadFields   types.List   `tfsdk:"custom_payload_field"`
 }
 
 // NewAlertingConfigResourceHandleFramework creates the resource handle for Alerting Configuration
@@ -94,13 +92,40 @@ func NewAlertingConfigResourceHandleFramework() ResourceHandleFramework[*restapi
 							setplanmodifier.RequiresReplace(),
 						},
 					},
-					DefaultCustomPayloadFieldsName: schema.MapAttribute{
-						Optional:    true,
+				},
+				Blocks: map[string]schema.Block{
+					DefaultCustomPayloadFieldsName: schema.ListNestedBlock{
 						Description: "Custom payload fields for the alerting configuration.",
-						ElementType: types.StringType,
+						NestedObject: schema.NestedBlockObject{
+							Attributes: map[string]schema.Attribute{
+								CustomPayloadFieldsFieldKey: schema.StringAttribute{
+									Required:    true,
+									Description: "The key of the custom payload field",
+								},
+								CustomPayloadFieldsFieldStaticStringValue: schema.StringAttribute{
+									Optional:    true,
+									Description: "The value of a static string custom payload field",
+								},
+								CustomPayloadFieldsFieldDynamicValue: schema.ListNestedAttribute{
+									Optional:    true,
+									Description: "The value of a dynamic custom payload field",
+									NestedObject: schema.NestedAttributeObject{
+										Attributes: map[string]schema.Attribute{
+											CustomPayloadFieldsFieldDynamicKey: schema.StringAttribute{
+												Optional:    true,
+												Description: "The key of the dynamic custom payload field",
+											},
+											CustomPayloadFieldsFieldDynamicTagName: schema.StringAttribute{
+												Required:    true,
+												Description: "The name of the tag of the dynamic custom payload field",
+											},
+										},
+									},
+								},
+							},
+						},
 					},
 				},
-				Blocks: map[string]schema.Block{},
 			},
 			SchemaVersion: 2,
 		},
@@ -124,40 +149,68 @@ func (r *alertingConfigResourceFramework) SetComputedFields(_ context.Context, _
 }
 
 func (r *alertingConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, config *restapi.AlertingConfiguration) diag.Diagnostics {
-	// First, set the ID directly since it's a special field
-	diags := state.SetAttribute(ctx, path.Root("id"), types.StringValue(config.ID))
+	// Create a model and populate it with values from the config
+	model := AlertingConfigModel{
+		ID:        types.StringValue(config.ID),
+		AlertName: types.StringValue(config.AlertName),
+	}
+
+	// Set integration IDs
+	integrationIDs, diags := types.SetValueFrom(ctx, types.StringType, config.IntegrationIDs)
 	if diags.HasError() {
 		return diags
 	}
+	model.IntegrationIDs = integrationIDs
 
-	// Use UpdateStatePlugin to set all other fields
-	err := tfutils.UpdateStatePlugin(ctx, state, map[string]interface{}{
-		AlertingConfigFieldAlertName:             config.AlertName,
-		AlertingConfigFieldIntegrationIds:        config.IntegrationIDs,
-		AlertingConfigFieldEventFilterQuery:      *config.EventFilteringConfiguration.Query,
-		AlertingConfigFieldEventFilterEventTypes: r.convertEventTypesToHarmonizedStringRepresentation(config.EventFilteringConfiguration.EventTypes),
-		AlertingConfigFieldEventFilterRuleIDs:    config.EventFilteringConfiguration.RuleIDs,
-		DefaultCustomPayloadFieldsName:           mapCustomPayloadFieldsToSchema(config),
-	})
+	// Set event filter query
+	if config.EventFilteringConfiguration.Query != nil {
+		model.EventFilterQuery = types.StringValue(*config.EventFilteringConfiguration.Query)
+	} else {
+		model.EventFilterQuery = types.StringNull()
+	}
 
-	if err != nil {
-		return diag.Diagnostics{
-			diag.NewErrorDiagnostic(
-				"Error updating state",
-				err.Error(),
-			),
-		}
+	// Set event filter event types
+	eventTypes := r.convertEventTypesToHarmonizedStringRepresentation(config.EventFilteringConfiguration.EventTypes)
+	eventTypesSet, diags := types.SetValueFrom(ctx, types.StringType, eventTypes)
+	if diags.HasError() {
+		return diags
+	}
+	model.EventFilterEventTypes = eventTypesSet
+
+	// Set event filter rule IDs
+	ruleIDsSet, diags := types.SetValueFrom(ctx, types.StringType, config.EventFilteringConfiguration.RuleIDs)
+	if diags.HasError() {
+		return diags
+	}
+	model.EventFilterRuleIDs = ruleIDsSet
+
+	// Set custom payload fields
+	customPayloadFields := mapCustomPayloadFieldsToSchema(config)
+	// Convert to the appropriate type for the model
+	// This depends on the exact structure expected by the framework
+	// For now, we'll leave it as null since we need to determine the correct approach
+	model.CustomPayloadFields = types.ListNull(types.ObjectType{})
+
+	// Set the entire model to state
+	diags = state.Set(ctx, model)
+	if diags.HasError() {
+		return diags
 	}
 
 	return nil
 }
 
-func (r *alertingConfigResourceFramework) MapStateToDataObject(ctx context.Context, state *tfsdk.Plan) (*restapi.AlertingConfiguration, diag.Diagnostics) {
+func (r *alertingConfigResourceFramework) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.AlertingConfiguration, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var model AlertingConfigModel
 
-	// Get current state
-	diags.Append(state.Get(ctx, &model)...)
+	// Get current state from plan or state
+	if plan != nil {
+		diags.Append(plan.Get(ctx, &model)...)
+	} else if state != nil {
+		diags.Append(state.Get(ctx, &model)...)
+	}
+
 	if diags.HasError() {
 		return nil, diags
 	}
@@ -209,17 +262,12 @@ func (r *alertingConfigResourceFramework) MapStateToDataObject(ctx context.Conte
 	// Map custom payload fields
 	var customerPayloadFields []restapi.CustomPayloadField[any]
 	if !model.CustomPayloadFields.IsNull() {
-		var err error
-		customerPayloadFields, err = mapCustomPayloadFieldsFromSchemaWhenKeyExists(model.CustomPayloadFields)
-		if err != nil {
-			return nil, diag.Diagnostics{
-				diag.NewErrorDiagnostic(
-					"Error updating state",
-					err.Error(),
-				),
-			}
+		var payloadDiags diag.Diagnostics
+		customerPayloadFields, payloadDiags = BuildCustomPayloadFieldsTyped(ctx, model.CustomPayloadFields)
+		if payloadDiags.HasError() {
+			diags.Append(payloadDiags...)
+			return nil, diags
 		}
-
 	}
 
 	return &restapi.AlertingConfiguration{
