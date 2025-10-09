@@ -119,7 +119,7 @@ func (r *alertingConfigResourceFramework) GetRestResource(api restapi.InstanaAPI
 	return api.AlertingConfigurations()
 }
 
-func (r *alertingConfigResourceFramework) SetComputedFields(_ context.Context, _ *tfsdk.State) diag.Diagnostics {
+func (r *alertingConfigResourceFramework) SetComputedFields(_ context.Context, _ *tfsdk.Plan) diag.Diagnostics {
 	return nil
 }
 
@@ -152,7 +152,7 @@ func (r *alertingConfigResourceFramework) UpdateState(ctx context.Context, state
 	return nil
 }
 
-func (r *alertingConfigResourceFramework) MapStateToDataObject(ctx context.Context, state *tfsdk.State) (*restapi.AlertingConfiguration, diag.Diagnostics) {
+func (r *alertingConfigResourceFramework) MapStateToDataObject(ctx context.Context, state *tfsdk.Plan) (*restapi.AlertingConfiguration, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var model AlertingConfigModel
 

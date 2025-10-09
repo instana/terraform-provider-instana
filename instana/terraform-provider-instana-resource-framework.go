@@ -38,10 +38,10 @@ type ResourceHandleFramework[T restapi.InstanaDataObject] interface {
 	UpdateState(ctx context.Context, state *tfsdk.State, obj T) diag.Diagnostics
 
 	// MapStateToDataObject maps the current state to the API model of the Instana API
-	MapStateToDataObject(ctx context.Context, state *tfsdk.State) (T, diag.Diagnostics)
+	MapStateToDataObject(ctx context.Context, state *tfsdk.Plan) (T, diag.Diagnostics)
 
 	// SetComputedFields calculate and set the calculated value of computed fields of the given resource
-	SetComputedFields(ctx context.Context, state *tfsdk.State) diag.Diagnostics
+	SetComputedFields(ctx context.Context, state *tfsdk.Plan) diag.Diagnostics
 }
 
 // NewTerraformResourceFramework creates a new terraform resource for the given handle
@@ -121,7 +121,7 @@ func (r *terraformResourceImplFramework[T]) Create(ctx context.Context, req reso
 	}
 
 	// Map state to data object
-	createRequest, diags := r.resourceHandle.MapStateToDataObject(ctx, &resp.State)
+	createRequest, diags := r.resourceHandle.MapStateToDataObject(ctx, &req.State)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
