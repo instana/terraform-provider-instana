@@ -136,60 +136,8 @@ var (
 					Description: "Threshold configuration for different severity levels",
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
-							LogAlertConfigFieldWarning: {
-								Type:        schema.TypeList,
-								MinItems:    0,
-								MaxItems:    1,
-								Optional:    true,
-								Description: "Warning severity threshold configuration",
-								Elem: &schema.Resource{
-									Schema: map[string]*schema.Schema{
-										ResourceFieldThresholdRuleStatic: {
-											Type:        schema.TypeList,
-											MinItems:    1,
-											MaxItems:    1,
-											Required:    true,
-											Description: "Static threshold configuration",
-											Elem: &schema.Resource{
-												Schema: map[string]*schema.Schema{
-													ResourceFieldThresholdRuleStaticValue: {
-														Type:        schema.TypeFloat,
-														Required:    true,
-														Description: "The static threshold value to compare against",
-													},
-												},
-											},
-										},
-									},
-								},
-							},
-							LogAlertConfigFieldCritical: {
-								Type:        schema.TypeList,
-								MinItems:    0,
-								MaxItems:    1,
-								Optional:    true,
-								Description: "Critical severity threshold configuration",
-								Elem: &schema.Resource{
-									Schema: map[string]*schema.Schema{
-										ResourceFieldThresholdRuleStatic: {
-											Type:        schema.TypeList,
-											MinItems:    1,
-											MaxItems:    1,
-											Required:    true,
-											Description: "Static threshold configuration",
-											Elem: &schema.Resource{
-												Schema: map[string]*schema.Schema{
-													ResourceFieldThresholdRuleStaticValue: {
-														Type:        schema.TypeFloat,
-														Required:    true,
-														Description: "The static threshold value to compare against",
-													},
-												},
-											},
-										},
-									},
-								},
-							},
+							LogAlertConfigFieldWarning:  thresholdRuleSchema,
+							LogAlertConfigFieldCritical: thresholdRuleSchema,
 						},
 					},
 				},
@@ -409,35 +357,11 @@ func (c *logAlertConfigResource) mapRulesToSchema(config *restapi.LogAlertConfig
 		criticalThreshold, isCriticalThresholdPresent := ruleWithThreshold.Thresholds[restapi.CriticalSeverity]
 
 		if isWarningThresholdPresent {
-			// Create a static threshold structure for warning
-			if warningThreshold.Type == "staticThreshold" && warningThreshold.Value != nil {
-				warningMap := []map[string]interface{}{
-					{
-						ResourceFieldThresholdRuleStatic: []map[string]interface{}{
-							{
-								ResourceFieldThresholdRuleStaticValue: *warningThreshold.Value,
-							},
-						},
-					},
-				}
-				thresholdMap[LogAlertConfigFieldWarning] = warningMap
-			}
+			thresholdMap[ResourceFieldThresholdRuleWarningSeverity] = newThresholdRuleMapper().toState(&warningThreshold)
 		}
 
 		if isCriticalThresholdPresent {
-			// Create a static threshold structure for critical
-			if criticalThreshold.Type == "staticThreshold" && criticalThreshold.Value != nil {
-				criticalMap := []map[string]interface{}{
-					{
-						ResourceFieldThresholdRuleStatic: []map[string]interface{}{
-							{
-								ResourceFieldThresholdRuleStaticValue: *criticalThreshold.Value,
-							},
-						},
-					},
-				}
-				thresholdMap[LogAlertConfigFieldCritical] = criticalMap
-			}
+			thresholdMap[ResourceFieldThresholdRuleCriticalSeverity] = newThresholdRuleMapper().toState(&criticalThreshold)
 		}
 
 		ruleMap[LogAlertConfigFieldThreshold] = []interface{}{thresholdMap}
@@ -583,33 +507,15 @@ func (c *logAlertConfigResource) mapRuleFromSchema(d *schema.ResourceData) []res
 	thresholdSlice := ruleConfig[LogAlertConfigFieldThreshold].([]interface{})
 	if len(thresholdSlice) > 0 {
 		thresholdConfig := thresholdSlice[0].(map[string]interface{})
-
-		// Map warning threshold if present
-		if warningSlice, ok := thresholdConfig[LogAlertConfigFieldWarning].([]interface{}); ok && len(warningSlice) > 0 {
-			warningConfig := warningSlice[0].(map[string]interface{})
-			if staticSlice, ok := warningConfig[ResourceFieldThresholdRuleStatic].([]interface{}); ok && len(staticSlice) > 0 {
-				staticConfig := staticSlice[0].(map[string]interface{})
-				value := staticConfig[ResourceFieldThresholdRuleStaticValue].(float64)
-				valuePtr := &value
-				thresholdMap[restapi.WarningSeverity] = restapi.ThresholdRule{
-					Type:  "staticThreshold",
-					Value: valuePtr,
-				}
-			}
+		if v, ok := thresholdConfig[ResourceFieldThresholdRuleWarningSeverity]; ok && len(v.([]interface{})) == 1 {
+			warningThresholdSlice := v.([]interface{})
+			thresholdRule := newThresholdRuleMapper().fromState(warningThresholdSlice)
+			thresholdMap[restapi.WarningSeverity] = *thresholdRule
 		}
-
-		// Map critical threshold if present
-		if criticalSlice, ok := thresholdConfig[LogAlertConfigFieldCritical].([]interface{}); ok && len(criticalSlice) > 0 {
-			criticalConfig := criticalSlice[0].(map[string]interface{})
-			if staticSlice, ok := criticalConfig[ResourceFieldThresholdRuleStatic].([]interface{}); ok && len(staticSlice) > 0 {
-				staticConfig := staticSlice[0].(map[string]interface{})
-				value := staticConfig[ResourceFieldThresholdRuleStaticValue].(float64)
-				valuePtr := &value
-				thresholdMap[restapi.CriticalSeverity] = restapi.ThresholdRule{
-					Type:  "staticThreshold",
-					Value: valuePtr,
-				}
-			}
+		if v, ok := thresholdConfig[ResourceFieldThresholdRuleCriticalSeverity]; ok && len(v.([]interface{})) == 1 {
+			criticalThresholdSlice := v.([]interface{})
+			thresholdRule := newThresholdRuleMapper().fromState(criticalThresholdSlice)
+			thresholdMap[restapi.CriticalSeverity] = *thresholdRule
 		}
 	}
 

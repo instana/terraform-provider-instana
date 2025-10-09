@@ -102,17 +102,14 @@ func (t thresholdRuleMapperImpl) toState(threshold *restapi.ThresholdRule) []map
 	thresholdRule := make(map[string]interface{})
 	result[0] = thresholdRule
 
-	// For static threshold
-	if threshold.Type == "staticThreshold" {
+	switch threshold.Type {
+	case "staticThreshold":
 		staticConfig := make(map[string]interface{})
 		if threshold.Value != nil {
 			staticConfig[ResourceFieldThresholdRuleStaticValue] = *threshold.Value
 		}
 		thresholdRule[ResourceFieldThresholdRuleStatic] = []interface{}{staticConfig}
-		// Add empty historic baseline for compatibility with tests
-		thresholdRule[ResourceFieldThresholdRuleHistoricBaseline] = []interface{}{}
-	} else if threshold.Type == "historicBaseline" {
-		// For historic baseline
+	case "historicBaseline":
 		historicConfig := make(map[string]interface{})
 		if threshold.Baseline != nil {
 			historicConfig[ResourceFieldThresholdRuleHistoricBaselineBaseline] = *threshold.Baseline
@@ -124,26 +121,16 @@ func (t thresholdRuleMapperImpl) toState(threshold *restapi.ThresholdRule) []map
 			historicConfig[ResourceFieldThresholdRuleHistoricBaselineSeasonality] = *threshold.Seasonality
 		}
 		thresholdRule[ResourceFieldThresholdRuleHistoricBaseline] = []interface{}{historicConfig}
-		// Add empty static threshold for compatibility with tests
-		thresholdRule[ResourceFieldThresholdRuleStatic] = []interface{}{}
 	}
 
 	return result
 }
 
-func (t *thresholdRuleMapperImpl) mapThresholdTypeToSchema(input string) string {
-	if input == "historicBaseline" {
-		return ResourceFieldThresholdRuleHistoricBaseline
-	} else if input == "staticThreshold" {
-		return ResourceFieldThresholdRuleStatic
-	}
-	return input
-}
-
 func (t *thresholdRuleMapperImpl) mapThresholdTypeFromSchema(input string) string {
-	if input == ResourceFieldThresholdRuleHistoricBaseline {
+	switch input {
+	case ResourceFieldThresholdRuleHistoricBaseline:
 		return "historicBaseline"
-	} else if input == ResourceFieldThresholdRuleStatic {
+	case ResourceFieldThresholdRuleStatic:
 		return "staticThreshold"
 	}
 	return input
