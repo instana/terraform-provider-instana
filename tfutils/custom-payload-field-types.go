@@ -23,7 +23,7 @@ func CustomPayloadFieldAttributeTypes() map[string]attr.Type {
 	return map[string]attr.Type{
 		"key":           types.StringType,
 		"value":         types.StringType,
-		"dynamic_value": types.ListType{ElemType: types.MapType{ElemType: types.StringType}},
+		"dynamic_value": types.ListType{ElemType: GetDynamicValueType()},
 	}
 }
 
@@ -45,11 +45,7 @@ func GetDynamicValueType() types.ObjectType {
 // and "dynamic_value" (for dynamic values) attributes
 func GetCustomPayloadFieldType() types.ObjectType {
 	return types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"key":           types.StringType,
-			"value":         types.StringType,
-			"dynamic_value": types.ListType{ElemType: GetDynamicValueType()},
-		},
+		AttrTypes: CustomPayloadFieldAttributeTypes(),
 	}
 }
 
@@ -102,12 +98,8 @@ func CustomPayloadFieldsToTerraform(ctx context.Context, fields []restapi.Custom
 				}
 			}
 			tfField["value"] = types.StringValue(staticValue)
-			nullVal, d := types.ListValueFrom(ctx, types.MapType{ElemType: types.StringType}, nil)
-			diags = append(diags, d...)
-			if d.HasError() {
-				return types.List{}, diags
-			}
-			tfField["dynamic_value"] = nullVal
+			// Use null for dynamic_value
+			tfField["dynamic_value"] = types.ListNull(GetDynamicValueType())
 		} else if field.Type == restapi.DynamicCustomPayloadType {
 			// Dynamic value
 			dynamicValue, ok := field.Value.(restapi.DynamicCustomPayloadFieldValue)
@@ -120,18 +112,27 @@ func CustomPayloadFieldsToTerraform(ctx context.Context, fields []restapi.Custom
 			}
 
 			// Create a map for the dynamic value
-			dynamicValueMap := map[string]string{}
+			dynamicAttrs := make(map[string]attr.Value)
 
-			dynamicValueMap["tag_name"] = dynamicValue.TagName
+			dynamicAttrs["tag_name"] = types.StringValue(dynamicValue.TagName)
 
 			if dynamicValue.Key != nil {
-				dynamicValueMap["key"] = *dynamicValue.Key
+				dynamicAttrs["key"] = types.StringValue(*dynamicValue.Key)
+			} else {
+				dynamicAttrs["key"] = types.StringNull()
 			}
 
-			// Build the list value (element type MapType{ElemType:String})
-			dynListVal, d := types.ListValueFrom(ctx, types.MapType{ElemType: types.StringType}, []map[string]string{dynamicValueMap})
-			diags = append(diags, d...)
+			// Create the dynamic value object
+			dynamicObj, d := types.ObjectValue(GetDynamicValueType().AttrTypes, dynamicAttrs)
 			if d.HasError() {
+				diags = append(diags, d...)
+				return types.List{}, diags
+			}
+
+			// Create a list with one dynamic value object
+			dynListVal, d := types.ListValue(GetDynamicValueType(), []attr.Value{dynamicObj})
+			if d.HasError() {
+				diags = append(diags, d...)
 				return types.List{}, diags
 			}
 
@@ -147,8 +148,10 @@ func CustomPayloadFieldsToTerraform(ctx context.Context, fields []restapi.Custom
 		tfFields = append(tfFields, objVal)
 	}
 
-	// Use ListValueFrom to convert the slice of maps to a Terraform list
-	return types.ListValueFrom(ctx, GetCustomPayloadFieldType(), tfFields)
+	// Create the list of custom payload fields
+	return types.ListValue(types.ObjectType{
+		AttrTypes: CustomPayloadFieldAttributeTypes(),
+	}, tfFields)
 }
 
 // Made with Bob
