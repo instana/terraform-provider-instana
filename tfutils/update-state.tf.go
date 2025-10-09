@@ -295,4 +295,16 @@ func diagsToString(diags diag.Diagnostics) string {
 	return strings.Join(errorMessages, "; ")
 }
 
+func ArrayToStateSet(elements []string) (types.Set, diag.Diagnostics) {
+	// Each element in the Set must have an element type
+	elems := make([]attr.Value, len(elements))
+	for i, id := range elements {
+		elems[i] = types.StringValue(id)
+	}
+
+	// Build the types.Set from the elements
+	setVal, diags := types.SetValue(types.StringType, elems)
+	return setVal, diags
+}
+
 // Made with Bob
