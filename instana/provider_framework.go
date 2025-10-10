@@ -133,10 +133,15 @@ func (p *InstanaProvider) DataSources(_ context.Context) []func() datasource.Dat
 // Resources defines the resources implemented in the provider
 func (p *InstanaProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		func() resource.Resource {
-			return NewTerraformResourceFramework(NewAlertingConfigResourceHandleFramework())
-		},
-		// Add more resources here as they are migrated
+		// Add resources here -
+		addResouceHandle(NewAlertingConfigResourceHandleFramework),
+	}
+}
+
+// Helper function to wrap resource handles
+func addResouceHandle[T restapi.InstanaDataObject](handleFunc func() ResourceHandleFramework[T]) func() resource.Resource {
+	return func() resource.Resource {
+		return NewTerraformResourceFramework(handleFunc())
 	}
 }
 
