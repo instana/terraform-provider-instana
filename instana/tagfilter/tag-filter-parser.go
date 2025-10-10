@@ -179,7 +179,7 @@ func (e *PrimaryExpression) Render() string {
 // ComparisonExpression representation of a comparison expression.
 type ComparisonExpression struct {
 	Entity       *EntitySpec `parser:"@@"`
-	Operator     Operator    `parser:"@( \"EQUALS\" | \"NOT_EQUAL\" | \"CONTAINS\" | \"NOT_CONTAIN\" | \"STARTS_WITH\" | \"ENDS_WITH\" | \"NOT_STARTS_WITH\" | \"NOT_ENDS_WITH\" | \"GREATER_OR_EQUAL_THAN\" | \"LESS_OR_EQUAL_THAN\" | \"LESS_THAN\" | \"GREATER_THAN\" )"`
+	Operator     Operator    `parser:"@( \"EQUALS\" | \"REGEX_MATCH\" | \"NOT_EQUAL\" | \"CONTAINS\" | \"NOT_CONTAIN\" | \"STARTS_WITH\" | \"ENDS_WITH\" | \"NOT_STARTS_WITH\" | \"NOT_ENDS_WITH\" | \"GREATER_OR_EQUAL_THAN\" | \"LESS_OR_EQUAL_THAN\" | \"LESS_THAN\" | \"GREATER_THAN\" )"`
 	NumberValue  *int64      `parser:"( @Number"`
 	BooleanValue *bool       `parser:"| @( \"FALSE\" | \"TRUE\" )"`
 	StringValue  *string     `parser:"| @String )"`
