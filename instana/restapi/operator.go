@@ -76,6 +76,8 @@ const (
 	GreaterThanOperator = ExpressionOperator("GREATER_THAN")
 	//LessThanOperator constant for the LESS_THAN operator
 	LessThanOperator = ExpressionOperator("LESS_THAN")
+	//RegexMatchOperator constant for the REGEX_MATCH operator
+	RegexMatchOperator = ExpressionOperator("REGEX_MATCH")
 )
 
 // SupportedComparisonOperators list of supported comparison operators of Instana API
@@ -92,6 +94,7 @@ var SupportedComparisonOperators = ExpressionOperators{
 	LessOrEqualThanOperator,
 	GreaterThanOperator,
 	LessThanOperator,
+	RegexMatchOperator,
 }
 
 // SupportedUnaryExpressionOperators list of supported unary expression operators of Instana API
