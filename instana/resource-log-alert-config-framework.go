@@ -1195,17 +1195,20 @@ func (r *logAlertConfigResourceFramework) mapRulesFromState(ctx context.Context,
 			if len(thresholdElements) > 0 {
 				thresholdObj := thresholdElements[0]
 
-				var thresholdObjMap map[string]attr.Value
-				diags.Append(thresholdObj.As(ctx, &thresholdObjMap, basetypes.ObjectAsOptions{})...)
+				// Use a properly structured type instead of a generic map
+				var thresholdStruct struct {
+					Warning  types.List `tfsdk:"warning"`
+					Critical types.List `tfsdk:"critical"`
+				}
+
+				diags.Append(thresholdObj.As(ctx, &thresholdStruct, basetypes.ObjectAsOptions{})...)
 				if diags.HasError() {
 					return nil, diags
 				}
 
 				// Process warning threshold
-				warningVal, ok := thresholdObjMap[LogAlertConfigFieldWarning]
-				if ok && !warningVal.(types.List).IsNull() && !warningVal.(types.List).IsUnknown() {
-					warningList := warningVal.(types.List)
-					warningThreshold, warningDiags := r.mapThresholdRuleFromState(ctx, warningList)
+				if !thresholdStruct.Warning.IsNull() && !thresholdStruct.Warning.IsUnknown() {
+					warningThreshold, warningDiags := r.mapThresholdRuleFromState(ctx, thresholdStruct.Warning)
 					diags.Append(warningDiags...)
 					if diags.HasError() {
 						return nil, diags
@@ -1217,10 +1220,8 @@ func (r *logAlertConfigResourceFramework) mapRulesFromState(ctx context.Context,
 				}
 
 				// Process critical threshold
-				criticalVal, ok := thresholdObjMap[LogAlertConfigFieldCritical]
-				if ok && !criticalVal.(types.List).IsNull() && !criticalVal.(types.List).IsUnknown() {
-					criticalList := criticalVal.(types.List)
-					criticalThreshold, criticalDiags := r.mapThresholdRuleFromState(ctx, criticalList)
+				if !thresholdStruct.Critical.IsNull() && !thresholdStruct.Critical.IsUnknown() {
+					criticalThreshold, criticalDiags := r.mapThresholdRuleFromState(ctx, thresholdStruct.Critical)
 					diags.Append(criticalDiags...)
 					if diags.HasError() {
 						return nil, diags
@@ -1264,15 +1265,17 @@ func (r *logAlertConfigResourceFramework) mapThresholdRuleFromState(ctx context.
 	// Get the threshold object
 	thresholdObj := thresholdElements[0]
 
-	// Extract the static block
-	var thresholdMap map[string]attr.Value
-	diags.Append(thresholdObj.As(ctx, &thresholdMap, basetypes.ObjectAsOptions{})...)
+	// Extract the static block using a properly structured type
+	var thresholdStruct struct {
+		Static types.List `tfsdk:"static"`
+	}
+
+	diags.Append(thresholdObj.As(ctx, &thresholdStruct, basetypes.ObjectAsOptions{})...)
 	if diags.HasError() {
 		return nil, diags
 	}
 
-	staticVal, ok := thresholdMap["static"]
-	if !ok || staticVal.(types.List).IsNull() || staticVal.(types.List).IsUnknown() {
+	if thresholdStruct.Static.IsNull() || thresholdStruct.Static.IsUnknown() {
 		diags.AddError(
 			"Missing static threshold",
 			"The threshold configuration is missing the required 'static' block",
@@ -1280,7 +1283,7 @@ func (r *logAlertConfigResourceFramework) mapThresholdRuleFromState(ctx context.
 		return nil, diags
 	}
 
-	staticList := staticVal.(types.List)
+	staticList := thresholdStruct.Static
 	var staticElements []types.Object
 	diags.Append(staticList.ElementsAs(ctx, &staticElements, false)...)
 	if diags.HasError() {
