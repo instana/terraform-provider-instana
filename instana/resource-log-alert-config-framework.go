@@ -844,8 +844,13 @@ func (r *logAlertConfigResourceFramework) mapRulesToState(ctx context.Context, r
 		} else {
 			thresholdObj[LogAlertConfigFieldWarning] = types.ListNull(types.ObjectType{
 				AttrTypes: map[string]attr.Type{
-					LogAlertConfigFieldType:  types.StringType,
-					LogAlertConfigFieldValue: types.StringType,
+					"static": types.ListType{
+						ElemType: types.ObjectType{
+							AttrTypes: map[string]attr.Type{
+								LogAlertConfigFieldValue: types.Int64Type,
+							},
+						},
+					},
 				},
 			})
 		}
@@ -862,8 +867,13 @@ func (r *logAlertConfigResourceFramework) mapRulesToState(ctx context.Context, r
 		} else {
 			thresholdObj[LogAlertConfigFieldCritical] = types.ListNull(types.ObjectType{
 				AttrTypes: map[string]attr.Type{
-					LogAlertConfigFieldType:  types.StringType,
-					LogAlertConfigFieldValue: types.StringType,
+					"static": types.ListType{
+						ElemType: types.ObjectType{
+							AttrTypes: map[string]attr.Type{
+								LogAlertConfigFieldValue: types.Int64Type,
+							},
+						},
+					},
 				},
 			})
 		}
@@ -874,16 +884,26 @@ func (r *logAlertConfigResourceFramework) mapRulesToState(ctx context.Context, r
 				LogAlertConfigFieldWarning: types.ListType{
 					ElemType: types.ObjectType{
 						AttrTypes: map[string]attr.Type{
-							LogAlertConfigFieldType:  types.StringType,
-							LogAlertConfigFieldValue: types.StringType,
+							"static": types.ListType{
+								ElemType: types.ObjectType{
+									AttrTypes: map[string]attr.Type{
+										LogAlertConfigFieldValue: types.Int64Type,
+									},
+								},
+							},
 						},
 					},
 				},
 				LogAlertConfigFieldCritical: types.ListType{
 					ElemType: types.ObjectType{
 						AttrTypes: map[string]attr.Type{
-							LogAlertConfigFieldType:  types.StringType,
-							LogAlertConfigFieldValue: types.StringType,
+							"static": types.ListType{
+								ElemType: types.ObjectType{
+									AttrTypes: map[string]attr.Type{
+										LogAlertConfigFieldValue: types.Int64Type,
+									},
+								},
+							},
 						},
 					},
 				},
@@ -902,16 +922,26 @@ func (r *logAlertConfigResourceFramework) mapRulesToState(ctx context.Context, r
 					LogAlertConfigFieldWarning: types.ListType{
 						ElemType: types.ObjectType{
 							AttrTypes: map[string]attr.Type{
-								LogAlertConfigFieldType:  types.StringType,
-								LogAlertConfigFieldValue: types.StringType,
+								"static": types.ListType{
+									ElemType: types.ObjectType{
+										AttrTypes: map[string]attr.Type{
+											LogAlertConfigFieldValue: types.Int64Type,
+										},
+									},
+								},
 							},
 						},
 					},
 					LogAlertConfigFieldCritical: types.ListType{
 						ElemType: types.ObjectType{
 							AttrTypes: map[string]attr.Type{
-								LogAlertConfigFieldType:  types.StringType,
-								LogAlertConfigFieldValue: types.StringType,
+								"static": types.ListType{
+									ElemType: types.ObjectType{
+										AttrTypes: map[string]attr.Type{
+											LogAlertConfigFieldValue: types.Int64Type,
+										},
+									},
+								},
 							},
 						},
 					},
@@ -939,16 +969,26 @@ func (r *logAlertConfigResourceFramework) mapRulesToState(ctx context.Context, r
 							LogAlertConfigFieldWarning: types.ListType{
 								ElemType: types.ObjectType{
 									AttrTypes: map[string]attr.Type{
-										LogAlertConfigFieldType:  types.StringType,
-										LogAlertConfigFieldValue: types.StringType,
+										"static": types.ListType{
+											ElemType: types.ObjectType{
+												AttrTypes: map[string]attr.Type{
+													LogAlertConfigFieldValue: types.Int64Type,
+												},
+											},
+										},
 									},
 								},
 							},
 							LogAlertConfigFieldCritical: types.ListType{
 								ElemType: types.ObjectType{
 									AttrTypes: map[string]attr.Type{
-										LogAlertConfigFieldType:  types.StringType,
-										LogAlertConfigFieldValue: types.StringType,
+										"static": types.ListType{
+											ElemType: types.ObjectType{
+												AttrTypes: map[string]attr.Type{
+													LogAlertConfigFieldValue: types.Int64Type,
+												},
+											},
+										},
 									},
 								},
 							},
@@ -979,16 +1019,26 @@ func (r *logAlertConfigResourceFramework) mapRulesToState(ctx context.Context, r
 							LogAlertConfigFieldWarning: types.ListType{
 								ElemType: types.ObjectType{
 									AttrTypes: map[string]attr.Type{
-										LogAlertConfigFieldType:  types.StringType,
-										LogAlertConfigFieldValue: types.StringType,
+										"static": types.ListType{
+											ElemType: types.ObjectType{
+												AttrTypes: map[string]attr.Type{
+													LogAlertConfigFieldValue: types.Int64Type,
+												},
+											},
+										},
 									},
 								},
 							},
 							LogAlertConfigFieldCritical: types.ListType{
 								ElemType: types.ObjectType{
 									AttrTypes: map[string]attr.Type{
-										LogAlertConfigFieldType:  types.StringType,
-										LogAlertConfigFieldValue: types.StringType,
+										"static": types.ListType{
+											ElemType: types.ObjectType{
+												AttrTypes: map[string]attr.Type{
+													LogAlertConfigFieldValue: types.Int64Type,
+												},
+											},
+										},
 									},
 								},
 							},
