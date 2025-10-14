@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
@@ -338,13 +337,9 @@ func NewAPITokenResourceHandleFramework() ResourceHandleFramework[*restapi.APITo
 						Description: "Configures if the API token has limited applications scope",
 					},
 					APITokenFieldLimitedBizOpsScope: schema.BoolAttribute{
-						Optional: true,
-						Computed: true,
-						Default:  booldefault.StaticBool(false),
-						PlanModifiers: []planmodifier.Bool{
-							boolplanmodifier.UseStateForUnknown(),
-						},
-
+						Optional:    true,
+						Computed:    true,
+						Default:     booldefault.StaticBool(false),
 						Description: "Configures if the API token has limited business operations scope",
 					},
 					APITokenFieldLimitedWebsitesScope: schema.BoolAttribute{
@@ -468,13 +463,10 @@ func NewAPITokenResourceHandleFramework() ResourceHandleFramework[*restapi.APITo
 						Description: "Configures if the API token has limited api gateway scope",
 					},
 					APITokenFieldLimitedGenAIScope: schema.BoolAttribute{
-						Optional: true,
-						Computed: true,
-						Default:  booldefault.StaticBool(false),
-						PlanModifiers: []planmodifier.Bool{
-							boolplanmodifier.UseStateForUnknown(),
-						},
-						Description: "Configures if the API token has limited gen gi scope",
+						Optional:    true,
+						Computed:    true,
+						Default:     booldefault.StaticBool(false),
+						Description: "Configures if the API token has limited gen ai scope",
 					},
 
 					// Additional permissions
@@ -641,13 +633,9 @@ func NewAPITokenResourceHandleFramework() ResourceHandleFramework[*restapi.APITo
 						Description: "Configures if the API token is allowed to configure LLM",
 					},
 					APITokenFieldCanConfigureAiAgents: schema.BoolAttribute{
-						Optional: true,
-						Computed: true,
-						Default:  booldefault.StaticBool(false),
-						PlanModifiers: []planmodifier.Bool{
-							boolplanmodifier.UseStateForUnknown(),
-						},
-
+						Optional:    true,
+						Computed:    true,
+						Default:     booldefault.StaticBool(false),
 						Description: "Configures if the API token is allowed to configure Ai Agents",
 					},
 					APITokenFieldCanConfigureApdex: schema.BoolAttribute{
