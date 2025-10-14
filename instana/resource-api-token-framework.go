@@ -78,7 +78,6 @@ type APITokenModel struct {
 	LimitedLinuxKvmHypervisorScope types.Bool `tfsdk:"limited_linux_kvm_hypervisor_scope"`
 	LimitedServiceLevelScope       types.Bool `tfsdk:"limited_service_level_scope"`
 	LimitedAiGatewayScope          types.Bool `tfsdk:"limited_ai_gateway_scope"`
-	LimitedGenAIScope              types.Bool `tfsdk:"limited_gen_ai_scope"`
 
 	// Additional permissions
 	CanConfigurePersonalAPITokens             types.Bool `tfsdk:"can_configure_personal_api_tokens"`
@@ -462,12 +461,6 @@ func NewAPITokenResourceHandleFramework() ResourceHandleFramework[*restapi.APITo
 						Default:     booldefault.StaticBool(false),
 						Description: "Configures if the API token has limited api gateway scope",
 					},
-					APITokenFieldLimitedGenAIScope: schema.BoolAttribute{
-						Optional:    true,
-						Computed:    true,
-						Default:     booldefault.StaticBool(false),
-						Description: "Configures if the API token has limited gen ai scope",
-					},
 
 					// Additional permissions
 					APITokenFieldCanConfigurePersonalAPITokens: schema.BoolAttribute{
@@ -752,7 +745,7 @@ func (r *apiTokenResourceFramework) UpdateState(ctx context.Context, state *tfsd
 		LimitedLinuxKvmHypervisorScope: types.BoolValue(apiToken.LimitedLinuxKvmHypervisorScope),
 		LimitedServiceLevelScope:       types.BoolValue(apiToken.LimitedServiceLevelScope),
 		LimitedAiGatewayScope:          types.BoolValue(apiToken.LimitedAiGatewayScope),
-		LimitedGenAIScope:              types.BoolValue(apiToken.LimitedGenAIScope),
+
 		// Additional permissions
 		CanConfigurePersonalAPITokens:             types.BoolValue(apiToken.CanConfigurePersonalAPITokens),
 		CanConfigureDatabaseManagement:            types.BoolValue(apiToken.CanConfigureDatabaseManagement),
@@ -867,7 +860,6 @@ func (r *apiTokenResourceFramework) MapStateToDataObject(ctx context.Context, pl
 		LimitedLinuxKvmHypervisorScope: model.LimitedLinuxKvmHypervisorScope.ValueBool(),
 		LimitedServiceLevelScope:       model.LimitedServiceLevelScope.ValueBool(),
 		LimitedAiGatewayScope:          model.LimitedAiGatewayScope.ValueBool(),
-		LimitedGenAIScope:              model.LimitedGenAIScope.ValueBool(),
 
 		// Additional permissions
 		CanConfigurePersonalAPITokens:             model.CanConfigurePersonalAPITokens.ValueBool(),
