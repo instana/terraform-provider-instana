@@ -46,7 +46,6 @@ type APITokenModel struct {
 	CanViewLogs                              types.Bool   `tfsdk:"can_view_logs"`
 	CanViewTraceDetails                      types.Bool   `tfsdk:"can_view_trace_details"`
 	CanConfigureSessionSettings              types.Bool   `tfsdk:"can_configure_session_settings"`
-	CanConfigureServiceLevelIndicators       types.Bool   `tfsdk:"can_configure_service_level_indicators"`
 	CanConfigureGlobalAlertPayload           types.Bool   `tfsdk:"can_configure_global_alert_payload"`
 	CanConfigureGlobalApplicationSmartAlerts types.Bool   `tfsdk:"can_configure_global_application_smart_alerts"`
 	CanConfigureGlobalSyntheticSmartAlerts   types.Bool   `tfsdk:"can_configure_global_synthetic_smart_alerts"`
@@ -76,35 +75,43 @@ type APITokenModel struct {
 	LimitedWindowsHypervisorScope  types.Bool `tfsdk:"limited_windows_hypervisor_scope"`
 	LimitedAlertChannelsScope      types.Bool `tfsdk:"limited_alert_channels_scope"`
 	LimitedLinuxKvmHypervisorScope types.Bool `tfsdk:"limited_linux_kvm_hypervisor_scope"`
+	LimitedServiceLevelScope       types.Bool `tfsdk:"limited_service_level_scope"`
+	LimitedAiGatewayScope          types.Bool `tfsdk:"limited_ai_gateway_scope"`
+	LimitedGenAIScope              types.Bool `tfsdk:"limited_gen_ai_scope"`
 
 	// Additional permissions
-	CanConfigurePersonalAPITokens    types.Bool `tfsdk:"can_configure_personal_api_tokens"`
-	CanConfigureDatabaseManagement   types.Bool `tfsdk:"can_configure_database_management"`
-	CanConfigureAutomationActions    types.Bool `tfsdk:"can_configure_automation_actions"`
-	CanConfigureAutomationPolicies   types.Bool `tfsdk:"can_configure_automation_policies"`
-	CanRunAutomationActions          types.Bool `tfsdk:"can_run_automation_actions"`
-	CanDeleteAutomationActionHistory types.Bool `tfsdk:"can_delete_automation_action_history"`
-	CanConfigureSyntheticTests       types.Bool `tfsdk:"can_configure_synthetic_tests"`
-	CanConfigureSyntheticLocations   types.Bool `tfsdk:"can_configure_synthetic_locations"`
-	CanConfigureSyntheticCredentials types.Bool `tfsdk:"can_configure_synthetic_credentials"`
-	CanViewSyntheticTests            types.Bool `tfsdk:"can_view_synthetic_tests"`
-	CanViewSyntheticLocations        types.Bool `tfsdk:"can_view_synthetic_locations"`
-	CanViewSyntheticTestResults      types.Bool `tfsdk:"can_view_synthetic_test_results"`
-	CanUseSyntheticCredentials       types.Bool `tfsdk:"can_use_synthetic_credentials"`
-	CanConfigureBizops               types.Bool `tfsdk:"can_configure_bizops"`
-	CanViewBusinessProcesses         types.Bool `tfsdk:"can_view_business_processes"`
-	CanViewBusinessProcessDetails    types.Bool `tfsdk:"can_view_business_process_details"`
-	CanViewBusinessActivities        types.Bool `tfsdk:"can_view_business_activities"`
-	CanViewBizAlerts                 types.Bool `tfsdk:"can_view_biz_alerts"`
-	CanDeleteLogs                    types.Bool `tfsdk:"can_delete_logs"`
-	CanCreateHeapDump                types.Bool `tfsdk:"can_create_heap_dump"`
-	CanCreateThreadDump              types.Bool `tfsdk:"can_create_thread_dump"`
-	CanManuallyCloseIssue            types.Bool `tfsdk:"can_manually_close_issue"`
-	CanViewLogVolume                 types.Bool `tfsdk:"can_view_log_volume"`
-	CanConfigureLogRetentionPeriod   types.Bool `tfsdk:"can_configure_log_retention_period"`
-	CanConfigureSubtraces            types.Bool `tfsdk:"can_configure_subtraces"`
-	CanInvokeAlertChannel            types.Bool `tfsdk:"can_invoke_alert_channel"`
-	CanConfigureLlm                  types.Bool `tfsdk:"can_configure_llm"`
+	CanConfigurePersonalAPITokens             types.Bool `tfsdk:"can_configure_personal_api_tokens"`
+	CanConfigureDatabaseManagement            types.Bool `tfsdk:"can_configure_database_management"`
+	CanConfigureAutomationActions             types.Bool `tfsdk:"can_configure_automation_actions"`
+	CanConfigureAutomationPolicies            types.Bool `tfsdk:"can_configure_automation_policies"`
+	CanRunAutomationActions                   types.Bool `tfsdk:"can_run_automation_actions"`
+	CanDeleteAutomationActionHistory          types.Bool `tfsdk:"can_delete_automation_action_history"`
+	CanConfigureSyntheticTests                types.Bool `tfsdk:"can_configure_synthetic_tests"`
+	CanConfigureSyntheticLocations            types.Bool `tfsdk:"can_configure_synthetic_locations"`
+	CanConfigureSyntheticCredentials          types.Bool `tfsdk:"can_configure_synthetic_credentials"`
+	CanViewSyntheticTests                     types.Bool `tfsdk:"can_view_synthetic_tests"`
+	CanViewSyntheticLocations                 types.Bool `tfsdk:"can_view_synthetic_locations"`
+	CanViewSyntheticTestResults               types.Bool `tfsdk:"can_view_synthetic_test_results"`
+	CanUseSyntheticCredentials                types.Bool `tfsdk:"can_use_synthetic_credentials"`
+	CanConfigureBizops                        types.Bool `tfsdk:"can_configure_bizops"`
+	CanViewBusinessProcesses                  types.Bool `tfsdk:"can_view_business_processes"`
+	CanViewBusinessProcessDetails             types.Bool `tfsdk:"can_view_business_process_details"`
+	CanViewBusinessActivities                 types.Bool `tfsdk:"can_view_business_activities"`
+	CanViewBizAlerts                          types.Bool `tfsdk:"can_view_biz_alerts"`
+	CanDeleteLogs                             types.Bool `tfsdk:"can_delete_logs"`
+	CanCreateHeapDump                         types.Bool `tfsdk:"can_create_heap_dump"`
+	CanCreateThreadDump                       types.Bool `tfsdk:"can_create_thread_dump"`
+	CanManuallyCloseIssue                     types.Bool `tfsdk:"can_manually_close_issue"`
+	CanViewLogVolume                          types.Bool `tfsdk:"can_view_log_volume"`
+	CanConfigureLogRetentionPeriod            types.Bool `tfsdk:"can_configure_log_retention_period"`
+	CanConfigureSubtraces                     types.Bool `tfsdk:"can_configure_subtraces"`
+	CanInvokeAlertChannel                     types.Bool `tfsdk:"can_invoke_alert_channel"`
+	CanConfigureLlm                           types.Bool `tfsdk:"can_configure_llm"`
+	CanConfigureAiAgents                      types.Bool `tfsdk:"can_configure_ai_agents"`
+	CanConfigureApdex                         types.Bool `tfsdk:"can_configure_apdex"`
+	CanConfigureServiceLevelCorrectionWindows types.Bool `tfsdk:"can_configure_service_level_correction_windows"`
+	CanConfigureServiceLevelSmartAlerts       types.Bool `tfsdk:"can_configure_service_level_smart_alerts"`
+	CanConfigureServiceLevels                 types.Bool `tfsdk:"can_configure_service_levels"`
 }
 
 // NewAPITokenResourceHandleFramework creates the resource handle for API Tokens
@@ -230,10 +237,6 @@ func NewAPITokenResourceHandleFramework() ResourceHandleFramework[*restapi.APITo
 						Optional:    true,
 						Description: "Configures if the API token is allowed to configure session settings",
 					},
-					APITokenFieldCanConfigureServiceLevelIndicators: schema.BoolAttribute{
-						Optional:    true,
-						Description: "Configures if the API token is allowed to configure service level indicators",
-					},
 					APITokenFieldCanConfigureGlobalAlertPayload: schema.BoolAttribute{
 						Optional:    true,
 						Description: "Configures if the API token is allowed to configure global alert payload",
@@ -343,6 +346,18 @@ func NewAPITokenResourceHandleFramework() ResourceHandleFramework[*restapi.APITo
 					APITokenFieldLimitedLinuxKvmHypervisorScope: schema.BoolAttribute{
 						Optional:    true,
 						Description: "Configures if the API token has limited linux kvm hypervisor scope",
+					},
+					APITokenFieldLimitedServiceLevelScope: schema.BoolAttribute{
+						Optional:    true,
+						Description: "Configures if the API token has limited service level scope",
+					},
+					APITokenFieldLimitedAiGatewayScope: schema.BoolAttribute{
+						Optional:    true,
+						Description: "Configures if the API token has limited api gateway scope",
+					},
+					APITokenFieldLimitedGenAIScope: schema.BoolAttribute{
+						Optional:    true,
+						Description: "Configures if the API token has limited gen gi scope",
 					},
 
 					// Additional permissions
@@ -454,6 +469,26 @@ func NewAPITokenResourceHandleFramework() ResourceHandleFramework[*restapi.APITo
 						Optional:    true,
 						Description: "Configures if the API token is allowed to configure LLM",
 					},
+					APITokenFieldCanConfigureAiAgents: schema.BoolAttribute{
+						Optional:    true,
+						Description: "Configures if the API token is allowed to configure Ai Agents",
+					},
+					APITokenFieldCanConfigureApdex: schema.BoolAttribute{
+						Optional:    true,
+						Description: "Configures if the API token is allowed to configure Apdex",
+					},
+					APITokenFieldCanConfigureServiceLevelCorrectionWindows: schema.BoolAttribute{
+						Optional:    true,
+						Description: "Configures if the API token is allowed to configure service level Correction Windows",
+					},
+					APITokenFieldCanConfigureServiceLevelSmartAlerts: schema.BoolAttribute{
+						Optional:    true,
+						Description: "Configures if the API token is allowed to configure service level smart alerts",
+					},
+					APITokenFieldCanConfigureServiceLevels: schema.BoolAttribute{
+						Optional:    true,
+						Description: "Configures if the API token is allowed to configure service levels",
+					},
 				},
 			},
 			SchemaVersion: 2,
@@ -513,7 +548,6 @@ func (r *apiTokenResourceFramework) UpdateState(ctx context.Context, state *tfsd
 		CanViewLogs:                              types.BoolValue(apiToken.CanViewLogs),
 		CanViewTraceDetails:                      types.BoolValue(apiToken.CanViewTraceDetails),
 		CanConfigureSessionSettings:              types.BoolValue(apiToken.CanConfigureSessionSettings),
-		CanConfigureServiceLevelIndicators:       types.BoolValue(apiToken.CanConfigureServiceLevelIndicators),
 		CanConfigureGlobalAlertPayload:           types.BoolValue(apiToken.CanConfigureGlobalAlertPayload),
 		CanConfigureGlobalApplicationSmartAlerts: types.BoolValue(apiToken.CanConfigureGlobalApplicationSmartAlerts),
 		CanConfigureGlobalSyntheticSmartAlerts:   types.BoolValue(apiToken.CanConfigureGlobalSyntheticSmartAlerts),
@@ -583,8 +617,12 @@ func (r *apiTokenResourceFramework) MapStateToDataObject(ctx context.Context, pl
 	var model APITokenModel
 	var diags diag.Diagnostics
 
-	// Read the model from state
-	diags = state.Get(ctx, &model)
+	// Get current state from plan or state
+	if plan != nil {
+		diags.Append(plan.Get(ctx, &model)...)
+	} else if state != nil {
+		diags.Append(state.Get(ctx, &model)...)
+	}
 	if diags.HasError() {
 		return nil, diags
 	}
@@ -619,7 +657,6 @@ func (r *apiTokenResourceFramework) MapStateToDataObject(ctx context.Context, pl
 		CanViewLogs:                              model.CanViewLogs.ValueBool(),
 		CanViewTraceDetails:                      model.CanViewTraceDetails.ValueBool(),
 		CanConfigureSessionSettings:              model.CanConfigureSessionSettings.ValueBool(),
-		CanConfigureServiceLevelIndicators:       model.CanConfigureServiceLevelIndicators.ValueBool(),
 		CanConfigureGlobalAlertPayload:           model.CanConfigureGlobalAlertPayload.ValueBool(),
 		CanConfigureGlobalApplicationSmartAlerts: model.CanConfigureGlobalApplicationSmartAlerts.ValueBool(),
 		CanConfigureGlobalSyntheticSmartAlerts:   model.CanConfigureGlobalSyntheticSmartAlerts.ValueBool(),
@@ -649,6 +686,9 @@ func (r *apiTokenResourceFramework) MapStateToDataObject(ctx context.Context, pl
 		LimitedWindowsHypervisorScope:  model.LimitedWindowsHypervisorScope.ValueBool(),
 		LimitedAlertChannelsScope:      model.LimitedAlertChannelsScope.ValueBool(),
 		LimitedLinuxKvmHypervisorScope: model.LimitedLinuxKvmHypervisorScope.ValueBool(),
+		LimitedServiceLevelScope:       model.LimitedServiceLevelScope.ValueBool(),
+		LimitedAiGatewayScope:          model.LimitedAiGatewayScope.ValueBool(),
+		LimitedGenAIScope:              model.LimitedGenAIScope.ValueBool(),
 
 		// Additional permissions
 		CanConfigurePersonalAPITokens:    model.CanConfigurePersonalAPITokens.ValueBool(),
@@ -678,6 +718,12 @@ func (r *apiTokenResourceFramework) MapStateToDataObject(ctx context.Context, pl
 		CanConfigureSubtraces:            model.CanConfigureSubtraces.ValueBool(),
 		CanInvokeAlertChannel:            model.CanInvokeAlertChannel.ValueBool(),
 		CanConfigureLlm:                  model.CanConfigureLlm.ValueBool(),
+
+		CanConfigureAiAgents:                      model.CanConfigureAiAgents.ValueBool(),
+		CanConfigureApdex:                         model.CanConfigureApdex.ValueBool(),
+		CanConfigureServiceLevelCorrectionWindows: model.CanConfigureServiceLevelCorrectionWindows.ValueBool(),
+		CanConfigureServiceLevelSmartAlerts:       model.CanConfigureServiceLevelSmartAlerts.ValueBool(),
+		CanConfigureServiceLevels:                 model.CanConfigureServiceLevels.ValueBool(),
 	}
 
 	return apiToken, diags
