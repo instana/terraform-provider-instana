@@ -64,8 +64,6 @@ const (
 	APITokenFieldCanViewTraceDetails = "can_view_trace_details"
 	//APITokenFieldCanConfigureSessionSettings constant value for the schema field can_configure_session_settings
 	APITokenFieldCanConfigureSessionSettings = "can_configure_session_settings"
-	//APITokenFieldCanConfigureServiceLevelIndicators constant value for the schema field can_configure_service_level_indicators
-	APITokenFieldCanConfigureServiceLevelIndicators = "can_configure_service_level_indicators"
 	//APITokenFieldCanConfigureGlobalAlertPayload constant value for the schema field can_configure_global_alert_payload
 	APITokenFieldCanConfigureGlobalAlertPayload           = "can_configure_global_alert_payload"
 	APITokenFieldCanConfigureGlobalApplicationSmartAlerts = "can_configure_global_application_smart_alerts"
@@ -76,7 +74,7 @@ const (
 	APITokenFieldCanViewAccountAndBillingInformation = "can_view_account_and_billing_information"
 	//APITokenFieldCanEditAllAccessibleCustomDashboards constant value for the schema field can_edit_all_accessible_custom_dashboards
 	APITokenFieldCanEditAllAccessibleCustomDashboards = "can_edit_all_accessible_custom_dashboards"
-	
+
 	// New permission fields
 	APITokenFieldLimitedApplicationsScope       = "limited_applications_scope"
 	APITokenFieldLimitedBizOpsScope             = "limited_biz_ops_scope"
@@ -98,34 +96,43 @@ const (
 	APITokenFieldLimitedWindowsHypervisorScope  = "limited_windows_hypervisor_scope"
 	APITokenFieldLimitedAlertChannelsScope      = "limited_alert_channels_scope"
 	APITokenFieldLimitedLinuxKvmHypervisorScope = "limited_linux_kvm_hypervisor_scope"
-	
-	APITokenFieldCanConfigurePersonalAPITokens      = "can_configure_personal_api_tokens"
-	APITokenFieldCanConfigureDatabaseManagement     = "can_configure_database_management"
-	APITokenFieldCanConfigureAutomationActions      = "can_configure_automation_actions"
-	APITokenFieldCanConfigureAutomationPolicies     = "can_configure_automation_policies"
-	APITokenFieldCanRunAutomationActions            = "can_run_automation_actions"
-	APITokenFieldCanDeleteAutomationActionHistory   = "can_delete_automation_action_history"
-	APITokenFieldCanConfigureSyntheticTests         = "can_configure_synthetic_tests"
-	APITokenFieldCanConfigureSyntheticLocations     = "can_configure_synthetic_locations"
-	APITokenFieldCanConfigureSyntheticCredentials   = "can_configure_synthetic_credentials"
-	APITokenFieldCanViewSyntheticTests              = "can_view_synthetic_tests"
-	APITokenFieldCanViewSyntheticLocations          = "can_view_synthetic_locations"
-	APITokenFieldCanViewSyntheticTestResults        = "can_view_synthetic_test_results"
-	APITokenFieldCanUseSyntheticCredentials         = "can_use_synthetic_credentials"
-	APITokenFieldCanConfigureBizops                 = "can_configure_bizops"
-	APITokenFieldCanViewBusinessProcesses           = "can_view_business_processes"
-	APITokenFieldCanViewBusinessProcessDetails      = "can_view_business_process_details"
-	APITokenFieldCanViewBusinessActivities          = "can_view_business_activities"
-	APITokenFieldCanViewBizAlerts                   = "can_view_biz_alerts"
-	APITokenFieldCanDeleteLogs                      = "can_delete_logs"
-	APITokenFieldCanCreateHeapDump                  = "can_create_heap_dump"
-	APITokenFieldCanCreateThreadDump                = "can_create_thread_dump"
-	APITokenFieldCanManuallyCloseIssue              = "can_manually_close_issue"
-	APITokenFieldCanViewLogVolume                   = "can_view_log_volume"
-	APITokenFieldCanConfigureLogRetentionPeriod     = "can_configure_log_retention_period"
-	APITokenFieldCanConfigureSubtraces              = "can_configure_subtraces"
-	APITokenFieldCanInvokeAlertChannel              = "can_invoke_alert_channel"
-	APITokenFieldCanConfigureLlm                    = "can_configure_llm"
+
+	APITokenFieldLimitedServiceLevelScope = "limited_service_level_scope"
+	APITokenFieldLimitedAiGatewayScope    = "limited_ai_gateway_scope"
+	APITokenFieldLimitedGenAIScope        = "limited_gen_ai_scope"
+
+	APITokenFieldCanConfigurePersonalAPITokens             = "can_configure_personal_api_tokens"
+	APITokenFieldCanConfigureDatabaseManagement            = "can_configure_database_management"
+	APITokenFieldCanConfigureAutomationActions             = "can_configure_automation_actions"
+	APITokenFieldCanConfigureAutomationPolicies            = "can_configure_automation_policies"
+	APITokenFieldCanRunAutomationActions                   = "can_run_automation_actions"
+	APITokenFieldCanDeleteAutomationActionHistory          = "can_delete_automation_action_history"
+	APITokenFieldCanConfigureSyntheticTests                = "can_configure_synthetic_tests"
+	APITokenFieldCanConfigureSyntheticLocations            = "can_configure_synthetic_locations"
+	APITokenFieldCanConfigureSyntheticCredentials          = "can_configure_synthetic_credentials"
+	APITokenFieldCanViewSyntheticTests                     = "can_view_synthetic_tests"
+	APITokenFieldCanViewSyntheticLocations                 = "can_view_synthetic_locations"
+	APITokenFieldCanViewSyntheticTestResults               = "can_view_synthetic_test_results"
+	APITokenFieldCanUseSyntheticCredentials                = "can_use_synthetic_credentials"
+	APITokenFieldCanConfigureBizops                        = "can_configure_bizops"
+	APITokenFieldCanViewBusinessProcesses                  = "can_view_business_processes"
+	APITokenFieldCanViewBusinessProcessDetails             = "can_view_business_process_details"
+	APITokenFieldCanViewBusinessActivities                 = "can_view_business_activities"
+	APITokenFieldCanViewBizAlerts                          = "can_view_biz_alerts"
+	APITokenFieldCanDeleteLogs                             = "can_delete_logs"
+	APITokenFieldCanCreateHeapDump                         = "can_create_heap_dump"
+	APITokenFieldCanCreateThreadDump                       = "can_create_thread_dump"
+	APITokenFieldCanManuallyCloseIssue                     = "can_manually_close_issue"
+	APITokenFieldCanViewLogVolume                          = "can_view_log_volume"
+	APITokenFieldCanConfigureLogRetentionPeriod            = "can_configure_log_retention_period"
+	APITokenFieldCanConfigureSubtraces                     = "can_configure_subtraces"
+	APITokenFieldCanInvokeAlertChannel                     = "can_invoke_alert_channel"
+	APITokenFieldCanConfigureLlm                           = "can_configure_llm"
+	APITokenFieldCanConfigureAiAgents                      = "can_configure_ai_agents"
+	APITokenFieldCanConfigureApdex                         = "can_configure_apdex"
+	APITokenFieldCanConfigureServiceLevelCorrectionWindows = "can_configure_service_level_correction_windows"
+	APITokenFieldCanConfigureServiceLevelSmartAlerts       = "can_configure_service_level_smart_alerts"
+	APITokenFieldCanConfigureServiceLevels                 = "can_configure_service_levels"
 )
 
 var (
@@ -347,7 +354,7 @@ var (
 		Default:     false,
 		Description: "Configures if the API token is allowed to edit all accessible custom dashboards",
 	}
-	
+
 	// New schema definitions for scope limitations
 	apiTokenSchemaLimitedApplicationsScope = &schema.Schema{
 		Type:        schema.TypeBool,
@@ -469,7 +476,7 @@ var (
 		Default:     false,
 		Description: "Configures if the API token has limited linux kvm hypervisor scope",
 	}
-	
+
 	// New schema definitions for additional permissions
 	apiTokenSchemaCanConfigurePersonalAPITokens = &schema.Schema{
 		Type:        schema.TypeBool,
@@ -677,7 +684,7 @@ func NewAPITokenResourceHandle() ResourceHandle[*restapi.APIToken] {
 				APITokenFieldCanConfigureGlobalLogSmartAlerts:         apiTokenSchemaCanConfigureGlobalLogSmartAlerts,
 				APITokenFieldCanViewAccountAndBillingInformation:      apiTokenSchemaCanViewAccountAndBillingInformation,
 				APITokenFieldCanEditAllAccessibleCustomDashboards:     apiTokenSchemaCanEditAllAccessibleCustomDashboards,
-				
+
 				// Scope limitations
 				APITokenFieldLimitedApplicationsScope:       apiTokenSchemaLimitedApplicationsScope,
 				APITokenFieldLimitedBizOpsScope:             apiTokenSchemaLimitedBizOpsScope,
@@ -699,35 +706,35 @@ func NewAPITokenResourceHandle() ResourceHandle[*restapi.APIToken] {
 				APITokenFieldLimitedWindowsHypervisorScope:  apiTokenSchemaLimitedWindowsHypervisorScope,
 				APITokenFieldLimitedAlertChannelsScope:      apiTokenSchemaLimitedAlertChannelsScope,
 				APITokenFieldLimitedLinuxKvmHypervisorScope: apiTokenSchemaLimitedLinuxKvmHypervisorScope,
-				
+
 				// Additional permissions
-				APITokenFieldCanConfigurePersonalAPITokens:      apiTokenSchemaCanConfigurePersonalAPITokens,
-				APITokenFieldCanConfigureDatabaseManagement:     apiTokenSchemaCanConfigureDatabaseManagement,
-				APITokenFieldCanConfigureAutomationActions:      apiTokenSchemaCanConfigureAutomationActions,
-				APITokenFieldCanConfigureAutomationPolicies:     apiTokenSchemaCanConfigureAutomationPolicies,
-				APITokenFieldCanRunAutomationActions:            apiTokenSchemaCanRunAutomationActions,
-				APITokenFieldCanDeleteAutomationActionHistory:   apiTokenSchemaCanDeleteAutomationActionHistory,
-				APITokenFieldCanConfigureSyntheticTests:         apiTokenSchemaCanConfigureSyntheticTests,
-				APITokenFieldCanConfigureSyntheticLocations:     apiTokenSchemaCanConfigureSyntheticLocations,
-				APITokenFieldCanConfigureSyntheticCredentials:   apiTokenSchemaCanConfigureSyntheticCredentials,
-				APITokenFieldCanViewSyntheticTests:              apiTokenSchemaCanViewSyntheticTests,
-				APITokenFieldCanViewSyntheticLocations:          apiTokenSchemaCanViewSyntheticLocations,
-				APITokenFieldCanViewSyntheticTestResults:        apiTokenSchemaCanViewSyntheticTestResults,
-				APITokenFieldCanUseSyntheticCredentials:         apiTokenSchemaCanUseSyntheticCredentials,
-				APITokenFieldCanConfigureBizops:                 apiTokenSchemaCanConfigureBizops,
-				APITokenFieldCanViewBusinessProcesses:           apiTokenSchemaCanViewBusinessProcesses,
-				APITokenFieldCanViewBusinessProcessDetails:      apiTokenSchemaCanViewBusinessProcessDetails,
-				APITokenFieldCanViewBusinessActivities:          apiTokenSchemaCanViewBusinessActivities,
-				APITokenFieldCanViewBizAlerts:                   apiTokenSchemaCanViewBizAlerts,
-				APITokenFieldCanDeleteLogs:                      apiTokenSchemaCanDeleteLogs,
-				APITokenFieldCanCreateHeapDump:                  apiTokenSchemaCanCreateHeapDump,
-				APITokenFieldCanCreateThreadDump:                apiTokenSchemaCanCreateThreadDump,
-				APITokenFieldCanManuallyCloseIssue:              apiTokenSchemaCanManuallyCloseIssue,
-				APITokenFieldCanViewLogVolume:                   apiTokenSchemaCanViewLogVolume,
-				APITokenFieldCanConfigureLogRetentionPeriod:     apiTokenSchemaCanConfigureLogRetentionPeriod,
-				APITokenFieldCanConfigureSubtraces:              apiTokenSchemaCanConfigureSubtraces,
-				APITokenFieldCanInvokeAlertChannel:              apiTokenSchemaCanInvokeAlertChannel,
-				APITokenFieldCanConfigureLlm:                    apiTokenSchemaCanConfigureLlm,
+				APITokenFieldCanConfigurePersonalAPITokens:    apiTokenSchemaCanConfigurePersonalAPITokens,
+				APITokenFieldCanConfigureDatabaseManagement:   apiTokenSchemaCanConfigureDatabaseManagement,
+				APITokenFieldCanConfigureAutomationActions:    apiTokenSchemaCanConfigureAutomationActions,
+				APITokenFieldCanConfigureAutomationPolicies:   apiTokenSchemaCanConfigureAutomationPolicies,
+				APITokenFieldCanRunAutomationActions:          apiTokenSchemaCanRunAutomationActions,
+				APITokenFieldCanDeleteAutomationActionHistory: apiTokenSchemaCanDeleteAutomationActionHistory,
+				APITokenFieldCanConfigureSyntheticTests:       apiTokenSchemaCanConfigureSyntheticTests,
+				APITokenFieldCanConfigureSyntheticLocations:   apiTokenSchemaCanConfigureSyntheticLocations,
+				APITokenFieldCanConfigureSyntheticCredentials: apiTokenSchemaCanConfigureSyntheticCredentials,
+				APITokenFieldCanViewSyntheticTests:            apiTokenSchemaCanViewSyntheticTests,
+				APITokenFieldCanViewSyntheticLocations:        apiTokenSchemaCanViewSyntheticLocations,
+				APITokenFieldCanViewSyntheticTestResults:      apiTokenSchemaCanViewSyntheticTestResults,
+				APITokenFieldCanUseSyntheticCredentials:       apiTokenSchemaCanUseSyntheticCredentials,
+				APITokenFieldCanConfigureBizops:               apiTokenSchemaCanConfigureBizops,
+				APITokenFieldCanViewBusinessProcesses:         apiTokenSchemaCanViewBusinessProcesses,
+				APITokenFieldCanViewBusinessProcessDetails:    apiTokenSchemaCanViewBusinessProcessDetails,
+				APITokenFieldCanViewBusinessActivities:        apiTokenSchemaCanViewBusinessActivities,
+				APITokenFieldCanViewBizAlerts:                 apiTokenSchemaCanViewBizAlerts,
+				APITokenFieldCanDeleteLogs:                    apiTokenSchemaCanDeleteLogs,
+				APITokenFieldCanCreateHeapDump:                apiTokenSchemaCanCreateHeapDump,
+				APITokenFieldCanCreateThreadDump:              apiTokenSchemaCanCreateThreadDump,
+				APITokenFieldCanManuallyCloseIssue:            apiTokenSchemaCanManuallyCloseIssue,
+				APITokenFieldCanViewLogVolume:                 apiTokenSchemaCanViewLogVolume,
+				APITokenFieldCanConfigureLogRetentionPeriod:   apiTokenSchemaCanConfigureLogRetentionPeriod,
+				APITokenFieldCanConfigureSubtraces:            apiTokenSchemaCanConfigureSubtraces,
+				APITokenFieldCanInvokeAlertChannel:            apiTokenSchemaCanInvokeAlertChannel,
+				APITokenFieldCanConfigureLlm:                  apiTokenSchemaCanConfigureLlm,
 			},
 			SchemaVersion:    2,
 			SkipIDGeneration: true,
@@ -803,7 +810,7 @@ func (r *apiTokenResource) UpdateState(d *schema.ResourceData, apiToken *restapi
 		APITokenFieldCanConfigureGlobalLogSmartAlerts:         apiToken.CanConfigureGlobalLogSmartAlerts,
 		APITokenFieldCanViewAccountAndBillingInformation:      apiToken.CanViewAccountAndBillingInformation,
 		APITokenFieldCanEditAllAccessibleCustomDashboards:     apiToken.CanEditAllAccessibleCustomDashboards,
-		
+
 		// Scope limitations
 		APITokenFieldLimitedApplicationsScope:       apiToken.LimitedApplicationsScope,
 		APITokenFieldLimitedBizOpsScope:             apiToken.LimitedBizOpsScope,
@@ -825,35 +832,35 @@ func (r *apiTokenResource) UpdateState(d *schema.ResourceData, apiToken *restapi
 		APITokenFieldLimitedWindowsHypervisorScope:  apiToken.LimitedWindowsHypervisorScope,
 		APITokenFieldLimitedAlertChannelsScope:      apiToken.LimitedAlertChannelsScope,
 		APITokenFieldLimitedLinuxKvmHypervisorScope: apiToken.LimitedLinuxKvmHypervisorScope,
-		
+
 		// Additional permissions
-		APITokenFieldCanConfigurePersonalAPITokens:      apiToken.CanConfigurePersonalAPITokens,
-		APITokenFieldCanConfigureDatabaseManagement:     apiToken.CanConfigureDatabaseManagement,
-		APITokenFieldCanConfigureAutomationActions:      apiToken.CanConfigureAutomationActions,
-		APITokenFieldCanConfigureAutomationPolicies:     apiToken.CanConfigureAutomationPolicies,
-		APITokenFieldCanRunAutomationActions:            apiToken.CanRunAutomationActions,
-		APITokenFieldCanDeleteAutomationActionHistory:   apiToken.CanDeleteAutomationActionHistory,
-		APITokenFieldCanConfigureSyntheticTests:         apiToken.CanConfigureSyntheticTests,
-		APITokenFieldCanConfigureSyntheticLocations:     apiToken.CanConfigureSyntheticLocations,
-		APITokenFieldCanConfigureSyntheticCredentials:   apiToken.CanConfigureSyntheticCredentials,
-		APITokenFieldCanViewSyntheticTests:              apiToken.CanViewSyntheticTests,
-		APITokenFieldCanViewSyntheticLocations:          apiToken.CanViewSyntheticLocations,
-		APITokenFieldCanViewSyntheticTestResults:        apiToken.CanViewSyntheticTestResults,
-		APITokenFieldCanUseSyntheticCredentials:         apiToken.CanUseSyntheticCredentials,
-		APITokenFieldCanConfigureBizops:                 apiToken.CanConfigureBizops,
-		APITokenFieldCanViewBusinessProcesses:           apiToken.CanViewBusinessProcesses,
-		APITokenFieldCanViewBusinessProcessDetails:      apiToken.CanViewBusinessProcessDetails,
-		APITokenFieldCanViewBusinessActivities:          apiToken.CanViewBusinessActivities,
-		APITokenFieldCanViewBizAlerts:                   apiToken.CanViewBizAlerts,
-		APITokenFieldCanDeleteLogs:                      apiToken.CanDeleteLogs,
-		APITokenFieldCanCreateHeapDump:                  apiToken.CanCreateHeapDump,
-		APITokenFieldCanCreateThreadDump:                apiToken.CanCreateThreadDump,
-		APITokenFieldCanManuallyCloseIssue:              apiToken.CanManuallyCloseIssue,
-		APITokenFieldCanViewLogVolume:                   apiToken.CanViewLogVolume,
-		APITokenFieldCanConfigureLogRetentionPeriod:     apiToken.CanConfigureLogRetentionPeriod,
-		APITokenFieldCanConfigureSubtraces:              apiToken.CanConfigureSubtraces,
-		APITokenFieldCanInvokeAlertChannel:              apiToken.CanInvokeAlertChannel,
-		APITokenFieldCanConfigureLlm:                    apiToken.CanConfigureLlm,
+		APITokenFieldCanConfigurePersonalAPITokens:    apiToken.CanConfigurePersonalAPITokens,
+		APITokenFieldCanConfigureDatabaseManagement:   apiToken.CanConfigureDatabaseManagement,
+		APITokenFieldCanConfigureAutomationActions:    apiToken.CanConfigureAutomationActions,
+		APITokenFieldCanConfigureAutomationPolicies:   apiToken.CanConfigureAutomationPolicies,
+		APITokenFieldCanRunAutomationActions:          apiToken.CanRunAutomationActions,
+		APITokenFieldCanDeleteAutomationActionHistory: apiToken.CanDeleteAutomationActionHistory,
+		APITokenFieldCanConfigureSyntheticTests:       apiToken.CanConfigureSyntheticTests,
+		APITokenFieldCanConfigureSyntheticLocations:   apiToken.CanConfigureSyntheticLocations,
+		APITokenFieldCanConfigureSyntheticCredentials: apiToken.CanConfigureSyntheticCredentials,
+		APITokenFieldCanViewSyntheticTests:            apiToken.CanViewSyntheticTests,
+		APITokenFieldCanViewSyntheticLocations:        apiToken.CanViewSyntheticLocations,
+		APITokenFieldCanViewSyntheticTestResults:      apiToken.CanViewSyntheticTestResults,
+		APITokenFieldCanUseSyntheticCredentials:       apiToken.CanUseSyntheticCredentials,
+		APITokenFieldCanConfigureBizops:               apiToken.CanConfigureBizops,
+		APITokenFieldCanViewBusinessProcesses:         apiToken.CanViewBusinessProcesses,
+		APITokenFieldCanViewBusinessProcessDetails:    apiToken.CanViewBusinessProcessDetails,
+		APITokenFieldCanViewBusinessActivities:        apiToken.CanViewBusinessActivities,
+		APITokenFieldCanViewBizAlerts:                 apiToken.CanViewBizAlerts,
+		APITokenFieldCanDeleteLogs:                    apiToken.CanDeleteLogs,
+		APITokenFieldCanCreateHeapDump:                apiToken.CanCreateHeapDump,
+		APITokenFieldCanCreateThreadDump:              apiToken.CanCreateThreadDump,
+		APITokenFieldCanManuallyCloseIssue:            apiToken.CanManuallyCloseIssue,
+		APITokenFieldCanViewLogVolume:                 apiToken.CanViewLogVolume,
+		APITokenFieldCanConfigureLogRetentionPeriod:   apiToken.CanConfigureLogRetentionPeriod,
+		APITokenFieldCanConfigureSubtraces:            apiToken.CanConfigureSubtraces,
+		APITokenFieldCanInvokeAlertChannel:            apiToken.CanInvokeAlertChannel,
+		APITokenFieldCanConfigureLlm:                  apiToken.CanConfigureLlm,
 	})
 }
 
@@ -895,7 +902,7 @@ func (r *apiTokenResource) MapStateToDataObject(d *schema.ResourceData) (*restap
 		CanConfigureGlobalLogSmartAlerts:         d.Get(APITokenFieldCanConfigureGlobalLogSmartAlerts).(bool),
 		CanViewAccountAndBillingInformation:      d.Get(APITokenFieldCanViewAccountAndBillingInformation).(bool),
 		CanEditAllAccessibleCustomDashboards:     d.Get(APITokenFieldCanEditAllAccessibleCustomDashboards).(bool),
-		
+
 		// Scope limitations
 		LimitedApplicationsScope:       d.Get(APITokenFieldLimitedApplicationsScope).(bool),
 		LimitedBizOpsScope:             d.Get(APITokenFieldLimitedBizOpsScope).(bool),
@@ -917,35 +924,35 @@ func (r *apiTokenResource) MapStateToDataObject(d *schema.ResourceData) (*restap
 		LimitedWindowsHypervisorScope:  d.Get(APITokenFieldLimitedWindowsHypervisorScope).(bool),
 		LimitedAlertChannelsScope:      d.Get(APITokenFieldLimitedAlertChannelsScope).(bool),
 		LimitedLinuxKvmHypervisorScope: d.Get(APITokenFieldLimitedLinuxKvmHypervisorScope).(bool),
-		
+
 		// Additional permissions
-		CanConfigurePersonalAPITokens:      d.Get(APITokenFieldCanConfigurePersonalAPITokens).(bool),
-		CanConfigureDatabaseManagement:     d.Get(APITokenFieldCanConfigureDatabaseManagement).(bool),
-		CanConfigureAutomationActions:      d.Get(APITokenFieldCanConfigureAutomationActions).(bool),
-		CanConfigureAutomationPolicies:     d.Get(APITokenFieldCanConfigureAutomationPolicies).(bool),
-		CanRunAutomationActions:            d.Get(APITokenFieldCanRunAutomationActions).(bool),
-		CanDeleteAutomationActionHistory:   d.Get(APITokenFieldCanDeleteAutomationActionHistory).(bool),
-		CanConfigureSyntheticTests:         d.Get(APITokenFieldCanConfigureSyntheticTests).(bool),
-		CanConfigureSyntheticLocations:     d.Get(APITokenFieldCanConfigureSyntheticLocations).(bool),
-		CanConfigureSyntheticCredentials:   d.Get(APITokenFieldCanConfigureSyntheticCredentials).(bool),
-		CanViewSyntheticTests:              d.Get(APITokenFieldCanViewSyntheticTests).(bool),
-		CanViewSyntheticLocations:          d.Get(APITokenFieldCanViewSyntheticLocations).(bool),
-		CanViewSyntheticTestResults:        d.Get(APITokenFieldCanViewSyntheticTestResults).(bool),
-		CanUseSyntheticCredentials:         d.Get(APITokenFieldCanUseSyntheticCredentials).(bool),
-		CanConfigureBizops:                 d.Get(APITokenFieldCanConfigureBizops).(bool),
-		CanViewBusinessProcesses:           d.Get(APITokenFieldCanViewBusinessProcesses).(bool),
-		CanViewBusinessProcessDetails:      d.Get(APITokenFieldCanViewBusinessProcessDetails).(bool),
-		CanViewBusinessActivities:          d.Get(APITokenFieldCanViewBusinessActivities).(bool),
-		CanViewBizAlerts:                   d.Get(APITokenFieldCanViewBizAlerts).(bool),
-		CanDeleteLogs:                      d.Get(APITokenFieldCanDeleteLogs).(bool),
-		CanCreateHeapDump:                  d.Get(APITokenFieldCanCreateHeapDump).(bool),
-		CanCreateThreadDump:                d.Get(APITokenFieldCanCreateThreadDump).(bool),
-		CanManuallyCloseIssue:              d.Get(APITokenFieldCanManuallyCloseIssue).(bool),
-		CanViewLogVolume:                   d.Get(APITokenFieldCanViewLogVolume).(bool),
-		CanConfigureLogRetentionPeriod:     d.Get(APITokenFieldCanConfigureLogRetentionPeriod).(bool),
-		CanConfigureSubtraces:              d.Get(APITokenFieldCanConfigureSubtraces).(bool),
-		CanInvokeAlertChannel:              d.Get(APITokenFieldCanInvokeAlertChannel).(bool),
-		CanConfigureLlm:                    d.Get(APITokenFieldCanConfigureLlm).(bool),
+		CanConfigurePersonalAPITokens:    d.Get(APITokenFieldCanConfigurePersonalAPITokens).(bool),
+		CanConfigureDatabaseManagement:   d.Get(APITokenFieldCanConfigureDatabaseManagement).(bool),
+		CanConfigureAutomationActions:    d.Get(APITokenFieldCanConfigureAutomationActions).(bool),
+		CanConfigureAutomationPolicies:   d.Get(APITokenFieldCanConfigureAutomationPolicies).(bool),
+		CanRunAutomationActions:          d.Get(APITokenFieldCanRunAutomationActions).(bool),
+		CanDeleteAutomationActionHistory: d.Get(APITokenFieldCanDeleteAutomationActionHistory).(bool),
+		CanConfigureSyntheticTests:       d.Get(APITokenFieldCanConfigureSyntheticTests).(bool),
+		CanConfigureSyntheticLocations:   d.Get(APITokenFieldCanConfigureSyntheticLocations).(bool),
+		CanConfigureSyntheticCredentials: d.Get(APITokenFieldCanConfigureSyntheticCredentials).(bool),
+		CanViewSyntheticTests:            d.Get(APITokenFieldCanViewSyntheticTests).(bool),
+		CanViewSyntheticLocations:        d.Get(APITokenFieldCanViewSyntheticLocations).(bool),
+		CanViewSyntheticTestResults:      d.Get(APITokenFieldCanViewSyntheticTestResults).(bool),
+		CanUseSyntheticCredentials:       d.Get(APITokenFieldCanUseSyntheticCredentials).(bool),
+		CanConfigureBizops:               d.Get(APITokenFieldCanConfigureBizops).(bool),
+		CanViewBusinessProcesses:         d.Get(APITokenFieldCanViewBusinessProcesses).(bool),
+		CanViewBusinessProcessDetails:    d.Get(APITokenFieldCanViewBusinessProcessDetails).(bool),
+		CanViewBusinessActivities:        d.Get(APITokenFieldCanViewBusinessActivities).(bool),
+		CanViewBizAlerts:                 d.Get(APITokenFieldCanViewBizAlerts).(bool),
+		CanDeleteLogs:                    d.Get(APITokenFieldCanDeleteLogs).(bool),
+		CanCreateHeapDump:                d.Get(APITokenFieldCanCreateHeapDump).(bool),
+		CanCreateThreadDump:              d.Get(APITokenFieldCanCreateThreadDump).(bool),
+		CanManuallyCloseIssue:            d.Get(APITokenFieldCanManuallyCloseIssue).(bool),
+		CanViewLogVolume:                 d.Get(APITokenFieldCanViewLogVolume).(bool),
+		CanConfigureLogRetentionPeriod:   d.Get(APITokenFieldCanConfigureLogRetentionPeriod).(bool),
+		CanConfigureSubtraces:            d.Get(APITokenFieldCanConfigureSubtraces).(bool),
+		CanInvokeAlertChannel:            d.Get(APITokenFieldCanInvokeAlertChannel).(bool),
+		CanConfigureLlm:                  d.Get(APITokenFieldCanConfigureLlm).(bool),
 	}, nil
 }
 
