@@ -138,6 +138,8 @@ func (p *InstanaProvider) Resources(_ context.Context) []func() resource.Resourc
 		addResouceHandle(NewLogAlertConfigResourceHandleFramework),
 		addResouceHandle(NewAlertingChannelResourceHandleFramework),
 		addResouceHandle(NewAPITokenResourceHandleFramework),
+		addResouceHandle(NewApplicationAlertConfigResourceHandleFramework),
+		addResouceHandle(NewGlobalApplicationAlertConfigResourceHandleFramework),
 	}
 }
 
