@@ -99,7 +99,6 @@ const (
 
 	APITokenFieldLimitedServiceLevelScope = "limited_service_level_scope"
 	APITokenFieldLimitedAiGatewayScope    = "limited_ai_gateway_scope"
-	APITokenFieldLimitedGenAIScope        = "limited_gen_ai_scope"
 
 	APITokenFieldCanConfigurePersonalAPITokens             = "can_configure_personal_api_tokens"
 	APITokenFieldCanConfigureDatabaseManagement            = "can_configure_database_management"
