@@ -146,6 +146,7 @@ func (p *InstanaProvider) Resources(_ context.Context) []func() resource.Resourc
 		addResouceHandle(NewCustomDashboardResourceHandleFramework),
 		addResouceHandle(NewCustomEventSpecificationResourceHandleFramework),
 		addResouceHandle(NewInfraAlertConfigResourceHandleFramework),
+		addResouceHandle(NewGroupResourceHandleFramework),
 	}
 }
 
