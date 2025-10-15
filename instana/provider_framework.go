@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
-	"github.com/gessnerfl/terraform-provider-instana/instana/tf_framework"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -150,16 +149,10 @@ func (p *InstanaProvider) Resources(_ context.Context) []func() resource.Resourc
 		addResouceHandle(NewGroupResourceHandleFramework),
 		addResouceHandle(NewSliConfigResourceHandleFramework),
 		addResouceHandle(NewSloAlertConfigResourceHandleFramework),
+		addResouceHandle(NewSloCorrectionConfigResourceHandleFramework),
+		addResouceHandle(NewSyntheticAlertConfigResourceHandleFramework),
 
-		func() resource.Resource {
-			return tf_framework.NewSloConfigResource()
-		},
-		func() resource.Resource {
-			return tf_framework.NewSloCorrectionConfigResource()
-		},
-		func() resource.Resource {
-			return tf_framework.NewSyntheticAlertConfigResource()
-		},
+		addResouceHandle(NewSloConfigResourceHandleFramework),
 	}
 }
 
