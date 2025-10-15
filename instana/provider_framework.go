@@ -148,6 +148,7 @@ func (p *InstanaProvider) Resources(_ context.Context) []func() resource.Resourc
 		addResouceHandle(NewInfraAlertConfigResourceHandleFramework),
 		addResouceHandle(NewGroupResourceHandleFramework),
 		addResouceHandle(NewSliConfigResourceHandleFramework),
+		addResouceHandle(NewSloAlertConfigResourceHandleFramework),
 	}
 }
 
