@@ -150,8 +150,12 @@ func (p *InstanaProvider) Resources(_ context.Context) []func() resource.Resourc
 		addResouceHandle(NewGroupResourceHandleFramework),
 		addResouceHandle(NewSliConfigResourceHandleFramework),
 		addResouceHandle(NewSloAlertConfigResourceHandleFramework),
+
 		func() resource.Resource {
 			return tf_framework.NewSloConfigResource()
+		},
+		func() resource.Resource {
+			return tf_framework.NewSloCorrectionConfigResource()
 		},
 	}
 }
