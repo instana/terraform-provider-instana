@@ -157,6 +157,9 @@ func (p *InstanaProvider) Resources(_ context.Context) []func() resource.Resourc
 		func() resource.Resource {
 			return tf_framework.NewSloCorrectionConfigResource()
 		},
+		func() resource.Resource {
+			return tf_framework.NewSyntheticAlertConfigResource()
+		},
 	}
 }
 
