@@ -127,6 +127,7 @@ func (p *InstanaProvider) Configure(ctx context.Context, req provider.ConfigureR
 func (p *InstanaProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		// Add data sources here when implemented
+		NewAlertingChannelDataSourceFramework,
 	}
 }
 
