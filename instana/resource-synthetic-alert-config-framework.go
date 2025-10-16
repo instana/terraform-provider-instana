@@ -161,37 +161,7 @@ func NewSyntheticAlertConfigResourceHandleFramework() ResourceHandleFramework[*r
 							listvalidator.SizeBetween(1, 1),
 						},
 					},
-					"custom_payload_field": schema.ListNestedBlock{
-						Description: "Custom payload fields for the alerting configuration.",
-						NestedObject: schema.NestedBlockObject{
-							Attributes: map[string]schema.Attribute{
-								"key": schema.StringAttribute{
-									Required:    true,
-									Description: "The key of the custom payload field.",
-								},
-								"value": schema.StringAttribute{
-									Optional:    true,
-									Description: "The value of a static string custom payload field.",
-								},
-								"dynamic_value": schema.ListNestedAttribute{
-									Optional:    true,
-									Description: "The value of a dynamic custom payload field.",
-									NestedObject: schema.NestedAttributeObject{
-										Attributes: map[string]schema.Attribute{
-											"key": schema.StringAttribute{
-												Optional:    true,
-												Description: "The key of the dynamic custom payload field.",
-											},
-											"tag_name": schema.StringAttribute{
-												Required:    true,
-												Description: "The name of the tag of the dynamic custom payload field.",
-											},
-										},
-									},
-								},
-							},
-						},
-					},
+					"custom_payload_field": GetCustomPayloadFieldsSchema(),
 				},
 			},
 			SchemaVersion: 1,

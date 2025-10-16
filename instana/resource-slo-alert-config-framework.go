@@ -208,28 +208,7 @@ func NewSloAlertConfigResourceHandleFramework() ResourceHandleFramework[*restapi
 							},
 						},
 					},
-					"custom_payload_fields": schema.ListNestedBlock{
-						Description: "Custom payload fields for the alert.",
-						NestedObject: schema.NestedBlockObject{
-							Attributes: map[string]schema.Attribute{
-								"key": schema.StringAttribute{
-									Required:    true,
-									Description: "The key of the custom payload field.",
-								},
-								"value": schema.StringAttribute{
-									Required:    true,
-									Description: "The value of the custom payload field.",
-								},
-								"type": schema.StringAttribute{
-									Optional:    true,
-									Description: "The type of the custom payload field.",
-									Validators: []validator.String{
-										stringvalidator.OneOf("text", "dynamic"),
-									},
-								},
-							},
-						},
-					},
+					"custom_payload_fields": GetCustomPayloadFieldsSchema(),
 				},
 			},
 			SchemaVersion: 1,
@@ -386,38 +365,13 @@ func (r *sloAlertConfigResourceFramework) UpdateState(ctx context.Context, state
 		model.BurnRateConfig = types.ListNull(types.ObjectType{})
 	}
 
-	// Map custom payload fields
-	if len(sloAlertConfig.CustomerPayloadFields) > 0 {
-		customPayloadFields := []attr.Value{}
-		for _, field := range sloAlertConfig.CustomerPayloadFields {
-			customPayloadFieldModel := SloAlertCustomPayloadFieldModel{
-				Key:   types.StringValue(field.Key),
-				Value: types.StringValue(fmt.Sprintf("%v", field.Value)),
-				Type:  types.StringValue(string(field.Type)),
-			}
-
-			customPayloadFieldObj, objDiags := types.ObjectValueFrom(ctx, map[string]attr.Type{
-				"key":   types.StringType,
-				"value": types.StringType,
-				"type":  types.StringType,
-			}, customPayloadFieldModel)
-			if objDiags.HasError() {
-				diags.Append(objDiags...)
-				return diags
-			}
-			customPayloadFields = append(customPayloadFields, customPayloadFieldObj)
-		}
-
-		model.CustomPayload = types.ListValueMust(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"key":   types.StringType,
-				"value": types.StringType,
-				"type":  types.StringType,
-			},
-		}, customPayloadFields)
-	} else {
-		model.CustomPayload = types.ListNull(types.ObjectType{})
+	// Map custom payload fields using the reusable function
+	customPayloadFieldsList, payloadDiags := CustomPayloadFieldsToTerraform(ctx, sloAlertConfig.CustomerPayloadFields)
+	if payloadDiags.HasError() {
+		diags.Append(payloadDiags...)
+		return diags
 	}
+	model.CustomPayload = customPayloadFieldsList
 
 	// Set the state
 	diags.Append(state.Set(ctx, model)...)
@@ -587,28 +541,14 @@ func (r *sloAlertConfigResourceFramework) MapStateToDataObject(ctx context.Conte
 		}
 	}
 
-	// Map custom payload fields
+	// Map custom payload fields using the reusable function
 	var customPayloadFields []restapi.CustomPayloadField[any]
 	if !model.CustomPayload.IsNull() && !model.CustomPayload.IsUnknown() {
-		var customPayloadModels []SloAlertCustomPayloadFieldModel
-		diags.Append(model.CustomPayload.ElementsAs(ctx, &customPayloadModels, false)...)
-		if diags.HasError() {
+		var payloadDiags diag.Diagnostics
+		customPayloadFields, payloadDiags = MapCustomPayloadFieldsToAPIObject(ctx, model.CustomPayload)
+		if payloadDiags.HasError() {
+			diags.Append(payloadDiags...)
 			return nil, diags
-		}
-
-		for _, customPayloadModel := range customPayloadModels {
-			var fieldType restapi.CustomPayloadType
-			if !customPayloadModel.Type.IsNull() && customPayloadModel.Type.ValueString() == "dynamic" {
-				fieldType = restapi.DynamicCustomPayloadType
-			} else {
-				fieldType = restapi.StaticStringCustomPayloadType
-			}
-
-			customPayloadFields = append(customPayloadFields, restapi.CustomPayloadField[any]{
-				Key:   customPayloadModel.Key.ValueString(),
-				Value: customPayloadModel.Value.ValueString(),
-				Type:  fieldType,
-			})
 		}
 	}
 
