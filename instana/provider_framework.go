@@ -153,6 +153,7 @@ func (p *InstanaProvider) Resources(_ context.Context) []func() resource.Resourc
 		addResouceHandle(NewSyntheticAlertConfigResourceHandleFramework),
 		addResouceHandle(NewSyntheticTestResourceHandleFramework),
 		addResouceHandle(NewWebsiteAlertConfigResourceHandleFramework),
+		addResouceHandle(NewWebsiteMonitoringConfigResourceHandleFramework),
 		addResouceHandle(NewSloConfigResourceHandleFramework),
 	}
 }
