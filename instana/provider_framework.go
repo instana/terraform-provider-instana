@@ -128,6 +128,7 @@ func (p *InstanaProvider) DataSources(_ context.Context) []func() datasource.Dat
 	return []func() datasource.DataSource{
 		// Add data sources here when implemented
 		NewAlertingChannelDataSourceFramework,
+		NewAutomationActionDataSourceFramework,
 	}
 }
 
