@@ -131,6 +131,7 @@ func (p *InstanaProvider) DataSources(_ context.Context) []func() datasource.Dat
 		NewAutomationActionDataSourceFramework,
 		NewBuiltinEventDataSourceFramework,
 		NewCustomEventSpecificationDataSourceFramework,
+		NewHostAgentsDataSourceFramework,
 	}
 }
 
