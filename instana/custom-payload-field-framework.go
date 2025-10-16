@@ -81,7 +81,7 @@ func GetCustomPayloadFieldsSchema() schema.ListNestedBlock {
 							Description: "The key of the dynamic custom payload field",
 						},
 						CustomPayloadFieldsFieldDynamicTagName: schema.StringAttribute{
-							Required:    true,
+							Optional:    true,
 							Description: "The name of the tag of the dynamic custom payload field",
 						},
 					},
@@ -116,7 +116,7 @@ func GetCustomPayloadFieldsSetAttribute() schema.SetNestedAttribute {
 							Description: "The key of the dynamic custom payload field",
 						},
 						CustomPayloadFieldsFieldDynamicTagName: schema.StringAttribute{
-							Required:    true,
+							Optional:    true,
 							Description: "The name of the tag of the dynamic custom payload field",
 						},
 					},
@@ -151,7 +151,7 @@ func GetCustomPayloadFieldsSetBlock() schema.SetNestedBlock {
 							Description: "The key of the dynamic custom payload field",
 						},
 						CustomPayloadFieldsFieldDynamicTagName: schema.StringAttribute{
-							Required:    true,
+							Optional:    true,
 							Description: "The name of the tag of the dynamic custom payload field",
 						},
 					},
@@ -280,13 +280,28 @@ func MapCustomPayloadFieldsToAPIObject(ctx context.Context, customPayloadFieldsL
 
 			tagNameAttr, ok := dynAttrs["tag_name"]
 			if !ok || tagNameAttr.(types.String).IsNull() || tagNameAttr.(types.String).IsUnknown() {
+				// Only validate tag_name if dynamic_value is present and being used
+				if !e.DynamicValue.IsNull() && !e.DynamicValue.IsUnknown() {
+					diags.AddError(
+						"custom_payload_field.dynamic_value missing tag_name",
+						fmt.Sprintf("element index %d: dynamic_value object missing required 'tag_name' attribute", idx),
+					)
+					return nil, diags
+				}
+			}
+			tagName := ""
+			if ok && !tagNameAttr.(types.String).IsNull() && !tagNameAttr.(types.String).IsUnknown() {
+				tagName = tagNameAttr.(types.String).ValueString()
+			}
+
+			// If tag_name is empty, we can't create a valid dynamic value
+			if tagName == "" {
 				diags.AddError(
 					"custom_payload_field.dynamic_value missing tag_name",
-					fmt.Sprintf("element index %d: dynamic_value object missing required 'tag_name' attribute", idx),
+					fmt.Sprintf("element index %d: dynamic_value object requires a 'tag_name' attribute", idx),
 				)
 				return nil, diags
 			}
-			tagName := tagNameAttr.(types.String).ValueString()
 
 			dynValue := restapi.DynamicCustomPayloadFieldValue{
 				Key:     keyPtr,
