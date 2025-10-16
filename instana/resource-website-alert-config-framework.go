@@ -89,7 +89,7 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 					},
 				},
 				Blocks: map[string]schema.Block{
-					"custom_payload_fields": GetCustomPayloadFieldsSetBlock(),
+					"custom_payload_fields": GetCustomPayloadFieldsSchema(),
 					"threshold": schema.SingleNestedBlock{
 						Description: "The threshold configuration for the Website Alert Configuration.",
 						Attributes: map[string]schema.Attribute{
