@@ -126,6 +126,40 @@ func GetCustomPayloadFieldsSetAttribute() schema.SetNestedAttribute {
 	}
 }
 
+// GetCustomPayloadFieldsSetBlock returns the schema for custom payload fields as a set nested block
+// This can be used by any resource that needs to define custom payload fields as a set block
+func GetCustomPayloadFieldsSetBlock() schema.SetNestedBlock {
+	return schema.SetNestedBlock{
+		Description: "Custom payload fields for the configuration.",
+		NestedObject: schema.NestedBlockObject{
+			Attributes: map[string]schema.Attribute{
+				CustomPayloadFieldsFieldKey: schema.StringAttribute{
+					Required:    true,
+					Description: "The key of the custom payload field",
+				},
+				CustomPayloadFieldsFieldStaticStringValue: schema.StringAttribute{
+					Optional:    true,
+					Description: "The value of a static string custom payload field",
+				},
+				CustomPayloadFieldsFieldDynamicValue: schema.SingleNestedAttribute{
+					Optional:    true,
+					Description: "The value of a dynamic custom payload field",
+					Attributes: map[string]schema.Attribute{
+						CustomPayloadFieldsFieldDynamicKey: schema.StringAttribute{
+							Optional:    true,
+							Description: "The key of the dynamic custom payload field",
+						},
+						CustomPayloadFieldsFieldDynamicTagName: schema.StringAttribute{
+							Required:    true,
+							Description: "The name of the tag of the dynamic custom payload field",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
 // MapCustomPayloadFieldsToTerraform is a helper function to map custom payload fields from API objects to Terraform
 // This function delegates to the existing CustomPayloadFieldsToTerraform function in tfutils
 func CustomPayloadFieldsToTerraform(ctx context.Context, fields []restapi.CustomPayloadField[any]) (types.List, diag.Diagnostics) {

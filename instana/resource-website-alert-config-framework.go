@@ -89,21 +89,7 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 					},
 				},
 				Blocks: map[string]schema.Block{
-					"custom_payload_fields": schema.SetNestedBlock{
-						Description: "A list of custom payload fields.",
-						NestedObject: schema.NestedBlockObject{
-							Attributes: map[string]schema.Attribute{
-								"key": schema.StringAttribute{
-									Required:    true,
-									Description: "The key of the custom payload field.",
-								},
-								"value": schema.StringAttribute{
-									Optional:    true,
-									Description: "The value of a static string custom payload field.",
-								},
-							},
-						},
-					},
+					"custom_payload_fields": GetCustomPayloadFieldsSetBlock(),
 					"threshold": schema.SingleNestedBlock{
 						Description: "The threshold configuration for the Website Alert Configuration.",
 						Attributes: map[string]schema.Attribute{
