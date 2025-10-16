@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 // CustomPayloadFieldAttributeTypes returns a map of attribute types for custom payload fields
@@ -24,14 +25,14 @@ func CustomPayloadFieldAttributeTypes() map[string]attr.Type {
 	return map[string]attr.Type{
 		"key":           types.StringType,
 		"value":         types.StringType,
-		"dynamic_value": types.ListType{ElemType: GetDynamicValueType()},
+		"dynamic_value": GetDynamicValueType(),
 	}
 }
 
 type customPayloadFieldTFModel struct {
 	Key          types.String `tfsdk:"key"`
 	Value        types.String `tfsdk:"value"`
-	DynamicValue types.List   `tfsdk:"dynamic_value"`
+	DynamicValue types.Object `tfsdk:"dynamic_value"`
 }
 
 // GetDynamicValueType returns the object type for dynamic values in custom payload fields
@@ -71,19 +72,17 @@ func GetCustomPayloadFieldsSchema() schema.ListNestedBlock {
 					Optional:    true,
 					Description: "The value of a static string custom payload field",
 				},
-				CustomPayloadFieldsFieldDynamicValue: schema.ListNestedAttribute{
+				CustomPayloadFieldsFieldDynamicValue: schema.SingleNestedAttribute{
 					Optional:    true,
 					Description: "The value of a dynamic custom payload field",
-					NestedObject: schema.NestedAttributeObject{
-						Attributes: map[string]schema.Attribute{
-							CustomPayloadFieldsFieldDynamicKey: schema.StringAttribute{
-								Optional:    true,
-								Description: "The key of the dynamic custom payload field",
-							},
-							CustomPayloadFieldsFieldDynamicTagName: schema.StringAttribute{
-								Required:    true,
-								Description: "The name of the tag of the dynamic custom payload field",
-							},
+					Attributes: map[string]schema.Attribute{
+						CustomPayloadFieldsFieldDynamicKey: schema.StringAttribute{
+							Optional:    true,
+							Description: "The key of the dynamic custom payload field",
+						},
+						CustomPayloadFieldsFieldDynamicTagName: schema.StringAttribute{
+							Required:    true,
+							Description: "The name of the tag of the dynamic custom payload field",
 						},
 					},
 				},
@@ -108,19 +107,17 @@ func GetCustomPayloadFieldsSetAttribute() schema.SetNestedAttribute {
 					Optional:    true,
 					Description: "The value of a static string custom payload field",
 				},
-				CustomPayloadFieldsFieldDynamicValue: schema.ListNestedAttribute{
+				CustomPayloadFieldsFieldDynamicValue: schema.SingleNestedAttribute{
 					Optional:    true,
 					Description: "The value of a dynamic custom payload field",
-					NestedObject: schema.NestedAttributeObject{
-						Attributes: map[string]schema.Attribute{
-							CustomPayloadFieldsFieldDynamicKey: schema.StringAttribute{
-								Optional:    true,
-								Description: "The key of the dynamic custom payload field",
-							},
-							CustomPayloadFieldsFieldDynamicTagName: schema.StringAttribute{
-								Required:    true,
-								Description: "The name of the tag of the dynamic custom payload field",
-							},
+					Attributes: map[string]schema.Attribute{
+						CustomPayloadFieldsFieldDynamicKey: schema.StringAttribute{
+							Optional:    true,
+							Description: "The key of the dynamic custom payload field",
+						},
+						CustomPayloadFieldsFieldDynamicTagName: schema.StringAttribute{
+							Required:    true,
+							Description: "The name of the tag of the dynamic custom payload field",
 						},
 					},
 				},
@@ -164,7 +161,7 @@ func CustomPayloadFieldsToTerraform(ctx context.Context, fields []restapi.Custom
 			}
 			tfField["value"] = types.StringValue(staticValue)
 			// Use null for dynamic_value
-			tfField["dynamic_value"] = types.ListNull(GetDynamicValueType())
+			tfField["dynamic_value"] = types.ObjectNull(GetDynamicValueType().AttrTypes)
 		} else if field.Type == restapi.DynamicCustomPayloadType {
 			// Dynamic value
 			dynamicValue, ok := field.Value.(restapi.DynamicCustomPayloadFieldValue)
@@ -194,14 +191,7 @@ func CustomPayloadFieldsToTerraform(ctx context.Context, fields []restapi.Custom
 				return types.List{}, diags
 			}
 
-			// Create a list with one dynamic value object
-			dynListVal, d := types.ListValue(GetDynamicValueType(), []attr.Value{dynamicObj})
-			if d.HasError() {
-				diags = append(diags, d...)
-				return types.List{}, diags
-			}
-
-			tfField["dynamic_value"] = dynListVal
+			tfField["dynamic_value"] = dynamicObj
 			tfField["value"] = types.StringNull()
 		}
 		objVal, d := types.ObjectValue(CustomPayloadFieldAttributeTypes(), tfField)
@@ -240,23 +230,12 @@ func MapCustomPayloadFieldsToAPIObject(ctx context.Context, customPayloadFieldsL
 	for idx, e := range elems {
 		// If dynamic_value present -> dynamic
 		if !e.DynamicValue.IsNull() && !e.DynamicValue.IsUnknown() {
-			// Expect dynamic_value to be a list of maps[string]string
-			var dynList []map[string]string
-			diags = append(diags, e.DynamicValue.ElementsAs(ctx, &dynList, false)...)
+			// Extract values from the dynamic_value object
+			var dynMap map[string]string
+			diags = append(diags, e.DynamicValue.As(ctx, &dynMap, basetypes.ObjectAsOptions{})...)
 			if diags.HasError() {
 				return nil, diags
 			}
-
-			if len(dynList) == 0 {
-				diags.AddError(
-					"custom_payload_field.dynamic_value empty",
-					fmt.Sprintf("element index %d: dynamic_value list is empty", idx),
-				)
-				return nil, diags
-			}
-
-			// take first map (adapt if your schema allows multiples)
-			dynMap := dynList[0]
 
 			// build DynamicCustomPayloadFieldValue
 			var keyPtr *string
@@ -264,11 +243,12 @@ func MapCustomPayloadFieldsToAPIObject(ctx context.Context, customPayloadFieldsL
 				tmp := v
 				keyPtr = &tmp
 			}
-			tagName, ok := dynMap["tagName"]
+
+			tagName, ok := dynMap["tag_name"]
 			if !ok {
 				diags.AddError(
-					"custom_payload_field.dynamic_value missing tagName",
-					fmt.Sprintf("element index %d: dynamic_value map missing required 'tagName' key", idx),
+					"custom_payload_field.dynamic_value missing tag_name",
+					fmt.Sprintf("element index %d: dynamic_value object missing required 'tag_name' field", idx),
 				)
 				return nil, diags
 			}
