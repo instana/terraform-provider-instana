@@ -5,7 +5,6 @@ import (
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/instana/tagfilter"
-	"github.com/gessnerfl/terraform-provider-instana/tfutils"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -317,7 +316,7 @@ func (r *syntheticAlertConfigResourceFramework) MapStateToDataObject(ctx context
 	var customerPayloadFields []restapi.CustomPayloadField[any]
 	if !model.CustomPayloadFields.IsNull() {
 		var payloadDiags diag.Diagnostics
-		customerPayloadFields, payloadDiags = BuildCustomPayloadFieldsTyped(ctx, model.CustomPayloadFields)
+		customerPayloadFields, payloadDiags = MapCustomPayloadFieldsToAPIObject(ctx, model.CustomPayloadFields)
 		if payloadDiags.HasError() {
 			diags.Append(payloadDiags...)
 			return nil, diags
@@ -463,7 +462,7 @@ func (r *syntheticAlertConfigResourceFramework) UpdateState(ctx context.Context,
 	model.AlertChannelIds = alertChannelIdsSet
 
 	// Map custom payload fields
-	customPayloadFieldsList, payloadDiags := tfutils.CustomPayloadFieldsToTerraform(ctx, apiObject.CustomerPayloadFields)
+	customPayloadFieldsList, payloadDiags := CustomPayloadFieldsToTerraform(ctx, apiObject.CustomerPayloadFields)
 	if payloadDiags.HasError() {
 		diags.Append(payloadDiags...)
 		return diags

@@ -6,7 +6,6 @@ import (
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/instana/tagfilter"
-	"github.com/gessnerfl/terraform-provider-instana/tfutils"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -267,37 +266,7 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 							},
 						},
 					},
-					DefaultCustomPayloadFieldsName: schema.ListNestedBlock{
-						Description: "Custom payload fields for the application alert configuration.",
-						NestedObject: schema.NestedBlockObject{
-							Attributes: map[string]schema.Attribute{
-								CustomPayloadFieldsFieldKey: schema.StringAttribute{
-									Required:    true,
-									Description: "The key of the custom payload field",
-								},
-								CustomPayloadFieldsFieldStaticStringValue: schema.StringAttribute{
-									Optional:    true,
-									Description: "The value of a static string custom payload field",
-								},
-								CustomPayloadFieldsFieldDynamicValue: schema.ListNestedAttribute{
-									Optional:    true,
-									Description: "The value of a dynamic custom payload field",
-									NestedObject: schema.NestedAttributeObject{
-										Attributes: map[string]schema.Attribute{
-											CustomPayloadFieldsFieldDynamicKey: schema.StringAttribute{
-												Optional:    true,
-												Description: "The key of the dynamic custom payload field",
-											},
-											CustomPayloadFieldsFieldDynamicTagName: schema.StringAttribute{
-												Required:    true,
-												Description: "The name of the tag of the dynamic custom payload field",
-											},
-										},
-									},
-								},
-							},
-						},
-					},
+					DefaultCustomPayloadFieldsName: GetCustomPayloadFieldsSchema(),
 					ApplicationAlertConfigFieldRule: schema.ListNestedBlock{
 						Description: "Indicates the type of rule this alert configuration is about.",
 						NestedObject: schema.NestedBlockObject{
@@ -629,7 +598,7 @@ func (r *applicationAlertConfigResourceFramework) UpdateState(ctx context.Contex
 	model.TimeThreshold = timeThreshold
 
 	// Convert custom payload fields to Terraform types
-	customPayloadFields, payloadDiags := tfutils.CustomPayloadFieldsToTerraform(ctx, config.CustomerPayloadFields)
+	customPayloadFields, payloadDiags := CustomPayloadFieldsToTerraform(ctx, config.CustomerPayloadFields)
 	if payloadDiags.HasError() {
 		return payloadDiags
 	}
@@ -730,7 +699,7 @@ func (r *applicationAlertConfigResourceFramework) MapStateToDataObject(ctx conte
 	var customerPayloadFields []restapi.CustomPayloadField[any]
 	if !model.CustomPayloadFields.IsNull() {
 		var payloadDiags diag.Diagnostics
-		customerPayloadFields, payloadDiags = BuildCustomPayloadFieldsTyped(ctx, model.CustomPayloadFields)
+		customerPayloadFields, payloadDiags = MapCustomPayloadFieldsToAPIObject(ctx, model.CustomPayloadFields)
 		if payloadDiags.HasError() {
 			diags.Append(payloadDiags...)
 			return nil, diags
