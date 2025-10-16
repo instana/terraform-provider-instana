@@ -132,6 +132,7 @@ func (p *InstanaProvider) DataSources(_ context.Context) []func() datasource.Dat
 		NewBuiltinEventDataSourceFramework,
 		NewCustomEventSpecificationDataSourceFramework,
 		NewHostAgentsDataSourceFramework,
+		NewSyntheticLocationDataSourceFramework,
 	}
 }
 
