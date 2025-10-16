@@ -71,19 +71,18 @@ func GetCustomPayloadFieldsSchema() schema.ListNestedBlock {
 					Optional:    true,
 					Description: "The value of a static string custom payload field",
 				},
-				CustomPayloadFieldsFieldDynamicValue: schema.ListNestedAttribute{
-					Optional:    true,
+			},
+			Blocks: map[string]schema.Block{
+				CustomPayloadFieldsFieldDynamicValue: schema.SingleNestedBlock{
 					Description: "The value of a dynamic custom payload field",
-					NestedObject: schema.NestedAttributeObject{
-						Attributes: map[string]schema.Attribute{
-							CustomPayloadFieldsFieldDynamicKey: schema.StringAttribute{
-								Optional:    true,
-								Description: "The key of the dynamic custom payload field",
-							},
-							CustomPayloadFieldsFieldDynamicTagName: schema.StringAttribute{
-								Required:    true,
-								Description: "The name of the tag of the dynamic custom payload field",
-							},
+					Attributes: map[string]schema.Attribute{
+						CustomPayloadFieldsFieldDynamicKey: schema.StringAttribute{
+							Optional:    true,
+							Description: "The key of the dynamic custom payload field",
+						},
+						CustomPayloadFieldsFieldDynamicTagName: schema.StringAttribute{
+							Required:    true,
+							Description: "The name of the tag of the dynamic custom payload field",
 						},
 					},
 				},
@@ -108,19 +107,17 @@ func GetCustomPayloadFieldsSetAttribute() schema.SetNestedAttribute {
 					Optional:    true,
 					Description: "The value of a static string custom payload field",
 				},
-				CustomPayloadFieldsFieldDynamicValue: schema.ListNestedAttribute{
+				CustomPayloadFieldsFieldDynamicValue: schema.SingleNestedAttribute{
 					Optional:    true,
 					Description: "The value of a dynamic custom payload field",
-					NestedObject: schema.NestedAttributeObject{
-						Attributes: map[string]schema.Attribute{
-							CustomPayloadFieldsFieldDynamicKey: schema.StringAttribute{
-								Optional:    true,
-								Description: "The key of the dynamic custom payload field",
-							},
-							CustomPayloadFieldsFieldDynamicTagName: schema.StringAttribute{
-								Required:    true,
-								Description: "The name of the tag of the dynamic custom payload field",
-							},
+					Attributes: map[string]schema.Attribute{
+						CustomPayloadFieldsFieldDynamicKey: schema.StringAttribute{
+							Optional:    true,
+							Description: "The key of the dynamic custom payload field",
+						},
+						CustomPayloadFieldsFieldDynamicTagName: schema.StringAttribute{
+							Required:    true,
+							Description: "The name of the tag of the dynamic custom payload field",
 						},
 					},
 				},
@@ -144,8 +141,9 @@ func GetCustomPayloadFieldsSetBlock() schema.SetNestedBlock {
 					Optional:    true,
 					Description: "The value of a static string custom payload field",
 				},
-				CustomPayloadFieldsFieldDynamicValue: schema.SingleNestedAttribute{
-					Optional:    true,
+			},
+			Blocks: map[string]schema.Block{
+				CustomPayloadFieldsFieldDynamicValue: schema.SingleNestedBlock{
 					Description: "The value of a dynamic custom payload field",
 					Attributes: map[string]schema.Attribute{
 						CustomPayloadFieldsFieldDynamicKey: schema.StringAttribute{
@@ -298,11 +296,11 @@ func MapCustomPayloadFieldsToAPIObject(ctx context.Context, customPayloadFieldsL
 				tmp := v
 				keyPtr = &tmp
 			}
-			tagName, ok := dynMap["tagName"]
+			tagName, ok := dynMap["tag_name"]
 			if !ok {
 				diags.AddError(
-					"custom_payload_field.dynamic_value missing tagName",
-					fmt.Sprintf("element index %d: dynamic_value map missing required 'tagName' key", idx),
+					"custom_payload_field.dynamic_value missing tag_name",
+					fmt.Sprintf("element index %d: dynamic_value map missing required 'tag_name' key", idx),
 				)
 				return nil, diags
 			}
