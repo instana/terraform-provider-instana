@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
-	"github.com/gessnerfl/terraform-provider-instana/tfutils"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -211,7 +210,7 @@ func (r *alertingConfigResourceFramework) UpdateState(ctx context.Context, state
 	// Convert custom payload fields to the appropriate Terraform types
 	// Using the utility function from tfutils package for better maintainability and reusability
 	// This handles both static string and dynamic custom payload field types
-	customPayloadFieldsList, payloadDiags := tfutils.CustomPayloadFieldsToTerraform(ctx, config.CustomerPayloadFields)
+	customPayloadFieldsList, payloadDiags := CustomPayloadFieldsToTerraform(ctx, config.CustomerPayloadFields)
 	if payloadDiags.HasError() {
 		return payloadDiags
 	}
@@ -289,7 +288,7 @@ func (r *alertingConfigResourceFramework) MapStateToDataObject(ctx context.Conte
 	var customerPayloadFields []restapi.CustomPayloadField[any]
 	if !model.CustomPayloadFields.IsNull() {
 		var payloadDiags diag.Diagnostics
-		customerPayloadFields, payloadDiags = BuildCustomPayloadFieldsTyped(ctx, model.CustomPayloadFields)
+		customerPayloadFields, payloadDiags = MapCustomPayloadFieldsToAPIObject(ctx, model.CustomPayloadFields)
 		if payloadDiags.HasError() {
 			diags.Append(payloadDiags...)
 			return nil, diags
