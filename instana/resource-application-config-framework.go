@@ -7,6 +7,7 @@ import (
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/instana/tagfilter"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -15,10 +16,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 // ResourceInstanaApplicationConfigFramework the name of the terraform-provider-instana resource to manage application config
 const ResourceInstanaApplicationConfigFramework = "application_config"
+
+// ApplicationConfigFieldAccessRules field name for access rules
+const ApplicationConfigFieldAccessRules = "access_rules"
 
 // ApplicationConfigModel represents the data model for the application configuration resource
 type ApplicationConfigModel struct {
@@ -27,6 +32,7 @@ type ApplicationConfigModel struct {
 	Scope         types.String `tfsdk:"scope"`
 	BoundaryScope types.String `tfsdk:"boundary_scope"`
 	TagFilter     types.String `tfsdk:"tag_filter"`
+	AccessRules   types.List   `tfsdk:"access_rules"`
 }
 
 // NewApplicationConfigResourceHandleFramework creates the resource handle for Application Configuration
@@ -69,6 +75,35 @@ func NewApplicationConfigResourceHandleFramework() ResourceHandleFramework[*rest
 					ApplicationConfigFieldTagFilter: schema.StringAttribute{
 						Optional:    true,
 						Description: "The tag filter expression",
+					},
+					ApplicationConfigFieldAccessRules: schema.ListNestedAttribute{
+						Required:    true,
+						Description: "The access rules applied to the application config",
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"access_type": schema.StringAttribute{
+									Required:    true,
+									Description: "The access type of the given access rule",
+									Validators: []validator.String{
+										stringvalidator.OneOf(restapi.SupportedAccessTypes.ToStringSlice()...),
+									},
+								},
+								"related_id": schema.StringAttribute{
+									Optional:    true,
+									Description: "The id of the related entity (user, api_token, etc.) of the given access rule",
+									Validators: []validator.String{
+										stringvalidator.LengthBetween(0, 64),
+									},
+								},
+								"relation_type": schema.StringAttribute{
+									Required:    true,
+									Description: "The relation type of the given access rule",
+									Validators: []validator.String{
+										stringvalidator.OneOf(restapi.SupportedRelationTypes.ToStringSlice()...),
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -124,9 +159,61 @@ func (r *applicationConfigResourceFramework) UpdateState(ctx context.Context, st
 		model.TagFilter = types.StringNull()
 	}
 
+	// Map access rules
+	accessRules, d := r.mapAccessRulesToState(ctx, config.AccessRules)
+	diags.Append(d...)
+	if !diags.HasError() {
+		model.AccessRules = accessRules
+	}
+
 	// Set the entire model to state
-	diags = state.Set(ctx, model)
+	diags.Append(state.Set(ctx, model)...)
 	return diags
+}
+
+func (r *applicationConfigResourceFramework) mapAccessRulesToState(ctx context.Context, accessRules []restapi.AccessRule) (types.List, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	elements := make([]attr.Value, len(accessRules))
+
+	for i, rule := range accessRules {
+		ruleObj := map[string]attr.Value{
+			"access_type":   types.StringValue(string(rule.AccessType)),
+			"relation_type": types.StringValue(string(rule.RelationType)),
+		}
+
+		// Handle related ID
+		if rule.RelatedID != nil {
+			ruleObj["related_id"] = types.StringValue(*rule.RelatedID)
+		} else {
+			ruleObj["related_id"] = types.StringNull()
+		}
+
+		objValue, d := types.ObjectValue(
+			map[string]attr.Type{
+				"access_type":   types.StringType,
+				"related_id":    types.StringType,
+				"relation_type": types.StringType,
+			},
+			ruleObj,
+		)
+		diags.Append(d...)
+		if diags.HasError() {
+			return types.ListNull(types.ObjectType{}), diags
+		}
+
+		elements[i] = objValue
+	}
+
+	return types.ListValueMust(
+		types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"access_type":   types.StringType,
+				"related_id":    types.StringType,
+				"relation_type": types.StringType,
+			},
+		},
+		elements,
+	), diags
 }
 
 func (r *applicationConfigResourceFramework) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.ApplicationConfig, diag.Diagnostics) {
@@ -168,13 +255,69 @@ func (r *applicationConfigResourceFramework) MapStateToDataObject(ctx context.Co
 		tagFilter = mapper.ToAPIModel(expr)
 	}
 
+	// Map access rules
+	accessRules, d := r.mapAccessRulesFromState(ctx, model.AccessRules)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
 	return &restapi.ApplicationConfig{
 		ID:                  id,
 		Label:               model.Label.ValueString(),
 		Scope:               restapi.ApplicationConfigScope(model.Scope.ValueString()),
 		BoundaryScope:       restapi.BoundaryScope(model.BoundaryScope.ValueString()),
 		TagFilterExpression: tagFilter,
+		AccessRules:         accessRules,
 	}, diags
+}
+
+func (r *applicationConfigResourceFramework) mapAccessRulesFromState(ctx context.Context, accessRulesList types.List) ([]restapi.AccessRule, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	var accessRules []restapi.AccessRule
+
+	if accessRulesList.IsNull() {
+		return accessRules, diags
+	}
+
+	// Get the list of objects
+	var accessRuleObjects []types.Object
+	diags.Append(accessRulesList.ElementsAs(ctx, &accessRuleObjects, false)...)
+	if diags.HasError() {
+		return accessRules, diags
+	}
+
+	accessRules = make([]restapi.AccessRule, len(accessRuleObjects))
+	for i, obj := range accessRuleObjects {
+		var accessType types.String
+		var relationType types.String
+		var relatedID types.String
+
+		diags.Append(obj.As(ctx, &map[string]attr.Value{
+			"access_type":   &accessType,
+			"relation_type": &relationType,
+			"related_id":    &relatedID,
+		}, basetypes.ObjectAsOptions{})...)
+
+		if diags.HasError() {
+			return accessRules, diags
+		}
+
+		rule := restapi.AccessRule{
+			AccessType:   restapi.AccessType(accessType.ValueString()),
+			RelationType: restapi.RelationType(relationType.ValueString()),
+		}
+
+		// Handle related ID
+		if !relatedID.IsNull() && relatedID.ValueString() != "" {
+			relatedIDValue := relatedID.ValueString()
+			rule.RelatedID = &relatedIDValue
+		}
+
+		accessRules[i] = rule
+	}
+
+	return accessRules, diags
 }
 
 // Made with Bob
