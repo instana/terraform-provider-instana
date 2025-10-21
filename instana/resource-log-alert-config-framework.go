@@ -185,42 +185,8 @@ func NewLogAlertConfigResourceHandleFramework() ResourceHandleFramework[*restapi
 									Description: "Threshold configuration for different severity levels",
 									NestedObject: schema.NestedBlockObject{
 										Blocks: map[string]schema.Block{
-											LogAlertConfigFieldWarning: schema.ListNestedBlock{
-												Description: "Warning threshold configuration",
-												NestedObject: schema.NestedBlockObject{
-													Blocks: map[string]schema.Block{
-														"static": schema.ListNestedBlock{
-															Description: "Static threshold configuration",
-															NestedObject: schema.NestedBlockObject{
-																Attributes: map[string]schema.Attribute{
-																	LogAlertConfigFieldValue: schema.Int64Attribute{
-																		Required:    true,
-																		Description: "The value of the threshold",
-																	},
-																},
-															},
-														},
-													},
-												},
-											},
-											LogAlertConfigFieldCritical: schema.ListNestedBlock{
-												Description: "Critical threshold configuration",
-												NestedObject: schema.NestedBlockObject{
-													Blocks: map[string]schema.Block{
-														"static": schema.ListNestedBlock{
-															Description: "Static threshold configuration",
-															NestedObject: schema.NestedBlockObject{
-																Attributes: map[string]schema.Attribute{
-																	LogAlertConfigFieldValue: schema.Int64Attribute{
-																		Required:    true,
-																		Description: "The value of the threshold",
-																	},
-																},
-															},
-														},
-													},
-												},
-											},
+											LogAlertConfigFieldWarning:  StaticThresholdBlockSchema(),
+											LogAlertConfigFieldCritical: StaticThresholdBlockSchema(),
 										},
 									},
 									Validators: []validator.List{
@@ -803,49 +769,21 @@ func (r *logAlertConfigResourceFramework) mapRulesToState(ctx context.Context, r
 
 		// Map warning threshold
 		warningThreshold, isWarningThresholdPresent := ruleWithThreshold.Thresholds[restapi.WarningSeverity]
-		if isWarningThresholdPresent {
-			warningThresholdList, warningDiags := r.mapThresholdRuleToState(ctx, &warningThreshold)
-			diags.Append(warningDiags...)
-			if diags.HasError() {
-				return types.ListNull(types.ObjectType{}), diags
-			}
-			thresholdObj[LogAlertConfigFieldWarning] = warningThresholdList
-		} else {
-			thresholdObj[LogAlertConfigFieldWarning] = types.ListNull(types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"static": types.ListType{
-						ElemType: types.ObjectType{
-							AttrTypes: map[string]attr.Type{
-								LogAlertConfigFieldValue: types.Int64Type,
-							},
-						},
-					},
-				},
-			})
+		warningThresholdList, warningDiags := MapThresholdToState(ctx, isWarningThresholdPresent, &warningThreshold)
+		diags.Append(warningDiags...)
+		if diags.HasError() {
+			return types.ListNull(types.ObjectType{}), diags
 		}
+		thresholdObj[LogAlertConfigFieldWarning] = warningThresholdList
 
 		// Map critical threshold
 		criticalThreshold, isCriticalThresholdPresent := ruleWithThreshold.Thresholds[restapi.CriticalSeverity]
-		if isCriticalThresholdPresent {
-			criticalThresholdList, criticalDiags := r.mapThresholdRuleToState(ctx, &criticalThreshold)
-			diags.Append(criticalDiags...)
-			if diags.HasError() {
-				return types.ListNull(types.ObjectType{}), diags
-			}
-			thresholdObj[LogAlertConfigFieldCritical] = criticalThresholdList
-		} else {
-			thresholdObj[LogAlertConfigFieldCritical] = types.ListNull(types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"static": types.ListType{
-						ElemType: types.ObjectType{
-							AttrTypes: map[string]attr.Type{
-								LogAlertConfigFieldValue: types.Int64Type,
-							},
-						},
-					},
-				},
-			})
+		criticalThresholdList, criticalDiags := MapThresholdToState(ctx, isCriticalThresholdPresent, &criticalThreshold)
+		diags.Append(criticalDiags...)
+		if diags.HasError() {
+			return types.ListNull(types.ObjectType{}), diags
 		}
+		thresholdObj[LogAlertConfigFieldCritical] = criticalThresholdList
 
 		// Create threshold object value
 		thresholdObjVal, thresholdObjDiags := types.ObjectValue(
