@@ -16,7 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 // ResourceInstanaApplicationConfigFramework the name of the terraform-provider-instana resource to manage application config
@@ -74,6 +73,7 @@ func NewApplicationConfigResourceHandleFramework() ResourceHandleFramework[*rest
 					},
 					ApplicationConfigFieldTagFilter: schema.StringAttribute{
 						Optional:    true,
+						Computed:    true,
 						Description: "The tag filter expression",
 					},
 					ApplicationConfigFieldAccessRules: schema.ListNestedAttribute{
@@ -173,28 +173,45 @@ func (r *applicationConfigResourceFramework) UpdateState(ctx context.Context, st
 
 func (r *applicationConfigResourceFramework) mapAccessRulesToState(ctx context.Context, accessRules []restapi.AccessRule) (types.List, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	elements := make([]attr.Value, len(accessRules))
 
+	// If there are no access rules, return an empty list
+	if len(accessRules) == 0 {
+		return types.ListValueMust(
+			types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"access_type":   types.StringType,
+					"related_id":    types.StringType,
+					"relation_type": types.StringType,
+				},
+			},
+			[]attr.Value{},
+		), diags
+	}
+
+	// Create elements for each access rule
+	elements := make([]attr.Value, len(accessRules))
 	for i, rule := range accessRules {
-		ruleObj := map[string]attr.Value{
+		// Create a map for the rule attributes
+		ruleMap := map[string]attr.Value{
 			"access_type":   types.StringValue(string(rule.AccessType)),
 			"relation_type": types.StringValue(string(rule.RelationType)),
 		}
 
 		// Handle related ID
 		if rule.RelatedID != nil {
-			ruleObj["related_id"] = types.StringValue(*rule.RelatedID)
+			ruleMap["related_id"] = types.StringValue(*rule.RelatedID)
 		} else {
-			ruleObj["related_id"] = types.StringNull()
+			ruleMap["related_id"] = types.StringNull()
 		}
 
+		// Create object value
 		objValue, d := types.ObjectValue(
 			map[string]attr.Type{
 				"access_type":   types.StringType,
 				"related_id":    types.StringType,
 				"relation_type": types.StringType,
 			},
-			ruleObj,
+			ruleMap,
 		)
 		diags.Append(d...)
 		if diags.HasError() {
@@ -204,6 +221,7 @@ func (r *applicationConfigResourceFramework) mapAccessRulesToState(ctx context.C
 		elements[i] = objValue
 	}
 
+	// Create list value
 	return types.ListValueMust(
 		types.ObjectType{
 			AttrTypes: map[string]attr.Type{
@@ -293,14 +311,52 @@ func (r *applicationConfigResourceFramework) mapAccessRulesFromState(ctx context
 		var relationType types.String
 		var relatedID types.String
 
-		diags.Append(obj.As(ctx, &map[string]attr.Value{
-			"access_type":   &accessType,
-			"relation_type": &relationType,
-			"related_id":    &relatedID,
-		}, basetypes.ObjectAsOptions{})...)
+		// Extract values from the object
+		attrMap := obj.Attributes()
 
-		if diags.HasError() {
+		// Get access_type
+		if v, ok := attrMap["access_type"]; ok {
+			if str, ok := v.(types.String); ok {
+				accessType = str
+			} else {
+				diags.AddError(
+					"Invalid attribute type",
+					"access_type must be a string",
+				)
+				return accessRules, diags
+			}
+		} else {
+			diags.AddError(
+				"Missing attribute",
+				"access_type attribute is required for access rule",
+			)
 			return accessRules, diags
+		}
+
+		// Get relation_type
+		if v, ok := attrMap["relation_type"]; ok {
+			if str, ok := v.(types.String); ok {
+				relationType = str
+			} else {
+				diags.AddError(
+					"Invalid attribute type",
+					"relation_type must be a string",
+				)
+				return accessRules, diags
+			}
+		} else {
+			diags.AddError(
+				"Missing attribute",
+				"relation_type attribute is required for access rule",
+			)
+			return accessRules, diags
+		}
+
+		// Get related_id (optional)
+		if v, ok := attrMap["related_id"]; ok {
+			if str, ok := v.(types.String); ok {
+				relatedID = str
+			}
 		}
 
 		rule := restapi.AccessRule{
