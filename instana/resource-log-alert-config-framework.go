@@ -181,52 +181,7 @@ func NewLogAlertConfigResourceHandleFramework() ResourceHandleFramework[*restapi
 								},
 							},
 							Blocks: map[string]schema.Block{
-								LogAlertConfigFieldThreshold: schema.ListNestedBlock{
-									Description: "Threshold configuration for different severity levels",
-									NestedObject: schema.NestedBlockObject{
-										Blocks: map[string]schema.Block{
-											LogAlertConfigFieldWarning: schema.ListNestedBlock{
-												Description: "Warning threshold configuration",
-												NestedObject: schema.NestedBlockObject{
-													Blocks: map[string]schema.Block{
-														"static": schema.ListNestedBlock{
-															Description: "Static threshold configuration",
-															NestedObject: schema.NestedBlockObject{
-																Attributes: map[string]schema.Attribute{
-																	LogAlertConfigFieldValue: schema.Int64Attribute{
-																		Required:    true,
-																		Description: "The value of the threshold",
-																	},
-																},
-															},
-														},
-													},
-												},
-											},
-											LogAlertConfigFieldCritical: schema.ListNestedBlock{
-												Description: "Critical threshold configuration",
-												NestedObject: schema.NestedBlockObject{
-													Blocks: map[string]schema.Block{
-														"static": schema.ListNestedBlock{
-															Description: "Static threshold configuration",
-															NestedObject: schema.NestedBlockObject{
-																Attributes: map[string]schema.Attribute{
-																	LogAlertConfigFieldValue: schema.Int64Attribute{
-																		Required:    true,
-																		Description: "The value of the threshold",
-																	},
-																},
-															},
-														},
-													},
-												},
-											},
-										},
-									},
-									Validators: []validator.List{
-										listvalidator.SizeAtMost(1),
-									},
-								},
+								LogAlertConfigFieldThreshold: GetThresholdSchema(LogAlertConfigFieldValue, types.Int64Type),
 							},
 						},
 						Validators: []validator.List{
@@ -1021,82 +976,7 @@ func (r *logAlertConfigResourceFramework) mapRulesToState(ctx context.Context, r
 }
 
 func (r *logAlertConfigResourceFramework) mapThresholdRuleToState(ctx context.Context, threshold *restapi.ThresholdRule) (types.List, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	// Get the threshold value
-	var thresholdValue int64
-	if threshold.Value != nil {
-		thresholdValue = int64(*threshold.Value)
-	} else {
-		thresholdValue = 0
-	}
-
-	// Create static threshold object
-	staticObj := map[string]attr.Value{
-		LogAlertConfigFieldValue: types.Int64Value(thresholdValue),
-	}
-
-	staticObjVal, staticObjDiags := types.ObjectValue(
-		map[string]attr.Type{
-			LogAlertConfigFieldValue: types.Int64Type,
-		},
-		staticObj,
-	)
-	diags.Append(staticObjDiags...)
-	if diags.HasError() {
-		return types.ListNull(types.ObjectType{}), diags
-	}
-
-	// Create static list
-	staticList, staticListDiags := types.ListValue(
-		types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				LogAlertConfigFieldValue: types.Int64Type,
-			},
-		},
-		[]attr.Value{staticObjVal},
-	)
-	diags.Append(staticListDiags...)
-	if diags.HasError() {
-		return types.ListNull(types.ObjectType{}), diags
-	}
-
-	// Create threshold object with static block
-	thresholdObj := map[string]attr.Value{
-		"static": staticList,
-	}
-
-	thresholdObjVal, thresholdObjDiags := types.ObjectValue(
-		map[string]attr.Type{
-			"static": types.ListType{
-				ElemType: types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						LogAlertConfigFieldValue: types.Int64Type,
-					},
-				},
-			},
-		},
-		thresholdObj,
-	)
-	diags.Append(thresholdObjDiags...)
-	if diags.HasError() {
-		return types.ListNull(types.ObjectType{}), diags
-	}
-
-	return types.ListValue(
-		types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"static": types.ListType{
-					ElemType: types.ObjectType{
-						AttrTypes: map[string]attr.Type{
-							LogAlertConfigFieldValue: types.Int64Type,
-						},
-					},
-				},
-			},
-		},
-		[]attr.Value{thresholdObjVal},
-	)
+	return MapThresholdRuleToState(ctx, threshold, LogAlertConfigFieldValue, types.Int64Type)
 }
 
 func (r *logAlertConfigResourceFramework) mapRulesFromState(ctx context.Context, rulesList types.List) ([]restapi.RuleWithThreshold[restapi.LogAlertRule], diag.Diagnostics) {
@@ -1215,75 +1095,7 @@ func (r *logAlertConfigResourceFramework) mapRulesFromState(ctx context.Context,
 }
 
 func (r *logAlertConfigResourceFramework) mapThresholdRuleFromState(ctx context.Context, thresholdList types.List) (*restapi.ThresholdRule, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	if thresholdList.IsNull() || thresholdList.IsUnknown() {
-		return nil, diags
-	}
-
-	var thresholdElements []types.Object
-	diags.Append(thresholdList.ElementsAs(ctx, &thresholdElements, false)...)
-	if diags.HasError() {
-		return nil, diags
-	}
-
-	if len(thresholdElements) == 0 {
-		return nil, diags
-	}
-
-	// Get the threshold object
-	thresholdObj := thresholdElements[0]
-
-	// Extract the static block using a properly structured type
-	var thresholdStruct struct {
-		Static types.List `tfsdk:"static"`
-	}
-
-	diags.Append(thresholdObj.As(ctx, &thresholdStruct, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil, diags
-	}
-
-	if thresholdStruct.Static.IsNull() || thresholdStruct.Static.IsUnknown() {
-		diags.AddError(
-			"Missing static threshold",
-			"The threshold configuration is missing the required 'static' block",
-		)
-		return nil, diags
-	}
-
-	staticList := thresholdStruct.Static
-	var staticElements []types.Object
-	diags.Append(staticList.ElementsAs(ctx, &staticElements, false)...)
-	if diags.HasError() {
-		return nil, diags
-	}
-
-	if len(staticElements) == 0 {
-		diags.AddError(
-			"Empty static threshold",
-			"The static threshold block is empty",
-		)
-		return nil, diags
-	}
-
-	// Extract the value
-	var staticObj struct {
-		Value types.Int64 `tfsdk:"value"`
-	}
-
-	diags.Append(staticElements[0].As(ctx, &staticObj, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil, diags
-	}
-
-	// Convert to float64 pointer
-	valueFloat := float64(staticObj.Value.ValueInt64())
-
-	return &restapi.ThresholdRule{
-		Type:  "staticThreshold", // Always static for now
-		Value: &valueFloat,
-	}, diags
+	return MapThresholdRuleFromState(ctx, thresholdList, LogAlertConfigFieldValue)
 }
 
 // Made with Bob
