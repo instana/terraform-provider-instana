@@ -266,3 +266,31 @@ func (f *parserImpl) Parse(expression string) (*FilterExpression, error) {
 	}
 	return parsedExpression, nil
 }
+
+// ParseExpression parses the given expression string and returns the tag filter model
+func ParseExpression(expression string) (*restapi.TagFilter, error) {
+	parser := NewParser()
+	mapper := NewMapper()
+
+	parsed, err := parser.Parse(expression)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapper.ToAPIModel(parsed), nil
+}
+
+// RenderExpression renders the given tag filter model as a string
+func RenderExpression(filter *restapi.TagFilter) string {
+	if filter == nil {
+		return ""
+	}
+
+	mapper := NewMapper()
+	expr, err := mapper.FromAPIModel(filter)
+	if err != nil {
+		return ""
+	}
+
+	return expr.Render()
+}

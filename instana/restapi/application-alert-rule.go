@@ -12,4 +12,12 @@ type ApplicationAlertRule struct {
 	Level    *LogLevel           `json:"level"`
 	Message  *string             `json:"message"`
 	Operator *ExpressionOperator `json:"operator"`
+
+	// Rule type fields
+	ErrorRate  *ApplicationAlertRuleErrorRate  `json:"-"`
+	Errors     *ApplicationAlertRuleErrors     `json:"-"`
+	Logs       *ApplicationAlertRuleLogs       `json:"-"`
+	Slowness   *ApplicationAlertRuleSlowness   `json:"-"`
+	StatusCode *ApplicationAlertRuleStatusCode `json:"-"`
+	Throughput *ApplicationAlertRuleThroughput `json:"-"`
 }
