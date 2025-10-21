@@ -8,26 +8,26 @@ const GlobalApplicationAlertConfigsResourcePath = EventSettingsBasePath + "/glob
 
 // ApplicationAlertConfig is the representation of an application alert configuration in Instana
 type ApplicationAlertConfig struct {
-	ID                    string                               `json:"id"`
-	Name                  string                               `json:"name"`
-	Description           string                               `json:"description"`
-	Severity              int                                  `json:"severity"`
-	Triggering            bool                                 `json:"triggering"`
-	Applications          map[string]IncludedApplication       `json:"applications"`
-	BoundaryScope         BoundaryScope                        `json:"boundaryScope"`
-	TagFilterExpression   *TagFilter                           `json:"tagFilterExpression"`
-	IncludeInternal       bool                                 `json:"includeInternal"`
-	IncludeSynthetic      bool                                 `json:"includeSynthetic"`
-	EvaluationType        ApplicationAlertEvaluationType       `json:"evaluationType"`
-	AlertChannelIDs       []string                             `json:"alertChannelIds"`
-	AlertChannels         map[string][]string                  `json:"alertChannels"`
-	Granularity           Granularity                          `json:"granularity"`
-	GracePeriod           int                                  `json:"gracePeriod"`
-	CustomerPayloadFields []CustomPayloadField[interface{}]    `json:"customPayloadFields"`
-	Rule                  *ApplicationAlertRule                `json:"rule"`
-	Rules                 []ApplicationAlertRuleWithThresholds `json:"rules"`
-	Threshold             *Threshold                           `json:"threshold"`
-	TimeThreshold         *ApplicationAlertTimeThreshold       `json:"timeThreshold"`
+	ID                    string                                    `json:"id"`
+	Name                  string                                    `json:"name"`
+	Description           string                                    `json:"description"`
+	Severity              int                                       `json:"severity"`
+	Triggering            bool                                      `json:"triggering"`
+	Applications          map[string]IncludedApplication            `json:"applications"`
+	BoundaryScope         BoundaryScope                             `json:"boundaryScope"`
+	TagFilterExpression   *TagFilter                                `json:"tagFilterExpression"`
+	IncludeInternal       bool                                      `json:"includeInternal"`
+	IncludeSynthetic      bool                                      `json:"includeSynthetic"`
+	EvaluationType        ApplicationAlertEvaluationType            `json:"evaluationType"`
+	AlertChannelIDs       []string                                  `json:"alertChannelIds"`
+	AlertChannels         map[string][]string                       `json:"alertChannels"`
+	Granularity           Granularity                               `json:"granularity"`
+	GracePeriod           int                                       `json:"gracePeriod"`
+	CustomerPayloadFields []CustomPayloadField[interface{}]         `json:"customPayloadFields"`
+	Rule                  *ApplicationAlertRule                     `json:"rule"`
+	Rules                 []RuleWithThreshold[ApplicationAlertRule] `json:"rules"`
+	Threshold             *Threshold                                `json:"threshold"`
+	TimeThreshold         *ApplicationAlertTimeThreshold            `json:"timeThreshold"`
 }
 
 // GetIDForResourcePath implementation of the interface InstanaDataObject
