@@ -72,8 +72,11 @@ func NewApplicationConfigResourceHandleFramework() ResourceHandleFramework[*rest
 						},
 					},
 					ApplicationConfigFieldTagFilter: schema.StringAttribute{
-						Optional:    true,
-						Computed:    true,
+						Optional: true,
+						Computed: true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 						Description: "The tag filter expression",
 					},
 					ApplicationConfigFieldAccessRules: schema.ListNestedAttribute{
