@@ -690,7 +690,19 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 										},
 									},
 								},
-								ApplicationAlertConfigFieldThresholds: GetThresholdSchema(ApplicationAlertConfigFieldValue, types.Float64Type),
+								ApplicationAlertConfigFieldThresholds: schema.SingleNestedBlock{
+									Description: "Map of severity to threshold configurations",
+									Attributes: map[string]schema.Attribute{
+										"warning": schema.Float64Attribute{
+											Optional:    true,
+											Description: "The threshold value for warning severity level",
+										},
+										"critical": schema.Float64Attribute{
+											Optional:    true,
+											Description: "The threshold value for critical severity level",
+										},
+									},
+								},
 							},
 						},
 					},
@@ -1184,9 +1196,9 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 			return nil, diags
 		}
 
-		rules := make([]restapi.ApplicationAlertRuleWithThresholds, len(ruleWithThresholds))
+		result.Rules = make([]restapi.ApplicationAlertRuleWithThresholds, len(ruleWithThresholds))
 		for i, ruleWithThreshold := range ruleWithThresholds {
-			rules[i] = restapi.ApplicationAlertRuleWithThresholds{
+			result.Rules[i] = restapi.ApplicationAlertRuleWithThresholds{
 				ThresholdOperator: ruleWithThreshold.ThresholdOperator.ValueString(),
 			}
 
@@ -1198,7 +1210,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 					return nil, diags
 				}
 
-				rules[i].Rule = &restapi.ApplicationAlertRule{}
+				result.Rules[i].Rule = &restapi.ApplicationAlertRule{}
 
 				// Handle error rate rule
 				if !rule.ErrorRate.IsNull() && !rule.ErrorRate.IsUnknown() {
@@ -1208,7 +1220,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 						return nil, diags
 					}
 					if len(errorRateRules) > 0 {
-						rules[i].Rule.ErrorRate = &restapi.ApplicationAlertRuleErrorRate{
+						result.Rules[i].Rule.ErrorRate = &restapi.ApplicationAlertRuleErrorRate{
 							MetricName:  errorRateRules[0].MetricName.ValueString(),
 							Aggregation: errorRateRules[0].Aggregation.ValueString(),
 						}
@@ -1223,7 +1235,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 						return nil, diags
 					}
 					if len(errorsRules) > 0 {
-						rules[i].Rule.Errors = &restapi.ApplicationAlertRuleErrors{
+						result.Rules[i].Rule.Errors = &restapi.ApplicationAlertRuleErrors{
 							MetricName:  errorsRules[0].MetricName.ValueString(),
 							Aggregation: errorsRules[0].Aggregation.ValueString(),
 						}
@@ -1238,7 +1250,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 						return nil, diags
 					}
 					if len(logsRules) > 0 {
-						rules[i].Rule.Logs = &restapi.ApplicationAlertRuleLogs{
+						result.Rules[i].Rule.Logs = &restapi.ApplicationAlertRuleLogs{
 							MetricName:  logsRules[0].MetricName.ValueString(),
 							Aggregation: logsRules[0].Aggregation.ValueString(),
 							Level:       logsRules[0].Level.ValueString(),
@@ -1256,7 +1268,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 						return nil, diags
 					}
 					if len(slownessRules) > 0 {
-						rules[i].Rule.Slowness = &restapi.ApplicationAlertRuleSlowness{
+						result.Rules[i].Rule.Slowness = &restapi.ApplicationAlertRuleSlowness{
 							MetricName:  slownessRules[0].MetricName.ValueString(),
 							Aggregation: slownessRules[0].Aggregation.ValueString(),
 						}
@@ -1271,7 +1283,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 						return nil, diags
 					}
 					if len(statusCodeRules) > 0 {
-						rules[i].Rule.StatusCode = &restapi.ApplicationAlertRuleStatusCode{
+						result.Rules[i].Rule.StatusCode = &restapi.ApplicationAlertRuleStatusCode{
 							MetricName:      statusCodeRules[0].MetricName.ValueString(),
 							Aggregation:     statusCodeRules[0].Aggregation.ValueString(),
 							StatusCodeStart: int(statusCodeRules[0].StatusCodeStart.ValueInt64()),
@@ -1288,7 +1300,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 						return nil, diags
 					}
 					if len(throughputRules) > 0 {
-						rules[i].Rule.Throughput = &restapi.ApplicationAlertRuleThroughput{
+						result.Rules[i].Rule.Throughput = &restapi.ApplicationAlertRuleThroughput{
 							MetricName:  throughputRules[0].MetricName.ValueString(),
 							Aggregation: throughputRules[0].Aggregation.ValueString(),
 						}
@@ -1298,22 +1310,18 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 
 			// Handle thresholds
 			if !ruleWithThreshold.Thresholds.IsNull() && !ruleWithThreshold.Thresholds.IsUnknown() {
-				thresholds := make(map[restapi.AlertSeverity]restapi.ThresholdRule)
+				thresholds := make(map[string]restapi.ThresholdValue)
 				for k, v := range ruleWithThreshold.Thresholds.Elements() {
 					var thresholdConfig ThresholdConfigRuleModel
 					diags = v.(types.Object).As(ctx, &thresholdConfig, basetypes.ObjectAsOptions{})
 					if diags.HasError() {
 						return nil, diags
 					}
-
-					// Create a threshold rule with the value
-					valueFloat := thresholdConfig.Value.ValueFloat64()
-					thresholds[restapi.AlertSeverity(k)] = restapi.ThresholdRule{
-						Type:  "staticThreshold", // Always static for now
-						Value: &valueFloat,
+					thresholds[k] = restapi.ThresholdValue{
+						Value: thresholdConfig.Value.ValueFloat64(),
 					}
 				}
-				rules[i].Thresholds = thresholds
+				result.Rules[i].Thresholds = thresholds
 			}
 		}
 	}
@@ -1899,37 +1907,15 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 			// Create thresholds map
 			thresholdElements := make(map[string]attr.Value)
 			for severity, threshold := range ruleWithThreshold.Thresholds {
-				// Use the common threshold mapping function
-				_, thresholdDiags := MapThresholdRuleToState(ctx, &threshold, ApplicationAlertConfigFieldValue, types.Float64Type)
-				if thresholdDiags.HasError() {
-					diags.Append(thresholdDiags...)
+				thresholdObj, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
+					"value": types.Float64Type,
+				}, map[string]interface{}{
+					"value": threshold.Value,
+				})
+				if diags.HasError() {
 					return diags
 				}
-
-				// Extract the value from the threshold list and create a simplified threshold object
-				var thresholdObj types.Object
-
-				// For backward compatibility, we still use the simplified format with just the value
-				// This maintains the existing schema structure
-				if threshold.Value != nil {
-					var objDiags diag.Diagnostics
-					thresholdObj, objDiags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-						"value": types.Float64Type,
-					}, map[string]interface{}{
-						"value": *threshold.Value,
-					})
-					if objDiags.HasError() {
-						diags.Append(objDiags...)
-						return diags
-					}
-				} else {
-					// Fallback to empty object if no value
-					thresholdObj = types.ObjectNull(map[string]attr.Type{
-						"value": types.Float64Type,
-					})
-				}
-
-				thresholdElements[string(severity)] = thresholdObj
+				thresholdElements[severity] = thresholdObj
 			}
 
 			// Create rule with threshold object
