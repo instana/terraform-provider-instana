@@ -710,8 +710,46 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 						Description: "Threshold configuration for different severity levels",
 						NestedObject: schema.NestedBlockObject{
 							Blocks: map[string]schema.Block{
-								LogAlertConfigFieldWarning:  StaticAndAdaptiveThresholdBlockSchema(),
-								LogAlertConfigFieldCritical: StaticAndAdaptiveThresholdBlockSchema(),
+								"static": schema.SingleNestedBlock{
+									Description: "Static threshold definition.",
+									Attributes: map[string]schema.Attribute{
+										"operator": schema.StringAttribute{
+											Description: "Comparison operator for the static threshold.",
+											Optional:    true,
+											Validators: []validator.String{
+												stringvalidator.OneOf([]string{">=", ">", "<=", "<", "=="}...),
+											},
+										},
+										"value": schema.Float64Attribute{
+											Description: "The numeric value for the static threshold.",
+											Optional:    true,
+										},
+									},
+								},
+								"adaptive_baseline": schema.SingleNestedBlock{
+									Description: "Static threshold definition.",
+									Attributes: map[string]schema.Attribute{
+										"operator": schema.StringAttribute{
+											Description: "Comparison operator for the static threshold.",
+											Optional:    true,
+											Validators: []validator.String{
+												stringvalidator.OneOf([]string{">=", ">", "<=", "<", "=="}...),
+											},
+										},
+										"deviation_factor": schema.Float64Attribute{
+											Description: "The numeric value for the deviation factor.",
+											Optional:    true,
+										},
+										"adaptability": schema.Float64Attribute{
+											Description: "The numeric value for the adaptability.",
+											Optional:    true,
+										},
+										"seasonality": schema.StringAttribute{
+											Description: "Value for the seasonality.",
+											Optional:    true,
+										},
+									},
+								},
 							},
 						},
 						Validators: []validator.List{
@@ -771,7 +809,8 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 					},
 				},
 			},
-			SchemaVersion: 1,
+			SkipIDGeneration: true,
+			SchemaVersion:    1,
 		},
 	}
 }
@@ -1029,17 +1068,98 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 
 	// Handle threshold
 	if !model.Threshold.IsNull() && !model.Threshold.IsUnknown() {
-
-		var thresholdMap map[restapi.AlertSeverity]restapi.ThresholdRule
-		var thresholdDiags diag.Diagnostics
-
-		thresholdMap, thresholdDiags = MapThresholdsFromState(ctx, model.Threshold)
-		diags.Append(thresholdDiags...)
+		// We need to convert from ThresholdRule to Threshold
+		// First, get the operator from the schema
+		var thresholdElements []types.Object
+		diags.Append(model.Threshold.ElementsAs(ctx, &thresholdElements, false)...)
 		if diags.HasError() {
 			return nil, diags
 		}
-		result.Threshold = thresholdMap
 
+		if len(thresholdElements) > 0 {
+			// Create a new Threshold object
+			threshold := &restapi.Threshold{}
+
+			// Check for static threshold
+			if staticVal, ok := thresholdElements[0].Attributes()[ThresholdFieldStatic]; ok && !staticVal.IsNull() && !staticVal.IsUnknown() {
+				staticList, ok := staticVal.(types.List)
+				if ok && !staticList.IsNull() && !staticList.IsUnknown() {
+					var staticElements []types.Object
+					diags.Append(staticList.ElementsAs(ctx, &staticElements, false)...)
+					if diags.HasError() {
+						return nil, diags
+					}
+
+					if len(staticElements) > 0 {
+						// Extract the operator and value
+						var staticObj struct {
+							Operator types.String  `tfsdk:"operator"`
+							Value    types.Float64 `tfsdk:"value"`
+						}
+
+						diags.Append(staticElements[0].As(ctx, &staticObj, basetypes.ObjectAsOptions{})...)
+						if diags.HasError() {
+							return nil, diags
+						}
+
+						// Set the threshold type and operator
+						threshold.Type = "staticThreshold"
+						threshold.Operator = restapi.ThresholdOperator(staticObj.Operator.ValueString())
+
+						// Set the value
+						if !staticObj.Value.IsNull() && !staticObj.Value.IsUnknown() {
+							value := staticObj.Value.ValueFloat64()
+							threshold.Value = &value
+						}
+					}
+				}
+			}
+
+			// Check for adaptive baseline threshold
+			if adaptiveVal, ok := thresholdElements[0].Attributes()[ThresholdFieldAdaptiveBaseline]; ok && !adaptiveVal.IsNull() && !adaptiveVal.IsUnknown() {
+				adaptiveList, ok := adaptiveVal.(types.List)
+				if ok && !adaptiveList.IsNull() && !adaptiveList.IsUnknown() {
+					var adaptiveElements []types.Object
+					diags.Append(adaptiveList.ElementsAs(ctx, &adaptiveElements, false)...)
+					if diags.HasError() {
+						return nil, diags
+					}
+
+					if len(adaptiveElements) > 0 {
+						// Extract the operator, deviation factor, adaptability, and seasonality
+						var adaptiveObj struct {
+							Operator        types.String  `tfsdk:"operator"`
+							DeviationFactor types.Float64 `tfsdk:"deviation_factor"`
+							Adaptability    types.Float64 `tfsdk:"adaptability"`
+							Seasonality     types.String  `tfsdk:"seasonality"`
+						}
+
+						diags.Append(adaptiveElements[0].As(ctx, &adaptiveObj, basetypes.ObjectAsOptions{})...)
+						if diags.HasError() {
+							return nil, diags
+						}
+
+						// Set the threshold type and operator
+						threshold.Type = "adaptiveBaseline"
+						threshold.Operator = restapi.ThresholdOperator(adaptiveObj.Operator.ValueString())
+
+						// Set the deviation factor
+						if !adaptiveObj.DeviationFactor.IsNull() && !adaptiveObj.DeviationFactor.IsUnknown() {
+							deviationFactor := float32(adaptiveObj.DeviationFactor.ValueFloat64())
+							threshold.DeviationFactor = &deviationFactor
+						}
+
+						// Set the seasonality
+						if !adaptiveObj.Seasonality.IsNull() && !adaptiveObj.Seasonality.IsUnknown() {
+							seasonality := restapi.ThresholdSeasonality(adaptiveObj.Seasonality.ValueString())
+							threshold.Seasonality = &seasonality
+						}
+					}
+				}
+			}
+
+			result.Threshold = threshold
+		}
 	}
 
 	// Handle rule (deprecated but supported for backward compatibility)
@@ -1545,49 +1665,161 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 		// Map thresholds
 		thresholdObj := map[string]attr.Value{}
 
-		// Map warning threshold
-		warningThreshold, isWarningThresholdPresent := data.Threshold[restapi.WarningSeverity]
-		warningThresholdList, warningDiags := MapThresholdToState(ctx, isWarningThresholdPresent, &warningThreshold)
-		if warningDiags.HasError() {
-			return warningDiags
-		}
-		thresholdObj[LogAlertConfigFieldWarning] = warningThresholdList
+		// Create threshold object based on the threshold type
+		if data.Threshold != nil {
+			// Map static threshold
+			if data.Threshold.Type == "staticThreshold" {
+				// Create static threshold object
+				staticObj := map[string]attr.Value{}
 
-		// Map critical threshold
-		criticalThreshold, isCriticalThresholdPresent := data.Threshold[restapi.CriticalSeverity]
-		criticalThresholdList, criticalDiags := MapThresholdToState(ctx, isCriticalThresholdPresent, &criticalThreshold)
-		if criticalDiags.HasError() {
-			return criticalDiags
-		}
-		thresholdObj[LogAlertConfigFieldCritical] = criticalThresholdList
+				// Add operator
+				staticObj["operator"] = types.StringValue(string(data.Threshold.Operator))
 
-		// Create threshold object value
+				// Add value
+				if data.Threshold.Value != nil {
+					staticObj["value"] = types.Float64Value(*data.Threshold.Value)
+				} else {
+					staticObj["value"] = types.Float64Null()
+				}
+
+				// Create static object value
+				staticObjVal, staticObjDiags := types.ObjectValue(
+					map[string]attr.Type{
+						"operator": types.StringType,
+						"value":    types.Float64Type,
+					},
+					staticObj,
+				)
+				if staticObjDiags.HasError() {
+					return staticObjDiags
+				}
+
+				// Create static list
+				staticList, staticListDiags := types.ListValue(
+					types.ObjectType{
+						AttrTypes: map[string]attr.Type{
+							"operator": types.StringType,
+							"value":    types.Float64Type,
+						},
+					},
+					[]attr.Value{staticObjVal},
+				)
+				if staticListDiags.HasError() {
+					return staticListDiags
+				}
+
+				thresholdObj[ThresholdFieldStatic] = staticList
+			} else if data.Threshold.Type == "adaptiveBaseline" {
+				// Create adaptive baseline threshold object
+				adaptiveObj := map[string]attr.Value{}
+
+				// Add operator
+				adaptiveObj["operator"] = types.StringValue(string(data.Threshold.Operator))
+
+				// Add deviation factor
+				if data.Threshold.DeviationFactor != nil {
+					adaptiveObj["deviation_factor"] = types.Float64Value(float64(*data.Threshold.DeviationFactor))
+				} else {
+					adaptiveObj["deviation_factor"] = types.Float64Null()
+				}
+
+				// Add adaptability (assuming it's stored in Value for now)
+				if data.Threshold.Value != nil {
+					adaptiveObj["adaptability"] = types.Float64Value(*data.Threshold.Value)
+				} else {
+					adaptiveObj["adaptability"] = types.Float64Null()
+				}
+
+				// Add seasonality
+				if data.Threshold.Seasonality != nil {
+					adaptiveObj["seasonality"] = types.StringValue(string(*data.Threshold.Seasonality))
+				} else {
+					adaptiveObj["seasonality"] = types.StringNull()
+				}
+
+				// Create adaptive baseline object value
+				adaptiveObjVal, adaptiveObjDiags := types.ObjectValue(
+					map[string]attr.Type{
+						"operator":         types.StringType,
+						"deviation_factor": types.Float64Type,
+						"adaptability":     types.Float64Type,
+						"seasonality":      types.StringType,
+					},
+					adaptiveObj,
+				)
+				if adaptiveObjDiags.HasError() {
+					return adaptiveObjDiags
+				}
+
+				// Create adaptive baseline list
+				adaptiveList, adaptiveListDiags := types.ListValue(
+					types.ObjectType{
+						AttrTypes: map[string]attr.Type{
+							"operator":         types.StringType,
+							"deviation_factor": types.Float64Type,
+							"adaptability":     types.Float64Type,
+							"seasonality":      types.StringType,
+						},
+					},
+					[]attr.Value{adaptiveObjVal},
+				)
+				if adaptiveListDiags.HasError() {
+					return adaptiveListDiags
+				}
+
+				thresholdObj[ThresholdFieldAdaptiveBaseline] = adaptiveList
+			}
+		}
+
+		// Create threshold object value with the appropriate attribute types
+		thresholdAttrTypes := map[string]attr.Type{}
+
+		// Add static threshold attribute type if present
+		if _, ok := thresholdObj[ThresholdFieldStatic]; ok {
+			thresholdAttrTypes[ThresholdFieldStatic] = types.ListType{
+				ElemType: types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"operator": types.StringType,
+						"value":    types.Float64Type,
+					},
+				},
+			}
+		}
+
+		// Add adaptive baseline attribute type if present
+		if _, ok := thresholdObj[ThresholdFieldAdaptiveBaseline]; ok {
+			thresholdAttrTypes[ThresholdFieldAdaptiveBaseline] = types.ListType{
+				ElemType: types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"operator":         types.StringType,
+						"deviation_factor": types.Float64Type,
+						"adaptability":     types.Float64Type,
+						"seasonality":      types.StringType,
+					},
+				},
+			}
+		}
+
+		// Create the object value
 		thresholdObjVal, thresholdObjDiags := types.ObjectValue(
-			map[string]attr.Type{
-				LogAlertConfigFieldWarning:  GetStaticAndAdaptiveThresholdAttrListTypes(),
-				LogAlertConfigFieldCritical: GetStaticAndAdaptiveThresholdAttrListTypes(),
-			},
+			thresholdAttrTypes,
 			thresholdObj,
 		)
 		if thresholdObjDiags.HasError() {
 			return thresholdObjDiags
 		}
 
-		// Add threshold to rule
+		// Create the list value
 		thresholdList, thresholdListDiags := types.ListValue(
 			types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					LogAlertConfigFieldWarning:  GetStaticThresholdAttrListTypes(),
-					LogAlertConfigFieldCritical: GetStaticThresholdAttrListTypes(),
-				},
+				AttrTypes: thresholdAttrTypes,
 			},
 			[]attr.Value{thresholdObjVal},
 		)
-
-		model.Threshold = thresholdList
 		if thresholdListDiags.HasError() {
 			return thresholdListDiags
 		}
+
 		model.Threshold = thresholdList
 	}
 

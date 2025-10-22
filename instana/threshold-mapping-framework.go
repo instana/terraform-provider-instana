@@ -518,33 +518,46 @@ func MapThresholdRuleFromState(ctx context.Context, thresholdList types.List) (*
 
 	log.Printf("Threshold: %+v\n", thresholdObj)
 
+	// Get the attributes as a map to check which fields exist
+	attrs := thresholdObj.Attributes()
+
 	// Check for static threshold
-	var staticStruct struct {
-		Static           types.List `tfsdk:"static"`
-		HistoricBaseline types.List `tfsdk:"historic_baseline"`
-		AdaptiveBaseline types.List `tfsdk:"adaptive_baseline"`
-	}
-	diags.Append(thresholdObj.As(ctx, &staticStruct, basetypes.ObjectAsOptions{UnhandledNullAsEmpty: true, UnhandledUnknownAsEmpty: true})...)
-	if !diags.HasError() && !staticStruct.Static.IsNull() && !staticStruct.Static.IsUnknown() {
-		return mapStaticThresholdFromState(ctx, staticStruct.Static)
+	if staticVal, ok := attrs[ThresholdFieldStatic]; ok && !staticVal.IsNull() && !staticVal.IsUnknown() {
+		staticList, ok := staticVal.(types.List)
+		if !ok {
+			diags.AddError(
+				"Invalid static threshold type",
+				"Expected list type for static threshold",
+			)
+			return nil, diags
+		}
+		return mapStaticThresholdFromState(ctx, staticList)
 	}
 
 	// Check for historic baseline threshold
-	var historicStruct struct {
-		HistoricBaseline types.List `tfsdk:"historic_baseline"`
-	}
-	diags.Append(thresholdObj.As(ctx, &historicStruct, basetypes.ObjectAsOptions{UnhandledNullAsEmpty: true, UnhandledUnknownAsEmpty: true})...)
-	if !diags.HasError() && !historicStruct.HistoricBaseline.IsNull() && !historicStruct.HistoricBaseline.IsUnknown() {
-		return mapHistoricBaselineFromState(ctx, historicStruct.HistoricBaseline)
+	if historicVal, ok := attrs[ThresholdFieldHistoricBaseline]; ok && !historicVal.IsNull() && !historicVal.IsUnknown() {
+		historicList, ok := historicVal.(types.List)
+		if !ok {
+			diags.AddError(
+				"Invalid historic baseline threshold type",
+				"Expected list type for historic baseline threshold",
+			)
+			return nil, diags
+		}
+		return mapHistoricBaselineFromState(ctx, historicList)
 	}
 
 	// Check for adaptive baseline threshold
-	var adaptiveStruct struct {
-		AdaptiveBaseline types.List `tfsdk:"adaptive_baseline"`
-	}
-	diags.Append(thresholdObj.As(ctx, &adaptiveStruct, basetypes.ObjectAsOptions{UnhandledNullAsEmpty: true, UnhandledUnknownAsEmpty: true})...)
-	if !diags.HasError() && !adaptiveStruct.AdaptiveBaseline.IsNull() && !adaptiveStruct.AdaptiveBaseline.IsUnknown() {
-		return mapAdaptiveBaselineFromState(ctx, adaptiveStruct.AdaptiveBaseline)
+	if adaptiveVal, ok := attrs[ThresholdFieldAdaptiveBaseline]; ok && !adaptiveVal.IsNull() && !adaptiveVal.IsUnknown() {
+		adaptiveList, ok := adaptiveVal.(types.List)
+		if !ok {
+			diags.AddError(
+				"Invalid adaptive baseline threshold type",
+				"Expected list type for adaptive baseline threshold",
+			)
+			return nil, diags
+		}
+		return mapAdaptiveBaselineFromState(ctx, adaptiveList)
 	}
 
 	// If we get here, no valid threshold type was found
