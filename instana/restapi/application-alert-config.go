@@ -26,7 +26,7 @@ type ApplicationAlertConfig struct {
 	CustomerPayloadFields []CustomPayloadField[interface{}]    `json:"customPayloadFields"`
 	Rule                  *ApplicationAlertRule                `json:"rule"`
 	Rules                 []ApplicationAlertRuleWithThresholds `json:"rules"`
-	Threshold             map[AlertSeverity]ThresholdRule      `json:"threshold"`
+	Threshold             *Threshold                           `json:"threshold"`
 	TimeThreshold         *ApplicationAlertTimeThreshold       `json:"timeThreshold"`
 }
 
