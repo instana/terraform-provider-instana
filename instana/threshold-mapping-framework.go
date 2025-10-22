@@ -2,6 +2,7 @@ package instana
 
 import (
 	"context"
+	"log"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
@@ -515,11 +516,15 @@ func MapThresholdRuleFromState(ctx context.Context, thresholdList types.List) (*
 	// Get the threshold object
 	thresholdObj := thresholdElements[0]
 
+	log.Printf("Threshold: %+v\n", thresholdObj)
+
 	// Check for static threshold
 	var staticStruct struct {
-		Static types.List `tfsdk:"static"`
+		Static           types.List `tfsdk:"static"`
+		HistoricBaseline types.List `tfsdk:"historic_baseline"`
+		AdaptiveBaseline types.List `tfsdk:"adaptive_baseline"`
 	}
-	diags.Append(thresholdObj.As(ctx, &staticStruct, basetypes.ObjectAsOptions{})...)
+	diags.Append(thresholdObj.As(ctx, &staticStruct, basetypes.ObjectAsOptions{UnhandledNullAsEmpty: true, UnhandledUnknownAsEmpty: true})...)
 	if !diags.HasError() && !staticStruct.Static.IsNull() && !staticStruct.Static.IsUnknown() {
 		return mapStaticThresholdFromState(ctx, staticStruct.Static)
 	}
@@ -528,7 +533,7 @@ func MapThresholdRuleFromState(ctx context.Context, thresholdList types.List) (*
 	var historicStruct struct {
 		HistoricBaseline types.List `tfsdk:"historic_baseline"`
 	}
-	diags.Append(thresholdObj.As(ctx, &historicStruct, basetypes.ObjectAsOptions{})...)
+	diags.Append(thresholdObj.As(ctx, &historicStruct, basetypes.ObjectAsOptions{UnhandledNullAsEmpty: true, UnhandledUnknownAsEmpty: true})...)
 	if !diags.HasError() && !historicStruct.HistoricBaseline.IsNull() && !historicStruct.HistoricBaseline.IsUnknown() {
 		return mapHistoricBaselineFromState(ctx, historicStruct.HistoricBaseline)
 	}
@@ -537,7 +542,7 @@ func MapThresholdRuleFromState(ctx context.Context, thresholdList types.List) (*
 	var adaptiveStruct struct {
 		AdaptiveBaseline types.List `tfsdk:"adaptive_baseline"`
 	}
-	diags.Append(thresholdObj.As(ctx, &adaptiveStruct, basetypes.ObjectAsOptions{})...)
+	diags.Append(thresholdObj.As(ctx, &adaptiveStruct, basetypes.ObjectAsOptions{UnhandledNullAsEmpty: true, UnhandledUnknownAsEmpty: true})...)
 	if !diags.HasError() && !adaptiveStruct.AdaptiveBaseline.IsNull() && !adaptiveStruct.AdaptiveBaseline.IsUnknown() {
 		return mapAdaptiveBaselineFromState(ctx, adaptiveStruct.AdaptiveBaseline)
 	}

@@ -150,7 +150,7 @@ type ApplicationAlertConfigModel struct {
 	Rules               types.List   `tfsdk:"rules"`
 	Severity            types.String `tfsdk:"severity"`
 	TagFilter           types.String `tfsdk:"tag_filter"`
-	Threshold           types.Object `tfsdk:"threshold"`
+	Threshold           types.List   `tfsdk:"threshold"`
 	TimeThreshold       types.List   `tfsdk:"time_threshold"`
 	Triggering          types.Bool   `tfsdk:"triggering"`
 }
@@ -706,20 +706,16 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 							},
 						},
 					},
-					ResourceFieldThreshold: schema.SingleNestedBlock{
-						Description: "The threshold configuration for the alert",
-						Attributes: map[string]schema.Attribute{
-							"type": schema.StringAttribute{
-								Required:    true,
-								Description: "The type of the threshold",
-								Validators: []validator.String{
-									stringvalidator.OneOf("upperBound", "lowerBound"),
-								},
+					ResourceFieldThreshold: schema.ListNestedBlock{
+						Description: "Threshold configuration for different severity levels",
+						NestedObject: schema.NestedBlockObject{
+							Blocks: map[string]schema.Block{
+								LogAlertConfigFieldWarning:  StaticAndAdaptiveThresholdBlockSchema(),
+								LogAlertConfigFieldCritical: StaticAndAdaptiveThresholdBlockSchema(),
 							},
-							"value": schema.Float64Attribute{
-								Required:    true,
-								Description: "The value of the threshold",
-							},
+						},
+						Validators: []validator.List{
+							listvalidator.SizeAtMost(1),
 						},
 					},
 					ApplicationAlertConfigFieldTimeThreshold: schema.ListNestedBlock{
@@ -809,41 +805,56 @@ func (r *applicationAlertConfigResourceFramework) GetRestResource(api restapi.In
 }
 
 func (r *applicationAlertConfigResourceFramework) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.ApplicationAlertConfig, diag.Diagnostics) {
-	// Delegate to the resource implementation
-	resource, diags := r.NewResource(ctx, nil)
+	var diags diag.Diagnostics
+	var model ApplicationAlertConfigModel
+
+	// Get current state from plan or state
+	if plan != nil {
+		diags.Append(plan.Get(ctx, &model)...)
+	} else if state != nil {
+		diags.Append(state.Get(ctx, &model)...)
+	}
+
 	if diags.HasError() {
 		return nil, diags
 	}
 
-	// If state is provided, use it, otherwise use plan
-	if state != nil {
-		return resource.MapStateToDataObject(ctx, *state)
-	} else if plan != nil {
-		// Create a temporary state from the plan
-		var tempState tfsdk.State
-		tempState.Schema = plan.Schema
-		diags = plan.Get(ctx, &tempState.Raw)
-		if diags.HasError() {
-			return nil, diags
-		}
-		return resource.MapStateToDataObject(ctx, tempState)
-	} else {
-		return nil, diag.Diagnostics{
-			diag.NewErrorDiagnostic(
-				"Invalid parameters",
-				"Either plan or state must be provided",
-			),
-		}
+	// Delegate to the resource implementation
+	resource, resourceDiags := r.NewResource(ctx, nil)
+	if resourceDiags.HasError() {
+		diags.Append(resourceDiags...)
+		return nil, diags
 	}
+
+	// Create a new state with the model
+	var tempState tfsdk.State
+	if plan != nil {
+		tempState.Schema = plan.Schema
+	} else if state != nil {
+		tempState.Schema = state.Schema
+	}
+
+	// Set the model in the state
+	diags.Append(tempState.Set(ctx, model)...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	// Map the state to the data object
+	return resource.MapStateToDataObject(ctx, tempState)
 }
 
 func (r *applicationAlertConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, obj *restapi.ApplicationAlertConfig) diag.Diagnostics {
+	var diags diag.Diagnostics
+
 	// Delegate to the resource implementation
-	resource, diags := r.NewResource(ctx, nil)
-	if diags.HasError() {
+	resource, resourceDiags := r.NewResource(ctx, nil)
+	if resourceDiags.HasError() {
+		diags.Append(resourceDiags...)
 		return diags
 	}
 
+	// Update the state with the object
 	return resource.UpdateState(ctx, obj, state)
 }
 
@@ -1006,77 +1017,29 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 
 	// Handle custom payload fields
 	if !model.CustomPayloadFields.IsNull() && !model.CustomPayloadFields.IsUnknown() {
-		var customPayloadFields []map[string]interface{}
-		diags = model.CustomPayloadFields.ElementsAs(ctx, &customPayloadFields, false)
-		if diags.HasError() {
+		var customerPayloadFields []restapi.CustomPayloadField[any]
+		var payloadDiags diag.Diagnostics
+		customerPayloadFields, payloadDiags = MapCustomPayloadFieldsToAPIObject(ctx, model.CustomPayloadFields)
+		if payloadDiags.HasError() {
+			diags.Append(payloadDiags...)
 			return nil, diags
 		}
-
-		fields := make([]restapi.CustomPayloadField[interface{}], len(customPayloadFields))
-		for i, field := range customPayloadFields {
-			key, ok := field["key"].(string)
-			if !ok {
-				return nil, diag.Diagnostics{
-					diag.NewErrorDiagnostic(
-						"Invalid custom payload field",
-						"Custom payload field key must be a string",
-					),
-				}
-			}
-			value, ok := field["value"].(string)
-			if !ok {
-				return nil, diag.Diagnostics{
-					diag.NewErrorDiagnostic(
-						"Invalid custom payload field",
-						"Custom payload field value must be a string",
-					),
-				}
-			}
-			payloadType, ok := field["type"].(string)
-			if !ok {
-				payloadType = string(restapi.StaticStringCustomPayloadType)
-			}
-			fields[i] = restapi.CustomPayloadField[interface{}]{
-				Type:  restapi.CustomPayloadType(payloadType),
-				Key:   key,
-				Value: value,
-			}
-		}
-		result.CustomerPayloadFields = fields
+		result.CustomerPayloadFields = customerPayloadFields
 	}
 
 	// Handle threshold
 	if !model.Threshold.IsNull() && !model.Threshold.IsUnknown() {
-		var threshold map[string]interface{}
-		diags = model.Threshold.As(ctx, &threshold, basetypes.ObjectAsOptions{})
+
+		var thresholdMap map[restapi.AlertSeverity]restapi.ThresholdRule
+		var thresholdDiags diag.Diagnostics
+
+		thresholdMap, thresholdDiags = MapThresholdsFromState(ctx, model.Threshold)
+		diags.Append(thresholdDiags...)
 		if diags.HasError() {
 			return nil, diags
 		}
+		result.Threshold = thresholdMap
 
-		thresholdType, ok := threshold["type"].(string)
-		if !ok {
-			return nil, diag.Diagnostics{
-				diag.NewErrorDiagnostic(
-					"Invalid threshold",
-					"Threshold type must be a string",
-				),
-			}
-		}
-		thresholdValue, ok := threshold["value"].(float64)
-		if !ok {
-			return nil, diag.Diagnostics{
-				diag.NewErrorDiagnostic(
-					"Invalid threshold",
-					"Threshold value must be a number",
-				),
-			}
-		}
-
-		thresholdValuePtr := thresholdValue
-		result.Threshold = &restapi.Threshold{
-			Type:  thresholdType,
-			Value: &thresholdValuePtr,
-		}
 	}
 
 	// Handle rule (deprecated but supported for backward compatibility)
@@ -1571,45 +1534,61 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 	}
 
 	// Handle custom payload fields
-	if len(data.CustomerPayloadFields) > 0 {
-		elements := make([]attr.Value, len(data.CustomerPayloadFields))
-		for i, field := range data.CustomerPayloadFields {
-			fieldObj, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
-				"key":   types.StringType,
-				"value": types.StringType,
-				"type":  types.StringType,
-			}, map[string]interface{}{
-				"key":   field.Key,
-				"value": field.Value,
-				"type":  string(field.Type),
-			})
-			if diags.HasError() {
-				return diags
-			}
-			elements[i] = fieldObj
-		}
-		model.CustomPayloadFields = types.ListValueMust(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"key":   types.StringType,
-				"value": types.StringType,
-				"type":  types.StringType,
-			},
-		}, elements)
+	customPayloadFieldsList, payloadDiags := CustomPayloadFieldsToTerraform(ctx, data.CustomerPayloadFields)
+	if payloadDiags.HasError() {
+		return payloadDiags
 	}
+	model.CustomPayloadFields = customPayloadFieldsList
 
 	// Handle threshold
 	if data.Threshold != nil {
-		thresholdObj, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
-			"type":  types.StringType,
-			"value": types.Float64Type,
-		}, map[string]interface{}{
-			"type":  data.Threshold.Type,
-			"value": data.Threshold.Value,
-		})
-		if diags.HasError() {
-			return diags
+		// Map thresholds
+		thresholdObj := map[string]attr.Value{}
+
+		// Map warning threshold
+		warningThreshold, isWarningThresholdPresent := data.Threshold[restapi.WarningSeverity]
+		warningThresholdList, warningDiags := MapThresholdToState(ctx, isWarningThresholdPresent, &warningThreshold)
+		if warningDiags.HasError() {
+			return warningDiags
 		}
-		model.Threshold = thresholdObj
+		thresholdObj[LogAlertConfigFieldWarning] = warningThresholdList
+
+		// Map critical threshold
+		criticalThreshold, isCriticalThresholdPresent := data.Threshold[restapi.CriticalSeverity]
+		criticalThresholdList, criticalDiags := MapThresholdToState(ctx, isCriticalThresholdPresent, &criticalThreshold)
+		if criticalDiags.HasError() {
+			return criticalDiags
+		}
+		thresholdObj[LogAlertConfigFieldCritical] = criticalThresholdList
+
+		// Create threshold object value
+		thresholdObjVal, thresholdObjDiags := types.ObjectValue(
+			map[string]attr.Type{
+				LogAlertConfigFieldWarning:  GetStaticAndAdaptiveThresholdAttrListTypes(),
+				LogAlertConfigFieldCritical: GetStaticAndAdaptiveThresholdAttrListTypes(),
+			},
+			thresholdObj,
+		)
+		if thresholdObjDiags.HasError() {
+			return thresholdObjDiags
+		}
+
+		// Add threshold to rule
+		thresholdList, thresholdListDiags := types.ListValue(
+			types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					LogAlertConfigFieldWarning:  GetStaticThresholdAttrListTypes(),
+					LogAlertConfigFieldCritical: GetStaticThresholdAttrListTypes(),
+				},
+			},
+			[]attr.Value{thresholdObjVal},
+		)
+
+		model.Threshold = thresholdList
+		if thresholdListDiags.HasError() {
+			return thresholdListDiags
+		}
+		model.Threshold = thresholdList
 	}
 
 	// Handle rule (deprecated but supported for backward compatibility)
