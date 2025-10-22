@@ -22,7 +22,7 @@ type ApplicationAlertConfig struct {
 	AlertChannelIDs       []string                             `json:"alertChannelIds"`
 	AlertChannels         map[string][]string                  `json:"alertChannels"`
 	Granularity           Granularity                          `json:"granularity"`
-	GracePeriod           int                                  `json:"gracePeriod"`
+	GracePeriod           *int64                               `json:"gracePeriod"`
 	CustomerPayloadFields []CustomPayloadField[interface{}]    `json:"customPayloadFields"`
 	Rule                  *ApplicationAlertRule                `json:"rule"`
 	Rules                 []ApplicationAlertRuleWithThresholds `json:"rules"`
@@ -67,9 +67,11 @@ type EndpointScope struct {
 
 // ApplicationAlertTimeThreshold represents the time threshold configuration for application alerts
 type ApplicationAlertTimeThreshold struct {
-	RequestImpact        *ApplicationAlertTimeThresholdRequestImpact        `json:"requestImpact,omitempty"`
-	ViolationsInPeriod   *ApplicationAlertTimeThresholdViolationsInPeriod   `json:"violationsInPeriod,omitempty"`
-	ViolationsInSequence *ApplicationAlertTimeThresholdViolationsInSequence `json:"violationsInSequence,omitempty"`
+	Type                 string                                             `json:"type"`
+	TimeWindow           int64                                              `json:"timeWindow"`
+	RequestImpact        *ApplicationAlertTimeThresholdRequestImpact        `json:"-"`
+	ViolationsInPeriod   *ApplicationAlertTimeThresholdViolationsInPeriod   `json:"-"`
+	ViolationsInSequence *ApplicationAlertTimeThresholdViolationsInSequence `json:"-"`
 }
 
 // ApplicationAlertTimeThresholdRequestImpact represents the request impact time threshold configuration

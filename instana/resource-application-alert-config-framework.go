@@ -3,6 +3,7 @@ package instana
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/instana/tagfilter"
@@ -942,9 +943,8 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 	}
 
 	// Handle grace period
-	if !model.GracePeriod.IsNull() && !model.GracePeriod.IsUnknown() {
-		result.GracePeriod = int(model.GracePeriod.ValueInt64())
-	}
+
+	result.GracePeriod = extractGracePeriod(model.GracePeriod)
 
 	// Handle granularity
 	if !model.Granularity.IsNull() && !model.Granularity.IsUnknown() {
@@ -1079,82 +1079,78 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 		if len(thresholdElements) > 0 {
 			// Create a new Threshold object
 			threshold := &restapi.Threshold{}
+			log.Printf("static threshold elements : %+v\n", thresholdElements)
 
 			// Check for static threshold
 			if staticVal, ok := thresholdElements[0].Attributes()[ThresholdFieldStatic]; ok && !staticVal.IsNull() && !staticVal.IsUnknown() {
-				staticList, ok := staticVal.(types.List)
-				if ok && !staticList.IsNull() && !staticList.IsUnknown() {
-					var staticElements []types.Object
-					diags.Append(staticList.ElementsAs(ctx, &staticElements, false)...)
+				log.Printf("static threshold value type: %T\n", staticVal)
+
+				// Extract the operator and value directly from the static object
+				var staticObj struct {
+					Operator types.String  `tfsdk:"operator"`
+					Value    types.Float64 `tfsdk:"value"`
+				}
+
+				staticObject, ok := staticVal.(types.Object)
+				if ok && !staticObject.IsNull() && !staticObject.IsUnknown() {
+					log.Printf("static threshold individual: %+v\n", staticObject)
+
+					diags.Append(staticObject.As(ctx, &staticObj, basetypes.ObjectAsOptions{})...)
 					if diags.HasError() {
 						return nil, diags
 					}
 
-					if len(staticElements) > 0 {
-						// Extract the operator and value
-						var staticObj struct {
-							Operator types.String  `tfsdk:"operator"`
-							Value    types.Float64 `tfsdk:"value"`
-						}
+					// Set the threshold type and operator
+					threshold.Type = "staticThreshold"
+					threshold.Operator = restapi.ThresholdOperator(staticObj.Operator.ValueString())
 
-						diags.Append(staticElements[0].As(ctx, &staticObj, basetypes.ObjectAsOptions{})...)
-						if diags.HasError() {
-							return nil, diags
-						}
-
-						// Set the threshold type and operator
-						threshold.Type = "staticThreshold"
-						threshold.Operator = restapi.ThresholdOperator(staticObj.Operator.ValueString())
-
-						// Set the value
-						if !staticObj.Value.IsNull() && !staticObj.Value.IsUnknown() {
-							value := staticObj.Value.ValueFloat64()
-							threshold.Value = &value
-						}
+					// Set the value
+					if !staticObj.Value.IsNull() && !staticObj.Value.IsUnknown() {
+						value := staticObj.Value.ValueFloat64()
+						threshold.Value = &value
 					}
+					log.Printf("static threshold final: %+v\n", threshold)
 				}
 			}
 
 			// Check for adaptive baseline threshold
 			if adaptiveVal, ok := thresholdElements[0].Attributes()[ThresholdFieldAdaptiveBaseline]; ok && !adaptiveVal.IsNull() && !adaptiveVal.IsUnknown() {
-				adaptiveList, ok := adaptiveVal.(types.List)
-				if ok && !adaptiveList.IsNull() && !adaptiveList.IsUnknown() {
-					var adaptiveElements []types.Object
-					diags.Append(adaptiveList.ElementsAs(ctx, &adaptiveElements, false)...)
+				log.Printf("adaptive threshold value type: %T\n", adaptiveVal)
+
+				// Extract the operator, deviation factor, adaptability, and seasonality directly
+				var adaptiveObj struct {
+					Operator        types.String  `tfsdk:"operator"`
+					DeviationFactor types.Float64 `tfsdk:"deviation_factor"`
+					Adaptability    types.Float64 `tfsdk:"adaptability"`
+					Seasonality     types.String  `tfsdk:"seasonality"`
+				}
+
+				adaptiveObject, ok := adaptiveVal.(types.Object)
+				if ok && !adaptiveObject.IsNull() && !adaptiveObject.IsUnknown() {
+					log.Printf("adaptive threshold individual: %+v\n", adaptiveObject)
+
+					diags.Append(adaptiveObject.As(ctx, &adaptiveObj, basetypes.ObjectAsOptions{})...)
 					if diags.HasError() {
 						return nil, diags
 					}
 
-					if len(adaptiveElements) > 0 {
-						// Extract the operator, deviation factor, adaptability, and seasonality
-						var adaptiveObj struct {
-							Operator        types.String  `tfsdk:"operator"`
-							DeviationFactor types.Float64 `tfsdk:"deviation_factor"`
-							Adaptability    types.Float64 `tfsdk:"adaptability"`
-							Seasonality     types.String  `tfsdk:"seasonality"`
-						}
+					// Set the threshold type and operator
+					threshold.Type = "adaptiveBaseline"
+					threshold.Operator = restapi.ThresholdOperator(adaptiveObj.Operator.ValueString())
 
-						diags.Append(adaptiveElements[0].As(ctx, &adaptiveObj, basetypes.ObjectAsOptions{})...)
-						if diags.HasError() {
-							return nil, diags
-						}
-
-						// Set the threshold type and operator
-						threshold.Type = "adaptiveBaseline"
-						threshold.Operator = restapi.ThresholdOperator(adaptiveObj.Operator.ValueString())
-
-						// Set the deviation factor
-						if !adaptiveObj.DeviationFactor.IsNull() && !adaptiveObj.DeviationFactor.IsUnknown() {
-							deviationFactor := float32(adaptiveObj.DeviationFactor.ValueFloat64())
-							threshold.DeviationFactor = &deviationFactor
-						}
-
-						// Set the seasonality
-						if !adaptiveObj.Seasonality.IsNull() && !adaptiveObj.Seasonality.IsUnknown() {
-							seasonality := restapi.ThresholdSeasonality(adaptiveObj.Seasonality.ValueString())
-							threshold.Seasonality = &seasonality
-						}
+					// Set the deviation factor
+					if !adaptiveObj.DeviationFactor.IsNull() && !adaptiveObj.DeviationFactor.IsUnknown() {
+						deviationFactor := float32(adaptiveObj.DeviationFactor.ValueFloat64())
+						threshold.DeviationFactor = &deviationFactor
 					}
+
+					// Set the seasonality
+					if !adaptiveObj.Seasonality.IsNull() && !adaptiveObj.Seasonality.IsUnknown() {
+						seasonality := restapi.ThresholdSeasonality(adaptiveObj.Seasonality.ValueString())
+						threshold.Seasonality = &seasonality
+					}
+
+					log.Printf("adaptive threshold final: %+v\n", threshold)
 				}
 			}
 
@@ -1230,6 +1226,9 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 					return nil, diags
 				}
 				if len(slownessRules) > 0 {
+					result.Rule.MetricName = slownessRules[0].MetricName.ValueString()
+					result.Rule.Aggregation = restapi.Aggregation(slownessRules[0].Aggregation.ValueString())
+					result.Rule.AlertType = ApplicationAlertConfigFieldRuleSlowness
 					result.Rule.Slowness = &restapi.ApplicationAlertRuleSlowness{
 						MetricName:  slownessRules[0].MetricName.ValueString(),
 						Aggregation: slownessRules[0].Aggregation.ValueString(),
@@ -1345,12 +1344,17 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 
 				// Handle slowness rule
 				if !rule.Slowness.IsNull() && !rule.Slowness.IsUnknown() {
+					log.Printf("Slowness : %+v\n", rule.Slowness)
 					var slownessRules []RuleConfigModel
 					diags = rule.Slowness.ElementsAs(ctx, &slownessRules, false)
+					log.Printf("Slowness mapped : %+v\n", slownessRules)
 					if diags.HasError() {
 						return nil, diags
 					}
 					if len(slownessRules) > 0 {
+						result.Rules[i].Rule.MetricName = slownessRules[0].MetricName.ValueString()
+						result.Rules[i].Rule.Aggregation = restapi.Aggregation(slownessRules[0].Aggregation.ValueString())
+						result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleSlowness
 						result.Rules[i].Rule.Slowness = &restapi.ApplicationAlertRuleSlowness{
 							MetricName:  slownessRules[0].MetricName.ValueString(),
 							Aggregation: slownessRules[0].Aggregation.ValueString(),
@@ -1442,6 +1446,8 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 					return nil, diags
 				}
 				if len(requestImpacts) > 0 {
+					result.TimeThreshold.Type = "requestImpact"
+					result.TimeThreshold.TimeWindow = requestImpacts[0].TimeWindow.ValueInt64()
 					result.TimeThreshold.RequestImpact = &restapi.ApplicationAlertTimeThresholdRequestImpact{
 						TimeWindow: int(requestImpacts[0].TimeWindow.ValueInt64()),
 						Requests:   int(requestImpacts[0].Requests.ValueInt64()),
@@ -1457,6 +1463,8 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 					return nil, diags
 				}
 				if len(violationsInPeriods) > 0 {
+					result.TimeThreshold.Type = "violationsInPeriod"
+					result.TimeThreshold.TimeWindow = violationsInPeriods[0].TimeWindow.ValueInt64()
 					result.TimeThreshold.ViolationsInPeriod = &restapi.ApplicationAlertTimeThresholdViolationsInPeriod{
 						TimeWindow: int(violationsInPeriods[0].TimeWindow.ValueInt64()),
 						Violations: int(violationsInPeriods[0].Violations.ValueInt64()),
@@ -1472,6 +1480,8 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 					return nil, diags
 				}
 				if len(violationsInSequences) > 0 {
+					result.TimeThreshold.Type = "violationsInSequence"
+					result.TimeThreshold.TimeWindow = violationsInSequences[0].TimeWindow.ValueInt64()
 					result.TimeThreshold.ViolationsInSequence = &restapi.ApplicationAlertTimeThresholdViolationsInSequence{
 						TimeWindow: int(violationsInSequences[0].TimeWindow.ValueInt64()),
 					}
@@ -1481,6 +1491,14 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 	}
 
 	return result, nil
+}
+
+func extractGracePeriod(v types.Int64) *int64 {
+	if v.IsNull() || v.IsUnknown() {
+		return nil // send as null (omitted in JSON)
+	}
+	val := v.ValueInt64()
+	return &val
 }
 
 func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Context, data *restapi.ApplicationAlertConfig, state *tfsdk.State) diag.Diagnostics {
@@ -1497,8 +1515,8 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 	}
 
 	// Handle grace period
-	if data.GracePeriod > 0 {
-		model.GracePeriod = types.Int64Value(int64(data.GracePeriod))
+	if data.GracePeriod != nil {
+		model.GracePeriod = types.Int64Value(*data.GracePeriod)
 	}
 
 	// Handle tag filter
