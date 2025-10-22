@@ -978,55 +978,17 @@ func (r *logAlertConfigResourceFramework) mapRulesFromState(ctx context.Context,
 		thresholdOperator := restapi.ThresholdOperator(rule.ThresholdOperator.ValueString())
 
 		// Map thresholds
-		thresholdMap := make(map[restapi.AlertSeverity]restapi.ThresholdRule)
+		var thresholdMap map[restapi.AlertSeverity]restapi.ThresholdRule
+		var thresholdDiags diag.Diagnostics
 
 		if !rule.Threshold.IsNull() && !rule.Threshold.IsUnknown() {
-			var thresholdElements []types.Object
-			diags.Append(rule.Threshold.ElementsAs(ctx, &thresholdElements, false)...)
+			thresholdMap, thresholdDiags = MapThresholdsFromState(ctx, rule.Threshold)
+			diags.Append(thresholdDiags...)
 			if diags.HasError() {
 				return nil, diags
 			}
-
-			if len(thresholdElements) > 0 {
-				thresholdObj := thresholdElements[0]
-
-				// Use a properly structured type instead of a generic map
-				var thresholdStruct struct {
-					Warning  types.List `tfsdk:"warning"`
-					Critical types.List `tfsdk:"critical"`
-				}
-
-				diags.Append(thresholdObj.As(ctx, &thresholdStruct, basetypes.ObjectAsOptions{})...)
-				if diags.HasError() {
-					return nil, diags
-				}
-
-				// Process warning threshold
-				if !thresholdStruct.Warning.IsNull() && !thresholdStruct.Warning.IsUnknown() {
-					warningThreshold, warningDiags := MapThresholdRuleFromState(ctx, thresholdStruct.Warning)
-					diags.Append(warningDiags...)
-					if diags.HasError() {
-						return nil, diags
-					}
-
-					if warningThreshold != nil {
-						thresholdMap[restapi.WarningSeverity] = *warningThreshold
-					}
-				}
-
-				// Process critical threshold
-				if !thresholdStruct.Critical.IsNull() && !thresholdStruct.Critical.IsUnknown() {
-					criticalThreshold, criticalDiags := MapThresholdRuleFromState(ctx, thresholdStruct.Critical)
-					diags.Append(criticalDiags...)
-					if diags.HasError() {
-						return nil, diags
-					}
-
-					if criticalThreshold != nil {
-						thresholdMap[restapi.CriticalSeverity] = *criticalThreshold
-					}
-				}
-			}
+		} else {
+			thresholdMap = make(map[restapi.AlertSeverity]restapi.ThresholdRule)
 		}
 
 		// Create rule with threshold
@@ -1040,6 +1002,6 @@ func (r *logAlertConfigResourceFramework) mapRulesFromState(ctx context.Context,
 	return result, diags
 }
 
-// mapThresholdRuleFromState has been moved to threshold-mapping-framework.go
+// mapThresholdRuleFromState and MapThresholdsFromState have been moved to threshold-mapping-framework.go
 
 // Made with Bob

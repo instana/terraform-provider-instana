@@ -38,6 +38,28 @@ func StaticBlockSchema() schema.ListNestedBlock {
 	}
 }
 
+func AdaptiveBlockSchema() schema.ListNestedBlock {
+	return schema.ListNestedBlock{
+		Description: "Threshold configuration",
+		NestedObject: schema.NestedBlockObject{
+			Attributes: map[string]schema.Attribute{
+				ThresholdFieldAdaptiveBaselineDeviation: schema.Float64Attribute{
+					Optional:    true,
+					Description: "The deviation factor for the adaptive baseline threshold",
+				},
+				ThresholdFieldAdaptiveBaselineAdaptability: schema.Float64Attribute{
+					Optional:    true,
+					Description: "The adaptability for the adaptive baseline threshold",
+				},
+				ThresholdFieldAdaptiveBaselineSeasonality: schema.StringAttribute{
+					Optional:    true,
+					Description: "The seasonality for the adaptive baseline threshold",
+				},
+			},
+		},
+	}
+}
+
 // StaticThresholdBlockSchema returns the schema for static threshold configuration
 func StaticThresholdBlockSchema() schema.ListNestedBlock {
 	return schema.ListNestedBlock{
@@ -45,6 +67,19 @@ func StaticThresholdBlockSchema() schema.ListNestedBlock {
 		NestedObject: schema.NestedBlockObject{
 			Blocks: map[string]schema.Block{
 				ThresholdFieldStatic: StaticBlockSchema(),
+			},
+		},
+	}
+}
+
+// define a static and adaptive schema for threshold configuration
+func StaticAndAdaptiveThresholdBlockSchema() schema.ListNestedBlock {
+	return schema.ListNestedBlock{
+		Description: "Threshold configuration",
+		NestedObject: schema.NestedBlockObject{
+			Blocks: map[string]schema.Block{
+				ThresholdFieldStatic:           StaticBlockSchema(),
+				ThresholdFieldAdaptiveBaseline: AdaptiveBlockSchema(),
 			},
 		},
 	}
@@ -635,3 +670,60 @@ func mapAdaptiveBaselineFromState(ctx context.Context, adaptiveList types.List) 
 }
 
 // Made with Bob
+
+// MapThresholdsFromState maps thresholds from Terraform state to a map of AlertSeverity to ThresholdRule
+func MapThresholdsFromState(ctx context.Context, thresholdList types.List) (map[restapi.AlertSeverity]restapi.ThresholdRule, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	thresholdMap := make(map[restapi.AlertSeverity]restapi.ThresholdRule)
+
+	if !thresholdList.IsNull() && !thresholdList.IsUnknown() {
+		var thresholdElements []types.Object
+		diags.Append(thresholdList.ElementsAs(ctx, &thresholdElements, false)...)
+		if diags.HasError() {
+			return nil, diags
+		}
+
+		if len(thresholdElements) > 0 {
+			thresholdObj := thresholdElements[0]
+
+			// Use a properly structured type instead of a generic map
+			var thresholdStruct struct {
+				Warning  types.List `tfsdk:"warning"`
+				Critical types.List `tfsdk:"critical"`
+			}
+
+			diags.Append(thresholdObj.As(ctx, &thresholdStruct, basetypes.ObjectAsOptions{})...)
+			if diags.HasError() {
+				return nil, diags
+			}
+
+			// Process warning threshold
+			if !thresholdStruct.Warning.IsNull() && !thresholdStruct.Warning.IsUnknown() {
+				warningThreshold, warningDiags := MapThresholdRuleFromState(ctx, thresholdStruct.Warning)
+				diags.Append(warningDiags...)
+				if diags.HasError() {
+					return nil, diags
+				}
+
+				if warningThreshold != nil {
+					thresholdMap[restapi.WarningSeverity] = *warningThreshold
+				}
+			}
+
+			// Process critical threshold
+			if !thresholdStruct.Critical.IsNull() && !thresholdStruct.Critical.IsUnknown() {
+				criticalThreshold, criticalDiags := MapThresholdRuleFromState(ctx, thresholdStruct.Critical)
+				diags.Append(criticalDiags...)
+				if diags.HasError() {
+					return nil, diags
+				}
+
+				if criticalThreshold != nil {
+					thresholdMap[restapi.CriticalSeverity] = *criticalThreshold
+				}
+			}
+		}
+	}
+
+	return thresholdMap, diags
+}

@@ -234,7 +234,7 @@ type AppAlertViolationsInSequenceModel struct {
 type RuleWithThresholdModel struct {
 	Rule              types.Object `tfsdk:"rule"`
 	ThresholdOperator types.String `tfsdk:"threshold_operator"`
-	Thresholds        types.Map    `tfsdk:"thresholds"`
+	Thresholds        types.List   `tfsdk:"thresholds"`
 }
 
 // ThresholdConfigRuleModel represents a threshold configuration for a rule
@@ -690,19 +690,7 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 										},
 									},
 								},
-								ApplicationAlertConfigFieldThresholds: schema.SingleNestedBlock{
-									Description: "Map of severity to threshold configurations",
-									Attributes: map[string]schema.Attribute{
-										"warning": schema.Float64Attribute{
-											Optional:    true,
-											Description: "The threshold value for warning severity level",
-										},
-										"critical": schema.Float64Attribute{
-											Optional:    true,
-											Description: "The threshold value for critical severity level",
-										},
-									},
-								},
+								ApplicationAlertConfigFieldThresholds: StaticAndAdaptiveThresholdBlockSchema(),
 							},
 						},
 					},
@@ -1309,20 +1297,33 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 			}
 
 			// Handle thresholds
+			var thresholdMap map[restapi.AlertSeverity]restapi.ThresholdRule
+			var thresholdDiags diag.Diagnostics
+
 			if !ruleWithThreshold.Thresholds.IsNull() && !ruleWithThreshold.Thresholds.IsUnknown() {
-				thresholds := make(map[string]restapi.ThresholdValue)
-				for k, v := range ruleWithThreshold.Thresholds.Elements() {
-					var thresholdConfig ThresholdConfigRuleModel
-					diags = v.(types.Object).As(ctx, &thresholdConfig, basetypes.ObjectAsOptions{})
-					if diags.HasError() {
-						return nil, diags
-					}
-					thresholds[k] = restapi.ThresholdValue{
-						Value: thresholdConfig.Value.ValueFloat64(),
-					}
+				thresholdMap, thresholdDiags = MapThresholdsFromState(ctx, ruleWithThreshold.Thresholds)
+				diags.Append(thresholdDiags...)
+				if diags.HasError() {
+					return nil, diags
 				}
-				result.Rules[i].Thresholds = thresholds
+				result.Rules[i].Thresholds = thresholdMap
 			}
+
+			// // Handle thresholds
+			// if !ruleWithThreshold.Thresholds.IsNull() && !ruleWithThreshold.Thresholds.IsUnknown() {
+			// 	thresholds := make(map[string]restapi.ThresholdValue)
+			// 	for k, v := range ruleWithThreshold.Thresholds.Elements() {
+			// 		var thresholdConfig ThresholdConfigRuleModel
+			// 		diags = v.(types.Object).As(ctx, &thresholdConfig, basetypes.ObjectAsOptions{})
+			// 		if diags.HasError() {
+			// 			return nil, diags
+			// 		}
+			// 		thresholds[k] = restapi.ThresholdValue{
+			// 			Value: thresholdConfig.Value.ValueFloat64(),
+			// 		}
+			// 	}
+			// 	result.Rules[i].Thresholds = thresholdMap
+			// }
 		}
 	}
 
