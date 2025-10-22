@@ -6,6 +6,7 @@ import (
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/instana/tagfilter"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -690,7 +691,18 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 										},
 									},
 								},
-								ApplicationAlertConfigFieldThresholds: StaticAndAdaptiveThresholdBlockSchema(),
+								ApplicationAlertConfigFieldThresholds: schema.ListNestedBlock{
+									Description: "Threshold configuration for different severity levels",
+									NestedObject: schema.NestedBlockObject{
+										Blocks: map[string]schema.Block{
+											LogAlertConfigFieldWarning:  StaticAndAdaptiveThresholdBlockSchema(),
+											LogAlertConfigFieldCritical: StaticAndAdaptiveThresholdBlockSchema(),
+										},
+									},
+									Validators: []validator.List{
+										listvalidator.SizeAtMost(1),
+									},
+								},
 							},
 						},
 					},
@@ -1953,22 +1965,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 			)
 			diags.Append(thresholdListDiags...)
 			if diags.HasError() {
-				return types.ListNull(types.ObjectType{}), diags
-			}
-
-			ruleObj[LogAlertConfigFieldThreshold] = thresholdList
-
-			thresholdElements := make(map[restapi.AlertSeverity]attr.Value)
-			for severity, threshold := range ruleWithThreshold.Thresholds {
-				thresholdObj, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
-					"value": types.Float64Type,
-				}, map[string]interface{}{
-					"value": threshold.Value,
-				})
-				if diags.HasError() {
-					return diags
-				}
-				thresholdElements[severity] = thresholdObj
+				return diags
 			}
 
 			// Create rule with threshold object
@@ -1984,11 +1981,18 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 					},
 				},
 				"threshold_operator": types.StringType,
-				"thresholds":         GetStaticAndAdaptiveThresholdAttrListTypes(),
+				"thresholds": types.ListType{
+					ElemType: types.ObjectType{
+						AttrTypes: map[string]attr.Type{
+							LogAlertConfigFieldWarning:  GetStaticThresholdAttrListTypes(),
+							LogAlertConfigFieldCritical: GetStaticThresholdAttrListTypes(),
+						},
+					},
+				},
 			}, map[string]interface{}{
 				"rule":               ruleObj,
 				"threshold_operator": ruleWithThreshold.ThresholdOperator,
-				"thresholds":         thresholdElements,
+				"thresholds":         thresholdList,
 			})
 			if diags.HasError() {
 				return diags
