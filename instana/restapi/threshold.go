@@ -79,4 +79,5 @@ type ThresholdRule struct {
 	Seasonality     *ThresholdSeasonality `json:"seasonality"`
 	Baseline        *[][]float64          `json:"baseline"`
 	DeviationFactor *float32              `json:"deviationFactor"`
+	Adaptability    *float64              `json:"adaptability"`
 }
