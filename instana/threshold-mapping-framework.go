@@ -628,7 +628,7 @@ func mapAdaptiveBaselineFromState(ctx context.Context, adaptiveList types.List) 
 	// Set adaptability (stored in Value field)
 	if !adaptiveObj.Adaptability.IsNull() && !adaptiveObj.Adaptability.IsUnknown() {
 		adaptability := adaptiveObj.Adaptability.ValueFloat64()
-		thresholdRule.Value = &adaptability
+		thresholdRule.Adaptability = &adaptability
 	}
 
 	return thresholdRule, diags
