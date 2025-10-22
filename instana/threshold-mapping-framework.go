@@ -463,6 +463,37 @@ func GetStaticThresholdAttrListTypes() types.ListType {
 	}
 }
 
+// GetStaticAndAdaptiveThresholdAttrTypes returns the attribute types map for both static and adaptive thresholds
+func GetStaticAndAdaptiveThresholdAttrTypes() map[string]attr.Type {
+	return map[string]attr.Type{
+		ThresholdFieldStatic: types.ListType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					LogAlertConfigFieldValue: types.Int64Type,
+				},
+			},
+		},
+		ThresholdFieldAdaptiveBaseline: types.ListType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					ThresholdFieldAdaptiveBaselineDeviation:    types.Float64Type,
+					ThresholdFieldAdaptiveBaselineAdaptability: types.Float64Type,
+					ThresholdFieldAdaptiveBaselineSeasonality:  types.StringType,
+				},
+			},
+		},
+	}
+}
+
+// GetStaticAndAdaptiveThresholdAttrListTypes returns a ListType for both static and adaptive threshold schemas
+func GetStaticAndAdaptiveThresholdAttrListTypes() types.ListType {
+	return types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: GetStaticAndAdaptiveThresholdAttrTypes(),
+		},
+	}
+}
+
 // MapThresholdRuleFromState maps a threshold rule from Terraform state to API model
 func MapThresholdRuleFromState(ctx context.Context, thresholdList types.List) (*restapi.ThresholdRule, diag.Diagnostics) {
 	var diags diag.Diagnostics
