@@ -1906,7 +1906,59 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 			}
 
 			// Create thresholds map
-			thresholdElements := make(map[string]attr.Value)
+
+			// Map thresholds
+			thresholdObj := map[string]attr.Value{}
+
+			// Map warning threshold
+			warningThreshold, isWarningThresholdPresent := ruleWithThreshold.Thresholds[restapi.WarningSeverity]
+			warningThresholdList, warningDiags := MapThresholdToState(ctx, isWarningThresholdPresent, &warningThreshold)
+			diags.Append(warningDiags...)
+			if diags.HasError() {
+				return diags
+			}
+			thresholdObj[LogAlertConfigFieldWarning] = warningThresholdList
+
+			// Map critical threshold
+			criticalThreshold, isCriticalThresholdPresent := ruleWithThreshold.Thresholds[restapi.CriticalSeverity]
+			criticalThresholdList, criticalDiags := MapThresholdToState(ctx, isCriticalThresholdPresent, &criticalThreshold)
+			diags.Append(criticalDiags...)
+			if diags.HasError() {
+				return diags
+			}
+			thresholdObj[LogAlertConfigFieldCritical] = criticalThresholdList
+
+			// Create threshold object value
+			thresholdObjVal, thresholdObjDiags := types.ObjectValue(
+				map[string]attr.Type{
+					LogAlertConfigFieldWarning:  GetStaticAndAdaptiveThresholdAttrListTypes(),
+					LogAlertConfigFieldCritical: GetStaticAndAdaptiveThresholdAttrListTypes(),
+				},
+				thresholdObj,
+			)
+			diags.Append(thresholdObjDiags...)
+			if diags.HasError() {
+				return diags
+			}
+
+			// Add threshold to rule
+			thresholdList, thresholdListDiags := types.ListValue(
+				types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						LogAlertConfigFieldWarning:  GetStaticThresholdAttrListTypes(),
+						LogAlertConfigFieldCritical: GetStaticThresholdAttrListTypes(),
+					},
+				},
+				[]attr.Value{thresholdObjVal},
+			)
+			diags.Append(thresholdListDiags...)
+			if diags.HasError() {
+				return types.ListNull(types.ObjectType{}), diags
+			}
+
+			ruleObj[LogAlertConfigFieldThreshold] = thresholdList
+
+			thresholdElements := make(map[restapi.AlertSeverity]attr.Value)
 			for severity, threshold := range ruleWithThreshold.Thresholds {
 				thresholdObj, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
 					"value": types.Float64Type,
@@ -1932,17 +1984,11 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 					},
 				},
 				"threshold_operator": types.StringType,
-				"thresholds": types.MapType{
-					ElemType: types.ObjectType{
-						AttrTypes: map[string]attr.Type{
-							"value": types.Float64Type,
-						},
-					},
-				},
+				"thresholds":         GetStaticAndAdaptiveThresholdAttrListTypes(),
 			}, map[string]interface{}{
 				"rule":               ruleObj,
 				"threshold_operator": ruleWithThreshold.ThresholdOperator,
-				"thresholds":         types.MapValueMust(types.ObjectType{AttrTypes: map[string]attr.Type{"value": types.Float64Type}}, thresholdElements),
+				"thresholds":         thresholdElements,
 			})
 			if diags.HasError() {
 				return diags
@@ -1963,13 +2009,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 					},
 				},
 				"threshold_operator": types.StringType,
-				"thresholds": types.MapType{
-					ElemType: types.ObjectType{
-						AttrTypes: map[string]attr.Type{
-							"value": types.Float64Type,
-						},
-					},
-				},
+				"thresholds":         GetStaticAndAdaptiveThresholdAttrListTypes(),
 			},
 		}, rulesElements)
 	}
