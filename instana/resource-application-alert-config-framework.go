@@ -148,36 +148,11 @@ type ApplicationModel struct {
 	Services      types.Set    `tfsdk:"service"`
 }
 
-// Define the expected type for the service attribute
-func (a ApplicationModel) GetServiceType() attr.Type {
-	endpointType := types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"endpoint_id": types.StringType,
-			"inclusive":   types.BoolType,
-		},
-	}
-
-	return types.SetType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"service_id": types.StringType,
-				"inclusive":  types.BoolType,
-				"endpoint": types.SetType{
-					ElemType: endpointType,
-				},
-			},
-		},
-	}
-}
-
 // ServiceModel represents a service in the application alert config
 type ServiceModel struct {
 	ServiceID types.String `tfsdk:"service_id"`
 	Inclusive types.Bool   `tfsdk:"inclusive"`
 	Endpoints types.Set    `tfsdk:"endpoint"`
-
-	// Define the expected type for Endpoints
-	_ struct{} `tfsdk:"endpoint,types=set[object]"`
 }
 
 // EndpointModel represents an endpoint in the application alert config
@@ -1595,11 +1570,9 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 		"service":        serviceSetType, // key must match tfsdk tag on ApplicationModel
 	}
 	applicationObjectType := types.ObjectType{AttrTypes: applicationAttrTypes}
-	applicationSetType := types.SetType{ElemType: applicationObjectType}
 
 	if len(data.Applications) > 0 {
 		appElements := make([]attr.Value, 0, len(data.Applications))
-		appIndex := 0
 		for _, app := range data.Applications {
 			appModel := ApplicationModel{
 				ApplicationID: types.StringValue(app.ApplicationID),
@@ -1607,7 +1580,6 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 			}
 
 			svcElements := make([]attr.Value, 0, len(app.Services))
-			svcIndex := 0
 			for _, svc := range app.Services {
 				svcModel := ServiceModel{
 					ServiceID: types.StringValue(svc.ServiceID),
@@ -1615,117 +1587,35 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 				}
 
 				epElements := make([]attr.Value, 0, len(svc.Endpoints))
-				epIndex := 0
 				for _, ep := range svc.Endpoints {
 					epModel := EndpointModel{
 						EndpointID: types.StringValue(ep.EndpointID),
 						Inclusive:  types.BoolValue(ep.Inclusive),
 					}
-					epObj, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
-						"endpoint_id": types.StringType,
-						"inclusive":   types.BoolType,
-					}, epModel)
+					epObj, diags := types.ObjectValueFrom(ctx, endpointAttrTypes, epModel)
 					if diags.HasError() {
 						return diags
 					}
-					epElements[epIndex] = epObj
-					epIndex++
+					epElements = append(epElements, epObj)
 				}
-				svcModel.Endpoints = types.SetValueMust(types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"endpoint_id": types.StringType,
-						"inclusive":   types.BoolType,
-					},
-				}, epElements)
-
-				// Define endpoint type explicitly
-				endpointType := types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"endpoint_id": types.StringType,
-						"inclusive":   types.BoolType,
-					},
-				}
-
-				svcObj, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
-					"service_id": types.StringType,
-					"inclusive":  types.BoolType,
-					"endpoint": types.SetType{
-						ElemType: endpointType,
-					},
-				}, svcModel)
+				svcModel.Endpoints = types.SetValueMust(endpointObjectType, epElements)
+				svcObj, diags := types.ObjectValueFrom(ctx, serviceAttrTypes, svcModel)
 				if diags.HasError() {
 					return diags
 				}
-				svcElements[svcIndex] = svcObj
-				svcIndex++
-			}
-			appModel.Services = types.SetValueMust(appModel.GetServiceType(), svcElements)
+				svcElements = append(svcElements, svcObj)
 
-			// Define endpoint type explicitly
-			endpointType := types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"endpoint_id": types.StringType,
-					"inclusive":   types.BoolType,
-				},
 			}
+			appModel.Services = types.SetValueMust(serviceObjectType, svcElements)
 
-			// Define service type explicitly
-			serviceType := types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"service_id": types.StringType,
-					"inclusive":  types.BoolType,
-					"endpoint": types.SetType{
-						ElemType: endpointType,
-					},
-				},
-			}
-
-			appObj, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
-				"application_id": types.StringType,
-				"inclusive":      types.BoolType,
-				"service": types.SetType{
-					ElemType: serviceType,
-				},
-			}, appModel)
+			appObj, diags := types.ObjectValueFrom(ctx, applicationAttrTypes, appModel)
 			if diags.HasError() {
 				return diags
 			}
-			appElements[appIndex] = appObj
-			appIndex++
-		}
-		// No need to create an instance of ApplicationModel anymore
-
-		// Define endpoint type explicitly
-		endpointType := types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"endpoint_id": types.StringType,
-				"inclusive":   types.BoolType,
-			},
+			appElements = append(appElements, appObj)
 		}
 
-		// Define service type explicitly
-		serviceType := types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"service_id": types.StringType,
-				"inclusive":  types.BoolType,
-				"endpoint": types.SetType{
-					ElemType: endpointType,
-				},
-			},
-		}
-
-		// Define application type explicitly
-		applicationType := types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"application_id": types.StringType,
-				"inclusive":      types.BoolType,
-				"service": types.SetType{
-					ElemType: serviceType,
-				},
-			},
-		}
-
-		model.Applications = types.SetValueMust(applicationType, appElements)
+		model.Applications = types.SetValueMust(applicationObjectType, appElements)
 	}
 
 	// Handle custom payload fields
