@@ -1171,10 +1171,9 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 					return nil, diags
 				}
 				if len(errorRateRules) > 0 {
-					result.Rule.ErrorRate = &restapi.ApplicationAlertRuleErrorRate{
-						MetricName:  errorRateRules[0].MetricName.ValueString(),
-						Aggregation: errorRateRules[0].Aggregation.ValueString(),
-					}
+					result.Rule.AlertType = ApplicationAlertConfigFieldRuleErrorRate
+					result.Rule.MetricName = errorRateRules[0].MetricName.ValueString()
+					result.Rule.Aggregation = restapi.Aggregation(errorRateRules[0].Aggregation.ValueString())
 				}
 			}
 
@@ -1186,10 +1185,9 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 					return nil, diags
 				}
 				if len(errorsRules) > 0 {
-					result.Rule.Errors = &restapi.ApplicationAlertRuleErrors{
-						MetricName:  errorsRules[0].MetricName.ValueString(),
-						Aggregation: errorsRules[0].Aggregation.ValueString(),
-					}
+					result.Rule.AlertType = ApplicationAlertConfigFieldRuleErrors
+					result.Rule.MetricName = errorsRules[0].MetricName.ValueString()
+					result.Rule.Aggregation = restapi.Aggregation(errorsRules[0].Aggregation.ValueString())
 				}
 			}
 
@@ -1201,13 +1199,19 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 					return nil, diags
 				}
 				if len(logsRules) > 0 {
-					result.Rule.Logs = &restapi.ApplicationAlertRuleLogs{
-						MetricName:  logsRules[0].MetricName.ValueString(),
-						Aggregation: logsRules[0].Aggregation.ValueString(),
-						Level:       logsRules[0].Level.ValueString(),
-						Message:     logsRules[0].Message.ValueString(),
-						Operator:    logsRules[0].Operator.ValueString(),
-					}
+					result.Rule.AlertType = ApplicationAlertConfigFieldRuleLogs
+					result.Rule.MetricName = logsRules[0].MetricName.ValueString()
+					result.Rule.Aggregation = restapi.Aggregation(logsRules[0].Aggregation.ValueString())
+
+					// Set additional fields for logs
+					level := restapi.LogLevel(logsRules[0].Level.ValueString())
+					result.Rule.Level = &level
+
+					message := logsRules[0].Message.ValueString()
+					result.Rule.Message = &message
+
+					operator := restapi.ExpressionOperator(logsRules[0].Operator.ValueString())
+					result.Rule.Operator = &operator
 				}
 			}
 
@@ -1219,13 +1223,9 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 					return nil, diags
 				}
 				if len(slownessRules) > 0 {
+					result.Rule.AlertType = ApplicationAlertConfigFieldRuleSlowness
 					result.Rule.MetricName = slownessRules[0].MetricName.ValueString()
 					result.Rule.Aggregation = restapi.Aggregation(slownessRules[0].Aggregation.ValueString())
-					result.Rule.AlertType = ApplicationAlertConfigFieldRuleSlowness
-					result.Rule.Slowness = &restapi.ApplicationAlertRuleSlowness{
-						MetricName:  slownessRules[0].MetricName.ValueString(),
-						Aggregation: slownessRules[0].Aggregation.ValueString(),
-					}
 				}
 			}
 
@@ -1237,12 +1237,16 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 					return nil, diags
 				}
 				if len(statusCodeRules) > 0 {
-					result.Rule.StatusCode = &restapi.ApplicationAlertRuleStatusCode{
-						MetricName:      statusCodeRules[0].MetricName.ValueString(),
-						Aggregation:     statusCodeRules[0].Aggregation.ValueString(),
-						StatusCodeStart: int(statusCodeRules[0].StatusCodeStart.ValueInt64()),
-						StatusCodeEnd:   int(statusCodeRules[0].StatusCodeEnd.ValueInt64()),
-					}
+					result.Rule.AlertType = ApplicationAlertConfigFieldRuleStatusCode
+					result.Rule.MetricName = statusCodeRules[0].MetricName.ValueString()
+					result.Rule.Aggregation = restapi.Aggregation(statusCodeRules[0].Aggregation.ValueString())
+
+					// Set additional fields for status code
+					statusCodeStart := int32(statusCodeRules[0].StatusCodeStart.ValueInt64())
+					result.Rule.StatusCodeStart = &statusCodeStart
+
+					statusCodeEnd := int32(statusCodeRules[0].StatusCodeEnd.ValueInt64())
+					result.Rule.StatusCodeEnd = &statusCodeEnd
 				}
 			}
 
@@ -1254,10 +1258,9 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 					return nil, diags
 				}
 				if len(throughputRules) > 0 {
-					result.Rule.Throughput = &restapi.ApplicationAlertRuleThroughput{
-						MetricName:  throughputRules[0].MetricName.ValueString(),
-						Aggregation: throughputRules[0].Aggregation.ValueString(),
-					}
+					result.Rule.AlertType = ApplicationAlertConfigFieldRuleThroughput
+					result.Rule.MetricName = throughputRules[0].MetricName.ValueString()
+					result.Rule.Aggregation = restapi.Aggregation(throughputRules[0].Aggregation.ValueString())
 				}
 			}
 		}
@@ -1295,10 +1298,9 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 						return nil, diags
 					}
 					if len(errorRateRules) > 0 {
-						result.Rules[i].Rule.ErrorRate = &restapi.ApplicationAlertRuleErrorRate{
-							MetricName:  errorRateRules[0].MetricName.ValueString(),
-							Aggregation: errorRateRules[0].Aggregation.ValueString(),
-						}
+						result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleErrorRate
+						result.Rules[i].Rule.MetricName = errorRateRules[0].MetricName.ValueString()
+						result.Rules[i].Rule.Aggregation = restapi.Aggregation(errorRateRules[0].Aggregation.ValueString())
 					}
 				}
 
@@ -1310,10 +1312,9 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 						return nil, diags
 					}
 					if len(errorsRules) > 0 {
-						result.Rules[i].Rule.Errors = &restapi.ApplicationAlertRuleErrors{
-							MetricName:  errorsRules[0].MetricName.ValueString(),
-							Aggregation: errorsRules[0].Aggregation.ValueString(),
-						}
+						result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleErrors
+						result.Rules[i].Rule.MetricName = errorsRules[0].MetricName.ValueString()
+						result.Rules[i].Rule.Aggregation = restapi.Aggregation(errorsRules[0].Aggregation.ValueString())
 					}
 				}
 
@@ -1325,13 +1326,19 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 						return nil, diags
 					}
 					if len(logsRules) > 0 {
-						result.Rules[i].Rule.Logs = &restapi.ApplicationAlertRuleLogs{
-							MetricName:  logsRules[0].MetricName.ValueString(),
-							Aggregation: logsRules[0].Aggregation.ValueString(),
-							Level:       logsRules[0].Level.ValueString(),
-							Message:     logsRules[0].Message.ValueString(),
-							Operator:    logsRules[0].Operator.ValueString(),
-						}
+						result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleLogs
+						result.Rules[i].Rule.MetricName = logsRules[0].MetricName.ValueString()
+						result.Rules[i].Rule.Aggregation = restapi.Aggregation(logsRules[0].Aggregation.ValueString())
+
+						// Set additional fields for logs
+						level := restapi.LogLevel(logsRules[0].Level.ValueString())
+						result.Rules[i].Rule.Level = &level
+
+						message := logsRules[0].Message.ValueString()
+						result.Rules[i].Rule.Message = &message
+
+						operator := restapi.ExpressionOperator(logsRules[0].Operator.ValueString())
+						result.Rules[i].Rule.Operator = &operator
 					}
 				}
 
@@ -1345,13 +1352,9 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 						return nil, diags
 					}
 					if len(slownessRules) > 0 {
+						result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleSlowness
 						result.Rules[i].Rule.MetricName = slownessRules[0].MetricName.ValueString()
 						result.Rules[i].Rule.Aggregation = restapi.Aggregation(slownessRules[0].Aggregation.ValueString())
-						result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleSlowness
-						result.Rules[i].Rule.Slowness = &restapi.ApplicationAlertRuleSlowness{
-							MetricName:  slownessRules[0].MetricName.ValueString(),
-							Aggregation: slownessRules[0].Aggregation.ValueString(),
-						}
 					}
 				}
 
@@ -1363,12 +1366,16 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 						return nil, diags
 					}
 					if len(statusCodeRules) > 0 {
-						result.Rules[i].Rule.StatusCode = &restapi.ApplicationAlertRuleStatusCode{
-							MetricName:      statusCodeRules[0].MetricName.ValueString(),
-							Aggregation:     statusCodeRules[0].Aggregation.ValueString(),
-							StatusCodeStart: int(statusCodeRules[0].StatusCodeStart.ValueInt64()),
-							StatusCodeEnd:   int(statusCodeRules[0].StatusCodeEnd.ValueInt64()),
-						}
+						result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleStatusCode
+						result.Rules[i].Rule.MetricName = statusCodeRules[0].MetricName.ValueString()
+						result.Rules[i].Rule.Aggregation = restapi.Aggregation(statusCodeRules[0].Aggregation.ValueString())
+
+						// Set additional fields for status code
+						statusCodeStart := int32(statusCodeRules[0].StatusCodeStart.ValueInt64())
+						result.Rules[i].Rule.StatusCodeStart = &statusCodeStart
+
+						statusCodeEnd := int32(statusCodeRules[0].StatusCodeEnd.ValueInt64())
+						result.Rules[i].Rule.StatusCodeEnd = &statusCodeEnd
 					}
 				}
 
@@ -1380,10 +1387,9 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 						return nil, diags
 					}
 					if len(throughputRules) > 0 {
-						result.Rules[i].Rule.Throughput = &restapi.ApplicationAlertRuleThroughput{
-							MetricName:  throughputRules[0].MetricName.ValueString(),
-							Aggregation: throughputRules[0].Aggregation.ValueString(),
-						}
+						result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleThroughput
+						result.Rules[i].Rule.MetricName = throughputRules[0].MetricName.ValueString()
+						result.Rules[i].Rule.Aggregation = restapi.Aggregation(throughputRules[0].Aggregation.ValueString())
 					}
 				}
 			}
@@ -1792,133 +1798,152 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 	if data.Rule != nil {
 		ruleModel := RuleModel{}
 
-		// Handle error rate rule
-		if data.Rule.ErrorRate != nil {
-			errorRateElements := []attr.Value{
-				types.ObjectValueMust(map[string]attr.Type{
-					"metric_name": types.StringType,
-					"aggregation": types.StringType,
-				}, map[string]attr.Value{
-					"metric_name": types.StringValue(data.Rule.ErrorRate.MetricName),
-					"aggregation": types.StringValue(data.Rule.ErrorRate.Aggregation),
-				}),
-			}
-			ruleModel.ErrorRate = types.ListValueMust(types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"metric_name": types.StringType,
-					"aggregation": types.StringType,
-				},
-			}, errorRateElements)
-		}
+		// Set rule model fields based on the AlertType
+		if data.Rule != nil {
+			switch data.Rule.AlertType {
+			case ApplicationAlertConfigFieldRuleErrorRate:
+				errorRateElements := []attr.Value{
+					types.ObjectValueMust(map[string]attr.Type{
+						"metric_name": types.StringType,
+						"aggregation": types.StringType,
+					}, map[string]attr.Value{
+						"metric_name": types.StringValue(data.Rule.MetricName),
+						"aggregation": types.StringValue(string(data.Rule.Aggregation)),
+					}),
+				}
+				ruleModel.ErrorRate = types.ListValueMust(types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"metric_name": types.StringType,
+						"aggregation": types.StringType,
+					},
+				}, errorRateElements)
 
-		// Handle errors rule
-		if data.Rule.Errors != nil {
-			errorsElements := []attr.Value{
-				types.ObjectValueMust(map[string]attr.Type{
-					"metric_name": types.StringType,
-					"aggregation": types.StringType,
-				}, map[string]attr.Value{
-					"metric_name": types.StringValue(data.Rule.Errors.MetricName),
-					"aggregation": types.StringValue(data.Rule.Errors.Aggregation),
-				}),
-			}
-			ruleModel.Errors = types.ListValueMust(types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"metric_name": types.StringType,
-					"aggregation": types.StringType,
-				},
-			}, errorsElements)
-		}
+			case ApplicationAlertConfigFieldRuleErrors:
+				errorsElements := []attr.Value{
+					types.ObjectValueMust(map[string]attr.Type{
+						"metric_name": types.StringType,
+						"aggregation": types.StringType,
+					}, map[string]attr.Value{
+						"metric_name": types.StringValue(data.Rule.MetricName),
+						"aggregation": types.StringValue(string(data.Rule.Aggregation)),
+					}),
+				}
+				ruleModel.Errors = types.ListValueMust(types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"metric_name": types.StringType,
+						"aggregation": types.StringType,
+					},
+				}, errorsElements)
 
-		// Handle logs rule
-		if data.Rule.Logs != nil {
-			logsElements := []attr.Value{
-				types.ObjectValueMust(map[string]attr.Type{
-					"metric_name": types.StringType,
-					"aggregation": types.StringType,
-					"level":       types.StringType,
-					"message":     types.StringType,
-					"operator":    types.StringType,
-				}, map[string]attr.Value{
-					"metric_name": types.StringValue(data.Rule.Logs.MetricName),
-					"aggregation": types.StringValue(data.Rule.Logs.Aggregation),
-					"level":       types.StringValue(data.Rule.Logs.Level),
-					"message":     types.StringValue(data.Rule.Logs.Message),
-					"operator":    types.StringValue(data.Rule.Logs.Operator),
-				}),
-			}
-			ruleModel.Logs = types.ListValueMust(types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"metric_name": types.StringType,
-					"aggregation": types.StringType,
-					"level":       types.StringType,
-					"message":     types.StringType,
-					"operator":    types.StringType,
-				},
-			}, logsElements)
-		}
+			case ApplicationAlertConfigFieldRuleLogs:
+				// For logs, we need to handle additional fields
+				level := ""
+				message := ""
+				operator := ""
 
-		// Handle slowness rule
-		if data.Rule.Slowness != nil {
-			slownessElements := []attr.Value{
-				types.ObjectValueMust(map[string]attr.Type{
-					"metric_name": types.StringType,
-					"aggregation": types.StringType,
-				}, map[string]attr.Value{
-					"metric_name": types.StringValue(data.Rule.Slowness.MetricName),
-					"aggregation": types.StringValue(data.Rule.Slowness.Aggregation),
-				}),
-			}
-			ruleModel.Slowness = types.ListValueMust(types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"metric_name": types.StringType,
-					"aggregation": types.StringType,
-				},
-			}, slownessElements)
-		}
+				if data.Rule.Level != nil {
+					level = string(*data.Rule.Level)
+				}
+				if data.Rule.Message != nil {
+					message = *data.Rule.Message
+				}
+				if data.Rule.Operator != nil {
+					operator = string(*data.Rule.Operator)
+				}
 
-		// Handle status code rule
-		if data.Rule.StatusCode != nil {
-			statusCodeElements := []attr.Value{
-				types.ObjectValueMust(map[string]attr.Type{
-					"metric_name":       types.StringType,
-					"aggregation":       types.StringType,
-					"status_code_start": types.Int64Type,
-					"status_code_end":   types.Int64Type,
-				}, map[string]attr.Value{
-					"metric_name":       types.StringValue(data.Rule.StatusCode.MetricName),
-					"aggregation":       types.StringValue(data.Rule.StatusCode.Aggregation),
-					"status_code_start": types.Int64Value(int64(data.Rule.StatusCode.StatusCodeStart)),
-					"status_code_end":   types.Int64Value(int64(data.Rule.StatusCode.StatusCodeEnd)),
-				}),
-			}
-			ruleModel.StatusCode = types.ListValueMust(types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"metric_name":       types.StringType,
-					"aggregation":       types.StringType,
-					"status_code_start": types.Int64Type,
-					"status_code_end":   types.Int64Type,
-				},
-			}, statusCodeElements)
-		}
+				logsElements := []attr.Value{
+					types.ObjectValueMust(map[string]attr.Type{
+						"metric_name": types.StringType,
+						"aggregation": types.StringType,
+						"level":       types.StringType,
+						"message":     types.StringType,
+						"operator":    types.StringType,
+					}, map[string]attr.Value{
+						"metric_name": types.StringValue(data.Rule.MetricName),
+						"aggregation": types.StringValue(string(data.Rule.Aggregation)),
+						"level":       types.StringValue(level),
+						"message":     types.StringValue(message),
+						"operator":    types.StringValue(operator),
+					}),
+				}
+				ruleModel.Logs = types.ListValueMust(types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"metric_name": types.StringType,
+						"aggregation": types.StringType,
+						"level":       types.StringType,
+						"message":     types.StringType,
+						"operator":    types.StringType,
+					},
+				}, logsElements)
 
-		// Handle throughput rule
-		if data.Rule.Throughput != nil {
-			throughputElements := []attr.Value{
-				types.ObjectValueMust(map[string]attr.Type{
-					"metric_name": types.StringType,
-					"aggregation": types.StringType,
-				}, map[string]attr.Value{
-					"metric_name": types.StringValue(data.Rule.Throughput.MetricName),
-					"aggregation": types.StringValue(data.Rule.Throughput.Aggregation),
-				}),
+			case ApplicationAlertConfigFieldRuleSlowness:
+				slownessElements := []attr.Value{
+					types.ObjectValueMust(map[string]attr.Type{
+						"metric_name": types.StringType,
+						"aggregation": types.StringType,
+					}, map[string]attr.Value{
+						"metric_name": types.StringValue(data.Rule.MetricName),
+						"aggregation": types.StringValue(string(data.Rule.Aggregation)),
+					}),
+				}
+				ruleModel.Slowness = types.ListValueMust(types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"metric_name": types.StringType,
+						"aggregation": types.StringType,
+					},
+				}, slownessElements)
+
+			case ApplicationAlertConfigFieldRuleStatusCode:
+				// For status code, we need to handle additional fields
+				statusCodeStart := int64(0)
+				statusCodeEnd := int64(0)
+
+				if data.Rule.StatusCodeStart != nil {
+					statusCodeStart = int64(*data.Rule.StatusCodeStart)
+				}
+				if data.Rule.StatusCodeEnd != nil {
+					statusCodeEnd = int64(*data.Rule.StatusCodeEnd)
+				}
+
+				statusCodeElements := []attr.Value{
+					types.ObjectValueMust(map[string]attr.Type{
+						"metric_name":       types.StringType,
+						"aggregation":       types.StringType,
+						"status_code_start": types.Int64Type,
+						"status_code_end":   types.Int64Type,
+					}, map[string]attr.Value{
+						"metric_name":       types.StringValue(data.Rule.MetricName),
+						"aggregation":       types.StringValue(string(data.Rule.Aggregation)),
+						"status_code_start": types.Int64Value(statusCodeStart),
+						"status_code_end":   types.Int64Value(statusCodeEnd),
+					}),
+				}
+				ruleModel.StatusCode = types.ListValueMust(types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"metric_name":       types.StringType,
+						"aggregation":       types.StringType,
+						"status_code_start": types.Int64Type,
+						"status_code_end":   types.Int64Type,
+					},
+				}, statusCodeElements)
+
+			case ApplicationAlertConfigFieldRuleThroughput:
+				throughputElements := []attr.Value{
+					types.ObjectValueMust(map[string]attr.Type{
+						"metric_name": types.StringType,
+						"aggregation": types.StringType,
+					}, map[string]attr.Value{
+						"metric_name": types.StringValue(data.Rule.MetricName),
+						"aggregation": types.StringValue(string(data.Rule.Aggregation)),
+					}),
+				}
+				ruleModel.Throughput = types.ListValueMust(types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"metric_name": types.StringType,
+						"aggregation": types.StringType,
+					},
+				}, throughputElements)
 			}
-			ruleModel.Throughput = types.ListValueMust(types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"metric_name": types.StringType,
-					"aggregation": types.StringType,
-				},
-			}, throughputElements)
 		}
 
 		ruleObj, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
