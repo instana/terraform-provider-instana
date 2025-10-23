@@ -769,7 +769,7 @@ func (r *logAlertConfigResourceFramework) mapRulesToState(ctx context.Context, r
 
 		// Map warning threshold
 		warningThreshold, isWarningThresholdPresent := ruleWithThreshold.Thresholds[restapi.WarningSeverity]
-		warningThresholdList, warningDiags := MapThresholdToState(ctx, isWarningThresholdPresent, &warningThreshold)
+		warningThresholdList, warningDiags := MapThresholdToState(ctx, isWarningThresholdPresent, &warningThreshold, []string{"static"})
 		diags.Append(warningDiags...)
 		if diags.HasError() {
 			return types.ListNull(types.ObjectType{}), diags
@@ -778,7 +778,7 @@ func (r *logAlertConfigResourceFramework) mapRulesToState(ctx context.Context, r
 
 		// Map critical threshold
 		criticalThreshold, isCriticalThresholdPresent := ruleWithThreshold.Thresholds[restapi.CriticalSeverity]
-		criticalThresholdList, criticalDiags := MapThresholdToState(ctx, isCriticalThresholdPresent, &criticalThreshold)
+		criticalThresholdList, criticalDiags := MapThresholdToState(ctx, isCriticalThresholdPresent, &criticalThreshold, []string{"static"})
 		diags.Append(criticalDiags...)
 		if diags.HasError() {
 			return types.ListNull(types.ObjectType{}), diags

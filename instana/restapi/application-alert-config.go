@@ -23,7 +23,7 @@ type ApplicationAlertConfig struct {
 	AlertChannels         map[string][]string                  `json:"alertChannels"`
 	Granularity           Granularity                          `json:"granularity"`
 	GracePeriod           *int64                               `json:"gracePeriod"`
-	CustomerPayloadFields []CustomPayloadField[interface{}]    `json:"customPayloadFields"`
+	CustomerPayloadFields []CustomPayloadField[any]            `json:"customPayloadFields"`
 	Rule                  *ApplicationAlertRule                `json:"rule"`
 	Rules                 []ApplicationAlertRuleWithThresholds `json:"rules"`
 	Threshold             *Threshold                           `json:"threshold"`
