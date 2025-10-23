@@ -1797,12 +1797,18 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 	// Handle rule (deprecated but supported for backward compatibility)
 	if data.Rule != nil {
 		ruleModel := RuleModel{}
+		errorRateElements := make([]attr.Value, 0)
+		errorsElements := make([]attr.Value, 0)
+		logsElements := make([]attr.Value, 0)
+		slownessElements := make([]attr.Value, 0)
+		statusCodeElements := make([]attr.Value, 0)
+		throughputElements := make([]attr.Value, 0)
 
 		// Set rule model fields based on the AlertType
 		if data.Rule != nil {
 			switch data.Rule.AlertType {
 			case ApplicationAlertConfigFieldRuleErrorRate:
-				errorRateElements := []attr.Value{
+				errorRateElements = []attr.Value{
 					types.ObjectValueMust(map[string]attr.Type{
 						"metric_name": types.StringType,
 						"aggregation": types.StringType,
@@ -1811,15 +1817,9 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 						"aggregation": types.StringValue(string(data.Rule.Aggregation)),
 					}),
 				}
-				ruleModel.ErrorRate = types.ListValueMust(types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"metric_name": types.StringType,
-						"aggregation": types.StringType,
-					},
-				}, errorRateElements)
 
 			case ApplicationAlertConfigFieldRuleErrors:
-				errorsElements := []attr.Value{
+				errorsElements = []attr.Value{
 					types.ObjectValueMust(map[string]attr.Type{
 						"metric_name": types.StringType,
 						"aggregation": types.StringType,
@@ -1828,12 +1828,6 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 						"aggregation": types.StringValue(string(data.Rule.Aggregation)),
 					}),
 				}
-				ruleModel.Errors = types.ListValueMust(types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"metric_name": types.StringType,
-						"aggregation": types.StringType,
-					},
-				}, errorsElements)
 
 			case ApplicationAlertConfigFieldRuleLogs:
 				// For logs, we need to handle additional fields
@@ -1851,7 +1845,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 					operator = string(*data.Rule.Operator)
 				}
 
-				logsElements := []attr.Value{
+				logsElements = []attr.Value{
 					types.ObjectValueMust(map[string]attr.Type{
 						"metric_name": types.StringType,
 						"aggregation": types.StringType,
@@ -1866,18 +1860,9 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 						"operator":    types.StringValue(operator),
 					}),
 				}
-				ruleModel.Logs = types.ListValueMust(types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"metric_name": types.StringType,
-						"aggregation": types.StringType,
-						"level":       types.StringType,
-						"message":     types.StringType,
-						"operator":    types.StringType,
-					},
-				}, logsElements)
 
 			case ApplicationAlertConfigFieldRuleSlowness:
-				slownessElements := []attr.Value{
+				slownessElements = []attr.Value{
 					types.ObjectValueMust(map[string]attr.Type{
 						"metric_name": types.StringType,
 						"aggregation": types.StringType,
@@ -1886,12 +1871,6 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 						"aggregation": types.StringValue(string(data.Rule.Aggregation)),
 					}),
 				}
-				ruleModel.Slowness = types.ListValueMust(types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"metric_name": types.StringType,
-						"aggregation": types.StringType,
-					},
-				}, slownessElements)
 
 			case ApplicationAlertConfigFieldRuleStatusCode:
 				// For status code, we need to handle additional fields
@@ -1905,7 +1884,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 					statusCodeEnd = int64(*data.Rule.StatusCodeEnd)
 				}
 
-				statusCodeElements := []attr.Value{
+				statusCodeElements = []attr.Value{
 					types.ObjectValueMust(map[string]attr.Type{
 						"metric_name":       types.StringType,
 						"aggregation":       types.StringType,
@@ -1918,17 +1897,9 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 						"status_code_end":   types.Int64Value(statusCodeEnd),
 					}),
 				}
-				ruleModel.StatusCode = types.ListValueMust(types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"metric_name":       types.StringType,
-						"aggregation":       types.StringType,
-						"status_code_start": types.Int64Type,
-						"status_code_end":   types.Int64Type,
-					},
-				}, statusCodeElements)
 
 			case ApplicationAlertConfigFieldRuleThroughput:
-				throughputElements := []attr.Value{
+				throughputElements = []attr.Value{
 					types.ObjectValueMust(map[string]attr.Type{
 						"metric_name": types.StringType,
 						"aggregation": types.StringType,
@@ -1937,14 +1908,56 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 						"aggregation": types.StringValue(string(data.Rule.Aggregation)),
 					}),
 				}
-				ruleModel.Throughput = types.ListValueMust(types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"metric_name": types.StringType,
-						"aggregation": types.StringType,
-					},
-				}, throughputElements)
+
 			}
 		}
+
+		ruleModel.ErrorRate = types.ListValueMust(types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"metric_name": types.StringType,
+				"aggregation": types.StringType,
+			},
+		}, errorRateElements)
+
+		ruleModel.Errors = types.ListValueMust(types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"metric_name": types.StringType,
+				"aggregation": types.StringType,
+			},
+		}, errorsElements)
+
+		ruleModel.Logs = types.ListValueMust(types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"metric_name": types.StringType,
+				"aggregation": types.StringType,
+				"level":       types.StringType,
+				"message":     types.StringType,
+				"operator":    types.StringType,
+			},
+		}, logsElements)
+
+		ruleModel.Slowness = types.ListValueMust(types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"metric_name": types.StringType,
+				"aggregation": types.StringType,
+			},
+		}, slownessElements)
+
+		ruleModel.StatusCode = types.ListValueMust(types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"metric_name":       types.StringType,
+				"aggregation":       types.StringType,
+				"status_code_start": types.Int64Type,
+				"status_code_end":   types.Int64Type,
+			},
+		}, statusCodeElements)
+
+		ruleModel.Throughput = types.ListValueMust(types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"metric_name": types.StringType,
+				"aggregation": types.StringType,
+			},
+		}, throughputElements)
 
 		ruleObj, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
 			"error_rate":  types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
@@ -1976,48 +1989,54 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 		for i, ruleWithThreshold := range data.Rules {
 			// Create rule model
 			ruleModel := RuleModel{}
+			errorRateElements := make([]attr.Value, 0)
+			errorsElements := make([]attr.Value, 0)
+			logsElements := make([]attr.Value, 0)
+			slownessElements := make([]attr.Value, 0)
+			statusCodeElements := make([]attr.Value, 0)
+			throughputElements := make([]attr.Value, 0)
 
-			// Handle error rate rule
-			if ruleWithThreshold.Rule.ErrorRate != nil {
-				errorRateElements := []attr.Value{
+			// Set rule model fields based on the AlertType
+			switch ruleWithThreshold.Rule.AlertType {
+			case ApplicationAlertConfigFieldRuleErrorRate:
+				errorRateElements = []attr.Value{
 					types.ObjectValueMust(map[string]attr.Type{
 						"metric_name": types.StringType,
 						"aggregation": types.StringType,
 					}, map[string]attr.Value{
-						"metric_name": types.StringValue(ruleWithThreshold.Rule.ErrorRate.MetricName),
-						"aggregation": types.StringValue(ruleWithThreshold.Rule.ErrorRate.Aggregation),
+						"metric_name": types.StringValue(ruleWithThreshold.Rule.MetricName),
+						"aggregation": types.StringValue(string(ruleWithThreshold.Rule.Aggregation)),
 					}),
 				}
-				ruleModel.ErrorRate = types.ListValueMust(types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"metric_name": types.StringType,
-						"aggregation": types.StringType,
-					},
-				}, errorRateElements)
-			}
 
-			// Handle errors rule
-			if ruleWithThreshold.Rule.Errors != nil {
-				errorsElements := []attr.Value{
+			case ApplicationAlertConfigFieldRuleErrors:
+				errorsElements = []attr.Value{
 					types.ObjectValueMust(map[string]attr.Type{
 						"metric_name": types.StringType,
 						"aggregation": types.StringType,
 					}, map[string]attr.Value{
-						"metric_name": types.StringValue(ruleWithThreshold.Rule.Errors.MetricName),
-						"aggregation": types.StringValue(ruleWithThreshold.Rule.Errors.Aggregation),
+						"metric_name": types.StringValue(ruleWithThreshold.Rule.MetricName),
+						"aggregation": types.StringValue(string(ruleWithThreshold.Rule.Aggregation)),
 					}),
 				}
-				ruleModel.Errors = types.ListValueMust(types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"metric_name": types.StringType,
-						"aggregation": types.StringType,
-					},
-				}, errorsElements)
-			}
 
-			// Handle logs rule
-			if ruleWithThreshold.Rule.Logs != nil {
-				logsElements := []attr.Value{
+			case ApplicationAlertConfigFieldRuleLogs:
+				// For logs, we need to handle additional fields
+				level := ""
+				message := ""
+				operator := ""
+
+				if ruleWithThreshold.Rule.Level != nil {
+					level = string(*ruleWithThreshold.Rule.Level)
+				}
+				if ruleWithThreshold.Rule.Message != nil {
+					message = *ruleWithThreshold.Rule.Message
+				}
+				if ruleWithThreshold.Rule.Operator != nil {
+					operator = string(*ruleWithThreshold.Rule.Operator)
+				}
+
+				logsElements = []attr.Value{
 					types.ObjectValueMust(map[string]attr.Type{
 						"metric_name": types.StringType,
 						"aggregation": types.StringType,
@@ -2025,86 +2044,110 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 						"message":     types.StringType,
 						"operator":    types.StringType,
 					}, map[string]attr.Value{
-						"metric_name": types.StringValue(ruleWithThreshold.Rule.Logs.MetricName),
-						"aggregation": types.StringValue(ruleWithThreshold.Rule.Logs.Aggregation),
-						"level":       types.StringValue(ruleWithThreshold.Rule.Logs.Level),
-						"message":     types.StringValue(ruleWithThreshold.Rule.Logs.Message),
-						"operator":    types.StringValue(ruleWithThreshold.Rule.Logs.Operator),
+						"metric_name": types.StringValue(ruleWithThreshold.Rule.MetricName),
+						"aggregation": types.StringValue(string(ruleWithThreshold.Rule.Aggregation)),
+						"level":       types.StringValue(level),
+						"message":     types.StringValue(message),
+						"operator":    types.StringValue(operator),
 					}),
 				}
-				ruleModel.Logs = types.ListValueMust(types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"metric_name": types.StringType,
-						"aggregation": types.StringType,
-						"level":       types.StringType,
-						"message":     types.StringType,
-						"operator":    types.StringType,
-					},
-				}, logsElements)
-			}
 
-			// Handle slowness rule
-			if ruleWithThreshold.Rule.Slowness != nil {
-				slownessElements := []attr.Value{
+			case ApplicationAlertConfigFieldRuleSlowness:
+				slownessElements = []attr.Value{
 					types.ObjectValueMust(map[string]attr.Type{
 						"metric_name": types.StringType,
 						"aggregation": types.StringType,
 					}, map[string]attr.Value{
-						"metric_name": types.StringValue(ruleWithThreshold.Rule.Slowness.MetricName),
-						"aggregation": types.StringValue(ruleWithThreshold.Rule.Slowness.Aggregation),
+						"metric_name": types.StringValue(ruleWithThreshold.Rule.MetricName),
+						"aggregation": types.StringValue(string(ruleWithThreshold.Rule.Aggregation)),
 					}),
 				}
-				ruleModel.Slowness = types.ListValueMust(types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"metric_name": types.StringType,
-						"aggregation": types.StringType,
-					},
-				}, slownessElements)
-			}
 
-			// Handle status code rule
-			if ruleWithThreshold.Rule.StatusCode != nil {
-				statusCodeElements := []attr.Value{
+			case ApplicationAlertConfigFieldRuleStatusCode:
+				// For status code, we need to handle additional fields
+				statusCodeStart := int64(0)
+				statusCodeEnd := int64(0)
+
+				if ruleWithThreshold.Rule.StatusCodeStart != nil {
+					statusCodeStart = int64(*ruleWithThreshold.Rule.StatusCodeStart)
+				}
+				if ruleWithThreshold.Rule.StatusCodeEnd != nil {
+					statusCodeEnd = int64(*ruleWithThreshold.Rule.StatusCodeEnd)
+				}
+
+				statusCodeElements = []attr.Value{
 					types.ObjectValueMust(map[string]attr.Type{
 						"metric_name":       types.StringType,
 						"aggregation":       types.StringType,
 						"status_code_start": types.Int64Type,
 						"status_code_end":   types.Int64Type,
 					}, map[string]attr.Value{
-						"metric_name":       types.StringValue(ruleWithThreshold.Rule.StatusCode.MetricName),
-						"aggregation":       types.StringValue(ruleWithThreshold.Rule.StatusCode.Aggregation),
-						"status_code_start": types.Int64Value(int64(ruleWithThreshold.Rule.StatusCode.StatusCodeStart)),
-						"status_code_end":   types.Int64Value(int64(ruleWithThreshold.Rule.StatusCode.StatusCodeEnd)),
+						"metric_name":       types.StringValue(ruleWithThreshold.Rule.MetricName),
+						"aggregation":       types.StringValue(string(ruleWithThreshold.Rule.Aggregation)),
+						"status_code_start": types.Int64Value(statusCodeStart),
+						"status_code_end":   types.Int64Value(statusCodeEnd),
 					}),
 				}
-				ruleModel.StatusCode = types.ListValueMust(types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"metric_name":       types.StringType,
-						"aggregation":       types.StringType,
-						"status_code_start": types.Int64Type,
-						"status_code_end":   types.Int64Type,
-					},
-				}, statusCodeElements)
-			}
 
-			// Handle throughput rule
-			if ruleWithThreshold.Rule.Throughput != nil {
-				throughputElements := []attr.Value{
+			case ApplicationAlertConfigFieldRuleThroughput:
+				throughputElements = []attr.Value{
 					types.ObjectValueMust(map[string]attr.Type{
 						"metric_name": types.StringType,
 						"aggregation": types.StringType,
 					}, map[string]attr.Value{
-						"metric_name": types.StringValue(ruleWithThreshold.Rule.Throughput.MetricName),
-						"aggregation": types.StringValue(ruleWithThreshold.Rule.Throughput.Aggregation),
+						"metric_name": types.StringValue(ruleWithThreshold.Rule.MetricName),
+						"aggregation": types.StringValue(string(ruleWithThreshold.Rule.Aggregation)),
 					}),
 				}
-				ruleModel.Throughput = types.ListValueMust(types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"metric_name": types.StringType,
-						"aggregation": types.StringType,
-					},
-				}, throughputElements)
+
 			}
+
+			ruleModel.ErrorRate = types.ListValueMust(types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"metric_name": types.StringType,
+					"aggregation": types.StringType,
+				},
+			}, errorRateElements)
+
+			ruleModel.Errors = types.ListValueMust(types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"metric_name": types.StringType,
+					"aggregation": types.StringType,
+				},
+			}, errorsElements)
+
+			ruleModel.Logs = types.ListValueMust(types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"metric_name": types.StringType,
+					"aggregation": types.StringType,
+					"level":       types.StringType,
+					"message":     types.StringType,
+					"operator":    types.StringType,
+				},
+			}, logsElements)
+
+			ruleModel.Slowness = types.ListValueMust(types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"metric_name": types.StringType,
+					"aggregation": types.StringType,
+				},
+			}, slownessElements)
+
+			ruleModel.StatusCode = types.ListValueMust(types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"metric_name":       types.StringType,
+					"aggregation":       types.StringType,
+					"status_code_start": types.Int64Type,
+					"status_code_end":   types.Int64Type,
+				},
+			}, statusCodeElements)
+
+			ruleModel.Throughput = types.ListValueMust(types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"metric_name": types.StringType,
+					"aggregation": types.StringType,
+				},
+			}, throughputElements)
 
 			ruleObj, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
 				"error_rate":  types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
@@ -2125,7 +2168,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 
 			// Map warning threshold
 			warningThreshold, isWarningThresholdPresent := ruleWithThreshold.Thresholds[restapi.WarningSeverity]
-			warningThresholdList, warningDiags := MapThresholdToState(ctx, isWarningThresholdPresent, &warningThreshold)
+			warningThresholdList, warningDiags := MapThresholdToState(ctx, isWarningThresholdPresent, &warningThreshold, []string{"static", "adaptiveBaseline"})
 			diags.Append(warningDiags...)
 			if diags.HasError() {
 				return diags
@@ -2134,7 +2177,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 
 			// Map critical threshold
 			criticalThreshold, isCriticalThresholdPresent := ruleWithThreshold.Thresholds[restapi.CriticalSeverity]
-			criticalThresholdList, criticalDiags := MapThresholdToState(ctx, isCriticalThresholdPresent, &criticalThreshold)
+			criticalThresholdList, criticalDiags := MapThresholdToState(ctx, isCriticalThresholdPresent, &criticalThreshold, []string{"static", "adaptiveBaseline"})
 			diags.Append(criticalDiags...)
 			if diags.HasError() {
 				return diags
@@ -2158,8 +2201,8 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 			thresholdList, thresholdListDiags := types.ListValue(
 				types.ObjectType{
 					AttrTypes: map[string]attr.Type{
-						LogAlertConfigFieldWarning:  GetStaticThresholdAttrListTypes(),
-						LogAlertConfigFieldCritical: GetStaticThresholdAttrListTypes(),
+						LogAlertConfigFieldWarning:  GetStaticAndAdaptiveThresholdAttrListTypes(),
+						LogAlertConfigFieldCritical: GetStaticAndAdaptiveThresholdAttrListTypes(),
 					},
 				},
 				[]attr.Value{thresholdObjVal},
@@ -2185,8 +2228,8 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 				"thresholds": types.ListType{
 					ElemType: types.ObjectType{
 						AttrTypes: map[string]attr.Type{
-							LogAlertConfigFieldWarning:  GetStaticThresholdAttrListTypes(),
-							LogAlertConfigFieldCritical: GetStaticThresholdAttrListTypes(),
+							LogAlertConfigFieldWarning:  GetStaticAndAdaptiveThresholdAttrListTypes(),
+							LogAlertConfigFieldCritical: GetStaticAndAdaptiveThresholdAttrListTypes(),
 						},
 					},
 				},
@@ -2214,7 +2257,14 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 					},
 				},
 				"threshold_operator": types.StringType,
-				"thresholds":         GetStaticAndAdaptiveThresholdAttrListTypes(),
+				"thresholds": types.ListType{
+					ElemType: types.ObjectType{
+						AttrTypes: map[string]attr.Type{
+							LogAlertConfigFieldWarning:  GetStaticAndAdaptiveThresholdAttrListTypes(),
+							LogAlertConfigFieldCritical: GetStaticAndAdaptiveThresholdAttrListTypes(),
+						},
+					},
+				},
 			},
 		}, rulesElements)
 	}

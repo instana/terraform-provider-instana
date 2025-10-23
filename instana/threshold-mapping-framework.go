@@ -176,26 +176,106 @@ func AdaptiveThresholdBlockSchema() schema.ListNestedBlock {
 }
 
 // MapThresholdToState maps a threshold rule to a Terraform state representation
-func MapThresholdToState(ctx context.Context, isThresholdPresent bool, threshold *restapi.ThresholdRule) (types.List, diag.Diagnostics) {
+func MapThresholdToState(ctx context.Context, isThresholdPresent bool, threshold *restapi.ThresholdRule, expectedThresholdTypes []string) (types.List, diag.Diagnostics) {
 	var diags diag.Diagnostics
+
+	// Initialize attribute types map with all expected threshold types
+	thresholdAttrTypes := map[string]attr.Type{}
+	// Create threshold object based on type
+	thresholdObj := map[string]attr.Value{}
+
+	// Add expected threshold types to the attribute types map
+	for _, thresholdType := range expectedThresholdTypes {
+		switch thresholdType {
+		case "static":
+			thresholdAttrTypes[ThresholdFieldStatic] = types.ListType{
+				ElemType: types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						LogAlertConfigFieldValue: types.Int64Type,
+					},
+				},
+			}
+			thresholdObj[ThresholdFieldStatic] = types.ListNull(types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					LogAlertConfigFieldValue: types.Int64Type,
+				},
+			})
+		case "historicBaseline":
+			thresholdAttrTypes[ThresholdFieldHistoricBaseline] = types.ListType{
+				ElemType: types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						ThresholdFieldHistoricBaselineBaseline:    types.SetType{ElemType: types.SetType{ElemType: types.Float64Type}},
+						ThresholdFieldHistoricBaselineDeviation:   types.Float64Type,
+						ThresholdFieldHistoricBaselineSeasonality: types.StringType,
+					},
+				},
+			}
+			thresholdObj[ThresholdFieldHistoricBaseline] = types.ListNull(types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					ThresholdFieldHistoricBaselineBaseline:    types.SetType{ElemType: types.SetType{ElemType: types.Float64Type}},
+					ThresholdFieldHistoricBaselineDeviation:   types.Float64Type,
+					ThresholdFieldHistoricBaselineSeasonality: types.StringType,
+				},
+			})
+		case "adaptiveBaseline":
+			thresholdAttrTypes[ThresholdFieldAdaptiveBaseline] = types.ListType{
+				ElemType: types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						ThresholdFieldAdaptiveBaselineDeviation:    types.Float64Type,
+						ThresholdFieldAdaptiveBaselineAdaptability: types.Float64Type,
+						ThresholdFieldAdaptiveBaselineSeasonality:  types.StringType,
+					},
+				},
+			}
+			thresholdObj[ThresholdFieldAdaptiveBaseline] = types.ListNull(types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					ThresholdFieldAdaptiveBaselineDeviation:    types.Float64Type,
+					ThresholdFieldAdaptiveBaselineAdaptability: types.Float64Type,
+					ThresholdFieldAdaptiveBaselineSeasonality:  types.StringType,
+				},
+			})
+		}
+	}
 
 	if !isThresholdPresent || threshold == nil {
 		return types.ListNull(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				ThresholdFieldStatic: types.ListType{
-					ElemType: types.ObjectType{
-						AttrTypes: map[string]attr.Type{
-							LogAlertConfigFieldValue: types.Int64Type,
-						},
-					},
-				},
-			},
+			AttrTypes: thresholdAttrTypes,
 		}), diags
 	}
 
-	// Create threshold object based on type
-	thresholdObj := map[string]attr.Value{}
-	thresholdAttrTypes := map[string]attr.Type{}
+	// Initialize all expected threshold types with null values
+	for _, thresholdType := range expectedThresholdTypes {
+		switch thresholdType {
+		case "static":
+			if threshold.Type != "staticThreshold" {
+				thresholdObj[ThresholdFieldStatic] = types.ListNull(types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						LogAlertConfigFieldValue: types.Int64Type,
+					},
+				})
+			}
+		case "historicBaseline":
+			if threshold.Type != "historicBaseline" {
+				thresholdObj[ThresholdFieldHistoricBaseline] = types.ListNull(types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						ThresholdFieldHistoricBaselineBaseline:    types.SetType{ElemType: types.SetType{ElemType: types.Float64Type}},
+						ThresholdFieldHistoricBaselineDeviation:   types.Float64Type,
+						ThresholdFieldHistoricBaselineSeasonality: types.StringType,
+					},
+				})
+			}
+		case "adaptiveBaseline":
+			if threshold.Type != "adaptiveBaseline" {
+				thresholdObj[ThresholdFieldAdaptiveBaseline] = types.ListNull(types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						ThresholdFieldAdaptiveBaselineDeviation:    types.Float64Type,
+						ThresholdFieldAdaptiveBaselineAdaptability: types.Float64Type,
+						ThresholdFieldAdaptiveBaselineSeasonality:  types.StringType,
+					},
+				})
+			}
+		}
+	}
 
 	switch threshold.Type {
 	case "historicBaseline":
