@@ -2230,6 +2230,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 			if diags.HasError() {
 				return diags
 			}
+			log.Printf("before calling rules value initial")
 
 			// Create rule with threshold object
 			ruleWithThresholdObj, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
@@ -2262,7 +2263,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 			}
 			rulesElements[i] = ruleWithThresholdObj
 		}
-
+		log.Printf("before calling rules value final")
 		model.Rules = types.ListValueMust(types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 				"rule": types.ObjectType{
