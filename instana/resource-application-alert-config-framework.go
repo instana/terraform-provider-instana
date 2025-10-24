@@ -1447,10 +1447,8 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 				if len(requestImpacts) > 0 {
 					result.TimeThreshold.Type = "requestImpact"
 					result.TimeThreshold.TimeWindow = requestImpacts[0].TimeWindow.ValueInt64()
-					result.TimeThreshold.RequestImpact = &restapi.ApplicationAlertTimeThresholdRequestImpact{
-						TimeWindow: int(requestImpacts[0].TimeWindow.ValueInt64()),
-						Requests:   int(requestImpacts[0].Requests.ValueInt64()),
-					}
+					result.TimeThreshold.Requests = int(requestImpacts[0].Requests.ValueInt64())
+
 				}
 			}
 
@@ -1464,10 +1462,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 				if len(violationsInPeriods) > 0 {
 					result.TimeThreshold.Type = "violationsInPeriod"
 					result.TimeThreshold.TimeWindow = violationsInPeriods[0].TimeWindow.ValueInt64()
-					result.TimeThreshold.ViolationsInPeriod = &restapi.ApplicationAlertTimeThresholdViolationsInPeriod{
-						TimeWindow: int(violationsInPeriods[0].TimeWindow.ValueInt64()),
-						Violations: int(violationsInPeriods[0].Violations.ValueInt64()),
-					}
+					result.TimeThreshold.Violations = int(violationsInPeriods[0].Violations.ValueInt64())
 				}
 			}
 
@@ -1481,9 +1476,6 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 				if len(violationsInSequences) > 0 {
 					result.TimeThreshold.Type = "violationsInSequence"
 					result.TimeThreshold.TimeWindow = violationsInSequences[0].TimeWindow.ValueInt64()
-					result.TimeThreshold.ViolationsInSequence = &restapi.ApplicationAlertTimeThresholdViolationsInSequence{
-						TimeWindow: int(violationsInSequences[0].TimeWindow.ValueInt64()),
-					}
 				}
 			}
 		}
@@ -1501,6 +1493,8 @@ func extractGracePeriod(v types.Int64) *int64 {
 }
 
 func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Context, state *tfsdk.State, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
+	var diags diag.Diagnostics
+
 	model := ApplicationAlertConfigModel{
 		ID:               types.StringValue(data.ID),
 		Name:             types.StringValue(data.Name),
@@ -1530,7 +1524,10 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 			model.Severity = types.StringValue(severity)
 		}
 	}
-
+	if diags.HasError() {
+		return diags
+	}
+	log.Printf("Before allertchannel id stage")
 	// Handle alert channel IDs (deprecated but supported for backward compatibility)
 	if len(data.AlertChannelIDs) > 0 {
 		elements := make([]attr.Value, len(data.AlertChannelIDs))
@@ -1540,6 +1537,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 		model.AlertChannelIDs = types.SetValueMust(types.StringType, elements)
 	}
 
+	log.Printf("Before alert channel stage")
 	// Handle alert channels (new format as map of severity to channel IDs)
 	if len(data.AlertChannels) > 0 {
 		elements := make(map[string]attr.Value)
@@ -1551,8 +1549,13 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 			elements[severity] = types.SetValueMust(types.StringType, channelElements)
 		}
 		model.AlertChannels = types.MapValueMust(types.SetType{ElemType: types.StringType}, elements)
-	}
+		log.Printf("static threshold elements : %+v\n", model.AlertChannels)
 
+	}
+	if diags.HasError() {
+		return diags
+	}
+	log.Printf("Before applicaion stage")
 	// Handle applications
 	// Predefine attribute/type maps once
 	endpointAttrTypes := map[string]attr.Type{
@@ -1623,7 +1626,11 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 
 		model.Applications = types.SetValueMust(applicationObjectType, appElements)
 	}
+	if diags.HasError() {
+		return diags
+	}
 
+	log.Printf("Before custom payload stage")
 	// Handle custom payload fields
 	customPayloadFieldsList, payloadDiags := CustomPayloadFieldsToTerraform(ctx, data.CustomerPayloadFields)
 	if payloadDiags.HasError() {
@@ -1631,6 +1638,10 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 	}
 	model.CustomPayloadFields = customPayloadFieldsList
 
+	if diags.HasError() {
+		return diags
+	}
+	log.Printf("Before Threshold stage")
 	// Handle threshold
 	if data.Threshold != nil {
 		// Map thresholds
@@ -1794,6 +1805,10 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 		model.Threshold = thresholdList
 	}
 
+	if diags.HasError() {
+		return diags
+	}
+	log.Printf("Before Rule stage")
 	// Handle rule (deprecated but supported for backward compatibility)
 	if data.Rule != nil {
 		ruleModel := RuleModel{}
@@ -1983,6 +1998,10 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 		}, []attr.Value{ruleObj})
 	}
 
+	if diags.HasError() {
+		return diags
+	}
+	log.Printf("Before Rules stage")
 	// Handle rules (new format with multiple thresholds and severity levels)
 	if len(data.Rules) > 0 {
 		rulesElements := make([]attr.Value, len(data.Rules))
@@ -2268,64 +2287,69 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 			},
 		}, rulesElements)
 	}
-
+	if diags.HasError() {
+		return diags
+	}
+	log.Printf("Before TimeThreshold stage")
 	// Handle time threshold
 	if data.TimeThreshold != nil {
 		timeThresholdModel := AppAlertTimeThresholdModel{}
 
-		// Handle request impact
-		if data.TimeThreshold.RequestImpact != nil {
-			requestImpactElements := []attr.Value{
+		violationsInSequenceElements := []attr.Value{}
+		requestImpactElements := []attr.Value{}
+		violationsInPeriodElements := []attr.Value{}
+		// Determine which time threshold to populate based on the Type field
+		switch data.TimeThreshold.Type {
+		case "requestImpact":
+			requestImpactElements = []attr.Value{
 				types.ObjectValueMust(map[string]attr.Type{
 					"time_window": types.Int64Type,
 					"requests":    types.Int64Type,
 				}, map[string]attr.Value{
-					"time_window": types.Int64Value(int64(data.TimeThreshold.RequestImpact.TimeWindow)),
-					"requests":    types.Int64Value(int64(data.TimeThreshold.RequestImpact.Requests)),
+					"time_window": types.Int64Value(int64(data.TimeThreshold.TimeWindow)),
+					"requests":    types.Int64Value(int64(data.TimeThreshold.Requests)),
 				}),
 			}
-			timeThresholdModel.RequestImpact = types.ListValueMust(types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"time_window": types.Int64Type,
-					"requests":    types.Int64Type,
-				},
-			}, requestImpactElements)
-		}
 
-		// Handle violations in period
-		if data.TimeThreshold.ViolationsInPeriod != nil {
-			violationsInPeriodElements := []attr.Value{
+		case "violationsInPeriod":
+			violationsInPeriodElements = []attr.Value{
 				types.ObjectValueMust(map[string]attr.Type{
 					"time_window": types.Int64Type,
 					"violations":  types.Int64Type,
 				}, map[string]attr.Value{
-					"time_window": types.Int64Value(int64(data.TimeThreshold.ViolationsInPeriod.TimeWindow)),
-					"violations":  types.Int64Value(int64(data.TimeThreshold.ViolationsInPeriod.Violations)),
+					"time_window": types.Int64Value(int64(data.TimeThreshold.TimeWindow)),
+					"violations":  types.Int64Value(int64(data.TimeThreshold.Violations)),
 				}),
 			}
-			timeThresholdModel.ViolationsInPeriod = types.ListValueMust(types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"time_window": types.Int64Type,
-					"violations":  types.Int64Type,
-				},
-			}, violationsInPeriodElements)
-		}
 
-		// Handle violations in sequence
-		if data.TimeThreshold.ViolationsInSequence != nil {
-			violationsInSequenceElements := []attr.Value{
+		case "violationsInSequence":
+			violationsInSequenceElements = []attr.Value{
 				types.ObjectValueMust(map[string]attr.Type{
 					"time_window": types.Int64Type,
 				}, map[string]attr.Value{
-					"time_window": types.Int64Value(int64(data.TimeThreshold.ViolationsInSequence.TimeWindow)),
+					"time_window": types.Int64Value(int64(data.TimeThreshold.TimeWindow)),
 				}),
 			}
-			timeThresholdModel.ViolationsInSequence = types.ListValueMust(types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"time_window": types.Int64Type,
-				},
-			}, violationsInSequenceElements)
+
 		}
+		timeThresholdModel.RequestImpact = types.ListValueMust(types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"time_window": types.Int64Type,
+				"requests":    types.Int64Type,
+			},
+		}, requestImpactElements)
+
+		timeThresholdModel.ViolationsInPeriod = types.ListValueMust(types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"time_window": types.Int64Type,
+				"violations":  types.Int64Type,
+			},
+		}, violationsInPeriodElements)
+		timeThresholdModel.ViolationsInSequence = types.ListValueMust(types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"time_window": types.Int64Type,
+			},
+		}, violationsInSequenceElements)
 
 		timeThresholdObj, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
 			"request_impact":         types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"time_window": types.Int64Type, "requests": types.Int64Type}}},
@@ -2344,6 +2368,10 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 			},
 		}, []attr.Value{timeThresholdObj})
 	}
-
+	if diags.HasError() {
+		return diags
+	}
+	log.Printf("Reached final stage")
+	log.Printf("static threshold elements : %+v\n", model)
 	return state.Set(ctx, model)
 }
