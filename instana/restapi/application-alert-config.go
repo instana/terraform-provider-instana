@@ -67,11 +67,10 @@ type EndpointScope struct {
 
 // ApplicationAlertTimeThreshold represents the time threshold configuration for application alerts
 type ApplicationAlertTimeThreshold struct {
-	Type                 string                                             `json:"type"`
-	TimeWindow           int64                                              `json:"timeWindow"`
-	RequestImpact        *ApplicationAlertTimeThresholdRequestImpact        `json:"-"`
-	ViolationsInPeriod   *ApplicationAlertTimeThresholdViolationsInPeriod   `json:"-"`
-	ViolationsInSequence *ApplicationAlertTimeThresholdViolationsInSequence `json:"-"`
+	Type       string `json:"type"`
+	TimeWindow int64  `json:"timeWindow"`
+	Violations int    `json:"violations"`
+	Requests   int    `json:"requests"`
 }
 
 // ApplicationAlertTimeThresholdRequestImpact represents the request impact time threshold configuration
