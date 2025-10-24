@@ -119,26 +119,26 @@ const (
 
 // ApplicationAlertConfigModel represents the data model for the application alert configuration resource
 type ApplicationAlertConfigModel struct {
-	ID                  types.String `tfsdk:"id"`
-	AlertChannelIDs     types.Set    `tfsdk:"alert_channel_ids"`
-	AlertChannels       types.Map    `tfsdk:"alert_channels"`
-	Applications        types.Set    `tfsdk:"application"`
-	BoundaryScope       types.String `tfsdk:"boundary_scope"`
-	CustomPayloadFields types.List   `tfsdk:"custom_payload_field"`
-	Description         types.String `tfsdk:"description"`
-	EvaluationType      types.String `tfsdk:"evaluation_type"`
-	GracePeriod         types.Int64  `tfsdk:"grace_period"`
-	Granularity         types.Int64  `tfsdk:"granularity"`
-	IncludeInternal     types.Bool   `tfsdk:"include_internal"`
-	IncludeSynthetic    types.Bool   `tfsdk:"include_synthetic"`
-	Name                types.String `tfsdk:"name"`
-	Rule                types.List   `tfsdk:"rule"`
-	Rules               types.List   `tfsdk:"rules"`
-	Severity            types.String `tfsdk:"severity"`
-	TagFilter           types.String `tfsdk:"tag_filter"`
-	Threshold           types.List   `tfsdk:"threshold"`
-	TimeThreshold       types.List   `tfsdk:"time_threshold"`
-	Triggering          types.Bool   `tfsdk:"triggering"`
+	ID                  types.String               `tfsdk:"id"`
+	AlertChannelIDs     types.Set                  `tfsdk:"alert_channel_ids"`
+	AlertChannels       types.Map                  `tfsdk:"alert_channels"`
+	Applications        types.Set                  `tfsdk:"application"`
+	BoundaryScope       types.String               `tfsdk:"boundary_scope"`
+	CustomPayloadFields types.List                 `tfsdk:"custom_payload_field"`
+	Description         types.String               `tfsdk:"description"`
+	EvaluationType      types.String               `tfsdk:"evaluation_type"`
+	GracePeriod         types.Int64                `tfsdk:"grace_period"`
+	Granularity         types.Int64                `tfsdk:"granularity"`
+	IncludeInternal     types.Bool                 `tfsdk:"include_internal"`
+	IncludeSynthetic    types.Bool                 `tfsdk:"include_synthetic"`
+	Name                types.String               `tfsdk:"name"`
+	Rule                types.List                 `tfsdk:"rule"`
+	Rules               types.List                 `tfsdk:"rules"`
+	Severity            types.String               `tfsdk:"severity"`
+	TagFilter           types.String               `tfsdk:"tag_filter"`
+	Threshold           *ApplicationThresholdModel `tfsdk:"threshold"`
+	TimeThreshold       types.List                 `tfsdk:"time_threshold"`
+	Triggering          types.Bool                 `tfsdk:"triggering"`
 }
 
 // ApplicationModel represents an application in the application alert config
@@ -146,6 +146,12 @@ type ApplicationModel struct {
 	ApplicationID types.String `tfsdk:"application_id"`
 	Inclusive     types.Bool   `tfsdk:"inclusive"`
 	Services      types.Set    `tfsdk:"service"`
+}
+
+// ApplicationThresholdModel represents a threshold in the application alert config
+type ApplicationThresholdModel struct {
+	Static           *StaticTypeModel       `tfsdk:"static"`
+	AdaptiveBaseline *AdaptiveBaselineModel `tfsdk:"adaptive_baseline"`
 }
 
 // ServiceModel represents a service in the application alert config
@@ -246,11 +252,13 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 					},
 					ApplicationAlertConfigFieldAlertChannelIDs: schema.SetAttribute{
 						Optional:    true,
+						Computed:    true,
 						Description: "List of IDs of alert channels defined in Instana. Deprecated: Use alert_channels instead.",
 						ElementType: types.StringType,
 					},
 					ApplicationAlertConfigFieldAlertChannels: schema.MapAttribute{
 						Optional:    true,
+						Computed:    true,
 						Description: "Set of alert channel IDs associated with the severity.",
 						ElementType: types.SetType{
 							ElemType: types.StringType,
@@ -692,54 +700,49 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 							},
 						},
 					},
-					ResourceFieldThreshold: schema.ListNestedBlock{
+					ResourceFieldThreshold: schema.SingleNestedBlock{
 						Description: "Threshold configuration for different severity levels",
-						NestedObject: schema.NestedBlockObject{
-							Blocks: map[string]schema.Block{
-								"static": schema.SingleNestedBlock{
-									Description: "Static threshold definition.",
-									Attributes: map[string]schema.Attribute{
-										"operator": schema.StringAttribute{
-											Description: "Comparison operator for the static threshold.",
-											Optional:    true,
-											Validators: []validator.String{
-												stringvalidator.OneOf([]string{">=", ">", "<=", "<", "=="}...),
-											},
-										},
-										"value": schema.Float64Attribute{
-											Description: "The numeric value for the static threshold.",
-											Optional:    true,
+						Blocks: map[string]schema.Block{
+							"static": schema.SingleNestedBlock{
+								Description: "Static threshold definition.",
+								Attributes: map[string]schema.Attribute{
+									"operator": schema.StringAttribute{
+										Description: "Comparison operator for the static threshold.",
+										Optional:    true,
+										Validators: []validator.String{
+											stringvalidator.OneOf([]string{">=", ">", "<=", "<", "=="}...),
 										},
 									},
-								},
-								"adaptive_baseline": schema.SingleNestedBlock{
-									Description: "Static threshold definition.",
-									Attributes: map[string]schema.Attribute{
-										"operator": schema.StringAttribute{
-											Description: "Comparison operator for the static threshold.",
-											Optional:    true,
-											Validators: []validator.String{
-												stringvalidator.OneOf([]string{">=", ">", "<=", "<", "=="}...),
-											},
-										},
-										"deviation_factor": schema.Float64Attribute{
-											Description: "The numeric value for the deviation factor.",
-											Optional:    true,
-										},
-										"adaptability": schema.Float64Attribute{
-											Description: "The numeric value for the adaptability.",
-											Optional:    true,
-										},
-										"seasonality": schema.StringAttribute{
-											Description: "Value for the seasonality.",
-											Optional:    true,
-										},
+									"value": schema.Int64Attribute{
+										Description: "The numeric value for the static threshold.",
+										Optional:    true,
 									},
 								},
 							},
-						},
-						Validators: []validator.List{
-							listvalidator.SizeAtMost(1),
+							"adaptive_baseline": schema.SingleNestedBlock{
+								Description: "Static threshold definition.",
+								Attributes: map[string]schema.Attribute{
+									"operator": schema.StringAttribute{
+										Description: "Comparison operator for the static threshold.",
+										Optional:    true,
+										Validators: []validator.String{
+											stringvalidator.OneOf([]string{">=", ">", "<=", "<", "=="}...),
+										},
+									},
+									"deviation_factor": schema.Float64Attribute{
+										Description: "The numeric value for the deviation factor.",
+										Optional:    true,
+									},
+									"adaptability": schema.Float64Attribute{
+										Description: "The numeric value for the adaptability.",
+										Optional:    true,
+									},
+									"seasonality": schema.StringAttribute{
+										Description: "Value for the seasonality.",
+										Optional:    true,
+									},
+								},
+							},
 						},
 					},
 					ApplicationAlertConfigFieldTimeThreshold: schema.ListNestedBlock{
@@ -1060,95 +1063,119 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 	}
 
 	// Handle threshold
-	if !model.Threshold.IsNull() && !model.Threshold.IsUnknown() {
+	if model.Threshold != nil {
 		// We need to convert from ThresholdRule to Threshold
 		// First, get the operator from the schema
-		var thresholdElements []types.Object
-		diags.Append(model.Threshold.ElementsAs(ctx, &thresholdElements, false)...)
-		if diags.HasError() {
-			return nil, diags
+		//var thresholdElements []types.Object
+
+		threshold := &restapi.Threshold{}
+
+		if model.Threshold.Static != nil {
+			value := float64(model.Threshold.Static.Value.ValueInt64())
+			threshold.Value = &value
+			threshold.Type = "staticThreshold"
+
+			threshold.Operator = restapi.ThresholdOperator(model.Threshold.Static.Operator.ValueString())
+
 		}
+		if model.Threshold.AdaptiveBaseline != nil {
+			threshold.Type = "adaptiveBaselineThreshold"
+			threshold.Operator = restapi.ThresholdOperator(model.Threshold.AdaptiveBaseline.Operator.ValueString())
+			deviationFactor := model.Threshold.AdaptiveBaseline.DeviationFactor.ValueFloat32()
+			threshold.DeviationFactor = &deviationFactor
+			adaptability := model.Threshold.AdaptiveBaseline.Adaptability.ValueFloat32()
+			threshold.Adaptability = &adaptability
+			seasonality := restapi.ThresholdSeasonality(model.Threshold.AdaptiveBaseline.Seasonality.ValueString())
+			threshold.Seasonality = &seasonality
 
-		if len(thresholdElements) > 0 {
-			// Create a new Threshold object
-			threshold := &restapi.Threshold{}
-			log.Printf("static threshold elements : %+v\n", thresholdElements)
-
-			// Check for static threshold
-			if staticVal, ok := thresholdElements[0].Attributes()[ThresholdFieldStatic]; ok && !staticVal.IsNull() && !staticVal.IsUnknown() {
-				log.Printf("static threshold value type: %T\n", staticVal)
-
-				// Extract the operator and value directly from the static object
-				var staticObj struct {
-					Operator types.String  `tfsdk:"operator"`
-					Value    types.Float64 `tfsdk:"value"`
-				}
-
-				staticObject, ok := staticVal.(types.Object)
-				if ok && !staticObject.IsNull() && !staticObject.IsUnknown() {
-					log.Printf("static threshold individual: %+v\n", staticObject)
-
-					diags.Append(staticObject.As(ctx, &staticObj, basetypes.ObjectAsOptions{})...)
-					if diags.HasError() {
-						return nil, diags
-					}
-
-					// Set the threshold type and operator
-					threshold.Type = "staticThreshold"
-					threshold.Operator = restapi.ThresholdOperator(staticObj.Operator.ValueString())
-
-					// Set the value
-					if !staticObj.Value.IsNull() && !staticObj.Value.IsUnknown() {
-						value := staticObj.Value.ValueFloat64()
-						threshold.Value = &value
-					}
-					log.Printf("static threshold final: %+v\n", threshold)
-				}
-			}
-
-			// Check for adaptive baseline threshold
-			if adaptiveVal, ok := thresholdElements[0].Attributes()[ThresholdFieldAdaptiveBaseline]; ok && !adaptiveVal.IsNull() && !adaptiveVal.IsUnknown() {
-				log.Printf("adaptive threshold value type: %T\n", adaptiveVal)
-
-				// Extract the operator, deviation factor, adaptability, and seasonality directly
-				var adaptiveObj struct {
-					Operator        types.String  `tfsdk:"operator"`
-					DeviationFactor types.Float64 `tfsdk:"deviation_factor"`
-					Adaptability    types.Float64 `tfsdk:"adaptability"`
-					Seasonality     types.String  `tfsdk:"seasonality"`
-				}
-
-				adaptiveObject, ok := adaptiveVal.(types.Object)
-				if ok && !adaptiveObject.IsNull() && !adaptiveObject.IsUnknown() {
-					log.Printf("adaptive threshold individual: %+v\n", adaptiveObject)
-
-					diags.Append(adaptiveObject.As(ctx, &adaptiveObj, basetypes.ObjectAsOptions{})...)
-					if diags.HasError() {
-						return nil, diags
-					}
-
-					// Set the threshold type and operator
-					threshold.Type = "adaptiveBaseline"
-					threshold.Operator = restapi.ThresholdOperator(adaptiveObj.Operator.ValueString())
-
-					// Set the deviation factor
-					if !adaptiveObj.DeviationFactor.IsNull() && !adaptiveObj.DeviationFactor.IsUnknown() {
-						deviationFactor := float32(adaptiveObj.DeviationFactor.ValueFloat64())
-						threshold.DeviationFactor = &deviationFactor
-					}
-
-					// Set the seasonality
-					if !adaptiveObj.Seasonality.IsNull() && !adaptiveObj.Seasonality.IsUnknown() {
-						seasonality := restapi.ThresholdSeasonality(adaptiveObj.Seasonality.ValueString())
-						threshold.Seasonality = &seasonality
-					}
-
-					log.Printf("adaptive threshold final: %+v\n", threshold)
-				}
-			}
-
-			result.Threshold = threshold
 		}
+		result.Threshold = threshold
+
+		// diags.Append(model.Threshold.ElementsAs(ctx, &thresholdElements, false)...)
+		// if diags.HasError() {
+		// 	return nil, diags
+		// }
+
+		// if len(thresholdElements) > 0 {
+		// 	// Create a new Threshold object
+		// 	threshold := &restapi.Threshold{}
+		// 	log.Printf("static threshold elements : %+v\n", thresholdElements)
+
+		// 	// Check for static threshold
+		// 	if staticVal, ok := thresholdElements[0].Attributes()[ThresholdFieldStatic]; ok && !staticVal.IsNull() && !staticVal.IsUnknown() {
+		// 		log.Printf("static threshold value type: %T\n", staticVal)
+
+		// 		// Extract the operator and value directly from the static object
+		// 		var staticObj struct {
+		// 			Operator types.String `tfsdk:"operator"`
+		// 			Value    types.Int64  `tfsdk:"value"`
+		// 		}
+
+		// 		staticObject, ok := staticVal.(types.Object)
+		// 		if ok && !staticObject.IsNull() && !staticObject.IsUnknown() {
+		// 			log.Printf("static threshold individual: %+v\n", staticObject)
+
+		// 			diags.Append(staticObject.As(ctx, &staticObj, basetypes.ObjectAsOptions{})...)
+		// 			if diags.HasError() {
+		// 				return nil, diags
+		// 			}
+
+		// 			// Set the threshold type and operator
+		// 			threshold.Type = "staticThreshold"
+		// 			threshold.Operator = restapi.ThresholdOperator(staticObj.Operator.ValueString())
+
+		// 			// Set the value
+		// 			if !staticObj.Value.IsNull() && !staticObj.Value.IsUnknown() {
+		// 				value := float64(staticObj.Value.ValueInt64())
+		// 				threshold.Value = &value
+		// 			}
+		// 			log.Printf("static threshold final: %+v\n", threshold)
+		// 		}
+		// 	}
+
+		// 	// Check for adaptive baseline threshold
+		// 	if adaptiveVal, ok := thresholdElements[0].Attributes()[ThresholdFieldAdaptiveBaseline]; ok && !adaptiveVal.IsNull() && !adaptiveVal.IsUnknown() {
+		// 		log.Printf("adaptive threshold value type: %T\n", adaptiveVal)
+
+		// 		// Extract the operator, deviation factor, adaptability, and seasonality directly
+		// 		var adaptiveObj struct {
+		// 			Operator        types.String  `tfsdk:"operator"`
+		// 			DeviationFactor types.Float64 `tfsdk:"deviation_factor"`
+		// 			Adaptability    types.Float64 `tfsdk:"adaptability"`
+		// 			Seasonality     types.String  `tfsdk:"seasonality"`
+		// 		}
+
+		// 		adaptiveObject, ok := adaptiveVal.(types.Object)
+		// 		if ok && !adaptiveObject.IsNull() && !adaptiveObject.IsUnknown() {
+		// 			log.Printf("adaptive threshold individual: %+v\n", adaptiveObject)
+
+		// 			diags.Append(adaptiveObject.As(ctx, &adaptiveObj, basetypes.ObjectAsOptions{})...)
+		// 			if diags.HasError() {
+		// 				return nil, diags
+		// 			}
+
+		// 			// Set the threshold type and operator
+		// 			threshold.Type = "adaptiveBaseline"
+		// 			threshold.Operator = restapi.ThresholdOperator(adaptiveObj.Operator.ValueString())
+
+		// 			// Set the deviation factor
+		// 			if !adaptiveObj.DeviationFactor.IsNull() && !adaptiveObj.DeviationFactor.IsUnknown() {
+		// 				deviationFactor := float32(adaptiveObj.DeviationFactor.ValueFloat64())
+		// 				threshold.DeviationFactor = &deviationFactor
+		// 			}
+
+		// 			// Set the seasonality
+		// 			if !adaptiveObj.Seasonality.IsNull() && !adaptiveObj.Seasonality.IsUnknown() {
+		// 				seasonality := restapi.ThresholdSeasonality(adaptiveObj.Seasonality.ValueString())
+		// 				threshold.Seasonality = &seasonality
+		// 			}
+
+		// 			log.Printf("adaptive threshold final: %+v\n", threshold)
+		// 		}
+		// 	}
+
+		// 	result.Threshold = threshold
+		// }
 	}
 
 	// Handle rule (deprecated but supported for backward compatibility)
@@ -1644,165 +1671,194 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 	log.Printf("Before Threshold stage")
 	// Handle threshold
 	if data.Threshold != nil {
-		// Map thresholds
-		thresholdObj := map[string]attr.Value{}
 
-		// Create threshold object based on the threshold type
-		if data.Threshold != nil {
-			// Map static threshold
-			if data.Threshold.Type == "staticThreshold" {
-				// Create static threshold object
-				staticObj := map[string]attr.Value{}
+		applicationModel := ApplicationThresholdModel{
+			Static:           nil,
+			AdaptiveBaseline: nil,
+		}
 
-				// Add operator
-				staticObj["operator"] = types.StringValue(string(data.Threshold.Operator))
-
-				// Add value
-				if data.Threshold.Value != nil {
-					staticObj["value"] = types.Float64Value(*data.Threshold.Value)
-				} else {
-					staticObj["value"] = types.Float64Null()
-				}
-
-				// Create static object value
-				staticObjVal, staticObjDiags := types.ObjectValue(
-					map[string]attr.Type{
-						"operator": types.StringType,
-						"value":    types.Float64Type,
-					},
-					staticObj,
-				)
-				if staticObjDiags.HasError() {
-					return staticObjDiags
-				}
-
-				// Create static list
-				staticList, staticListDiags := types.ListValue(
-					types.ObjectType{
-						AttrTypes: map[string]attr.Type{
-							"operator": types.StringType,
-							"value":    types.Float64Type,
-						},
-					},
-					[]attr.Value{staticObjVal},
-				)
-				if staticListDiags.HasError() {
-					return staticListDiags
-				}
-
-				thresholdObj[ThresholdFieldStatic] = staticList
-			} else if data.Threshold.Type == "adaptiveBaseline" {
-				// Create adaptive baseline threshold object
-				adaptiveObj := map[string]attr.Value{}
-
-				// Add operator
-				adaptiveObj["operator"] = types.StringValue(string(data.Threshold.Operator))
-
-				// Add deviation factor
-				if data.Threshold.DeviationFactor != nil {
-					adaptiveObj["deviation_factor"] = types.Float64Value(float64(*data.Threshold.DeviationFactor))
-				} else {
-					adaptiveObj["deviation_factor"] = types.Float64Null()
-				}
-
-				// Add adaptability (assuming it's stored in Value for now)
-				if data.Threshold.Value != nil {
-					adaptiveObj["adaptability"] = types.Float64Value(*data.Threshold.Value)
-				} else {
-					adaptiveObj["adaptability"] = types.Float64Null()
-				}
-
-				// Add seasonality
-				if data.Threshold.Seasonality != nil {
-					adaptiveObj["seasonality"] = types.StringValue(string(*data.Threshold.Seasonality))
-				} else {
-					adaptiveObj["seasonality"] = types.StringNull()
-				}
-
-				// Create adaptive baseline object value
-				adaptiveObjVal, adaptiveObjDiags := types.ObjectValue(
-					map[string]attr.Type{
-						"operator":         types.StringType,
-						"deviation_factor": types.Float64Type,
-						"adaptability":     types.Float64Type,
-						"seasonality":      types.StringType,
-					},
-					adaptiveObj,
-				)
-				if adaptiveObjDiags.HasError() {
-					return adaptiveObjDiags
-				}
-
-				// Create adaptive baseline list
-				adaptiveList, adaptiveListDiags := types.ListValue(
-					types.ObjectType{
-						AttrTypes: map[string]attr.Type{
-							"operator":         types.StringType,
-							"deviation_factor": types.Float64Type,
-							"adaptability":     types.Float64Type,
-							"seasonality":      types.StringType,
-						},
-					},
-					[]attr.Value{adaptiveObjVal},
-				)
-				if adaptiveListDiags.HasError() {
-					return adaptiveListDiags
-				}
-
-				thresholdObj[ThresholdFieldAdaptiveBaseline] = adaptiveList
+		if data.Threshold.Type == "staticThreshold" {
+			staticModel := StaticTypeModel{
+				Operator: types.StringValue(string(data.Threshold.Operator)),
+				Value:    types.Int64Value(int64(*data.Threshold.Value)),
 			}
+			applicationModel.Static = &staticModel
 		}
-
-		// Create threshold object value with the appropriate attribute types
-		thresholdAttrTypes := map[string]attr.Type{}
-
-		// Add static threshold attribute type if present
-		if _, ok := thresholdObj[ThresholdFieldStatic]; ok {
-			thresholdAttrTypes[ThresholdFieldStatic] = types.ListType{
-				ElemType: types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"operator": types.StringType,
-						"value":    types.Float64Type,
-					},
-				},
+		if data.Threshold.Type == "adaptiveBaseline" {
+			adaptiveBaselineModel := AdaptiveBaselineModel{
+				Operator:        types.StringValue(string(data.Threshold.Operator)),
+				DeviationFactor: types.Float32Value(*data.Threshold.DeviationFactor),
+				Adaptability:    types.Float32Value(*data.Threshold.Adaptability),
+				Seasonality:     types.StringValue(string(*data.Threshold.Seasonality)),
 			}
+			applicationModel.AdaptiveBaseline = &adaptiveBaselineModel
 		}
 
-		// Add adaptive baseline attribute type if present
-		if _, ok := thresholdObj[ThresholdFieldAdaptiveBaseline]; ok {
-			thresholdAttrTypes[ThresholdFieldAdaptiveBaseline] = types.ListType{
-				ElemType: types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"operator":         types.StringType,
-						"deviation_factor": types.Float64Type,
-						"adaptability":     types.Float64Type,
-						"seasonality":      types.StringType,
-					},
-				},
-			}
-		}
+		model.Threshold = &applicationModel
 
-		// Create the object value
-		thresholdObjVal, thresholdObjDiags := types.ObjectValue(
-			thresholdAttrTypes,
-			thresholdObj,
-		)
-		if thresholdObjDiags.HasError() {
-			return thresholdObjDiags
-		}
+		// // Map thresholds
+		// thresholdObj := map[string]attr.Value{}
+		// // Create threshold object value with the appropriate attribute types
+		// thresholdAttrTypes := map[string]attr.Type{}
+		// // Create threshold object based on the threshold type
+		// if data.Threshold != nil {
+		// 	// Map static threshold
+		// 	thresholdObj[ThresholdFieldStatic] = types.ListNull(types.ObjectType{
+		// 		AttrTypes: map[string]attr.Type{
+		// 			LogAlertConfigFieldValue: types.Int64Type,
+		// 			"operator":               types.StringType,
+		// 		},
+		// 	})
+		// 	thresholdObj[ThresholdFieldAdaptiveBaseline] = types.ListNull(types.ObjectType{
+		// 		AttrTypes: map[string]attr.Type{
+		// 			ThresholdFieldAdaptiveBaselineDeviation:    types.Float64Type,
+		// 			ThresholdFieldAdaptiveBaselineAdaptability: types.Float64Type,
+		// 			ThresholdFieldAdaptiveBaselineSeasonality:  types.StringType,
+		// 			"operator": types.StringType,
+		// 		},
+		// 	})
+		// 	thresholdAttrTypes[ThresholdFieldStatic] = types.ListType{
+		// 		ElemType: types.ObjectType{
+		// 			AttrTypes: map[string]attr.Type{
+		// 				"operator":               types.StringType,
+		// 				LogAlertConfigFieldValue: types.Int64Type,
+		// 			},
+		// 		},
+		// 	}
+		// 	thresholdAttrTypes[ThresholdFieldAdaptiveBaseline] = types.ListType{
+		// 		ElemType: types.ObjectType{
+		// 			AttrTypes: map[string]attr.Type{
+		// 				"operator":         types.StringType,
+		// 				"deviation_factor": types.Float64Type,
+		// 				"adaptability":     types.Float64Type,
+		// 				"seasonality":      types.StringType,
+		// 			},
+		// 		},
+		// 	}
+		// 	if data.Threshold.Type == "staticThreshold" {
+		// 		// Create static threshold object
+		// 		staticObj := map[string]attr.Value{}
 
-		// Create the list value
-		thresholdList, thresholdListDiags := types.ListValue(
-			types.ObjectType{
-				AttrTypes: thresholdAttrTypes,
-			},
-			[]attr.Value{thresholdObjVal},
-		)
-		if thresholdListDiags.HasError() {
-			return thresholdListDiags
-		}
+		// 		// Add operator
+		// 		staticObj["operator"] = types.StringValue(string(data.Threshold.Operator))
 
-		model.Threshold = thresholdList
+		// 		// Add value
+		// 		if data.Threshold.Value != nil {
+		// 			staticObj["value"] = types.Int64Value(int64(*data.Threshold.Value))
+		// 		} else {
+		// 			staticObj["value"] = types.Int64Null()
+		// 		}
+
+		// 		// Create static object value
+		// 		staticObjVal, staticObjDiags := types.ObjectValue(
+		// 			map[string]attr.Type{
+		// 				"operator": types.StringType,
+		// 				"value":    types.Int64Type,
+		// 			},
+		// 			staticObj,
+		// 		)
+		// 		if staticObjDiags.HasError() {
+		// 			return staticObjDiags
+		// 		}
+
+		// 		// Create static list
+		// 		staticList, staticListDiags := types.ListValue(
+		// 			types.ObjectType{
+		// 				AttrTypes: map[string]attr.Type{
+		// 					"operator": types.StringType,
+		// 					"value":    types.Int64Type,
+		// 				},
+		// 			},
+		// 			[]attr.Value{staticObjVal},
+		// 		)
+		// 		if staticListDiags.HasError() {
+		// 			return staticListDiags
+		// 		}
+
+		// 		thresholdObj[ThresholdFieldStatic] = staticList
+		// 	} else if data.Threshold.Type == "adaptiveBaseline" {
+		// 		// Create adaptive baseline threshold object
+		// 		adaptiveObj := map[string]attr.Value{}
+
+		// 		// Add operator
+		// 		adaptiveObj["operator"] = types.StringValue(string(data.Threshold.Operator))
+
+		// 		// Add deviation factor
+		// 		if data.Threshold.DeviationFactor != nil {
+		// 			adaptiveObj["deviation_factor"] = types.Float64Value(float64(*data.Threshold.DeviationFactor))
+		// 		} else {
+		// 			adaptiveObj["deviation_factor"] = types.Float64Null()
+		// 		}
+
+		// 		// Add adaptability (assuming it's stored in Value for now)
+		// 		if data.Threshold.Value != nil {
+		// 			adaptiveObj["adaptability"] = types.Float64Value(*data.Threshold.Value)
+		// 		} else {
+		// 			adaptiveObj["adaptability"] = types.Float64Null()
+		// 		}
+
+		// 		// Add seasonality
+		// 		if data.Threshold.Seasonality != nil {
+		// 			adaptiveObj["seasonality"] = types.StringValue(string(*data.Threshold.Seasonality))
+		// 		} else {
+		// 			adaptiveObj["seasonality"] = types.StringNull()
+		// 		}
+
+		// 		// Create adaptive baseline object value
+		// 		adaptiveObjVal, adaptiveObjDiags := types.ObjectValue(
+		// 			map[string]attr.Type{
+		// 				"operator":         types.StringType,
+		// 				"deviation_factor": types.Float64Type,
+		// 				"adaptability":     types.Float64Type,
+		// 				"seasonality":      types.StringType,
+		// 			},
+		// 			adaptiveObj,
+		// 		)
+		// 		if adaptiveObjDiags.HasError() {
+		// 			return adaptiveObjDiags
+		// 		}
+
+		// 		// Create adaptive baseline list
+		// 		adaptiveList, adaptiveListDiags := types.ListValue(
+		// 			types.ObjectType{
+		// 				AttrTypes: map[string]attr.Type{
+		// 					"operator":         types.StringType,
+		// 					"deviation_factor": types.Float64Type,
+		// 					"adaptability":     types.Float64Type,
+		// 					"seasonality":      types.StringType,
+		// 				},
+		// 			},
+		// 			[]attr.Value{adaptiveObjVal},
+		// 		)
+		// 		if adaptiveListDiags.HasError() {
+		// 			return adaptiveListDiags
+		// 		}
+
+		// 		thresholdObj[ThresholdFieldAdaptiveBaseline] = adaptiveList
+		// 	}
+		// }
+
+		// // Create the object value
+		// thresholdObjVal, thresholdObjDiags := types.ObjectValue(
+		// 	thresholdAttrTypes,
+		// 	thresholdObj,
+		// )
+		// if thresholdObjDiags.HasError() {
+		// 	return thresholdObjDiags
+		// }
+
+		// // Create the list value
+		// thresholdList, thresholdListDiags := types.ListValue(
+		// 	types.ObjectType{
+		// 		AttrTypes: thresholdAttrTypes,
+		// 	},
+		// 	[]attr.Value{thresholdObjVal},
+		// )
+		// if thresholdListDiags.HasError() {
+		// 	return thresholdListDiags
+		// }
+
+		// model.Threshold = thresholdList
 	}
 
 	if diags.HasError() {
@@ -1974,14 +2030,17 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 			},
 		}, throughputElements)
 
-		ruleObj, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
+		// Define rule attribute types
+		ruleAttrTypes := map[string]attr.Type{
 			"error_rate":  types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
 			"errors":      types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
 			"logs":        types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "level": types.StringType, "message": types.StringType, "operator": types.StringType}}},
 			"slowness":    types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
 			"status_code": types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "status_code_start": types.Int64Type, "status_code_end": types.Int64Type}}},
 			"throughput":  types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
-		}, ruleModel)
+		}
+
+		ruleObj, diags := types.ObjectValueFrom(ctx, ruleAttrTypes, ruleModel)
 		if diags.HasError() {
 			return diags
 		}
@@ -2168,14 +2227,17 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 				},
 			}, throughputElements)
 
-			ruleObj, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
+			// Define rule attribute types
+			ruleAttrTypes := map[string]attr.Type{
 				"error_rate":  types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
 				"errors":      types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
 				"logs":        types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "level": types.StringType, "message": types.StringType, "operator": types.StringType}}},
 				"slowness":    types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
 				"status_code": types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "status_code_start": types.Int64Type, "status_code_end": types.Int64Type}}},
 				"throughput":  types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
-			}, ruleModel)
+			}
+
+			ruleObj, diags := types.ObjectValueFrom(ctx, ruleAttrTypes, ruleModel)
 			if diags.HasError() {
 				return diags
 			}
@@ -2231,6 +2293,10 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 				return diags
 			}
 			log.Printf("before calling rules value initial")
+			ruleWithThresholdModel := RuleWithThresholdModel{}
+			ruleWithThresholdModel.Rule = ruleObj
+			ruleWithThresholdModel.ThresholdOperator = types.StringValue(ruleWithThreshold.ThresholdOperator)
+			ruleWithThresholdModel.Thresholds = thresholdList
 
 			// Create rule with threshold object
 			ruleWithThresholdObj, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
@@ -2253,18 +2319,14 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 						},
 					},
 				},
-			}, map[string]attr.Value{
-				"rule":               ruleObj,
-				"threshold_operator": types.StringValue(ruleWithThreshold.ThresholdOperator),
-				"thresholds":         thresholdList,
-			})
+			}, ruleWithThresholdModel)
 			if diags.HasError() {
 				return diags
 			}
 			rulesElements[i] = ruleWithThresholdObj
 		}
 		log.Printf("before calling rules value final")
-		model.Rules = types.ListValueMust(types.ObjectType{
+		model.Rules = types.ListNull(types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 				"rule": types.ObjectType{
 					AttrTypes: map[string]attr.Type{
@@ -2286,7 +2348,30 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 					},
 				},
 			},
-		}, rulesElements)
+		})
+		// model.Rules = types.ListValueMust(types.ObjectType{
+		// 	AttrTypes: map[string]attr.Type{
+		// 		"rule": types.ObjectType{
+		// 			AttrTypes: map[string]attr.Type{
+		// 				"error_rate":  types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
+		// 				"errors":      types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
+		// 				"logs":        types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "level": types.StringType, "message": types.StringType, "operator": types.StringType}}},
+		// 				"slowness":    types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
+		// 				"status_code": types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "status_code_start": types.Int64Type, "status_code_end": types.Int64Type}}},
+		// 				"throughput":  types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
+		// 			},
+		// 		},
+		// 		"threshold_operator": types.StringType,
+		// 		"thresholds": types.ListType{
+		// 			ElemType: types.ObjectType{
+		// 				AttrTypes: map[string]attr.Type{
+		// 					LogAlertConfigFieldWarning:  GetStaticAndAdaptiveThresholdAttrListTypes(),
+		// 					LogAlertConfigFieldCritical: GetStaticAndAdaptiveThresholdAttrListTypes(),
+		// 				},
+		// 			},
+		// 		},
+		// 	},
+		// }, rulesElements)
 	}
 	if diags.HasError() {
 		return diags
@@ -2352,11 +2437,14 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 			},
 		}, violationsInSequenceElements)
 
-		timeThresholdObj, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
+		// Define attribute types for time threshold
+		timeThresholdAttrTypes := map[string]attr.Type{
 			"request_impact":         types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"time_window": types.Int64Type, "requests": types.Int64Type}}},
 			"violations_in_period":   types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"time_window": types.Int64Type, "violations": types.Int64Type}}},
 			"violations_in_sequence": types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"time_window": types.Int64Type}}},
-		}, timeThresholdModel)
+		}
+
+		timeThresholdObj, diags := types.ObjectValueFrom(ctx, timeThresholdAttrTypes, timeThresholdModel)
 		if diags.HasError() {
 			return diags
 		}

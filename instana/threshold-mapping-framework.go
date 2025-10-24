@@ -21,6 +21,18 @@ const (
 	ThresholdFieldStatic   = "static"
 )
 
+type AdaptiveBaselineModel struct {
+	Operator        types.String  `tfsdk:"operator"`
+	DeviationFactor types.Float32 `tfsdk:"deviation_factor"`
+	Adaptability    types.Float32 `tfsdk:"adaptability"`
+	Seasonality     types.String  `tfsdk:"seasonality"`
+}
+
+type StaticTypeModel struct {
+	Operator types.String `tfsdk:"operator"`
+	Value    types.Int64  `tfsdk:"value"`
+}
+
 // StaticThresholdBlockSchema returns the schema for static block configuration
 func StaticBlockSchema() schema.ListNestedBlock {
 	return schema.ListNestedBlock{
