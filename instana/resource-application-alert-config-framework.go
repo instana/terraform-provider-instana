@@ -2252,9 +2252,9 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 						},
 					},
 				},
-			}, map[string]interface{}{
+			}, map[string]attr.Value{
 				"rule":               ruleObj,
-				"threshold_operator": ruleWithThreshold.ThresholdOperator,
+				"threshold_operator": types.StringValue(ruleWithThreshold.ThresholdOperator),
 				"thresholds":         thresholdList,
 			})
 			if diags.HasError() {
