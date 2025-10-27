@@ -33,7 +33,7 @@ type CustomEventSpecificationModel struct {
 	ExpirationTime      types.Int64  `tfsdk:"expiration_time"`
 	Enabled             types.Bool   `tfsdk:"enabled"`
 	RuleLogicalOperator types.String `tfsdk:"rule_logical_operator"`
-	Rules               types.List   `tfsdk:"rules"`
+	Rules               types.Object `tfsdk:"rules"`
 }
 
 // RulesModel represents the rules container in the custom event specification
@@ -310,7 +310,7 @@ func createCustomEventSpecificationSchema() schema.Schema {
 								},
 								"tag_filter": schema.StringAttribute{
 									Description: "The tag filter of the rule",
-									Required:    true,
+									Optional:    true,
 								},
 							},
 						},
@@ -751,80 +751,69 @@ func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Cont
 		}
 
 		// Set the rules in the model
-		model.Rules = types.ListValueMust(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"entity_count": types.ListType{ElemType: types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"severity":           types.StringType,
-						"condition_operator": types.StringType,
-						"condition_value":    types.Float64Type,
-					},
-				}},
-				"entity_count_verification": types.ListType{ElemType: types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"severity":              types.StringType,
-						"condition_operator":    types.StringType,
-						"condition_value":       types.Float64Type,
-						"matching_entity_type":  types.StringType,
-						"matching_operator":     types.StringType,
-						"matching_entity_label": types.StringType,
-					},
-				}},
-				"entity_verification": types.ListType{ElemType: types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"severity":              types.StringType,
-						"matching_entity_type":  types.StringType,
-						"matching_operator":     types.StringType,
-						"matching_entity_label": types.StringType,
-						"offline_duration":      types.Int64Type,
-					},
-				}},
-				"host_availability": types.ListType{ElemType: types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"severity":         types.StringType,
-						"offline_duration": types.Int64Type,
-						"close_after":      types.Int64Type,
-						"tag_filter":       types.StringType,
-					},
-				}},
-				"system": types.ListType{ElemType: types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"severity":       types.StringType,
-						"system_rule_id": types.StringType,
-					},
-				}},
-				"threshold": types.ListType{ElemType: types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"severity":    types.StringType,
-						"metric_name": types.StringType,
-						"metric_pattern": types.ListType{ElemType: types.ObjectType{
-							AttrTypes: map[string]attr.Type{
-								"prefix":      types.StringType,
-								"postfix":     types.StringType,
-								"placeholder": types.StringType,
-								"operator":    types.StringType,
-							},
-						}},
-						"rollup":             types.Int64Type,
-						"window":             types.Int64Type,
-						"aggregation":        types.StringType,
-						"condition_operator": types.StringType,
-						"condition_value":    types.Float64Type,
-					},
-				}},
-			},
-		}, []attr.Value{rulesObj})
+		model.Rules = rulesObj
 	} else {
 		// No rules
-		model.Rules = types.ListNull(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"entity_count":              types.ListType{ElemType: types.ObjectType{}},
-				"entity_count_verification": types.ListType{ElemType: types.ObjectType{}},
-				"entity_verification":       types.ListType{ElemType: types.ObjectType{}},
-				"host_availability":         types.ListType{ElemType: types.ObjectType{}},
-				"system":                    types.ListType{ElemType: types.ObjectType{}},
-				"threshold":                 types.ListType{ElemType: types.ObjectType{}},
-			},
+		model.Rules = types.ObjectNull(map[string]attr.Type{
+			"entity_count": types.ListType{ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"severity":           types.StringType,
+					"condition_operator": types.StringType,
+					"condition_value":    types.Float64Type,
+				},
+			}},
+			"entity_count_verification": types.ListType{ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"severity":              types.StringType,
+					"condition_operator":    types.StringType,
+					"condition_value":       types.Float64Type,
+					"matching_entity_type":  types.StringType,
+					"matching_operator":     types.StringType,
+					"matching_entity_label": types.StringType,
+				},
+			}},
+			"entity_verification": types.ListType{ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"severity":              types.StringType,
+					"matching_entity_type":  types.StringType,
+					"matching_operator":     types.StringType,
+					"matching_entity_label": types.StringType,
+					"offline_duration":      types.Int64Type,
+				},
+			}},
+			"host_availability": types.ListType{ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"severity":         types.StringType,
+					"offline_duration": types.Int64Type,
+					"close_after":      types.Int64Type,
+					"tag_filter":       types.StringType,
+				},
+			}},
+			"system": types.ListType{ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"severity":       types.StringType,
+					"system_rule_id": types.StringType,
+				},
+			}},
+			"threshold": types.ListType{ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"severity":    types.StringType,
+					"metric_name": types.StringType,
+					"metric_pattern": types.ListType{ElemType: types.ObjectType{
+						AttrTypes: map[string]attr.Type{
+							"prefix":      types.StringType,
+							"postfix":     types.StringType,
+							"placeholder": types.StringType,
+							"operator":    types.StringType,
+						},
+					}},
+					"rollup":             types.Int64Type,
+					"window":             types.Int64Type,
+					"aggregation":        types.StringType,
+					"condition_operator": types.StringType,
+					"condition_value":    types.Float64Type,
+				},
+			}},
 		})
 	}
 
