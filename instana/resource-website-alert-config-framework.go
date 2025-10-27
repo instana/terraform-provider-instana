@@ -658,7 +658,7 @@ func (r *websiteAlertConfigResourceFramework) mapTimeThresholdFromModel(ctx cont
 	return nil, diags
 }
 
-func (r *websiteAlertConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, apiObject *restapi.WebsiteAlertConfig) diag.Diagnostics {
+func (r *websiteAlertConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *restapi.WebsiteAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	// Convert severity from API representation to Terraform representation

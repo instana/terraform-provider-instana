@@ -681,7 +681,7 @@ func (r *apiTokenResourceFramework) SetComputedFields(ctx context.Context, plan 
 	return diags
 }
 
-func (r *apiTokenResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, apiToken *restapi.APIToken) diag.Diagnostics {
+func (r *apiTokenResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiToken *restapi.APIToken) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	// Create a model and populate it with values from the API token

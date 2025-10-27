@@ -319,7 +319,7 @@ func (r *syntheticAlertConfigResourceFramework) MapStateToDataObject(ctx context
 	return syntheticAlertConfig, diags
 }
 
-func (r *syntheticAlertConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, apiObject *restapi.SyntheticAlertConfig) diag.Diagnostics {
+func (r *syntheticAlertConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *restapi.SyntheticAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	// Map basic fields

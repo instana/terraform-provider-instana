@@ -149,7 +149,7 @@ func (r *groupResourceFramework) SetComputedFields(ctx context.Context, plan *tf
 	return nil
 }
 
-func (r *groupResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, group *restapi.Group) diag.Diagnostics {
+func (r *groupResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, group *restapi.Group) diag.Diagnostics {
 	var diags diag.Diagnostics
 	model := GroupModel{
 		ID:   types.StringValue(group.ID),

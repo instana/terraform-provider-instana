@@ -314,7 +314,7 @@ func (r *infraAlertConfigResourceFramework) SetComputedFields(ctx context.Contex
 	return nil
 }
 
-func (r *infraAlertConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, resource *restapi.InfraAlertConfig) diag.Diagnostics {
+func (r *infraAlertConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, resource *restapi.InfraAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 	model := InfraAlertConfigModel{
 		ID:             types.StringValue(resource.ID),

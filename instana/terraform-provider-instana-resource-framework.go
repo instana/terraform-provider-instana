@@ -36,7 +36,7 @@ type ResourceHandleFramework[T restapi.InstanaDataObject] interface {
 	GetRestResource(api restapi.InstanaAPI) restapi.RestResource[T]
 
 	// UpdateState updates the state of the resource with the input data from the Instana API
-	UpdateState(ctx context.Context, state *tfsdk.State, obj T) diag.Diagnostics
+	UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, obj T) diag.Diagnostics
 
 	// MapStateToDataObject maps the current state to the API model of the Instana API
 	MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (T, diag.Diagnostics)
@@ -140,7 +140,7 @@ func (r *terraformResourceImplFramework[T]) Create(ctx context.Context, req reso
 	log.Printf("before calling updateState")
 
 	// Update state with created object
-	diags = r.resourceHandle.UpdateState(ctx, &resp.State, createdObject)
+	diags = r.resourceHandle.UpdateState(ctx, &resp.State, &req.Plan, createdObject)
 	log.Printf("After calling updateState")
 	log.Printf("Error : %+v\n", diags)
 	resp.Diagnostics.Append(diags...)
@@ -198,7 +198,7 @@ func (r *terraformResourceImplFramework[T]) Read(ctx context.Context, req resour
 	}
 
 	// Update state with the current object
-	diags := r.resourceHandle.UpdateState(ctx, &resp.State, obj)
+	diags := r.resourceHandle.UpdateState(ctx, &resp.State, nil, obj)
 	resp.Diagnostics.Append(diags...)
 }
 
@@ -230,7 +230,7 @@ func (r *terraformResourceImplFramework[T]) Update(ctx context.Context, req reso
 	}
 
 	// Update state with updated object
-	diags = r.resourceHandle.UpdateState(ctx, &resp.State, updatedObject)
+	diags = r.resourceHandle.UpdateState(ctx, &resp.State, &req.Plan, updatedObject)
 	resp.Diagnostics.Append(diags...)
 }
 

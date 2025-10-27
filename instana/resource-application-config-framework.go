@@ -131,7 +131,7 @@ func (r *applicationConfigResourceFramework) SetComputedFields(_ context.Context
 	return nil
 }
 
-func (r *applicationConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, config *restapi.ApplicationConfig) diag.Diagnostics {
+func (r *applicationConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, config *restapi.ApplicationConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	// Create a model and populate it with values from the config

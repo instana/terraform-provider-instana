@@ -25,7 +25,7 @@ func UpdateState(d *sdkschema.ResourceData, data map[string]interface{}) error {
 	return nil
 }
 
-func UpdateStatePlugin(ctx context.Context, state *tfsdk.State, data map[string]interface{}) error {
+func UpdateStatePlugin(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, data map[string]interface{}) error {
 	for k, v := range data {
 		if v == nil {
 			// Set null value for nil

@@ -445,7 +445,7 @@ func (r *syntheticTestResourceFramework) mapConfigurationFromModel(ctx context.C
 	return restapi.SyntheticTestConfig{}, diags
 }
 
-func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, apiObject *restapi.SyntheticTest) diag.Diagnostics {
+func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *restapi.SyntheticTest) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	// Create a model and populate it with values from the API object

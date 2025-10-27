@@ -84,7 +84,7 @@ func (r *websiteMonitoringConfigResourceFramework) MapStateToDataObject(ctx cont
 	}, diags
 }
 
-func (r *websiteMonitoringConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, apiObject *restapi.WebsiteMonitoringConfig) diag.Diagnostics {
+func (r *websiteMonitoringConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *restapi.WebsiteMonitoringConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	// Create a model and populate it with values from the API object

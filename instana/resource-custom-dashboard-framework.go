@@ -113,31 +113,40 @@ func (r *customDashboardResourceFramework) SetComputedFields(_ context.Context, 
 	return nil
 }
 
-func (r *customDashboardResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, dashboard *restapi.CustomDashboard) diag.Diagnostics {
+func (r *customDashboardResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, dashboard *restapi.CustomDashboard) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	// Create a model and populate it with values from the dashboard
-	model := CustomDashboardModel{
-		ID:    types.StringValue(dashboard.ID),
-		Title: types.StringValue(dashboard.Title),
-	}
+	var model CustomDashboardModel
+	if plan != nil {
+		// Create a model from the current plan to overcome the unknown values issue after updation
+		diags.Append(plan.Get(ctx, &model)...)
+		model.ID = types.StringValue(dashboard.ID)
+		model.Title = types.StringValue(dashboard.Title)
 
-	// Handle widgets
-	widgetsBytes, err := dashboard.Widgets.MarshalJSON()
-	if err != nil {
-		diags.AddError(
-			"Error marshaling widgets",
-			fmt.Sprintf("Failed to marshal widgets: %s", err),
-		)
-		return diags
-	}
-	model.Widgets = types.StringValue(NormalizeJSONString(string(widgetsBytes)))
+	} else {
+		// Create a model and populate it with values from the dashboard
+		model = CustomDashboardModel{
+			ID:    types.StringValue(dashboard.ID),
+			Title: types.StringValue(dashboard.Title),
+		}
 
-	// Map access rules
-	accessRules, d := r.mapAccessRulesToState(ctx, dashboard.AccessRules)
-	diags.Append(d...)
-	if !diags.HasError() {
-		model.AccessRules = accessRules
+		// Handle widgets
+		widgetsBytes, err := dashboard.Widgets.MarshalJSON()
+		if err != nil {
+			diags.AddError(
+				"Error marshaling widgets",
+				fmt.Sprintf("Failed to marshal widgets: %s", err),
+			)
+			return diags
+		}
+		model.Widgets = types.StringValue(NormalizeJSONString(string(widgetsBytes)))
+
+		// Map access rules
+		accessRules, d := r.mapAccessRulesToState(ctx, dashboard.AccessRules)
+		diags.Append(d...)
+		if !diags.HasError() {
+			model.AccessRules = accessRules
+		}
 	}
 
 	// Set the entire model to state

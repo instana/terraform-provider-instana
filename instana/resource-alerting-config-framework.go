@@ -131,7 +131,7 @@ func (r *alertingConfigResourceFramework) SetComputedFields(_ context.Context, _
 	return nil
 }
 
-func (r *alertingConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, config *restapi.AlertingConfiguration) diag.Diagnostics {
+func (r *alertingConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, config *restapi.AlertingConfiguration) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	// Create a model and populate it with values from the config

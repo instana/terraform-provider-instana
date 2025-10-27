@@ -172,7 +172,7 @@ func (r *automationPolicyResourceFramework) SetComputedFields(_ context.Context,
 	return nil
 }
 
-func (r *automationPolicyResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, policy *restapi.AutomationPolicy) diag.Diagnostics {
+func (r *automationPolicyResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, policy *restapi.AutomationPolicy) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	// Create a model and populate it with values from the policy
