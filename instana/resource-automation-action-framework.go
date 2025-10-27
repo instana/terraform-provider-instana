@@ -205,7 +205,7 @@ func (r *automationActionResourceFramework) SetComputedFields(_ context.Context,
 	return nil
 }
 
-func (r *automationActionResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, automationAction *restapi.AutomationAction) diag.Diagnostics {
+func (r *automationActionResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, automationAction *restapi.AutomationAction) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	// Create a model and populate it with values from the API response

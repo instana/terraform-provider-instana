@@ -907,7 +907,7 @@ func (r *applicationAlertConfigResourceFramework) MapStateToDataObject(ctx conte
 	return resource.MapStateToDataObject(ctx, tempState)
 }
 
-func (r *applicationAlertConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, obj *restapi.ApplicationAlertConfig) diag.Diagnostics {
+func (r *applicationAlertConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, obj *restapi.ApplicationAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	// Delegate to the resource implementation
@@ -918,7 +918,7 @@ func (r *applicationAlertConfigResourceFramework) UpdateState(ctx context.Contex
 	}
 
 	// Update the state with the object
-	return resource.UpdateState(ctx, state, obj)
+	return resource.UpdateState(ctx, state, nil, obj)
 }
 
 func (r *applicationAlertConfigResourceFramework) SetComputedFields(ctx context.Context, plan *tfsdk.Plan) diag.Diagnostics {
@@ -931,7 +931,7 @@ type ResourceFramework[T restapi.InstanaDataObject] interface {
 	GetID(data T) string
 	SetID(data T, id string)
 	MapStateToDataObject(ctx context.Context, state tfsdk.State) (T, diag.Diagnostics)
-	UpdateState(ctx context.Context, state *tfsdk.State, obj T) diag.Diagnostics
+	UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, obj T) diag.Diagnostics
 }
 
 func (r *applicationAlertConfigResourceFramework) NewResource(ctx context.Context, api restapi.InstanaAPI) (ResourceFramework[*restapi.ApplicationAlertConfig], diag.Diagnostics) {
@@ -1642,7 +1642,7 @@ func extractGracePeriod(v types.Int64) *int64 {
 	return &val
 }
 
-func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Context, state *tfsdk.State, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
+func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	model := ApplicationAlertConfigModel{

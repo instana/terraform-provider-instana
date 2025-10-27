@@ -412,7 +412,7 @@ func (r *customEventSpecificationResourceFramework) SetComputedFields(_ context.
 	return nil
 }
 
-func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, spec *restapi.CustomEventSpecification) diag.Diagnostics {
+func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, spec *restapi.CustomEventSpecification) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	// Create a model and populate it with values from the spec

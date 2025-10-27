@@ -237,7 +237,7 @@ func (r *logAlertConfigResourceFramework) SetComputedFields(_ context.Context, _
 	return nil
 }
 
-func (r *logAlertConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, config *restapi.LogAlertConfig) diag.Diagnostics {
+func (r *logAlertConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, config *restapi.LogAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	// Create a model and populate it with values from the config

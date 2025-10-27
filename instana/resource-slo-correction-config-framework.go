@@ -205,7 +205,7 @@ func (r *sloCorrectionConfigResourceFramework) MapStateToDataObject(ctx context.
 	return sloCorrectionConfig, diags
 }
 
-func (r *sloCorrectionConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, apiObject *restapi.SloCorrectionConfig) diag.Diagnostics {
+func (r *sloCorrectionConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *restapi.SloCorrectionConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	// Create a model and populate it with values from the config

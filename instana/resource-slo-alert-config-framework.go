@@ -229,7 +229,7 @@ func (r *sloAlertConfigResourceFramework) SetComputedFields(_ context.Context, _
 	return nil
 }
 
-func (r *sloAlertConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, sloAlertConfig *restapi.SloAlertConfig) diag.Diagnostics {
+func (r *sloAlertConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, sloAlertConfig *restapi.SloAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 	model := SloAlertConfigModel{
 		ID:          types.StringValue(sloAlertConfig.ID),

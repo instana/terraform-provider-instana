@@ -215,7 +215,7 @@ func (r *alertingChannelResourceFramework) SetComputedFields(_ context.Context, 
 	return nil
 }
 
-func (r *alertingChannelResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, alertingChannel *restapi.AlertingChannel) diag.Diagnostics {
+func (r *alertingChannelResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, alertingChannel *restapi.AlertingChannel) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	// Create a model and populate it with values from the alerting channel

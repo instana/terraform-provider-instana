@@ -273,7 +273,7 @@ func (r *sliConfigResourceFramework) SetComputedFields(ctx context.Context, plan
 	return nil
 }
 
-func (r *sliConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, sliConfig *restapi.SliConfig) diag.Diagnostics {
+func (r *sliConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, sliConfig *restapi.SliConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 	model := SliConfigModel{
 		ID:                         types.StringValue(sliConfig.ID),

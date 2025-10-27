@@ -45,7 +45,7 @@ func (r *sloConfigResourceFramework) MapStateToDataObject(ctx context.Context, p
 	return &restapi.SloConfig{}, nil
 }
 
-func (r *sloConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, apiObject *restapi.SloConfig) diag.Diagnostics {
+func (r *sloConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *restapi.SloConfig) diag.Diagnostics {
 	// This is a wrapper for the existing SloConfigResource
 	// In a real implementation, we would need to properly update the state from the API object
 	return nil
