@@ -285,6 +285,9 @@ func RenderExpression(filter *restapi.TagFilter) string {
 	if filter == nil {
 		return ""
 	}
+	if filter.Elements == nil {
+		return ""
+	}
 
 	mapper := NewMapper()
 	expr, err := mapper.FromAPIModel(filter)
