@@ -2,6 +2,7 @@ package instana
 
 import (
 	"context"
+
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/instana/tagfilter"
 	"github.com/gessnerfl/terraform-provider-instana/tfutils"
@@ -411,14 +412,14 @@ func (c *infraAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) 
 	}
 
 	return &restapi.InfraAlertConfig{
-		ID:                    d.Id(),
-		Name:                  d.Get(InfraAlertConfigFieldName).(string),
-		Description:           d.Get(InfraAlertConfigFieldDescription).(string),
-		TagFilterExpression:   tagFilter,
-		GroupBy:               ReadArrayParameterFromResource[string](d, InfraAlertConfigFieldGroupBy),
-		AlertChannels:         c.mapAlertChannelsFromSchema(d),
-		Granularity:           restapi.Granularity(d.Get(InfraAlertConfigFieldGranularity).(int)),
-		TimeThreshold:         c.mapTimeThresholdFromSchema(d),
+		ID:                  d.Id(),
+		Name:                d.Get(InfraAlertConfigFieldName).(string),
+		Description:         d.Get(InfraAlertConfigFieldDescription).(string),
+		TagFilterExpression: tagFilter,
+		GroupBy:             ReadArrayParameterFromResource[string](d, InfraAlertConfigFieldGroupBy),
+		AlertChannels:       c.mapAlertChannelsFromSchema(d),
+		Granularity:         restapi.Granularity(d.Get(InfraAlertConfigFieldGranularity).(int)),
+		//TimeThreshold:         c.mapTimeThresholdFromSchema(d),
 		CustomerPayloadFields: customPayloadFields,
 		Rules:                 c.mapRuleFromSchema(d),
 		EvaluationType:        restapi.InfraAlertEvaluationType(evaluationTypeStr),
