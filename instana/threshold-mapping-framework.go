@@ -40,7 +40,8 @@ func StaticBlockSchema() schema.ListNestedBlock {
 		NestedObject: schema.NestedBlockObject{
 			Attributes: map[string]schema.Attribute{
 				LogAlertConfigFieldValue: schema.Int64Attribute{
-					Required:    true,
+					Optional:    true,
+					Computed:    true,
 					Description: "The value of the threshold",
 				},
 			},
@@ -58,14 +59,17 @@ func AdaptiveBlockSchema() schema.ListNestedBlock {
 			Attributes: map[string]schema.Attribute{
 				ThresholdFieldAdaptiveBaselineDeviation: schema.Float64Attribute{
 					Optional:    true,
+					Computed:    true,
 					Description: "The deviation factor for the adaptive baseline threshold",
 				},
 				ThresholdFieldAdaptiveBaselineAdaptability: schema.Float64Attribute{
 					Optional:    true,
+					Computed:    true,
 					Description: "The adaptability for the adaptive baseline threshold",
 				},
 				ThresholdFieldAdaptiveBaselineSeasonality: schema.StringAttribute{
 					Optional:    true,
+					Computed:    true,
 					Description: "The seasonality for the adaptive baseline threshold",
 				},
 			},
@@ -685,6 +689,13 @@ func mapStaticThresholdFromState(ctx context.Context, staticList types.List) (*r
 
 	diags.Append(staticElements[0].As(ctx, &staticObj, basetypes.ObjectAsOptions{})...)
 	if diags.HasError() {
+		return nil, diags
+	}
+	if staticObj.Value.IsNull() || staticObj.Value.IsUnknown() {
+		diags.AddError(
+			"Static Threshold value is required",
+			"Static Threshold value is required",
+		)
 		return nil, diags
 	}
 

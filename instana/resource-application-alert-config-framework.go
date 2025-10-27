@@ -401,11 +401,13 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 									NestedObject: schema.NestedBlockObject{
 										Attributes: map[string]schema.Attribute{
 											ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
-												Required:    true,
+												Optional:    true,
+												Computed:    true,
 												Description: "The metric name of the application alert rule",
 											},
 											ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
 												Optional:    true,
+												Computed:    true,
 												Description: "The aggregation function of the application alert rule",
 												Validators: []validator.String{
 													stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
@@ -419,11 +421,13 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 									NestedObject: schema.NestedBlockObject{
 										Attributes: map[string]schema.Attribute{
 											ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
-												Required:    true,
+												Optional:    true,
+												Computed:    true,
 												Description: "The metric name of the application alert rule",
 											},
 											ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
 												Optional:    true,
+												Computed:    true,
 												Description: "The aggregation function of the application alert rule",
 												Validators: []validator.String{
 													stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
@@ -437,18 +441,21 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 									NestedObject: schema.NestedBlockObject{
 										Attributes: map[string]schema.Attribute{
 											ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
-												Required:    true,
+												Optional:    true,
+												Computed:    true,
 												Description: "The metric name of the application alert rule",
 											},
 											ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
 												Optional:    true,
+												Computed:    true,
 												Description: "The aggregation function of the application alert rule",
 												Validators: []validator.String{
 													stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
 												},
 											},
 											ApplicationAlertConfigFieldRuleLogsLevel: schema.StringAttribute{
-												Required:    true,
+												Optional:    true,
+												Computed:    true,
 												Description: "The log level for which this rule applies to",
 												Validators: []validator.String{
 													stringvalidator.OneOf(restapi.SupportedLogLevels.ToStringSlice()...),
@@ -456,10 +463,12 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 											},
 											ApplicationAlertConfigFieldRuleLogsMessage: schema.StringAttribute{
 												Optional:    true,
+												Computed:    true,
 												Description: "The log message for which this rule applies to",
 											},
 											ApplicationAlertConfigFieldRuleLogsOperator: schema.StringAttribute{
-												Required:    true,
+												Optional:    true,
+												Computed:    true,
 												Description: "The operator which will be applied to evaluate this rule",
 												Validators: []validator.String{
 													stringvalidator.OneOf(restapi.SupportedExpressionOperators.ToStringSlice()...),
@@ -473,11 +482,13 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 									NestedObject: schema.NestedBlockObject{
 										Attributes: map[string]schema.Attribute{
 											ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
-												Required:    true,
+												Optional:    true,
+												Computed:    true,
 												Description: "The metric name of the application alert rule",
 											},
 											ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
-												Required:    true,
+												Optional:    true,
+												Computed:    true,
 												Description: "The aggregation function of the application alert rule",
 												Validators: []validator.String{
 													stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
@@ -491,11 +502,13 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 									NestedObject: schema.NestedBlockObject{
 										Attributes: map[string]schema.Attribute{
 											ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
-												Required:    true,
+												Optional:    true,
+												Computed:    true,
 												Description: "The metric name of the application alert rule",
 											},
 											ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
 												Optional:    true,
+												Computed:    true,
 												Description: "The aggregation function of the application alert rule",
 												Validators: []validator.String{
 													stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
@@ -503,10 +516,12 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 											},
 											ApplicationAlertConfigFieldRuleStatusCodeStart: schema.Int64Attribute{
 												Optional:    true,
+												Computed:    true,
 												Description: "minimal HTTP status code applied for this rule",
 											},
 											ApplicationAlertConfigFieldRuleStatusCodeEnd: schema.Int64Attribute{
 												Optional:    true,
+												Computed:    true,
 												Description: "maximum HTTP status code applied for this rule",
 											},
 										},
@@ -517,11 +532,13 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 									NestedObject: schema.NestedBlockObject{
 										Attributes: map[string]schema.Attribute{
 											ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
-												Required:    true,
+												Optional:    true,
+												Computed:    true,
 												Description: "The metric name of the application alert rule",
 											},
 											ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
 												Optional:    true,
+												Computed:    true,
 												Description: "The aggregation function of the application alert rule",
 												Validators: []validator.String{
 													stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
@@ -538,7 +555,8 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 						NestedObject: schema.NestedBlockObject{
 							Attributes: map[string]schema.Attribute{
 								ApplicationAlertConfigFieldThresholdOperator: schema.StringAttribute{
-									Required:    true,
+									Optional:    true,
+									Computed:    true,
 									Description: "The operator to apply for threshold comparison",
 									Validators: []validator.String{
 										stringvalidator.OneOf(">", ">=", "<", "<="),
@@ -554,12 +572,13 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 											NestedObject: schema.NestedBlockObject{
 												Attributes: map[string]schema.Attribute{
 													ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
-														Required:    true,
+														Optional:    true,
 														Computed:    true,
 														Description: "The metric name of the application alert rule",
 													},
 													ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
 														Optional:    true,
+														Computed:    true,
 														Description: "The aggregation function of the application alert rule",
 														Validators: []validator.String{
 															stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
@@ -573,11 +592,13 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 											NestedObject: schema.NestedBlockObject{
 												Attributes: map[string]schema.Attribute{
 													ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
-														Required:    true,
+														Optional:    true,
+														Computed:    true,
 														Description: "The metric name of the application alert rule",
 													},
 													ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
 														Optional:    true,
+														Computed:    true,
 														Description: "The aggregation function of the application alert rule",
 														Validators: []validator.String{
 															stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
@@ -591,18 +612,21 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 											NestedObject: schema.NestedBlockObject{
 												Attributes: map[string]schema.Attribute{
 													ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
-														Required:    true,
+														Optional:    true,
+														Computed:    true,
 														Description: "The metric name of the application alert rule",
 													},
 													ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
 														Optional:    true,
+														Computed:    true,
 														Description: "The aggregation function of the application alert rule",
 														Validators: []validator.String{
 															stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
 														},
 													},
 													ApplicationAlertConfigFieldRuleLogsLevel: schema.StringAttribute{
-														Required:    true,
+														Optional:    true,
+														Computed:    true,
 														Description: "The log level for which this rule applies to",
 														Validators: []validator.String{
 															stringvalidator.OneOf(restapi.SupportedLogLevels.ToStringSlice()...),
@@ -610,10 +634,12 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 													},
 													ApplicationAlertConfigFieldRuleLogsMessage: schema.StringAttribute{
 														Optional:    true,
+														Computed:    true,
 														Description: "The log message for which this rule applies to",
 													},
 													ApplicationAlertConfigFieldRuleLogsOperator: schema.StringAttribute{
-														Required:    true,
+														Optional:    true,
+														Computed:    true,
 														Description: "The operator which will be applied to evaluate this rule",
 														Validators: []validator.String{
 															stringvalidator.OneOf(restapi.SupportedExpressionOperators.ToStringSlice()...),
@@ -627,11 +653,13 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 											NestedObject: schema.NestedBlockObject{
 												Attributes: map[string]schema.Attribute{
 													ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
-														Required:    true,
+														Optional:    true,
+														Computed:    true,
 														Description: "The metric name of the application alert rule",
 													},
 													ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
-														Required:    true,
+														Optional:    true,
+														Computed:    true,
 														Description: "The aggregation function of the application alert rule",
 														Validators: []validator.String{
 															stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
@@ -645,11 +673,13 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 											NestedObject: schema.NestedBlockObject{
 												Attributes: map[string]schema.Attribute{
 													ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
-														Required:    true,
+														Optional:    true,
+														Computed:    true,
 														Description: "The metric name of the application alert rule",
 													},
 													ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
 														Optional:    true,
+														Computed:    true,
 														Description: "The aggregation function of the application alert rule",
 														Validators: []validator.String{
 															stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
@@ -657,10 +687,12 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 													},
 													ApplicationAlertConfigFieldRuleStatusCodeStart: schema.Int64Attribute{
 														Optional:    true,
+														Computed:    true,
 														Description: "minimal HTTP status code applied for this rule",
 													},
 													ApplicationAlertConfigFieldRuleStatusCodeEnd: schema.Int64Attribute{
 														Optional:    true,
+														Computed:    true,
 														Description: "maximum HTTP status code applied for this rule",
 													},
 												},
@@ -671,11 +703,13 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 											NestedObject: schema.NestedBlockObject{
 												Attributes: map[string]schema.Attribute{
 													ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
-														Required:    true,
+														Optional:    true,
+														Computed:    true,
 														Description: "The metric name of the application alert rule",
 													},
 													ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
 														Optional:    true,
+														Computed:    true,
 														Description: "The aggregation function of the application alert rule",
 														Validators: []validator.String{
 															stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
@@ -1199,6 +1233,13 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 					return nil, diags
 				}
 				if len(errorRateRules) > 0 {
+					if errorRateRules[0].MetricName.IsNull() || errorRateRules[0].MetricName.IsUnknown() {
+						diags.AddError(
+							"MetricName is required for Error rate rules",
+							"MetricName is required for Error rate rules",
+						)
+						return nil, diags
+					}
 					result.Rule.AlertType = ApplicationAlertConfigFieldRuleErrorRate
 					result.Rule.MetricName = errorRateRules[0].MetricName.ValueString()
 					result.Rule.Aggregation = restapi.Aggregation(errorRateRules[0].Aggregation.ValueString())
@@ -1213,6 +1254,13 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 					return nil, diags
 				}
 				if len(errorsRules) > 0 {
+					if errorsRules[0].MetricName.IsNull() || errorsRules[0].MetricName.IsUnknown() {
+						diags.AddError(
+							"MetricName is required for Error rules",
+							"MetricName is required for Error rules",
+						)
+						return nil, diags
+					}
 					result.Rule.AlertType = ApplicationAlertConfigFieldRuleErrors
 					result.Rule.MetricName = errorsRules[0].MetricName.ValueString()
 					result.Rule.Aggregation = restapi.Aggregation(errorsRules[0].Aggregation.ValueString())
@@ -1227,6 +1275,15 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 					return nil, diags
 				}
 				if len(logsRules) > 0 {
+					if logsRules[0].MetricName.IsNull() || logsRules[0].MetricName.IsUnknown() ||
+						logsRules[0].Level.IsNull() || logsRules[0].Level.IsUnknown() ||
+						logsRules[0].Operator.IsNull() || logsRules[0].Operator.IsUnknown() {
+						diags.AddError(
+							"MetricName,Log level, Log operators are required for log rules",
+							"MetricName,Log level, Log operators are required for log rules",
+						)
+						return nil, diags
+					}
 					result.Rule.AlertType = ApplicationAlertConfigFieldRuleLogs
 					result.Rule.MetricName = logsRules[0].MetricName.ValueString()
 					result.Rule.Aggregation = restapi.Aggregation(logsRules[0].Aggregation.ValueString())
@@ -1251,6 +1308,13 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 					return nil, diags
 				}
 				if len(slownessRules) > 0 {
+					if slownessRules[0].MetricName.IsNull() || slownessRules[0].MetricName.IsUnknown() {
+						diags.AddError(
+							"MetricName is required for slowness rules",
+							"MetricName is required for slowness rules",
+						)
+						return nil, diags
+					}
 					result.Rule.AlertType = ApplicationAlertConfigFieldRuleSlowness
 					result.Rule.MetricName = slownessRules[0].MetricName.ValueString()
 					result.Rule.Aggregation = restapi.Aggregation(slownessRules[0].Aggregation.ValueString())
@@ -1265,6 +1329,13 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 					return nil, diags
 				}
 				if len(statusCodeRules) > 0 {
+					if statusCodeRules[0].MetricName.IsNull() || statusCodeRules[0].MetricName.IsUnknown() {
+						diags.AddError(
+							"MetricName is required for statuc code rules",
+							"MetricName is required for statuc code rules",
+						)
+						return nil, diags
+					}
 					result.Rule.AlertType = ApplicationAlertConfigFieldRuleStatusCode
 					result.Rule.MetricName = statusCodeRules[0].MetricName.ValueString()
 					result.Rule.Aggregation = restapi.Aggregation(statusCodeRules[0].Aggregation.ValueString())
@@ -1286,6 +1357,13 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 					return nil, diags
 				}
 				if len(throughputRules) > 0 {
+					if throughputRules[0].MetricName.IsNull() || throughputRules[0].MetricName.IsUnknown() {
+						diags.AddError(
+							"MetricName is required for thoughput rule",
+							"MetricName is required for Error rate rule",
+						)
+						return nil, diags
+					}
 					result.Rule.AlertType = ApplicationAlertConfigFieldRuleThroughput
 					result.Rule.MetricName = throughputRules[0].MetricName.ValueString()
 					result.Rule.Aggregation = restapi.Aggregation(throughputRules[0].Aggregation.ValueString())
@@ -1326,6 +1404,13 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 						return nil, diags
 					}
 					if len(errorRateRules) > 0 {
+						if errorRateRules[0].MetricName.IsNull() || errorRateRules[0].MetricName.IsUnknown() {
+							diags.AddError(
+								"MetricName is required for Error rate rules",
+								"MetricName is required for Error rate rules",
+							)
+							return nil, diags
+						}
 						result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleErrorRate
 						result.Rules[i].Rule.MetricName = errorRateRules[0].MetricName.ValueString()
 						result.Rules[i].Rule.Aggregation = restapi.Aggregation(errorRateRules[0].Aggregation.ValueString())
@@ -1340,6 +1425,13 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 						return nil, diags
 					}
 					if len(errorsRules) > 0 {
+						if errorsRules[0].MetricName.IsNull() || errorsRules[0].MetricName.IsUnknown() {
+							diags.AddError(
+								"MetricName is required for Error rules",
+								"MetricName is required for Error rules",
+							)
+							return nil, diags
+						}
 						result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleErrors
 						result.Rules[i].Rule.MetricName = errorsRules[0].MetricName.ValueString()
 						result.Rules[i].Rule.Aggregation = restapi.Aggregation(errorsRules[0].Aggregation.ValueString())
@@ -1354,6 +1446,15 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 						return nil, diags
 					}
 					if len(logsRules) > 0 {
+						if logsRules[0].MetricName.IsNull() || logsRules[0].MetricName.IsUnknown() ||
+							logsRules[0].Level.IsNull() || logsRules[0].Level.IsUnknown() ||
+							logsRules[0].Operator.IsNull() || logsRules[0].Operator.IsUnknown() {
+							diags.AddError(
+								"MetricName,log level,log operator are required for log rules",
+								"MetricName,log level,log operator are required for log rules",
+							)
+							return nil, diags
+						}
 						result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleLogs
 						result.Rules[i].Rule.MetricName = logsRules[0].MetricName.ValueString()
 						result.Rules[i].Rule.Aggregation = restapi.Aggregation(logsRules[0].Aggregation.ValueString())
@@ -1380,6 +1481,13 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 						return nil, diags
 					}
 					if len(slownessRules) > 0 {
+						if slownessRules[0].MetricName.IsNull() || slownessRules[0].MetricName.IsUnknown() {
+							diags.AddError(
+								"MetricName is required for slowness",
+								"MetricName is required for slowness",
+							)
+							return nil, diags
+						}
 						result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleSlowness
 						result.Rules[i].Rule.MetricName = slownessRules[0].MetricName.ValueString()
 						result.Rules[i].Rule.Aggregation = restapi.Aggregation(slownessRules[0].Aggregation.ValueString())
@@ -1394,6 +1502,13 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 						return nil, diags
 					}
 					if len(statusCodeRules) > 0 {
+						if statusCodeRules[0].MetricName.IsNull() || statusCodeRules[0].MetricName.IsUnknown() {
+							diags.AddError(
+								"MetricName is required for status code",
+								"MetricName is required for statuc code",
+							)
+							return nil, diags
+						}
 						result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleStatusCode
 						result.Rules[i].Rule.MetricName = statusCodeRules[0].MetricName.ValueString()
 						result.Rules[i].Rule.Aggregation = restapi.Aggregation(statusCodeRules[0].Aggregation.ValueString())
@@ -1415,6 +1530,13 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 						return nil, diags
 					}
 					if len(throughputRules) > 0 {
+						if throughputRules[0].MetricName.IsNull() || throughputRules[0].MetricName.IsUnknown() {
+							diags.AddError(
+								"MetricName is required for througput",
+								"MetricName is required for throughput",
+							)
+							return nil, diags
+						}
 						result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleThroughput
 						result.Rules[i].Rule.MetricName = throughputRules[0].MetricName.ValueString()
 						result.Rules[i].Rule.Aggregation = restapi.Aggregation(throughputRules[0].Aggregation.ValueString())
@@ -2368,29 +2490,29 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 				},
 			},
 		})
-		// model.Rules = types.ListValueMust(types.ObjectType{
-		// 	AttrTypes: map[string]attr.Type{
-		// 		"rule": types.ObjectType{
-		// 			AttrTypes: map[string]attr.Type{
-		// 				"error_rate":  types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
-		// 				"errors":      types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
-		// 				"logs":        types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "level": types.StringType, "message": types.StringType, "operator": types.StringType}}},
-		// 				"slowness":    types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
-		// 				"status_code": types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "status_code_start": types.Int64Type, "status_code_end": types.Int64Type}}},
-		// 				"throughput":  types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
-		// 			},
-		// 		},
-		// 		"threshold_operator": types.StringType,
-		// 		"thresholds": types.ListType{
-		// 			ElemType: types.ObjectType{
-		// 				AttrTypes: map[string]attr.Type{
-		// 					LogAlertConfigFieldWarning:  GetStaticAndAdaptiveThresholdAttrListTypes(),
-		// 					LogAlertConfigFieldCritical: GetStaticAndAdaptiveThresholdAttrListTypes(),
-		// 				},
-		// 			},
-		// 		},
-		// 	},
-		// }, rulesElements)
+		model.Rules = types.ListValueMust(types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"rule": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"error_rate":  types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
+						"errors":      types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
+						"logs":        types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "level": types.StringType, "message": types.StringType, "operator": types.StringType}}},
+						"slowness":    types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
+						"status_code": types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "status_code_start": types.Int64Type, "status_code_end": types.Int64Type}}},
+						"throughput":  types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
+					},
+				},
+				"threshold_operator": types.StringType,
+				"thresholds": types.ListType{
+					ElemType: types.ObjectType{
+						AttrTypes: map[string]attr.Type{
+							LogAlertConfigFieldWarning:  GetStaticAndAdaptiveThresholdAttrListTypes(),
+							LogAlertConfigFieldCritical: GetStaticAndAdaptiveThresholdAttrListTypes(),
+						},
+					},
+				},
+			},
+		}, rulesElements)
 	}
 	if diags.HasError() {
 		return diags
