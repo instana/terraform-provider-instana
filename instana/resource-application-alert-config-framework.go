@@ -100,7 +100,7 @@ const (
 // Additional application alert config field names
 const (
 	ApplicationAlertConfigFieldRules             = "rules"
-	ApplicationAlertConfigFieldThresholds        = "thresholds"
+	ApplicationAlertConfigFieldThreshold         = "threshold"
 	ApplicationAlertConfigFieldThresholdOperator = "threshold_operator"
 	ApplicationAlertConfigFieldGracePeriod       = "grace_period"
 	ApplicationAlertConfigFieldAlertChannels     = "alert_channels"
@@ -227,7 +227,7 @@ type AppAlertViolationsInSequenceModel struct {
 type RuleWithThresholdModel struct {
 	Rule              types.Object `tfsdk:"rule"`
 	ThresholdOperator types.String `tfsdk:"threshold_operator"`
-	Thresholds        types.List   `tfsdk:"thresholds"`
+	Thresholds        types.List   `tfsdk:"threshold"`
 }
 
 // ThresholdConfigRuleModel represents a threshold configuration for a rule
@@ -720,7 +720,7 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 										},
 									},
 								},
-								ApplicationAlertConfigFieldThresholds: schema.ListNestedBlock{
+								ApplicationAlertConfigFieldThreshold: schema.ListNestedBlock{
 									Description: "Threshold configuration for different severity levels",
 									NestedObject: schema.NestedBlockObject{
 										Blocks: map[string]schema.Block{
@@ -2452,7 +2452,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 					},
 				},
 				"threshold_operator": types.StringType,
-				"thresholds": types.ListType{
+				"threshold": types.ListType{
 					ElemType: types.ObjectType{
 						AttrTypes: map[string]attr.Type{
 							LogAlertConfigFieldWarning:  GetStaticAndAdaptiveThresholdAttrListTypes(),
@@ -2503,7 +2503,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 					},
 				},
 				"threshold_operator": types.StringType,
-				"thresholds": types.ListType{
+				"threshold": types.ListType{
 					ElemType: types.ObjectType{
 						AttrTypes: map[string]attr.Type{
 							LogAlertConfigFieldWarning:  GetStaticAndAdaptiveThresholdAttrListTypes(),

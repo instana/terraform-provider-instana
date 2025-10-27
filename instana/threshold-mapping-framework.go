@@ -57,12 +57,12 @@ func AdaptiveBlockSchema() schema.ListNestedBlock {
 		Description: "Threshold configuration",
 		NestedObject: schema.NestedBlockObject{
 			Attributes: map[string]schema.Attribute{
-				ThresholdFieldAdaptiveBaselineDeviation: schema.Float64Attribute{
+				ThresholdFieldAdaptiveBaselineDeviation: schema.Float32Attribute{
 					Optional:    true,
 					Computed:    true,
 					Description: "The deviation factor for the adaptive baseline threshold",
 				},
-				ThresholdFieldAdaptiveBaselineAdaptability: schema.Float64Attribute{
+				ThresholdFieldAdaptiveBaselineAdaptability: schema.Float32Attribute{
 					Optional:    true,
 					Computed:    true,
 					Description: "The adaptability for the adaptive baseline threshold",
@@ -124,7 +124,7 @@ func HistoricBaselineBlockSchema() schema.ListNestedBlock {
 		Description: "Historic baseline threshold configuration",
 		NestedObject: schema.NestedBlockObject{
 			Attributes: map[string]schema.Attribute{
-				ThresholdFieldHistoricBaselineDeviation: schema.Float64Attribute{
+				ThresholdFieldHistoricBaselineDeviation: schema.Float32Attribute{
 					Optional:    true,
 					Description: "The deviation factor for the historic baseline threshold",
 				},
@@ -150,11 +150,11 @@ func AdaptiveBaselineBlockSchema() schema.ListNestedBlock {
 		Description: "Adaptive baseline threshold configuration",
 		NestedObject: schema.NestedBlockObject{
 			Attributes: map[string]schema.Attribute{
-				ThresholdFieldAdaptiveBaselineDeviation: schema.Float64Attribute{
+				ThresholdFieldAdaptiveBaselineDeviation: schema.Float32Attribute{
 					Required:    true,
 					Description: "The deviation factor for the adaptive baseline threshold",
 				},
-				ThresholdFieldAdaptiveBaselineAdaptability: schema.Float64Attribute{
+				ThresholdFieldAdaptiveBaselineAdaptability: schema.Float32Attribute{
 					Required:    true,
 					Description: "The adaptability factor for the adaptive baseline threshold",
 				},
@@ -221,7 +221,7 @@ func MapThresholdToState(ctx context.Context, isThresholdPresent bool, threshold
 				ElemType: types.ObjectType{
 					AttrTypes: map[string]attr.Type{
 						ThresholdFieldHistoricBaselineBaseline:    types.SetType{ElemType: types.SetType{ElemType: types.Float64Type}},
-						ThresholdFieldHistoricBaselineDeviation:   types.Float64Type,
+						ThresholdFieldHistoricBaselineDeviation:   types.Float32Type,
 						ThresholdFieldHistoricBaselineSeasonality: types.StringType,
 					},
 				},
@@ -229,7 +229,7 @@ func MapThresholdToState(ctx context.Context, isThresholdPresent bool, threshold
 			thresholdObj[ThresholdFieldHistoricBaseline] = types.ListNull(types.ObjectType{
 				AttrTypes: map[string]attr.Type{
 					ThresholdFieldHistoricBaselineBaseline:    types.SetType{ElemType: types.SetType{ElemType: types.Float64Type}},
-					ThresholdFieldHistoricBaselineDeviation:   types.Float64Type,
+					ThresholdFieldHistoricBaselineDeviation:   types.Float32Type,
 					ThresholdFieldHistoricBaselineSeasonality: types.StringType,
 				},
 			})
@@ -237,16 +237,16 @@ func MapThresholdToState(ctx context.Context, isThresholdPresent bool, threshold
 			thresholdAttrTypes[ThresholdFieldAdaptiveBaseline] = types.ListType{
 				ElemType: types.ObjectType{
 					AttrTypes: map[string]attr.Type{
-						ThresholdFieldAdaptiveBaselineDeviation:    types.Float64Type,
-						ThresholdFieldAdaptiveBaselineAdaptability: types.Float64Type,
+						ThresholdFieldAdaptiveBaselineDeviation:    types.Float32Type,
+						ThresholdFieldAdaptiveBaselineAdaptability: types.Float32Type,
 						ThresholdFieldAdaptiveBaselineSeasonality:  types.StringType,
 					},
 				},
 			}
 			thresholdObj[ThresholdFieldAdaptiveBaseline] = types.ListNull(types.ObjectType{
 				AttrTypes: map[string]attr.Type{
-					ThresholdFieldAdaptiveBaselineDeviation:    types.Float64Type,
-					ThresholdFieldAdaptiveBaselineAdaptability: types.Float64Type,
+					ThresholdFieldAdaptiveBaselineDeviation:    types.Float32Type,
+					ThresholdFieldAdaptiveBaselineAdaptability: types.Float32Type,
 					ThresholdFieldAdaptiveBaselineSeasonality:  types.StringType,
 				},
 			})
@@ -275,7 +275,7 @@ func MapThresholdToState(ctx context.Context, isThresholdPresent bool, threshold
 				thresholdObj[ThresholdFieldHistoricBaseline] = types.ListNull(types.ObjectType{
 					AttrTypes: map[string]attr.Type{
 						ThresholdFieldHistoricBaselineBaseline:    types.SetType{ElemType: types.SetType{ElemType: types.Float64Type}},
-						ThresholdFieldHistoricBaselineDeviation:   types.Float64Type,
+						ThresholdFieldHistoricBaselineDeviation:   types.Float32Type,
 						ThresholdFieldHistoricBaselineSeasonality: types.StringType,
 					},
 				})
@@ -284,8 +284,8 @@ func MapThresholdToState(ctx context.Context, isThresholdPresent bool, threshold
 			if threshold.Type != "adaptiveBaseline" {
 				thresholdObj[ThresholdFieldAdaptiveBaseline] = types.ListNull(types.ObjectType{
 					AttrTypes: map[string]attr.Type{
-						ThresholdFieldAdaptiveBaselineDeviation:    types.Float64Type,
-						ThresholdFieldAdaptiveBaselineAdaptability: types.Float64Type,
+						ThresholdFieldAdaptiveBaselineDeviation:    types.Float32Type,
+						ThresholdFieldAdaptiveBaselineAdaptability: types.Float32Type,
 						ThresholdFieldAdaptiveBaselineSeasonality:  types.StringType,
 					},
 				})
@@ -306,7 +306,7 @@ func MapThresholdToState(ctx context.Context, isThresholdPresent bool, threshold
 			ElemType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{
 					ThresholdFieldHistoricBaselineBaseline:    types.SetType{ElemType: types.SetType{ElemType: types.Float64Type}},
-					ThresholdFieldHistoricBaselineDeviation:   types.Float64Type,
+					ThresholdFieldHistoricBaselineDeviation:   types.Float32Type,
 					ThresholdFieldHistoricBaselineSeasonality: types.StringType,
 				},
 			},
@@ -323,8 +323,8 @@ func MapThresholdToState(ctx context.Context, isThresholdPresent bool, threshold
 		thresholdAttrTypes[ThresholdFieldAdaptiveBaseline] = types.ListType{
 			ElemType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{
-					ThresholdFieldAdaptiveBaselineDeviation:    types.Float64Type,
-					ThresholdFieldAdaptiveBaselineAdaptability: types.Float64Type,
+					ThresholdFieldAdaptiveBaselineDeviation:    types.Float32Type,
+					ThresholdFieldAdaptiveBaselineAdaptability: types.Float32Type,
 					ThresholdFieldAdaptiveBaselineSeasonality:  types.StringType,
 				},
 			},
@@ -419,9 +419,9 @@ func mapHistoricBaselineToState(ctx context.Context, threshold *restapi.Threshol
 
 	// Map deviation factor
 	if threshold.DeviationFactor != nil {
-		historicObj[ThresholdFieldHistoricBaselineDeviation] = types.Float64Value(float64(*threshold.DeviationFactor))
+		historicObj[ThresholdFieldHistoricBaselineDeviation] = types.Float32Value(float32(*threshold.DeviationFactor))
 	} else {
-		historicObj[ThresholdFieldHistoricBaselineDeviation] = types.Float64Value(1.0)
+		historicObj[ThresholdFieldHistoricBaselineDeviation] = types.Float32Value(1.0)
 	}
 
 	// Map baseline
@@ -460,7 +460,7 @@ func mapHistoricBaselineToState(ctx context.Context, threshold *restapi.Threshol
 	historicObjVal, historicObjDiags := types.ObjectValue(
 		map[string]attr.Type{
 			ThresholdFieldHistoricBaselineBaseline:    types.SetType{ElemType: types.SetType{ElemType: types.Float64Type}},
-			ThresholdFieldHistoricBaselineDeviation:   types.Float64Type,
+			ThresholdFieldHistoricBaselineDeviation:   types.Float32Type,
 			ThresholdFieldHistoricBaselineSeasonality: types.StringType,
 		},
 		historicObj,
@@ -475,7 +475,7 @@ func mapHistoricBaselineToState(ctx context.Context, threshold *restapi.Threshol
 		types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 				ThresholdFieldHistoricBaselineBaseline:    types.SetType{ElemType: types.SetType{ElemType: types.Float64Type}},
-				ThresholdFieldHistoricBaselineDeviation:   types.Float64Type,
+				ThresholdFieldHistoricBaselineDeviation:   types.Float32Type,
 				ThresholdFieldHistoricBaselineSeasonality: types.StringType,
 			},
 		},
@@ -499,24 +499,18 @@ func mapAdaptiveBaselineToState(ctx context.Context, threshold *restapi.Threshol
 
 	// Map deviation factor
 	if threshold.DeviationFactor != nil {
-		adaptiveObj[ThresholdFieldAdaptiveBaselineDeviation] = types.Float64Value(float64(*threshold.DeviationFactor))
+		adaptiveObj[ThresholdFieldAdaptiveBaselineDeviation] = types.Float32Value(float32(*threshold.DeviationFactor))
 	} else {
-		adaptiveObj[ThresholdFieldAdaptiveBaselineDeviation] = types.Float64Value(1.0)
+		adaptiveObj[ThresholdFieldAdaptiveBaselineDeviation] = types.Float32Value(1.0)
 	}
 
-	// Map adaptability (assuming it's stored in a field like Value for now)
-	// In a real implementation, you might need to adjust this based on the actual API model
-	if threshold.Value != nil {
-		adaptiveObj[ThresholdFieldAdaptiveBaselineAdaptability] = types.Float64Value(*threshold.Value)
-	} else {
-		adaptiveObj[ThresholdFieldAdaptiveBaselineAdaptability] = types.Float64Value(0.5) // Default value
-	}
+	adaptiveObj[ThresholdFieldAdaptiveBaselineAdaptability] = types.Float32Value(*threshold.Adaptability)
 
 	// Create adaptive baseline object value
 	adaptiveObjVal, adaptiveObjDiags := types.ObjectValue(
 		map[string]attr.Type{
-			ThresholdFieldAdaptiveBaselineDeviation:    types.Float64Type,
-			ThresholdFieldAdaptiveBaselineAdaptability: types.Float64Type,
+			ThresholdFieldAdaptiveBaselineDeviation:    types.Float32Type,
+			ThresholdFieldAdaptiveBaselineAdaptability: types.Float32Type,
 			ThresholdFieldAdaptiveBaselineSeasonality:  types.StringType,
 		},
 		adaptiveObj,
@@ -530,8 +524,8 @@ func mapAdaptiveBaselineToState(ctx context.Context, threshold *restapi.Threshol
 	return types.ListValue(
 		types.ObjectType{
 			AttrTypes: map[string]attr.Type{
-				ThresholdFieldAdaptiveBaselineDeviation:    types.Float64Type,
-				ThresholdFieldAdaptiveBaselineAdaptability: types.Float64Type,
+				ThresholdFieldAdaptiveBaselineDeviation:    types.Float32Type,
+				ThresholdFieldAdaptiveBaselineAdaptability: types.Float32Type,
 				ThresholdFieldAdaptiveBaselineSeasonality:  types.StringType,
 			},
 		},
@@ -573,8 +567,8 @@ func GetStaticAndAdaptiveThresholdAttrTypes() map[string]attr.Type {
 		ThresholdFieldAdaptiveBaseline: types.ListType{
 			ElemType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{
-					ThresholdFieldAdaptiveBaselineDeviation:    types.Float64Type,
-					ThresholdFieldAdaptiveBaselineAdaptability: types.Float64Type,
+					ThresholdFieldAdaptiveBaselineDeviation:    types.Float32Type,
+					ThresholdFieldAdaptiveBaselineAdaptability: types.Float32Type,
 					ThresholdFieldAdaptiveBaselineSeasonality:  types.StringType,
 				},
 			},
@@ -729,7 +723,7 @@ func mapHistoricBaselineFromState(ctx context.Context, historicList types.List) 
 	// Extract the historic baseline configuration
 	var historicObj struct {
 		Baseline    types.Set     `tfsdk:"baseline"`
-		Deviation   types.Float64 `tfsdk:"deviation_factor"`
+		Deviation   types.Float32 `tfsdk:"deviation_factor"`
 		Seasonality types.String  `tfsdk:"seasonality"`
 	}
 
@@ -751,15 +745,13 @@ func mapHistoricBaselineFromState(ctx context.Context, historicList types.List) 
 
 	// Set deviation factor
 	if !historicObj.Deviation.IsNull() && !historicObj.Deviation.IsUnknown() {
-		deviationFactor := float32(historicObj.Deviation.ValueFloat64())
+		deviationFactor := float32(historicObj.Deviation.ValueFloat32())
 		thresholdRule.DeviationFactor = &deviationFactor
 	}
 
 	// Set baseline
 	if !historicObj.Baseline.IsNull() && !historicObj.Baseline.IsUnknown() {
-		// This is a complex nested structure, would need more implementation
 		// For now, we'll leave it as nil
-		// In a real implementation, you would need to convert the Set to [][]float64
 	}
 
 	return thresholdRule, diags
@@ -785,7 +777,7 @@ func mapAdaptiveBaselineFromState(ctx context.Context, adaptiveList types.List) 
 
 	// Extract the adaptive baseline configuration
 	var adaptiveObj struct {
-		Deviation    types.Float64 `tfsdk:"deviation_factor"`
+		Deviation    types.Float32 `tfsdk:"deviation_factor"`
 		Adaptability types.Float32 `tfsdk:"adaptability"`
 		Seasonality  types.String  `tfsdk:"seasonality"`
 	}
@@ -808,7 +800,7 @@ func mapAdaptiveBaselineFromState(ctx context.Context, adaptiveList types.List) 
 
 	// Set deviation factor
 	if !adaptiveObj.Deviation.IsNull() && !adaptiveObj.Deviation.IsUnknown() {
-		deviationFactor := float32(adaptiveObj.Deviation.ValueFloat64())
+		deviationFactor := float32(adaptiveObj.Deviation.ValueFloat32())
 		thresholdRule.DeviationFactor = &deviationFactor
 	}
 
