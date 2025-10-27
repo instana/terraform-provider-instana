@@ -555,6 +555,7 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 												Attributes: map[string]schema.Attribute{
 													ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
 														Required:    true,
+														Computed:    true,
 														Description: "The metric name of the application alert rule",
 													},
 													ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
@@ -729,11 +730,11 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 											stringvalidator.OneOf([]string{">=", ">", "<=", "<", "=="}...),
 										},
 									},
-									"deviation_factor": schema.Float64Attribute{
+									"deviation_factor": schema.Float32Attribute{
 										Description: "The numeric value for the deviation factor.",
 										Optional:    true,
 									},
-									"adaptability": schema.Float64Attribute{
+									"adaptability": schema.Float32Attribute{
 										Description: "The numeric value for the adaptability.",
 										Optional:    true,
 									},
@@ -1079,7 +1080,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 
 		}
 		if model.Threshold.AdaptiveBaseline != nil {
-			threshold.Type = "adaptiveBaselineThreshold"
+			threshold.Type = "adaptiveBaseline"
 			threshold.Operator = restapi.ThresholdOperator(model.Threshold.AdaptiveBaseline.Operator.ValueString())
 			deviationFactor := model.Threshold.AdaptiveBaseline.DeviationFactor.ValueFloat32()
 			threshold.DeviationFactor = &deviationFactor
@@ -1541,7 +1542,21 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 
 	// Handle tag filter
 	if data.TagFilterExpression != nil {
-		model.TagFilter = types.StringValue(tagfilter.RenderExpression(data.TagFilterExpression))
+		normalizedTagFilterString, err := tagfilter.MapTagFilterToNormalizedString(data.TagFilterExpression)
+		if err != nil {
+			diags.AddError(
+				"Error normalizing tag filter",
+				"Could not normalize tag filter: "+err.Error(),
+			)
+			return diags
+		}
+		if normalizedTagFilterString == nil {
+			model.TagFilter = types.StringNull()
+		} else {
+			model.TagFilter = types.StringValue(*normalizedTagFilterString)
+		}
+	} else {
+		model.TagFilter = types.StringNull()
 	}
 
 	// Handle severity (deprecated but supported for backward compatibility)
@@ -1562,6 +1577,8 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 			elements[i] = types.StringValue(id)
 		}
 		model.AlertChannelIDs = types.SetValueMust(types.StringType, elements)
+	} else {
+		model.AlertChannelIDs = types.SetNull(types.StringType)
 	}
 
 	log.Printf("Before alert channel stage")
@@ -1578,6 +1595,8 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 		model.AlertChannels = types.MapValueMust(types.SetType{ElemType: types.StringType}, elements)
 		log.Printf("static threshold elements : %+v\n", model.AlertChannels)
 
+	} else {
+		model.AlertChannels = types.MapNull(types.SetType{ElemType: types.StringType})
 	}
 	if diags.HasError() {
 		return diags

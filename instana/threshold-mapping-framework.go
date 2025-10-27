@@ -775,7 +775,7 @@ func mapAdaptiveBaselineFromState(ctx context.Context, adaptiveList types.List) 
 	// Extract the adaptive baseline configuration
 	var adaptiveObj struct {
 		Deviation    types.Float64 `tfsdk:"deviation_factor"`
-		Adaptability types.Float64 `tfsdk:"adaptability"`
+		Adaptability types.Float32 `tfsdk:"adaptability"`
 		Seasonality  types.String  `tfsdk:"seasonality"`
 	}
 
@@ -803,7 +803,7 @@ func mapAdaptiveBaselineFromState(ctx context.Context, adaptiveList types.List) 
 
 	// Set adaptability (stored in Value field)
 	if !adaptiveObj.Adaptability.IsNull() && !adaptiveObj.Adaptability.IsUnknown() {
-		adaptability := adaptiveObj.Adaptability.ValueFloat64()
+		adaptability := adaptiveObj.Adaptability.ValueFloat32()
 		thresholdRule.Adaptability = &adaptability
 	}
 
