@@ -15,6 +15,98 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
+// SloConfigModel represents the data model for the SLO configuration resource
+type SloConfigModel struct {
+	ID         types.String   `tfsdk:"id"`
+	Name       types.String   `tfsdk:"name"`
+	Target     types.Float64  `tfsdk:"target"`
+	Tags       []types.String `tfsdk:"tags"`
+	RbacTags   []types.Object `tfsdk:"rbac_tags"`
+	Entity     types.Object   `tfsdk:"slo_entity"`
+	Indicator  types.Object   `tfsdk:"slo_indicator"`
+	TimeWindow types.Object   `tfsdk:"slo_time_window"`
+}
+
+// RbacTagModel represents an RBAC tag in the Terraform model
+type RbacTagModel struct {
+	DisplayName types.String `tfsdk:"display_name"`
+	ID          types.String `tfsdk:"id"`
+}
+
+// ApplicationEntityModel represents an application entity in the Terraform model
+type ApplicationEntityModel struct {
+	ApplicationID    types.String `tfsdk:"application_id"`
+	ServiceID        types.String `tfsdk:"service_id"`
+	EndpointID       types.String `tfsdk:"endpoint_id"`
+	BoundaryScope    types.String `tfsdk:"boundary_scope"`
+	IncludeSynthetic types.Bool   `tfsdk:"include_synthetic"`
+	IncludeInternal  types.Bool   `tfsdk:"include_internal"`
+	FilterExpression types.String `tfsdk:"filter_expression"`
+}
+
+// WebsiteEntityModel represents a website entity in the Terraform model
+type WebsiteEntityModel struct {
+	WebsiteID        types.String `tfsdk:"website_id"`
+	BeaconType       types.String `tfsdk:"beacon_type"`
+	FilterExpression types.String `tfsdk:"filter_expression"`
+}
+
+// SyntheticEntityModel represents a synthetic entity in the Terraform model
+type SyntheticEntityModel struct {
+	SyntheticTestIDs []types.String `tfsdk:"synthetic_test_ids"`
+	FilterExpression types.String   `tfsdk:"filter_expression"`
+}
+
+// TimeBasedLatencyIndicatorModel represents a time-based latency indicator in the Terraform model
+type TimeBasedLatencyIndicatorModel struct {
+	Threshold   types.Float64 `tfsdk:"threshold"`
+	Aggregation types.String  `tfsdk:"aggregation"`
+}
+
+// EventBasedLatencyIndicatorModel represents an event-based latency indicator in the Terraform model
+type EventBasedLatencyIndicatorModel struct {
+	Threshold types.Float64 `tfsdk:"threshold"`
+}
+
+// TimeBasedAvailabilityIndicatorModel represents a time-based availability indicator in the Terraform model
+type TimeBasedAvailabilityIndicatorModel struct {
+	Threshold   types.Float64 `tfsdk:"threshold"`
+	Aggregation types.String  `tfsdk:"aggregation"`
+}
+
+// EventBasedAvailabilityIndicatorModel represents an event-based availability indicator in the Terraform model
+type EventBasedAvailabilityIndicatorModel struct {
+	// No fields needed for this indicator type
+}
+
+// TrafficIndicatorModel represents a traffic indicator in the Terraform model
+type TrafficIndicatorModel struct {
+	TrafficType types.String  `tfsdk:"traffic_type"`
+	Threshold   types.Float64 `tfsdk:"threshold"`
+	Aggregation types.String  `tfsdk:"aggregation"`
+}
+
+// CustomIndicatorModel represents a custom indicator in the Terraform model
+type CustomIndicatorModel struct {
+	GoodEventFilterExpression types.String `tfsdk:"good_event_filter_expression"`
+	BadEventFilterExpression  types.String `tfsdk:"bad_event_filter_expression"`
+}
+
+// RollingTimeWindowModel represents a rolling time window in the Terraform model
+type RollingTimeWindowModel struct {
+	Duration     types.Int64  `tfsdk:"duration"`
+	DurationUnit types.String `tfsdk:"duration_unit"`
+	Timezone     types.String `tfsdk:"timezone"`
+}
+
+// FixedTimeWindowModel represents a fixed time window in the Terraform model
+type FixedTimeWindowModel struct {
+	Duration       types.Int64   `tfsdk:"duration"`
+	DurationUnit   types.String  `tfsdk:"duration_unit"`
+	Timezone       types.String  `tfsdk:"timezone"`
+	StartTimestamp types.Float64 `tfsdk:"start_timestamp"`
+}
+
 // ResourceInstanaSloConfigFramework the name of the terraform-provider-instana resource to manage SLO configurations
 const ResourceInstanaSloConfigFramework = "slo_config"
 
@@ -414,7 +506,89 @@ func (r *sloConfigResourceFramework) MapStateToDataObject(ctx context.Context, p
 	return sloConfig, diags
 }
 
-// Helper methods for mapping entity, indicator, and time window from plan
+func (r *sloConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *restapi.SloConfig) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	// Set ID
+	diags.Append(state.SetAttribute(ctx, path.Root("id"), types.StringValue(apiObject.ID))...)
+
+	// Set basic fields
+	diags.Append(state.SetAttribute(ctx, path.Root(SloConfigFieldName), types.StringValue(apiObject.Name))...)
+	diags.Append(state.SetAttribute(ctx, path.Root(SloConfigFieldTarget), types.Float64Value(apiObject.Target))...)
+
+	// Set tags if present
+	if apiObject.Tags != nil {
+		if tagsList, ok := apiObject.Tags.([]interface{}); ok {
+			var tags []types.String
+			for _, tag := range tagsList {
+				if tagStr, ok := tag.(string); ok {
+					tags = append(tags, types.StringValue(tagStr))
+				}
+			}
+			diags.Append(state.SetAttribute(ctx, path.Root(SloConfigFieldTags), tags)...)
+		}
+	}
+
+	// Set RBAC tags if present
+	if apiObject.RbacTags != nil {
+		if rbacTagsList, ok := apiObject.RbacTags.([]interface{}); ok {
+			var rbacTags []map[string]attr.Value
+			for _, tag := range rbacTagsList {
+				if rbacTagMap, ok := tag.(map[string]interface{}); ok {
+					displayName, _ := rbacTagMap["displayName"].(string)
+					id, _ := rbacTagMap["id"].(string)
+
+					rbacTag := map[string]attr.Value{
+						"display_name": types.StringValue(displayName),
+						"id":           types.StringValue(id),
+					}
+					rbacTags = append(rbacTags, rbacTag)
+				}
+			}
+
+			if len(rbacTags) > 0 {
+				rbacTagsType, err := types.ListValueFrom(
+					ctx,
+					types.ObjectType{
+						AttrTypes: map[string]attr.Type{
+							"display_name": types.StringType,
+							"id":           types.StringType,
+						},
+					},
+					rbacTags,
+				)
+				if err == nil {
+					diags.Append(state.SetAttribute(ctx, path.Root(SloConfigFieldRbacTags), rbacTagsType)...)
+				}
+			}
+		}
+	}
+
+	// Map entity
+	entityData, entityDiags := r.mapEntityToState(ctx, apiObject)
+	diags.Append(entityDiags...)
+	if !diags.HasError() {
+		diags.Append(state.SetAttribute(ctx, path.Root(SloConfigFieldSloEntity), entityData)...)
+	}
+
+	// Map indicator
+	indicatorData, indicatorDiags := r.mapIndicatorToState(ctx, apiObject)
+	diags.Append(indicatorDiags...)
+	if !diags.HasError() {
+		diags.Append(state.SetAttribute(ctx, path.Root(SloConfigFieldSloIndicator), indicatorData)...)
+	}
+
+	// Map time window
+	timeWindowData, timeWindowDiags := r.mapTimeWindowToState(ctx, apiObject)
+	diags.Append(timeWindowDiags...)
+	if !diags.HasError() {
+		diags.Append(state.SetAttribute(ctx, path.Root(SloConfigFieldSloTimeWindow), timeWindowData)...)
+	}
+
+	return diags
+}
+
+// Helper methods for mapping entity from plan
 func (r *sloConfigResourceFramework) mapEntityFromPlan(ctx context.Context, planData tfsdk.Config) (interface{}, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
@@ -614,6 +788,7 @@ func (r *sloConfigResourceFramework) mapEntityFromPlan(ctx context.Context, plan
 	return nil, diags
 }
 
+// Helper methods for mapping indicator from plan
 func (r *sloConfigResourceFramework) mapIndicatorFromPlan(ctx context.Context, planData tfsdk.Config) (interface{}, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
@@ -816,6 +991,7 @@ func (r *sloConfigResourceFramework) mapIndicatorFromPlan(ctx context.Context, p
 	return nil, diags
 }
 
+// Helper methods for mapping time window from plan
 func (r *sloConfigResourceFramework) mapTimeWindowFromPlan(ctx context.Context, planData tfsdk.Config) (interface{}, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
@@ -903,88 +1079,6 @@ func (r *sloConfigResourceFramework) mapTimeWindowFromPlan(ctx context.Context, 
 		"Exactly one time window configuration is required",
 	)
 	return nil, diags
-}
-
-func (r *sloConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *restapi.SloConfig) diag.Diagnostics {
-	var diags diag.Diagnostics
-
-	// Set ID
-	diags.Append(state.SetAttribute(ctx, path.Root("id"), types.StringValue(apiObject.ID))...)
-
-	// Set basic fields
-	diags.Append(state.SetAttribute(ctx, path.Root(SloConfigFieldName), types.StringValue(apiObject.Name))...)
-	diags.Append(state.SetAttribute(ctx, path.Root(SloConfigFieldTarget), types.Float64Value(apiObject.Target))...)
-
-	// Set tags if present
-	if apiObject.Tags != nil {
-		if tagsList, ok := apiObject.Tags.([]interface{}); ok {
-			var tags []types.String
-			for _, tag := range tagsList {
-				if tagStr, ok := tag.(string); ok {
-					tags = append(tags, types.StringValue(tagStr))
-				}
-			}
-			diags.Append(state.SetAttribute(ctx, path.Root(SloConfigFieldTags), tags)...)
-		}
-	}
-
-	// Set RBAC tags if present
-	if apiObject.RbacTags != nil {
-		if rbacTagsList, ok := apiObject.RbacTags.([]interface{}); ok {
-			var rbacTags []map[string]attr.Value
-			for _, tag := range rbacTagsList {
-				if rbacTagMap, ok := tag.(map[string]interface{}); ok {
-					displayName, _ := rbacTagMap["displayName"].(string)
-					id, _ := rbacTagMap["id"].(string)
-
-					rbacTag := map[string]attr.Value{
-						"display_name": types.StringValue(displayName),
-						"id":           types.StringValue(id),
-					}
-					rbacTags = append(rbacTags, rbacTag)
-				}
-			}
-
-			if len(rbacTags) > 0 {
-				rbacTagsType, err := types.ListValueFrom(
-					ctx,
-					types.ObjectType{
-						AttrTypes: map[string]attr.Type{
-							"display_name": types.StringType,
-							"id":           types.StringType,
-						},
-					},
-					rbacTags,
-				)
-				if err == nil {
-					diags.Append(state.SetAttribute(ctx, path.Root(SloConfigFieldRbacTags), rbacTagsType)...)
-				}
-			}
-		}
-	}
-
-	// Map entity
-	entityData, entityDiags := r.mapEntityToState(ctx, apiObject)
-	diags.Append(entityDiags...)
-	if !diags.HasError() {
-		diags.Append(state.SetAttribute(ctx, path.Root(SloConfigFieldSloEntity), entityData)...)
-	}
-
-	// Map indicator
-	indicatorData, indicatorDiags := r.mapIndicatorToState(ctx, apiObject)
-	diags.Append(indicatorDiags...)
-	if !diags.HasError() {
-		diags.Append(state.SetAttribute(ctx, path.Root(SloConfigFieldSloIndicator), indicatorData)...)
-	}
-
-	// Map time window
-	timeWindowData, timeWindowDiags := r.mapTimeWindowToState(ctx, apiObject)
-	diags.Append(timeWindowDiags...)
-	if !diags.HasError() {
-		diags.Append(state.SetAttribute(ctx, path.Root(SloConfigFieldSloTimeWindow), timeWindowData)...)
-	}
-
-	return diags
 }
 
 // Helper methods for mapping entity, indicator, and time window to state
