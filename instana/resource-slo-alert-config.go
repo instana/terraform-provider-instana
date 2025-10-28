@@ -309,7 +309,7 @@ func (r *sloAlertConfigResource) sloAlertConfigStateUpgradeV0(_ context.Context,
 }
 
 func (r *sloAlertConfigResource) UpdateState(d *schema.ResourceData, sloAlertConfig *restapi.SloAlertConfig) error {
-	debug(">> UpdateState")
+	//debug(">> UpdateState")
 
 	var thresholdType, thresholdOperator string
 
@@ -405,7 +405,7 @@ func (r *sloAlertConfigResource) UpdateState(d *schema.ResourceData, sloAlertCon
 
 	d.SetId(sloAlertConfig.ID)
 
-	debug(">> UpdateState with: " + obj2json(tfData))
+	//debug(">> UpdateState with: " + obj2json(tfData))
 
 	return tfutils.UpdateState(d, tfData)
 }
@@ -443,8 +443,8 @@ func convertToFloat64(value interface{}) (float64, error) {
 
 // tf state -> api
 func (r *sloAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*restapi.SloAlertConfig, error) {
-	debug(">> MapStateToDataObject")
-	debug(obj2json(d))
+	//debug(">> MapStateToDataObject")
+	//debug(obj2json(d))
 	sid := d.Id()
 	if len(sid) == 0 {
 		sid = RandomID()
