@@ -460,43 +460,16 @@ func (r *sloConfigResourceFramework) MapStateToDataObject(ctx context.Context, p
 	rbacTagsList := mapRbacTags(ctx, model.RbacTags)
 
 	// Get entity data
-	var entity interface{}
-	if !model.Entity.IsNull() && !model.Entity.IsUnknown() {
-		// Convert the entity object to a tfsdk.Config for processing
-		var planData tfsdk.Config
-		if plan != nil {
-			diags.Append(plan.Get(ctx, &planData)...)
-		} else if state != nil {
-			diags.Append(state.Get(ctx, &planData)...)
-		}
-
-		entityData, entityDiags := r.mapEntityFromState(ctx, model.Entity)
-		diags.Append(entityDiags...)
-		if !diags.HasError() {
-			entity = entityData
-		}
-	}
+	entityData, entityDiags := r.mapEntityFromState(ctx, model.Entity)
+	diags.Append(entityDiags...)
 
 	// Get indicator data
-	var indicator interface{}
-	if !model.Indicator.IsNull() && !model.Indicator.IsUnknown() {
-		// Convert the indicator object to a tfsdk.Config for processing
-		var planData tfsdk.Config
-		if plan != nil {
-			diags.Append(plan.Get(ctx, &planData)...)
-		} else if state != nil {
-			diags.Append(state.Get(ctx, &planData)...)
-		}
-
-		indicatorData, indicatorDiags := r.mapIndicatorFromPlan(ctx, planData)
-		diags.Append(indicatorDiags...)
-		if !diags.HasError() {
-			indicator = indicatorData
-		}
-	}
+	indicator, indicatorDiags := r.mapIndicatorFromState(ctx, model.Indicator)
+	diags.Append(indicatorDiags...)
 
 	// Get time window data
 	var timeWindow interface{}
+	// Check if time window is set (it's a types.Object, so we can use IsNull)
 	if !model.TimeWindow.IsNull() && !model.TimeWindow.IsUnknown() {
 		// Convert the time window object to a tfsdk.Config for processing
 		var planData tfsdk.Config
@@ -523,7 +496,7 @@ func (r *sloConfigResourceFramework) MapStateToDataObject(ctx context.Context, p
 		Name:       name,
 		Target:     target,
 		Tags:       tagsList,
-		Entity:     entity,
+		Entity:     entityData,
 		Indicator:  indicator,
 		TimeWindow: timeWindow,
 		RbacTags:   rbacTagsList,
@@ -632,9 +605,8 @@ func (r *sloConfigResourceFramework) UpdateState(ctx context.Context, state *tfs
 }
 
 // Helper methods for mapping entity from plan
-func (r *sloConfigResourceFramework) mapEntityFromState(ctx context.Context, entityObj EntityModel) (interface{}, diag.Diagnostics) {
+func (r *sloConfigResourceFramework) mapEntityFromState(ctx context.Context, entityObj EntityModel) (restapi.SloEntity, diag.Diagnostics) {
 	var diags diag.Diagnostics
-
 	// Check for application entity
 	if entityObj.ApplicationEntityModel != nil {
 		applicationModel := entityObj.ApplicationEntityModel
@@ -645,7 +617,7 @@ func (r *sloConfigResourceFramework) mapEntityFromState(ctx context.Context, ent
 		includeInternal := applicationModel.IncludeInternal.ValueBool()
 		includeSynthetic := applicationModel.IncludeSynthetic.ValueBool()
 
-		appEntityObj := restapi.SloApplicationEntity{
+		appEntityObj := restapi.SloEntity{
 			Type:             SloConfigApplicationEntity,
 			ApplicationID:    &applicationIdStr,
 			ServiceID:        &serviceID,
@@ -676,30 +648,22 @@ func (r *sloConfigResourceFramework) mapEntityFromState(ctx context.Context, ent
 	}
 
 	// Check for website entity
-	var websiteEntity types.Object
-	websitePath := path.Root(SloConfigFieldSloEntity).AtListIndex(0).AtName(SloConfigWebsiteEntity)
-	diags.Append(planData.GetAttribute(ctx, websitePath, &websiteEntity)...)
+	if entityObj.WebsiteEntityModel != nil {
+		websiteModel := entityObj.WebsiteEntityModel
+		websiteIdStr := websiteModel.WebsiteID.ValueString()
+		beaconTypeStr := websiteModel.BeaconType.ValueString()
 
-	if !websiteEntity.IsNull() && !websiteEntity.IsUnknown() {
-		// Get website entity fields
-		var websiteID, beaconType types.String
-		var filterExpression types.String
-
-		websitePath := path.Root(SloConfigFieldSloEntity).AtListIndex(0).AtName(SloConfigWebsiteEntity).AtListIndex(0)
-
-		diags.Append(planData.GetAttribute(ctx, websitePath.AtName(SloConfigFieldWebsiteID), &websiteID)...)
-		diags.Append(planData.GetAttribute(ctx, websitePath.AtName(SloConfigFieldBeaconType), &beaconType)...)
-		diags.Append(planData.GetAttribute(ctx, websitePath.AtName(SloConfigFieldFilterExpression), &filterExpression)...)
-
-		if diags.HasError() {
-			return nil, diags
+		websiteEntityObj := restapi.SloEntity{
+			Type:       SloConfigWebsiteEntity,
+			WebsiteId:  &websiteIdStr,
+			BeaconType: &beaconTypeStr,
 		}
 
 		// Convert filter expression to API model if set
 		var tagFilter *restapi.TagFilter
-		if !filterExpression.IsNull() && !filterExpression.IsUnknown() {
+		if !websiteModel.FilterExpression.IsNull() && !websiteModel.FilterExpression.IsUnknown() {
 			parser := tagfilter.NewParser()
-			expr, err := parser.Parse(filterExpression.ValueString())
+			expr, err := parser.Parse(websiteModel.FilterExpression.ValueString())
 			if err != nil {
 				diags.AddError(
 					"Error parsing filter expression",
@@ -711,54 +675,32 @@ func (r *sloConfigResourceFramework) mapEntityFromState(ctx context.Context, ent
 			mapper := tagfilter.NewMapper()
 			tagFilter = mapper.ToAPIModel(expr)
 		}
-
-		// Create website entity
-		websiteEntityObj := restapi.SloWebsiteEntity{
-			Type:             SloConfigWebsiteEntity,
-			FilterExpression: tagFilter,
-		}
-
-		if !websiteID.IsNull() && !websiteID.IsUnknown() {
-			websiteEntityObj.WebsiteId = &[]string{websiteID.ValueString()}[0]
-		}
-
-		if !beaconType.IsNull() && !beaconType.IsUnknown() {
-			websiteEntityObj.BeaconType = &[]string{beaconType.ValueString()}[0]
-		}
-
+		websiteEntityObj.FilterExpression = tagFilter
 		return websiteEntityObj, diags
 	}
 
 	// Check for synthetic entity
-	var syntheticEntity types.Object
-	syntheticPath := path.Root(SloConfigFieldSloEntity).AtListIndex(0).AtName(SloConfigSyntheticEntity)
-	diags.Append(planData.GetAttribute(ctx, syntheticPath, &syntheticEntity)...)
-
-	if !syntheticEntity.IsNull() && !syntheticEntity.IsUnknown() {
-		// Get synthetic entity fields
-		var syntheticTestIDs []types.String
-		var filterExpression types.String
-
-		syntheticPath := path.Root(SloConfigFieldSloEntity).AtListIndex(0).AtName(SloConfigSyntheticEntity).AtListIndex(0)
-
-		diags.Append(planData.GetAttribute(ctx, syntheticPath.AtName(SloConfigFieldSyntheticTestIDs), &syntheticTestIDs)...)
-		diags.Append(planData.GetAttribute(ctx, syntheticPath.AtName(SloConfigFieldFilterExpression), &filterExpression)...)
-
-		if diags.HasError() {
-			return nil, diags
-		}
+	if entityObj.SyntheticEntityModel != nil {
+		syntheticModel := entityObj.SyntheticEntityModel
 
 		// Convert synthetic test IDs to []interface{}
 		var testIDs []interface{}
-		for _, id := range syntheticTestIDs {
-			testIDs = append(testIDs, id.ValueString())
+		for _, id := range syntheticModel.SyntheticTestIDs {
+			if !id.IsNull() && !id.IsUnknown() {
+				testIDs = append(testIDs, id.ValueString())
+			}
+		}
+
+		syntheticEntityObj := restapi.SloEntity{
+			Type:             SloConfigSyntheticEntity,
+			SyntheticTestIDs: testIDs,
 		}
 
 		// Convert filter expression to API model if set
 		var tagFilter *restapi.TagFilter
-		if !filterExpression.IsNull() && !filterExpression.IsUnknown() {
+		if !syntheticModel.FilterExpression.IsNull() && !syntheticModel.FilterExpression.IsUnknown() {
 			parser := tagfilter.NewParser()
-			expr, err := parser.Parse(filterExpression.ValueString())
+			expr, err := parser.Parse(syntheticModel.FilterExpression.ValueString())
 			if err != nil {
 				diags.AddError(
 					"Error parsing filter expression",
@@ -770,31 +712,36 @@ func (r *sloConfigResourceFramework) mapEntityFromState(ctx context.Context, ent
 			mapper := tagfilter.NewMapper()
 			tagFilter = mapper.ToAPIModel(expr)
 		}
+		syntheticEntityObj.FilterExpression = tagFilter
+		return syntheticEntityObj, diags
+	}
 
-		// Create synthetic entity
-		syntheticEntityObj := restapi.SloSyntheticEntity{
-			Type:             SloConfigSyntheticEntity,
-			SyntheticTestIDs: testIDs,
-			FilterExpression: tagFilter,
+	// Check for infra entity
+	if entityObj.InfraEntityModel != nil {
+		infraModel := entityObj.InfraEntityModel
+
+		infraEntityObj := restapi.SloEntity{
+			Type:      SloConfigInfraEntity,
+			InfraType: infraModel.InfraType,
 		}
 
-		return syntheticEntityObj, diags
+		return infraEntityObj, diags
 	}
 
 	diags.AddError(
 		"Missing entity configuration",
 		"Exactly one entity configuration is required",
 	)
-	return nil, diags
+	return restapi.SloEntity{}, diags
 }
 
 // Helper methods for mapping indicator from plan
-func (r *sloConfigResourceFramework) mapIndicatorFromPlan(ctx context.Context, planData tfsdk.Config) (interface{}, diag.Diagnostics) {
+func (r *sloConfigResourceFramework) mapIndicatorFromState(ctx context.Context, indicatorModel IndicatorModel) (restapi.SloIndicator, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Check which indicator type is set
 	var indicatorBlock types.Object
-	diags.Append(planData.GetAttribute(ctx, path.Root(SloConfigFieldSloIndicator), &indicatorBlock)...)
+	diags.Append(indicatorModel.GetAttribute(ctx, path.Root(SloConfigFieldSloIndicator), &indicatorBlock)...)
 
 	if diags.HasError() || indicatorBlock.IsNull() || indicatorBlock.IsUnknown() {
 		return nil, diags
@@ -803,7 +750,7 @@ func (r *sloConfigResourceFramework) mapIndicatorFromPlan(ctx context.Context, p
 	// Check for time-based latency indicator
 	var timeBasedLatency types.Object
 	timeBasedLatencyPath := path.Root(SloConfigFieldSloIndicator).AtListIndex(0).AtName("time_based_latency")
-	diags.Append(planData.GetAttribute(ctx, timeBasedLatencyPath, &timeBasedLatency)...)
+	diags.Append(indicatorModel.GetAttribute(ctx, timeBasedLatencyPath, &timeBasedLatency)...)
 
 	if !timeBasedLatency.IsNull() && !timeBasedLatency.IsUnknown() {
 		// Get time-based latency fields
@@ -812,8 +759,8 @@ func (r *sloConfigResourceFramework) mapIndicatorFromPlan(ctx context.Context, p
 
 		timeBasedLatencyPath := path.Root(SloConfigFieldSloIndicator).AtListIndex(0).AtName("time_based_latency").AtListIndex(0)
 
-		diags.Append(planData.GetAttribute(ctx, timeBasedLatencyPath.AtName("threshold"), &threshold)...)
-		diags.Append(planData.GetAttribute(ctx, timeBasedLatencyPath.AtName("aggregation"), &aggregation)...)
+		diags.Append(indicatorModel.GetAttribute(ctx, timeBasedLatencyPath.AtName("threshold"), &threshold)...)
+		diags.Append(indicatorModel.GetAttribute(ctx, timeBasedLatencyPath.AtName("aggregation"), &aggregation)...)
 
 		if diags.HasError() {
 			return nil, diags
@@ -831,7 +778,7 @@ func (r *sloConfigResourceFramework) mapIndicatorFromPlan(ctx context.Context, p
 	// Check for event-based latency indicator
 	var eventBasedLatency types.Object
 	eventBasedLatencyPath := path.Root(SloConfigFieldSloIndicator).AtListIndex(0).AtName("event_based_latency")
-	diags.Append(planData.GetAttribute(ctx, eventBasedLatencyPath, &eventBasedLatency)...)
+	diags.Append(indicatorModel.GetAttribute(ctx, eventBasedLatencyPath, &eventBasedLatency)...)
 
 	if !eventBasedLatency.IsNull() && !eventBasedLatency.IsUnknown() {
 		// Get event-based latency fields
@@ -839,7 +786,7 @@ func (r *sloConfigResourceFramework) mapIndicatorFromPlan(ctx context.Context, p
 
 		eventBasedLatencyPath := path.Root(SloConfigFieldSloIndicator).AtListIndex(0).AtName("event_based_latency").AtListIndex(0)
 
-		diags.Append(planData.GetAttribute(ctx, eventBasedLatencyPath.AtName("threshold"), &threshold)...)
+		diags.Append(indicatorModel.GetAttribute(ctx, eventBasedLatencyPath.AtName("threshold"), &threshold)...)
 
 		if diags.HasError() {
 			return nil, diags
@@ -856,7 +803,7 @@ func (r *sloConfigResourceFramework) mapIndicatorFromPlan(ctx context.Context, p
 	// Check for time-based availability indicator
 	var timeBasedAvailability types.Object
 	timeBasedAvailabilityPath := path.Root(SloConfigFieldSloIndicator).AtListIndex(0).AtName("time_based_availability")
-	diags.Append(planData.GetAttribute(ctx, timeBasedAvailabilityPath, &timeBasedAvailability)...)
+	diags.Append(indicatorModel.GetAttribute(ctx, timeBasedAvailabilityPath, &timeBasedAvailability)...)
 
 	if !timeBasedAvailability.IsNull() && !timeBasedAvailability.IsUnknown() {
 		// Get time-based availability fields
@@ -865,8 +812,8 @@ func (r *sloConfigResourceFramework) mapIndicatorFromPlan(ctx context.Context, p
 
 		timeBasedAvailabilityPath := path.Root(SloConfigFieldSloIndicator).AtListIndex(0).AtName("time_based_availability").AtListIndex(0)
 
-		diags.Append(planData.GetAttribute(ctx, timeBasedAvailabilityPath.AtName("threshold"), &threshold)...)
-		diags.Append(planData.GetAttribute(ctx, timeBasedAvailabilityPath.AtName("aggregation"), &aggregation)...)
+		diags.Append(indicatorModel.GetAttribute(ctx, timeBasedAvailabilityPath.AtName("threshold"), &threshold)...)
+		diags.Append(indicatorModel.GetAttribute(ctx, timeBasedAvailabilityPath.AtName("aggregation"), &aggregation)...)
 
 		if diags.HasError() {
 			return nil, diags
@@ -884,7 +831,7 @@ func (r *sloConfigResourceFramework) mapIndicatorFromPlan(ctx context.Context, p
 	// Check for event-based availability indicator
 	var eventBasedAvailability types.Object
 	eventBasedAvailabilityPath := path.Root(SloConfigFieldSloIndicator).AtListIndex(0).AtName("event_based_availability")
-	diags.Append(planData.GetAttribute(ctx, eventBasedAvailabilityPath, &eventBasedAvailability)...)
+	diags.Append(indicatorModel.GetAttribute(ctx, eventBasedAvailabilityPath, &eventBasedAvailability)...)
 
 	if !eventBasedAvailability.IsNull() && !eventBasedAvailability.IsUnknown() {
 		// Create event-based availability indicator
@@ -897,7 +844,7 @@ func (r *sloConfigResourceFramework) mapIndicatorFromPlan(ctx context.Context, p
 	// Check for traffic indicator
 	var traffic types.Object
 	trafficPath := path.Root(SloConfigFieldSloIndicator).AtListIndex(0).AtName("traffic")
-	diags.Append(planData.GetAttribute(ctx, trafficPath, &traffic)...)
+	diags.Append(indicatorModel.GetAttribute(ctx, trafficPath, &traffic)...)
 
 	if !traffic.IsNull() && !traffic.IsUnknown() {
 		// Get traffic fields
@@ -907,9 +854,9 @@ func (r *sloConfigResourceFramework) mapIndicatorFromPlan(ctx context.Context, p
 
 		trafficPath := path.Root(SloConfigFieldSloIndicator).AtListIndex(0).AtName("traffic").AtListIndex(0)
 
-		diags.Append(planData.GetAttribute(ctx, trafficPath.AtName("traffic_type"), &trafficType)...)
-		diags.Append(planData.GetAttribute(ctx, trafficPath.AtName("threshold"), &threshold)...)
-		diags.Append(planData.GetAttribute(ctx, trafficPath.AtName("aggregation"), &aggregation)...)
+		diags.Append(indicatorModel.GetAttribute(ctx, trafficPath.AtName("traffic_type"), &trafficType)...)
+		diags.Append(indicatorModel.GetAttribute(ctx, trafficPath.AtName("threshold"), &threshold)...)
+		diags.Append(indicatorModel.GetAttribute(ctx, trafficPath.AtName("aggregation"), &aggregation)...)
 
 		if diags.HasError() {
 			return nil, diags
@@ -927,7 +874,7 @@ func (r *sloConfigResourceFramework) mapIndicatorFromPlan(ctx context.Context, p
 	// Check for custom indicator
 	var custom types.Object
 	customPath := path.Root(SloConfigFieldSloIndicator).AtListIndex(0).AtName("custom")
-	diags.Append(planData.GetAttribute(ctx, customPath, &custom)...)
+	diags.Append(indicatorModel.GetAttribute(ctx, customPath, &custom)...)
 
 	if !custom.IsNull() && !custom.IsUnknown() {
 		// Get custom fields
@@ -935,8 +882,8 @@ func (r *sloConfigResourceFramework) mapIndicatorFromPlan(ctx context.Context, p
 
 		customPath := path.Root(SloConfigFieldSloIndicator).AtListIndex(0).AtName("custom").AtListIndex(0)
 
-		diags.Append(planData.GetAttribute(ctx, customPath.AtName("good_event_filter_expression"), &goodEventFilterExpression)...)
-		diags.Append(planData.GetAttribute(ctx, customPath.AtName("bad_event_filter_expression"), &badEventFilterExpression)...)
+		diags.Append(indicatorModel.GetAttribute(ctx, customPath.AtName("good_event_filter_expression"), &goodEventFilterExpression)...)
+		diags.Append(indicatorModel.GetAttribute(ctx, customPath.AtName("bad_event_filter_expression"), &badEventFilterExpression)...)
 
 		if diags.HasError() {
 			return nil, diags
@@ -1112,6 +1059,8 @@ func (r *sloConfigResourceFramework) mapEntityToState(ctx context.Context, apiOb
 		return r.mapWebsiteEntityToState(ctx, entityMap)
 	case SloConfigSyntheticEntity:
 		return r.mapSyntheticEntityToState(ctx, entityMap)
+	case SloConfigInfraEntity:
+		return r.mapInfraEntityToState(ctx, entityMap)
 	default:
 		diags.AddError(
 			"Error mapping entity to state",
@@ -1328,6 +1277,45 @@ func (r *sloConfigResourceFramework) mapSyntheticEntityToState(ctx context.Conte
 	if err != nil {
 		diags.AddError(
 			"Error creating synthetic entity object",
+			fmt.Sprintf("Could not create object: %s", err),
+		)
+		return types.ObjectNull(nil), diags
+	}
+
+	return obj, diags
+}
+
+func (r *sloConfigResourceFramework) mapInfraEntityToState(ctx context.Context, entityMap map[string]interface{}) (types.Object, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Extract infra entity fields
+	infraType, _ := entityMap["infraType"].(string)
+
+	// Create infra entity object
+	infraEntityObj := map[string]interface{}{
+		"infra_type": types.StringValue(infraType),
+	}
+
+	// Create entity object
+	entityObj := map[string]interface{}{
+		SloConfigInfraEntity: []interface{}{infraEntityObj},
+	}
+
+	// Convert to types.Object
+	objType := map[string]attr.Type{
+		SloConfigInfraEntity: types.ListType{
+			ElemType: types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"infra_type": types.StringType,
+				},
+			},
+		},
+	}
+
+	obj, err := types.ObjectValueFrom(ctx, objType, entityObj)
+	if err != nil {
+		diags.AddError(
+			"Error creating infra entity object",
 			fmt.Sprintf("Could not create object: %s", err),
 		)
 		return types.ObjectNull(nil), diags
