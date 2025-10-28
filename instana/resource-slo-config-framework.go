@@ -12,10 +12,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 // ResourceInstanaSloConfigFramework the name of the terraform-provider-instana resource to manage SLO configurations
 const ResourceInstanaSloConfigFramework = "slo_config"
+
+// SloConfigFieldRbacTags is the field name for RBAC tags
+const SloConfigFieldRbacTags = "rbac_tags"
 
 // NewSloConfigResourceHandleFramework creates the resource handle for SLO Config
 func NewSloConfigResourceHandleFramework() ResourceHandleFramework[*restapi.SloConfig] {
@@ -49,6 +53,22 @@ func (r *sloConfigResourceFramework) MetaData() *ResourceMetaDataFramework {
 						ElementType: types.StringType,
 						Optional:    true,
 						Description: "The tags of the SLO configuration",
+					},
+					SloConfigFieldRbacTags: schema.ListNestedAttribute{
+						Optional:    true,
+						Description: "RBAC tags for the SLO configuration",
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"display_name": schema.StringAttribute{
+									Required:    true,
+									Description: "Display name of the RBAC tag",
+								},
+								"id": schema.StringAttribute{
+									Required:    true,
+									Description: "ID of the RBAC tag",
+								},
+							},
+						},
 					},
 				},
 				Blocks: map[string]schema.Block{
@@ -301,6 +321,7 @@ func (r *sloConfigResourceFramework) MapStateToDataObject(ctx context.Context, p
 	var name types.String
 	var target types.Float64
 	var tags []types.String
+	var rbacTags []types.Object
 
 	if state != nil {
 		diags.Append(state.GetAttribute(ctx, path.Root("id"), &id)...)
@@ -308,6 +329,7 @@ func (r *sloConfigResourceFramework) MapStateToDataObject(ctx context.Context, p
 	diags.Append(planData.GetAttribute(ctx, path.Root(SloConfigFieldName), &name)...)
 	diags.Append(planData.GetAttribute(ctx, path.Root(SloConfigFieldTarget), &target)...)
 	diags.Append(planData.GetAttribute(ctx, path.Root(SloConfigFieldTags), &tags)...)
+	diags.Append(planData.GetAttribute(ctx, path.Root(SloConfigFieldRbacTags), &rbacTags)...)
 
 	if diags.HasError() {
 		return nil, diags
@@ -347,6 +369,31 @@ func (r *sloConfigResourceFramework) MapStateToDataObject(ctx context.Context, p
 		return nil, diags
 	}
 
+	// Convert RBAC tags to []interface{}
+	var rbacTagsList []interface{}
+	for _, tag := range rbacTags {
+		if !tag.IsNull() && !tag.IsUnknown() {
+			attrs := make(map[string]attr.Value)
+			if err := tag.As(ctx, &attrs, basetypes.ObjectAsOptions{}); err == nil {
+				var displayName, tagID types.String
+				if displayNameAttr, ok := attrs["display_name"]; ok {
+					displayName = displayNameAttr.(types.String)
+				}
+				if idAttr, ok := attrs["id"]; ok {
+					tagID = idAttr.(types.String)
+				}
+
+				if !displayName.IsNull() && !displayName.IsUnknown() && !tagID.IsNull() && !tagID.IsUnknown() {
+					rbacTag := map[string]interface{}{
+						"displayName": displayName.ValueString(),
+						"id":          tagID.ValueString(),
+					}
+					rbacTagsList = append(rbacTagsList, rbacTag)
+				}
+			}
+		}
+	}
+
 	// Create SLO config object
 	sloConfig := &restapi.SloConfig{
 		ID:         id.ValueString(),
@@ -356,6 +403,7 @@ func (r *sloConfigResourceFramework) MapStateToDataObject(ctx context.Context, p
 		Entity:     entity,
 		Indicator:  indicator,
 		TimeWindow: timeWindow,
+		RbacTags:   rbacTagsList,
 	}
 
 	// Generate ID if needed
@@ -877,6 +925,41 @@ func (r *sloConfigResourceFramework) UpdateState(ctx context.Context, state *tfs
 				}
 			}
 			diags.Append(state.SetAttribute(ctx, path.Root(SloConfigFieldTags), tags)...)
+		}
+	}
+
+	// Set RBAC tags if present
+	if apiObject.RbacTags != nil {
+		if rbacTagsList, ok := apiObject.RbacTags.([]interface{}); ok {
+			var rbacTags []map[string]attr.Value
+			for _, tag := range rbacTagsList {
+				if rbacTagMap, ok := tag.(map[string]interface{}); ok {
+					displayName, _ := rbacTagMap["displayName"].(string)
+					id, _ := rbacTagMap["id"].(string)
+
+					rbacTag := map[string]attr.Value{
+						"display_name": types.StringValue(displayName),
+						"id":           types.StringValue(id),
+					}
+					rbacTags = append(rbacTags, rbacTag)
+				}
+			}
+
+			if len(rbacTags) > 0 {
+				rbacTagsType, err := types.ListValueFrom(
+					ctx,
+					types.ObjectType{
+						AttrTypes: map[string]attr.Type{
+							"display_name": types.StringType,
+							"id":           types.StringType,
+						},
+					},
+					rbacTags,
+				)
+				if err == nil {
+					diags.Append(state.SetAttribute(ctx, path.Root(SloConfigFieldRbacTags), rbacTagsType)...)
+				}
+			}
 		}
 	}
 
