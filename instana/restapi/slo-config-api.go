@@ -19,9 +19,16 @@ type SloConfig struct {
 	Entity     interface{} `json:"entity"`
 	Indicator  interface{} `json:"indicator"`
 	TimeWindow interface{} `json:"timeWindow"`
+	RbacTags   interface{} `json:"rbacTags,omitempty"`
 
 	// CreatedDate int         `json:"createdDate"`
 	// LastUpdated int         `json:"lastUpdated"`
+}
+
+// RbacTag represents a RBAC tag in the SLO configuration
+type RbacTag struct {
+	DisplayName string `json:"displayName"`
+	ID          string `json:"id"`
 }
 
 // SloEntity represents the nested object sli entity of the sli config REST resource at Instana
