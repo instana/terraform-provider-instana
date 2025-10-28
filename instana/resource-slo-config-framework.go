@@ -394,12 +394,13 @@ func (r *sloConfigResourceFramework) SetComputedFields(_ context.Context, _ *tfs
 
 func (r *sloConfigResourceFramework) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.SloConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	var planData tfsdk.Config
+	var model SloConfigModel
 
+	// Get current state from plan or state
 	if plan != nil {
-		diags.Append(plan.Get(ctx, &planData)...)
+		diags.Append(plan.Get(ctx, &model)...)
 	} else if state != nil {
-		diags.Append(state.Get(ctx, &planData)...)
+		diags.Append(state.Get(ctx, &model)...)
 	} else {
 		diags.AddError(
 			"Error mapping state to data object",
@@ -408,62 +409,31 @@ func (r *sloConfigResourceFramework) MapStateToDataObject(ctx context.Context, p
 		return nil, diags
 	}
 
-	// Get basic fields
-	var id types.String
-	var name types.String
-	var target types.Float64
-	var tags []types.String
-	var rbacTags []types.Object
-
-	if state != nil {
-		diags.Append(state.GetAttribute(ctx, path.Root("id"), &id)...)
-	}
-	diags.Append(planData.GetAttribute(ctx, path.Root(SloConfigFieldName), &name)...)
-	diags.Append(planData.GetAttribute(ctx, path.Root(SloConfigFieldTarget), &target)...)
-	diags.Append(planData.GetAttribute(ctx, path.Root(SloConfigFieldTags), &tags)...)
-	diags.Append(planData.GetAttribute(ctx, path.Root(SloConfigFieldRbacTags), &rbacTags)...)
-
 	if diags.HasError() {
 		return nil, diags
 	}
+
+	// Map ID
+	id := ""
+	if !model.ID.IsNull() {
+		id = model.ID.ValueString()
+	}
+
+	// Map name and target
+	name := model.Name.ValueString()
+	target := model.Target.ValueFloat64()
 
 	// Convert tags to []interface{}
 	var tagsList []interface{}
-	for _, tag := range tags {
-		tagsList = append(tagsList, tag.ValueString())
-	}
-
-	// Get entity data
-	var entity interface{}
-	entityData, entityDiags := r.mapEntityFromPlan(ctx, planData)
-	diags.Append(entityDiags...)
-	if !diags.HasError() {
-		entity = entityData
-	}
-
-	// Get indicator data
-	var indicator interface{}
-	indicatorData, indicatorDiags := r.mapIndicatorFromPlan(ctx, planData)
-	diags.Append(indicatorDiags...)
-	if !diags.HasError() {
-		indicator = indicatorData
-	}
-
-	// Get time window data
-	var timeWindow interface{}
-	timeWindowData, timeWindowDiags := r.mapTimeWindowFromPlan(ctx, planData)
-	diags.Append(timeWindowDiags...)
-	if !diags.HasError() {
-		timeWindow = timeWindowData
-	}
-
-	if diags.HasError() {
-		return nil, diags
+	for _, tag := range model.Tags {
+		if !tag.IsNull() && !tag.IsUnknown() {
+			tagsList = append(tagsList, tag.ValueString())
+		}
 	}
 
 	// Convert RBAC tags to []interface{}
 	var rbacTagsList []interface{}
-	for _, tag := range rbacTags {
+	for _, tag := range model.RbacTags {
 		if !tag.IsNull() && !tag.IsUnknown() {
 			attrs := make(map[string]attr.Value)
 			if err := tag.As(ctx, &attrs, basetypes.ObjectAsOptions{}); err == nil {
@@ -486,11 +456,69 @@ func (r *sloConfigResourceFramework) MapStateToDataObject(ctx context.Context, p
 		}
 	}
 
+	// Get entity data
+	var entity interface{}
+	if !model.Entity.IsNull() && !model.Entity.IsUnknown() {
+		// Convert the entity object to a tfsdk.Config for processing
+		var planData tfsdk.Config
+		if plan != nil {
+			diags.Append(plan.Get(ctx, &planData)...)
+		} else if state != nil {
+			diags.Append(state.Get(ctx, &planData)...)
+		}
+
+		entityData, entityDiags := r.mapEntityFromPlan(ctx, planData)
+		diags.Append(entityDiags...)
+		if !diags.HasError() {
+			entity = entityData
+		}
+	}
+
+	// Get indicator data
+	var indicator interface{}
+	if !model.Indicator.IsNull() && !model.Indicator.IsUnknown() {
+		// Convert the indicator object to a tfsdk.Config for processing
+		var planData tfsdk.Config
+		if plan != nil {
+			diags.Append(plan.Get(ctx, &planData)...)
+		} else if state != nil {
+			diags.Append(state.Get(ctx, &planData)...)
+		}
+
+		indicatorData, indicatorDiags := r.mapIndicatorFromPlan(ctx, planData)
+		diags.Append(indicatorDiags...)
+		if !diags.HasError() {
+			indicator = indicatorData
+		}
+	}
+
+	// Get time window data
+	var timeWindow interface{}
+	if !model.TimeWindow.IsNull() && !model.TimeWindow.IsUnknown() {
+		// Convert the time window object to a tfsdk.Config for processing
+		var planData tfsdk.Config
+		if plan != nil {
+			diags.Append(plan.Get(ctx, &planData)...)
+		} else if state != nil {
+			diags.Append(state.Get(ctx, &planData)...)
+		}
+
+		timeWindowData, timeWindowDiags := r.mapTimeWindowFromPlan(ctx, planData)
+		diags.Append(timeWindowDiags...)
+		if !diags.HasError() {
+			timeWindow = timeWindowData
+		}
+	}
+
+	if diags.HasError() {
+		return nil, diags
+	}
+
 	// Create SLO config object
 	sloConfig := &restapi.SloConfig{
-		ID:         id.ValueString(),
-		Name:       name.ValueString(),
-		Target:     target.ValueFloat64(),
+		ID:         id,
+		Name:       name,
+		Target:     target,
 		Tags:       tagsList,
 		Entity:     entity,
 		Indicator:  indicator,
@@ -509,12 +537,12 @@ func (r *sloConfigResourceFramework) MapStateToDataObject(ctx context.Context, p
 func (r *sloConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *restapi.SloConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	// Set ID
-	diags.Append(state.SetAttribute(ctx, path.Root("id"), types.StringValue(apiObject.ID))...)
-
-	// Set basic fields
-	diags.Append(state.SetAttribute(ctx, path.Root(SloConfigFieldName), types.StringValue(apiObject.Name))...)
-	diags.Append(state.SetAttribute(ctx, path.Root(SloConfigFieldTarget), types.Float64Value(apiObject.Target))...)
+	// Create a model and populate it with values from the API object
+	model := SloConfigModel{
+		ID:     types.StringValue(apiObject.ID),
+		Name:   types.StringValue(apiObject.Name),
+		Target: types.Float64Value(apiObject.Target),
+	}
 
 	// Set tags if present
 	if apiObject.Tags != nil {
@@ -525,42 +553,36 @@ func (r *sloConfigResourceFramework) UpdateState(ctx context.Context, state *tfs
 					tags = append(tags, types.StringValue(tagStr))
 				}
 			}
-			diags.Append(state.SetAttribute(ctx, path.Root(SloConfigFieldTags), tags)...)
+			model.Tags = tags
 		}
 	}
 
 	// Set RBAC tags if present
 	if apiObject.RbacTags != nil {
 		if rbacTagsList, ok := apiObject.RbacTags.([]interface{}); ok {
-			var rbacTags []map[string]attr.Value
+			var rbacTags []types.Object
 			for _, tag := range rbacTagsList {
 				if rbacTagMap, ok := tag.(map[string]interface{}); ok {
 					displayName, _ := rbacTagMap["displayName"].(string)
 					id, _ := rbacTagMap["id"].(string)
 
-					rbacTag := map[string]attr.Value{
-						"display_name": types.StringValue(displayName),
-						"id":           types.StringValue(id),
-					}
-					rbacTags = append(rbacTags, rbacTag)
-				}
-			}
-
-			if len(rbacTags) > 0 {
-				rbacTagsType, err := types.ListValueFrom(
-					ctx,
-					types.ObjectType{
-						AttrTypes: map[string]attr.Type{
+					rbacTagObj, err := types.ObjectValueFrom(
+						ctx,
+						map[string]attr.Type{
 							"display_name": types.StringType,
 							"id":           types.StringType,
 						},
-					},
-					rbacTags,
-				)
-				if err == nil {
-					diags.Append(state.SetAttribute(ctx, path.Root(SloConfigFieldRbacTags), rbacTagsType)...)
+						map[string]attr.Value{
+							"display_name": types.StringValue(displayName),
+							"id":           types.StringValue(id),
+						},
+					)
+					if err == nil {
+						rbacTags = append(rbacTags, rbacTagObj)
+					}
 				}
 			}
+			model.RbacTags = rbacTags
 		}
 	}
 
@@ -568,21 +590,27 @@ func (r *sloConfigResourceFramework) UpdateState(ctx context.Context, state *tfs
 	entityData, entityDiags := r.mapEntityToState(ctx, apiObject)
 	diags.Append(entityDiags...)
 	if !diags.HasError() {
-		diags.Append(state.SetAttribute(ctx, path.Root(SloConfigFieldSloEntity), entityData)...)
+		model.Entity = entityData
 	}
 
 	// Map indicator
 	indicatorData, indicatorDiags := r.mapIndicatorToState(ctx, apiObject)
 	diags.Append(indicatorDiags...)
 	if !diags.HasError() {
-		diags.Append(state.SetAttribute(ctx, path.Root(SloConfigFieldSloIndicator), indicatorData)...)
+		model.Indicator = indicatorData
 	}
 
 	// Map time window
 	timeWindowData, timeWindowDiags := r.mapTimeWindowToState(ctx, apiObject)
 	diags.Append(timeWindowDiags...)
 	if !diags.HasError() {
-		diags.Append(state.SetAttribute(ctx, path.Root(SloConfigFieldSloTimeWindow), timeWindowData)...)
+		model.TimeWindow = timeWindowData
+	}
+
+	// Set the entire model to state
+	diags.Append(state.Set(ctx, model)...)
+	if diags.HasError() {
+		return diags
 	}
 
 	return diags
