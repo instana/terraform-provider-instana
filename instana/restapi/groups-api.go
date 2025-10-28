@@ -120,6 +120,35 @@ const (
 	PermissionCanConfigureAutomationPolicies = InstanaPermission("CAN_CONFIGURE_AUTOMATION_POLICIES")
 	//PermissionCanConfigureAutomationActions const for Instana permission CAN_CONFIGURE_AUTOMATION_ACTIONS
 	PermissionCanConfigureAutomationActions = InstanaPermission("CAN_CONFIGURE_AUTOMATION_ACTIONS")
+
+	PermissionCanConfigureApdex                         = InstanaPermission("CAN_CONFIGURE_APDEX")
+	PermissionCanConfigureCustomEntities                = InstanaPermission("CAN_CONFIGURE_CUSTOM_ENTITIES")
+	PermissionCanConfigureServiceLevels                 = InstanaPermission("CAN_CONFIGURE_SERVICE_LEVELS")
+	PermissionCanConfigureServiceLevelCorrectionWindows = InstanaPermission("CAN_CONFIGURE_SERVICE_LEVEL_CORRECTION_WINDOWS")
+	PermissionCanConfigureServiceLevelSmartAlerts       = InstanaPermission("CAN_CONFIGURE_SERVICE_LEVEL_SMART_ALERTS")
+
+	PermissionLimitedApplicationScope         = InstanaPermission("LIMITED_APPLICATIONS_SCOPE")
+	PermissionLimittedLinuxKvmHypervisorScope = InstanaPermission("LIMITED_LINUX_KVM_HYPERVISOR_SCOPE")
+	PermissionLimitedVspherScope              = InstanaPermission("LIMITED_VSPHERE_SCOPE")
+	PermissionLimitedOpenstackScope           = InstanaPermission("LIMITED_OPENSTACK_SCOPE")
+	PermissionLimitedZhmcScope                = InstanaPermission("LIMITED_ZHMC_SCOPE")
+	PermissionLimitedXenserverScope           = InstanaPermission("LIMITED_XENSERVER_SCOPE")
+	PermissionLimitedKubernetesScope          = InstanaPermission("LIMITED_KUBERNETES_SCOPE")
+	PermissionLimitedPowervcScope             = InstanaPermission("LIMITED_POWERVC_SCOPE")
+	PermissionLimitedSapScope                 = InstanaPermission("LIMITED_SAP_SCOPE")
+	PermissionLimitedPcfScope                 = InstanaPermission("LIMITED_PCF_SCOPE")
+	PermissionLimitedSyntheticsScope          = InstanaPermission("LIMITED_SYNTHETICS_SCOPE")
+	PermissionLimitedServiceLevelScope        = InstanaPermission("LIMITED_SERVICE_LEVEL_SCOPE")
+	PermissionLimitedAutomationScope          = InstanaPermission("LIMITED_AUTOMATION_SCOPE")
+	PermissionLimitedBizopsScope              = InstanaPermission("LIMITED_BIZOPS_SCOPE")
+	PermissionLimitedPhmcScope                = InstanaPermission("LIMITED_PHMC_SCOPE")
+	PermissionLimitedGenAiScope               = InstanaPermission("LIMITED_GEN_AI_SCOPE")
+	PermissionLimitedInfrastructureScope      = InstanaPermission("LIMITED_INFRASTRUCTURE_SCOPE")
+	PermissionLimitedNutanixScope             = InstanaPermission("LIMITED_NUTANIX_SCOPE")
+	PermissionLimitedWindowsHypervisorScope   = InstanaPermission("LIMITED_WINDOWS_HYPERVISOR_SCOPE")
+	PermissionLimitedAiGatewayScope           = InstanaPermission("LIMITED_AI_GATEWAY_SCOPE")
+	PermissionLimitedMObileAppsScope          = InstanaPermission("LIMITED_MOBILE_APPS_SCOPE")
+	PermissionLimitedWebsitesScope            = InstanaPermission("LIMITED_WEBSITES_SCOPE")
 )
 
 // InstanaPermissions data type representing a slice of Instana permissions
@@ -194,6 +223,33 @@ var SupportedInstanaPermissions = InstanaPermissions{
 	PermissionCanConfigureBizOps,
 	PermissionCanConfigureAutomationPolicies,
 	PermissionCanConfigureAutomationActions,
+	PermissionLimitedApplicationScope,
+	PermissionLimittedLinuxKvmHypervisorScope,
+	PermissionLimitedVspherScope,
+	PermissionLimitedOpenstackScope,
+	PermissionLimitedZhmcScope,
+	PermissionLimitedXenserverScope,
+	PermissionLimitedKubernetesScope,
+	PermissionLimitedPowervcScope,
+	PermissionLimitedSapScope,
+	PermissionLimitedPcfScope,
+	PermissionLimitedSyntheticsScope,
+	PermissionLimitedServiceLevelScope,
+	PermissionLimitedAutomationScope,
+	PermissionLimitedBizopsScope,
+	PermissionLimitedPhmcScope,
+	PermissionLimitedGenAiScope,
+	PermissionLimitedInfrastructureScope,
+	PermissionLimitedNutanixScope,
+	PermissionLimitedWindowsHypervisorScope,
+	PermissionLimitedAiGatewayScope,
+	PermissionLimitedMObileAppsScope,
+	PermissionLimitedWebsitesScope,
+	PermissionCanConfigureApdex,
+	PermissionCanConfigureCustomEntities,
+	PermissionCanConfigureServiceLevels,
+	PermissionCanConfigureServiceLevelCorrectionWindows,
+	PermissionCanConfigureServiceLevelSmartAlerts,
 }
 
 // GroupsResourcePath path to Group resource of Instana RESTful API

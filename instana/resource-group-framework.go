@@ -17,7 +17,7 @@ import (
 )
 
 // ResourceInstanaGroupFramework the name of the terraform-provider-instana resource to manage groups for role based access control
-const ResourceInstanaGroupFramework = "instana_rbac_group"
+const ResourceInstanaGroupFramework = "rbac_group"
 
 // GroupModel represents the data model for RBAC Group
 type GroupModel struct {
@@ -333,7 +333,8 @@ func (r *groupResourceFramework) MapStateToDataObject(ctx context.Context, plan 
 	}
 
 	// Map members
-	var members []restapi.APIMember
+	//var members []restapi.APIMember
+	members := make([]restapi.APIMember, 0)
 	if !model.Members.IsNull() && !model.Members.IsUnknown() {
 		var memberModels []GroupMemberModel
 		diags.Append(model.Members.ElementsAs(ctx, &memberModels, false)...)
@@ -341,8 +342,8 @@ func (r *groupResourceFramework) MapStateToDataObject(ctx context.Context, plan 
 			return nil, diags
 		}
 
-		members = make([]restapi.APIMember, len(memberModels))
-		for i, memberModel := range memberModels {
+		//members = make([]restapi.APIMember, len(memberModels))
+		for _, memberModel := range memberModels {
 			member := restapi.APIMember{
 				UserID: memberModel.UserID.ValueString(),
 			}
@@ -352,7 +353,7 @@ func (r *groupResourceFramework) MapStateToDataObject(ctx context.Context, plan 
 				member.Email = &email
 			}
 
-			members[i] = member
+			members = append(members, member)
 		}
 	}
 
@@ -395,6 +396,12 @@ func (r *groupResourceFramework) MapStateToDataObject(ctx context.Context, plan 
 			if !permissionSetModel.InfraDFQFilter.IsNull() && !permissionSetModel.InfraDFQFilter.IsUnknown() {
 				permissionSet.InfraDFQFilter = &restapi.ScopeBinding{
 					ScopeID: permissionSetModel.InfraDFQFilter.ValueString(),
+				}
+			} else {
+				roleId := "-1"
+				permissionSet.InfraDFQFilter = &restapi.ScopeBinding{
+					ScopeID:     "",
+					ScopeRoleID: &roleId,
 				}
 			}
 
