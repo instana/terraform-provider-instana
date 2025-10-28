@@ -180,8 +180,8 @@ func (r *sloCorrectionConfigResource) sloCorrectionConfigStateUpgradeV0(_ contex
 
 // MapStateToDataObject maps the Terraform state to the SloCorrectionConfig data object.
 func (r *sloCorrectionConfigResource) MapStateToDataObject(d *schema.ResourceData) (*restapi.SloCorrectionConfig, error) {
-	debug(">> MapStateToDataObject")
-	debug(obj2json(d))
+	//debug(">> MapStateToDataObject")
+	//debug(obj2json(d))
 	sid := d.Id()
 	if len(sid) == 0 {
 		sid = RandomID()

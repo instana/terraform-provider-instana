@@ -6,9 +6,7 @@ import (
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/instana/tagfilter"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -16,14 +14,14 @@ import (
 
 // SloConfigModel represents the data model for the SLO configuration resource
 type SloConfigModel struct {
-	ID         types.String   `tfsdk:"id"`
-	Name       types.String   `tfsdk:"name"`
-	Target     types.Float64  `tfsdk:"target"`
-	Tags       []types.String `tfsdk:"tags"`
-	RbacTags   []RbacTagModel `tfsdk:"rbac_tags"`
-	Entity     EntityModel    `tfsdk:"entity"`
-	Indicator  IndicatorModel `tfsdk:"indicator"`
-	TimeWindow types.Object   `tfsdk:"time_window"`
+	ID         types.String    `tfsdk:"id"`
+	Name       types.String    `tfsdk:"name"`
+	Target     types.Float64   `tfsdk:"target"`
+	Tags       []types.String  `tfsdk:"tags"`
+	RbacTags   []RbacTagModel  `tfsdk:"rbac_tags"`
+	Entity     EntityModel     `tfsdk:"entity"`
+	Indicator  IndicatorModel  `tfsdk:"indicator"`
+	TimeWindow TimeWindowModel `tfsdk:"time_window"`
 }
 
 // RbacTagModel represents an RBAC tag in the Terraform model
@@ -467,24 +465,8 @@ func (r *sloConfigResourceFramework) MapStateToDataObject(ctx context.Context, p
 	indicator, indicatorDiags := r.mapIndicatorFromState(ctx, model.Indicator)
 	diags.Append(indicatorDiags...)
 
-	// Get time window data
-	var timeWindow interface{}
-	// Check if time window is set (it's a types.Object, so we can use IsNull)
-	if !model.TimeWindow.IsNull() && !model.TimeWindow.IsUnknown() {
-		// Convert the time window object to a tfsdk.Config for processing
-		var planData tfsdk.Config
-		if plan != nil {
-			diags.Append(plan.Get(ctx, &planData)...)
-		} else if state != nil {
-			diags.Append(state.Get(ctx, &planData)...)
-		}
-
-		timeWindowData, timeWindowDiags := r.mapTimeWindowFromPlan(ctx, planData)
-		diags.Append(timeWindowDiags...)
-		if !diags.HasError() {
-			timeWindow = timeWindowData
-		}
-	}
+	timeWindowData, timeWindowDiags := r.mapTimeWindowFromState(ctx, model.TimeWindow)
+	diags.Append(timeWindowDiags...)
 
 	if diags.HasError() {
 		return nil, diags
@@ -498,7 +480,7 @@ func (r *sloConfigResourceFramework) MapStateToDataObject(ctx context.Context, p
 		Tags:       tagsList,
 		Entity:     entityData,
 		Indicator:  indicator,
-		TimeWindow: timeWindow,
+		TimeWindow: timeWindowData,
 		RbacTags:   rbacTagsList,
 	}
 
@@ -534,44 +516,23 @@ func (r *sloConfigResourceFramework) UpdateState(ctx context.Context, state *tfs
 
 	// Set tags if present
 	if apiObject.Tags != nil {
-		if tagsList, ok := apiObject.Tags.([]interface{}); ok {
-			var tags []types.String
-			for _, tag := range tagsList {
-				if tagStr, ok := tag.(string); ok {
-					tags = append(tags, types.StringValue(tagStr))
-				}
-			}
-			model.Tags = tags
+		var tags []types.String
+		for _, tag := range apiObject.Tags {
+			tags = append(tags, types.StringValue(tag))
 		}
+		model.Tags = tags
 	}
 
 	// Set RBAC tags if present
 	if apiObject.RbacTags != nil {
-		if rbacTagsList, ok := apiObject.RbacTags.([]interface{}); ok {
-			var rbacTags []types.Object
-			for _, tag := range rbacTagsList {
-				if rbacTagMap, ok := tag.(map[string]interface{}); ok {
-					displayName, _ := rbacTagMap["displayName"].(string)
-					id, _ := rbacTagMap["id"].(string)
-
-					rbacTagObj, err := types.ObjectValueFrom(
-						ctx,
-						map[string]attr.Type{
-							"display_name": types.StringType,
-							"id":           types.StringType,
-						},
-						map[string]attr.Value{
-							"display_name": types.StringValue(displayName),
-							"id":           types.StringValue(id),
-						},
-					)
-					if err == nil {
-						rbacTags = append(rbacTags, rbacTagObj)
-					}
-				}
-			}
-			model.RbacTags = rbacTags
+		var rbacTags []RbacTagModel
+		for _, tag := range apiObject.RbacTags {
+			rbacTags = append(rbacTags, RbacTagModel{
+				DisplayName: types.StringValue(tag.DisplayName),
+				ID:          types.StringValue(tag.ID),
+			})
 		}
+		model.RbacTags = rbacTags
 	}
 
 	// Map entity
@@ -637,7 +598,7 @@ func (r *sloConfigResourceFramework) mapEntityFromState(ctx context.Context, ent
 					"Error parsing filter expression",
 					fmt.Sprintf("Could not parse filter expression: %s", err),
 				)
-				return nil, diags
+				return restapi.SloEntity{}, diags
 			}
 
 			mapper := tagfilter.NewMapper()
@@ -669,7 +630,7 @@ func (r *sloConfigResourceFramework) mapEntityFromState(ctx context.Context, ent
 					"Error parsing filter expression",
 					fmt.Sprintf("Could not parse filter expression: %s", err),
 				)
-				return nil, diags
+				return restapi.SloEntity{}, diags
 			}
 
 			mapper := tagfilter.NewMapper()
@@ -706,7 +667,7 @@ func (r *sloConfigResourceFramework) mapEntityFromState(ctx context.Context, ent
 					"Error parsing filter expression",
 					fmt.Sprintf("Could not parse filter expression: %s", err),
 				)
-				return nil, diags
+				return restapi.SloEntity{}, diags
 			}
 
 			mapper := tagfilter.NewMapper()
@@ -739,183 +700,105 @@ func (r *sloConfigResourceFramework) mapEntityFromState(ctx context.Context, ent
 func (r *sloConfigResourceFramework) mapIndicatorFromState(ctx context.Context, indicatorModel IndicatorModel) (restapi.SloIndicator, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	// Check which indicator type is set
-	var indicatorBlock types.Object
-	diags.Append(indicatorModel.GetAttribute(ctx, path.Root(SloConfigFieldSloIndicator), &indicatorBlock)...)
-
-	if diags.HasError() || indicatorBlock.IsNull() || indicatorBlock.IsUnknown() {
-		return nil, diags
-	}
-
 	// Check for time-based latency indicator
-	var timeBasedLatency types.Object
-	timeBasedLatencyPath := path.Root(SloConfigFieldSloIndicator).AtListIndex(0).AtName("time_based_latency")
-	diags.Append(indicatorModel.GetAttribute(ctx, timeBasedLatencyPath, &timeBasedLatency)...)
-
-	if !timeBasedLatency.IsNull() && !timeBasedLatency.IsUnknown() {
-		// Get time-based latency fields
-		var threshold types.Float64
-		var aggregation types.String
-
-		timeBasedLatencyPath := path.Root(SloConfigFieldSloIndicator).AtListIndex(0).AtName("time_based_latency").AtListIndex(0)
-
-		diags.Append(indicatorModel.GetAttribute(ctx, timeBasedLatencyPath.AtName("threshold"), &threshold)...)
-		diags.Append(indicatorModel.GetAttribute(ctx, timeBasedLatencyPath.AtName("aggregation"), &aggregation)...)
-
-		if diags.HasError() {
-			return nil, diags
-		}
+	if indicatorModel.TimeBasedLatencyIndicatorModel != nil {
+		model := indicatorModel.TimeBasedLatencyIndicatorModel
+		threshold := model.Threshold.ValueFloat64()
+		aggregation := model.Aggregation.ValueString()
 
 		// Create time-based latency indicator
-		return restapi.SloTimeBasedLatencyIndicator{
+		return restapi.SloIndicator{
 			Blueprint:   SloConfigAPIIndicatorBlueprintLatency,
 			Type:        SloConfigAPIIndicatorMeasurementTypeTimeBased,
-			Threshold:   threshold.ValueFloat64(),
-			Aggregation: aggregation.ValueString(),
+			Threshold:   threshold,
+			Aggregation: aggregation,
 		}, diags
 	}
 
 	// Check for event-based latency indicator
-	var eventBasedLatency types.Object
-	eventBasedLatencyPath := path.Root(SloConfigFieldSloIndicator).AtListIndex(0).AtName("event_based_latency")
-	diags.Append(indicatorModel.GetAttribute(ctx, eventBasedLatencyPath, &eventBasedLatency)...)
-
-	if !eventBasedLatency.IsNull() && !eventBasedLatency.IsUnknown() {
-		// Get event-based latency fields
-		var threshold types.Float64
-
-		eventBasedLatencyPath := path.Root(SloConfigFieldSloIndicator).AtListIndex(0).AtName("event_based_latency").AtListIndex(0)
-
-		diags.Append(indicatorModel.GetAttribute(ctx, eventBasedLatencyPath.AtName("threshold"), &threshold)...)
-
-		if diags.HasError() {
-			return nil, diags
-		}
+	if indicatorModel.EventBasedLatencyIndicatorModel != nil {
+		model := indicatorModel.EventBasedLatencyIndicatorModel
+		threshold := model.Threshold.ValueFloat64()
 
 		// Create event-based latency indicator
-		return restapi.SloEventBasedLatencyIndicator{
+		return restapi.SloIndicator{
 			Blueprint: SloConfigAPIIndicatorBlueprintLatency,
 			Type:      SloConfigAPIIndicatorMeasurementTypeEventBased,
-			Threshold: threshold.ValueFloat64(),
+			Threshold: threshold,
 		}, diags
 	}
 
 	// Check for time-based availability indicator
-	var timeBasedAvailability types.Object
-	timeBasedAvailabilityPath := path.Root(SloConfigFieldSloIndicator).AtListIndex(0).AtName("time_based_availability")
-	diags.Append(indicatorModel.GetAttribute(ctx, timeBasedAvailabilityPath, &timeBasedAvailability)...)
-
-	if !timeBasedAvailability.IsNull() && !timeBasedAvailability.IsUnknown() {
-		// Get time-based availability fields
-		var threshold types.Float64
-		var aggregation types.String
-
-		timeBasedAvailabilityPath := path.Root(SloConfigFieldSloIndicator).AtListIndex(0).AtName("time_based_availability").AtListIndex(0)
-
-		diags.Append(indicatorModel.GetAttribute(ctx, timeBasedAvailabilityPath.AtName("threshold"), &threshold)...)
-		diags.Append(indicatorModel.GetAttribute(ctx, timeBasedAvailabilityPath.AtName("aggregation"), &aggregation)...)
-
-		if diags.HasError() {
-			return nil, diags
-		}
+	if indicatorModel.TimeBasedAvailabilityIndicatorModel != nil {
+		model := indicatorModel.TimeBasedAvailabilityIndicatorModel
+		threshold := model.Threshold.ValueFloat64()
+		aggregation := model.Aggregation.ValueString()
 
 		// Create time-based availability indicator
-		return restapi.SloTimeBasedAvailabilityIndicator{
+		return restapi.SloIndicator{
 			Blueprint:   SloConfigAPIIndicatorBlueprintAvailability,
 			Type:        SloConfigAPIIndicatorMeasurementTypeTimeBased,
-			Threshold:   threshold.ValueFloat64(),
-			Aggregation: aggregation.ValueString(),
+			Threshold:   threshold,
+			Aggregation: aggregation,
 		}, diags
 	}
 
 	// Check for event-based availability indicator
-	var eventBasedAvailability types.Object
-	eventBasedAvailabilityPath := path.Root(SloConfigFieldSloIndicator).AtListIndex(0).AtName("event_based_availability")
-	diags.Append(indicatorModel.GetAttribute(ctx, eventBasedAvailabilityPath, &eventBasedAvailability)...)
-
-	if !eventBasedAvailability.IsNull() && !eventBasedAvailability.IsUnknown() {
+	if indicatorModel.EventBasedAvailabilityIndicatorModel != nil {
 		// Create event-based availability indicator
-		return restapi.SloEventBasedAvailabilityIndicator{
+		return restapi.SloIndicator{
 			Blueprint: SloConfigAPIIndicatorBlueprintAvailability,
 			Type:      SloConfigAPIIndicatorMeasurementTypeEventBased,
 		}, diags
 	}
 
 	// Check for traffic indicator
-	var traffic types.Object
-	trafficPath := path.Root(SloConfigFieldSloIndicator).AtListIndex(0).AtName("traffic")
-	diags.Append(indicatorModel.GetAttribute(ctx, trafficPath, &traffic)...)
-
-	if !traffic.IsNull() && !traffic.IsUnknown() {
-		// Get traffic fields
-		var trafficType types.String
-		var threshold types.Float64
-		var aggregation types.String
-
-		trafficPath := path.Root(SloConfigFieldSloIndicator).AtListIndex(0).AtName("traffic").AtListIndex(0)
-
-		diags.Append(indicatorModel.GetAttribute(ctx, trafficPath.AtName("traffic_type"), &trafficType)...)
-		diags.Append(indicatorModel.GetAttribute(ctx, trafficPath.AtName("threshold"), &threshold)...)
-		diags.Append(indicatorModel.GetAttribute(ctx, trafficPath.AtName("aggregation"), &aggregation)...)
-
-		if diags.HasError() {
-			return nil, diags
-		}
+	if indicatorModel.TrafficIndicatorModel != nil {
+		model := indicatorModel.TrafficIndicatorModel
+		trafficType := model.TrafficType.ValueString()
+		threshold := model.Threshold.ValueFloat64()
+		aggregation := model.Aggregation.ValueString()
 
 		// Create traffic indicator
-		return restapi.SloTrafficIndicator{
+		return restapi.SloIndicator{
 			Blueprint:   SloConfigAPIIndicatorBlueprintTraffic,
-			TrafficType: trafficType.ValueString(),
-			Threshold:   threshold.ValueFloat64(),
-			Aggregation: aggregation.ValueString(),
+			TrafficType: trafficType,
+			Threshold:   threshold,
+			Aggregation: aggregation,
 		}, diags
 	}
 
 	// Check for custom indicator
-	var custom types.Object
-	customPath := path.Root(SloConfigFieldSloIndicator).AtListIndex(0).AtName("custom")
-	diags.Append(indicatorModel.GetAttribute(ctx, customPath, &custom)...)
-
-	if !custom.IsNull() && !custom.IsUnknown() {
-		// Get custom fields
-		var goodEventFilterExpression, badEventFilterExpression types.String
-
-		customPath := path.Root(SloConfigFieldSloIndicator).AtListIndex(0).AtName("custom").AtListIndex(0)
-
-		diags.Append(indicatorModel.GetAttribute(ctx, customPath.AtName("good_event_filter_expression"), &goodEventFilterExpression)...)
-		diags.Append(indicatorModel.GetAttribute(ctx, customPath.AtName("bad_event_filter_expression"), &badEventFilterExpression)...)
-
-		if diags.HasError() {
-			return nil, diags
-		}
+	if indicatorModel.CustomIndicatorModel != nil {
+		model := indicatorModel.CustomIndicatorModel
 
 		// Convert filter expressions to API model
 		var goodEventFilter, badEventFilter *restapi.TagFilter
 
-		if !goodEventFilterExpression.IsNull() && !goodEventFilterExpression.IsUnknown() {
+		if !model.GoodEventFilterExpression.IsNull() && !model.GoodEventFilterExpression.IsUnknown() {
 			parser := tagfilter.NewParser()
-			expr, err := parser.Parse(goodEventFilterExpression.ValueString())
+			expr, err := parser.Parse(model.GoodEventFilterExpression.ValueString())
 			if err != nil {
 				diags.AddError(
 					"Error parsing good event filter expression",
 					fmt.Sprintf("Could not parse filter expression: %s", err),
 				)
-				return nil, diags
+				return restapi.SloIndicator{}, diags
 			}
 
 			mapper := tagfilter.NewMapper()
 			goodEventFilter = mapper.ToAPIModel(expr)
 		}
 
-		if !badEventFilterExpression.IsNull() && !badEventFilterExpression.IsUnknown() {
+		if !model.BadEventFilterExpression.IsNull() && !model.BadEventFilterExpression.IsUnknown() {
 			parser := tagfilter.NewParser()
-			expr, err := parser.Parse(badEventFilterExpression.ValueString())
+			expr, err := parser.Parse(model.BadEventFilterExpression.ValueString())
 			if err != nil {
 				diags.AddError(
 					"Error parsing bad event filter expression",
 					fmt.Sprintf("Could not parse filter expression: %s", err),
 				)
-				return nil, diags
+				return restapi.SloIndicator{}, diags
 			}
 
 			mapper := tagfilter.NewMapper()
@@ -923,7 +806,7 @@ func (r *sloConfigResourceFramework) mapIndicatorFromState(ctx context.Context, 
 		}
 
 		// Create custom indicator
-		return restapi.SloCustomIndicator{
+		return restapi.SloIndicator{
 			Type:                      SloConfigAPIIndicatorMeasurementTypeEventBased,
 			Blueprint:                 SloConfigAPIIndicatorBlueprintCustom,
 			GoodEventFilterExpression: goodEventFilter,
@@ -935,87 +818,52 @@ func (r *sloConfigResourceFramework) mapIndicatorFromState(ctx context.Context, 
 		"Missing indicator configuration",
 		"Exactly one indicator configuration is required",
 	)
-	return nil, diags
+	return restapi.SloIndicator{}, diags
 }
 
 // Helper methods for mapping time window from plan
-func (r *sloConfigResourceFramework) mapTimeWindowFromPlan(ctx context.Context, planData tfsdk.Config) (interface{}, diag.Diagnostics) {
+func (r *sloConfigResourceFramework) mapTimeWindowFromState(ctx context.Context, timeWindowModel TimeWindowModel) (restapi.SloTimeWindow, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	// Check which time window type is set
-	var timeWindowBlock types.Object
-	diags.Append(planData.GetAttribute(ctx, path.Root(SloConfigFieldSloTimeWindow), &timeWindowBlock)...)
-
-	if diags.HasError() || timeWindowBlock.IsNull() || timeWindowBlock.IsUnknown() {
-		return nil, diags
-	}
-
 	// Check for rolling time window
-	var rolling types.Object
-	rollingPath := path.Root(SloConfigFieldSloTimeWindow).AtListIndex(0).AtName("rolling")
-	diags.Append(planData.GetAttribute(ctx, rollingPath, &rolling)...)
-
-	if !rolling.IsNull() && !rolling.IsUnknown() {
-		// Get rolling time window fields
-		var duration types.Int64
-		var durationUnit, timezone types.String
-
-		rollingPath := path.Root(SloConfigFieldSloTimeWindow).AtListIndex(0).AtName("rolling").AtListIndex(0)
-
-		diags.Append(planData.GetAttribute(ctx, rollingPath.AtName("duration"), &duration)...)
-		diags.Append(planData.GetAttribute(ctx, rollingPath.AtName("duration_unit"), &durationUnit)...)
-		diags.Append(planData.GetAttribute(ctx, rollingPath.AtName("timezone"), &timezone)...)
-
-		if diags.HasError() {
-			return nil, diags
-		}
+	if timeWindowModel.RollingTimeWindowModel != nil {
+		rollingModel := timeWindowModel.RollingTimeWindowModel
+		duration := int(rollingModel.Duration.ValueInt64())
+		durationUnit := rollingModel.DurationUnit.ValueString()
 
 		// Create rolling time window
-		timeWindow := restapi.SloRollingTimeWindow{
+		timeWindow := restapi.SloTimeWindow{
 			Type:         SloConfigRollingTimeWindow,
-			Duration:     int(duration.ValueInt64()),
-			DurationUnit: durationUnit.ValueString(),
+			Duration:     duration,
+			DurationUnit: durationUnit,
 		}
 
-		if !timezone.IsNull() && !timezone.IsUnknown() {
-			timeWindow.Timezone = timezone.ValueString()
+		// Set timezone if present
+		if !rollingModel.Timezone.IsNull() && !rollingModel.Timezone.IsUnknown() {
+			timeWindow.Timezone = rollingModel.Timezone.ValueString()
 		}
 
 		return timeWindow, diags
 	}
 
 	// Check for fixed time window
-	var fixed types.Object
-	fixedPath := path.Root(SloConfigFieldSloTimeWindow).AtListIndex(0).AtName("fixed")
-	diags.Append(planData.GetAttribute(ctx, fixedPath, &fixed)...)
-
-	if !fixed.IsNull() && !fixed.IsUnknown() {
-		// Get fixed time window fields
-		var duration types.Int64
-		var durationUnit, timezone types.String
-		var startTimestamp types.Float64
-
-		fixedPath := path.Root(SloConfigFieldSloTimeWindow).AtListIndex(0).AtName("fixed").AtListIndex(0)
-
-		diags.Append(planData.GetAttribute(ctx, fixedPath.AtName("duration"), &duration)...)
-		diags.Append(planData.GetAttribute(ctx, fixedPath.AtName("duration_unit"), &durationUnit)...)
-		diags.Append(planData.GetAttribute(ctx, fixedPath.AtName("timezone"), &timezone)...)
-		diags.Append(planData.GetAttribute(ctx, fixedPath.AtName("start_timestamp"), &startTimestamp)...)
-
-		if diags.HasError() {
-			return nil, diags
-		}
+	if timeWindowModel.FixedTimeWindowModel != nil {
+		fixedModel := timeWindowModel.FixedTimeWindowModel
+		duration := int(fixedModel.Duration.ValueInt64())
+		durationUnit := fixedModel.DurationUnit.ValueString()
+		startTime := fixedModel.StartTimestamp.ValueFloat64()
 
 		// Create fixed time window
-		timeWindow := restapi.SloFixedTimeWindow{
+		timeWindow := restapi.SloTimeWindow{
 			Type:         SloConfigFixedTimeWindow,
-			Duration:     int(duration.ValueInt64()),
-			DurationUnit: durationUnit.ValueString(),
-			StartTime:    startTimestamp.ValueFloat64(),
+			Duration:     duration,
+			DurationUnit: durationUnit,
+			StartTime:    startTime,
 		}
 
-		if !timezone.IsNull() && !timezone.IsUnknown() {
-			timeWindow.Timezone = timezone.ValueString()
+		// Set timezone if present
+		if !fixedModel.Timezone.IsNull() && !fixedModel.Timezone.IsUnknown() {
+			timeWindow.Timezone = fixedModel.Timezone.ValueString()
 		}
 
 		return timeWindow, diags
@@ -1025,732 +873,282 @@ func (r *sloConfigResourceFramework) mapTimeWindowFromPlan(ctx context.Context, 
 		"Missing time window configuration",
 		"Exactly one time window configuration is required",
 	)
-	return nil, diags
+
+	// Return an empty SloTimeWindow with error diagnostics
+	return restapi.SloTimeWindow{}, diags
 }
 
 // Helper methods for mapping entity, indicator, and time window to state
-func (r *sloConfigResourceFramework) mapEntityToState(ctx context.Context, apiObject *restapi.SloConfig) (types.Object, diag.Diagnostics) {
+func (r *sloConfigResourceFramework) mapEntityToState(ctx context.Context, apiObject *restapi.SloConfig) (EntityModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	// Check entity type
-	entityMap, ok := apiObject.Entity.(map[string]interface{})
-	if !ok {
-		diags.AddError(
-			"Error mapping entity to state",
-			fmt.Sprintf("Expected map[string]interface{}, got: %T", apiObject.Entity),
-		)
-		return types.ObjectNull(nil), diags
-	}
-
-	entityType, ok := entityMap["type"].(string)
-	if !ok {
-		diags.AddError(
-			"Error mapping entity to state",
-			"Entity type is missing or not a string",
-		)
-		return types.ObjectNull(nil), diags
+	entityModel := EntityModel{
+		ApplicationEntityModel: nil,
+		WebsiteEntityModel:     nil,
+		SyntheticEntityModel:   nil,
+		InfraEntityModel:       nil,
 	}
 
 	// Create entity object based on type
-	switch entityType {
+	switch apiObject.Entity.Type {
 	case SloConfigApplicationEntity:
-		return r.mapApplicationEntityToState(ctx, entityMap)
+		appModel, appDiags := r.mapApplicationEntityToState(ctx, apiObject.Entity)
+		diags.Append(appDiags...)
+		if !diags.HasError() {
+			entityModel.ApplicationEntityModel = &appModel
+		}
 	case SloConfigWebsiteEntity:
-		return r.mapWebsiteEntityToState(ctx, entityMap)
+		websiteModel, websiteDiags := r.mapWebsiteEntityToState(ctx, apiObject.Entity)
+		diags.Append(websiteDiags...)
+		if !diags.HasError() {
+			entityModel.WebsiteEntityModel = &websiteModel
+		}
 	case SloConfigSyntheticEntity:
-		return r.mapSyntheticEntityToState(ctx, entityMap)
+		syntheticModel, syntheticDiags := r.mapSyntheticEntityToState(ctx, apiObject.Entity)
+		diags.Append(syntheticDiags...)
+		if !diags.HasError() {
+			entityModel.SyntheticEntityModel = &syntheticModel
+		}
 	case SloConfigInfraEntity:
-		return r.mapInfraEntityToState(ctx, entityMap)
+		infraModel, infraDiags := r.mapInfraEntityToState(ctx, apiObject.Entity)
+		diags.Append(infraDiags...)
+		if !diags.HasError() {
+			entityModel.InfraEntityModel = &infraModel
+		}
 	default:
 		diags.AddError(
 			"Error mapping entity to state",
-			fmt.Sprintf("Unsupported entity type: %s", entityType),
+			fmt.Sprintf("Unsupported entity type: %s", apiObject.Entity.Type),
 		)
-		return types.ObjectNull(nil), diags
 	}
+
+	return entityModel, diags
 }
 
-func (r *sloConfigResourceFramework) mapApplicationEntityToState(ctx context.Context, entityMap map[string]interface{}) (types.Object, diag.Diagnostics) {
+func (r *sloConfigResourceFramework) mapApplicationEntityToState(ctx context.Context, entity restapi.SloEntity) (ApplicationEntityModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
-
-	// Extract application entity fields
-	applicationID, _ := entityMap["applicationId"].(string)
-	serviceID, _ := entityMap["serviceId"].(string)
-	endpointID, _ := entityMap["endpointId"].(string)
-	boundaryScope, _ := entityMap["boundaryScope"].(string)
-
-	var includeInternal, includeSynthetic bool
-	if val, ok := entityMap["includeInternal"]; ok && val != nil {
-		includeInternal, _ = val.(bool)
-	}
-	if val, ok := entityMap["includeSynthetic"]; ok && val != nil {
-		includeSynthetic, _ = val.(bool)
-	}
 
 	// Handle filter expression
 	var filterExpression string
-	if tagFilter, ok := entityMap["tagFilterExpression"].(*restapi.TagFilter); ok && tagFilter != nil {
-		mapper := tagfilter.NewMapper()
-		expr, err := mapper.FromAPIModel(tagFilter)
-		if err == nil && expr != nil {
-			// Convert the expression to string format
-			filterExpression = fmt.Sprintf("%v", expr)
-		}
+
+	mapper := tagfilter.NewMapper()
+	expr, err := mapper.FromAPIModel(entity.FilterExpression)
+	if err == nil && expr != nil {
+		// Convert the expression to string format
+		filterExpression = fmt.Sprintf("%v", expr)
 	}
 
 	// Create application entity object
-	appEntityObj := map[string]interface{}{
-		SloConfigFieldApplicationID:    types.StringValue(applicationID),
-		SloConfigFieldBoundaryScope:    types.StringValue(boundaryScope),
-		SloConfigFieldIncludeInternal:  types.BoolValue(includeInternal),
-		SloConfigFieldIncludeSynthetic: types.BoolValue(includeSynthetic),
+	appEntityObj := ApplicationEntityModel{
+		ApplicationID:    types.StringValue(*entity.ApplicationID),
+		BoundaryScope:    types.StringValue(*entity.BoundaryScope),
+		IncludeInternal:  types.BoolValue(*entity.IncludeInternal),
+		IncludeSynthetic: types.BoolValue(*entity.IncludeSynthetic),
+		ServiceID:        types.StringValue(*entity.ServiceID),
+		EndpointID:       types.StringValue(*entity.EndpointID),
+		FilterExpression: types.StringValue(filterExpression),
 	}
 
-	if serviceID != "" {
-		appEntityObj[SloConfigFieldServiceID] = types.StringValue(serviceID)
-	} else {
-		appEntityObj[SloConfigFieldServiceID] = types.StringNull()
-	}
-
-	if endpointID != "" {
-		appEntityObj[SloConfigFieldEndpointID] = types.StringValue(endpointID)
-	} else {
-		appEntityObj[SloConfigFieldEndpointID] = types.StringNull()
-	}
-
-	if filterExpression != "" {
-		appEntityObj[SloConfigFieldFilterExpression] = types.StringValue(filterExpression)
-	} else {
-		appEntityObj[SloConfigFieldFilterExpression] = types.StringNull()
-	}
-
-	// Create entity object
-	entityObj := map[string]interface{}{
-		SloConfigApplicationEntity: []interface{}{appEntityObj},
-	}
-
-	// Convert to types.Object
-	objType := map[string]attr.Type{
-		SloConfigApplicationEntity: types.ListType{
-			ElemType: types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					SloConfigFieldApplicationID:    types.StringType,
-					SloConfigFieldBoundaryScope:    types.StringType,
-					SloConfigFieldIncludeInternal:  types.BoolType,
-					SloConfigFieldIncludeSynthetic: types.BoolType,
-					SloConfigFieldServiceID:        types.StringType,
-					SloConfigFieldEndpointID:       types.StringType,
-					SloConfigFieldFilterExpression: types.StringType,
-				},
-			},
-		},
-	}
-
-	obj, err := types.ObjectValueFrom(ctx, objType, entityObj)
-	if err != nil {
-		diags.AddError(
-			"Error creating application entity object",
-			fmt.Sprintf("Could not create object: %s", err),
-		)
-		return types.ObjectNull(nil), diags
-	}
-
-	return obj, diags
+	return appEntityObj, diags
 }
 
-func (r *sloConfigResourceFramework) mapWebsiteEntityToState(ctx context.Context, entityMap map[string]interface{}) (types.Object, diag.Diagnostics) {
+func (r *sloConfigResourceFramework) mapWebsiteEntityToState(ctx context.Context, entity restapi.SloEntity) (WebsiteEntityModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
-
-	// Extract website entity fields
-	websiteID, _ := entityMap["websiteId"].(string)
-	beaconType, _ := entityMap["beaconType"].(string)
 
 	// Handle filter expression
 	var filterExpression string
-	if tagFilter, ok := entityMap["tagFilterExpression"].(*restapi.TagFilter); ok && tagFilter != nil {
-		mapper := tagfilter.NewMapper()
-		expr, err := mapper.FromAPIModel(tagFilter)
-		if err == nil && expr != nil {
-			// Convert the expression to string format
-			filterExpression = fmt.Sprintf("%v", expr)
-		}
+
+	mapper := tagfilter.NewMapper()
+	expr, err := mapper.FromAPIModel(entity.FilterExpression)
+	if err == nil && expr != nil {
+		// Convert the expression to string format
+		filterExpression = fmt.Sprintf("%v", expr)
 	}
 
 	// Create website entity object
-	websiteEntityObj := map[string]interface{}{
-		SloConfigFieldWebsiteID:  types.StringValue(websiteID),
-		SloConfigFieldBeaconType: types.StringValue(beaconType),
+	websiteEntityObj := WebsiteEntityModel{
+		WebsiteID:        types.StringValue(*entity.WebsiteId),
+		BeaconType:       types.StringValue(*entity.BeaconType),
+		FilterExpression: types.StringValue(filterExpression),
 	}
 
-	if filterExpression != "" {
-		websiteEntityObj[SloConfigFieldFilterExpression] = types.StringValue(filterExpression)
-	} else {
-		websiteEntityObj[SloConfigFieldFilterExpression] = types.StringNull()
-	}
-
-	// Create entity object
-	entityObj := map[string]interface{}{
-		SloConfigWebsiteEntity: []interface{}{websiteEntityObj},
-	}
-
-	// Convert to types.Object
-	objType := map[string]attr.Type{
-		SloConfigWebsiteEntity: types.ListType{
-			ElemType: types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					SloConfigFieldWebsiteID:        types.StringType,
-					SloConfigFieldBeaconType:       types.StringType,
-					SloConfigFieldFilterExpression: types.StringType,
-				},
-			},
-		},
-	}
-
-	obj, err := types.ObjectValueFrom(ctx, objType, entityObj)
-	if err != nil {
-		diags.AddError(
-			"Error creating website entity object",
-			fmt.Sprintf("Could not create object: %s", err),
-		)
-		return types.ObjectNull(nil), diags
-	}
-
-	return obj, diags
+	return websiteEntityObj, diags
 }
 
-func (r *sloConfigResourceFramework) mapSyntheticEntityToState(ctx context.Context, entityMap map[string]interface{}) (types.Object, diag.Diagnostics) {
+func (r *sloConfigResourceFramework) mapSyntheticEntityToState(ctx context.Context, entity restapi.SloEntity) (SyntheticEntityModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
-
-	// Extract synthetic entity fields
-	syntheticTestIDs, _ := entityMap["syntheticTestIds"].([]interface{})
 
 	// Handle filter expression
 	var filterExpression string
-	if tagFilter, ok := entityMap["tagFilterExpression"].(*restapi.TagFilter); ok && tagFilter != nil {
-		mapper := tagfilter.NewMapper()
-		expr, err := mapper.FromAPIModel(tagFilter)
-		if err == nil && expr != nil {
-			// Convert the expression to string format
-			filterExpression = fmt.Sprintf("%v", expr)
-		}
+
+	mapper := tagfilter.NewMapper()
+	expr, err := mapper.FromAPIModel(entity.FilterExpression)
+	if err == nil && expr != nil {
+		// Convert the expression to string format
+		filterExpression = fmt.Sprintf("%v", expr)
 	}
 
 	// Convert synthetic test IDs to types.String
 	var testIDs []types.String
-	for _, id := range syntheticTestIDs {
+	for _, id := range entity.SyntheticTestIDs {
 		if idStr, ok := id.(string); ok {
 			testIDs = append(testIDs, types.StringValue(idStr))
 		}
 	}
 
 	// Create synthetic entity object
-	syntheticEntityObj := map[string]interface{}{
-		SloConfigFieldSyntheticTestIDs: testIDs,
+	syntheticEntityObj := SyntheticEntityModel{
+		SyntheticTestIDs: testIDs,
+		FilterExpression: types.StringValue(filterExpression),
 	}
 
-	if filterExpression != "" {
-		syntheticEntityObj[SloConfigFieldFilterExpression] = types.StringValue(filterExpression)
-	} else {
-		syntheticEntityObj[SloConfigFieldFilterExpression] = types.StringNull()
-	}
-
-	// Create entity object
-	entityObj := map[string]interface{}{
-		SloConfigSyntheticEntity: []interface{}{syntheticEntityObj},
-	}
-
-	// Convert to types.Object
-	objType := map[string]attr.Type{
-		SloConfigSyntheticEntity: types.ListType{
-			ElemType: types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					SloConfigFieldSyntheticTestIDs: types.ListType{
-						ElemType: types.StringType,
-					},
-					SloConfigFieldFilterExpression: types.StringType,
-				},
-			},
-		},
-	}
-
-	obj, err := types.ObjectValueFrom(ctx, objType, entityObj)
-	if err != nil {
-		diags.AddError(
-			"Error creating synthetic entity object",
-			fmt.Sprintf("Could not create object: %s", err),
-		)
-		return types.ObjectNull(nil), diags
-	}
-
-	return obj, diags
+	return syntheticEntityObj, diags
 }
 
-func (r *sloConfigResourceFramework) mapInfraEntityToState(ctx context.Context, entityMap map[string]interface{}) (types.Object, diag.Diagnostics) {
+func (r *sloConfigResourceFramework) mapInfraEntityToState(ctx context.Context, entity restapi.SloEntity) (InfraEntityModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
-
-	// Extract infra entity fields
-	infraType, _ := entityMap["infraType"].(string)
 
 	// Create infra entity object
-	infraEntityObj := map[string]interface{}{
-		"infra_type": types.StringValue(infraType),
+	infraEntityObj := InfraEntityModel{
+		Type:      entity.Type,
+		InfraType: entity.InfraType,
 	}
 
-	// Create entity object
-	entityObj := map[string]interface{}{
-		SloConfigInfraEntity: []interface{}{infraEntityObj},
-	}
-
-	// Convert to types.Object
-	objType := map[string]attr.Type{
-		SloConfigInfraEntity: types.ListType{
-			ElemType: types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"infra_type": types.StringType,
-				},
-			},
-		},
-	}
-
-	obj, err := types.ObjectValueFrom(ctx, objType, entityObj)
-	if err != nil {
-		diags.AddError(
-			"Error creating infra entity object",
-			fmt.Sprintf("Could not create object: %s", err),
-		)
-		return types.ObjectNull(nil), diags
-	}
-
-	return obj, diags
+	return infraEntityObj, diags
 }
 
-func (r *sloConfigResourceFramework) mapIndicatorToState(ctx context.Context, apiObject *restapi.SloConfig) (types.Object, diag.Diagnostics) {
+func (r *sloConfigResourceFramework) mapIndicatorToState(ctx context.Context, apiObject *restapi.SloConfig) (IndicatorModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
+	indicator := apiObject.Indicator
 
-	// Check indicator type
-	indicatorMap, ok := apiObject.Indicator.(map[string]interface{})
-	if !ok {
-		diags.AddError(
-			"Error mapping indicator to state",
-			fmt.Sprintf("Expected map[string]interface{}, got: %T", apiObject.Indicator),
-		)
-		return types.ObjectNull(nil), diags
+	// Create indicator model
+	indicatorModel := IndicatorModel{
+		TimeBasedLatencyIndicatorModel:       nil,
+		EventBasedLatencyIndicatorModel:      nil,
+		TimeBasedAvailabilityIndicatorModel:  nil,
+		EventBasedAvailabilityIndicatorModel: nil,
+		TrafficIndicatorModel:                nil,
+		CustomIndicatorModel:                 nil,
 	}
-
-	blueprint, _ := indicatorMap["blueprint"].(string)
-	indicatorType, _ := indicatorMap["type"].(string)
 
 	// Create indicator object based on type and blueprint
 	switch {
-	case indicatorType == SloConfigAPIIndicatorMeasurementTypeTimeBased && blueprint == SloConfigAPIIndicatorBlueprintLatency:
-		return r.mapTimeBasedLatencyIndicatorToState(ctx, indicatorMap)
-	case indicatorType == SloConfigAPIIndicatorMeasurementTypeEventBased && blueprint == SloConfigAPIIndicatorBlueprintLatency:
-		return r.mapEventBasedLatencyIndicatorToState(ctx, indicatorMap)
-	case indicatorType == SloConfigAPIIndicatorMeasurementTypeTimeBased && blueprint == SloConfigAPIIndicatorBlueprintAvailability:
-		return r.mapTimeBasedAvailabilityIndicatorToState(ctx, indicatorMap)
-	case indicatorType == SloConfigAPIIndicatorMeasurementTypeEventBased && blueprint == SloConfigAPIIndicatorBlueprintAvailability:
-		return r.mapEventBasedAvailabilityIndicatorToState(ctx, indicatorMap)
-	case blueprint == SloConfigAPIIndicatorBlueprintTraffic:
-		return r.mapTrafficIndicatorToState(ctx, indicatorMap)
-	case indicatorType == SloConfigAPIIndicatorMeasurementTypeEventBased && blueprint == SloConfigAPIIndicatorBlueprintCustom:
-		return r.mapCustomIndicatorToState(ctx, indicatorMap)
+	case indicator.Type == SloConfigAPIIndicatorMeasurementTypeTimeBased && indicator.Blueprint == SloConfigAPIIndicatorBlueprintLatency:
+		model := &TimeBasedLatencyIndicatorModel{
+			Threshold:   types.Float64Value(indicator.Threshold),
+			Aggregation: types.StringValue(indicator.Aggregation),
+		}
+		indicatorModel.TimeBasedLatencyIndicatorModel = model
+
+	case indicator.Type == SloConfigAPIIndicatorMeasurementTypeEventBased && indicator.Blueprint == SloConfigAPIIndicatorBlueprintLatency:
+		model := &EventBasedLatencyIndicatorModel{
+			Threshold: types.Float64Value(indicator.Threshold),
+		}
+		indicatorModel.EventBasedLatencyIndicatorModel = model
+
+	case indicator.Type == SloConfigAPIIndicatorMeasurementTypeTimeBased && indicator.Blueprint == SloConfigAPIIndicatorBlueprintAvailability:
+		model := &TimeBasedAvailabilityIndicatorModel{
+			Threshold:   types.Float64Value(indicator.Threshold),
+			Aggregation: types.StringValue(indicator.Aggregation),
+		}
+		indicatorModel.TimeBasedAvailabilityIndicatorModel = model
+
+	case indicator.Type == SloConfigAPIIndicatorMeasurementTypeEventBased && indicator.Blueprint == SloConfigAPIIndicatorBlueprintAvailability:
+		model := &EventBasedAvailabilityIndicatorModel{}
+		indicatorModel.EventBasedAvailabilityIndicatorModel = model
+
+	case indicator.Blueprint == SloConfigAPIIndicatorBlueprintTraffic:
+		model := &TrafficIndicatorModel{
+			TrafficType: types.StringValue(indicator.TrafficType),
+			Threshold:   types.Float64Value(indicator.Threshold),
+			Aggregation: types.StringValue(indicator.Aggregation),
+		}
+		indicatorModel.TrafficIndicatorModel = model
+
+	case indicator.Type == SloConfigAPIIndicatorMeasurementTypeEventBased && indicator.Blueprint == SloConfigAPIIndicatorBlueprintCustom:
+		// Handle filter expressions
+		var goodEventFilterExpression, badEventFilterExpression string
+
+		mapper := tagfilter.NewMapper()
+		if indicator.GoodEventFilterExpression != nil {
+			expr, err := mapper.FromAPIModel(indicator.GoodEventFilterExpression)
+			if err == nil && expr != nil {
+				goodEventFilterExpression = fmt.Sprintf("%v", expr)
+			}
+		}
+
+		if indicator.BadEventFilterExpression != nil {
+			expr, err := mapper.FromAPIModel(indicator.BadEventFilterExpression)
+			if err == nil && expr != nil {
+				badEventFilterExpression = fmt.Sprintf("%v", expr)
+			}
+		}
+
+		model := &CustomIndicatorModel{
+			GoodEventFilterExpression: types.StringValue(goodEventFilterExpression),
+			BadEventFilterExpression:  types.StringValue(badEventFilterExpression),
+		}
+		indicatorModel.CustomIndicatorModel = model
+
 	default:
 		diags.AddError(
 			"Error mapping indicator to state",
-			fmt.Sprintf("Unsupported indicator type: %s, blueprint: %s", indicatorType, blueprint),
+			fmt.Sprintf("Unsupported indicator type: %s, blueprint: %s", indicator.Type, indicator.Blueprint),
 		)
-		return types.ObjectNull(nil), diags
 	}
+
+	return indicatorModel, diags
 }
 
-func (r *sloConfigResourceFramework) mapTimeBasedLatencyIndicatorToState(ctx context.Context, indicatorMap map[string]interface{}) (types.Object, diag.Diagnostics) {
+func (r *sloConfigResourceFramework) mapTimeWindowToState(ctx context.Context, apiObject *restapi.SloConfig) (TimeWindowModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
+	timeWindow := apiObject.TimeWindow
 
-	// Extract time-based latency fields
-	threshold, _ := indicatorMap["threshold"].(float64)
-	aggregation, _ := indicatorMap["aggregation"].(string)
-
-	// Create time-based latency indicator object
-	indicatorObj := map[string]interface{}{
-		"time_based_latency": []interface{}{
-			map[string]interface{}{
-				"threshold":   types.Float64Value(threshold),
-				"aggregation": types.StringValue(aggregation),
-			},
-		},
+	// Create time window model
+	timeWindowModel := TimeWindowModel{
+		FixedTimeWindowModel:   nil,
+		RollingTimeWindowModel: nil,
 	}
-
-	// Convert to types.Object
-	objType := map[string]attr.Type{
-		"time_based_latency": types.ListType{
-			ElemType: types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"threshold":   types.Float64Type,
-					"aggregation": types.StringType,
-				},
-			},
-		},
-	}
-
-	obj, err := types.ObjectValueFrom(ctx, objType, indicatorObj)
-	if err != nil {
-		diags.AddError(
-			"Error creating time-based latency indicator object",
-			fmt.Sprintf("Could not create object: %s", err),
-		)
-		return types.ObjectNull(nil), diags
-	}
-
-	return obj, diags
-}
-
-func (r *sloConfigResourceFramework) mapEventBasedLatencyIndicatorToState(ctx context.Context, indicatorMap map[string]interface{}) (types.Object, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	// Extract event-based latency fields
-	threshold, _ := indicatorMap["threshold"].(float64)
-
-	// Create event-based latency indicator object
-	indicatorObj := map[string]interface{}{
-		"event_based_latency": []interface{}{
-			map[string]interface{}{
-				"threshold": types.Float64Value(threshold),
-			},
-		},
-	}
-
-	// Convert to types.Object
-	objType := map[string]attr.Type{
-		"event_based_latency": types.ListType{
-			ElemType: types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"threshold": types.Float64Type,
-				},
-			},
-		},
-	}
-
-	obj, err := types.ObjectValueFrom(ctx, objType, indicatorObj)
-	if err != nil {
-		diags.AddError(
-			"Error creating event-based latency indicator object",
-			fmt.Sprintf("Could not create object: %s", err),
-		)
-		return types.ObjectNull(nil), diags
-	}
-
-	return obj, diags
-}
-
-func (r *sloConfigResourceFramework) mapTimeBasedAvailabilityIndicatorToState(ctx context.Context, indicatorMap map[string]interface{}) (types.Object, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	// Extract time-based availability fields
-	threshold, _ := indicatorMap["threshold"].(float64)
-	aggregation, _ := indicatorMap["aggregation"].(string)
-
-	// Create time-based availability indicator object
-	indicatorObj := map[string]interface{}{
-		"time_based_availability": []interface{}{
-			map[string]interface{}{
-				"threshold":   types.Float64Value(threshold),
-				"aggregation": types.StringValue(aggregation),
-			},
-		},
-	}
-
-	// Convert to types.Object
-	objType := map[string]attr.Type{
-		"time_based_availability": types.ListType{
-			ElemType: types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"threshold":   types.Float64Type,
-					"aggregation": types.StringType,
-				},
-			},
-		},
-	}
-
-	obj, err := types.ObjectValueFrom(ctx, objType, indicatorObj)
-	if err != nil {
-		diags.AddError(
-			"Error creating time-based availability indicator object",
-			fmt.Sprintf("Could not create object: %s", err),
-		)
-		return types.ObjectNull(nil), diags
-	}
-
-	return obj, diags
-}
-
-func (r *sloConfigResourceFramework) mapEventBasedAvailabilityIndicatorToState(ctx context.Context, indicatorMap map[string]interface{}) (types.Object, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	// Create event-based availability indicator object
-	indicatorObj := map[string]interface{}{
-		"event_based_availability": []interface{}{
-			map[string]interface{}{},
-		},
-	}
-
-	// Convert to types.Object
-	objType := map[string]attr.Type{
-		"event_based_availability": types.ListType{
-			ElemType: types.ObjectType{
-				AttrTypes: map[string]attr.Type{},
-			},
-		},
-	}
-
-	obj, err := types.ObjectValueFrom(ctx, objType, indicatorObj)
-	if err != nil {
-		diags.AddError(
-			"Error creating event-based availability indicator object",
-			fmt.Sprintf("Could not create object: %s", err),
-		)
-		return types.ObjectNull(nil), diags
-	}
-
-	return obj, diags
-}
-
-func (r *sloConfigResourceFramework) mapTrafficIndicatorToState(ctx context.Context, indicatorMap map[string]interface{}) (types.Object, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	// Extract traffic fields
-	trafficType, _ := indicatorMap["trafficType"].(string)
-	threshold, _ := indicatorMap["threshold"].(float64)
-	aggregation, _ := indicatorMap["aggregation"].(string)
-
-	// Create traffic indicator object
-	indicatorObj := map[string]interface{}{
-		"traffic": []interface{}{
-			map[string]interface{}{
-				"traffic_type": types.StringValue(trafficType),
-				"threshold":    types.Float64Value(threshold),
-				"aggregation":  types.StringValue(aggregation),
-			},
-		},
-	}
-
-	// Convert to types.Object
-	objType := map[string]attr.Type{
-		"traffic": types.ListType{
-			ElemType: types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"traffic_type": types.StringType,
-					"threshold":    types.Float64Type,
-					"aggregation":  types.StringType,
-				},
-			},
-		},
-	}
-
-	obj, err := types.ObjectValueFrom(ctx, objType, indicatorObj)
-	if err != nil {
-		diags.AddError(
-			"Error creating traffic indicator object",
-			fmt.Sprintf("Could not create object: %s", err),
-		)
-		return types.ObjectNull(nil), diags
-	}
-
-	return obj, diags
-}
-
-func (r *sloConfigResourceFramework) mapCustomIndicatorToState(ctx context.Context, indicatorMap map[string]interface{}) (types.Object, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	// Handle filter expressions
-	var goodEventFilterExpression, badEventFilterExpression string
-
-	if goodEventFilter, ok := indicatorMap["goodEventsFilter"].(*restapi.TagFilter); ok && goodEventFilter != nil {
-		mapper := tagfilter.NewMapper()
-		expr, err := mapper.FromAPIModel(goodEventFilter)
-		if err == nil && expr != nil {
-			// Convert the expression to string format
-			goodEventFilterExpression = fmt.Sprintf("%v", expr)
-		}
-	}
-
-	if badEventFilter, ok := indicatorMap["badEventsFilter"].(*restapi.TagFilter); ok && badEventFilter != nil {
-		mapper := tagfilter.NewMapper()
-		expr, err := mapper.FromAPIModel(badEventFilter)
-		if err == nil && expr != nil {
-			// Convert the expression to string format
-			badEventFilterExpression = fmt.Sprintf("%v", expr)
-		}
-	}
-
-	// Create custom indicator object
-	customObj := map[string]interface{}{
-		"good_event_filter_expression": types.StringValue(goodEventFilterExpression),
-	}
-
-	if badEventFilterExpression != "" {
-		customObj["bad_event_filter_expression"] = types.StringValue(badEventFilterExpression)
-	} else {
-		customObj["bad_event_filter_expression"] = types.StringNull()
-	}
-
-	// Create indicator object
-	indicatorObj := map[string]interface{}{
-		"custom": []interface{}{customObj},
-	}
-
-	// Convert to types.Object
-	objType := map[string]attr.Type{
-		"custom": types.ListType{
-			ElemType: types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"good_event_filter_expression": types.StringType,
-					"bad_event_filter_expression":  types.StringType,
-				},
-			},
-		},
-	}
-
-	obj, err := types.ObjectValueFrom(ctx, objType, indicatorObj)
-	if err != nil {
-		diags.AddError(
-			"Error creating custom indicator object",
-			fmt.Sprintf("Could not create object: %s", err),
-		)
-		return types.ObjectNull(nil), diags
-	}
-
-	return obj, diags
-}
-
-func (r *sloConfigResourceFramework) mapTimeWindowToState(ctx context.Context, apiObject *restapi.SloConfig) (types.Object, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	// Check time window type
-	timeWindowMap, ok := apiObject.TimeWindow.(map[string]interface{})
-	if !ok {
-		diags.AddError(
-			"Error mapping time window to state",
-			fmt.Sprintf("Expected map[string]interface{}, got: %T", apiObject.TimeWindow),
-		)
-		return types.ObjectNull(nil), diags
-	}
-
-	timeWindowType, _ := timeWindowMap["type"].(string)
 
 	// Create time window object based on type
-	switch timeWindowType {
+	switch timeWindow.Type {
 	case SloConfigRollingTimeWindow:
-		return r.mapRollingTimeWindowToState(ctx, timeWindowMap)
+		model := &RollingTimeWindowModel{
+			Duration:     types.Int64Value(int64(timeWindow.Duration)),
+			DurationUnit: types.StringValue(timeWindow.DurationUnit),
+		}
+
+		if timeWindow.Timezone != "" {
+			model.Timezone = types.StringValue(timeWindow.Timezone)
+		} else {
+			model.Timezone = types.StringNull()
+		}
+
+		timeWindowModel.RollingTimeWindowModel = model
+
 	case SloConfigFixedTimeWindow:
-		return r.mapFixedTimeWindowToState(ctx, timeWindowMap)
+		model := &FixedTimeWindowModel{
+			Duration:       types.Int64Value(int64(timeWindow.Duration)),
+			DurationUnit:   types.StringValue(timeWindow.DurationUnit),
+			StartTimestamp: types.Float64Value(timeWindow.StartTime),
+		}
+
+		if timeWindow.Timezone != "" {
+			model.Timezone = types.StringValue(timeWindow.Timezone)
+		} else {
+			model.Timezone = types.StringNull()
+		}
+
+		timeWindowModel.FixedTimeWindowModel = model
+
 	default:
 		diags.AddError(
 			"Error mapping time window to state",
-			fmt.Sprintf("Unsupported time window type: %s", timeWindowType),
+			fmt.Sprintf("Unsupported time window type: %s", timeWindow.Type),
 		)
-		return types.ObjectNull(nil), diags
-	}
-}
-
-func (r *sloConfigResourceFramework) mapRollingTimeWindowToState(ctx context.Context, timeWindowMap map[string]interface{}) (types.Object, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	// Extract rolling time window fields
-	duration, _ := timeWindowMap["duration"].(float64)
-	durationUnit, _ := timeWindowMap["durationUnit"].(string)
-	timezone, _ := timeWindowMap["timezone"].(string)
-
-	// Create rolling time window object
-	timeWindowObj := map[string]interface{}{
-		"rolling": []interface{}{
-			map[string]interface{}{
-				"duration":      types.Int64Value(int64(duration)),
-				"duration_unit": types.StringValue(durationUnit),
-			},
-		},
 	}
 
-	if timezone != "" {
-		timeWindowObj["rolling"].([]interface{})[0].(map[string]interface{})["timezone"] = types.StringValue(timezone)
-	} else {
-		timeWindowObj["rolling"].([]interface{})[0].(map[string]interface{})["timezone"] = types.StringNull()
-	}
-
-	// Convert to types.Object
-	objType := map[string]attr.Type{
-		"rolling": types.ListType{
-			ElemType: types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"duration":      types.Int64Type,
-					"duration_unit": types.StringType,
-					"timezone":      types.StringType,
-				},
-			},
-		},
-	}
-
-	obj, err := types.ObjectValueFrom(ctx, objType, timeWindowObj)
-	if err != nil {
-		diags.AddError(
-			"Error creating rolling time window object",
-			fmt.Sprintf("Could not create object: %s", err),
-		)
-		return types.ObjectNull(nil), diags
-	}
-
-	return obj, diags
-}
-
-func (r *sloConfigResourceFramework) mapFixedTimeWindowToState(ctx context.Context, timeWindowMap map[string]interface{}) (types.Object, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	// Extract fixed time window fields
-	duration, _ := timeWindowMap["duration"].(float64)
-	durationUnit, _ := timeWindowMap["durationUnit"].(string)
-	timezone, _ := timeWindowMap["timezone"].(string)
-	startTimestamp, _ := timeWindowMap["startTimestamp"].(float64)
-
-	// Create fixed time window object
-	timeWindowObj := map[string]interface{}{
-		"fixed": []interface{}{
-			map[string]interface{}{
-				"duration":        types.Int64Value(int64(duration)),
-				"duration_unit":   types.StringValue(durationUnit),
-				"start_timestamp": types.Float64Value(startTimestamp),
-			},
-		},
-	}
-
-	if timezone != "" {
-		timeWindowObj["fixed"].([]interface{})[0].(map[string]interface{})["timezone"] = types.StringValue(timezone)
-	} else {
-		timeWindowObj["fixed"].([]interface{})[0].(map[string]interface{})["timezone"] = types.StringNull()
-	}
-
-	// Convert to types.Object
-	objType := map[string]attr.Type{
-		"fixed": types.ListType{
-			ElemType: types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"duration":        types.Int64Type,
-					"duration_unit":   types.StringType,
-					"timezone":        types.StringType,
-					"start_timestamp": types.Float64Type,
-				},
-			},
-		},
-	}
-
-	obj, err := types.ObjectValueFrom(ctx, objType, timeWindowObj)
-	if err != nil {
-		diags.AddError(
-			"Error creating fixed time window object",
-			fmt.Sprintf("Could not create object: %s", err),
-		)
-		return types.ObjectNull(nil), diags
-	}
-
-	return obj, diags
+	return timeWindowModel, diags
 }
 
 // Made with Bob
