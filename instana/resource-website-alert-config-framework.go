@@ -700,9 +700,4 @@ func (r *websiteAlertConfigResourceFramework) UpdateState(ctx context.Context, s
 	// Set state
 	diags.Append(state.Set(ctx, &model)...)
 	return diags
-
-	// Made with Bob
-	// Set state
-	diags.Append(state.Set(ctx, &model)...)
-	return diags
 }
