@@ -425,7 +425,7 @@ func (r *sloConfigResourceFramework) MapStateToDataObject(ctx context.Context, p
 	target := model.Target.ValueFloat64()
 
 	// Convert tags to []interface{}
-	var tagsList []string
+	tagsList := make([]string, 0)
 	for _, tag := range model.Tags {
 		if !tag.IsNull() && !tag.IsUnknown() {
 			tagsList = append(tagsList, tag.ValueString())
@@ -466,7 +466,7 @@ func (r *sloConfigResourceFramework) MapStateToDataObject(ctx context.Context, p
 }
 
 func mapRbacTags(ctx context.Context, rbacTags []RbacTagModel) []restapi.RbacTag {
-	var rbacTagsList []restapi.RbacTag
+	rbacTagsList := make([]restapi.RbacTag, 0)
 	for _, t := range rbacTags {
 		rbacTagsList = append(rbacTagsList, restapi.RbacTag{
 			DisplayName: t.DisplayName.ValueString(),
