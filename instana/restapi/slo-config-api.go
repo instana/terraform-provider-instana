@@ -80,9 +80,9 @@ type SloIndicator struct {
 	Blueprint                 string     `json:"blueprint"`
 	Type                      string     `json:"type"`
 	Threshold                 float64    `json:"threshold"`
-	Aggregation               string     `json:"aggregation"`
-	Operator                  string     `json:"operator"`
-	TrafficType               string     `json:"trafficType"`
+	Aggregation               *string    `json:"aggregation"`
+	Operator                  *string    `json:"operator"`
+	TrafficType               *string    `json:"trafficType"`
 	GoodEventFilterExpression *TagFilter `json:"goodEventsFilter"`
 	BadEventFilterExpression  *TagFilter `json:"badEventsFilter"`
 }

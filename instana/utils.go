@@ -209,3 +209,11 @@ func handleBooleanValue(i *bool) types.Bool {
 		return types.BoolValue(*i)
 	}
 }
+
+func setStringPointer(s types.String) *string {
+	if s.IsNull() || s.IsUnknown() {
+		return nil
+	}
+	v := s.ValueString()
+	return &v
+}
