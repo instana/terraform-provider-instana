@@ -584,7 +584,17 @@ func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state 
 			},
 			[]attr.Value{httpActionObj},
 		)
-		model.HttpScript = types.ListNull(types.ObjectType{})
+		model.HttpScript = types.ListNull(
+			types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"mark_synthetic_call": types.BoolType,
+					"retries":             types.Int64Type,
+					"retry_interval":      types.Int64Type,
+					"timeout":             types.StringType,
+					"script":              types.StringType,
+				},
+			},
+		)
 	} else if apiObject.Configuration.SyntheticType == "HTTPScript" {
 		httpScriptModel := tf_framework.HttpScriptConfigModel{
 			MarkSyntheticCall: types.BoolValue(apiObject.Configuration.MarkSyntheticCall),
@@ -621,7 +631,25 @@ func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state 
 			},
 			[]attr.Value{httpScriptObj},
 		)
-		model.HttpAction = types.ListNull(types.ObjectType{})
+		model.HttpAction = types.ListNull(
+			types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"mark_synthetic_call": types.BoolType,
+					"retries":             types.Int64Type,
+					"retry_interval":      types.Int64Type,
+					"timeout":             types.StringType,
+					"url":                 types.StringType,
+					"operation":           types.StringType,
+					"headers":             types.MapType{ElemType: types.StringType},
+					"body":                types.StringType,
+					"validation_string":   types.StringType,
+					"follow_redirect":     types.BoolType,
+					"allow_insecure":      types.BoolType,
+					"expect_status":       types.Int64Type,
+					"expect_match":        types.StringType,
+				},
+			},
+		)
 	}
 
 	// Set state
