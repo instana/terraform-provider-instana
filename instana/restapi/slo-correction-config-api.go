@@ -34,6 +34,7 @@ type Scheduling struct {
 	Duration      int          `json:"duration"`
 	DurationUnit  DurationUnit `json:"durationUnit"`
 	RecurrentRule string       `json:"recurrentRule,omitempty"`
+	Recurrent     bool         `json:"recurrent"`
 }
 
 // GetIDForResourcePath implementation of the interface InstanaDataObject
