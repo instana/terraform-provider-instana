@@ -213,7 +213,7 @@ func (r *terraformResourceImplFramework[T]) Update(ctx context.Context, req reso
 	}
 
 	// Map state to data object
-	obj, diags := r.resourceHandle.MapStateToDataObject(ctx, &req.Plan, nil)
+	obj, diags := r.resourceHandle.MapStateToDataObject(ctx, nil, &req.State)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

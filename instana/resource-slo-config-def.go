@@ -46,7 +46,6 @@ const (
 	SloConfigApplicationEntity = "application"
 	SloConfigWebsiteEntity     = "website"
 	SloConfigSyntheticEntity   = "synthetic"
-	SloConfigInfraEntity       = "infra"
 
 	// Slo time windows types
 	SloConfigRollingTimeWindow = "rolling"

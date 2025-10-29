@@ -8,7 +8,10 @@ import (
 	"github.com/gessnerfl/terraform-provider-instana/instana/tagfilter"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -39,7 +42,6 @@ type EntityModel struct {
 	ApplicationEntityModel *ApplicationEntityModel `tfsdk:"application"`
 	WebsiteEntityModel     *WebsiteEntityModel     `tfsdk:"website"`
 	SyntheticEntityModel   *SyntheticEntityModel   `tfsdk:"synthetic"`
-	InfraEntityModel       *InfraEntityModel       `tfsdk:"infra"`
 }
 type IndicatorModel struct {
 	TimeBasedLatencyIndicatorModel       *TimeBasedLatencyIndicatorModel       `tfsdk:"time_based_latency"`
@@ -58,10 +60,6 @@ type ApplicationEntityModel struct {
 	BoundaryScope    types.String `tfsdk:"boundary_scope"`
 	IncludeSynthetic types.Bool   `tfsdk:"include_synthetic"`
 	IncludeInternal  types.Bool   `tfsdk:"include_internal"`
-	FilterExpression types.String `tfsdk:"filter_expression"`
-}
-type InfraEntityModel struct {
-	InfraType        types.String `tfsdk:"infra_type"`
 	FilterExpression types.String `tfsdk:"filter_expression"`
 }
 
@@ -146,6 +144,9 @@ func NewSloConfigResourceHandleFramework() ResourceHandleFramework[*restapi.SloC
 					"id": schema.StringAttribute{
 						Computed:    true,
 						Description: "The ID of the SLO configuration",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 					SloConfigFieldName: schema.StringAttribute{
 						Required:    true,
@@ -368,7 +369,8 @@ func NewSloConfigResourceHandleFramework() ResourceHandleFramework[*restapi.SloC
 					},
 				},
 			},
-			SchemaVersion: 1,
+			SchemaVersion:    1,
+			SkipIDGeneration: true,
 		},
 	}
 }
@@ -385,8 +387,10 @@ func (r *sloConfigResourceFramework) GetRestResource(api restapi.InstanaAPI) res
 	return api.SloConfigs()
 }
 
-func (r *sloConfigResourceFramework) SetComputedFields(_ context.Context, _ *tfsdk.Plan) diag.Diagnostics {
-	return nil
+func (r *sloConfigResourceFramework) SetComputedFields(ctx context.Context, plan *tfsdk.Plan) diag.Diagnostics {
+	var diags diag.Diagnostics
+	diags.Append(plan.SetAttribute(ctx, path.Root("id"), types.StringValue(SloConfigFromTerraformIdPrefix+RandomID()))...)
+	return diags
 }
 
 func (r *sloConfigResourceFramework) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.SloConfig, diag.Diagnostics) {
@@ -456,11 +460,6 @@ func (r *sloConfigResourceFramework) MapStateToDataObject(ctx context.Context, p
 		Indicator:  indicator,
 		TimeWindow: timeWindowData,
 		RbacTags:   rbacTagsList,
-	}
-
-	// Generate ID if needed
-	if sloConfig.ID == "" {
-		sloConfig.ID = SloConfigFromTerraformIdPrefix + RandomID()
 	}
 
 	return sloConfig, diags
@@ -554,18 +553,18 @@ func (r *sloConfigResourceFramework) mapEntityFromState(ctx context.Context, ent
 			return restapi.SloEntity{}, diags
 		}
 		applicationIdStr := applicationModel.ApplicationID.ValueString()
-		serviceID := applicationModel.ServiceID.ValueString()
-		endpointID := applicationModel.EndpointID.ValueString()
-		boundaryScope := applicationModel.BoundaryScope.ValueString()
+		serviceID := setStringPointer(applicationModel.ServiceID)
+		endpointID := setStringPointer(applicationModel.EndpointID)
+		boundaryScope := setStringPointer(applicationModel.BoundaryScope)
 		includeInternal := applicationModel.IncludeInternal.ValueBool()
 		includeSynthetic := applicationModel.IncludeSynthetic.ValueBool()
 
 		appEntityObj := restapi.SloEntity{
 			Type:             SloConfigApplicationEntity,
 			ApplicationID:    &applicationIdStr,
-			ServiceID:        &serviceID,
-			EndpointID:       &endpointID,
-			BoundaryScope:    &boundaryScope,
+			ServiceID:        serviceID,
+			EndpointID:       endpointID,
+			BoundaryScope:    boundaryScope,
 			IncludeInternal:  &includeInternal,
 			IncludeSynthetic: &includeSynthetic,
 		}
@@ -593,13 +592,13 @@ func (r *sloConfigResourceFramework) mapEntityFromState(ctx context.Context, ent
 			return restapi.SloEntity{}, diags
 		}
 
-		websiteIdStr := websiteModel.WebsiteID.ValueString()
-		beaconTypeStr := websiteModel.BeaconType.ValueString()
+		websiteIdStr := setStringPointer(websiteModel.WebsiteID)
+		beaconTypeStr := setStringPointer(websiteModel.BeaconType)
 
 		websiteEntityObj := restapi.SloEntity{
 			Type:       SloConfigWebsiteEntity,
-			WebsiteId:  &websiteIdStr,
-			BeaconType: &beaconTypeStr,
+			WebsiteId:  websiteIdStr,
+			BeaconType: beaconTypeStr,
 		}
 
 		// Convert filter expression to API model if set
@@ -668,6 +667,13 @@ func mapTagFilterFromState(filterExpression types.String, tagFilter *restapi.Tag
 		}
 		mapper := tagfilter.NewMapper()
 		tagFilter = mapper.ToAPIModel(expr)
+	} else {
+		operator := restapi.LogicalOperatorType("AND")
+		tagFilter = &restapi.TagFilter{
+			Type:            "EXPRESSION",
+			LogicalOperator: &operator,
+			Elements:        []*restapi.TagFilter{},
+		}
 	}
 	return tagFilter, diags
 }
@@ -676,6 +682,7 @@ func mapTagFilterFromState(filterExpression types.String, tagFilter *restapi.Tag
 func (r *sloConfigResourceFramework) mapIndicatorFromState(ctx context.Context, indicatorModel IndicatorModel) (restapi.SloIndicator, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
+	defaultAggregation := "MEAN"
 	// Check for time-based latency indicator
 	if indicatorModel.TimeBasedLatencyIndicatorModel != nil {
 		model := indicatorModel.TimeBasedLatencyIndicatorModel
@@ -697,7 +704,7 @@ func (r *sloConfigResourceFramework) mapIndicatorFromState(ctx context.Context, 
 			Blueprint:   SloConfigAPIIndicatorBlueprintLatency,
 			Type:        SloConfigAPIIndicatorMeasurementTypeTimeBased,
 			Threshold:   threshold,
-			Aggregation: aggregation,
+			Aggregation: &aggregation,
 		}, diags
 	}
 
@@ -715,9 +722,10 @@ func (r *sloConfigResourceFramework) mapIndicatorFromState(ctx context.Context, 
 
 		// Create event-based latency indicator
 		return restapi.SloIndicator{
-			Blueprint: SloConfigAPIIndicatorBlueprintLatency,
-			Type:      SloConfigAPIIndicatorMeasurementTypeEventBased,
-			Threshold: threshold,
+			Blueprint:   SloConfigAPIIndicatorBlueprintLatency,
+			Type:        SloConfigAPIIndicatorMeasurementTypeEventBased,
+			Threshold:   threshold,
+			Aggregation: &defaultAggregation,
 		}, diags
 	}
 
@@ -740,7 +748,7 @@ func (r *sloConfigResourceFramework) mapIndicatorFromState(ctx context.Context, 
 			Blueprint:   SloConfigAPIIndicatorBlueprintAvailability,
 			Type:        SloConfigAPIIndicatorMeasurementTypeTimeBased,
 			Threshold:   threshold,
-			Aggregation: aggregation,
+			Aggregation: &aggregation,
 		}, diags
 	}
 
@@ -748,8 +756,9 @@ func (r *sloConfigResourceFramework) mapIndicatorFromState(ctx context.Context, 
 	if indicatorModel.EventBasedAvailabilityIndicatorModel != nil {
 		// Create event-based availability indicator
 		return restapi.SloIndicator{
-			Blueprint: SloConfigAPIIndicatorBlueprintAvailability,
-			Type:      SloConfigAPIIndicatorMeasurementTypeEventBased,
+			Blueprint:   SloConfigAPIIndicatorBlueprintAvailability,
+			Type:        SloConfigAPIIndicatorMeasurementTypeEventBased,
+			Aggregation: &defaultAggregation,
 		}, diags
 	}
 
@@ -772,9 +781,10 @@ func (r *sloConfigResourceFramework) mapIndicatorFromState(ctx context.Context, 
 		return restapi.SloIndicator{
 			Blueprint:   SloConfigAPIIndicatorBlueprintTraffic,
 			Type:        SloConfigAPIIndicatorMeasurementTypeTimeBased,
-			TrafficType: trafficType,
+			TrafficType: &trafficType,
 			Threshold:   threshold,
-			Operator:    operator,
+			Operator:    &operator,
+			Aggregation: &defaultAggregation,
 		}, diags
 	}
 
@@ -808,6 +818,7 @@ func (r *sloConfigResourceFramework) mapIndicatorFromState(ctx context.Context, 
 			Blueprint:                 SloConfigAPIIndicatorBlueprintCustom,
 			GoodEventFilterExpression: goodEventFilter,
 			BadEventFilterExpression:  badEventFilter,
+			Aggregation:               &defaultAggregation,
 		}, diags
 	}
 
@@ -905,7 +916,6 @@ func (r *sloConfigResourceFramework) mapEntityToState(ctx context.Context, apiOb
 		ApplicationEntityModel: nil,
 		WebsiteEntityModel:     nil,
 		SyntheticEntityModel:   nil,
-		InfraEntityModel:       nil,
 	}
 
 	// Create entity object based on type
@@ -941,16 +951,6 @@ func (r *sloConfigResourceFramework) mapEntityToState(ctx context.Context, apiOb
 func (r *sloConfigResourceFramework) mapApplicationEntityToState(ctx context.Context, entity restapi.SloEntity) (ApplicationEntityModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	// Handle filter expression
-	var filterExpression string
-
-	mapper := tagfilter.NewMapper()
-	expr, err := mapper.FromAPIModel(entity.FilterExpression)
-	if err == nil && expr != nil {
-		// Convert the expression to string format
-		filterExpression = fmt.Sprintf("%v", expr)
-	}
-
 	// Create application entity object
 	appEntityObj := ApplicationEntityModel{
 		ApplicationID:    handleStringValue(entity.ApplicationID),
@@ -959,7 +959,20 @@ func (r *sloConfigResourceFramework) mapApplicationEntityToState(ctx context.Con
 		IncludeSynthetic: handleBooleanValue(entity.IncludeSynthetic),
 		ServiceID:        handleStringValue(entity.ServiceID),
 		EndpointID:       handleStringValue(entity.EndpointID),
-		FilterExpression: types.StringValue(filterExpression),
+	}
+
+	// Handle filter expression
+	if entity.FilterExpression != nil {
+		filterExpression, err := tagfilter.MapTagFilterToNormalizedString(entity.FilterExpression)
+		if err != nil {
+			diags.AddError(
+				"Error normalizing filter expression",
+				"Could not normalize filter expression: "+err.Error(),
+			)
+			return ApplicationEntityModel{}, diags
+		}
+		appEntityObj.FilterExpression = handleStringValue(filterExpression)
+
 	}
 
 	return appEntityObj, diags
@@ -968,21 +981,23 @@ func (r *sloConfigResourceFramework) mapApplicationEntityToState(ctx context.Con
 func (r *sloConfigResourceFramework) mapWebsiteEntityToState(ctx context.Context, entity restapi.SloEntity) (WebsiteEntityModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	// Handle filter expression
-	var filterExpression string
-
-	mapper := tagfilter.NewMapper()
-	expr, err := mapper.FromAPIModel(entity.FilterExpression)
-	if err == nil && expr != nil {
-		// Convert the expression to string format
-		filterExpression = fmt.Sprintf("%v", expr)
-	}
-
 	// Create website entity object
 	websiteEntityObj := WebsiteEntityModel{
-		WebsiteID:        handleStringValue(entity.WebsiteId),
-		BeaconType:       handleStringValue(entity.BeaconType),
-		FilterExpression: types.StringValue(filterExpression),
+		WebsiteID:  handleStringValue(entity.WebsiteId),
+		BeaconType: handleStringValue(entity.BeaconType),
+	}
+	// Handle filter expression
+	if entity.FilterExpression != nil {
+		filterExpression, err := tagfilter.MapTagFilterToNormalizedString(entity.FilterExpression)
+		if err != nil {
+			diags.AddError(
+				"Error normalizing filter expression",
+				"Could not normalize filter expression: "+err.Error(),
+			)
+			return WebsiteEntityModel{}, diags
+		}
+		websiteEntityObj.FilterExpression = handleStringValue(filterExpression)
+
 	}
 
 	return websiteEntityObj, diags
@@ -990,16 +1005,6 @@ func (r *sloConfigResourceFramework) mapWebsiteEntityToState(ctx context.Context
 
 func (r *sloConfigResourceFramework) mapSyntheticEntityToState(ctx context.Context, entity restapi.SloEntity) (SyntheticEntityModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
-
-	// Handle filter expression
-	var filterExpression string
-
-	mapper := tagfilter.NewMapper()
-	expr, err := mapper.FromAPIModel(entity.FilterExpression)
-	if err == nil && expr != nil {
-		// Convert the expression to string format
-		filterExpression = fmt.Sprintf("%v", expr)
-	}
 
 	// Convert synthetic test IDs to types.String
 	var testIDs []types.String
@@ -1012,7 +1017,19 @@ func (r *sloConfigResourceFramework) mapSyntheticEntityToState(ctx context.Conte
 	// Create synthetic entity object
 	syntheticEntityObj := SyntheticEntityModel{
 		SyntheticTestIDs: testIDs,
-		FilterExpression: types.StringValue(filterExpression),
+	}
+	// Handle filter expression
+	if entity.FilterExpression != nil {
+		filterExpression, err := tagfilter.MapTagFilterToNormalizedString(entity.FilterExpression)
+		if err != nil {
+			diags.AddError(
+				"Error normalizing filter expression",
+				"Could not normalize filter expression: "+err.Error(),
+			)
+			return SyntheticEntityModel{}, diags
+		}
+		syntheticEntityObj.FilterExpression = handleStringValue(filterExpression)
+
 	}
 
 	return syntheticEntityObj, diags
@@ -1037,7 +1054,7 @@ func (r *sloConfigResourceFramework) mapIndicatorToState(ctx context.Context, ap
 	case indicator.Type == SloConfigAPIIndicatorMeasurementTypeTimeBased && indicator.Blueprint == SloConfigAPIIndicatorBlueprintLatency:
 		model := &TimeBasedLatencyIndicatorModel{
 			Threshold:   types.Float64Value(indicator.Threshold),
-			Aggregation: types.StringValue(indicator.Aggregation),
+			Aggregation: handleStringValue(indicator.Aggregation),
 		}
 		indicatorModel.TimeBasedLatencyIndicatorModel = model
 
@@ -1050,7 +1067,7 @@ func (r *sloConfigResourceFramework) mapIndicatorToState(ctx context.Context, ap
 	case indicator.Type == SloConfigAPIIndicatorMeasurementTypeTimeBased && indicator.Blueprint == SloConfigAPIIndicatorBlueprintAvailability:
 		model := &TimeBasedAvailabilityIndicatorModel{
 			Threshold:   types.Float64Value(indicator.Threshold),
-			Aggregation: types.StringValue(indicator.Aggregation),
+			Aggregation: handleStringValue(indicator.Aggregation),
 		}
 		indicatorModel.TimeBasedAvailabilityIndicatorModel = model
 
@@ -1060,35 +1077,41 @@ func (r *sloConfigResourceFramework) mapIndicatorToState(ctx context.Context, ap
 
 	case indicator.Blueprint == SloConfigAPIIndicatorBlueprintTraffic:
 		model := &TrafficIndicatorModel{
-			TrafficType: types.StringValue(indicator.TrafficType),
+			TrafficType: handleStringValue(indicator.TrafficType),
 			Threshold:   types.Float64Value(indicator.Threshold),
-			Aggregation: types.StringValue(indicator.Aggregation),
+			Aggregation: handleStringValue(indicator.Aggregation),
 		}
 		indicatorModel.TrafficIndicatorModel = model
 
 	case indicator.Type == SloConfigAPIIndicatorMeasurementTypeEventBased && indicator.Blueprint == SloConfigAPIIndicatorBlueprintCustom:
 		// Handle filter expressions
-		var goodEventFilterExpression, badEventFilterExpression string
-
-		mapper := tagfilter.NewMapper()
+		model := &CustomIndicatorModel{}
 		if indicator.GoodEventFilterExpression != nil {
-			expr, err := mapper.FromAPIModel(indicator.GoodEventFilterExpression)
-			if err == nil && expr != nil {
-				goodEventFilterExpression = fmt.Sprintf("%v", expr)
+			goodEventFilterExpression, err := tagfilter.MapTagFilterToNormalizedString(indicator.GoodEventFilterExpression)
+			if err != nil {
+				diags.AddError(
+					"Error normalizing goodEventFilterExpression",
+					"Could not normalize goodEventFilterExpression: "+err.Error(),
+				)
+				return IndicatorModel{}, diags
 			}
+			model.GoodEventFilterExpression = handleStringValue(goodEventFilterExpression)
+
 		}
 
 		if indicator.BadEventFilterExpression != nil {
-			expr, err := mapper.FromAPIModel(indicator.BadEventFilterExpression)
-			if err == nil && expr != nil {
-				badEventFilterExpression = fmt.Sprintf("%v", expr)
+			badEventFilterExpression, err := tagfilter.MapTagFilterToNormalizedString(indicator.BadEventFilterExpression)
+			if err != nil {
+				diags.AddError(
+					"Error normalizing badEventFilterExpression",
+					"Could not normalize badEventFilterExpression: "+err.Error(),
+				)
+				return IndicatorModel{}, diags
 			}
+			model.BadEventFilterExpression = handleStringValue(badEventFilterExpression)
+
 		}
 
-		model := &CustomIndicatorModel{
-			GoodEventFilterExpression: types.StringValue(goodEventFilterExpression),
-			BadEventFilterExpression:  types.StringValue(badEventFilterExpression),
-		}
 		indicatorModel.CustomIndicatorModel = model
 
 	default:
