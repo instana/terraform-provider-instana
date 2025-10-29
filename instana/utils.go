@@ -3,10 +3,12 @@ package instana
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/google/go-cmp/cmp"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rs/xid"
 )
@@ -190,4 +192,20 @@ func NormalizeJSONString(jsonString string) string {
 		return jsonString
 	}
 	return string(bytes)
+}
+
+func handleStringValue(i *string) types.String {
+	if i == nil {
+		return types.StringNull()
+	} else {
+		return types.StringValue(*i)
+	}
+}
+
+func handleBooleanValue(i *bool) types.Bool {
+	if i == nil {
+		return types.BoolNull()
+	} else {
+		return types.BoolValue(*i)
+	}
 }
