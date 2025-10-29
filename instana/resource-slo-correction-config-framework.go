@@ -37,6 +37,7 @@ type SchedulingModel struct {
 	Duration      types.Int64  `tfsdk:"duration"`
 	DurationUnit  types.String `tfsdk:"duration_unit"`
 	RecurrentRule types.String `tfsdk:"recurrent_rule"`
+	Recurrent     types.Bool   `tfsdk:"recurrent"`
 }
 
 // NewSloCorrectionConfigResourceHandleFramework creates the resource handle for SLO Correction Config
@@ -95,14 +96,19 @@ func NewSloCorrectionConfigResourceHandleFramework() ResourceHandleFramework[*re
 								},
 								"duration_unit": schema.StringAttribute{
 									Required:    true,
-									Description: "The unit of the duration (e.g.,'MINUTE' 'HOUR', 'DAY').",
+									Description: "The unit of the duration (e.g.,'minute' 'hour', 'day').",
 									Validators: []validator.String{
-										stringvalidator.OneOf("MINUTE", "HOUR", "DAY"),
+										stringvalidator.OneOf("millisecond", "second", "minute", "hour", "day", "week", "month"),
 									},
 								},
 								"recurrent_rule": schema.StringAttribute{
 									Optional:    true,
 									Description: "Recurrent rule for scheduling, if applicable.",
+								},
+								"recurrent": schema.BoolAttribute{
+									Optional:    true,
+									Computed:    true,
+									Description: "Indicates whether the Rule is reccurrent",
 								},
 							},
 						},
@@ -165,6 +171,7 @@ func (r *sloCorrectionConfigResourceFramework) MapStateToDataObject(ctx context.
 				StartTime:    schedulingModel.StartTime.ValueInt64(),
 				Duration:     int(schedulingModel.Duration.ValueInt64()),
 				DurationUnit: restapi.DurationUnit(strings.ToUpper(schedulingModel.DurationUnit.ValueString())),
+				Recurrent:    schedulingModel.Recurrent.ValueBool(),
 			}
 
 			if !schedulingModel.RecurrentRule.IsNull() {
@@ -222,6 +229,7 @@ func (r *sloCorrectionConfigResourceFramework) UpdateState(ctx context.Context, 
 		"duration":       types.Int64Value(int64(apiObject.Scheduling.Duration)),
 		"duration_unit":  types.StringValue(string(apiObject.Scheduling.DurationUnit)),
 		"recurrent_rule": types.StringValue(apiObject.Scheduling.RecurrentRule),
+		"recurrent":      types.BoolValue(apiObject.Scheduling.Recurrent),
 	}
 
 	schedulingType := map[string]attr.Type{
@@ -229,6 +237,7 @@ func (r *sloCorrectionConfigResourceFramework) UpdateState(ctx context.Context, 
 		"duration":       types.Int64Type,
 		"duration_unit":  types.StringType,
 		"recurrent_rule": types.StringType,
+		"recurrent":      types.BoolType,
 	}
 
 	schedulingValue, schedulingDiags := types.ObjectValue(schedulingType, schedulingObj)
