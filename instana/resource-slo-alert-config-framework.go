@@ -20,7 +20,7 @@ import (
 )
 
 // ResourceInstanaSloAlertConfigFramework the name of the terraform-provider-instana resource to manage SLO Alert configurations
-const ResourceInstanaSloAlertConfigFramework = "instana_slo_alert_config"
+const ResourceInstanaSloAlertConfigFramework = "slo_alert_config"
 
 // SloAlertConfigModel represents the data model for SLO Alert configuration
 type SloAlertConfigModel struct {
@@ -362,7 +362,15 @@ func (r *sloAlertConfigResourceFramework) UpdateState(ctx context.Context, state
 			},
 		}, burnRateConfigs)
 	} else {
-		model.BurnRateConfig = types.ListNull(types.ObjectType{})
+		model.BurnRateConfig = types.ListNull(types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"alert_window_type":  types.StringType,
+				"duration":           types.StringType,
+				"duration_unit_type": types.StringType,
+				"threshold_operator": types.StringType,
+				"threshold_value":    types.StringType,
+			},
+		})
 	}
 
 	// Map custom payload fields using the reusable function
