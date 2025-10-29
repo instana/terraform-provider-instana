@@ -280,8 +280,14 @@ func (r *syntheticAlertConfigResourceFramework) MapStateToDataObject(ctx context
 			)
 			return nil, diags
 		}
+	} else {
+		operator := restapi.LogicalOperatorType("AND")
+		tagFilter = &restapi.TagFilter{
+			Type:            "EXPRESSION",
+			LogicalOperator: &operator,
+			Elements:        []*restapi.TagFilter{},
+		}
 	}
-
 	// Map custom payload fields
 	var customerPayloadFields []restapi.CustomPayloadField[any]
 	if !model.CustomPayloadFields.IsNull() {
@@ -347,7 +353,12 @@ func (r *syntheticAlertConfigResourceFramework) UpdateState(ctx context.Context,
 			)
 			return diags
 		}
-		model.TagFilter = types.StringValue(*normalizedTagFilterString)
+		if normalizedTagFilterString != nil {
+			model.TagFilter = types.StringValue(*normalizedTagFilterString)
+		} else {
+			model.TagFilter = types.StringNull()
+		}
+
 	} else {
 		model.TagFilter = types.StringNull()
 	}
