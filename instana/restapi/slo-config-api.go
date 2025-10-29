@@ -43,7 +43,7 @@ type SloEntity struct {
 	WebsiteId        *string       `json:"websiteId"`
 	BeaconType       *string       `json:"beaconType"`
 	SyntheticTestIDs []interface{} `json:"syntheticTestIds"`
-	InfraType        string        `json:"infraType"`
+	InfraType        *string       `json:"infraType"`
 }
 
 // SloEntity represents the nested object sli entity of the sli config REST resource at Instana
@@ -81,6 +81,7 @@ type SloIndicator struct {
 	Type                      string     `json:"type"`
 	Threshold                 float64    `json:"threshold"`
 	Aggregation               string     `json:"aggregation"`
+	Operator                  string     `json:"operator"`
 	TrafficType               string     `json:"trafficType"`
 	GoodEventFilterExpression *TagFilter `json:"goodEventsFilter"`
 	BadEventFilterExpression  *TagFilter `json:"badEventsFilter"`

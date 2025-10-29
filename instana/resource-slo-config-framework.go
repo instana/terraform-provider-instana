@@ -6,8 +6,10 @@ import (
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/instana/tagfilter"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -59,8 +61,8 @@ type ApplicationEntityModel struct {
 	FilterExpression types.String `tfsdk:"filter_expression"`
 }
 type InfraEntityModel struct {
-	Type      string `json:"type"`
-	InfraType string `json:"infraType"`
+	InfraType        types.String `tfsdk:"infra_type"`
+	FilterExpression types.String `tfsdk:"filter_expression"`
 }
 
 // WebsiteEntityModel represents a website entity in the Terraform model
@@ -103,6 +105,7 @@ type TrafficIndicatorModel struct {
 	TrafficType types.String  `tfsdk:"traffic_type"`
 	Threshold   types.Float64 `tfsdk:"threshold"`
 	Aggregation types.String  `tfsdk:"aggregation"`
+	Operator    types.String  `tfsdk:"operator"`
 }
 
 // CustomIndicatorModel represents a custom indicator in the Terraform model
@@ -178,84 +181,67 @@ func NewSloConfigResourceHandleFramework() ResourceHandleFramework[*restapi.SloC
 					SloConfigFieldSloEntity: schema.SingleNestedBlock{
 						Description: "The entity to use for the SLO configuration",
 						Blocks: map[string]schema.Block{
-							SloConfigApplicationEntity: schema.ListNestedBlock{
+							SloConfigApplicationEntity: schema.SingleNestedBlock{
 								Description: "Application entity of SLO",
-								NestedObject: schema.NestedBlockObject{
-									Attributes: map[string]schema.Attribute{
-										SloConfigFieldApplicationID: schema.StringAttribute{
-											Required:    true,
-											Description: "The application ID of the entity",
-										},
-										SloConfigFieldBoundaryScope: schema.StringAttribute{
-											Required:    true,
-											Description: "The boundary scope for the entity configuration (ALL, INBOUND)",
-										},
-										SloConfigFieldFilterExpression: schema.StringAttribute{
-											Optional:    true,
-											Description: "Entity filter",
-										},
-										SloConfigFieldIncludeInternal: schema.BoolAttribute{
-											Optional:    true,
-											Description: "Optional flag to indicate whether also internal calls are included",
-										},
-										SloConfigFieldIncludeSynthetic: schema.BoolAttribute{
-											Optional:    true,
-											Description: "Optional flag to indicate whether also synthetic calls are included in the scope or not",
-										},
-										SloConfigFieldServiceID: schema.StringAttribute{
-											Optional:    true,
-											Description: "The service ID of the entity",
-										},
-										SloConfigFieldEndpointID: schema.StringAttribute{
-											Optional:    true,
-											Description: "The endpoint ID of the entity",
-										},
+								Attributes: map[string]schema.Attribute{
+									SloConfigFieldApplicationID: schema.StringAttribute{
+										Optional:    true,
+										Description: "The application ID of the entity",
+									},
+									SloConfigFieldBoundaryScope: schema.StringAttribute{
+										Optional:    true,
+										Description: "The boundary scope for the entity configuration (ALL, INBOUND)",
+									},
+									SloConfigFieldFilterExpression: schema.StringAttribute{
+										Optional:    true,
+										Description: "Entity filter",
+									},
+									SloConfigFieldIncludeInternal: schema.BoolAttribute{
+										Optional:    true,
+										Description: "Optional flag to indicate whether also internal calls are included",
+									},
+									SloConfigFieldIncludeSynthetic: schema.BoolAttribute{
+										Optional:    true,
+										Description: "Optional flag to indicate whether also synthetic calls are included in the scope or not",
+									},
+									SloConfigFieldServiceID: schema.StringAttribute{
+										Optional:    true,
+										Description: "The service ID of the entity",
+									},
+									SloConfigFieldEndpointID: schema.StringAttribute{
+										Optional:    true,
+										Description: "The endpoint ID of the entity",
 									},
 								},
 							},
-							SloConfigWebsiteEntity: schema.ListNestedBlock{
+							SloConfigWebsiteEntity: schema.SingleNestedBlock{
 								Description: "Website entity of SLO",
-								NestedObject: schema.NestedBlockObject{
-									Attributes: map[string]schema.Attribute{
-										SloConfigFieldWebsiteID: schema.StringAttribute{
-											Required:    true,
-											Description: "The website ID of the entity",
-										},
-										SloConfigFieldFilterExpression: schema.StringAttribute{
-											Optional:    true,
-											Description: "Entity filter",
-										},
-										SloConfigFieldBeaconType: schema.StringAttribute{
-											Required:    true,
-											Description: "The beacon type for the entity configuration (pageLoad, resourceLoad, httpRequest, error, custom, pageChange)",
-										},
+								Attributes: map[string]schema.Attribute{
+									SloConfigFieldWebsiteID: schema.StringAttribute{
+										Optional:    true,
+										Description: "The website ID of the entity",
+									},
+									SloConfigFieldFilterExpression: schema.StringAttribute{
+										Optional:    true,
+										Description: "Entity filter",
+									},
+									SloConfigFieldBeaconType: schema.StringAttribute{
+										Optional:    true,
+										Description: "The beacon type for the entity configuration (pageLoad, resourceLoad, httpRequest, error, custom, pageChange)",
 									},
 								},
 							},
-							SloConfigSyntheticEntity: schema.ListNestedBlock{
+							SloConfigSyntheticEntity: schema.SingleNestedBlock{
 								Description: "Synthetic entity of SLO",
-								NestedObject: schema.NestedBlockObject{
-									Attributes: map[string]schema.Attribute{
-										SloConfigFieldSyntheticTestIDs: schema.ListAttribute{
-											ElementType: types.StringType,
-											Required:    true,
-											Description: "The synthetics ID of the entity",
-										},
-										SloConfigFieldFilterExpression: schema.StringAttribute{
-											Optional:    true,
-											Description: "Entity filter",
-										},
+								Attributes: map[string]schema.Attribute{
+									SloConfigFieldSyntheticTestIDs: schema.ListAttribute{
+										ElementType: types.StringType,
+										Optional:    true,
+										Description: "The synthetics ID of the entity",
 									},
-								},
-							},
-							SloConfigInfraEntity: schema.ListNestedBlock{
-								Description: "Synthetic entity of SLO",
-								NestedObject: schema.NestedBlockObject{
-									Attributes: map[string]schema.Attribute{
-										"infra_type": schema.StringAttribute{
-											Optional:    true,
-											Description: "Entity filter",
-										},
+									SloConfigFieldFilterExpression: schema.StringAttribute{
+										Optional:    true,
+										Description: "Entity filter",
 									},
 								},
 							},
@@ -264,82 +250,74 @@ func NewSloConfigResourceHandleFramework() ResourceHandleFramework[*restapi.SloC
 					SloConfigFieldSloIndicator: schema.SingleNestedBlock{
 						Description: "The indicator to use for the SLO configuration",
 						Blocks: map[string]schema.Block{
-							"time_based_latency": schema.ListNestedBlock{
+							"time_based_latency": schema.SingleNestedBlock{
 								Description: "Time-based latency indicator",
-								NestedObject: schema.NestedBlockObject{
-									Attributes: map[string]schema.Attribute{
-										"threshold": schema.Float64Attribute{
-											Required:    true,
-											Description: "The threshold for the metric configuration",
-										},
-										"aggregation": schema.StringAttribute{
-											Required:    true,
-											Description: "The aggregation type for the metric configuration",
-										},
+								Attributes: map[string]schema.Attribute{
+									"threshold": schema.Float64Attribute{
+										Optional:    true,
+										Description: "The threshold for the metric configuration",
+									},
+									"aggregation": schema.StringAttribute{
+										Optional:    true,
+										Description: "The aggregation type for the metric configuration",
 									},
 								},
 							},
-							"event_based_latency": schema.ListNestedBlock{
+							"event_based_latency": schema.SingleNestedBlock{
 								Description: "Event-based latency indicator",
-								NestedObject: schema.NestedBlockObject{
-									Attributes: map[string]schema.Attribute{
-										"threshold": schema.Float64Attribute{
-											Required:    true,
-											Description: "The threshold for the metric configuration",
-										},
+								Attributes: map[string]schema.Attribute{
+									"threshold": schema.Float64Attribute{
+										Optional:    true,
+										Description: "The threshold for the metric configuration",
 									},
 								},
 							},
-							"time_based_availability": schema.ListNestedBlock{
+							"time_based_availability": schema.SingleNestedBlock{
 								Description: "Time-based availability indicator",
-								NestedObject: schema.NestedBlockObject{
-									Attributes: map[string]schema.Attribute{
-										"threshold": schema.Float64Attribute{
-											Required:    true,
-											Description: "The threshold for the metric configuration",
-										},
-										"aggregation": schema.StringAttribute{
-											Required:    true,
-											Description: "The aggregation type for the metric configuration",
-										},
+								Attributes: map[string]schema.Attribute{
+									"threshold": schema.Float64Attribute{
+										Optional:    true,
+										Description: "The threshold for the metric configuration",
+									},
+									"aggregation": schema.StringAttribute{
+										Optional:    true,
+										Description: "The aggregation type for the metric configuration",
 									},
 								},
 							},
-							"event_based_availability": schema.ListNestedBlock{
-								Description:  "Event-based availability indicator",
-								NestedObject: schema.NestedBlockObject{},
+							"event_based_availability": schema.SingleNestedBlock{
+								Description: "Event-based availability indicator",
 							},
-							"traffic": schema.ListNestedBlock{
+							"traffic": schema.SingleNestedBlock{
 								Description: "Traffic indicator",
-								NestedObject: schema.NestedBlockObject{
-									Attributes: map[string]schema.Attribute{
-										"traffic_type": schema.StringAttribute{
-											Required:    true,
-											Description: "The traffic type for the indicator",
-										},
-										"threshold": schema.Float64Attribute{
-											Required:    true,
-											Description: "The threshold for the metric configuration",
-										},
-										"aggregation": schema.StringAttribute{
-											Required:    true,
-											Description: "The aggregation type for the metric configuration",
+								Attributes: map[string]schema.Attribute{
+									"traffic_type": schema.StringAttribute{
+										Optional:    true,
+										Description: "The traffic type for the indicator",
+									},
+									"threshold": schema.Float64Attribute{
+										Optional:    true,
+										Description: "The threshold for the metric configuration",
+									},
+									"operator": schema.StringAttribute{
+										Optional:    true,
+										Description: "The aggregation type for the metric configuration",
+										Validators: []validator.String{
+											stringvalidator.OneOf(">", ">=", "<", "<="),
 										},
 									},
 								},
 							},
-							"custom": schema.ListNestedBlock{
+							"custom": schema.SingleNestedBlock{
 								Description: "Custom indicator",
-								NestedObject: schema.NestedBlockObject{
-									Attributes: map[string]schema.Attribute{
-										"good_event_filter_expression": schema.StringAttribute{
-											Required:    true,
-											Description: "Good event filter expression",
-										},
-										"bad_event_filter_expression": schema.StringAttribute{
-											Optional:    true,
-											Description: "Bad event filter expression",
-										},
+								Attributes: map[string]schema.Attribute{
+									"good_event_filter_expression": schema.StringAttribute{
+										Optional:    true,
+										Description: "Good event filter expression",
+									},
+									"bad_event_filter_expression": schema.StringAttribute{
+										Optional:    true,
+										Description: "Bad event filter expression",
 									},
 								},
 							},
@@ -348,45 +326,41 @@ func NewSloConfigResourceHandleFramework() ResourceHandleFramework[*restapi.SloC
 					SloConfigFieldSloTimeWindow: schema.SingleNestedBlock{
 						Description: "The time window to use for the SLO configuration",
 						Blocks: map[string]schema.Block{
-							"rolling": schema.ListNestedBlock{
+							"rolling": schema.SingleNestedBlock{
 								Description: "Rolling time window",
-								NestedObject: schema.NestedBlockObject{
-									Attributes: map[string]schema.Attribute{
-										"duration": schema.Int64Attribute{
-											Required:    true,
-											Description: "The duration of the time window",
-										},
-										"duration_unit": schema.StringAttribute{
-											Required:    true,
-											Description: "The duration unit of the time window (day, week)",
-										},
-										"timezone": schema.StringAttribute{
-											Optional:    true,
-											Description: "The timezone for the SLO configuration",
-										},
+								Attributes: map[string]schema.Attribute{
+									"duration": schema.Int64Attribute{
+										Optional:    true,
+										Description: "The duration of the time window",
+									},
+									"duration_unit": schema.StringAttribute{
+										Optional:    true,
+										Description: "The duration unit of the time window (day, week)",
+									},
+									"timezone": schema.StringAttribute{
+										Optional:    true,
+										Description: "The timezone for the SLO configuration",
 									},
 								},
 							},
-							"fixed": schema.ListNestedBlock{
+							"fixed": schema.SingleNestedBlock{
 								Description: "Fixed time window",
-								NestedObject: schema.NestedBlockObject{
-									Attributes: map[string]schema.Attribute{
-										"duration": schema.Int64Attribute{
-											Required:    true,
-											Description: "The duration of the time window",
-										},
-										"duration_unit": schema.StringAttribute{
-											Required:    true,
-											Description: "The duration unit of the time window (day, week)",
-										},
-										"timezone": schema.StringAttribute{
-											Optional:    true,
-											Description: "The timezone for the SLO configuration",
-										},
-										"start_timestamp": schema.Float64Attribute{
-											Required:    true,
-											Description: "Time window start time",
-										},
+								Attributes: map[string]schema.Attribute{
+									"duration": schema.Int64Attribute{
+										Optional:    true,
+										Description: "The duration of the time window",
+									},
+									"duration_unit": schema.StringAttribute{
+										Optional:    true,
+										Description: "The duration unit of the time window (day, week)",
+									},
+									"timezone": schema.StringAttribute{
+										Optional:    true,
+										Description: "The timezone for the SLO configuration",
+									},
+									"start_timestamp": schema.Float64Attribute{
+										Optional:    true,
+										Description: "Time window start time",
 									},
 								},
 							},
@@ -571,6 +545,14 @@ func (r *sloConfigResourceFramework) mapEntityFromState(ctx context.Context, ent
 	// Check for application entity
 	if entityObj.ApplicationEntityModel != nil {
 		applicationModel := entityObj.ApplicationEntityModel
+		if applicationModel.ApplicationID.IsUnknown() || applicationModel.ApplicationID.IsNull() ||
+			applicationModel.BoundaryScope.IsNull() || applicationModel.BoundaryScope.IsUnknown() {
+			diags.AddError(
+				"application_id and boundary_scope are required for application entity",
+				"application_id and boundary_scope are required for application entity",
+			)
+			return restapi.SloEntity{}, diags
+		}
 		applicationIdStr := applicationModel.ApplicationID.ValueString()
 		serviceID := applicationModel.ServiceID.ValueString()
 		endpointID := applicationModel.EndpointID.ValueString()
@@ -590,19 +572,9 @@ func (r *sloConfigResourceFramework) mapEntityFromState(ctx context.Context, ent
 
 		// Convert filter expression to API model if set
 		var tagFilter *restapi.TagFilter
-		if !applicationModel.FilterExpression.IsNull() && !applicationModel.FilterExpression.IsUnknown() {
-			parser := tagfilter.NewParser()
-			expr, err := parser.Parse(applicationModel.FilterExpression.ValueString())
-			if err != nil {
-				diags.AddError(
-					"Error parsing filter expression",
-					fmt.Sprintf("Could not parse filter expression: %s", err),
-				)
-				return restapi.SloEntity{}, diags
-			}
-
-			mapper := tagfilter.NewMapper()
-			tagFilter = mapper.ToAPIModel(expr)
+		tagFilter, tagDiags := mapTagFilterFromState(applicationModel.FilterExpression, tagFilter)
+		if tagDiags.HasError() {
+			return restapi.SloEntity{}, tagDiags
 		}
 		appEntityObj.FilterExpression = tagFilter
 		return appEntityObj, diags
@@ -611,6 +583,16 @@ func (r *sloConfigResourceFramework) mapEntityFromState(ctx context.Context, ent
 	// Check for website entity
 	if entityObj.WebsiteEntityModel != nil {
 		websiteModel := entityObj.WebsiteEntityModel
+
+		if websiteModel.WebsiteID.IsNull() || websiteModel.WebsiteID.IsUnknown() ||
+			websiteModel.BeaconType.IsNull() || websiteModel.BeaconType.IsUnknown() {
+			diags.AddError(
+				"website_id and beacon_type are required for website entity",
+				"website_id and beacon_type are required for website entity",
+			)
+			return restapi.SloEntity{}, diags
+		}
+
 		websiteIdStr := websiteModel.WebsiteID.ValueString()
 		beaconTypeStr := websiteModel.BeaconType.ValueString()
 
@@ -622,19 +604,9 @@ func (r *sloConfigResourceFramework) mapEntityFromState(ctx context.Context, ent
 
 		// Convert filter expression to API model if set
 		var tagFilter *restapi.TagFilter
-		if !websiteModel.FilterExpression.IsNull() && !websiteModel.FilterExpression.IsUnknown() {
-			parser := tagfilter.NewParser()
-			expr, err := parser.Parse(websiteModel.FilterExpression.ValueString())
-			if err != nil {
-				diags.AddError(
-					"Error parsing filter expression",
-					fmt.Sprintf("Could not parse filter expression: %s", err),
-				)
-				return restapi.SloEntity{}, diags
-			}
-
-			mapper := tagfilter.NewMapper()
-			tagFilter = mapper.ToAPIModel(expr)
+		tagFilter, tagDiags := mapTagFilterFromState(websiteModel.FilterExpression, tagFilter)
+		if tagDiags.HasError() {
+			return restapi.SloEntity{}, tagDiags
 		}
 		websiteEntityObj.FilterExpression = tagFilter
 		return websiteEntityObj, diags
@@ -643,6 +615,14 @@ func (r *sloConfigResourceFramework) mapEntityFromState(ctx context.Context, ent
 	// Check for synthetic entity
 	if entityObj.SyntheticEntityModel != nil {
 		syntheticModel := entityObj.SyntheticEntityModel
+
+		if len(syntheticModel.SyntheticTestIDs) == 0 {
+			diags.AddError(
+				"synthetic_test_ids is required for synthetic entity",
+				"synthetic_test_ids is required for synthetic entity",
+			)
+			return restapi.SloEntity{}, diags
+		}
 
 		// Convert synthetic test IDs to []interface{}
 		var testIDs []interface{}
@@ -659,34 +639,12 @@ func (r *sloConfigResourceFramework) mapEntityFromState(ctx context.Context, ent
 
 		// Convert filter expression to API model if set
 		var tagFilter *restapi.TagFilter
-		if !syntheticModel.FilterExpression.IsNull() && !syntheticModel.FilterExpression.IsUnknown() {
-			parser := tagfilter.NewParser()
-			expr, err := parser.Parse(syntheticModel.FilterExpression.ValueString())
-			if err != nil {
-				diags.AddError(
-					"Error parsing filter expression",
-					fmt.Sprintf("Could not parse filter expression: %s", err),
-				)
-				return restapi.SloEntity{}, diags
-			}
-
-			mapper := tagfilter.NewMapper()
-			tagFilter = mapper.ToAPIModel(expr)
+		tagFilter, tagDiags := mapTagFilterFromState(syntheticModel.FilterExpression, tagFilter)
+		if tagDiags.HasError() {
+			return restapi.SloEntity{}, tagDiags
 		}
 		syntheticEntityObj.FilterExpression = tagFilter
 		return syntheticEntityObj, diags
-	}
-
-	// Check for infra entity
-	if entityObj.InfraEntityModel != nil {
-		infraModel := entityObj.InfraEntityModel
-
-		infraEntityObj := restapi.SloEntity{
-			Type:      SloConfigInfraEntity,
-			InfraType: infraModel.InfraType,
-		}
-
-		return infraEntityObj, diags
 	}
 
 	diags.AddError(
@@ -696,6 +654,24 @@ func (r *sloConfigResourceFramework) mapEntityFromState(ctx context.Context, ent
 	return restapi.SloEntity{}, diags
 }
 
+func mapTagFilterFromState(filterExpression types.String, tagFilter *restapi.TagFilter) (*restapi.TagFilter, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	if !filterExpression.IsNull() && !filterExpression.IsUnknown() {
+		parser := tagfilter.NewParser()
+		expr, err := parser.Parse(filterExpression.ValueString())
+		if err != nil {
+			diags.AddError(
+				"Error parsing filter expression",
+				fmt.Sprintf("Could not parse filter expression: %s", err),
+			)
+			return nil, diags
+		}
+		mapper := tagfilter.NewMapper()
+		tagFilter = mapper.ToAPIModel(expr)
+	}
+	return tagFilter, diags
+}
+
 // Helper methods for mapping indicator from plan
 func (r *sloConfigResourceFramework) mapIndicatorFromState(ctx context.Context, indicatorModel IndicatorModel) (restapi.SloIndicator, diag.Diagnostics) {
 	var diags diag.Diagnostics
@@ -703,6 +679,16 @@ func (r *sloConfigResourceFramework) mapIndicatorFromState(ctx context.Context, 
 	// Check for time-based latency indicator
 	if indicatorModel.TimeBasedLatencyIndicatorModel != nil {
 		model := indicatorModel.TimeBasedLatencyIndicatorModel
+
+		if model.Threshold.IsNull() || model.Threshold.IsUnknown() ||
+			model.Aggregation.IsNull() || model.Aggregation.IsUnknown() {
+			diags.AddError(
+				"threshold and  aggregation are required for time_based_latency indicator",
+				"threshold and  aggregation are required for time_based_latency indicator",
+			)
+			return restapi.SloIndicator{}, diags
+		}
+
 		threshold := model.Threshold.ValueFloat64()
 		aggregation := model.Aggregation.ValueString()
 
@@ -718,6 +704,13 @@ func (r *sloConfigResourceFramework) mapIndicatorFromState(ctx context.Context, 
 	// Check for event-based latency indicator
 	if indicatorModel.EventBasedLatencyIndicatorModel != nil {
 		model := indicatorModel.EventBasedLatencyIndicatorModel
+		if model.Threshold.IsNull() || model.Threshold.IsUnknown() {
+			diags.AddError(
+				"threshold is required for event_based_latency indicator",
+				"threshold is required for event_based_latency indicator",
+			)
+			return restapi.SloIndicator{}, diags
+		}
 		threshold := model.Threshold.ValueFloat64()
 
 		// Create event-based latency indicator
@@ -731,6 +724,14 @@ func (r *sloConfigResourceFramework) mapIndicatorFromState(ctx context.Context, 
 	// Check for time-based availability indicator
 	if indicatorModel.TimeBasedAvailabilityIndicatorModel != nil {
 		model := indicatorModel.TimeBasedAvailabilityIndicatorModel
+		if model.Threshold.IsNull() || model.Threshold.IsUnknown() ||
+			model.Aggregation.IsNull() || model.Aggregation.IsUnknown() {
+			diags.AddError(
+				"threshold and  aggregation are required for time_based_availability indicator",
+				"threshold and  aggregation are required for time_based_availability indicator",
+			)
+			return restapi.SloIndicator{}, diags
+		}
 		threshold := model.Threshold.ValueFloat64()
 		aggregation := model.Aggregation.ValueString()
 
@@ -755,54 +756,50 @@ func (r *sloConfigResourceFramework) mapIndicatorFromState(ctx context.Context, 
 	// Check for traffic indicator
 	if indicatorModel.TrafficIndicatorModel != nil {
 		model := indicatorModel.TrafficIndicatorModel
+		if model.Threshold.IsNull() || model.Threshold.IsUnknown() ||
+			model.Operator.IsNull() || model.Operator.IsUnknown() {
+			diags.AddError(
+				"threshold and  operator are required for time_based_latency indicator",
+				"threshold and  operator are required for time_based_latency indicator",
+			)
+			return restapi.SloIndicator{}, diags
+		}
 		trafficType := model.TrafficType.ValueString()
 		threshold := model.Threshold.ValueFloat64()
-		aggregation := model.Aggregation.ValueString()
+		operator := model.Operator.ValueString()
 
 		// Create traffic indicator
 		return restapi.SloIndicator{
 			Blueprint:   SloConfigAPIIndicatorBlueprintTraffic,
+			Type:        SloConfigAPIIndicatorMeasurementTypeTimeBased,
 			TrafficType: trafficType,
 			Threshold:   threshold,
-			Aggregation: aggregation,
+			Operator:    operator,
 		}, diags
 	}
 
 	// Check for custom indicator
 	if indicatorModel.CustomIndicatorModel != nil {
 		model := indicatorModel.CustomIndicatorModel
-
-		// Convert filter expressions to API model
+		if model.GoodEventFilterExpression.IsNull() || model.GoodEventFilterExpression.IsUnknown() {
+			diags.AddError(
+				"good_event_filter_expression is required for custom indicator",
+				"good_event_filter_expression is required for custom indicator",
+			)
+			return restapi.SloIndicator{}, diags
+		}
+		// Convert good event filter expressions to API model
 		var goodEventFilter, badEventFilter *restapi.TagFilter
 
-		if !model.GoodEventFilterExpression.IsNull() && !model.GoodEventFilterExpression.IsUnknown() {
-			parser := tagfilter.NewParser()
-			expr, err := parser.Parse(model.GoodEventFilterExpression.ValueString())
-			if err != nil {
-				diags.AddError(
-					"Error parsing good event filter expression",
-					fmt.Sprintf("Could not parse filter expression: %s", err),
-				)
-				return restapi.SloIndicator{}, diags
-			}
-
-			mapper := tagfilter.NewMapper()
-			goodEventFilter = mapper.ToAPIModel(expr)
+		goodEventFilter, tagDiags := mapTagFilterFromState(model.GoodEventFilterExpression, goodEventFilter)
+		if tagDiags.HasError() {
+			return restapi.SloIndicator{}, tagDiags
 		}
 
-		if !model.BadEventFilterExpression.IsNull() && !model.BadEventFilterExpression.IsUnknown() {
-			parser := tagfilter.NewParser()
-			expr, err := parser.Parse(model.BadEventFilterExpression.ValueString())
-			if err != nil {
-				diags.AddError(
-					"Error parsing bad event filter expression",
-					fmt.Sprintf("Could not parse filter expression: %s", err),
-				)
-				return restapi.SloIndicator{}, diags
-			}
-
-			mapper := tagfilter.NewMapper()
-			badEventFilter = mapper.ToAPIModel(expr)
+		// Convert bad event filter expression to API model if set
+		badEventFilter, tagBadDiags := mapTagFilterFromState(model.BadEventFilterExpression, badEventFilter)
+		if tagBadDiags.HasError() {
+			return restapi.SloIndicator{}, tagDiags
 		}
 
 		// Create custom indicator
@@ -828,6 +825,17 @@ func (r *sloConfigResourceFramework) mapTimeWindowFromState(ctx context.Context,
 	// Check for rolling time window
 	if timeWindowModel.RollingTimeWindowModel != nil {
 		rollingModel := timeWindowModel.RollingTimeWindowModel
+
+		if rollingModel.Duration.IsNull() || rollingModel.Duration.IsUnknown() ||
+			rollingModel.DurationUnit.IsNull() || rollingModel.DurationUnit.IsUnknown() {
+
+			diags.AddError(
+				"duration and duration_unit are required for rolling time window",
+				"duration and duration_unit are required for rolling time window",
+			)
+			return restapi.SloTimeWindow{}, diags
+		}
+
 		duration := int(rollingModel.Duration.ValueInt64())
 		durationUnit := rollingModel.DurationUnit.ValueString()
 
@@ -849,6 +857,17 @@ func (r *sloConfigResourceFramework) mapTimeWindowFromState(ctx context.Context,
 	// Check for fixed time window
 	if timeWindowModel.FixedTimeWindowModel != nil {
 		fixedModel := timeWindowModel.FixedTimeWindowModel
+
+		if fixedModel.Duration.IsNull() || fixedModel.Duration.IsUnknown() ||
+			fixedModel.DurationUnit.IsNull() || fixedModel.DurationUnit.IsUnknown() ||
+			fixedModel.StartTimestamp.IsNull() || fixedModel.StartTimestamp.IsUnknown() {
+
+			diags.AddError(
+				"duration,duration_unit,start_timestamp are required for fixed time window",
+				"duration,duration_unit,start_timestamp are required for fixed time window",
+			)
+			return restapi.SloTimeWindow{}, diags
+		}
 		duration := int(fixedModel.Duration.ValueInt64())
 		durationUnit := fixedModel.DurationUnit.ValueString()
 		startTime := fixedModel.StartTimestamp.ValueFloat64()
@@ -909,12 +928,6 @@ func (r *sloConfigResourceFramework) mapEntityToState(ctx context.Context, apiOb
 		if !diags.HasError() {
 			entityModel.SyntheticEntityModel = &syntheticModel
 		}
-	case SloConfigInfraEntity:
-		infraModel, infraDiags := r.mapInfraEntityToState(ctx, apiObject.Entity)
-		diags.Append(infraDiags...)
-		if !diags.HasError() {
-			entityModel.InfraEntityModel = &infraModel
-		}
 	default:
 		diags.AddError(
 			"Error mapping entity to state",
@@ -940,12 +953,12 @@ func (r *sloConfigResourceFramework) mapApplicationEntityToState(ctx context.Con
 
 	// Create application entity object
 	appEntityObj := ApplicationEntityModel{
-		ApplicationID:    types.StringValue(*entity.ApplicationID),
-		BoundaryScope:    types.StringValue(*entity.BoundaryScope),
-		IncludeInternal:  types.BoolValue(*entity.IncludeInternal),
-		IncludeSynthetic: types.BoolValue(*entity.IncludeSynthetic),
-		ServiceID:        types.StringValue(*entity.ServiceID),
-		EndpointID:       types.StringValue(*entity.EndpointID),
+		ApplicationID:    handleStringValue(entity.ApplicationID),
+		BoundaryScope:    handleStringValue(entity.BoundaryScope),
+		IncludeInternal:  handleBooleanValue(entity.IncludeInternal),
+		IncludeSynthetic: handleBooleanValue(entity.IncludeSynthetic),
+		ServiceID:        handleStringValue(entity.ServiceID),
+		EndpointID:       handleStringValue(entity.EndpointID),
 		FilterExpression: types.StringValue(filterExpression),
 	}
 
@@ -967,8 +980,8 @@ func (r *sloConfigResourceFramework) mapWebsiteEntityToState(ctx context.Context
 
 	// Create website entity object
 	websiteEntityObj := WebsiteEntityModel{
-		WebsiteID:        types.StringValue(*entity.WebsiteId),
-		BeaconType:       types.StringValue(*entity.BeaconType),
+		WebsiteID:        handleStringValue(entity.WebsiteId),
+		BeaconType:       handleStringValue(entity.BeaconType),
 		FilterExpression: types.StringValue(filterExpression),
 	}
 
@@ -1003,18 +1016,6 @@ func (r *sloConfigResourceFramework) mapSyntheticEntityToState(ctx context.Conte
 	}
 
 	return syntheticEntityObj, diags
-}
-
-func (r *sloConfigResourceFramework) mapInfraEntityToState(ctx context.Context, entity restapi.SloEntity) (InfraEntityModel, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	// Create infra entity object
-	infraEntityObj := InfraEntityModel{
-		Type:      entity.Type,
-		InfraType: entity.InfraType,
-	}
-
-	return infraEntityObj, diags
 }
 
 func (r *sloConfigResourceFramework) mapIndicatorToState(ctx context.Context, apiObject *restapi.SloConfig) (IndicatorModel, diag.Diagnostics) {
