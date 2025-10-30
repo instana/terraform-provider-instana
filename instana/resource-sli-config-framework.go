@@ -85,6 +85,14 @@ type sliConfigResourceFramework struct {
 	metaData ResourceMetaDataFramework
 }
 
+var applicationTimeBasedObjectType = types.ObjectType{
+	AttrTypes: map[string]attr.Type{
+		"application_id": types.StringType,
+		"service_id":     types.StringType,
+		"endpoint_id":    types.StringType,
+		"boundary_scope": types.StringType,
+	},
+}
 var websiteTimeBasedObjectType = types.ObjectType{
 	AttrTypes: map[string]attr.Type{
 		"website_id":        types.StringType,
