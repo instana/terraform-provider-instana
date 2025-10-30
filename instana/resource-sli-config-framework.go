@@ -20,7 +20,7 @@ import (
 )
 
 // ResourceInstanaSliConfigFramework the name of the terraform-provider-instana resource to manage SLI configurations
-const ResourceInstanaSliConfigFramework = "instana_sli_config"
+const ResourceInstanaSliConfigFramework = "sli_config"
 
 // SliConfigModel represents the data model for SLI configuration
 type SliConfigModel struct {
@@ -62,6 +62,8 @@ type ApplicationEventBasedModel struct {
 	GoodEventFilterExpression types.String `tfsdk:"good_event_filter_expression"`
 	IncludeInternal           types.Bool   `tfsdk:"include_internal"`
 	IncludeSynthetic          types.Bool   `tfsdk:"include_synthetic"`
+	ServiceID                 types.String `tfsdk:"service_id"`
+	EndpointID                types.String `tfsdk:"endpoint_id"`
 }
 
 // WebsiteEventBasedModel represents the website event based SLI entity
@@ -81,6 +83,34 @@ type WebsiteTimeBasedModel struct {
 
 type sliConfigResourceFramework struct {
 	metaData ResourceMetaDataFramework
+}
+
+var websiteTimeBasedObjectType = types.ObjectType{
+	AttrTypes: map[string]attr.Type{
+		"website_id":        types.StringType,
+		"filter_expression": types.StringType,
+		"beacon_type":       types.StringType,
+	},
+}
+var applicationEventBasedObjectType = types.ObjectType{
+	AttrTypes: map[string]attr.Type{
+		"application_id":               types.StringType,
+		"boundary_scope":               types.StringType,
+		"bad_event_filter_expression":  types.StringType,
+		"good_event_filter_expression": types.StringType,
+		"include_internal":             types.BoolType,
+		"include_synthetic":            types.BoolType,
+		"service_id":                   types.StringType,
+		"endpoint_id":                  types.StringType,
+	},
+}
+var websiteEventBasedObjectType = types.ObjectType{
+	AttrTypes: map[string]attr.Type{
+		"website_id":                   types.StringType,
+		"bad_event_filter_expression":  types.StringType,
+		"good_event_filter_expression": types.StringType,
+		"beacon_type":                  types.StringType,
+	},
 }
 
 // NewSliConfigResourceHandleFramework creates the resource handle for SLI configuration
@@ -107,6 +137,7 @@ func NewSliConfigResourceHandleFramework() ResourceHandleFramework[*restapi.SliC
 					},
 					"initial_evaluation_timestamp": schema.Int64Attribute{
 						Optional:    true,
+						Computed:    true,
 						Description: "Initial evaluation timestamp for the SLI config",
 					},
 				},
@@ -147,7 +178,7 @@ func NewSliConfigResourceHandleFramework() ResourceHandleFramework[*restapi.SliC
 									NestedObject: schema.NestedBlockObject{
 										Attributes: map[string]schema.Attribute{
 											"application_id": schema.StringAttribute{
-												Required:    true,
+												Required:    true, // might be optional
 												Description: "The application ID of the entity",
 											},
 											"service_id": schema.StringAttribute{
@@ -198,6 +229,14 @@ func NewSliConfigResourceHandleFramework() ResourceHandleFramework[*restapi.SliC
 											"include_synthetic": schema.BoolAttribute{
 												Optional:    true,
 												Description: "Optional flag to indicate whether also synthetic calls are included in the scope or not",
+											},
+											"endpoint_id": schema.StringAttribute{
+												Optional:    true,
+												Description: "Specifies the ID of the Endpoint to be monitored by the availability-based application SLO",
+											},
+											"service_id": schema.StringAttribute{
+												Optional:    true,
+												Description: "Identifies the service to be monitored by the availability-based application SLO",
 											},
 										},
 									},
@@ -306,34 +345,33 @@ func (r *sliConfigResourceFramework) UpdateState(ctx context.Context, state *tfs
 			},
 		}, []attr.Value{metricConfigObj})
 	} else {
-		model.MetricConfiguration = types.ListNull(types.ObjectType{})
+		model.MetricConfiguration = types.ListNull(types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"metric_name": types.StringType,
+				"aggregation": types.StringType,
+				"threshold":   types.Float64Type,
+			},
+		})
 	}
 
 	// Map SLI entity
 	sliEntityModel := SliEntityModel{}
 	var entityDiags diag.Diagnostics
 
+	sliEntityModel.ApplicationTimeBased = types.ListNull(applicationTimeBasedObjectType)
+	sliEntityModel.ApplicationEventBased = types.ListNull(applicationEventBasedObjectType)
+	sliEntityModel.WebsiteEventBased = types.ListNull(websiteEventBasedObjectType)
+	sliEntityModel.WebsiteTimeBased = types.ListNull(websiteTimeBasedObjectType)
+
 	switch sliConfig.SliEntity.Type {
 	case "application":
 		sliEntityModel.ApplicationTimeBased, entityDiags = r.mapApplicationTimeBasedToState(ctx, sliConfig.SliEntity)
-		sliEntityModel.ApplicationEventBased = types.ListNull(types.ObjectType{})
-		sliEntityModel.WebsiteEventBased = types.ListNull(types.ObjectType{})
-		sliEntityModel.WebsiteTimeBased = types.ListNull(types.ObjectType{})
 	case "availability":
 		sliEntityModel.ApplicationEventBased, entityDiags = r.mapApplicationEventBasedToState(ctx, sliConfig.SliEntity)
-		sliEntityModel.ApplicationTimeBased = types.ListNull(types.ObjectType{})
-		sliEntityModel.WebsiteEventBased = types.ListNull(types.ObjectType{})
-		sliEntityModel.WebsiteTimeBased = types.ListNull(types.ObjectType{})
 	case "websiteEventBased":
 		sliEntityModel.WebsiteEventBased, entityDiags = r.mapWebsiteEventBasedToState(ctx, sliConfig.SliEntity)
-		sliEntityModel.ApplicationTimeBased = types.ListNull(types.ObjectType{})
-		sliEntityModel.ApplicationEventBased = types.ListNull(types.ObjectType{})
-		sliEntityModel.WebsiteTimeBased = types.ListNull(types.ObjectType{})
 	case "websiteTimeBased":
 		sliEntityModel.WebsiteTimeBased, entityDiags = r.mapWebsiteTimeBasedToState(ctx, sliConfig.SliEntity)
-		sliEntityModel.ApplicationTimeBased = types.ListNull(types.ObjectType{})
-		sliEntityModel.ApplicationEventBased = types.ListNull(types.ObjectType{})
-		sliEntityModel.WebsiteEventBased = types.ListNull(types.ObjectType{})
 	default:
 		diags.AddError(
 			"Unsupported SLI entity type",
@@ -349,10 +387,10 @@ func (r *sliConfigResourceFramework) UpdateState(ctx context.Context, state *tfs
 
 	// Create SLI entity object
 	sliEntityObj, entityObjDiags := types.ObjectValueFrom(ctx, map[string]attr.Type{
-		"application_time_based":  types.ListType{ElemType: types.ObjectType{}},
-		"application_event_based": types.ListType{ElemType: types.ObjectType{}},
-		"website_event_based":     types.ListType{ElemType: types.ObjectType{}},
-		"website_time_based":      types.ListType{ElemType: types.ObjectType{}},
+		"application_time_based":  types.ListType{ElemType: applicationTimeBasedObjectType},
+		"application_event_based": types.ListType{ElemType: applicationEventBasedObjectType},
+		"website_event_based":     types.ListType{ElemType: websiteEventBasedObjectType},
+		"website_time_based":      types.ListType{ElemType: websiteTimeBasedObjectType},
 	}, sliEntityModel)
 	if entityObjDiags.HasError() {
 		diags.Append(entityObjDiags...)
@@ -361,10 +399,10 @@ func (r *sliConfigResourceFramework) UpdateState(ctx context.Context, state *tfs
 
 	model.SliEntity = types.ListValueMust(types.ObjectType{
 		AttrTypes: map[string]attr.Type{
-			"application_time_based":  types.ListType{ElemType: types.ObjectType{}},
-			"application_event_based": types.ListType{ElemType: types.ObjectType{}},
-			"website_event_based":     types.ListType{ElemType: types.ObjectType{}},
-			"website_time_based":      types.ListType{ElemType: types.ObjectType{}},
+			"application_time_based":  types.ListType{ElemType: applicationTimeBasedObjectType},
+			"application_event_based": types.ListType{ElemType: applicationEventBasedObjectType},
+			"website_event_based":     types.ListType{ElemType: websiteEventBasedObjectType},
+			"website_time_based":      types.ListType{ElemType: websiteTimeBasedObjectType},
 		},
 	}, []attr.Value{sliEntityObj})
 
@@ -404,14 +442,7 @@ func (r *sliConfigResourceFramework) mapApplicationTimeBasedToState(ctx context.
 		return types.ListNull(types.ObjectType{}), diags
 	}
 
-	return types.ListValueMust(types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"application_id": types.StringType,
-			"service_id":     types.StringType,
-			"endpoint_id":    types.StringType,
-			"boundary_scope": types.StringType,
-		},
-	}, []attr.Value{appTimeBasedObj}), diags
+	return types.ListValueMust(applicationTimeBasedObjectType, []attr.Value{appTimeBasedObj}), diags
 }
 
 func (r *sliConfigResourceFramework) mapApplicationEventBasedToState(ctx context.Context, sliEntity restapi.SliEntity) (types.List, diag.Diagnostics) {
@@ -420,6 +451,8 @@ func (r *sliConfigResourceFramework) mapApplicationEventBasedToState(ctx context
 	appEventBasedModel := ApplicationEventBasedModel{
 		ApplicationID: types.StringValue(*sliEntity.ApplicationID),
 		BoundaryScope: types.StringValue(*sliEntity.BoundaryScope),
+		EndpointID:    types.StringValue(*sliEntity.EndpointID),
+		ServiceID:     types.StringValue(*sliEntity.ServiceID),
 	}
 
 	// Map good event filter expression
@@ -472,22 +505,15 @@ func (r *sliConfigResourceFramework) mapApplicationEventBasedToState(ctx context
 		"good_event_filter_expression": types.StringType,
 		"include_internal":             types.BoolType,
 		"include_synthetic":            types.BoolType,
+		"service_id":                   types.StringType,
+		"endpoint_id":                  types.StringType,
 	}, appEventBasedModel)
 	if objDiags.HasError() {
 		diags.Append(objDiags...)
 		return types.ListNull(types.ObjectType{}), diags
 	}
 
-	return types.ListValueMust(types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"application_id":               types.StringType,
-			"boundary_scope":               types.StringType,
-			"bad_event_filter_expression":  types.StringType,
-			"good_event_filter_expression": types.StringType,
-			"include_internal":             types.BoolType,
-			"include_synthetic":            types.BoolType,
-		},
-	}, []attr.Value{appEventBasedObj}), diags
+	return types.ListValueMust(applicationEventBasedObjectType, []attr.Value{appEventBasedObj}), diags
 }
 
 func (r *sliConfigResourceFramework) mapWebsiteEventBasedToState(ctx context.Context, sliEntity restapi.SliEntity) (types.List, diag.Diagnostics) {
@@ -539,14 +565,7 @@ func (r *sliConfigResourceFramework) mapWebsiteEventBasedToState(ctx context.Con
 		return types.ListNull(types.ObjectType{}), diags
 	}
 
-	return types.ListValueMust(types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"website_id":                   types.StringType,
-			"bad_event_filter_expression":  types.StringType,
-			"good_event_filter_expression": types.StringType,
-			"beacon_type":                  types.StringType,
-		},
-	}, []attr.Value{websiteEventBasedObj}), diags
+	return types.ListValueMust(websiteEventBasedObjectType, []attr.Value{websiteEventBasedObj}), diags
 }
 
 func (r *sliConfigResourceFramework) mapWebsiteTimeBasedToState(ctx context.Context, sliEntity restapi.SliEntity) (types.List, diag.Diagnostics) {
@@ -582,13 +601,7 @@ func (r *sliConfigResourceFramework) mapWebsiteTimeBasedToState(ctx context.Cont
 		return types.ListNull(types.ObjectType{}), diags
 	}
 
-	return types.ListValueMust(types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"website_id":        types.StringType,
-			"filter_expression": types.StringType,
-			"beacon_type":       types.StringType,
-		},
-	}, []attr.Value{websiteTimeBasedObj}), diags
+	return types.ListValueMust(websiteTimeBasedObjectType, []attr.Value{websiteTimeBasedObj}), diags
 }
 
 func (r *sliConfigResourceFramework) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.SliConfig, diag.Diagnostics) {
