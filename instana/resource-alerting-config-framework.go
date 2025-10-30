@@ -31,13 +31,6 @@ type AlertingConfigModel struct {
 	CustomPayloadFields   types.List   `tfsdk:"custom_payload_field"`
 }
 
-// CustomPayloadFieldModel represents a custom payload field in the Terraform model
-type CustomPayloadFieldModel struct {
-	Key          types.String `tfsdk:"key"`
-	Value        types.String `tfsdk:"value"`
-	DynamicValue types.List   `tfsdk:"dynamic_value"`
-}
-
 // DynamicValueModel represents a dynamic value in the Terraform model
 type DynamicValueModel struct {
 	Key     types.String `tfsdk:"key"`

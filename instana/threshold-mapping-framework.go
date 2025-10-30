@@ -33,6 +33,15 @@ type StaticTypeModel struct {
 	Value    types.Int64  `tfsdk:"value"`
 }
 
+type ThresholdPluginModel struct {
+	Warning  *ThresholdTypeModel `tfsdk:"warning"`
+	Critical *ThresholdTypeModel `tfsdk:"critical"`
+}
+type ThresholdTypeModel struct {
+	Static           *StaticTypeModel       `tfsdk:"static"`
+	AdaptiveBaseline *AdaptiveBaselineModel `tfsdk:"adaptive_baseline"`
+}
+
 // StaticThresholdBlockSchema returns the schema for static block configuration
 func StaticBlockSchema() schema.ListNestedBlock {
 	return schema.ListNestedBlock{
@@ -48,6 +57,49 @@ func StaticBlockSchema() schema.ListNestedBlock {
 		},
 		Validators: []validator.List{
 			listvalidator.SizeBetween(0, 1),
+		},
+	}
+}
+
+func StaticAttributeSchema() schema.ListNestedAttribute {
+	return schema.ListNestedAttribute{
+		Description: "Static threshold configuration",
+		NestedObject: schema.NestedAttributeObject{
+			Attributes: map[string]schema.Attribute{
+				LogAlertConfigFieldValue: schema.Int64Attribute{
+					Optional:    true,
+					Computed:    true,
+					Description: "The value of the threshold",
+				},
+			},
+		},
+		Validators: []validator.List{
+			listvalidator.SizeBetween(0, 1),
+		},
+	}
+}
+
+func AdaptiveAttributeSchema() schema.ListNestedAttribute {
+	return schema.ListNestedAttribute{
+		Description: "Threshold configuration",
+		NestedObject: schema.NestedAttributeObject{
+			Attributes: map[string]schema.Attribute{
+				ThresholdFieldAdaptiveBaselineDeviation: schema.Float32Attribute{
+					Optional:    true,
+					Computed:    true,
+					Description: "The deviation factor for the adaptive baseline threshold",
+				},
+				ThresholdFieldAdaptiveBaselineAdaptability: schema.Float32Attribute{
+					Optional:    true,
+					Computed:    true,
+					Description: "The adaptability for the adaptive baseline threshold",
+				},
+				ThresholdFieldAdaptiveBaselineSeasonality: schema.StringAttribute{
+					Optional:    true,
+					Computed:    true,
+					Description: "The seasonality for the adaptive baseline threshold",
+				},
+			},
 		},
 	}
 }
@@ -97,6 +149,18 @@ func StaticAndAdaptiveThresholdBlockSchema() schema.ListNestedBlock {
 			Blocks: map[string]schema.Block{
 				ThresholdFieldStatic:           StaticBlockSchema(),
 				ThresholdFieldAdaptiveBaseline: AdaptiveBlockSchema(),
+			},
+		},
+	}
+}
+
+func StaticAndAdaptiveThresholdAttributeSchema() schema.ListNestedAttribute {
+	return schema.ListNestedAttribute{
+		Description: "Threshold configuration",
+		NestedObject: schema.NestedAttributeObject{
+			Attributes: map[string]schema.Attribute{
+				ThresholdFieldStatic:           StaticAttributeSchema(),
+				ThresholdFieldAdaptiveBaseline: AdaptiveAttributeSchema(),
 			},
 		},
 	}
@@ -870,4 +934,72 @@ func MapThresholdsFromState(ctx context.Context, thresholdList types.List) (map[
 	}
 
 	return thresholdMap, diags
+}
+
+func MapThresholdsPluginFromState(ctx context.Context, thresholdStruct ThresholdPluginModel) (map[restapi.AlertSeverity]restapi.ThresholdRule, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	thresholdMap := make(map[restapi.AlertSeverity]restapi.ThresholdRule)
+
+	// Process warning threshold
+	if thresholdStruct.Warning != nil {
+		warningThreshold, warningDiags := MapThresholdRulePluginFromState(ctx, thresholdStruct.Warning)
+		diags.Append(warningDiags...)
+		if diags.HasError() {
+			return nil, diags
+		}
+
+		if warningThreshold != nil {
+			thresholdMap[restapi.WarningSeverity] = *warningThreshold
+		}
+	}
+
+	// Process critical threshold
+	if thresholdStruct.Critical != nil {
+		criticalThreshold, criticalDiags := MapThresholdRulePluginFromState(ctx, thresholdStruct.Critical)
+		diags.Append(criticalDiags...)
+		if diags.HasError() {
+			return nil, diags
+		}
+
+		if criticalThreshold != nil {
+			thresholdMap[restapi.CriticalSeverity] = *criticalThreshold
+		}
+	}
+
+	return thresholdMap, diags
+}
+
+// MapThresholdRulePluginFromState maps a threshold rule from Terraform state to API model - used for new plugin model using nestedAttribute
+func MapThresholdRulePluginFromState(ctx context.Context, thresholdObj *ThresholdTypeModel) (*restapi.ThresholdRule, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if thresholdObj == nil {
+		return nil, diags
+	}
+
+	// Check for static threshold
+	if thresholdObj.Static != nil {
+		staticVal := thresholdObj.Static
+		valueFloat := float64(staticVal.Value.ValueInt64())
+		return &restapi.ThresholdRule{
+			Type:  "staticThreshold",
+			Value: &valueFloat,
+		}, diags
+	}
+
+	// Check for adaptive baseline threshold
+	if thresholdObj.AdaptiveBaseline != nil {
+		adaptiveVal := thresholdObj.AdaptiveBaseline
+		seasonality := restapi.ThresholdSeasonality(adaptiveVal.Seasonality.ValueString())
+		deviationFactor := float32(adaptiveVal.DeviationFactor.ValueFloat32())
+		adaptability := adaptiveVal.Adaptability.ValueFloat32()
+
+		return &restapi.ThresholdRule{
+			Type:            "adaptiveBaseline",
+			Seasonality:     &seasonality,
+			DeviationFactor: &deviationFactor,
+			Adaptability:    &adaptability,
+		}, diags
+	}
+	return nil, diags
 }

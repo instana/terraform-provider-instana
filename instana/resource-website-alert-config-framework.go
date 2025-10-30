@@ -5,7 +5,6 @@ import (
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/instana/tagfilter"
-	"github.com/gessnerfl/terraform-provider-instana/instana/tf_framework"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -87,6 +86,127 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 						Description: "The evaluation granularity used for detection of violations of the defined threshold.",
 						Default:     int64default.StaticInt64(600000),
 					},
+					ApplicationAlertConfigFieldRules: schema.ListNestedAttribute{
+						Description: "A list of rules where each rule is associated with multiple thresholds and their corresponding severity levels.",
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"operator": schema.StringAttribute{
+									Optional:    true,
+									Computed:    true,
+									Description: "The operator to apply for threshold comparison",
+									Validators: []validator.String{
+										stringvalidator.OneOf(">", ">=", "<", "<="),
+									},
+								},
+								"rule": schema.SingleNestedAttribute{
+									Description: "Indicates the type of rule this alert configuration is about.",
+									Attributes: map[string]schema.Attribute{
+										"slowness": schema.ListNestedAttribute{
+											Description: "Rule based on the slowness of the configured alert configuration target.",
+											NestedObject: schema.NestedAttributeObject{
+												Attributes: map[string]schema.Attribute{
+													"metric_name": schema.StringAttribute{
+														Required:    true,
+														Description: "The metric name of the website alert rule.",
+													},
+													"aggregation": schema.StringAttribute{
+														Required:    true,
+														Description: "The aggregation function of the website alert rule.",
+														Validators: []validator.String{
+															stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
+														},
+													},
+												},
+											},
+										},
+										"specific_js_error": schema.ListNestedAttribute{
+											Description: "Rule based on a specific javascript error of the configured alert configuration target.",
+											NestedObject: schema.NestedAttributeObject{
+												Attributes: map[string]schema.Attribute{
+													"metric_name": schema.StringAttribute{
+														Required:    true,
+														Description: "The metric name of the website alert rule.",
+													},
+													"aggregation": schema.StringAttribute{
+														Optional:    true,
+														Description: "The aggregation function of the website alert rule.",
+														Validators: []validator.String{
+															stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
+														},
+													},
+													"operator": schema.StringAttribute{
+														Required:    true,
+														Description: "The operator which will be applied to evaluate this rule.",
+														Validators: []validator.String{
+															stringvalidator.OneOf("EQUALS", "DOES_NOT_EQUAL", "CONTAINS", "DOES_NOT_CONTAIN"),
+														},
+													},
+													"value": schema.StringAttribute{
+														Optional:    true,
+														Description: "The value identify the specific javascript error.",
+													},
+												},
+											},
+										},
+										"status_code": schema.ListNestedAttribute{
+											Description: "Rule based on the HTTP status code of the configured alert configuration target.",
+											NestedObject: schema.NestedAttributeObject{
+												Attributes: map[string]schema.Attribute{
+													"metric_name": schema.StringAttribute{
+														Required:    true,
+														Description: "The metric name of the website alert rule.",
+													},
+													"aggregation": schema.StringAttribute{
+														Optional:    true,
+														Description: "The aggregation function of the website alert rule.",
+														Validators: []validator.String{
+															stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
+														},
+													},
+													"operator": schema.StringAttribute{
+														Required:    true,
+														Description: "The operator which will be applied to evaluate this rule.",
+														Validators: []validator.String{
+															stringvalidator.OneOf("EQUALS", "DOES_NOT_EQUAL", "CONTAINS", "DOES_NOT_CONTAIN"),
+														},
+													},
+													"value": schema.StringAttribute{
+														Required:    true,
+														Description: "The value identify the specific http status code.",
+													},
+												},
+											},
+										},
+										"throughput": schema.ListNestedAttribute{
+											Description: "Rule based on the throughput of the configured alert configuration target.",
+											NestedObject: schema.NestedAttributeObject{
+												Attributes: map[string]schema.Attribute{
+													"metric_name": schema.StringAttribute{
+														Required:    true,
+														Description: "The metric name of the website alert rule.",
+													},
+													"aggregation": schema.StringAttribute{
+														Optional:    true,
+														Description: "The aggregation function of the website alert rule.",
+														Validators: []validator.String{
+															stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+								ApplicationAlertConfigFieldThreshold: schema.SingleNestedAttribute{
+									Description: "Threshold configuration for different severity levels",
+									Attributes: map[string]schema.Attribute{
+										LogAlertConfigFieldWarning:  StaticAndAdaptiveThresholdAttributeSchema(),
+										LogAlertConfigFieldCritical: StaticAndAdaptiveThresholdAttributeSchema(),
+									},
+								},
+							},
+						},
+					},
 				},
 				Blocks: map[string]schema.Block{
 					"custom_payload_fields": GetCustomPayloadFieldsSchema(),
@@ -106,100 +226,98 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 							},
 						},
 					},
-					"rule": schema.ListNestedBlock{
+					"rule": schema.SingleNestedBlock{
 						Description: "Indicates the type of rule this alert configuration is about.",
-						NestedObject: schema.NestedBlockObject{
-							Blocks: map[string]schema.Block{
-								"slowness": schema.ListNestedBlock{
-									Description: "Rule based on the slowness of the configured alert configuration target.",
-									NestedObject: schema.NestedBlockObject{
-										Attributes: map[string]schema.Attribute{
-											"metric_name": schema.StringAttribute{
-												Required:    true,
-												Description: "The metric name of the website alert rule.",
-											},
-											"aggregation": schema.StringAttribute{
-												Required:    true,
-												Description: "The aggregation function of the website alert rule.",
-												Validators: []validator.String{
-													stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
-												},
+						Blocks: map[string]schema.Block{
+							"slowness": schema.SingleNestedBlock{
+								Description: "Rule based on the slowness of the configured alert configuration target.",
+								NestedObject: schema.NestedBlockObject{
+									Attributes: map[string]schema.Attribute{
+										"metric_name": schema.StringAttribute{
+											Required:    true,
+											Description: "The metric name of the website alert rule.",
+										},
+										"aggregation": schema.StringAttribute{
+											Required:    true,
+											Description: "The aggregation function of the website alert rule.",
+											Validators: []validator.String{
+												stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
 											},
 										},
 									},
 								},
-								"specific_js_error": schema.ListNestedBlock{
-									Description: "Rule based on a specific javascript error of the configured alert configuration target.",
-									NestedObject: schema.NestedBlockObject{
-										Attributes: map[string]schema.Attribute{
-											"metric_name": schema.StringAttribute{
-												Required:    true,
-												Description: "The metric name of the website alert rule.",
+							},
+							"specific_js_error": schema.SingleNestedBlock{
+								Description: "Rule based on a specific javascript error of the configured alert configuration target.",
+								NestedObject: schema.NestedBlockObject{
+									Attributes: map[string]schema.Attribute{
+										"metric_name": schema.StringAttribute{
+											Required:    true,
+											Description: "The metric name of the website alert rule.",
+										},
+										"aggregation": schema.StringAttribute{
+											Optional:    true,
+											Description: "The aggregation function of the website alert rule.",
+											Validators: []validator.String{
+												stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
 											},
-											"aggregation": schema.StringAttribute{
-												Optional:    true,
-												Description: "The aggregation function of the website alert rule.",
-												Validators: []validator.String{
-													stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
-												},
+										},
+										"operator": schema.StringAttribute{
+											Required:    true,
+											Description: "The operator which will be applied to evaluate this rule.",
+											Validators: []validator.String{
+												stringvalidator.OneOf("EQUALS", "DOES_NOT_EQUAL", "CONTAINS", "DOES_NOT_CONTAIN"),
 											},
-											"operator": schema.StringAttribute{
-												Required:    true,
-												Description: "The operator which will be applied to evaluate this rule.",
-												Validators: []validator.String{
-													stringvalidator.OneOf("EQUALS", "DOES_NOT_EQUAL", "CONTAINS", "DOES_NOT_CONTAIN"),
-												},
-											},
-											"value": schema.StringAttribute{
-												Optional:    true,
-												Description: "The value identify the specific javascript error.",
-											},
+										},
+										"value": schema.StringAttribute{
+											Optional:    true,
+											Description: "The value identify the specific javascript error.",
 										},
 									},
 								},
-								"status_code": schema.ListNestedBlock{
-									Description: "Rule based on the HTTP status code of the configured alert configuration target.",
-									NestedObject: schema.NestedBlockObject{
-										Attributes: map[string]schema.Attribute{
-											"metric_name": schema.StringAttribute{
-												Required:    true,
-												Description: "The metric name of the website alert rule.",
+							},
+							"status_code": schema.SingleNestedBlock{
+								Description: "Rule based on the HTTP status code of the configured alert configuration target.",
+								NestedObject: schema.NestedBlockObject{
+									Attributes: map[string]schema.Attribute{
+										"metric_name": schema.StringAttribute{
+											Required:    true,
+											Description: "The metric name of the website alert rule.",
+										},
+										"aggregation": schema.StringAttribute{
+											Optional:    true,
+											Description: "The aggregation function of the website alert rule.",
+											Validators: []validator.String{
+												stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
 											},
-											"aggregation": schema.StringAttribute{
-												Optional:    true,
-												Description: "The aggregation function of the website alert rule.",
-												Validators: []validator.String{
-													stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
-												},
+										},
+										"operator": schema.StringAttribute{
+											Required:    true,
+											Description: "The operator which will be applied to evaluate this rule.",
+											Validators: []validator.String{
+												stringvalidator.OneOf("EQUALS", "DOES_NOT_EQUAL", "CONTAINS", "DOES_NOT_CONTAIN"),
 											},
-											"operator": schema.StringAttribute{
-												Required:    true,
-												Description: "The operator which will be applied to evaluate this rule.",
-												Validators: []validator.String{
-													stringvalidator.OneOf("EQUALS", "DOES_NOT_EQUAL", "CONTAINS", "DOES_NOT_CONTAIN"),
-												},
-											},
-											"value": schema.StringAttribute{
-												Required:    true,
-												Description: "The value identify the specific http status code.",
-											},
+										},
+										"value": schema.StringAttribute{
+											Required:    true,
+											Description: "The value identify the specific http status code.",
 										},
 									},
 								},
-								"throughput": schema.ListNestedBlock{
-									Description: "Rule based on the throughput of the configured alert configuration target.",
-									NestedObject: schema.NestedBlockObject{
-										Attributes: map[string]schema.Attribute{
-											"metric_name": schema.StringAttribute{
-												Required:    true,
-												Description: "The metric name of the website alert rule.",
-											},
-											"aggregation": schema.StringAttribute{
-												Optional:    true,
-												Description: "The aggregation function of the website alert rule.",
-												Validators: []validator.String{
-													stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
-												},
+							},
+							"throughput": schema.SingleNestedBlock{
+								Description: "Rule based on the throughput of the configured alert configuration target.",
+								NestedObject: schema.NestedBlockObject{
+									Attributes: map[string]schema.Attribute{
+										"metric_name": schema.StringAttribute{
+											Required:    true,
+											Description: "The metric name of the website alert rule.",
+										},
+										"aggregation": schema.StringAttribute{
+											Optional:    true,
+											Description: "The aggregation function of the website alert rule.",
+											Validators: []validator.String{
+												stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
 											},
 										},
 									},
@@ -291,7 +409,7 @@ func (r *websiteAlertConfigResourceFramework) SetComputedFields(_ context.Contex
 
 func (r *websiteAlertConfigResourceFramework) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.WebsiteAlertConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	var model tf_framework.WebsiteAlertConfigModel
+	var model WebsiteAlertConfigModel
 
 	// Get current state from plan or state
 	if plan != nil {
@@ -361,6 +479,44 @@ func (r *websiteAlertConfigResourceFramework) MapStateToDataObject(ctx context.C
 		return nil, diags
 	}
 
+	//Map rules
+	rules := make([]restapi.WebsiteAlertRuleWithThresholds, 0)
+	if len(model.Rules) != 0 {
+
+		// Skip custom payload fields for now
+		for _, i := range model.Rules {
+			var websiteAlertRule *restapi.WebsiteAlertRule
+			if i.Rule.Slowness != nil {
+				websiteAlertRule, diags = mapSlownessRule(ctx, diags, *i.Rule.Slowness)
+			} else if i.Rule.SpecificJsError != nil {
+				websiteAlertRule, diags = mapSpecificJsErrorRule(ctx, diags, *i.Rule.SpecificJsError)
+			} else if i.Rule.StatusCode != nil {
+				websiteAlertRule, diags = mapStatusCodeRule(ctx, diags, *i.Rule.StatusCode)
+			} else if i.Rule.Throughput != nil {
+				websiteAlertRule, diags = mapThroughputRule(ctx, diags, *i.Rule.Throughput)
+			}
+			var thresholdMap map[restapi.AlertSeverity]restapi.ThresholdRule
+			warningThreshold, warningDiags := MapThresholdRulePluginFromState(ctx, i.Thresholds.Warning)
+			diags.Append(warningDiags...)
+			if diags.HasError() {
+				return nil, diags
+			}
+			criticalThreshold, criticalDiags := MapThresholdRulePluginFromState(ctx, i.Thresholds.Critical)
+			diags.Append(criticalDiags...)
+			if diags.HasError() {
+				return nil, diags
+			}
+			thresholdMap[restapi.WarningSeverity] = *warningThreshold
+			thresholdMap[restapi.CriticalSeverity] = *criticalThreshold
+
+			rules = append(rules, restapi.WebsiteAlertRuleWithThresholds{
+				Rule:              websiteAlertRule,
+				ThresholdOperator: i.ThresholdOperator.ValueString(),
+				Thresholds:        thresholdMap,
+			})
+		}
+
+	}
 	// Create API object
 	return &restapi.WebsiteAlertConfig{
 		ID:                    model.ID.ValueString(),
@@ -373,13 +529,14 @@ func (r *websiteAlertConfigResourceFramework) MapStateToDataObject(ctx context.C
 		AlertChannelIDs:       alertChannelIDs,
 		Granularity:           restapi.Granularity(model.Granularity.ValueInt64()),
 		CustomerPayloadFields: customPayloadFields,
-		Rule:                  *rule,
+		Rule:                  rule,
 		Threshold:             *threshold,
 		TimeThreshold:         *timeThreshold,
+		Rules:                 rules,
 	}, diags
 }
 
-func (r *websiteAlertConfigResourceFramework) mapRuleFromModel(ctx context.Context, model tf_framework.WebsiteAlertConfigModel) (*restapi.WebsiteAlertRule, diag.Diagnostics) {
+func (r *websiteAlertConfigResourceFramework) mapRuleFromModel(ctx context.Context, model WebsiteAlertConfigModel) (*restapi.WebsiteAlertRule, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Check if rule is set
@@ -388,7 +545,7 @@ func (r *websiteAlertConfigResourceFramework) mapRuleFromModel(ctx context.Conte
 		return nil, diags
 	}
 
-	var ruleModels []tf_framework.WebsiteAlertRuleModel
+	var ruleModels []WebsiteAlertRuleModel
 	diags.Append(model.Rule.ElementsAs(ctx, &ruleModels, false)...)
 	if diags.HasError() {
 		return nil, diags
@@ -403,118 +560,108 @@ func (r *websiteAlertConfigResourceFramework) mapRuleFromModel(ctx context.Conte
 
 	// Check which rule type is set
 	if !ruleModel.Slowness.IsNull() && !ruleModel.Slowness.IsUnknown() {
-		var slownessModels []tf_framework.WebsiteAlertRuleConfigModel
+		var slownessModels []WebsiteAlertRuleConfigModel
 		diags.Append(ruleModel.Slowness.ElementsAs(ctx, &slownessModels, false)...)
 		if diags.HasError() {
 			return nil, diags
 		}
-
-		if len(slownessModels) != 1 {
-			diags.AddError("Invalid slowness rule", "Exactly one slowness rule configuration is required")
-			return nil, diags
-		}
-
-		slownessModel := slownessModels[0]
-		aggregation := restapi.Aggregation(slownessModel.Aggregation.ValueString())
-
-		return &restapi.WebsiteAlertRule{
-			AlertType:   "slowness",
-			MetricName:  slownessModel.MetricName.ValueString(),
-			Aggregation: &aggregation,
-		}, diags
+		return r.mapSlownessRule(ctx, diags, slownessModels[0])
 	} else if !ruleModel.SpecificJsError.IsNull() && !ruleModel.SpecificJsError.IsUnknown() {
-		var specificJsErrorModels []tf_framework.WebsiteAlertRuleConfigModel
+		var specificJsErrorModels []WebsiteAlertRuleConfigCompleteModel
 		diags.Append(ruleModel.SpecificJsError.ElementsAs(ctx, &specificJsErrorModels, false)...)
 		if diags.HasError() {
 			return nil, diags
 		}
-
-		if len(specificJsErrorModels) != 1 {
-			diags.AddError("Invalid specific JS error rule", "Exactly one specific JS error rule configuration is required")
-			return nil, diags
-		}
-
-		specificJsErrorModel := specificJsErrorModels[0]
-		var aggregationPtr *restapi.Aggregation
-		if !specificJsErrorModel.Aggregation.IsNull() && !specificJsErrorModel.Aggregation.IsUnknown() {
-			aggregation := restapi.Aggregation(specificJsErrorModel.Aggregation.ValueString())
-			aggregationPtr = &aggregation
-		}
-
-		operator := restapi.ExpressionOperator(specificJsErrorModel.Operator.ValueString())
-		var valuePtr *string
-		if !specificJsErrorModel.Value.IsNull() && !specificJsErrorModel.Value.IsUnknown() {
-			value := specificJsErrorModel.Value.ValueString()
-			valuePtr = &value
-		}
-
-		return &restapi.WebsiteAlertRule{
-			AlertType:   "specificJsError",
-			MetricName:  specificJsErrorModel.MetricName.ValueString(),
-			Aggregation: aggregationPtr,
-			Operator:    &operator,
-			Value:       valuePtr,
-		}, diags
+		return r.mapSpecificJsErrorRule(ctx, diags, specificJsErrorModels[0])
 	} else if !ruleModel.StatusCode.IsNull() && !ruleModel.StatusCode.IsUnknown() {
-		var statusCodeModels []tf_framework.WebsiteAlertRuleConfigModel
+		var statusCodeModels []WebsiteAlertRuleConfigCompleteModel
 		diags.Append(ruleModel.StatusCode.ElementsAs(ctx, &statusCodeModels, false)...)
 		if diags.HasError() {
 			return nil, diags
 		}
-
-		if len(statusCodeModels) != 1 {
-			diags.AddError("Invalid status code rule", "Exactly one status code rule configuration is required")
-			return nil, diags
-		}
-
-		statusCodeModel := statusCodeModels[0]
-		var aggregationPtr *restapi.Aggregation
-		if !statusCodeModel.Aggregation.IsNull() && !statusCodeModel.Aggregation.IsUnknown() {
-			aggregation := restapi.Aggregation(statusCodeModel.Aggregation.ValueString())
-			aggregationPtr = &aggregation
-		}
-
-		operator := restapi.ExpressionOperator(statusCodeModel.Operator.ValueString())
-		value := statusCodeModel.Value.ValueString()
-
-		return &restapi.WebsiteAlertRule{
-			AlertType:   "statusCode",
-			MetricName:  statusCodeModel.MetricName.ValueString(),
-			Aggregation: aggregationPtr,
-			Operator:    &operator,
-			Value:       &value,
-		}, diags
+		return r.mapStatusCodeRule(ctx, diags, statusCodeModels[0])
 	} else if !ruleModel.Throughput.IsNull() && !ruleModel.Throughput.IsUnknown() {
-		var throughputModels []tf_framework.WebsiteAlertRuleConfigModel
+		var throughputModels []WebsiteAlertRuleConfigModel
 		diags.Append(ruleModel.Throughput.ElementsAs(ctx, &throughputModels, false)...)
 		if diags.HasError() {
 			return nil, diags
 		}
-
-		if len(throughputModels) != 1 {
-			diags.AddError("Invalid throughput rule", "Exactly one throughput rule configuration is required")
-			return nil, diags
-		}
-
-		throughputModel := throughputModels[0]
-		var aggregationPtr *restapi.Aggregation
-		if !throughputModel.Aggregation.IsNull() && !throughputModel.Aggregation.IsUnknown() {
-			aggregation := restapi.Aggregation(throughputModel.Aggregation.ValueString())
-			aggregationPtr = &aggregation
-		}
-
-		return &restapi.WebsiteAlertRule{
-			AlertType:   "throughput",
-			MetricName:  throughputModel.MetricName.ValueString(),
-			Aggregation: aggregationPtr,
-		}, diags
+		return r.mapThroughputRule(ctx, diags, throughputModels[0])
 	}
 
 	diags.AddError("Invalid rule configuration", "Exactly one rule type configuration is required")
 	return nil, diags
 }
 
-func (r *websiteAlertConfigResourceFramework) mapThresholdFromModel(ctx context.Context, model tf_framework.WebsiteAlertConfigModel) (*restapi.Threshold, diag.Diagnostics) {
+func (r *websiteAlertConfigResourceFramework) mapThroughputRule(ctx context.Context, diags diag.Diagnostics, throughputModel WebsiteAlertRuleConfigModel) (*restapi.WebsiteAlertRule, diag.Diagnostics) {
+	var aggregationPtr *restapi.Aggregation
+	if !throughputModel.Aggregation.IsNull() && !throughputModel.Aggregation.IsUnknown() {
+		aggregation := restapi.Aggregation(throughputModel.Aggregation.ValueString())
+		aggregationPtr = &aggregation
+	}
+
+	return &restapi.WebsiteAlertRule{
+		AlertType:   "throughput",
+		MetricName:  throughputModel.MetricName.ValueString(),
+		Aggregation: aggregationPtr,
+	}, diags
+}
+
+func (r *websiteAlertConfigResourceFramework) mapStatusCodeRule(ctx context.Context, diags diag.Diagnostics, statusCodeModel WebsiteAlertRuleConfigCompleteModel) (*restapi.WebsiteAlertRule, diag.Diagnostics) {
+
+	var aggregationPtr *restapi.Aggregation
+	if !statusCodeModel.Aggregation.IsNull() && !statusCodeModel.Aggregation.IsUnknown() {
+		aggregation := restapi.Aggregation(statusCodeModel.Aggregation.ValueString())
+		aggregationPtr = &aggregation
+	}
+
+	operator := restapi.ExpressionOperator(statusCodeModel.Operator.ValueString())
+	value := statusCodeModel.Value.ValueString()
+
+	return &restapi.WebsiteAlertRule{
+		AlertType:   "statusCode",
+		MetricName:  statusCodeModel.MetricName.ValueString(),
+		Aggregation: aggregationPtr,
+		Operator:    &operator,
+		Value:       &value,
+	}, diags
+}
+
+func (r *websiteAlertConfigResourceFramework) mapSpecificJsErrorRule(ctx context.Context, diags diag.Diagnostics, specificJsErrorModel WebsiteAlertRuleConfigCompleteModel) (*restapi.WebsiteAlertRule, diag.Diagnostics) {
+
+	var aggregationPtr *restapi.Aggregation
+	if !specificJsErrorModel.Aggregation.IsNull() && !specificJsErrorModel.Aggregation.IsUnknown() {
+		aggregation := restapi.Aggregation(specificJsErrorModel.Aggregation.ValueString())
+		aggregationPtr = &aggregation
+	}
+
+	operator := restapi.ExpressionOperator(specificJsErrorModel.Operator.ValueString())
+	var valuePtr *string
+	if !specificJsErrorModel.Value.IsNull() && !specificJsErrorModel.Value.IsUnknown() {
+		value := specificJsErrorModel.Value.ValueString()
+		valuePtr = &value
+	}
+
+	return &restapi.WebsiteAlertRule{
+		AlertType:   "specificJsError",
+		MetricName:  specificJsErrorModel.MetricName.ValueString(),
+		Aggregation: aggregationPtr,
+		Operator:    &operator,
+		Value:       valuePtr,
+	}, diags
+}
+
+func (r *websiteAlertConfigResourceFramework) mapSlownessRule(ctx context.Context, diags diag.Diagnostics, slownessModel WebsiteAlertRuleConfigModel) (*restapi.WebsiteAlertRule, diag.Diagnostics) {
+	aggregation := restapi.Aggregation(slownessModel.Aggregation.ValueString())
+
+	return &restapi.WebsiteAlertRule{
+		AlertType:   "slowness",
+		MetricName:  slownessModel.MetricName.ValueString(),
+		Aggregation: &aggregation,
+	}, diags
+}
+
+func (r *websiteAlertConfigResourceFramework) mapThresholdFromModel(ctx context.Context, model WebsiteAlertConfigModel) (*restapi.Threshold, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Check if threshold is set
@@ -523,7 +670,7 @@ func (r *websiteAlertConfigResourceFramework) mapThresholdFromModel(ctx context.
 		return nil, diags
 	}
 
-	var thresholdModel tf_framework.ThresholdModel
+	var thresholdModel WebsiteThresholdModel
 	diags.Append(model.Threshold.As(ctx, &thresholdModel, basetypes.ObjectAsOptions{})...)
 	if diags.HasError() {
 		return nil, diags
@@ -537,7 +684,7 @@ func (r *websiteAlertConfigResourceFramework) mapThresholdFromModel(ctx context.
 	}, diags
 }
 
-func (r *websiteAlertConfigResourceFramework) mapTimeThresholdFromModel(ctx context.Context, model tf_framework.WebsiteAlertConfigModel) (*restapi.WebsiteTimeThreshold, diag.Diagnostics) {
+func (r *websiteAlertConfigResourceFramework) mapTimeThresholdFromModel(ctx context.Context, model WebsiteAlertConfigModel) (*restapi.WebsiteTimeThreshold, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Check if time threshold is set
@@ -546,7 +693,7 @@ func (r *websiteAlertConfigResourceFramework) mapTimeThresholdFromModel(ctx cont
 		return nil, diags
 	}
 
-	var timeThresholdModels []tf_framework.WebsiteTimeThresholdModel
+	var timeThresholdModels []WebsiteTimeThresholdModel
 	diags.Append(model.TimeThreshold.ElementsAs(ctx, &timeThresholdModels, false)...)
 	if diags.HasError() {
 		return nil, diags
@@ -561,7 +708,7 @@ func (r *websiteAlertConfigResourceFramework) mapTimeThresholdFromModel(ctx cont
 
 	// Check which time threshold type is set
 	if !timeThresholdModel.UserImpactOfViolationsInSequence.IsNull() && !timeThresholdModel.UserImpactOfViolationsInSequence.IsUnknown() {
-		var userImpactModels []tf_framework.WebsiteUserImpactOfViolationsInSequenceModel
+		var userImpactModels []WebsiteUserImpactOfViolationsInSequenceModel
 		diags.Append(timeThresholdModel.UserImpactOfViolationsInSequence.ElementsAs(ctx, &userImpactModels, false)...)
 		if diags.HasError() {
 			return nil, diags
@@ -600,7 +747,7 @@ func (r *websiteAlertConfigResourceFramework) mapTimeThresholdFromModel(ctx cont
 			Users:                   usersPtr,
 		}, diags
 	} else if !timeThresholdModel.ViolationsInPeriod.IsNull() && !timeThresholdModel.ViolationsInPeriod.IsUnknown() {
-		var violationsInPeriodModels []tf_framework.WebsiteViolationsInPeriodModel
+		var violationsInPeriodModels []WebsiteViolationsInPeriodModel
 		diags.Append(timeThresholdModel.ViolationsInPeriod.ElementsAs(ctx, &violationsInPeriodModels, false)...)
 		if diags.HasError() {
 			return nil, diags
@@ -630,7 +777,7 @@ func (r *websiteAlertConfigResourceFramework) mapTimeThresholdFromModel(ctx cont
 			Violations: violationsPtr,
 		}, diags
 	} else if !timeThresholdModel.ViolationsInSequence.IsNull() && !timeThresholdModel.ViolationsInSequence.IsUnknown() {
-		var violationsInSequenceModels []tf_framework.WebsiteViolationsInSequenceModel
+		var violationsInSequenceModels []WebsiteViolationsInSequenceModel
 		diags.Append(timeThresholdModel.ViolationsInSequence.ElementsAs(ctx, &violationsInSequenceModels, false)...)
 		if diags.HasError() {
 			return nil, diags
@@ -669,7 +816,7 @@ func (r *websiteAlertConfigResourceFramework) UpdateState(ctx context.Context, s
 	}
 
 	// Create a model and populate it with values from the config
-	model := tf_framework.WebsiteAlertConfigModel{
+	model := WebsiteAlertConfigModel{
 		ID:          types.StringValue(apiObject.ID),
 		Name:        types.StringValue(apiObject.Name),
 		Description: types.StringValue(apiObject.Description),
@@ -697,7 +844,50 @@ func (r *websiteAlertConfigResourceFramework) UpdateState(ctx context.Context, s
 		model.AlertChannelIDs = types.SetNull(types.StringType)
 	}
 
+	//map rule
+	model.Rule = r.mapRuleToState(ctx, apiObject)
+
+	//map rules
+
 	// Set state
 	diags.Append(state.Set(ctx, &model)...)
 	return diags
+}
+
+func (r *websiteAlertConfigResourceFramework) mapRuleToState(ctx context.Context, apiObject *restapi.WebsiteAlertConfig) WebsiteAlertRuleModel {
+
+	rule := apiObject.Rule
+	websiteAlertRuleModel := WebsiteAlertRuleModel{}
+	switch rule.AlertType {
+	case "throughput":
+		websiteAlertRuleConfigModel := WebsiteAlertRuleConfigModel{
+			MetricName:  types.StringValue(rule.MetricName),
+			Aggregation: types.StringValue(string(*rule.Aggregation)),
+		}
+		websiteAlertRuleModel.Throughput = &websiteAlertRuleConfigModel
+	case "slowness":
+		websiteAlertRuleConfigModel := WebsiteAlertRuleConfigModel{
+			MetricName:  types.StringValue(rule.MetricName),
+			Aggregation: types.StringValue(string(*rule.Aggregation)),
+		}
+		websiteAlertRuleModel.Slowness = &websiteAlertRuleConfigModel
+	case "statusCode":
+		websiteAlertRuleConfigModel := WebsiteAlertRuleConfigCompleteModel{
+			MetricName:  types.StringValue(rule.MetricName),
+			Aggregation: types.StringValue(string(*rule.Aggregation)),
+		}
+		websiteAlertRuleModel.StatusCode = &websiteAlertRuleConfigModel
+	case "specificJsError":
+		websiteAlertRuleConfigModel := WebsiteAlertRuleConfigCompleteModel{
+			MetricName:  types.StringValue(rule.MetricName),
+			Aggregation: types.StringValue(string(*rule.Aggregation)),
+			Operator:    types.StringValue(string(*rule.Operator)),
+			Value:       types.StringValue(*rule.Value),
+		}
+		websiteAlertRuleModel.SpecificJsError = &websiteAlertRuleConfigModel
+
+	}
+
+	return websiteAlertRuleModel
+
 }

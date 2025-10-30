@@ -2,6 +2,7 @@ package instana
 
 import (
 	"context"
+
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/instana/tagfilter"
 	"github.com/gessnerfl/terraform-provider-instana/tfutils"
@@ -500,7 +501,7 @@ func (r *websiteAlertConfigResource) MapStateToDataObject(d *schema.ResourceData
 		Description:           d.Get(WebsiteAlertConfigFieldDescription).(string),
 		Granularity:           restapi.Granularity(d.Get(WebsiteAlertConfigFieldGranularity).(int)),
 		Name:                  d.Get(WebsiteMonitoringConfigFieldName).(string),
-		Rule:                  *r.mapRuleFromSchema(d),
+		Rule:                  r.mapRuleFromSchema(d),
 		Severity:              severity,
 		TagFilterExpression:   tagFilter,
 		Threshold:             *threshold,
