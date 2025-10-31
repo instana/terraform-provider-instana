@@ -165,11 +165,7 @@ func (r *customDashboardResourceFramework) mapAccessRulesToState(ctx context.Con
 		}
 
 		// Handle related ID
-		if rule.RelatedID != nil {
-			ruleObj[CustomDashboardFieldAccessRuleRelatedID] = types.StringValue(*rule.RelatedID)
-		} else {
-			ruleObj[CustomDashboardFieldAccessRuleRelatedID] = types.StringNull()
-		}
+		ruleObj[CustomDashboardFieldAccessRuleRelatedID] = setStringPointerToState(rule.RelatedID)
 
 		objValue, d := types.ObjectValue(
 			map[string]attr.Type{

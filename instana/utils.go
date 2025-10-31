@@ -194,7 +194,12 @@ func NormalizeJSONString(jsonString string) string {
 	return string(bytes)
 }
 
-func handleStringValue(i *string) types.String {
+// this interface to handle the conversion of differnt numeric types
+type numericPtr interface {
+	~*int32 | ~*int64 | ~*float32 | ~*float64
+}
+
+func setStringPointerToState(i *string) types.String {
 	if i == nil {
 		return types.StringNull()
 	} else {
@@ -202,7 +207,82 @@ func handleStringValue(i *string) types.String {
 	}
 }
 
-func handleBooleanValue(i *bool) types.Bool {
+func setInt64PointerToState[T *int32 | *int64 | *float32 | *float64](i T) types.Int64 {
+	if i == nil {
+		return types.Int64Null()
+	}
+	switch v := any(i).(type) {
+	case *int32:
+		return types.Int64Value(int64(*v))
+	case *int64:
+		return types.Int64Value(*v)
+	case *float32:
+		return types.Int64Value(int64(*v))
+	case *float64:
+		return types.Int64Value(int64(*v))
+	default:
+		// unreachable because of the constraint, but keep safe fallback
+		return types.Int64Null()
+	}
+}
+
+func setInt32PointerToState[T *int32 | *int64 | *float32 | *float64](i T) types.Int32 {
+	if i == nil {
+		return types.Int32Null()
+	}
+	switch v := any(i).(type) {
+	case *int32:
+		return types.Int32Value(int32(*v))
+	case *int64:
+		return types.Int32Value(int32(*v))
+	case *float32:
+		return types.Int32Value(int32(*v))
+	case *float64:
+		return types.Int32Value(int32(*v))
+	default:
+		// unreachable because of the constraint, but keep safe fallback
+		return types.Int32Null()
+	}
+}
+func setFloat32PointerToState[T *int32 | *int64 | *float32 | *float64](i T) types.Float32 {
+	if i == nil {
+		return types.Float32Null()
+	}
+	switch v := any(i).(type) {
+	case *int32:
+		return types.Float32Value(float32(*v))
+	case *int64:
+		return types.Float32Value(float32(*v))
+	case *float32:
+		return types.Float32Value(float32(*v))
+	case *float64:
+		return types.Float32Value(float32(*v))
+	default:
+		// unreachable because of the constraint, but keep safe fallback
+		return types.Float32Null()
+	}
+}
+
+func setFloat64PointerToState[T *int32 | *int64 | *float32 | *float64](i T) types.Float64 {
+	if i == nil {
+		return types.Float64Null()
+	}
+	switch v := any(i).(type) {
+	case *int32:
+		return types.Float64Value(float64(*v))
+	case *int64:
+		return types.Float64Value(float64(*v))
+	case *float32:
+		return types.Float64Value(float64(*v))
+	case *float64:
+		return types.Float64Value(float64(*v))
+	default:
+		// unreachable because of the constraint, but keep safe fallback
+		return types.Float64Null()
+	}
+}
+
+func setBoolPointerToState(i *bool) types.Bool {
 	if i == nil {
 		return types.BoolNull()
 	} else {
@@ -210,7 +290,7 @@ func handleBooleanValue(i *bool) types.Bool {
 	}
 }
 
-func setStringPointer(s types.String) *string {
+func setStringPointerFromState(s types.String) *string {
 	if s.IsNull() || s.IsUnknown() {
 		return nil
 	}

@@ -63,6 +63,8 @@ func StaticBlockSchema() schema.ListNestedBlock {
 
 func StaticAttributeSchema() schema.ListNestedAttribute {
 	return schema.ListNestedAttribute{
+		Optional:    true,
+		Computed:    true,
 		Description: "Static threshold configuration",
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: map[string]schema.Attribute{
@@ -82,6 +84,8 @@ func StaticAttributeSchema() schema.ListNestedAttribute {
 func AdaptiveAttributeSchema() schema.ListNestedAttribute {
 	return schema.ListNestedAttribute{
 		Description: "Threshold configuration",
+		Optional:    true,
+		Computed:    true,
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: map[string]schema.Attribute{
 				ThresholdFieldAdaptiveBaselineDeviation: schema.Float32Attribute{
@@ -157,6 +161,8 @@ func StaticAndAdaptiveThresholdBlockSchema() schema.ListNestedBlock {
 func StaticAndAdaptiveThresholdAttributeSchema() schema.ListNestedAttribute {
 	return schema.ListNestedAttribute{
 		Description: "Threshold configuration",
+		Optional:    true,
+		Computed:    true,
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: map[string]schema.Attribute{
 				ThresholdFieldStatic:           StaticAttributeSchema(),
@@ -568,7 +574,7 @@ func mapAdaptiveBaselineToState(ctx context.Context, threshold *restapi.Threshol
 		adaptiveObj[ThresholdFieldAdaptiveBaselineDeviation] = types.Float32Value(1.0)
 	}
 
-	adaptiveObj[ThresholdFieldAdaptiveBaselineAdaptability] = types.Float32Value(*threshold.Adaptability)
+	adaptiveObj[ThresholdFieldAdaptiveBaselineAdaptability] = setFloat32PointerToState(threshold.Adaptability)
 
 	// Create adaptive baseline object value
 	adaptiveObjVal, adaptiveObjDiags := types.ObjectValue(
@@ -1011,8 +1017,8 @@ func MapThresholdPluginToState(ctx context.Context, threshold *restapi.Threshold
 	case "adaptiveBaseline":
 		adaptiveBaselineModel := AdaptiveBaselineModel{
 			Operator:        types.StringValue(threshold.Operator),
-			DeviationFactor: types.Float32Value(*threshold.DeviationFactor),
-			Adaptability:    types.Float32Value(*threshold.Adaptability),
+			DeviationFactor: setFloat32PointerToState(threshold.DeviationFactor),
+			Adaptability:    setFloat32PointerToState(threshold.Adaptability),
 			Seasonality:     types.StringValue(string(*threshold.Seasonality)),
 		}
 		thresholdTypeModel.AdaptiveBaseline = &adaptiveBaselineModel
@@ -1020,7 +1026,7 @@ func MapThresholdPluginToState(ctx context.Context, threshold *restapi.Threshold
 		// Default to static threshold for all other types
 		static := StaticTypeModel{
 			Operator: types.StringValue(threshold.Operator),
-			Value:    types.Int64Value(int64(*threshold.Value)),
+			Value:    setInt64PointerToState(threshold.Value),
 		}
 		thresholdTypeModel.Static = &static
 	}

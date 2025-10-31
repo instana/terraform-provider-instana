@@ -141,11 +141,7 @@ func (r *alertingConfigResourceFramework) UpdateState(ctx context.Context, state
 	model.IntegrationIDs = integrationIDs
 
 	// Set event filter query
-	if config.EventFilteringConfiguration.Query != nil {
-		model.EventFilterQuery = types.StringValue(*config.EventFilteringConfiguration.Query)
-	} else {
-		model.EventFilterQuery = types.StringNull()
-	}
+	model.EventFilterQuery = setStringPointerToState(config.EventFilteringConfiguration.Query)
 
 	// Set event filter event types
 	eventTypes := r.convertEventTypesToHarmonizedStringRepresentation(config.EventFilteringConfiguration.EventTypes)

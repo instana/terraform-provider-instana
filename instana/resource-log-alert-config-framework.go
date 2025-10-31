@@ -265,7 +265,7 @@ func (r *logAlertConfigResourceFramework) UpdateState(ctx context.Context, state
 			)
 			return diags
 		}
-		model.TagFilter = types.StringValue(*normalizedTagFilterString)
+		model.TagFilter = setStringPointerToState(normalizedTagFilterString)
 	} else {
 		model.TagFilter = types.StringNull()
 	}

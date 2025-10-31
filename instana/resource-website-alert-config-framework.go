@@ -16,7 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 // ResourceInstanaWebsiteAlertConfigFramework the name of the terraform-provider-instana resource to manage website alert configs
@@ -88,6 +87,8 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 					},
 					ApplicationAlertConfigFieldRules: schema.ListNestedAttribute{
 						Description: "A list of rules where each rule is associated with multiple thresholds and their corresponding severity levels.",
+						Optional:    true,
+						Computed:    true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"operator": schema.StringAttribute{
@@ -100,9 +101,13 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 								},
 								"rule": schema.SingleNestedAttribute{
 									Description: "Indicates the type of rule this alert configuration is about.",
+									Optional:    true,
+									Computed:    true,
 									Attributes: map[string]schema.Attribute{
 										"slowness": schema.ListNestedAttribute{
 											Description: "Rule based on the slowness of the configured alert configuration target.",
+											Optional:    true,
+											Computed:    true,
 											NestedObject: schema.NestedAttributeObject{
 												Attributes: map[string]schema.Attribute{
 													"metric_name": schema.StringAttribute{
@@ -121,6 +126,8 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 										},
 										"specific_js_error": schema.ListNestedAttribute{
 											Description: "Rule based on a specific javascript error of the configured alert configuration target.",
+											Optional:    true,
+											Computed:    true,
 											NestedObject: schema.NestedAttributeObject{
 												Attributes: map[string]schema.Attribute{
 													"metric_name": schema.StringAttribute{
@@ -150,6 +157,8 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 										},
 										"status_code": schema.ListNestedAttribute{
 											Description: "Rule based on the HTTP status code of the configured alert configuration target.",
+											Optional:    true,
+											Computed:    true,
 											NestedObject: schema.NestedAttributeObject{
 												Attributes: map[string]schema.Attribute{
 													"metric_name": schema.StringAttribute{
@@ -179,6 +188,8 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 										},
 										"throughput": schema.ListNestedAttribute{
 											Description: "Rule based on the throughput of the configured alert configuration target.",
+											Optional:    true,
+											Computed:    true,
 											NestedObject: schema.NestedAttributeObject{
 												Attributes: map[string]schema.Attribute{
 													"metric_name": schema.StringAttribute{
@@ -199,6 +210,8 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 								},
 								ApplicationAlertConfigFieldThreshold: schema.SingleNestedAttribute{
 									Description: "Threshold configuration for different severity levels",
+									Optional:    true,
+									Computed:    true,
 									Attributes: map[string]schema.Attribute{
 										LogAlertConfigFieldWarning:  StaticAndAdaptiveThresholdAttributeSchema(),
 										LogAlertConfigFieldCritical: StaticAndAdaptiveThresholdAttributeSchema(),
@@ -321,55 +334,49 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 						Description: "Indicates the type of violation of the defined threshold.",
 						NestedObject: schema.NestedBlockObject{
 							Blocks: map[string]schema.Block{
-								"user_impact_of_violations_in_sequence": schema.ListNestedBlock{
+								"user_impact_of_violations_in_sequence": schema.SingleNestedBlock{
 									Description: "Time threshold base on user impact of violations in sequence.",
-									NestedObject: schema.NestedBlockObject{
-										Attributes: map[string]schema.Attribute{
-											"time_window": schema.Int64Attribute{
-												Optional:    true,
-												Description: "The time window if the time threshold.",
+									Attributes: map[string]schema.Attribute{
+										"time_window": schema.Int64Attribute{
+											Optional:    true,
+											Description: "The time window if the time threshold.",
+										},
+										"impact_measurement_method": schema.StringAttribute{
+											Required:    true,
+											Description: "The impact method of the time threshold based on user impact of violations in sequence.",
+											Validators: []validator.String{
+												stringvalidator.OneOf("AGGREGATED", "PER_WINDOW"),
 											},
-											"impact_measurement_method": schema.StringAttribute{
-												Required:    true,
-												Description: "The impact method of the time threshold based on user impact of violations in sequence.",
-												Validators: []validator.String{
-													stringvalidator.OneOf("AGGREGATED", "PER_WINDOW"),
-												},
-											},
-											"user_percentage": schema.Float64Attribute{
-												Optional:    true,
-												Description: "The percentage of impacted users of the time threshold based on user impact of violations in sequence.",
-											},
-											"users": schema.Int64Attribute{
-												Optional:    true,
-												Description: "The number of impacted users of the time threshold based on user impact of violations in sequence.",
-											},
+										},
+										"user_percentage": schema.Float64Attribute{
+											Optional:    true,
+											Description: "The percentage of impacted users of the time threshold based on user impact of violations in sequence.",
+										},
+										"users": schema.Int64Attribute{
+											Optional:    true,
+											Description: "The number of impacted users of the time threshold based on user impact of violations in sequence.",
 										},
 									},
 								},
-								"violations_in_period": schema.ListNestedBlock{
+								"violations_in_period": schema.SingleNestedBlock{
 									Description: "Time threshold base on violations in period.",
-									NestedObject: schema.NestedBlockObject{
-										Attributes: map[string]schema.Attribute{
-											"time_window": schema.Int64Attribute{
-												Optional:    true,
-												Description: "The time window if the time threshold.",
-											},
-											"violations": schema.Int64Attribute{
-												Optional:    true,
-												Description: "The violations appeared in the period.",
-											},
+									Attributes: map[string]schema.Attribute{
+										"time_window": schema.Int64Attribute{
+											Optional:    true,
+											Description: "The time window if the time threshold.",
+										},
+										"violations": schema.Int64Attribute{
+											Optional:    true,
+											Description: "The violations appeared in the period.",
 										},
 									},
 								},
-								"violations_in_sequence": schema.ListNestedBlock{
+								"violations_in_sequence": schema.SingleNestedBlock{
 									Description: "Time threshold base on violations in sequence.",
-									NestedObject: schema.NestedBlockObject{
-										Attributes: map[string]schema.Attribute{
-											"time_window": schema.Int64Attribute{
-												Optional:    true,
-												Description: "The time window if the time threshold.",
-											},
+									Attributes: map[string]schema.Attribute{
+										"time_window": schema.Int64Attribute{
+											Optional:    true,
+											Description: "The time window if the time threshold.",
 										},
 									},
 								},
@@ -628,17 +635,11 @@ func (r *websiteAlertConfigResourceFramework) mapThresholdFromModel(ctx context.
 	var diags diag.Diagnostics
 
 	// Check if threshold is set
-	if model.Threshold.IsNull() || model.Threshold.IsUnknown() {
+	if model.Threshold == nil {
 		diags.AddError("Threshold is required", "Website alert config threshold is required")
 		return nil, diags
 	}
-
-	var thresholdModel WebsiteThresholdModel
-	diags.Append(model.Threshold.As(ctx, &thresholdModel, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil, diags
-	}
-
+	thresholdModel := *model.Threshold
 	value := thresholdModel.Value.ValueFloat64()
 	valuePtr := &value
 	return &restapi.Threshold{
@@ -651,38 +652,15 @@ func (r *websiteAlertConfigResourceFramework) mapTimeThresholdFromModel(ctx cont
 	var diags diag.Diagnostics
 
 	// Check if time threshold is set
-	if model.TimeThreshold.IsNull() || model.TimeThreshold.IsUnknown() {
+	if model.TimeThreshold == nil {
 		diags.AddError("Time threshold is required", "Website alert config time threshold is required")
 		return nil, diags
 	}
-
-	var timeThresholdModels []WebsiteTimeThresholdModel
-	diags.Append(model.TimeThreshold.ElementsAs(ctx, &timeThresholdModels, false)...)
-	if diags.HasError() {
-		return nil, diags
-	}
-
-	if len(timeThresholdModels) != 1 {
-		diags.AddError("Invalid time threshold", "Exactly one time threshold configuration is required")
-		return nil, diags
-	}
-
-	timeThresholdModel := timeThresholdModels[0]
+	timeThresholdModel := *model.TimeThreshold
 
 	// Check which time threshold type is set
-	if !timeThresholdModel.UserImpactOfViolationsInSequence.IsNull() && !timeThresholdModel.UserImpactOfViolationsInSequence.IsUnknown() {
-		var userImpactModels []WebsiteUserImpactOfViolationsInSequenceModel
-		diags.Append(timeThresholdModel.UserImpactOfViolationsInSequence.ElementsAs(ctx, &userImpactModels, false)...)
-		if diags.HasError() {
-			return nil, diags
-		}
-
-		if len(userImpactModels) != 1 {
-			diags.AddError("Invalid user impact configuration", "Exactly one user impact of violations in sequence configuration is required")
-			return nil, diags
-		}
-
-		userImpactModel := userImpactModels[0]
+	if timeThresholdModel.UserImpactOfViolationsInSequence != nil {
+		userImpactModel := timeThresholdModel.UserImpactOfViolationsInSequence
 		var timeWindowPtr *int64
 		if !userImpactModel.TimeWindow.IsNull() && !userImpactModel.TimeWindow.IsUnknown() {
 			timeWindow := userImpactModel.TimeWindow.ValueInt64()
@@ -709,19 +687,8 @@ func (r *websiteAlertConfigResourceFramework) mapTimeThresholdFromModel(ctx cont
 			UserPercentage:          userPercentagePtr,
 			Users:                   usersPtr,
 		}, diags
-	} else if !timeThresholdModel.ViolationsInPeriod.IsNull() && !timeThresholdModel.ViolationsInPeriod.IsUnknown() {
-		var violationsInPeriodModels []WebsiteViolationsInPeriodModel
-		diags.Append(timeThresholdModel.ViolationsInPeriod.ElementsAs(ctx, &violationsInPeriodModels, false)...)
-		if diags.HasError() {
-			return nil, diags
-		}
-
-		if len(violationsInPeriodModels) != 1 {
-			diags.AddError("Invalid violations in period", "Exactly one violations in period configuration is required")
-			return nil, diags
-		}
-
-		violationsInPeriodModel := violationsInPeriodModels[0]
+	} else if timeThresholdModel.ViolationsInPeriod != nil {
+		violationsInPeriodModel := timeThresholdModel.ViolationsInPeriod
 		var timeWindowPtr *int64
 		if !violationsInPeriodModel.TimeWindow.IsNull() && !violationsInPeriodModel.TimeWindow.IsUnknown() {
 			timeWindow := violationsInPeriodModel.TimeWindow.ValueInt64()
@@ -739,19 +706,8 @@ func (r *websiteAlertConfigResourceFramework) mapTimeThresholdFromModel(ctx cont
 			TimeWindow: timeWindowPtr,
 			Violations: violationsPtr,
 		}, diags
-	} else if !timeThresholdModel.ViolationsInSequence.IsNull() && !timeThresholdModel.ViolationsInSequence.IsUnknown() {
-		var violationsInSequenceModels []WebsiteViolationsInSequenceModel
-		diags.Append(timeThresholdModel.ViolationsInSequence.ElementsAs(ctx, &violationsInSequenceModels, false)...)
-		if diags.HasError() {
-			return nil, diags
-		}
-
-		if len(violationsInSequenceModels) != 1 {
-			diags.AddError("Invalid violations in sequence", "Exactly one violations in sequence configuration is required")
-			return nil, diags
-		}
-
-		violationsInSequenceModel := violationsInSequenceModels[0]
+	} else if timeThresholdModel.ViolationsInSequence != nil {
+		violationsInSequenceModel := timeThresholdModel.ViolationsInSequence
 		var timeWindowPtr *int64
 		if !violationsInSequenceModel.TimeWindow.IsNull() && !violationsInSequenceModel.TimeWindow.IsUnknown() {
 			timeWindow := violationsInSequenceModel.TimeWindow.ValueInt64()
@@ -812,11 +768,56 @@ func (r *websiteAlertConfigResourceFramework) UpdateState(ctx context.Context, s
 
 	//map rules
 	model.Rules = r.mapRulesToState(ctx, apiObject)
+
+	//map custom paylaod
+	customPayloadFieldsList, payloadDiags := CustomPayloadFieldsToTerraform(ctx, apiObject.CustomerPayloadFields)
+	if payloadDiags.HasError() {
+		diags.Append(payloadDiags...)
+		return diags
+	}
+	model.CustomPayloadFields = customPayloadFieldsList
+
+	//map threshold
+	model.Threshold = r.mapThresholdToState(ctx, apiObject.Threshold)
+
+	//map time threshold
+	model.TimeThreshold = r.mapTimeThresholdToState(apiObject.TimeThreshold)
+
 	// Set state
 	diags.Append(state.Set(ctx, &model)...)
 	return diags
 }
 
+func (r *websiteAlertConfigResourceFramework) mapTimeThresholdToState(timeThreshold restapi.WebsiteTimeThreshold) *WebsiteTimeThresholdModel {
+	websiteTimeThresholdModel := WebsiteTimeThresholdModel{}
+	switch timeThreshold.Type {
+	case "violationsInSequence":
+		websiteTimeThresholdModel.ViolationsInSequence = &WebsiteViolationsInSequenceModel{
+			TimeWindow: types.Int64Value(*timeThreshold.TimeWindow),
+		}
+	case "userImpactOfViolationsInSequence":
+		websiteTimeThresholdModel.UserImpactOfViolationsInSequence = &WebsiteUserImpactOfViolationsInSequenceModel{
+			TimeWindow:              types.Int64Value(*timeThreshold.TimeWindow),
+			ImpactMeasurementMethod: types.StringValue(string(*timeThreshold.ImpactMeasurementMethod)),
+			UserPercentage:          setFloat64PointerToState(timeThreshold.UserPercentage),
+			Users:                   types.Int64Value(int64(*timeThreshold.Users)),
+		}
+	case "violationsInPeriod":
+		websiteTimeThresholdModel.ViolationsInPeriod = &WebsiteViolationsInPeriodModel{
+			TimeWindow: types.Int64Value(*timeThreshold.TimeWindow),
+			Violations: types.Int64Value(int64(*timeThreshold.Violations)),
+		}
+	}
+	return &websiteTimeThresholdModel
+}
+
+func (r *websiteAlertConfigResourceFramework) mapThresholdToState(ctx context.Context, threshold restapi.Threshold) *WebsiteThresholdModel {
+	websiteThresholdModel := WebsiteThresholdModel{
+		Operator: types.StringValue(string(threshold.Operator)),
+		Value:    setFloat64PointerToState(threshold.Value),
+	}
+	return &websiteThresholdModel
+}
 func (r *websiteAlertConfigResourceFramework) mapRuleToState(ctx context.Context, rule *restapi.WebsiteAlertRule) *WebsiteAlertRuleModel {
 	websiteAlertRuleModel := WebsiteAlertRuleModel{}
 	switch rule.AlertType {
@@ -843,7 +844,7 @@ func (r *websiteAlertConfigResourceFramework) mapRuleToState(ctx context.Context
 			MetricName:  types.StringValue(rule.MetricName),
 			Aggregation: types.StringValue(string(*rule.Aggregation)),
 			Operator:    types.StringValue(string(*rule.Operator)),
-			Value:       types.StringValue(*rule.Value),
+			Value:       setStringPointerToState(rule.Value),
 		}
 		websiteAlertRuleModel.SpecificJsError = &websiteAlertRuleConfigModel
 

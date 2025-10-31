@@ -137,18 +137,10 @@ func (d *customEventSpecificationDataSourceFramework) Read(ctx context.Context, 
 	data.ID = types.StringValue(matchingSpec.ID)
 
 	// Handle description which is a pointer
-	if matchingSpec.Description != nil {
-		data.Description = types.StringValue(*matchingSpec.Description)
-	} else {
-		data.Description = types.StringNull()
-	}
+	data.Description = setStringPointerToState(matchingSpec.Description)
 
 	// Handle query which is a pointer
-	if matchingSpec.Query != nil {
-		data.Query = types.StringValue(*matchingSpec.Query)
-	} else {
-		data.Query = types.StringNull()
-	}
+	data.Query = setStringPointerToState(matchingSpec.Query)
 
 	// Handle expiration time which is a pointer
 	if matchingSpec.ExpirationTime != nil {

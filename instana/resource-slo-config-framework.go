@@ -553,9 +553,9 @@ func (r *sloConfigResourceFramework) mapEntityFromState(ctx context.Context, ent
 			return restapi.SloEntity{}, diags
 		}
 		applicationIdStr := applicationModel.ApplicationID.ValueString()
-		serviceID := setStringPointer(applicationModel.ServiceID)
-		endpointID := setStringPointer(applicationModel.EndpointID)
-		boundaryScope := setStringPointer(applicationModel.BoundaryScope)
+		serviceID := setStringPointerFromState(applicationModel.ServiceID)
+		endpointID := setStringPointerFromState(applicationModel.EndpointID)
+		boundaryScope := setStringPointerFromState(applicationModel.BoundaryScope)
 		includeInternal := applicationModel.IncludeInternal.ValueBool()
 		includeSynthetic := applicationModel.IncludeSynthetic.ValueBool()
 
@@ -592,8 +592,8 @@ func (r *sloConfigResourceFramework) mapEntityFromState(ctx context.Context, ent
 			return restapi.SloEntity{}, diags
 		}
 
-		websiteIdStr := setStringPointer(websiteModel.WebsiteID)
-		beaconTypeStr := setStringPointer(websiteModel.BeaconType)
+		websiteIdStr := setStringPointerFromState(websiteModel.WebsiteID)
+		beaconTypeStr := setStringPointerFromState(websiteModel.BeaconType)
 
 		websiteEntityObj := restapi.SloEntity{
 			Type:       SloConfigWebsiteEntity,
@@ -953,12 +953,12 @@ func (r *sloConfigResourceFramework) mapApplicationEntityToState(ctx context.Con
 
 	// Create application entity object
 	appEntityObj := ApplicationEntityModel{
-		ApplicationID:    handleStringValue(entity.ApplicationID),
-		BoundaryScope:    handleStringValue(entity.BoundaryScope),
-		IncludeInternal:  handleBooleanValue(entity.IncludeInternal),
-		IncludeSynthetic: handleBooleanValue(entity.IncludeSynthetic),
-		ServiceID:        handleStringValue(entity.ServiceID),
-		EndpointID:       handleStringValue(entity.EndpointID),
+		ApplicationID:    setStringPointerToState(entity.ApplicationID),
+		BoundaryScope:    setStringPointerToState(entity.BoundaryScope),
+		IncludeInternal:  setBoolPointerToState(entity.IncludeInternal),
+		IncludeSynthetic: setBoolPointerToState(entity.IncludeSynthetic),
+		ServiceID:        setStringPointerToState(entity.ServiceID),
+		EndpointID:       setStringPointerToState(entity.EndpointID),
 	}
 
 	// Handle filter expression
@@ -971,7 +971,7 @@ func (r *sloConfigResourceFramework) mapApplicationEntityToState(ctx context.Con
 			)
 			return ApplicationEntityModel{}, diags
 		}
-		appEntityObj.FilterExpression = handleStringValue(filterExpression)
+		appEntityObj.FilterExpression = setStringPointerToState(filterExpression)
 
 	}
 
@@ -983,8 +983,8 @@ func (r *sloConfigResourceFramework) mapWebsiteEntityToState(ctx context.Context
 
 	// Create website entity object
 	websiteEntityObj := WebsiteEntityModel{
-		WebsiteID:  handleStringValue(entity.WebsiteId),
-		BeaconType: handleStringValue(entity.BeaconType),
+		WebsiteID:  setStringPointerToState(entity.WebsiteId),
+		BeaconType: setStringPointerToState(entity.BeaconType),
 	}
 	// Handle filter expression
 	if entity.FilterExpression != nil {
@@ -996,7 +996,7 @@ func (r *sloConfigResourceFramework) mapWebsiteEntityToState(ctx context.Context
 			)
 			return WebsiteEntityModel{}, diags
 		}
-		websiteEntityObj.FilterExpression = handleStringValue(filterExpression)
+		websiteEntityObj.FilterExpression = setStringPointerToState(filterExpression)
 
 	}
 
@@ -1028,7 +1028,7 @@ func (r *sloConfigResourceFramework) mapSyntheticEntityToState(ctx context.Conte
 			)
 			return SyntheticEntityModel{}, diags
 		}
-		syntheticEntityObj.FilterExpression = handleStringValue(filterExpression)
+		syntheticEntityObj.FilterExpression = setStringPointerToState(filterExpression)
 
 	}
 
@@ -1054,7 +1054,7 @@ func (r *sloConfigResourceFramework) mapIndicatorToState(ctx context.Context, ap
 	case indicator.Type == SloConfigAPIIndicatorMeasurementTypeTimeBased && indicator.Blueprint == SloConfigAPIIndicatorBlueprintLatency:
 		model := &TimeBasedLatencyIndicatorModel{
 			Threshold:   types.Float64Value(indicator.Threshold),
-			Aggregation: handleStringValue(indicator.Aggregation),
+			Aggregation: setStringPointerToState(indicator.Aggregation),
 		}
 		indicatorModel.TimeBasedLatencyIndicatorModel = model
 
@@ -1067,7 +1067,7 @@ func (r *sloConfigResourceFramework) mapIndicatorToState(ctx context.Context, ap
 	case indicator.Type == SloConfigAPIIndicatorMeasurementTypeTimeBased && indicator.Blueprint == SloConfigAPIIndicatorBlueprintAvailability:
 		model := &TimeBasedAvailabilityIndicatorModel{
 			Threshold:   types.Float64Value(indicator.Threshold),
-			Aggregation: handleStringValue(indicator.Aggregation),
+			Aggregation: setStringPointerToState(indicator.Aggregation),
 		}
 		indicatorModel.TimeBasedAvailabilityIndicatorModel = model
 
@@ -1077,9 +1077,9 @@ func (r *sloConfigResourceFramework) mapIndicatorToState(ctx context.Context, ap
 
 	case indicator.Blueprint == SloConfigAPIIndicatorBlueprintTraffic:
 		model := &TrafficIndicatorModel{
-			TrafficType: handleStringValue(indicator.TrafficType),
+			TrafficType: setStringPointerToState(indicator.TrafficType),
 			Threshold:   types.Float64Value(indicator.Threshold),
-			Aggregation: handleStringValue(indicator.Aggregation),
+			Aggregation: setStringPointerToState(indicator.Aggregation),
 		}
 		indicatorModel.TrafficIndicatorModel = model
 
@@ -1095,7 +1095,7 @@ func (r *sloConfigResourceFramework) mapIndicatorToState(ctx context.Context, ap
 				)
 				return IndicatorModel{}, diags
 			}
-			model.GoodEventFilterExpression = handleStringValue(goodEventFilterExpression)
+			model.GoodEventFilterExpression = setStringPointerToState(goodEventFilterExpression)
 
 		}
 
@@ -1108,7 +1108,7 @@ func (r *sloConfigResourceFramework) mapIndicatorToState(ctx context.Context, ap
 				)
 				return IndicatorModel{}, diags
 			}
-			model.BadEventFilterExpression = handleStringValue(badEventFilterExpression)
+			model.BadEventFilterExpression = setStringPointerToState(badEventFilterExpression)
 
 		}
 

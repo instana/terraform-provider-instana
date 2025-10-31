@@ -163,11 +163,7 @@ func CustomPayloadFieldsToTerraform(ctx context.Context, fields []restapi.Custom
 
 			dynamicAttrs["tag_name"] = types.StringValue(dynamicValue.TagName)
 
-			if dynamicValue.Key != nil {
-				dynamicAttrs["key"] = types.StringValue(*dynamicValue.Key)
-			} else {
-				dynamicAttrs["key"] = types.StringNull()
-			}
+			dynamicAttrs["key"] = setStringPointerToState(dynamicValue.Key)
 
 			// Create the dynamic value object
 			dynamicObj, d := types.ObjectValue(GetDynamicValueType().AttrTypes, dynamicAttrs)

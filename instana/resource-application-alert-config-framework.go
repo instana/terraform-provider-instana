@@ -1672,11 +1672,9 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 			)
 			return diags
 		}
-		if normalizedTagFilterString == nil {
-			model.TagFilter = types.StringNull()
-		} else {
-			model.TagFilter = types.StringValue(*normalizedTagFilterString)
-		}
+
+		model.TagFilter = setStringPointerToState(normalizedTagFilterString)
+
 	} else {
 		model.TagFilter = types.StringNull()
 	}
@@ -1828,8 +1826,8 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 		if data.Threshold.Type == "adaptiveBaseline" {
 			adaptiveBaselineModel := AdaptiveBaselineModel{
 				Operator:        types.StringValue(string(data.Threshold.Operator)),
-				DeviationFactor: types.Float32Value(*data.Threshold.DeviationFactor),
-				Adaptability:    types.Float32Value(*data.Threshold.Adaptability),
+				DeviationFactor: setFloat32PointerToState(data.Threshold.DeviationFactor),
+				Adaptability:    setFloat32PointerToState(data.Threshold.Adaptability),
 				Seasonality:     types.StringValue(string(*data.Threshold.Seasonality)),
 			}
 			applicationModel.AdaptiveBaseline = &adaptiveBaselineModel
@@ -1933,7 +1931,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 
 		// 		// Add adaptability (assuming it's stored in Value for now)
 		// 		if data.Threshold.Value != nil {
-		// 			adaptiveObj["adaptability"] = types.Float64Value(*data.Threshold.Value)
+		// 			adaptiveObj["adaptability"] = setFloat64PointerToState(data.Threshold.Value)
 		// 		} else {
 		// 			adaptiveObj["adaptability"] = types.Float64Null()
 		// 		}

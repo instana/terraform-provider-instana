@@ -164,11 +164,7 @@ func (r *groupResourceFramework) UpdateState(ctx context.Context, state *tfsdk.S
 				UserID: types.StringValue(member.UserID),
 			}
 
-			if member.Email != nil {
-				memberModel.Email = types.StringValue(*member.Email)
-			} else {
-				memberModel.Email = types.StringNull()
-			}
+			memberModel.Email = setStringPointerToState(member.Email)
 
 			memberObj, memberDiags := types.ObjectValueFrom(ctx, map[string]attr.Type{
 				"user_id": types.StringType,
