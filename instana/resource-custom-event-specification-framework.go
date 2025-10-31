@@ -431,7 +431,7 @@ func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Cont
 	model.Description = setStringPointerToState(spec.Description)
 
 	if spec.ExpirationTime != nil {
-		model.ExpirationTime = types.Int64Value(int64(*spec.ExpirationTime))
+		model.ExpirationTime = setInt64PointerToState(spec.ExpirationTime)
 	} else {
 		model.ExpirationTime = types.Int64Null()
 	}
@@ -477,19 +477,19 @@ func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Cont
 						MatchingEntityType:  setStringPointerToState(rule.MatchingEntityType),
 						MatchingOperator:    setStringPointerToState(rule.MatchingOperator),
 						MatchingEntityLabel: setStringPointerToState(rule.MatchingEntityLabel),
-						OfflineDuration:     types.Int64Value(int64(*rule.OfflineDuration)),
+						OfflineDuration:     setInt64PointerToState(rule.OfflineDuration),
 					})
 				}
 			case restapi.HostAvailabilityRuleType:
 				if rule.OfflineDuration != nil {
 					hostRule := HostAvailabilityRuleModel{
 						Severity:        mapIntToSeverityString(rule.Severity),
-						OfflineDuration: types.Int64Value(int64(*rule.OfflineDuration)),
+						OfflineDuration: setInt64PointerToState(rule.OfflineDuration),
 						TagFilter:       types.StringValue(""), // Default empty string
 					}
 
 					if rule.CloseAfter != nil {
-						hostRule.CloseAfter = types.Int64Value(int64(*rule.CloseAfter))
+						hostRule.CloseAfter = setInt64PointerToState(rule.CloseAfter)
 					} else {
 						hostRule.CloseAfter = types.Int64Null()
 					}
@@ -518,8 +518,8 @@ func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Cont
 					thresholdRule := ThresholdRuleModel{
 						Severity:          mapIntToSeverityString(rule.Severity),
 						MetricName:        setStringPointerToState(rule.MetricName),
-						Rollup:            types.Int64Value(int64(*rule.Rollup)),
-						Window:            types.Int64Value(int64(*rule.Window)),
+						Rollup:            setInt64PointerToState(rule.Rollup),
+						Window:            setInt64PointerToState(rule.Window),
 						Aggregation:       setStringPointerToState(rule.Aggregation),
 						ConditionOperator: setStringPointerToState(rule.ConditionOperator),
 						ConditionValue:    setFloat64PointerToState(rule.ConditionValue),

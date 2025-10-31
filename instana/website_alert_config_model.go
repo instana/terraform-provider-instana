@@ -24,7 +24,7 @@ type WebsiteAlertConfigModel struct {
 
 type RuleWithThresholdPluginModel struct {
 	Rule              *WebsiteAlertRuleModel `tfsdk:"rule"`
-	ThresholdOperator types.String           `tfsdk:"threshold_operator"`
+	ThresholdOperator types.String           `tfsdk:"operator"`
 	Thresholds        *ThresholdPluginModel  `tfsdk:"threshold"`
 }
 

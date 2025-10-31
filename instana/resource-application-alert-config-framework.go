@@ -1659,7 +1659,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 
 	// Handle grace period
 	if data.GracePeriod != nil {
-		model.GracePeriod = types.Int64Value(*data.GracePeriod)
+		model.GracePeriod = setInt64PointerToState(data.GracePeriod)
 	}
 
 	// Handle tag filter
@@ -1819,7 +1819,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 		if data.Threshold.Type == "staticThreshold" {
 			staticModel := StaticTypeModel{
 				Operator: types.StringValue(string(data.Threshold.Operator)),
-				Value:    types.Int64Value(int64(*data.Threshold.Value)),
+				Value:    setInt64PointerToState(data.Threshold.Value),
 			}
 			applicationModel.Static = &staticModel
 		}
@@ -1883,7 +1883,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 
 		// 		// Add value
 		// 		if data.Threshold.Value != nil {
-		// 			staticObj["value"] = types.Int64Value(int64(*data.Threshold.Value))
+		// 			staticObj["value"] = setInt64PointerToState(data.Threshold.Value))
 		// 		} else {
 		// 			staticObj["value"] = types.Int64Null()
 		// 		}
