@@ -81,4 +81,5 @@ type ThresholdRule struct {
 	Baseline        *[][]float64          `json:"baseline"`
 	DeviationFactor *float32              `json:"deviationFactor"`
 	Adaptability    *float32              `json:"adaptability"`
+	Operator        string                `json:"operator"`
 }
