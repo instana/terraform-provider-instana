@@ -231,94 +231,86 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 						Blocks: map[string]schema.Block{
 							"slowness": schema.SingleNestedBlock{
 								Description: "Rule based on the slowness of the configured alert configuration target.",
-								NestedObject: schema.NestedBlockObject{
-									Attributes: map[string]schema.Attribute{
-										"metric_name": schema.StringAttribute{
-											Required:    true,
-											Description: "The metric name of the website alert rule.",
-										},
-										"aggregation": schema.StringAttribute{
-											Required:    true,
-											Description: "The aggregation function of the website alert rule.",
-											Validators: []validator.String{
-												stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
-											},
+								Attributes: map[string]schema.Attribute{
+									"metric_name": schema.StringAttribute{
+										Required:    true,
+										Description: "The metric name of the website alert rule.",
+									},
+									"aggregation": schema.StringAttribute{
+										Required:    true,
+										Description: "The aggregation function of the website alert rule.",
+										Validators: []validator.String{
+											stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
 										},
 									},
 								},
 							},
 							"specific_js_error": schema.SingleNestedBlock{
 								Description: "Rule based on a specific javascript error of the configured alert configuration target.",
-								NestedObject: schema.NestedBlockObject{
-									Attributes: map[string]schema.Attribute{
-										"metric_name": schema.StringAttribute{
-											Required:    true,
-											Description: "The metric name of the website alert rule.",
+								Attributes: map[string]schema.Attribute{
+									"metric_name": schema.StringAttribute{
+										Required:    true,
+										Description: "The metric name of the website alert rule.",
+									},
+									"aggregation": schema.StringAttribute{
+										Optional:    true,
+										Description: "The aggregation function of the website alert rule.",
+										Validators: []validator.String{
+											stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
 										},
-										"aggregation": schema.StringAttribute{
-											Optional:    true,
-											Description: "The aggregation function of the website alert rule.",
-											Validators: []validator.String{
-												stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
-											},
+									},
+									"operator": schema.StringAttribute{
+										Required:    true,
+										Description: "The operator which will be applied to evaluate this rule.",
+										Validators: []validator.String{
+											stringvalidator.OneOf("EQUALS", "DOES_NOT_EQUAL", "CONTAINS", "DOES_NOT_CONTAIN"),
 										},
-										"operator": schema.StringAttribute{
-											Required:    true,
-											Description: "The operator which will be applied to evaluate this rule.",
-											Validators: []validator.String{
-												stringvalidator.OneOf("EQUALS", "DOES_NOT_EQUAL", "CONTAINS", "DOES_NOT_CONTAIN"),
-											},
-										},
-										"value": schema.StringAttribute{
-											Optional:    true,
-											Description: "The value identify the specific javascript error.",
-										},
+									},
+									"value": schema.StringAttribute{
+										Optional:    true,
+										Description: "The value identify the specific javascript error.",
 									},
 								},
 							},
 							"status_code": schema.SingleNestedBlock{
 								Description: "Rule based on the HTTP status code of the configured alert configuration target.",
-								NestedObject: schema.NestedBlockObject{
-									Attributes: map[string]schema.Attribute{
-										"metric_name": schema.StringAttribute{
-											Required:    true,
-											Description: "The metric name of the website alert rule.",
+								Attributes: map[string]schema.Attribute{
+									"metric_name": schema.StringAttribute{
+										Required:    true,
+										Description: "The metric name of the website alert rule.",
+									},
+									"aggregation": schema.StringAttribute{
+										Optional:    true,
+										Description: "The aggregation function of the website alert rule.",
+										Validators: []validator.String{
+											stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
 										},
-										"aggregation": schema.StringAttribute{
-											Optional:    true,
-											Description: "The aggregation function of the website alert rule.",
-											Validators: []validator.String{
-												stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
-											},
+									},
+									"operator": schema.StringAttribute{
+										Required:    true,
+										Description: "The operator which will be applied to evaluate this rule.",
+										Validators: []validator.String{
+											stringvalidator.OneOf("EQUALS", "DOES_NOT_EQUAL", "CONTAINS", "DOES_NOT_CONTAIN"),
 										},
-										"operator": schema.StringAttribute{
-											Required:    true,
-											Description: "The operator which will be applied to evaluate this rule.",
-											Validators: []validator.String{
-												stringvalidator.OneOf("EQUALS", "DOES_NOT_EQUAL", "CONTAINS", "DOES_NOT_CONTAIN"),
-											},
-										},
-										"value": schema.StringAttribute{
-											Required:    true,
-											Description: "The value identify the specific http status code.",
-										},
+									},
+									"value": schema.StringAttribute{
+										Required:    true,
+										Description: "The value identify the specific http status code.",
 									},
 								},
 							},
 							"throughput": schema.SingleNestedBlock{
 								Description: "Rule based on the throughput of the configured alert configuration target.",
-								NestedObject: schema.NestedBlockObject{
-									Attributes: map[string]schema.Attribute{
-										"metric_name": schema.StringAttribute{
-											Required:    true,
-											Description: "The metric name of the website alert rule.",
-										},
-										"aggregation": schema.StringAttribute{
-											Optional:    true,
-											Description: "The aggregation function of the website alert rule.",
-											Validators: []validator.String{
-												stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
-											},
+								Attributes: map[string]schema.Attribute{
+									"metric_name": schema.StringAttribute{
+										Required:    true,
+										Description: "The metric name of the website alert rule.",
+									},
+									"aggregation": schema.StringAttribute{
+										Optional:    true,
+										Description: "The aggregation function of the website alert rule.",
+										Validators: []validator.String{
+											stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
 										},
 									},
 								},
@@ -486,14 +478,16 @@ func (r *websiteAlertConfigResourceFramework) MapStateToDataObject(ctx context.C
 		// Skip custom payload fields for now
 		for _, i := range model.Rules {
 			var websiteAlertRule *restapi.WebsiteAlertRule
-			if i.Rule.Slowness != nil {
-				websiteAlertRule, diags = mapSlownessRule(ctx, diags, *i.Rule.Slowness)
-			} else if i.Rule.SpecificJsError != nil {
-				websiteAlertRule, diags = mapSpecificJsErrorRule(ctx, diags, *i.Rule.SpecificJsError)
-			} else if i.Rule.StatusCode != nil {
-				websiteAlertRule, diags = mapStatusCodeRule(ctx, diags, *i.Rule.StatusCode)
-			} else if i.Rule.Throughput != nil {
-				websiteAlertRule, diags = mapThroughputRule(ctx, diags, *i.Rule.Throughput)
+			if i.Rule != nil {
+				if i.Rule.Slowness != nil {
+					websiteAlertRule, diags = r.mapSlownessRule(ctx, diags, *i.Rule.Slowness)
+				} else if i.Rule.SpecificJsError != nil {
+					websiteAlertRule, diags = r.mapSpecificJsErrorRule(ctx, diags, *i.Rule.SpecificJsError)
+				} else if i.Rule.StatusCode != nil {
+					websiteAlertRule, diags = r.mapStatusCodeRule(ctx, diags, *i.Rule.StatusCode)
+				} else if i.Rule.Throughput != nil {
+					websiteAlertRule, diags = r.mapThroughputRule(ctx, diags, *i.Rule.Throughput)
+				}
 			}
 			var thresholdMap map[restapi.AlertSeverity]restapi.ThresholdRule
 			warningThreshold, warningDiags := MapThresholdRulePluginFromState(ctx, i.Thresholds.Warning)
@@ -540,53 +534,22 @@ func (r *websiteAlertConfigResourceFramework) mapRuleFromModel(ctx context.Conte
 	var diags diag.Diagnostics
 
 	// Check if rule is set
-	if model.Rule.IsNull() || model.Rule.IsUnknown() {
+	if model.Rule == nil {
 		diags.AddError("Rule is required", "Website alert config rule is required")
 		return nil, diags
 	}
 
-	var ruleModels []WebsiteAlertRuleModel
-	diags.Append(model.Rule.ElementsAs(ctx, &ruleModels, false)...)
-	if diags.HasError() {
-		return nil, diags
-	}
-
-	if len(ruleModels) != 1 {
-		diags.AddError("Invalid rule configuration", "Exactly one rule configuration is required")
-		return nil, diags
-	}
-
-	ruleModel := ruleModels[0]
+	ruleModel := model.Rule
 
 	// Check which rule type is set
-	if !ruleModel.Slowness.IsNull() && !ruleModel.Slowness.IsUnknown() {
-		var slownessModels []WebsiteAlertRuleConfigModel
-		diags.Append(ruleModel.Slowness.ElementsAs(ctx, &slownessModels, false)...)
-		if diags.HasError() {
-			return nil, diags
-		}
-		return r.mapSlownessRule(ctx, diags, slownessModels[0])
-	} else if !ruleModel.SpecificJsError.IsNull() && !ruleModel.SpecificJsError.IsUnknown() {
-		var specificJsErrorModels []WebsiteAlertRuleConfigCompleteModel
-		diags.Append(ruleModel.SpecificJsError.ElementsAs(ctx, &specificJsErrorModels, false)...)
-		if diags.HasError() {
-			return nil, diags
-		}
-		return r.mapSpecificJsErrorRule(ctx, diags, specificJsErrorModels[0])
-	} else if !ruleModel.StatusCode.IsNull() && !ruleModel.StatusCode.IsUnknown() {
-		var statusCodeModels []WebsiteAlertRuleConfigCompleteModel
-		diags.Append(ruleModel.StatusCode.ElementsAs(ctx, &statusCodeModels, false)...)
-		if diags.HasError() {
-			return nil, diags
-		}
-		return r.mapStatusCodeRule(ctx, diags, statusCodeModels[0])
-	} else if !ruleModel.Throughput.IsNull() && !ruleModel.Throughput.IsUnknown() {
-		var throughputModels []WebsiteAlertRuleConfigModel
-		diags.Append(ruleModel.Throughput.ElementsAs(ctx, &throughputModels, false)...)
-		if diags.HasError() {
-			return nil, diags
-		}
-		return r.mapThroughputRule(ctx, diags, throughputModels[0])
+	if ruleModel.Slowness != nil {
+		return r.mapSlownessRule(ctx, diags, *ruleModel.Slowness)
+	} else if ruleModel.SpecificJsError != nil {
+		return r.mapSpecificJsErrorRule(ctx, diags, *ruleModel.SpecificJsError)
+	} else if ruleModel.StatusCode != nil {
+		return r.mapStatusCodeRule(ctx, diags, *ruleModel.StatusCode)
+	} else if ruleModel.Throughput != nil {
+		return r.mapThroughputRule(ctx, diags, *ruleModel.Throughput)
 	}
 
 	diags.AddError("Invalid rule configuration", "Exactly one rule type configuration is required")
@@ -845,18 +808,16 @@ func (r *websiteAlertConfigResourceFramework) UpdateState(ctx context.Context, s
 	}
 
 	//map rule
-	model.Rule = r.mapRuleToState(ctx, apiObject)
+	model.Rule = r.mapRuleToState(ctx, apiObject.Rule)
 
 	//map rules
-
+	model.Rules = r.mapRulesToState(ctx, apiObject)
 	// Set state
 	diags.Append(state.Set(ctx, &model)...)
 	return diags
 }
 
-func (r *websiteAlertConfigResourceFramework) mapRuleToState(ctx context.Context, apiObject *restapi.WebsiteAlertConfig) WebsiteAlertRuleModel {
-
-	rule := apiObject.Rule
+func (r *websiteAlertConfigResourceFramework) mapRuleToState(ctx context.Context, rule *restapi.WebsiteAlertRule) *WebsiteAlertRuleModel {
 	websiteAlertRuleModel := WebsiteAlertRuleModel{}
 	switch rule.AlertType {
 	case "throughput":
@@ -888,6 +849,28 @@ func (r *websiteAlertConfigResourceFramework) mapRuleToState(ctx context.Context
 
 	}
 
-	return websiteAlertRuleModel
+	return &websiteAlertRuleModel
+
+}
+
+func (r *websiteAlertConfigResourceFramework) mapRulesToState(ctx context.Context, apiObject *restapi.WebsiteAlertConfig) []RuleWithThresholdPluginModel {
+	rules := apiObject.Rules
+	var rulesModel []RuleWithThresholdPluginModel
+	for _, i := range rules {
+		warningThreshold, _ := i.Thresholds[restapi.WarningSeverity]
+		criticalThreshold, _ := i.Thresholds[restapi.CriticalSeverity]
+
+		thresholdPluginModel := ThresholdPluginModel{
+			Warning:  MapThresholdPluginToState(ctx, &warningThreshold),
+			Critical: MapThresholdPluginToState(ctx, &criticalThreshold),
+		}
+		ruleModel := RuleWithThresholdPluginModel{
+			Rule:              r.mapRuleToState(ctx, i.Rule),
+			ThresholdOperator: types.StringValue(i.ThresholdOperator),
+			Thresholds:        &thresholdPluginModel,
+		}
+		rulesModel = append(rulesModel, ruleModel)
+	}
+	return rulesModel
 
 }

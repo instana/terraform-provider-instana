@@ -16,16 +16,16 @@ type WebsiteAlertConfigModel struct {
 	AlertChannelIDs     types.Set                      `tfsdk:"alert_channel_ids"`
 	Granularity         types.Int64                    `tfsdk:"granularity"`
 	CustomPayloadFields types.Set                      `tfsdk:"custom_payload_fields"`
-	Rule                WebsiteAlertRuleModel          `tfsdk:"rule"`
+	Rule                *WebsiteAlertRuleModel         `tfsdk:"rule"`
 	Threshold           types.Object                   `tfsdk:"threshold"`
 	TimeThreshold       types.List                     `tfsdk:"time_threshold"`
 	Rules               []RuleWithThresholdPluginModel `tfsdk:"rules"`
 }
 
 type RuleWithThresholdPluginModel struct {
-	Rule              WebsiteAlertRuleModel `tfsdk:"rule"`
-	ThresholdOperator types.String          `tfsdk:"threshold_operator"`
-	Thresholds        ThresholdPluginModel  `tfsdk:"threshold"`
+	Rule              *WebsiteAlertRuleModel `tfsdk:"rule"`
+	ThresholdOperator types.String           `tfsdk:"threshold_operator"`
+	Thresholds        *ThresholdPluginModel  `tfsdk:"threshold"`
 }
 
 // // WebsiteAlertRuleModel represents the rule configuration for Website Alert Config

@@ -1003,3 +1003,27 @@ func MapThresholdRulePluginFromState(ctx context.Context, thresholdObj *Threshol
 	}
 	return nil, diags
 }
+
+// MapThresholdToState maps a threshold rule to a Terraform state representation - used for nested attribute instead of block object
+func MapThresholdPluginToState(ctx context.Context, threshold *restapi.ThresholdRule) *ThresholdTypeModel {
+	thresholdTypeModel := ThresholdTypeModel{}
+	switch threshold.Type {
+	case "adaptiveBaseline":
+		adaptiveBaselineModel := AdaptiveBaselineModel{
+			Operator:        types.StringValue(threshold.Operator),
+			DeviationFactor: types.Float32Value(*threshold.DeviationFactor),
+			Adaptability:    types.Float32Value(*threshold.Adaptability),
+			Seasonality:     types.StringValue(string(*threshold.Seasonality)),
+		}
+		thresholdTypeModel.AdaptiveBaseline = &adaptiveBaselineModel
+	default:
+		// Default to static threshold for all other types
+		static := StaticTypeModel{
+			Operator: types.StringValue(threshold.Operator),
+			Value:    types.Int64Value(int64(*threshold.Value)),
+		}
+		thresholdTypeModel.Static = &static
+	}
+
+	return &thresholdTypeModel
+}
