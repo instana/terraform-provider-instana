@@ -457,18 +457,10 @@ func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state 
 	}
 
 	// Map description
-	if apiObject.Description != nil {
-		model.Description = types.StringValue(*apiObject.Description)
-	} else {
-		model.Description = types.StringNull()
-	}
+	model.Description = setStringPointerToState(apiObject.Description)
 
 	// Map application ID
-	if apiObject.ApplicationID != nil {
-		model.ApplicationID = types.StringValue(*apiObject.ApplicationID)
-	} else {
-		model.ApplicationID = types.StringNull()
-	}
+	model.ApplicationID = setStringPointerToState(apiObject.ApplicationID)
 
 	// Map test frequency
 	if apiObject.TestFrequency != nil {
@@ -508,33 +500,26 @@ func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state 
 		}
 
 		// Map optional fields
-		if apiObject.Configuration.Timeout != nil {
-			httpActionModel.Timeout = types.StringValue(*apiObject.Configuration.Timeout)
-		}
-		if apiObject.Configuration.URL != nil {
-			httpActionModel.URL = types.StringValue(*apiObject.Configuration.URL)
-		}
-		if apiObject.Configuration.Operation != nil {
-			httpActionModel.Operation = types.StringValue(*apiObject.Configuration.Operation)
-		}
-		if apiObject.Configuration.Body != nil {
-			httpActionModel.Body = types.StringValue(*apiObject.Configuration.Body)
-		}
-		if apiObject.Configuration.ValidationString != nil {
-			httpActionModel.ValidationString = types.StringValue(*apiObject.Configuration.ValidationString)
-		}
+		httpActionModel.Timeout = setStringPointerToState(apiObject.Configuration.Timeout)
+
+		httpActionModel.URL = setStringPointerToState(apiObject.Configuration.URL)
+
+		httpActionModel.Operation = setStringPointerToState(apiObject.Configuration.Operation)
+
+		httpActionModel.Body = setStringPointerToState(apiObject.Configuration.Body)
+
+		httpActionModel.ValidationString = setStringPointerToState(apiObject.Configuration.ValidationString)
+
 		if apiObject.Configuration.FollowRedirect != nil {
-			httpActionModel.FollowRedirect = types.BoolValue(*apiObject.Configuration.FollowRedirect)
+			httpActionModel.FollowRedirect = setBoolPointerToState(apiObject.Configuration.FollowRedirect)
 		}
 		if apiObject.Configuration.AllowInsecure != nil {
-			httpActionModel.AllowInsecure = types.BoolValue(*apiObject.Configuration.AllowInsecure)
+			httpActionModel.AllowInsecure = setBoolPointerToState(apiObject.Configuration.AllowInsecure)
 		}
 		if apiObject.Configuration.ExpectStatus != nil {
 			httpActionModel.ExpectStatus = types.Int64Value(int64(*apiObject.Configuration.ExpectStatus))
 		}
-		if apiObject.Configuration.ExpectMatch != nil {
-			httpActionModel.ExpectMatch = types.StringValue(*apiObject.Configuration.ExpectMatch)
-		}
+		httpActionModel.ExpectMatch = setStringPointerToState(apiObject.Configuration.ExpectMatch)
 
 		// Map headers
 		if apiObject.Configuration.Headers != nil && len(apiObject.Configuration.Headers) > 0 {
@@ -603,12 +588,9 @@ func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state 
 		}
 
 		// Map optional fields
-		if apiObject.Configuration.Timeout != nil {
-			httpScriptModel.Timeout = types.StringValue(*apiObject.Configuration.Timeout)
-		}
-		if apiObject.Configuration.Script != nil {
-			httpScriptModel.Script = types.StringValue(*apiObject.Configuration.Script)
-		}
+		httpScriptModel.Timeout = setStringPointerToState(apiObject.Configuration.Timeout)
+
+		httpScriptModel.Script = setStringPointerToState(apiObject.Configuration.Script)
 
 		// Create object for http_script
 		httpScriptObj, _ := types.ObjectValueFrom(ctx, map[string]attr.Type{

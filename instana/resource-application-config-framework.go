@@ -153,11 +153,8 @@ func (r *applicationConfigResourceFramework) UpdateState(ctx context.Context, st
 				),
 			}
 		}
-		if normalizedTagFilterString != nil {
-			model.TagFilter = types.StringValue(*normalizedTagFilterString)
-		} else {
-			model.TagFilter = types.StringNull()
-		}
+		model.TagFilter = setStringPointerToState(normalizedTagFilterString)
+
 	} else {
 		model.TagFilter = types.StringNull()
 	}
@@ -201,11 +198,7 @@ func (r *applicationConfigResourceFramework) mapAccessRulesToState(ctx context.C
 		}
 
 		// Handle related ID
-		if rule.RelatedID != nil {
-			ruleMap["related_id"] = types.StringValue(*rule.RelatedID)
-		} else {
-			ruleMap["related_id"] = types.StringNull()
-		}
+		ruleMap["related_id"] = setStringPointerToState(rule.RelatedID)
 
 		// Create object value
 		objValue, d := types.ObjectValue(

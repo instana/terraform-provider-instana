@@ -137,11 +137,7 @@ func (d *builtinEventDataSourceFramework) Read(ctx context.Context, req datasour
 	data.ID = types.StringValue(matchingEvent.ID)
 
 	// Handle description which is a pointer
-	if matchingEvent.Description != nil {
-		data.Description = types.StringValue(*matchingEvent.Description)
-	} else {
-		data.Description = types.StringNull()
-	}
+	data.Description = setStringPointerToState(matchingEvent.Description)
 
 	// Convert severity from API representation to Terraform representation
 	severity, err := ConvertSeverityFromInstanaAPIToTerraformRepresentation(matchingEvent.Severity)

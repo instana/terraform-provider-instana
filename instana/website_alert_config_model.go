@@ -15,10 +15,10 @@ type WebsiteAlertConfigModel struct {
 	TagFilter           types.String                   `tfsdk:"tag_filter"`
 	AlertChannelIDs     types.Set                      `tfsdk:"alert_channel_ids"`
 	Granularity         types.Int64                    `tfsdk:"granularity"`
-	CustomPayloadFields types.Set                      `tfsdk:"custom_payload_fields"`
+	CustomPayloadFields types.List                     `tfsdk:"custom_payload_fields"`
 	Rule                *WebsiteAlertRuleModel         `tfsdk:"rule"`
-	Threshold           types.Object                   `tfsdk:"threshold"`
-	TimeThreshold       types.List                     `tfsdk:"time_threshold"`
+	Threshold           *WebsiteThresholdModel         `tfsdk:"threshold"`
+	TimeThreshold       *WebsiteTimeThresholdModel     `tfsdk:"time_threshold"`
 	Rules               []RuleWithThresholdPluginModel `tfsdk:"rules"`
 }
 
@@ -59,9 +59,9 @@ type WebsiteAlertRuleConfigModel struct {
 
 // WebsiteTimeThresholdModel represents the time threshold configuration for Website Alert Config
 type WebsiteTimeThresholdModel struct {
-	UserImpactOfViolationsInSequence types.List `tfsdk:"user_impact_of_violations_in_sequence"`
-	ViolationsInPeriod               types.List `tfsdk:"violations_in_period"`
-	ViolationsInSequence             types.List `tfsdk:"violations_in_sequence"`
+	UserImpactOfViolationsInSequence *WebsiteUserImpactOfViolationsInSequenceModel `tfsdk:"user_impact_of_violations_in_sequence"`
+	ViolationsInPeriod               *WebsiteViolationsInPeriodModel               `tfsdk:"violations_in_period"`
+	ViolationsInSequence             *WebsiteViolationsInSequenceModel             `tfsdk:"violations_in_sequence"`
 }
 
 // WebsiteUserImpactOfViolationsInSequenceModel represents the user impact configuration for time threshold

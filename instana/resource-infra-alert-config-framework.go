@@ -261,11 +261,8 @@ func (r *infraAlertConfigResourceFramework) UpdateState(ctx context.Context, sta
 			)
 			return diags
 		}
-		if tagFilterString != nil {
-			model.TagFilter = types.StringValue(*tagFilterString)
-		} else {
-			model.TagFilter = types.StringNull()
-		}
+		model.TagFilter = setStringPointerToState(tagFilterString)
+
 	} else {
 		model.TagFilter = types.StringNull()
 	}

@@ -426,17 +426,9 @@ func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Cont
 	}
 
 	// Set optional fields
-	if spec.Query != nil {
-		model.Query = types.StringValue(*spec.Query)
-	} else {
-		model.Query = types.StringValue("")
-	}
+	model.Query = setStringPointerToState(spec.Query)
 
-	if spec.Description != nil {
-		model.Description = types.StringValue(*spec.Description)
-	} else {
-		model.Description = types.StringValue("")
-	}
+	model.Description = setStringPointerToState(spec.Description)
 
 	if spec.ExpirationTime != nil {
 		model.ExpirationTime = types.Int64Value(int64(*spec.ExpirationTime))
@@ -461,8 +453,8 @@ func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Cont
 				if rule.ConditionOperator != nil && rule.ConditionValue != nil {
 					entityCountRules = append(entityCountRules, EntityCountRuleModel{
 						Severity:          mapIntToSeverityString(rule.Severity),
-						ConditionOperator: types.StringValue(*rule.ConditionOperator),
-						ConditionValue:    types.Float64Value(*rule.ConditionValue),
+						ConditionOperator: setStringPointerToState(rule.ConditionOperator),
+						ConditionValue:    setFloat64PointerToState(rule.ConditionValue),
 					})
 				}
 			case restapi.EntityCountVerificationRuleType:
@@ -470,11 +462,11 @@ func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Cont
 					rule.MatchingEntityType != nil && rule.MatchingOperator != nil && rule.MatchingEntityLabel != nil {
 					entityCountVerificationRules = append(entityCountVerificationRules, EntityCountVerificationRuleModel{
 						Severity:            mapIntToSeverityString(rule.Severity),
-						ConditionOperator:   types.StringValue(*rule.ConditionOperator),
-						ConditionValue:      types.Float64Value(*rule.ConditionValue),
-						MatchingEntityType:  types.StringValue(*rule.MatchingEntityType),
-						MatchingOperator:    types.StringValue(*rule.MatchingOperator),
-						MatchingEntityLabel: types.StringValue(*rule.MatchingEntityLabel),
+						ConditionOperator:   setStringPointerToState(rule.ConditionOperator),
+						ConditionValue:      setFloat64PointerToState(rule.ConditionValue),
+						MatchingEntityType:  setStringPointerToState(rule.MatchingEntityType),
+						MatchingOperator:    setStringPointerToState(rule.MatchingOperator),
+						MatchingEntityLabel: setStringPointerToState(rule.MatchingEntityLabel),
 					})
 				}
 			case restapi.EntityVerificationRuleType:
@@ -482,9 +474,9 @@ func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Cont
 					rule.MatchingEntityLabel != nil && rule.OfflineDuration != nil {
 					entityVerificationRules = append(entityVerificationRules, EntityVerificationRuleModel{
 						Severity:            mapIntToSeverityString(rule.Severity),
-						MatchingEntityType:  types.StringValue(*rule.MatchingEntityType),
-						MatchingOperator:    types.StringValue(*rule.MatchingOperator),
-						MatchingEntityLabel: types.StringValue(*rule.MatchingEntityLabel),
+						MatchingEntityType:  setStringPointerToState(rule.MatchingEntityType),
+						MatchingOperator:    setStringPointerToState(rule.MatchingOperator),
+						MatchingEntityLabel: setStringPointerToState(rule.MatchingEntityLabel),
 						OfflineDuration:     types.Int64Value(int64(*rule.OfflineDuration)),
 					})
 				}
@@ -507,7 +499,7 @@ func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Cont
 						// Convert tag filter to string representation
 						normalizedTagFilterString, err := tagfilter.MapTagFilterToNormalizedString(rule.TagFilter)
 						if err == nil && normalizedTagFilterString != nil {
-							hostRule.TagFilter = types.StringValue(*normalizedTagFilterString)
+							hostRule.TagFilter = setStringPointerToState(normalizedTagFilterString)
 						}
 					}
 
@@ -517,7 +509,7 @@ func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Cont
 				if rule.SystemRuleID != nil {
 					systemRules = append(systemRules, SystemRuleModel{
 						Severity:     mapIntToSeverityString(rule.Severity),
-						SystemRuleID: types.StringValue(*rule.SystemRuleID),
+						SystemRuleID: setStringPointerToState(rule.SystemRuleID),
 					})
 				}
 			case restapi.ThresholdRuleType:
@@ -525,12 +517,12 @@ func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Cont
 					rule.Aggregation != nil && rule.ConditionOperator != nil && rule.ConditionValue != nil {
 					thresholdRule := ThresholdRuleModel{
 						Severity:          mapIntToSeverityString(rule.Severity),
-						MetricName:        types.StringValue(*rule.MetricName),
+						MetricName:        setStringPointerToState(rule.MetricName),
 						Rollup:            types.Int64Value(int64(*rule.Rollup)),
 						Window:            types.Int64Value(int64(*rule.Window)),
-						Aggregation:       types.StringValue(*rule.Aggregation),
-						ConditionOperator: types.StringValue(*rule.ConditionOperator),
-						ConditionValue:    types.Float64Value(*rule.ConditionValue),
+						Aggregation:       setStringPointerToState(rule.Aggregation),
+						ConditionOperator: setStringPointerToState(rule.ConditionOperator),
+						ConditionValue:    setFloat64PointerToState(rule.ConditionValue),
 					}
 
 					// Handle metric pattern if present
@@ -540,17 +532,9 @@ func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Cont
 							Operator: types.StringValue(rule.MetricPattern.Operator),
 						}
 
-						if rule.MetricPattern.Postfix != nil {
-							metricPatternModel.Postfix = types.StringValue(*rule.MetricPattern.Postfix)
-						} else {
-							metricPatternModel.Postfix = types.StringValue("")
-						}
+						metricPatternModel.Postfix = setStringPointerToState(rule.MetricPattern.Postfix)
 
-						if rule.MetricPattern.Placeholder != nil {
-							metricPatternModel.Placeholder = types.StringValue(*rule.MetricPattern.Placeholder)
-						} else {
-							metricPatternModel.Placeholder = types.StringValue("")
-						}
+						metricPatternModel.Placeholder = setStringPointerToState(rule.MetricPattern.Placeholder)
 
 						// Create a list of metric patterns with this single pattern
 						metricPatterns, diags := types.ListValueFrom(ctx, types.ObjectType{

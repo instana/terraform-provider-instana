@@ -354,7 +354,7 @@ func (r *syntheticAlertConfigResourceFramework) UpdateState(ctx context.Context,
 			return diags
 		}
 		if normalizedTagFilterString != nil {
-			model.TagFilter = types.StringValue(*normalizedTagFilterString)
+			model.TagFilter = setStringPointerToState(normalizedTagFilterString)
 		} else {
 			model.TagFilter = types.StringNull()
 		}

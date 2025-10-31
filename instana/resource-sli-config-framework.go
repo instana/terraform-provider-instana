@@ -423,21 +423,13 @@ func (r *sliConfigResourceFramework) mapApplicationTimeBasedToState(ctx context.
 	var diags diag.Diagnostics
 
 	appTimeBasedModel := ApplicationTimeBasedModel{
-		ApplicationID: types.StringValue(*sliEntity.ApplicationID),
-		BoundaryScope: types.StringValue(*sliEntity.BoundaryScope),
+		ApplicationID: setStringPointerToState(sliEntity.ApplicationID),
+		BoundaryScope: setStringPointerToState(sliEntity.BoundaryScope),
 	}
 
-	if sliEntity.ServiceID != nil {
-		appTimeBasedModel.ServiceID = types.StringValue(*sliEntity.ServiceID)
-	} else {
-		appTimeBasedModel.ServiceID = types.StringNull()
-	}
+	appTimeBasedModel.ServiceID = setStringPointerToState(sliEntity.ServiceID)
 
-	if sliEntity.EndpointID != nil {
-		appTimeBasedModel.EndpointID = types.StringValue(*sliEntity.EndpointID)
-	} else {
-		appTimeBasedModel.EndpointID = types.StringNull()
-	}
+	appTimeBasedModel.EndpointID = setStringPointerToState(sliEntity.EndpointID)
 
 	appTimeBasedObj, objDiags := types.ObjectValueFrom(ctx, map[string]attr.Type{
 		"application_id": types.StringType,
@@ -457,10 +449,10 @@ func (r *sliConfigResourceFramework) mapApplicationEventBasedToState(ctx context
 	var diags diag.Diagnostics
 
 	appEventBasedModel := ApplicationEventBasedModel{
-		ApplicationID: types.StringValue(*sliEntity.ApplicationID),
-		BoundaryScope: types.StringValue(*sliEntity.BoundaryScope),
-		EndpointID:    types.StringValue(*sliEntity.EndpointID),
-		ServiceID:     types.StringValue(*sliEntity.ServiceID),
+		ApplicationID: setStringPointerToState(sliEntity.ApplicationID),
+		BoundaryScope: setStringPointerToState(sliEntity.BoundaryScope),
+		EndpointID:    setStringPointerToState(sliEntity.EndpointID),
+		ServiceID:     setStringPointerToState(sliEntity.ServiceID),
 	}
 
 	// Map good event filter expression
@@ -473,7 +465,7 @@ func (r *sliConfigResourceFramework) mapApplicationEventBasedToState(ctx context
 			)
 			return types.ListNull(types.ObjectType{}), diags
 		}
-		appEventBasedModel.GoodEventFilterExpression = types.StringValue(*goodEventFilterStr)
+		appEventBasedModel.GoodEventFilterExpression = setStringPointerToState(goodEventFilterStr)
 	} else {
 		appEventBasedModel.GoodEventFilterExpression = types.StringNull()
 	}
@@ -488,20 +480,20 @@ func (r *sliConfigResourceFramework) mapApplicationEventBasedToState(ctx context
 			)
 			return types.ListNull(types.ObjectType{}), diags
 		}
-		appEventBasedModel.BadEventFilterExpression = types.StringValue(*badEventFilterStr)
+		appEventBasedModel.BadEventFilterExpression = setStringPointerToState(badEventFilterStr)
 	} else {
 		appEventBasedModel.BadEventFilterExpression = types.StringNull()
 	}
 
 	// Map include internal and synthetic flags
 	if sliEntity.IncludeInternal != nil {
-		appEventBasedModel.IncludeInternal = types.BoolValue(*sliEntity.IncludeInternal)
+		appEventBasedModel.IncludeInternal = setBoolPointerToState(sliEntity.IncludeInternal)
 	} else {
 		appEventBasedModel.IncludeInternal = types.BoolValue(false)
 	}
 
 	if sliEntity.IncludeSynthetic != nil {
-		appEventBasedModel.IncludeSynthetic = types.BoolValue(*sliEntity.IncludeSynthetic)
+		appEventBasedModel.IncludeSynthetic = setBoolPointerToState(sliEntity.IncludeSynthetic)
 	} else {
 		appEventBasedModel.IncludeSynthetic = types.BoolValue(false)
 	}
@@ -528,8 +520,8 @@ func (r *sliConfigResourceFramework) mapWebsiteEventBasedToState(ctx context.Con
 	var diags diag.Diagnostics
 
 	websiteEventBasedModel := WebsiteEventBasedModel{
-		WebsiteID:  types.StringValue(*sliEntity.WebsiteId),
-		BeaconType: types.StringValue(*sliEntity.BeaconType),
+		WebsiteID:  setStringPointerToState(sliEntity.WebsiteId),
+		BeaconType: setStringPointerToState(sliEntity.BeaconType),
 	}
 
 	// Map good event filter expression
@@ -542,7 +534,7 @@ func (r *sliConfigResourceFramework) mapWebsiteEventBasedToState(ctx context.Con
 			)
 			return types.ListNull(types.ObjectType{}), diags
 		}
-		websiteEventBasedModel.GoodEventFilterExpression = types.StringValue(*goodEventFilterStr)
+		websiteEventBasedModel.GoodEventFilterExpression = setStringPointerToState(goodEventFilterStr)
 	} else {
 		websiteEventBasedModel.GoodEventFilterExpression = types.StringNull()
 	}
@@ -557,7 +549,7 @@ func (r *sliConfigResourceFramework) mapWebsiteEventBasedToState(ctx context.Con
 			)
 			return types.ListNull(types.ObjectType{}), diags
 		}
-		websiteEventBasedModel.BadEventFilterExpression = types.StringValue(*badEventFilterStr)
+		websiteEventBasedModel.BadEventFilterExpression = setStringPointerToState(badEventFilterStr)
 	} else {
 		websiteEventBasedModel.BadEventFilterExpression = types.StringNull()
 	}
@@ -580,8 +572,8 @@ func (r *sliConfigResourceFramework) mapWebsiteTimeBasedToState(ctx context.Cont
 	var diags diag.Diagnostics
 
 	websiteTimeBasedModel := WebsiteTimeBasedModel{
-		WebsiteID:  types.StringValue(*sliEntity.WebsiteId),
-		BeaconType: types.StringValue(*sliEntity.BeaconType),
+		WebsiteID:  setStringPointerToState(sliEntity.WebsiteId),
+		BeaconType: setStringPointerToState(sliEntity.BeaconType),
 	}
 
 	// Map filter expression
@@ -594,7 +586,7 @@ func (r *sliConfigResourceFramework) mapWebsiteTimeBasedToState(ctx context.Cont
 			)
 			return types.ListNull(types.ObjectType{}), diags
 		}
-		websiteTimeBasedModel.FilterExpression = types.StringValue(*filterExprStr)
+		websiteTimeBasedModel.FilterExpression = setStringPointerToState(filterExprStr)
 	} else {
 		websiteTimeBasedModel.FilterExpression = types.StringNull()
 	}

@@ -407,8 +407,8 @@ func (r *alertingChannelResourceFramework) mapOpsGenieChannelToState(ctx context
 
 	// Create OpsGenie channel object
 	opsGenieObj := map[string]attr.Value{
-		AlertingChannelOpsGenieFieldAPIKey: types.StringValue(*channel.APIKey),
-		AlertingChannelOpsGenieFieldRegion: types.StringValue(*channel.Region),
+		AlertingChannelOpsGenieFieldAPIKey: setStringPointerToState(channel.APIKey),
+		AlertingChannelOpsGenieFieldRegion: setStringPointerToState(channel.Region),
 		AlertingChannelOpsGenieFieldTags:   tagsList,
 	}
 
@@ -442,7 +442,7 @@ func (r *alertingChannelResourceFramework) mapPagerDutyChannelToState(ctx contex
 
 	// Create PagerDuty channel object
 	pagerDutyObj := map[string]attr.Value{
-		AlertingChannelPagerDutyFieldServiceIntegrationKey: types.StringValue(*channel.ServiceIntegrationKey),
+		AlertingChannelPagerDutyFieldServiceIntegrationKey: setStringPointerToState(channel.ServiceIntegrationKey),
 	}
 
 	pagerDutyObjVal, pagerDutyObjDiags := types.ObjectValue(
@@ -471,18 +471,18 @@ func (r *alertingChannelResourceFramework) mapSlackChannelToState(ctx context.Co
 
 	// Create Slack channel object
 	slackObj := map[string]attr.Value{
-		AlertingChannelSlackFieldWebhookURL: types.StringValue(*channel.WebhookURL),
+		AlertingChannelSlackFieldWebhookURL: setStringPointerToState(channel.WebhookURL),
 	}
 
 	// Add optional fields if present
 	if channel.IconURL != nil && *channel.IconURL != "" {
-		slackObj[AlertingChannelSlackFieldIconURL] = types.StringValue(*channel.IconURL)
+		slackObj[AlertingChannelSlackFieldIconURL] = setStringPointerToState(channel.IconURL)
 	} else {
 		slackObj[AlertingChannelSlackFieldIconURL] = types.StringNull()
 	}
 
 	if channel.Channel != nil && *channel.Channel != "" {
-		slackObj[AlertingChannelSlackFieldChannel] = types.StringValue(*channel.Channel)
+		slackObj[AlertingChannelSlackFieldChannel] = setStringPointerToState(channel.Channel)
 	} else {
 		slackObj[AlertingChannelSlackFieldChannel] = types.StringNull()
 	}
@@ -517,8 +517,8 @@ func (r *alertingChannelResourceFramework) mapSplunkChannelToState(ctx context.C
 
 	// Create Splunk channel object
 	splunkObj := map[string]attr.Value{
-		AlertingChannelSplunkFieldURL:   types.StringValue(*channel.URL),
-		AlertingChannelSplunkFieldToken: types.StringValue(*channel.Token),
+		AlertingChannelSplunkFieldURL:   setStringPointerToState(channel.URL),
+		AlertingChannelSplunkFieldToken: setStringPointerToState(channel.Token),
 	}
 
 	splunkObjVal, splunkObjDiags := types.ObjectValue(
@@ -549,8 +549,8 @@ func (r *alertingChannelResourceFramework) mapVictorOpsChannelToState(ctx contex
 
 	// Create VictorOps channel object
 	victorOpsObj := map[string]attr.Value{
-		AlertingChannelVictorOpsFieldAPIKey:     types.StringValue(*channel.APIKey),
-		AlertingChannelVictorOpsFieldRoutingKey: types.StringValue(*channel.RoutingKey),
+		AlertingChannelVictorOpsFieldAPIKey:     setStringPointerToState(channel.APIKey),
+		AlertingChannelVictorOpsFieldRoutingKey: setStringPointerToState(channel.RoutingKey),
 	}
 
 	victorOpsObjVal, victorOpsObjDiags := types.ObjectValue(
@@ -641,7 +641,7 @@ func (r *alertingChannelResourceFramework) mapWebhookBasedChannelToState(ctx con
 
 	// Create webhook-based channel object
 	webhookBasedObj := map[string]attr.Value{
-		AlertingChannelWebhookBasedFieldWebhookURL: types.StringValue(*channel.WebhookURL),
+		AlertingChannelWebhookBasedFieldWebhookURL: setStringPointerToState(channel.WebhookURL),
 	}
 
 	webhookBasedObjVal, webhookBasedObjDiags := types.ObjectValue(
