@@ -219,14 +219,16 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 						Description: "The threshold configuration for the Website Alert Configuration.",
 						Attributes: map[string]schema.Attribute{
 							"operator": schema.StringAttribute{
-								Required:    true,
+								Optional:    true,
+								Computed:    true,
 								Description: "The operator of the threshold.",
 								Validators: []validator.String{
 									stringvalidator.OneOf(">", ">=", "<", "<=", "=="),
 								},
 							},
 							"value": schema.Float64Attribute{
-								Required:    true,
+								Optional:    true,
+								Computed:    true,
 								Description: "The value of the threshold.",
 							},
 						},
@@ -848,12 +850,12 @@ func (r *websiteAlertConfigResourceFramework) mapRulesToState(ctx context.Contex
 	rules := apiObject.Rules
 	var rulesModel []RuleWithThresholdPluginModel
 	for _, i := range rules {
-		warningThreshold, _ := i.Thresholds[restapi.WarningSeverity]
-		criticalThreshold, _ := i.Thresholds[restapi.CriticalSeverity]
+		warningThreshold, isWarningThresholdPresent := i.Thresholds[restapi.WarningSeverity]
+		criticalThreshold, isCriticalThresholdPresent := i.Thresholds[restapi.CriticalSeverity]
 
 		thresholdPluginModel := ThresholdPluginModel{
-			Warning:  MapThresholdPluginToState(ctx, &warningThreshold),
-			Critical: MapThresholdPluginToState(ctx, &criticalThreshold),
+			Warning:  MapThresholdPluginToState(ctx, &warningThreshold, isWarningThresholdPresent),
+			Critical: MapThresholdPluginToState(ctx, &criticalThreshold, isCriticalThresholdPresent),
 		}
 		ruleModel := RuleWithThresholdPluginModel{
 			Rule:              r.mapRuleToState(ctx, i.Rule),
