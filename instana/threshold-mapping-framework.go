@@ -97,6 +97,11 @@ func AdaptiveAttributeSchema() schema.SingleNestedAttribute {
 				Computed:    true,
 				Description: "The seasonality for the adaptive baseline threshold",
 			},
+			"operator": schema.StringAttribute{
+				Optional:    true,
+				Computed:    true,
+				Description: "The operator for the adaptive baseline threshold",
+			},
 		},
 	}
 }
@@ -1002,8 +1007,11 @@ func MapThresholdRulePluginFromState(ctx context.Context, thresholdObj *Threshol
 }
 
 // MapThresholdToState maps a threshold rule to a Terraform state representation - used for nested attribute instead of block object
-func MapThresholdPluginToState(ctx context.Context, threshold *restapi.ThresholdRule) *ThresholdTypeModel {
+func MapThresholdPluginToState(ctx context.Context, threshold *restapi.ThresholdRule, dataPresent bool) *ThresholdTypeModel {
 	thresholdTypeModel := ThresholdTypeModel{}
+	if dataPresent == false {
+		return nil
+	}
 	switch threshold.Type {
 	case "adaptiveBaseline":
 		adaptiveBaselineModel := AdaptiveBaselineModel{
