@@ -487,13 +487,13 @@ func (r *sliConfigResourceFramework) mapApplicationEventBasedToState(ctx context
 
 	// Map include internal and synthetic flags
 	if sliEntity.IncludeInternal != nil {
-		appEventBasedModel.IncludeInternal = setBoolPointerToState(sliEntity.IncludeInternal)
+		appEventBasedModel.IncludeInternal = types.BoolValue(*sliEntity.IncludeInternal)
 	} else {
 		appEventBasedModel.IncludeInternal = types.BoolValue(false)
 	}
 
 	if sliEntity.IncludeSynthetic != nil {
-		appEventBasedModel.IncludeSynthetic = setBoolPointerToState(sliEntity.IncludeSynthetic)
+		appEventBasedModel.IncludeSynthetic = types.BoolValue(*sliEntity.IncludeSynthetic)
 	} else {
 		appEventBasedModel.IncludeSynthetic = types.BoolValue(false)
 	}

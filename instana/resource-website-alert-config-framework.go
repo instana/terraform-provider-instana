@@ -104,104 +104,96 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 									Optional:    true,
 									Computed:    true,
 									Attributes: map[string]schema.Attribute{
-										"slowness": schema.ListNestedAttribute{
+										"slowness": schema.SingleNestedAttribute{
 											Description: "Rule based on the slowness of the configured alert configuration target.",
 											Optional:    true,
 											Computed:    true,
-											NestedObject: schema.NestedAttributeObject{
-												Attributes: map[string]schema.Attribute{
-													"metric_name": schema.StringAttribute{
-														Required:    true,
-														Description: "The metric name of the website alert rule.",
-													},
-													"aggregation": schema.StringAttribute{
-														Required:    true,
-														Description: "The aggregation function of the website alert rule.",
-														Validators: []validator.String{
-															stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
-														},
+											Attributes: map[string]schema.Attribute{
+												"metric_name": schema.StringAttribute{
+													Required:    true,
+													Description: "The metric name of the website alert rule.",
+												},
+												"aggregation": schema.StringAttribute{
+													Required:    true,
+													Description: "The aggregation function of the website alert rule.",
+													Validators: []validator.String{
+														stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
 													},
 												},
 											},
 										},
-										"specific_js_error": schema.ListNestedAttribute{
+										"specific_js_error": schema.SingleNestedAttribute{
 											Description: "Rule based on a specific javascript error of the configured alert configuration target.",
 											Optional:    true,
 											Computed:    true,
-											NestedObject: schema.NestedAttributeObject{
-												Attributes: map[string]schema.Attribute{
-													"metric_name": schema.StringAttribute{
-														Required:    true,
-														Description: "The metric name of the website alert rule.",
+											Attributes: map[string]schema.Attribute{
+												"metric_name": schema.StringAttribute{
+													Required:    true,
+													Description: "The metric name of the website alert rule.",
+												},
+												"aggregation": schema.StringAttribute{
+													Optional:    true,
+													Description: "The aggregation function of the website alert rule.",
+													Validators: []validator.String{
+														stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
 													},
-													"aggregation": schema.StringAttribute{
-														Optional:    true,
-														Description: "The aggregation function of the website alert rule.",
-														Validators: []validator.String{
-															stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
-														},
+												},
+												"operator": schema.StringAttribute{
+													Required:    true,
+													Description: "The operator which will be applied to evaluate this rule.",
+													Validators: []validator.String{
+														stringvalidator.OneOf("EQUALS", "DOES_NOT_EQUAL", "CONTAINS", "DOES_NOT_CONTAIN"),
 													},
-													"operator": schema.StringAttribute{
-														Required:    true,
-														Description: "The operator which will be applied to evaluate this rule.",
-														Validators: []validator.String{
-															stringvalidator.OneOf("EQUALS", "DOES_NOT_EQUAL", "CONTAINS", "DOES_NOT_CONTAIN"),
-														},
-													},
-													"value": schema.StringAttribute{
-														Optional:    true,
-														Description: "The value identify the specific javascript error.",
-													},
+												},
+												"value": schema.StringAttribute{
+													Optional:    true,
+													Description: "The value identify the specific javascript error.",
 												},
 											},
 										},
-										"status_code": schema.ListNestedAttribute{
+										"status_code": schema.SingleNestedAttribute{
 											Description: "Rule based on the HTTP status code of the configured alert configuration target.",
 											Optional:    true,
 											Computed:    true,
-											NestedObject: schema.NestedAttributeObject{
-												Attributes: map[string]schema.Attribute{
-													"metric_name": schema.StringAttribute{
-														Required:    true,
-														Description: "The metric name of the website alert rule.",
+											Attributes: map[string]schema.Attribute{
+												"metric_name": schema.StringAttribute{
+													Required:    true,
+													Description: "The metric name of the website alert rule.",
+												},
+												"aggregation": schema.StringAttribute{
+													Optional:    true,
+													Description: "The aggregation function of the website alert rule.",
+													Validators: []validator.String{
+														stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
 													},
-													"aggregation": schema.StringAttribute{
-														Optional:    true,
-														Description: "The aggregation function of the website alert rule.",
-														Validators: []validator.String{
-															stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
-														},
+												},
+												"operator": schema.StringAttribute{
+													Required:    true,
+													Description: "The operator which will be applied to evaluate this rule.",
+													Validators: []validator.String{
+														stringvalidator.OneOf("EQUALS", "DOES_NOT_EQUAL", "CONTAINS", "DOES_NOT_CONTAIN"),
 													},
-													"operator": schema.StringAttribute{
-														Required:    true,
-														Description: "The operator which will be applied to evaluate this rule.",
-														Validators: []validator.String{
-															stringvalidator.OneOf("EQUALS", "DOES_NOT_EQUAL", "CONTAINS", "DOES_NOT_CONTAIN"),
-														},
-													},
-													"value": schema.StringAttribute{
-														Required:    true,
-														Description: "The value identify the specific http status code.",
-													},
+												},
+												"value": schema.StringAttribute{
+													Required:    true,
+													Description: "The value identify the specific http status code.",
 												},
 											},
 										},
-										"throughput": schema.ListNestedAttribute{
+										"throughput": schema.SingleNestedAttribute{
 											Description: "Rule based on the throughput of the configured alert configuration target.",
 											Optional:    true,
 											Computed:    true,
-											NestedObject: schema.NestedAttributeObject{
-												Attributes: map[string]schema.Attribute{
-													"metric_name": schema.StringAttribute{
-														Required:    true,
-														Description: "The metric name of the website alert rule.",
-													},
-													"aggregation": schema.StringAttribute{
-														Optional:    true,
-														Description: "The aggregation function of the website alert rule.",
-														Validators: []validator.String{
-															stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
-														},
+											Attributes: map[string]schema.Attribute{
+												"metric_name": schema.StringAttribute{
+													Required:    true,
+													Description: "The metric name of the website alert rule.",
+												},
+												"aggregation": schema.StringAttribute{
+													Optional:    true,
+													Description: "The aggregation function of the website alert rule.",
+													Validators: []validator.String{
+														stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
 													},
 												},
 											},
@@ -330,54 +322,52 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 							},
 						},
 					},
-					"time_threshold": schema.ListNestedBlock{
+					"time_threshold": schema.SingleNestedBlock{
 						Description: "Indicates the type of violation of the defined threshold.",
-						NestedObject: schema.NestedBlockObject{
-							Blocks: map[string]schema.Block{
-								"user_impact_of_violations_in_sequence": schema.SingleNestedBlock{
-									Description: "Time threshold base on user impact of violations in sequence.",
-									Attributes: map[string]schema.Attribute{
-										"time_window": schema.Int64Attribute{
-											Optional:    true,
-											Description: "The time window if the time threshold.",
-										},
-										"impact_measurement_method": schema.StringAttribute{
-											Required:    true,
-											Description: "The impact method of the time threshold based on user impact of violations in sequence.",
-											Validators: []validator.String{
-												stringvalidator.OneOf("AGGREGATED", "PER_WINDOW"),
-											},
-										},
-										"user_percentage": schema.Float64Attribute{
-											Optional:    true,
-											Description: "The percentage of impacted users of the time threshold based on user impact of violations in sequence.",
-										},
-										"users": schema.Int64Attribute{
-											Optional:    true,
-											Description: "The number of impacted users of the time threshold based on user impact of violations in sequence.",
+						Blocks: map[string]schema.Block{
+							"user_impact_of_violations_in_sequence": schema.SingleNestedBlock{
+								Description: "Time threshold base on user impact of violations in sequence.",
+								Attributes: map[string]schema.Attribute{
+									"time_window": schema.Int64Attribute{
+										Optional:    true,
+										Description: "The time window if the time threshold.",
+									},
+									"impact_measurement_method": schema.StringAttribute{
+										Required:    true,
+										Description: "The impact method of the time threshold based on user impact of violations in sequence.",
+										Validators: []validator.String{
+											stringvalidator.OneOf("AGGREGATED", "PER_WINDOW"),
 										},
 									},
-								},
-								"violations_in_period": schema.SingleNestedBlock{
-									Description: "Time threshold base on violations in period.",
-									Attributes: map[string]schema.Attribute{
-										"time_window": schema.Int64Attribute{
-											Optional:    true,
-											Description: "The time window if the time threshold.",
-										},
-										"violations": schema.Int64Attribute{
-											Optional:    true,
-											Description: "The violations appeared in the period.",
-										},
+									"user_percentage": schema.Float64Attribute{
+										Optional:    true,
+										Description: "The percentage of impacted users of the time threshold based on user impact of violations in sequence.",
+									},
+									"users": schema.Int64Attribute{
+										Optional:    true,
+										Description: "The number of impacted users of the time threshold based on user impact of violations in sequence.",
 									},
 								},
-								"violations_in_sequence": schema.SingleNestedBlock{
-									Description: "Time threshold base on violations in sequence.",
-									Attributes: map[string]schema.Attribute{
-										"time_window": schema.Int64Attribute{
-											Optional:    true,
-											Description: "The time window if the time threshold.",
-										},
+							},
+							"violations_in_period": schema.SingleNestedBlock{
+								Description: "Time threshold base on violations in period.",
+								Attributes: map[string]schema.Attribute{
+									"time_window": schema.Int64Attribute{
+										Optional:    true,
+										Description: "The time window if the time threshold.",
+									},
+									"violations": schema.Int64Attribute{
+										Optional:    true,
+										Description: "The violations appeared in the period.",
+									},
+								},
+							},
+							"violations_in_sequence": schema.SingleNestedBlock{
+								Description: "Time threshold base on violations in sequence.",
+								Attributes: map[string]schema.Attribute{
+									"time_window": schema.Int64Attribute{
+										Optional:    true,
+										Description: "The time window if the time threshold.",
 									},
 								},
 							},
@@ -793,19 +783,19 @@ func (r *websiteAlertConfigResourceFramework) mapTimeThresholdToState(timeThresh
 	switch timeThreshold.Type {
 	case "violationsInSequence":
 		websiteTimeThresholdModel.ViolationsInSequence = &WebsiteViolationsInSequenceModel{
-			TimeWindow: types.Int64Value(*timeThreshold.TimeWindow),
+			TimeWindow: setInt64PointerToState(timeThreshold.TimeWindow),
 		}
 	case "userImpactOfViolationsInSequence":
 		websiteTimeThresholdModel.UserImpactOfViolationsInSequence = &WebsiteUserImpactOfViolationsInSequenceModel{
-			TimeWindow:              types.Int64Value(*timeThreshold.TimeWindow),
+			TimeWindow:              setInt64PointerToState(timeThreshold.TimeWindow),
 			ImpactMeasurementMethod: types.StringValue(string(*timeThreshold.ImpactMeasurementMethod)),
 			UserPercentage:          setFloat64PointerToState(timeThreshold.UserPercentage),
-			Users:                   types.Int64Value(int64(*timeThreshold.Users)),
+			Users:                   setInt64PointerToState(timeThreshold.Users),
 		}
 	case "violationsInPeriod":
 		websiteTimeThresholdModel.ViolationsInPeriod = &WebsiteViolationsInPeriodModel{
-			TimeWindow: types.Int64Value(*timeThreshold.TimeWindow),
-			Violations: types.Int64Value(int64(*timeThreshold.Violations)),
+			TimeWindow: setInt64PointerToState(timeThreshold.TimeWindow),
+			Violations: setInt64PointerToState(timeThreshold.Violations),
 		}
 	}
 	return &websiteTimeThresholdModel

@@ -196,7 +196,7 @@ func NormalizeJSONString(jsonString string) string {
 
 // this interface to handle the conversion of differnt numeric types
 type numericPtr interface {
-	~*int32 | ~*int64 | ~*float32 | ~*float64
+	~*int32 | ~*int64 | ~*float32 | ~*float64 | ~*int
 }
 
 func setStringPointerToState(i *string) types.String {
@@ -207,11 +207,13 @@ func setStringPointerToState(i *string) types.String {
 	}
 }
 
-func setInt64PointerToState[T *int32 | *int64 | *float32 | *float64](i T) types.Int64 {
+func setInt64PointerToState[T numericPtr](i T) types.Int64 {
 	if i == nil {
 		return types.Int64Null()
 	}
 	switch v := any(i).(type) {
+	case *int:
+		return types.Int64Value(int64(*v))
 	case *int32:
 		return types.Int64Value(int64(*v))
 	case *int64:
@@ -226,11 +228,13 @@ func setInt64PointerToState[T *int32 | *int64 | *float32 | *float64](i T) types.
 	}
 }
 
-func setInt32PointerToState[T *int32 | *int64 | *float32 | *float64](i T) types.Int32 {
+func setInt32PointerToState[T numericPtr](i T) types.Int32 {
 	if i == nil {
 		return types.Int32Null()
 	}
 	switch v := any(i).(type) {
+	case *int:
+		return types.Int32Value(int32(*v))
 	case *int32:
 		return types.Int32Value(int32(*v))
 	case *int64:
@@ -244,11 +248,13 @@ func setInt32PointerToState[T *int32 | *int64 | *float32 | *float64](i T) types.
 		return types.Int32Null()
 	}
 }
-func setFloat32PointerToState[T *int32 | *int64 | *float32 | *float64](i T) types.Float32 {
+func setFloat32PointerToState[T numericPtr](i T) types.Float32 {
 	if i == nil {
 		return types.Float32Null()
 	}
 	switch v := any(i).(type) {
+	case *int:
+		return types.Float32Value(float32(*v))
 	case *int32:
 		return types.Float32Value(float32(*v))
 	case *int64:
@@ -263,11 +269,13 @@ func setFloat32PointerToState[T *int32 | *int64 | *float32 | *float64](i T) type
 	}
 }
 
-func setFloat64PointerToState[T *int32 | *int64 | *float32 | *float64](i T) types.Float64 {
+func setFloat64PointerToState[T numericPtr](i T) types.Float64 {
 	if i == nil {
 		return types.Float64Null()
 	}
 	switch v := any(i).(type) {
+	case *int:
+		return types.Float64Value(float64(*v))
 	case *int32:
 		return types.Float64Value(float64(*v))
 	case *int64:

@@ -464,7 +464,7 @@ func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state 
 
 	// Map test frequency
 	if apiObject.TestFrequency != nil {
-		model.TestFrequency = types.Int64Value(int64(*apiObject.TestFrequency))
+		model.TestFrequency = setInt64PointerToState(apiObject.TestFrequency)
 	} else {
 		model.TestFrequency = types.Int64Null()
 	}
@@ -511,13 +511,13 @@ func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state 
 		httpActionModel.ValidationString = setStringPointerToState(apiObject.Configuration.ValidationString)
 
 		if apiObject.Configuration.FollowRedirect != nil {
-			httpActionModel.FollowRedirect = setBoolPointerToState(apiObject.Configuration.FollowRedirect)
+			httpActionModel.FollowRedirect = types.BoolValue(*apiObject.Configuration.FollowRedirect)
 		}
 		if apiObject.Configuration.AllowInsecure != nil {
-			httpActionModel.AllowInsecure = setBoolPointerToState(apiObject.Configuration.AllowInsecure)
+			httpActionModel.AllowInsecure = types.BoolValue(*apiObject.Configuration.AllowInsecure)
 		}
 		if apiObject.Configuration.ExpectStatus != nil {
-			httpActionModel.ExpectStatus = types.Int64Value(int64(*apiObject.Configuration.ExpectStatus))
+			httpActionModel.ExpectStatus = setInt64PointerToState(apiObject.Configuration.ExpectStatus)
 		}
 		httpActionModel.ExpectMatch = setStringPointerToState(apiObject.Configuration.ExpectMatch)
 

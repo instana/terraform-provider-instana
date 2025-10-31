@@ -144,7 +144,7 @@ func (d *customEventSpecificationDataSourceFramework) Read(ctx context.Context, 
 
 	// Handle expiration time which is a pointer
 	if matchingSpec.ExpirationTime != nil {
-		data.ExpirationTime = types.Int64Value(int64(*matchingSpec.ExpirationTime))
+		data.ExpirationTime = setInt64PointerToState(matchingSpec.ExpirationTime)
 	} else {
 		data.ExpirationTime = types.Int64Null()
 	}

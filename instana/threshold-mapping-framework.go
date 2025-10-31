@@ -61,48 +61,41 @@ func StaticBlockSchema() schema.ListNestedBlock {
 	}
 }
 
-func StaticAttributeSchema() schema.ListNestedAttribute {
-	return schema.ListNestedAttribute{
+func StaticAttributeSchema() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
 		Optional:    true,
 		Computed:    true,
 		Description: "Static threshold configuration",
-		NestedObject: schema.NestedAttributeObject{
-			Attributes: map[string]schema.Attribute{
-				LogAlertConfigFieldValue: schema.Int64Attribute{
-					Optional:    true,
-					Computed:    true,
-					Description: "The value of the threshold",
-				},
+		Attributes: map[string]schema.Attribute{
+			LogAlertConfigFieldValue: schema.Int64Attribute{
+				Optional:    true,
+				Computed:    true,
+				Description: "The value of the threshold",
 			},
-		},
-		Validators: []validator.List{
-			listvalidator.SizeBetween(0, 1),
 		},
 	}
 }
 
-func AdaptiveAttributeSchema() schema.ListNestedAttribute {
-	return schema.ListNestedAttribute{
+func AdaptiveAttributeSchema() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
 		Description: "Threshold configuration",
 		Optional:    true,
 		Computed:    true,
-		NestedObject: schema.NestedAttributeObject{
-			Attributes: map[string]schema.Attribute{
-				ThresholdFieldAdaptiveBaselineDeviation: schema.Float32Attribute{
-					Optional:    true,
-					Computed:    true,
-					Description: "The deviation factor for the adaptive baseline threshold",
-				},
-				ThresholdFieldAdaptiveBaselineAdaptability: schema.Float32Attribute{
-					Optional:    true,
-					Computed:    true,
-					Description: "The adaptability for the adaptive baseline threshold",
-				},
-				ThresholdFieldAdaptiveBaselineSeasonality: schema.StringAttribute{
-					Optional:    true,
-					Computed:    true,
-					Description: "The seasonality for the adaptive baseline threshold",
-				},
+		Attributes: map[string]schema.Attribute{
+			ThresholdFieldAdaptiveBaselineDeviation: schema.Float32Attribute{
+				Optional:    true,
+				Computed:    true,
+				Description: "The deviation factor for the adaptive baseline threshold",
+			},
+			ThresholdFieldAdaptiveBaselineAdaptability: schema.Float32Attribute{
+				Optional:    true,
+				Computed:    true,
+				Description: "The adaptability for the adaptive baseline threshold",
+			},
+			ThresholdFieldAdaptiveBaselineSeasonality: schema.StringAttribute{
+				Optional:    true,
+				Computed:    true,
+				Description: "The seasonality for the adaptive baseline threshold",
 			},
 		},
 	}
@@ -158,16 +151,14 @@ func StaticAndAdaptiveThresholdBlockSchema() schema.ListNestedBlock {
 	}
 }
 
-func StaticAndAdaptiveThresholdAttributeSchema() schema.ListNestedAttribute {
-	return schema.ListNestedAttribute{
+func StaticAndAdaptiveThresholdAttributeSchema() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
 		Description: "Threshold configuration",
 		Optional:    true,
 		Computed:    true,
-		NestedObject: schema.NestedAttributeObject{
-			Attributes: map[string]schema.Attribute{
-				ThresholdFieldStatic:           StaticAttributeSchema(),
-				ThresholdFieldAdaptiveBaseline: AdaptiveAttributeSchema(),
-			},
+		Attributes: map[string]schema.Attribute{
+			ThresholdFieldStatic:           StaticAttributeSchema(),
+			ThresholdFieldAdaptiveBaseline: AdaptiveAttributeSchema(),
 		},
 	}
 }
@@ -489,7 +480,7 @@ func mapHistoricBaselineToState(ctx context.Context, threshold *restapi.Threshol
 
 	// Map deviation factor
 	if threshold.DeviationFactor != nil {
-		historicObj[ThresholdFieldHistoricBaselineDeviation] = types.Float32Value(float32(*threshold.DeviationFactor))
+		historicObj[ThresholdFieldHistoricBaselineDeviation] = setFloat32PointerToState(threshold.DeviationFactor)
 	} else {
 		historicObj[ThresholdFieldHistoricBaselineDeviation] = types.Float32Value(1.0)
 	}
@@ -569,7 +560,7 @@ func mapAdaptiveBaselineToState(ctx context.Context, threshold *restapi.Threshol
 
 	// Map deviation factor
 	if threshold.DeviationFactor != nil {
-		adaptiveObj[ThresholdFieldAdaptiveBaselineDeviation] = types.Float32Value(float32(*threshold.DeviationFactor))
+		adaptiveObj[ThresholdFieldAdaptiveBaselineDeviation] = setFloat32PointerToState(threshold.DeviationFactor)
 	} else {
 		adaptiveObj[ThresholdFieldAdaptiveBaselineDeviation] = types.Float32Value(1.0)
 	}
