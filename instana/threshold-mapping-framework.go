@@ -938,36 +938,36 @@ func MapThresholdsFromState(ctx context.Context, thresholdList types.List) (map[
 	return thresholdMap, diags
 }
 
-func MapThresholdsPluginFromState(ctx context.Context, thresholdStruct ThresholdPluginModel) (map[restapi.AlertSeverity]restapi.ThresholdRule, diag.Diagnostics) {
+func MapThresholdsPluginFromState(ctx context.Context, thresholdStruct *ThresholdPluginModel) (map[restapi.AlertSeverity]restapi.ThresholdRule, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	thresholdMap := make(map[restapi.AlertSeverity]restapi.ThresholdRule)
+	if thresholdStruct != nil {
+		// Process warning threshold
+		if thresholdStruct.Warning != nil {
+			warningThreshold, warningDiags := MapThresholdRulePluginFromState(ctx, thresholdStruct.Warning)
+			diags.Append(warningDiags...)
+			if diags.HasError() {
+				return nil, diags
+			}
 
-	// Process warning threshold
-	if thresholdStruct.Warning != nil {
-		warningThreshold, warningDiags := MapThresholdRulePluginFromState(ctx, thresholdStruct.Warning)
-		diags.Append(warningDiags...)
-		if diags.HasError() {
-			return nil, diags
+			if warningThreshold != nil {
+				thresholdMap[restapi.WarningSeverity] = *warningThreshold
+			}
 		}
 
-		if warningThreshold != nil {
-			thresholdMap[restapi.WarningSeverity] = *warningThreshold
+		// Process critical threshold
+		if thresholdStruct.Critical != nil {
+			criticalThreshold, criticalDiags := MapThresholdRulePluginFromState(ctx, thresholdStruct.Critical)
+			diags.Append(criticalDiags...)
+			if diags.HasError() {
+				return nil, diags
+			}
+
+			if criticalThreshold != nil {
+				thresholdMap[restapi.CriticalSeverity] = *criticalThreshold
+			}
 		}
 	}
-
-	// Process critical threshold
-	if thresholdStruct.Critical != nil {
-		criticalThreshold, criticalDiags := MapThresholdRulePluginFromState(ctx, thresholdStruct.Critical)
-		diags.Append(criticalDiags...)
-		if diags.HasError() {
-			return nil, diags
-		}
-
-		if criticalThreshold != nil {
-			thresholdMap[restapi.CriticalSeverity] = *criticalThreshold
-		}
-	}
-
 	return thresholdMap, diags
 }
 
@@ -995,12 +995,13 @@ func MapThresholdRulePluginFromState(ctx context.Context, thresholdObj *Threshol
 		seasonality := restapi.ThresholdSeasonality(adaptiveVal.Seasonality.ValueString())
 		deviationFactor := float32(adaptiveVal.DeviationFactor.ValueFloat32())
 		adaptability := adaptiveVal.Adaptability.ValueFloat32()
-
+		operator := setStringPointerFromState(adaptiveVal.Operator)
 		return &restapi.ThresholdRule{
 			Type:            "adaptiveBaseline",
 			Seasonality:     &seasonality,
 			DeviationFactor: &deviationFactor,
 			Adaptability:    &adaptability,
+			Operator:        operator,
 		}, diags
 	}
 	return nil, diags
@@ -1015,7 +1016,7 @@ func MapThresholdPluginToState(ctx context.Context, threshold *restapi.Threshold
 	switch threshold.Type {
 	case "adaptiveBaseline":
 		adaptiveBaselineModel := AdaptiveBaselineModel{
-			Operator:        types.StringValue(threshold.Operator),
+			Operator:        setStringPointerToState(threshold.Operator),
 			DeviationFactor: setFloat32PointerToState(threshold.DeviationFactor),
 			Adaptability:    setFloat32PointerToState(threshold.Adaptability),
 			Seasonality:     types.StringValue(string(*threshold.Seasonality)),
@@ -1024,7 +1025,7 @@ func MapThresholdPluginToState(ctx context.Context, threshold *restapi.Threshold
 	default:
 		// Default to static threshold for all other types
 		static := StaticTypeModel{
-			Operator: types.StringValue(threshold.Operator),
+			Operator: setStringPointerToState(threshold.Operator),
 			Value:    setInt64PointerToState(threshold.Value),
 		}
 		thresholdTypeModel.Static = &static

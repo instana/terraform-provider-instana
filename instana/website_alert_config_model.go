@@ -91,8 +91,8 @@ type CustomPayloadFieldModel struct {
 
 // ThresholdModel represents the threshold configuration
 type WebsiteThresholdModel struct {
-	Operator types.String  `tfsdk:"operator"`
-	Value    types.Float64 `tfsdk:"value"`
+	Static           *StaticTypeModel       `tfsdk:"static"`
+	AdaptiveBaseline *AdaptiveBaselineModel `tfsdk:"adaptive_baseline"`
 }
 
 // Made with Bob
