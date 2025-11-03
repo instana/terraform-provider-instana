@@ -2,6 +2,8 @@ package instana
 
 import (
 	"context"
+	"fmt"
+	"log"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/instana/tagfilter"
@@ -216,20 +218,47 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 				Blocks: map[string]schema.Block{
 					"custom_payload_fields": GetCustomPayloadFieldsSchema(),
 					"threshold": schema.SingleNestedBlock{
-						Description: "The threshold configuration for the Website Alert Configuration.",
-						Attributes: map[string]schema.Attribute{
-							"operator": schema.StringAttribute{
-								Optional:    true,
-								Computed:    true,
-								Description: "The operator of the threshold.",
-								Validators: []validator.String{
-									stringvalidator.OneOf(">", ">=", "<", "<=", "=="),
+						Description: "Threshold configuration for different severity levels",
+						Blocks: map[string]schema.Block{
+							"static": schema.SingleNestedBlock{
+								Description: "Static threshold definition.",
+								Attributes: map[string]schema.Attribute{
+									"operator": schema.StringAttribute{
+										Description: "Comparison operator for the static threshold.",
+										Optional:    true,
+										Validators: []validator.String{
+											stringvalidator.OneOf([]string{">=", ">", "<=", "<", "=="}...),
+										},
+									},
+									"value": schema.Int64Attribute{
+										Description: "The numeric value for the static threshold.",
+										Optional:    true,
+									},
 								},
 							},
-							"value": schema.Float64Attribute{
-								Optional:    true,
-								Computed:    true,
-								Description: "The value of the threshold.",
+							"adaptive_baseline": schema.SingleNestedBlock{
+								Description: "Static threshold definition.",
+								Attributes: map[string]schema.Attribute{
+									"operator": schema.StringAttribute{
+										Description: "Comparison operator for the static threshold.",
+										Optional:    true,
+										Validators: []validator.String{
+											stringvalidator.OneOf([]string{">=", ">", "<=", "<", "=="}...),
+										},
+									},
+									"deviation_factor": schema.Float32Attribute{
+										Description: "The numeric value for the deviation factor.",
+										Optional:    true,
+									},
+									"adaptability": schema.Float32Attribute{
+										Description: "The numeric value for the adaptability.",
+										Optional:    true,
+									},
+									"seasonality": schema.StringAttribute{
+										Description: "Value for the seasonality.",
+										Optional:    true,
+									},
+								},
 							},
 						},
 					},
@@ -240,11 +269,13 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 								Description: "Rule based on the slowness of the configured alert configuration target.",
 								Attributes: map[string]schema.Attribute{
 									"metric_name": schema.StringAttribute{
-										Required:    true,
+										Optional:    true,
+										Computed:    true,
 										Description: "The metric name of the website alert rule.",
 									},
 									"aggregation": schema.StringAttribute{
-										Required:    true,
+										Optional:    true,
+										Computed:    true,
 										Description: "The aggregation function of the website alert rule.",
 										Validators: []validator.String{
 											stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
@@ -256,18 +287,21 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 								Description: "Rule based on a specific javascript error of the configured alert configuration target.",
 								Attributes: map[string]schema.Attribute{
 									"metric_name": schema.StringAttribute{
-										Required:    true,
+										Optional:    true,
+										Computed:    true,
 										Description: "The metric name of the website alert rule.",
 									},
 									"aggregation": schema.StringAttribute{
 										Optional:    true,
+										Computed:    true,
 										Description: "The aggregation function of the website alert rule.",
 										Validators: []validator.String{
 											stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
 										},
 									},
 									"operator": schema.StringAttribute{
-										Required:    true,
+										Optional:    true,
+										Computed:    true,
 										Description: "The operator which will be applied to evaluate this rule.",
 										Validators: []validator.String{
 											stringvalidator.OneOf("EQUALS", "DOES_NOT_EQUAL", "CONTAINS", "DOES_NOT_CONTAIN"),
@@ -275,6 +309,7 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 									},
 									"value": schema.StringAttribute{
 										Optional:    true,
+										Computed:    true,
 										Description: "The value identify the specific javascript error.",
 									},
 								},
@@ -283,25 +318,29 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 								Description: "Rule based on the HTTP status code of the configured alert configuration target.",
 								Attributes: map[string]schema.Attribute{
 									"metric_name": schema.StringAttribute{
-										Required:    true,
+										Optional:    true,
+										Computed:    true,
 										Description: "The metric name of the website alert rule.",
 									},
 									"aggregation": schema.StringAttribute{
 										Optional:    true,
+										Computed:    true,
 										Description: "The aggregation function of the website alert rule.",
 										Validators: []validator.String{
 											stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
 										},
 									},
 									"operator": schema.StringAttribute{
-										Required:    true,
+										Optional:    true,
+										Computed:    true,
 										Description: "The operator which will be applied to evaluate this rule.",
 										Validators: []validator.String{
 											stringvalidator.OneOf("EQUALS", "DOES_NOT_EQUAL", "CONTAINS", "DOES_NOT_CONTAIN"),
 										},
 									},
 									"value": schema.StringAttribute{
-										Required:    true,
+										Optional:    true,
+										Computed:    true,
 										Description: "The value identify the specific http status code.",
 									},
 								},
@@ -310,11 +349,13 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 								Description: "Rule based on the throughput of the configured alert configuration target.",
 								Attributes: map[string]schema.Attribute{
 									"metric_name": schema.StringAttribute{
-										Required:    true,
+										Optional:    true,
+										Computed:    true,
 										Description: "The metric name of the website alert rule.",
 									},
 									"aggregation": schema.StringAttribute{
 										Optional:    true,
+										Computed:    true,
 										Description: "The aggregation function of the website alert rule.",
 										Validators: []validator.String{
 											stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
@@ -332,10 +373,12 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 								Attributes: map[string]schema.Attribute{
 									"time_window": schema.Int64Attribute{
 										Optional:    true,
+										Computed:    true,
 										Description: "The time window if the time threshold.",
 									},
 									"impact_measurement_method": schema.StringAttribute{
-										Required:    true,
+										Optional:    true,
+										Computed:    true,
 										Description: "The impact method of the time threshold based on user impact of violations in sequence.",
 										Validators: []validator.String{
 											stringvalidator.OneOf("AGGREGATED", "PER_WINDOW"),
@@ -343,10 +386,12 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 									},
 									"user_percentage": schema.Float64Attribute{
 										Optional:    true,
+										Computed:    true,
 										Description: "The percentage of impacted users of the time threshold based on user impact of violations in sequence.",
 									},
 									"users": schema.Int64Attribute{
 										Optional:    true,
+										Computed:    true,
 										Description: "The number of impacted users of the time threshold based on user impact of violations in sequence.",
 									},
 								},
@@ -356,10 +401,12 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 								Attributes: map[string]schema.Attribute{
 									"time_window": schema.Int64Attribute{
 										Optional:    true,
+										Computed:    true,
 										Description: "The time window if the time threshold.",
 									},
 									"violations": schema.Int64Attribute{
 										Optional:    true,
+										Computed:    true,
 										Description: "The violations appeared in the period.",
 									},
 								},
@@ -369,6 +416,7 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 								Attributes: map[string]schema.Attribute{
 									"time_window": schema.Int64Attribute{
 										Optional:    true,
+										Computed:    true,
 										Description: "The time window if the time threshold.",
 									},
 								},
@@ -431,6 +479,13 @@ func (r *websiteAlertConfigResourceFramework) MapStateToDataObject(ctx context.C
 		}
 		mapper := tagfilter.NewMapper()
 		tagFilter = mapper.ToAPIModel(expr)
+	} else {
+		operator := restapi.LogicalOperatorType("AND")
+		tagFilter = &restapi.TagFilter{
+			Type:            "EXPRESSION",
+			LogicalOperator: &operator,
+			Elements:        []*restapi.TagFilter{},
+		}
 	}
 
 	// Map alert channel IDs
@@ -443,10 +498,18 @@ func (r *websiteAlertConfigResourceFramework) MapStateToDataObject(ctx context.C
 	}
 
 	// Map custom payload fields
-	var customPayloadFields []restapi.CustomPayloadField[any]
+	customPayloadFields := make([]restapi.CustomPayloadField[any], 0)
+	// if !model.CustomPayloadFields.IsNull() && !model.CustomPayloadFields.IsUnknown() {
+	// 	// Skip custom payload fields for now
+	// 	customPayloadFields = []restapi.CustomPayloadField[any]{}
+	// }
 	if !model.CustomPayloadFields.IsNull() && !model.CustomPayloadFields.IsUnknown() {
-		// Skip custom payload fields for now
-		customPayloadFields = []restapi.CustomPayloadField[any]{}
+		var payloadDiags diag.Diagnostics
+		customPayloadFields, payloadDiags = MapCustomPayloadFieldsToAPIObject(ctx, model.CustomPayloadFields)
+		if payloadDiags.HasError() {
+			diags.Append(payloadDiags...)
+			return nil, diags
+		}
 	}
 
 	// Map rule
@@ -488,19 +551,19 @@ func (r *websiteAlertConfigResourceFramework) MapStateToDataObject(ctx context.C
 					websiteAlertRule, diags = r.mapThroughputRule(ctx, diags, *i.Rule.Throughput)
 				}
 			}
-			var thresholdMap map[restapi.AlertSeverity]restapi.ThresholdRule
-			warningThreshold, warningDiags := MapThresholdRulePluginFromState(ctx, i.Thresholds.Warning)
-			diags.Append(warningDiags...)
+			thresholdMap, thresholdDiags := MapThresholdsPluginFromState(ctx, i.Thresholds)
+			//warningThreshold, warningDiags := MapThresholdRulePluginFromState(ctx, i.Thresholds.Warning)
+			diags.Append(thresholdDiags...)
 			if diags.HasError() {
 				return nil, diags
 			}
-			criticalThreshold, criticalDiags := MapThresholdRulePluginFromState(ctx, i.Thresholds.Critical)
-			diags.Append(criticalDiags...)
-			if diags.HasError() {
-				return nil, diags
-			}
-			thresholdMap[restapi.WarningSeverity] = *warningThreshold
-			thresholdMap[restapi.CriticalSeverity] = *criticalThreshold
+			// criticalThreshold, criticalDiags := MapThresholdRulePluginFromState(ctx, i.Thresholds.Critical)
+			// diags.Append(criticalDiags...)
+			// if diags.HasError() {
+			// 	return nil, diags
+			// }
+			// thresholdMap[restapi.WarningSeverity] = *warningThreshold
+			// thresholdMap[restapi.CriticalSeverity] = *criticalThreshold
 
 			rules = append(rules, restapi.WebsiteAlertRuleWithThresholds{
 				Rule:              websiteAlertRule,
@@ -631,13 +694,29 @@ func (r *websiteAlertConfigResourceFramework) mapThresholdFromModel(ctx context.
 		diags.AddError("Threshold is required", "Website alert config threshold is required")
 		return nil, diags
 	}
-	thresholdModel := *model.Threshold
-	value := thresholdModel.Value.ValueFloat64()
-	valuePtr := &value
-	return &restapi.Threshold{
-		Operator: restapi.ThresholdOperator(thresholdModel.Operator.ValueString()),
-		Value:    valuePtr,
-	}, diags
+
+	threshold := &restapi.Threshold{}
+
+	if model.Threshold.Static != nil {
+		value := float64(model.Threshold.Static.Value.ValueInt64())
+		threshold.Value = &value
+		threshold.Type = "staticThreshold"
+
+		threshold.Operator = restapi.ThresholdOperator(model.Threshold.Static.Operator.ValueString())
+
+	}
+	if model.Threshold.AdaptiveBaseline != nil {
+		threshold.Type = "adaptiveBaseline"
+		threshold.Operator = restapi.ThresholdOperator(model.Threshold.AdaptiveBaseline.Operator.ValueString())
+		deviationFactor := model.Threshold.AdaptiveBaseline.DeviationFactor.ValueFloat32()
+		threshold.DeviationFactor = &deviationFactor
+		adaptability := model.Threshold.AdaptiveBaseline.Adaptability.ValueFloat32()
+		threshold.Adaptability = &adaptability
+		seasonality := restapi.ThresholdSeasonality(model.Threshold.AdaptiveBaseline.Seasonality.ValueString())
+		threshold.Seasonality = &seasonality
+
+	}
+	return threshold, diags
 }
 
 func (r *websiteAlertConfigResourceFramework) mapTimeThresholdFromModel(ctx context.Context, model WebsiteAlertConfigModel) (*restapi.WebsiteTimeThreshold, diag.Diagnostics) {
@@ -739,7 +818,15 @@ func (r *websiteAlertConfigResourceFramework) UpdateState(ctx context.Context, s
 
 	// Map tag filter expression
 	if apiObject.TagFilterExpression != nil {
-		model.TagFilter = types.StringValue("tag filter expression")
+		filterExprStr, err := tagfilter.MapTagFilterToNormalizedString(apiObject.TagFilterExpression)
+		if err != nil {
+			diags.AddError(
+				"Error mapping filter expression",
+				fmt.Sprintf("Failed to map filter expression: %s", err),
+			)
+			return diags
+		}
+		model.TagFilter = setStringPointerToState(filterExprStr)
 	} else {
 		model.TagFilter = types.StringNull()
 	}
@@ -775,6 +862,7 @@ func (r *websiteAlertConfigResourceFramework) UpdateState(ctx context.Context, s
 	//map time threshold
 	model.TimeThreshold = r.mapTimeThresholdToState(apiObject.TimeThreshold)
 
+	log.Printf("website model %v", model)
 	// Set state
 	diags.Append(state.Set(ctx, &model)...)
 	return diags
@@ -805,10 +893,29 @@ func (r *websiteAlertConfigResourceFramework) mapTimeThresholdToState(timeThresh
 
 func (r *websiteAlertConfigResourceFramework) mapThresholdToState(ctx context.Context, threshold restapi.Threshold) *WebsiteThresholdModel {
 	websiteThresholdModel := WebsiteThresholdModel{
-		Operator: types.StringValue(string(threshold.Operator)),
-		Value:    setFloat64PointerToState(threshold.Value),
+		Static:           nil,
+		AdaptiveBaseline: nil,
 	}
+
+	if threshold.Type == "staticThreshold" {
+		staticModel := StaticTypeModel{
+			Operator: types.StringValue(string(threshold.Operator)),
+			Value:    setInt64PointerToState(threshold.Value),
+		}
+		websiteThresholdModel.Static = &staticModel
+	}
+	if threshold.Type == "adaptiveBaseline" {
+		adaptiveBaselineModel := AdaptiveBaselineModel{
+			Operator:        types.StringValue(string(threshold.Operator)),
+			DeviationFactor: setFloat32PointerToState(threshold.DeviationFactor),
+			Adaptability:    setFloat32PointerToState(threshold.Adaptability),
+			Seasonality:     types.StringValue(string(*threshold.Seasonality)),
+		}
+		websiteThresholdModel.AdaptiveBaseline = &adaptiveBaselineModel
+	}
+
 	return &websiteThresholdModel
+
 }
 func (r *websiteAlertConfigResourceFramework) mapRuleToState(ctx context.Context, rule *restapi.WebsiteAlertRule) *WebsiteAlertRuleModel {
 	websiteAlertRuleModel := WebsiteAlertRuleModel{}
