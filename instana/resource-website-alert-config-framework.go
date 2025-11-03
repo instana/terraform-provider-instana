@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -109,7 +110,6 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 										"slowness": schema.SingleNestedAttribute{
 											Description: "Rule based on the slowness of the configured alert configuration target.",
 											Optional:    true,
-											Computed:    true,
 											Attributes: map[string]schema.Attribute{
 												"metric_name": schema.StringAttribute{
 													Required:    true,
@@ -127,7 +127,6 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 										"specific_js_error": schema.SingleNestedAttribute{
 											Description: "Rule based on a specific javascript error of the configured alert configuration target.",
 											Optional:    true,
-											Computed:    true,
 											Attributes: map[string]schema.Attribute{
 												"metric_name": schema.StringAttribute{
 													Required:    true,
@@ -156,7 +155,6 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 										"status_code": schema.SingleNestedAttribute{
 											Description: "Rule based on the HTTP status code of the configured alert configuration target.",
 											Optional:    true,
-											Computed:    true,
 											Attributes: map[string]schema.Attribute{
 												"metric_name": schema.StringAttribute{
 													Required:    true,
@@ -185,7 +183,6 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 										"throughput": schema.SingleNestedAttribute{
 											Description: "Rule based on the throughput of the configured alert configuration target.",
 											Optional:    true,
-											Computed:    true,
 											Attributes: map[string]schema.Attribute{
 												"metric_name": schema.StringAttribute{
 													Required:    true,
@@ -207,8 +204,8 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 									Optional:    true,
 									Computed:    true,
 									Attributes: map[string]schema.Attribute{
-										LogAlertConfigFieldWarning:  StaticAndAdaptiveThresholdAttributeSchema(),
-										LogAlertConfigFieldCritical: StaticAndAdaptiveThresholdAttributeSchema(),
+										LogAlertConfigFieldWarning:  AllThresholdAttributeSchema(),
+										LogAlertConfigFieldCritical: AllThresholdAttributeSchema(),
 									},
 								},
 							},
@@ -235,6 +232,9 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 										Optional:    true,
 									},
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseStateForUnknown(),
+								},
 							},
 							"adaptive_baseline": schema.SingleNestedBlock{
 								Description: "Static threshold definition.",
@@ -259,7 +259,11 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 										Optional:    true,
 									},
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseStateForUnknown(),
+								},
 							},
+							"historic_baseline": HistoricBaselineBlockSchema(),
 						},
 					},
 					"rule": schema.SingleNestedBlock{
@@ -281,6 +285,9 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 											stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
 										},
 									},
+								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseStateForUnknown(),
 								},
 							},
 							"specific_js_error": schema.SingleNestedBlock{
@@ -313,6 +320,9 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 										Description: "The value identify the specific javascript error.",
 									},
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseStateForUnknown(),
+								},
 							},
 							"status_code": schema.SingleNestedBlock{
 								Description: "Rule based on the HTTP status code of the configured alert configuration target.",
@@ -344,6 +354,9 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 										Description: "The value identify the specific http status code.",
 									},
 								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseStateForUnknown(),
+								},
 							},
 							"throughput": schema.SingleNestedBlock{
 								Description: "Rule based on the throughput of the configured alert configuration target.",
@@ -361,6 +374,9 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 											stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
 										},
 									},
+								},
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseStateForUnknown(),
 								},
 							},
 						},
@@ -533,6 +549,7 @@ func (r *websiteAlertConfigResourceFramework) MapStateToDataObject(ctx context.C
 		return nil, diags
 	}
 
+	log.Printf("reached rules section")
 	//Map rules
 	rules := make([]restapi.WebsiteAlertRuleWithThresholds, 0)
 	if len(model.Rules) != 0 {
@@ -541,35 +558,38 @@ func (r *websiteAlertConfigResourceFramework) MapStateToDataObject(ctx context.C
 		for _, i := range model.Rules {
 			var websiteAlertRule *restapi.WebsiteAlertRule
 			if i.Rule != nil {
-				if i.Rule.Slowness != nil {
+				log.Printf("reached rule section")
+
+				// Check each rule type and only process if not null/unknown
+				if i.Rule.Slowness != nil && !i.Rule.Slowness.MetricName.IsNull() && !i.Rule.Slowness.MetricName.IsUnknown() {
+					log.Printf("inside slowness")
 					websiteAlertRule, diags = r.mapSlownessRule(ctx, diags, *i.Rule.Slowness)
-				} else if i.Rule.SpecificJsError != nil {
+				} else if i.Rule.SpecificJsError != nil && !i.Rule.SpecificJsError.MetricName.IsNull() && !i.Rule.SpecificJsError.MetricName.IsUnknown() {
+					log.Printf("inside SpecificJsError")
 					websiteAlertRule, diags = r.mapSpecificJsErrorRule(ctx, diags, *i.Rule.SpecificJsError)
-				} else if i.Rule.StatusCode != nil {
+				} else if i.Rule.StatusCode != nil && !i.Rule.StatusCode.MetricName.IsNull() && !i.Rule.StatusCode.MetricName.IsUnknown() {
+					log.Printf("inside StatusCode")
 					websiteAlertRule, diags = r.mapStatusCodeRule(ctx, diags, *i.Rule.StatusCode)
-				} else if i.Rule.Throughput != nil {
+				} else if i.Rule.Throughput != nil && !i.Rule.Throughput.MetricName.IsNull() && !i.Rule.Throughput.MetricName.IsUnknown() {
+					log.Printf("inside Throughput")
 					websiteAlertRule, diags = r.mapThroughputRule(ctx, diags, *i.Rule.Throughput)
 				}
 			}
-			thresholdMap, thresholdDiags := MapThresholdsPluginFromState(ctx, i.Thresholds)
-			//warningThreshold, warningDiags := MapThresholdRulePluginFromState(ctx, i.Thresholds.Warning)
-			diags.Append(thresholdDiags...)
-			if diags.HasError() {
-				return nil, diags
-			}
-			// criticalThreshold, criticalDiags := MapThresholdRulePluginFromState(ctx, i.Thresholds.Critical)
-			// diags.Append(criticalDiags...)
-			// if diags.HasError() {
-			// 	return nil, diags
-			// }
-			// thresholdMap[restapi.WarningSeverity] = *warningThreshold
-			// thresholdMap[restapi.CriticalSeverity] = *criticalThreshold
 
-			rules = append(rules, restapi.WebsiteAlertRuleWithThresholds{
-				Rule:              websiteAlertRule,
-				ThresholdOperator: i.ThresholdOperator.ValueString(),
-				Thresholds:        thresholdMap,
-			})
+			// Only process if we have a valid rule
+			if websiteAlertRule != nil {
+				thresholdMap, thresholdDiags := MapThresholdsAllPluginFromState(ctx, i.Thresholds)
+				diags.Append(thresholdDiags...)
+				if diags.HasError() {
+					return nil, diags
+				}
+
+				rules = append(rules, restapi.WebsiteAlertRuleWithThresholds{
+					Rule:              websiteAlertRule,
+					ThresholdOperator: i.ThresholdOperator.ValueString(),
+					Thresholds:        thresholdMap,
+				})
+			}
 		}
 
 	}
@@ -714,6 +734,16 @@ func (r *websiteAlertConfigResourceFramework) mapThresholdFromModel(ctx context.
 		threshold.Adaptability = &adaptability
 		seasonality := restapi.ThresholdSeasonality(model.Threshold.AdaptiveBaseline.Seasonality.ValueString())
 		threshold.Seasonality = &seasonality
+
+	}
+	if model.Threshold.HistoricBaseline != nil {
+		threshold.Type = "historicBaseline"
+		deviationFactor := model.Threshold.HistoricBaseline.Deviation.ValueFloat32()
+		threshold.DeviationFactor = &deviationFactor
+		seasonality := restapi.ThresholdSeasonality(model.Threshold.HistoricBaseline.Seasonality.ValueString())
+		threshold.Seasonality = &seasonality
+		baseline, _ := mapBaselineFromState(ctx, model.Threshold.HistoricBaseline.Baseline)
+		threshold.Baseline = baseline
 
 	}
 	return threshold, diags
@@ -913,12 +943,28 @@ func (r *websiteAlertConfigResourceFramework) mapThresholdToState(ctx context.Co
 		}
 		websiteThresholdModel.AdaptiveBaseline = &adaptiveBaselineModel
 	}
+	if threshold.Type == "historicBaseline" {
+		historicBaselineModel := HistoricBaselineModel{
+			Deviation:   setFloat32PointerToState(threshold.DeviationFactor),
+			Seasonality: types.StringValue(string(*threshold.Seasonality)),
+		}
+		thresholdRules := restapi.ThresholdRule{
+			Baseline: threshold.Baseline,
+		}
+		historicBaselineModel.Baseline, _ = mapBaseline(&thresholdRules)
+		websiteThresholdModel.HistoricBaseline = &historicBaselineModel
+	}
 
 	return &websiteThresholdModel
 
 }
 func (r *websiteAlertConfigResourceFramework) mapRuleToState(ctx context.Context, rule *restapi.WebsiteAlertRule) *WebsiteAlertRuleModel {
-	websiteAlertRuleModel := WebsiteAlertRuleModel{}
+	websiteAlertRuleModel := WebsiteAlertRuleModel{
+		Slowness:        nil,
+		SpecificJsError: nil,
+		StatusCode:      nil,
+		Throughput:      nil,
+	}
 	switch rule.AlertType {
 	case "throughput":
 		websiteAlertRuleConfigModel := WebsiteAlertRuleConfigModel{
@@ -960,9 +1006,9 @@ func (r *websiteAlertConfigResourceFramework) mapRulesToState(ctx context.Contex
 		warningThreshold, isWarningThresholdPresent := i.Thresholds[restapi.WarningSeverity]
 		criticalThreshold, isCriticalThresholdPresent := i.Thresholds[restapi.CriticalSeverity]
 
-		thresholdPluginModel := ThresholdPluginModel{
-			Warning:  MapThresholdPluginToState(ctx, &warningThreshold, isWarningThresholdPresent),
-			Critical: MapThresholdPluginToState(ctx, &criticalThreshold, isCriticalThresholdPresent),
+		thresholdPluginModel := ThresholdAllPluginModel{
+			Warning:  MapAllThresholdPluginToState(ctx, &warningThreshold, isWarningThresholdPresent),
+			Critical: MapAllThresholdPluginToState(ctx, &criticalThreshold, isCriticalThresholdPresent),
 		}
 		ruleModel := RuleWithThresholdPluginModel{
 			Rule:              r.mapRuleToState(ctx, i.Rule),

@@ -23,9 +23,9 @@ type WebsiteAlertConfigModel struct {
 }
 
 type RuleWithThresholdPluginModel struct {
-	Rule              *WebsiteAlertRuleModel `tfsdk:"rule"`
-	ThresholdOperator types.String           `tfsdk:"operator"`
-	Thresholds        *ThresholdPluginModel  `tfsdk:"threshold"`
+	Rule              *WebsiteAlertRuleModel   `tfsdk:"rule"`
+	ThresholdOperator types.String             `tfsdk:"operator"`
+	Thresholds        *ThresholdAllPluginModel `tfsdk:"threshold"`
 }
 
 // // WebsiteAlertRuleModel represents the rule configuration for Website Alert Config
@@ -93,6 +93,7 @@ type CustomPayloadFieldModel struct {
 type WebsiteThresholdModel struct {
 	Static           *StaticTypeModel       `tfsdk:"static"`
 	AdaptiveBaseline *AdaptiveBaselineModel `tfsdk:"adaptive_baseline"`
+	HistoricBaseline *HistoricBaselineModel `tfsdk:"historic_baseline"`
 }
 
 // Made with Bob
