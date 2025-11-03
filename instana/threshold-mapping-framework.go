@@ -9,6 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -28,18 +30,15 @@ type AdaptiveBaselineModel struct {
 	Seasonality     types.String  `tfsdk:"seasonality"`
 }
 
+type HistoricBaselineModel struct {
+	Baseline    types.List    `tfsdk:"baseline"`
+	Deviation   types.Float32 `tfsdk:"deviation_factor"`
+	Seasonality types.String  `tfsdk:"seasonality"`
+}
+
 type StaticTypeModel struct {
 	Operator types.String `tfsdk:"operator"`
 	Value    types.Int64  `tfsdk:"value"`
-}
-
-type ThresholdPluginModel struct {
-	Warning  *ThresholdTypeModel `tfsdk:"warning"`
-	Critical *ThresholdTypeModel `tfsdk:"critical"`
-}
-type ThresholdTypeModel struct {
-	Static           *StaticTypeModel       `tfsdk:"static"`
-	AdaptiveBaseline *AdaptiveBaselineModel `tfsdk:"adaptive_baseline"`
 }
 
 // StaticThresholdBlockSchema returns the schema for static block configuration
@@ -57,51 +56,6 @@ func StaticBlockSchema() schema.ListNestedBlock {
 		},
 		Validators: []validator.List{
 			listvalidator.SizeBetween(0, 1),
-		},
-	}
-}
-
-func StaticAttributeSchema() schema.SingleNestedAttribute {
-	return schema.SingleNestedAttribute{
-		Optional:    true,
-		Computed:    true,
-		Description: "Static threshold configuration",
-		Attributes: map[string]schema.Attribute{
-			LogAlertConfigFieldValue: schema.Int64Attribute{
-				Optional:    true,
-				Computed:    true,
-				Description: "The value of the threshold",
-			},
-		},
-	}
-}
-
-func AdaptiveAttributeSchema() schema.SingleNestedAttribute {
-	return schema.SingleNestedAttribute{
-		Description: "Threshold configuration",
-		Optional:    true,
-		Computed:    true,
-		Attributes: map[string]schema.Attribute{
-			ThresholdFieldAdaptiveBaselineDeviation: schema.Float32Attribute{
-				Optional:    true,
-				Computed:    true,
-				Description: "The deviation factor for the adaptive baseline threshold",
-			},
-			ThresholdFieldAdaptiveBaselineAdaptability: schema.Float32Attribute{
-				Optional:    true,
-				Computed:    true,
-				Description: "The adaptability for the adaptive baseline threshold",
-			},
-			ThresholdFieldAdaptiveBaselineSeasonality: schema.StringAttribute{
-				Optional:    true,
-				Computed:    true,
-				Description: "The seasonality for the adaptive baseline threshold",
-			},
-			"operator": schema.StringAttribute{
-				Optional:    true,
-				Computed:    true,
-				Description: "The operator for the adaptive baseline threshold",
-			},
 		},
 	}
 }
@@ -156,14 +110,16 @@ func StaticAndAdaptiveThresholdBlockSchema() schema.ListNestedBlock {
 	}
 }
 
-func StaticAndAdaptiveThresholdAttributeSchema() schema.SingleNestedAttribute {
-	return schema.SingleNestedAttribute{
+// define a static and adaptive schema for threshold configuration
+func AllThresholdBlockSchema() schema.ListNestedBlock {
+	return schema.ListNestedBlock{
 		Description: "Threshold configuration",
-		Optional:    true,
-		Computed:    true,
-		Attributes: map[string]schema.Attribute{
-			ThresholdFieldStatic:           StaticAttributeSchema(),
-			ThresholdFieldAdaptiveBaseline: AdaptiveAttributeSchema(),
+		NestedObject: schema.NestedBlockObject{
+			Blocks: map[string]schema.Block{
+				ThresholdFieldStatic:           StaticBlockSchema(),
+				ThresholdFieldAdaptiveBaseline: AdaptiveBlockSchema(),
+				ThresholdFieldHistoricBaseline: HistoricBaselineBlockSchema(),
+			},
 		},
 	}
 }
@@ -185,27 +141,28 @@ const (
 )
 
 // HistoricBaselineBlockSchema returns the schema for historic baseline configuration
-func HistoricBaselineBlockSchema() schema.ListNestedBlock {
-	return schema.ListNestedBlock{
+func HistoricBaselineBlockSchema() schema.SingleNestedBlock {
+	return schema.SingleNestedBlock{
 		Description: "Historic baseline threshold configuration",
-		NestedObject: schema.NestedBlockObject{
-			Attributes: map[string]schema.Attribute{
-				ThresholdFieldHistoricBaselineDeviation: schema.Float32Attribute{
-					Optional:    true,
-					Description: "The deviation factor for the historic baseline threshold",
-				},
-				ThresholdFieldHistoricBaselineSeasonality: schema.StringAttribute{
-					Required:    true,
-					Description: "The seasonality of the historic baseline threshold (DAILY or WEEKLY)",
-				},
-				ThresholdFieldHistoricBaselineBaseline: schema.SetAttribute{
-					Optional:    true,
-					Description: "The baseline of the historic baseline threshold",
-					ElementType: types.SetType{
-						ElemType: types.Float64Type,
-					},
+		Attributes: map[string]schema.Attribute{
+			ThresholdFieldHistoricBaselineDeviation: schema.Float32Attribute{
+				Optional:    true,
+				Description: "The deviation factor for the historic baseline threshold",
+			},
+			ThresholdFieldHistoricBaselineSeasonality: schema.StringAttribute{
+				Optional:    true,
+				Description: "The seasonality of the historic baseline threshold (DAILY or WEEKLY)",
+			},
+			ThresholdFieldHistoricBaselineBaseline: schema.ListAttribute{
+				Optional:    true,
+				Description: "The baseline of the historic baseline threshold",
+				ElementType: types.ListType{
+					ElemType: types.Float64Type,
 				},
 			},
+		},
+		PlanModifiers: []planmodifier.Object{
+			objectplanmodifier.UseStateForUnknown(),
 		},
 	}
 }
@@ -286,7 +243,7 @@ func MapThresholdToState(ctx context.Context, isThresholdPresent bool, threshold
 			thresholdAttrTypes[ThresholdFieldHistoricBaseline] = types.ListType{
 				ElemType: types.ObjectType{
 					AttrTypes: map[string]attr.Type{
-						ThresholdFieldHistoricBaselineBaseline:    types.SetType{ElemType: types.SetType{ElemType: types.Float64Type}},
+						ThresholdFieldHistoricBaselineBaseline:    types.ListType{ElemType: types.ListType{ElemType: types.Float64Type}},
 						ThresholdFieldHistoricBaselineDeviation:   types.Float32Type,
 						ThresholdFieldHistoricBaselineSeasonality: types.StringType,
 					},
@@ -294,7 +251,7 @@ func MapThresholdToState(ctx context.Context, isThresholdPresent bool, threshold
 			}
 			thresholdObj[ThresholdFieldHistoricBaseline] = types.ListNull(types.ObjectType{
 				AttrTypes: map[string]attr.Type{
-					ThresholdFieldHistoricBaselineBaseline:    types.SetType{ElemType: types.SetType{ElemType: types.Float64Type}},
+					ThresholdFieldHistoricBaselineBaseline:    types.ListType{ElemType: types.ListType{ElemType: types.Float64Type}},
 					ThresholdFieldHistoricBaselineDeviation:   types.Float32Type,
 					ThresholdFieldHistoricBaselineSeasonality: types.StringType,
 				},
@@ -340,7 +297,7 @@ func MapThresholdToState(ctx context.Context, isThresholdPresent bool, threshold
 			if threshold.Type != "historicBaseline" {
 				thresholdObj[ThresholdFieldHistoricBaseline] = types.ListNull(types.ObjectType{
 					AttrTypes: map[string]attr.Type{
-						ThresholdFieldHistoricBaselineBaseline:    types.SetType{ElemType: types.SetType{ElemType: types.Float64Type}},
+						ThresholdFieldHistoricBaselineBaseline:    types.ListType{ElemType: types.ListType{ElemType: types.Float64Type}},
 						ThresholdFieldHistoricBaselineDeviation:   types.Float32Type,
 						ThresholdFieldHistoricBaselineSeasonality: types.StringType,
 					},
@@ -371,7 +328,7 @@ func MapThresholdToState(ctx context.Context, isThresholdPresent bool, threshold
 		thresholdAttrTypes[ThresholdFieldHistoricBaseline] = types.ListType{
 			ElemType: types.ObjectType{
 				AttrTypes: map[string]attr.Type{
-					ThresholdFieldHistoricBaselineBaseline:    types.SetType{ElemType: types.SetType{ElemType: types.Float64Type}},
+					ThresholdFieldHistoricBaselineBaseline:    types.ListType{ElemType: types.ListType{ElemType: types.Float64Type}},
 					ThresholdFieldHistoricBaselineDeviation:   types.Float32Type,
 					ThresholdFieldHistoricBaselineSeasonality: types.StringType,
 				},
@@ -492,40 +449,21 @@ func mapHistoricBaselineToState(ctx context.Context, threshold *restapi.Threshol
 
 	// Map baseline
 	if threshold.Baseline != nil {
-		baselineSetValues := []attr.Value{}
-		for _, baselineArray := range *threshold.Baseline {
-			innerSetValues := []attr.Value{}
-			for _, value := range baselineArray {
-				innerSetValues = append(innerSetValues, types.Float64Value(value))
-			}
-
-			innerSet, innerSetDiags := types.SetValue(types.Float64Type, innerSetValues)
-			diags.Append(innerSetDiags...)
-			if diags.HasError() {
-				return types.ListNull(types.ObjectType{}), diags
-			}
-
-			baselineSetValues = append(baselineSetValues, innerSet)
-		}
-
-		baselineSet, baselineSetDiags := types.SetValue(
-			types.SetType{ElemType: types.Float64Type},
-			baselineSetValues,
-		)
-		diags.Append(baselineSetDiags...)
+		baselineSet, baselineDiags := mapBaseline(threshold)
+		diags.Append(baselineDiags...)
 		if diags.HasError() {
 			return types.ListNull(types.ObjectType{}), diags
 		}
 
 		historicObj[ThresholdFieldHistoricBaselineBaseline] = baselineSet
 	} else {
-		historicObj[ThresholdFieldHistoricBaselineBaseline] = types.SetNull(types.SetType{ElemType: types.Float64Type})
+		historicObj[ThresholdFieldHistoricBaselineBaseline] = types.ListNull(types.ListType{ElemType: types.Float64Type})
 	}
 
 	// Create historic baseline object value
 	historicObjVal, historicObjDiags := types.ObjectValue(
 		map[string]attr.Type{
-			ThresholdFieldHistoricBaselineBaseline:    types.SetType{ElemType: types.SetType{ElemType: types.Float64Type}},
+			ThresholdFieldHistoricBaselineBaseline:    types.ListType{ElemType: types.ListType{ElemType: types.Float64Type}},
 			ThresholdFieldHistoricBaselineDeviation:   types.Float32Type,
 			ThresholdFieldHistoricBaselineSeasonality: types.StringType,
 		},
@@ -540,13 +478,68 @@ func mapHistoricBaselineToState(ctx context.Context, threshold *restapi.Threshol
 	return types.ListValue(
 		types.ObjectType{
 			AttrTypes: map[string]attr.Type{
-				ThresholdFieldHistoricBaselineBaseline:    types.SetType{ElemType: types.SetType{ElemType: types.Float64Type}},
+				ThresholdFieldHistoricBaselineBaseline:    types.ListType{ElemType: types.ListType{ElemType: types.Float64Type}},
 				ThresholdFieldHistoricBaselineDeviation:   types.Float32Type,
 				ThresholdFieldHistoricBaselineSeasonality: types.StringType,
 			},
 		},
 		[]attr.Value{historicObjVal},
 	)
+}
+
+func mapBaseline(threshold *restapi.ThresholdRule) (basetypes.ListValue, diag.Diagnostics) {
+	var baselineDiags diag.Diagnostics
+	baselineListValues := []attr.Value{}
+	for _, baselineArray := range *threshold.Baseline {
+		innerListValues := []attr.Value{}
+		for _, value := range baselineArray {
+			innerListValues = append(innerListValues, types.Float64Value(value))
+		}
+
+		innerSet, innerSetDiags := types.ListValue(types.Float64Type, innerListValues)
+		baselineDiags.Append(innerSetDiags...)
+		if baselineDiags.HasError() {
+			return basetypes.ListValue{}, baselineDiags
+		}
+
+		baselineListValues = append(baselineListValues, innerSet)
+	}
+
+	baselineSet, baselineSetDiags := types.ListValue(
+		types.ListType{ElemType: types.Float64Type},
+		baselineListValues,
+	)
+	baselineDiags.Append(baselineSetDiags...)
+	if baselineDiags.HasError() {
+		return basetypes.ListValue{}, baselineDiags
+	}
+	return baselineSet, baselineDiags
+}
+
+// mapBaselineFromState converts a Terraform List of List (baseline data) to API format
+func mapBaselineFromState(ctx context.Context, baselineList types.List) (*[][]float64, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Get the outer list elements (each element is itself a list of float64)
+	var outerListElements []types.List
+	diags.Append(baselineList.ElementsAs(ctx, &outerListElements, false)...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	// Convert to [][]float64
+	baseline := make([][]float64, 0, len(outerListElements))
+	for _, innerList := range outerListElements {
+		// Get the inner list elements (float64 values)
+		var innerValues []float64
+		diags.Append(innerList.ElementsAs(ctx, &innerValues, false)...)
+		if diags.HasError() {
+			return nil, diags
+		}
+		baseline = append(baseline, innerValues)
+	}
+
+	return &baseline, diags
 }
 
 // mapAdaptiveBaselineToState maps an adaptive baseline threshold to Terraform state
@@ -788,7 +781,7 @@ func mapHistoricBaselineFromState(ctx context.Context, historicList types.List) 
 
 	// Extract the historic baseline configuration
 	var historicObj struct {
-		Baseline    types.Set     `tfsdk:"baseline"`
+		Baseline    types.List    `tfsdk:"baseline"`
 		Deviation   types.Float32 `tfsdk:"deviation_factor"`
 		Seasonality types.String  `tfsdk:"seasonality"`
 	}
@@ -817,7 +810,12 @@ func mapHistoricBaselineFromState(ctx context.Context, historicList types.List) 
 
 	// Set baseline
 	if !historicObj.Baseline.IsNull() && !historicObj.Baseline.IsUnknown() {
-		// For now, we'll leave it as nil
+		baseline, baselineDiags := mapBaselineFromState(ctx, historicObj.Baseline)
+		diags.Append(baselineDiags...)
+		if diags.HasError() {
+			return nil, diags
+		}
+		thresholdRule.Baseline = baseline
 	}
 
 	return thresholdRule, diags
@@ -936,100 +934,4 @@ func MapThresholdsFromState(ctx context.Context, thresholdList types.List) (map[
 	}
 
 	return thresholdMap, diags
-}
-
-func MapThresholdsPluginFromState(ctx context.Context, thresholdStruct *ThresholdPluginModel) (map[restapi.AlertSeverity]restapi.ThresholdRule, diag.Diagnostics) {
-	var diags diag.Diagnostics
-	thresholdMap := make(map[restapi.AlertSeverity]restapi.ThresholdRule)
-	if thresholdStruct != nil {
-		// Process warning threshold
-		if thresholdStruct.Warning != nil {
-			warningThreshold, warningDiags := MapThresholdRulePluginFromState(ctx, thresholdStruct.Warning)
-			diags.Append(warningDiags...)
-			if diags.HasError() {
-				return nil, diags
-			}
-
-			if warningThreshold != nil {
-				thresholdMap[restapi.WarningSeverity] = *warningThreshold
-			}
-		}
-
-		// Process critical threshold
-		if thresholdStruct.Critical != nil {
-			criticalThreshold, criticalDiags := MapThresholdRulePluginFromState(ctx, thresholdStruct.Critical)
-			diags.Append(criticalDiags...)
-			if diags.HasError() {
-				return nil, diags
-			}
-
-			if criticalThreshold != nil {
-				thresholdMap[restapi.CriticalSeverity] = *criticalThreshold
-			}
-		}
-	}
-	return thresholdMap, diags
-}
-
-// MapThresholdRulePluginFromState maps a threshold rule from Terraform state to API model - used for new plugin model using nestedAttribute
-func MapThresholdRulePluginFromState(ctx context.Context, thresholdObj *ThresholdTypeModel) (*restapi.ThresholdRule, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	if thresholdObj == nil {
-		return nil, diags
-	}
-
-	// Check for static threshold
-	if thresholdObj.Static != nil {
-		staticVal := thresholdObj.Static
-		valueFloat := float64(staticVal.Value.ValueInt64())
-		return &restapi.ThresholdRule{
-			Type:  "staticThreshold",
-			Value: &valueFloat,
-		}, diags
-	}
-
-	// Check for adaptive baseline threshold
-	if thresholdObj.AdaptiveBaseline != nil {
-		adaptiveVal := thresholdObj.AdaptiveBaseline
-		seasonality := restapi.ThresholdSeasonality(adaptiveVal.Seasonality.ValueString())
-		deviationFactor := float32(adaptiveVal.DeviationFactor.ValueFloat32())
-		adaptability := adaptiveVal.Adaptability.ValueFloat32()
-		operator := setStringPointerFromState(adaptiveVal.Operator)
-		return &restapi.ThresholdRule{
-			Type:            "adaptiveBaseline",
-			Seasonality:     &seasonality,
-			DeviationFactor: &deviationFactor,
-			Adaptability:    &adaptability,
-			Operator:        operator,
-		}, diags
-	}
-	return nil, diags
-}
-
-// MapThresholdToState maps a threshold rule to a Terraform state representation - used for nested attribute instead of block object
-func MapThresholdPluginToState(ctx context.Context, threshold *restapi.ThresholdRule, dataPresent bool) *ThresholdTypeModel {
-	thresholdTypeModel := ThresholdTypeModel{}
-	if dataPresent == false {
-		return nil
-	}
-	switch threshold.Type {
-	case "adaptiveBaseline":
-		adaptiveBaselineModel := AdaptiveBaselineModel{
-			Operator:        setStringPointerToState(threshold.Operator),
-			DeviationFactor: setFloat32PointerToState(threshold.DeviationFactor),
-			Adaptability:    setFloat32PointerToState(threshold.Adaptability),
-			Seasonality:     types.StringValue(string(*threshold.Seasonality)),
-		}
-		thresholdTypeModel.AdaptiveBaseline = &adaptiveBaselineModel
-	default:
-		// Default to static threshold for all other types
-		static := StaticTypeModel{
-			Operator: setStringPointerToState(threshold.Operator),
-			Value:    setInt64PointerToState(threshold.Value),
-		}
-		thresholdTypeModel.Static = &static
-	}
-
-	return &thresholdTypeModel
 }
