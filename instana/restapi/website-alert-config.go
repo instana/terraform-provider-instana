@@ -8,7 +8,7 @@ type WebsiteAlertConfig struct {
 	ID                    string                           `json:"id"`
 	Name                  string                           `json:"name"`
 	Description           string                           `json:"description"`
-	Severity              int                              `json:"severity"`
+	Severity              *int                             `json:"severity"`
 	Triggering            bool                             `json:"triggering"`
 	WebsiteID             string                           `json:"websiteId"`
 	TagFilterExpression   *TagFilter                       `json:"tagFilterExpression"`
@@ -16,7 +16,7 @@ type WebsiteAlertConfig struct {
 	Granularity           Granularity                      `json:"granularity"`
 	CustomerPayloadFields []CustomPayloadField[any]        `json:"customPayloadFields"`
 	Rule                  *WebsiteAlertRule                `json:"rule"`
-	Threshold             Threshold                        `json:"threshold"`
+	Threshold             *Threshold                       `json:"threshold"`
 	TimeThreshold         WebsiteTimeThreshold             `json:"timeThreshold"`
 	Rules                 []WebsiteAlertRuleWithThresholds `json:"rules"`
 }

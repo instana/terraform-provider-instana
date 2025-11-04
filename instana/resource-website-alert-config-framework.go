@@ -54,7 +54,8 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 						},
 					},
 					"severity": schema.StringAttribute{
-						Required:    true,
+						Optional:    true,
+						Computed:    true,
 						Description: "The severity of the alert when triggered.",
 						Validators: []validator.String{
 							stringvalidator.OneOf("warning", "critical"),
@@ -477,11 +478,15 @@ func (r *websiteAlertConfigResourceFramework) MapStateToDataObject(ctx context.C
 		return nil, diags
 	}
 
+	var severity *int
 	// Convert severity from Terraform representation to API representation
-	severity, err := ConvertSeverityFromTerraformToInstanaAPIRepresentation(model.Severity.ValueString())
-	if err != nil {
-		diags.AddError("Error converting severity", err.Error())
-		return nil, diags
+	if !model.Severity.IsNull() && !model.Severity.IsUnknown() {
+		severityVal, err := ConvertSeverityFromTerraformToInstanaAPIRepresentation(model.Severity.ValueString())
+		severity = &severityVal
+		if err != nil {
+			diags.AddError("Error converting severity", err.Error())
+			return nil, diags
+		}
 	}
 
 	// Map tag filter expression
@@ -552,10 +557,15 @@ func (r *websiteAlertConfigResourceFramework) MapStateToDataObject(ctx context.C
 	log.Printf("reached rules section")
 	//Map rules
 	rules := make([]restapi.WebsiteAlertRuleWithThresholds, 0)
-	if len(model.Rules) != 0 {
+	if !model.Rules.IsNull() && !model.Rules.IsUnknown() {
+		var rulesList []RuleWithThresholdPluginModel
+		diags.Append(model.Rules.ElementsAs(ctx, &rulesList, false)...)
+		if diags.HasError() {
+			return nil, diags
+		}
 
-		// Skip custom payload fields for now
-		for _, i := range model.Rules {
+		// Process each rule
+		for _, i := range rulesList {
 			var websiteAlertRule *restapi.WebsiteAlertRule
 			if i.Rule != nil {
 				log.Printf("reached rule section")
@@ -591,7 +601,6 @@ func (r *websiteAlertConfigResourceFramework) MapStateToDataObject(ctx context.C
 				})
 			}
 		}
-
 	}
 	// Create API object
 	return &restapi.WebsiteAlertConfig{
@@ -606,7 +615,7 @@ func (r *websiteAlertConfigResourceFramework) MapStateToDataObject(ctx context.C
 		Granularity:           restapi.Granularity(model.Granularity.ValueInt64()),
 		CustomerPayloadFields: customPayloadFields,
 		Rule:                  rule,
-		Threshold:             *threshold,
+		Threshold:             threshold,
 		TimeThreshold:         *timeThreshold,
 		Rules:                 rules,
 	}, diags
@@ -617,7 +626,7 @@ func (r *websiteAlertConfigResourceFramework) mapRuleFromModel(ctx context.Conte
 
 	// Check if rule is set
 	if model.Rule == nil {
-		diags.AddError("Rule is required", "Website alert config rule is required")
+		//diags.AddError("Rule is required", "Website alert config rule is required")
 		return nil, diags
 	}
 
@@ -711,7 +720,7 @@ func (r *websiteAlertConfigResourceFramework) mapThresholdFromModel(ctx context.
 
 	// Check if threshold is set
 	if model.Threshold == nil {
-		diags.AddError("Threshold is required", "Website alert config threshold is required")
+		//diags.AddError("Threshold is required", "Website alert config threshold is required")
 		return nil, diags
 	}
 
@@ -829,7 +838,7 @@ func (r *websiteAlertConfigResourceFramework) UpdateState(ctx context.Context, s
 	var diags diag.Diagnostics
 
 	// Convert severity from API representation to Terraform representation
-	severity, err := ConvertSeverityFromInstanaAPIToTerraformRepresentation(apiObject.Severity)
+	severity, err := ConvertSeverityFromInstanaAPIToTerraformRepresentation(*apiObject.Severity)
 	if err != nil {
 		diags.AddError("Error converting severity", err.Error())
 		return diags
@@ -876,7 +885,105 @@ func (r *websiteAlertConfigResourceFramework) UpdateState(ctx context.Context, s
 	model.Rule = r.mapRuleToState(ctx, apiObject.Rule)
 
 	//map rules
-	model.Rules = r.mapRulesToState(ctx, apiObject)
+	rulesModel := r.mapRulesToState(ctx, apiObject)
+	// Define the proper attribute types for RuleWithThresholdPluginModel
+	ruleAttrTypes := map[string]attr.Type{
+		"rule": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"slowness": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"metric_name": types.StringType,
+						"aggregation": types.StringType,
+					},
+				},
+				"specific_js_error": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"metric_name": types.StringType,
+						"aggregation": types.StringType,
+						"operator":    types.StringType,
+						"value":       types.StringType,
+					},
+				},
+				"status_code": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"metric_name": types.StringType,
+						"aggregation": types.StringType,
+						"operator":    types.StringType,
+						"value":       types.StringType,
+					},
+				},
+				"throughput": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"metric_name": types.StringType,
+						"aggregation": types.StringType,
+					},
+				},
+			},
+		},
+		"operator": types.StringType,
+		"threshold": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"warning": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"static": types.ObjectType{
+							AttrTypes: map[string]attr.Type{
+								"operator": types.StringType,
+								"value":    types.Int64Type,
+							},
+						},
+						"adaptive_baseline": types.ObjectType{
+							AttrTypes: map[string]attr.Type{
+								"deviation_factor": types.Float32Type,
+								"adaptability":     types.Float32Type,
+								"seasonality":      types.StringType,
+								"operator":         types.StringType,
+							},
+						},
+						"historic_baseline": types.ObjectType{
+							AttrTypes: map[string]attr.Type{
+								"baseline":         types.ListType{ElemType: types.ListType{ElemType: types.Float64Type}},
+								"deviation_factor": types.Float32Type,
+								"seasonality":      types.StringType,
+							},
+						},
+					},
+				},
+				"critical": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"static": types.ObjectType{
+							AttrTypes: map[string]attr.Type{
+								"operator": types.StringType,
+								"value":    types.Int64Type,
+							},
+						},
+						"adaptive_baseline": types.ObjectType{
+							AttrTypes: map[string]attr.Type{
+								"deviation_factor": types.Float32Type,
+								"adaptability":     types.Float32Type,
+								"seasonality":      types.StringType,
+								"operator":         types.StringType,
+							},
+						},
+						"historic_baseline": types.ObjectType{
+							AttrTypes: map[string]attr.Type{
+								"baseline":         types.ListType{ElemType: types.ListType{ElemType: types.Float64Type}},
+								"deviation_factor": types.Float32Type,
+								"seasonality":      types.StringType,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	// Use ListValueFrom to automatically infer types from the slice of structs
+	rulesListValue, rulesDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ruleAttrTypes}, rulesModel)
+	diags.Append(rulesDiags...)
+	if diags.HasError() {
+		return diags
+	}
+	model.Rules = rulesListValue
 
 	//map custom paylaod
 	customPayloadFieldsList, payloadDiags := CustomPayloadFieldsToTerraform(ctx, apiObject.CustomerPayloadFields)
@@ -921,35 +1028,41 @@ func (r *websiteAlertConfigResourceFramework) mapTimeThresholdToState(timeThresh
 	return &websiteTimeThresholdModel
 }
 
-func (r *websiteAlertConfigResourceFramework) mapThresholdToState(ctx context.Context, threshold restapi.Threshold) *WebsiteThresholdModel {
+func (r *websiteAlertConfigResourceFramework) mapThresholdToState(ctx context.Context, threshold *restapi.Threshold) *WebsiteThresholdModel {
+	if threshold == nil {
+		return nil
+	}
+
 	websiteThresholdModel := WebsiteThresholdModel{
 		Static:           nil,
 		AdaptiveBaseline: nil,
 	}
 
-	if threshold.Type == "staticThreshold" {
+	thresholdVal := *threshold
+
+	if thresholdVal.Type == "staticThreshold" {
 		staticModel := StaticTypeModel{
-			Operator: types.StringValue(string(threshold.Operator)),
-			Value:    setInt64PointerToState(threshold.Value),
+			Operator: types.StringValue(string(thresholdVal.Operator)),
+			Value:    setInt64PointerToState(thresholdVal.Value),
 		}
 		websiteThresholdModel.Static = &staticModel
 	}
-	if threshold.Type == "adaptiveBaseline" {
+	if thresholdVal.Type == "adaptiveBaseline" {
 		adaptiveBaselineModel := AdaptiveBaselineModel{
-			Operator:        types.StringValue(string(threshold.Operator)),
-			DeviationFactor: setFloat32PointerToState(threshold.DeviationFactor),
-			Adaptability:    setFloat32PointerToState(threshold.Adaptability),
-			Seasonality:     types.StringValue(string(*threshold.Seasonality)),
+			Operator:        types.StringValue(string(thresholdVal.Operator)),
+			DeviationFactor: setFloat32PointerToState(thresholdVal.DeviationFactor),
+			Adaptability:    setFloat32PointerToState(thresholdVal.Adaptability),
+			Seasonality:     types.StringValue(string(*thresholdVal.Seasonality)),
 		}
 		websiteThresholdModel.AdaptiveBaseline = &adaptiveBaselineModel
 	}
-	if threshold.Type == "historicBaseline" {
+	if thresholdVal.Type == "historicBaseline" {
 		historicBaselineModel := HistoricBaselineModel{
-			Deviation:   setFloat32PointerToState(threshold.DeviationFactor),
-			Seasonality: types.StringValue(string(*threshold.Seasonality)),
+			Deviation:   setFloat32PointerToState(thresholdVal.DeviationFactor),
+			Seasonality: types.StringValue(string(*thresholdVal.Seasonality)),
 		}
 		thresholdRules := restapi.ThresholdRule{
-			Baseline: threshold.Baseline,
+			Baseline: thresholdVal.Baseline,
 		}
 		historicBaselineModel.Baseline, _ = mapBaseline(&thresholdRules)
 		websiteThresholdModel.HistoricBaseline = &historicBaselineModel
