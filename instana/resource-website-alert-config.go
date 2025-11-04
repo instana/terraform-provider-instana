@@ -375,7 +375,7 @@ func (r *websiteAlertConfigResource) SetComputedFields(_ *schema.ResourceData) e
 }
 
 func (r *websiteAlertConfigResource) UpdateState(d *schema.ResourceData, config *restapi.WebsiteAlertConfig) error {
-	severity, err := ConvertSeverityFromInstanaAPIToTerraformRepresentation(config.Severity)
+	severity, err := ConvertSeverityFromInstanaAPIToTerraformRepresentation(*config.Severity)
 	if err != nil {
 		return err
 	}
@@ -397,7 +397,7 @@ func (r *websiteAlertConfigResource) UpdateState(d *schema.ResourceData, config 
 		WebsiteAlertConfigFieldRule:            r.mapRuleToSchema(config),
 		WebsiteAlertConfigFieldSeverity:        severity,
 		WebsiteAlertConfigFieldTagFilter:       normalizedTagFilterString,
-		ResourceFieldThreshold:                 newThresholdMapper().toState(&config.Threshold),
+		ResourceFieldThreshold:                 newThresholdMapper().toState(config.Threshold),
 		WebsiteAlertConfigFieldTimeThreshold:   r.mapTimeThresholdToSchema(config),
 		WebsiteAlertConfigFieldTriggering:      config.Triggering,
 		WebsiteAlertConfigFieldWebsiteID:       config.WebsiteID,
@@ -474,7 +474,10 @@ func (r *websiteAlertConfigResource) mapTimeThresholdTypeToSchema(input string) 
 }
 
 func (r *websiteAlertConfigResource) MapStateToDataObject(d *schema.ResourceData) (*restapi.WebsiteAlertConfig, error) {
-	severity, err := ConvertSeverityFromTerraformToInstanaAPIRepresentation(d.Get(WebsiteAlertConfigFieldSeverity).(string))
+	var severity *int
+	// Convert severity from Terraform representation to API representation
+	severityVal, err := ConvertSeverityFromTerraformToInstanaAPIRepresentation(d.Get(WebsiteAlertConfigFieldSeverity).(string))
+	severity = &severityVal
 	if err != nil {
 		return nil, err
 	}
@@ -504,7 +507,7 @@ func (r *websiteAlertConfigResource) MapStateToDataObject(d *schema.ResourceData
 		Rule:                  r.mapRuleFromSchema(d),
 		Severity:              severity,
 		TagFilterExpression:   tagFilter,
-		Threshold:             *threshold,
+		Threshold:             threshold,
 		TimeThreshold:         *r.mapTimeThresholdFromSchema(d),
 		Triggering:            d.Get(WebsiteAlertConfigFieldTriggering).(bool),
 		WebsiteID:             d.Get(WebsiteAlertConfigFieldWebsiteID).(string),
