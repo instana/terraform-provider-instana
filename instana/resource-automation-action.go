@@ -21,6 +21,7 @@ const ActionTypeHttp = "HTTP"
 // encodings
 const AsciiEncoding = "ascii"
 const Base64Encoding = "base64"
+const UTF8Encoding = "UTF8"
 
 // NewAutomationActionResourceHandle creates the resource handle for Automation Actions
 func NewAutomationActionResourceHandle() ResourceHandle[*restapi.AutomationAction] {
