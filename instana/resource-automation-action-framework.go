@@ -76,8 +76,8 @@ type BasicAuthModel struct {
 	Password types.String `tfsdk:"password"`
 }
 type ApiKeyModel struct {
-	key         types.String `tfsdk:"key"`
-	value       types.String `tfsdk:"value"`
+	Key         types.String `tfsdk:"key"`
+	Value       types.String `tfsdk:"value"`
 	KeyLocation types.String `tfsdk:"key_location"`
 }
 type BearerTokenModel struct {
@@ -165,6 +165,7 @@ func NewAutomationActionResourceHandleFramework() ResourceHandleFramework[*resta
 					},
 					AutomationActionFieldScript: schema.SingleNestedAttribute{
 						Optional:    true,
+						Computed:    true,
 						Description: "Script configuration for the automation action.",
 						Attributes: map[string]schema.Attribute{
 							AutomationActionFieldContent: schema.StringAttribute{
@@ -179,10 +180,15 @@ func NewAutomationActionResourceHandleFramework() ResourceHandleFramework[*resta
 								Optional:    true,
 								Description: "The timeout for script execution in seconds.",
 							},
+							"source": schema.StringAttribute{
+								Optional:    true,
+								Description: "The source of the script.",
+							},
 						},
 					},
 					AutomationActionFieldHttp: schema.SingleNestedAttribute{
 						Optional:    true,
+						Computed:    true,
 						Description: "HTTP configuration for the automation action.",
 						Attributes: map[string]schema.Attribute{
 							AutomationActionFieldHost: schema.StringAttribute{
@@ -212,6 +218,225 @@ func NewAutomationActionResourceHandleFramework() ResourceHandleFramework[*resta
 							AutomationActionFieldTimeout: schema.StringAttribute{
 								Optional:    true,
 								Description: "The timeout for HTTP request execution in seconds.",
+							},
+							"language": schema.StringAttribute{
+								Optional:    true,
+								Description: "The language for the HTTP request.",
+							},
+							"content_type": schema.StringAttribute{
+								Optional:    true,
+								Description: "The content type for the HTTP request.",
+							},
+							"basic_auth": schema.SingleNestedAttribute{
+								Optional:    true,
+								Computed:    true,
+								Description: "Basic authentication configuration.",
+								Attributes: map[string]schema.Attribute{
+									"username": schema.StringAttribute{
+										Required:    true,
+										Description: "The username for basic authentication.",
+									},
+									"password": schema.StringAttribute{
+										Required:    true,
+										Description: "The password for basic authentication.",
+									},
+								},
+							},
+							"token": schema.SingleNestedAttribute{
+								Optional:    true,
+								Computed:    true,
+								Description: "Bearer token authentication configuration.",
+								Attributes: map[string]schema.Attribute{
+									"bearer_token": schema.StringAttribute{
+										Required:    true,
+										Description: "The bearer token for authentication.",
+									},
+								},
+							},
+							"api_key": schema.SingleNestedAttribute{
+								Optional:    true,
+								Computed:    true,
+								Description: "API key authentication configuration.",
+								Attributes: map[string]schema.Attribute{
+									"key": schema.StringAttribute{
+										Required:    true,
+										Description: "The API key name.",
+									},
+									"value": schema.StringAttribute{
+										Required:    true,
+										Description: "The API key value.",
+									},
+									"key_location": schema.StringAttribute{
+										Required:    true,
+										Description: "Where to add the API key (header or query).",
+									},
+								},
+							},
+							"auth": schema.StringAttribute{
+								Optional:    true,
+								Description: "Authentication type (basicAuth, bearerToken, apiKey, noAuth).",
+							},
+						},
+					},
+					"manual": schema.SingleNestedAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: "Manual action configuration.",
+						Attributes: map[string]schema.Attribute{
+							"content": schema.StringAttribute{
+								Required:    true,
+								Description: "The content for the manual action.",
+							},
+						},
+					},
+					"jira": schema.SingleNestedAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: "Jira action configuration.",
+						Attributes: map[string]schema.Attribute{
+							"project": schema.StringAttribute{
+								Optional:    true,
+								Description: "The Jira project.",
+							},
+							"operation": schema.StringAttribute{
+								Optional:    true,
+								Description: "The Jira operation type.",
+							},
+							"issue_type": schema.StringAttribute{
+								Optional:    true,
+								Description: "The Jira issue type.",
+							},
+							"description": schema.StringAttribute{
+								Optional:    true,
+								Description: "The Jira issue description.",
+							},
+							"assignee": schema.StringAttribute{
+								Optional:    true,
+								Description: "The Jira issue assignee.",
+							},
+							"title": schema.StringAttribute{
+								Optional:    true,
+								Description: "The Jira issue title.",
+							},
+							"labels": schema.StringAttribute{
+								Optional:    true,
+								Description: "The Jira issue labels.",
+							},
+							"comment": schema.StringAttribute{
+								Optional:    true,
+								Description: "The Jira issue comment.",
+							},
+						},
+					},
+					"github": schema.SingleNestedAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: "GitHub action configuration.",
+						Attributes: map[string]schema.Attribute{
+							"owner": schema.StringAttribute{
+								Optional:    true,
+								Description: "The GitHub repository owner.",
+							},
+							"repo": schema.StringAttribute{
+								Optional:    true,
+								Description: "The GitHub repository name.",
+							},
+							"title": schema.StringAttribute{
+								Optional:    true,
+								Description: "The GitHub issue title.",
+							},
+							"body": schema.StringAttribute{
+								Optional:    true,
+								Description: "The GitHub issue body.",
+							},
+							"operation": schema.StringAttribute{
+								Optional:    true,
+								Description: "The GitHub operation type.",
+							},
+							"assignees": schema.StringAttribute{
+								Optional:    true,
+								Description: "The GitHub issue assignees.",
+							},
+							"labels": schema.StringAttribute{
+								Optional:    true,
+								Description: "The GitHub issue labels.",
+							},
+							"comment": schema.StringAttribute{
+								Optional:    true,
+								Description: "The GitHub issue comment.",
+							},
+						},
+					},
+					"doc_link": schema.SingleNestedAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: "Documentation link action configuration.",
+						Attributes: map[string]schema.Attribute{
+							"url": schema.StringAttribute{
+								Required:    true,
+								Description: "The URL to the documentation.",
+							},
+						},
+					},
+					"gitlab": schema.SingleNestedAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: "GitLab action configuration.",
+						Attributes: map[string]schema.Attribute{
+							"project_id": schema.StringAttribute{
+								Optional:    true,
+								Description: "The GitLab project ID.",
+							},
+							"title": schema.StringAttribute{
+								Optional:    true,
+								Description: "The GitLab issue title.",
+							},
+							"description": schema.StringAttribute{
+								Optional:    true,
+								Description: "The GitLab issue description.",
+							},
+							"operation": schema.StringAttribute{
+								Optional:    true,
+								Description: "The GitLab operation type.",
+							},
+							"labels": schema.StringAttribute{
+								Optional:    true,
+								Description: "The GitLab issue labels.",
+							},
+							"issue_type": schema.StringAttribute{
+								Optional:    true,
+								Description: "The GitLab issue type.",
+							},
+							"comment": schema.StringAttribute{
+								Optional:    true,
+								Description: "The GitLab issue comment.",
+							},
+						},
+					},
+					"ansible": schema.SingleNestedAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: "Ansible action configuration.",
+						Attributes: map[string]schema.Attribute{
+							"workflow_id": schema.StringAttribute{
+								Optional:    true,
+								Description: "The Ansible workflow ID.",
+							},
+							"playbook_id": schema.StringAttribute{
+								Optional:    true,
+								Description: "The Ansible playbook ID.",
+							},
+							"playbook_file_name": schema.StringAttribute{
+								Optional:    true,
+								Description: "The Ansible playbook file name.",
+							},
+							"url": schema.StringAttribute{
+								Optional:    true,
+								Description: "The Ansible URL.",
+							},
+							"host_id": schema.StringAttribute{
+								Optional:    true,
+								Description: "The host ID from which this action is created.",
 							},
 						},
 					},
@@ -319,23 +544,69 @@ func (r *automationActionResourceFramework) UpdateState(ctx context.Context, sta
 		})
 	}
 
-	// Handle script configuration
-	if automationAction.Type == ActionTypeScript {
-		scriptConfig, d := r.mapScriptFieldsToState(ctx, automationAction)
+	// Handle action type specific configuration
+	d := r.mapActionTypeFieldsToState(ctx, automationAction, &model)
+	diags.Append(d...)
+
+	// Set the entire model to state
+	diags.Append(state.Set(ctx, model)...)
+	return diags
+}
+
+func (r *automationActionResourceFramework) mapActionTypeFieldsToState(ctx context.Context, action *restapi.AutomationAction, model *AutomationActionModel) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	switch action.Type {
+	case ActionTypeScript:
+		scriptConfig, d := r.mapScriptFieldsToState(ctx, action)
 		diags.Append(d...)
 		if !diags.HasError() {
 			model.Script = scriptConfig
 		}
-	} else if automationAction.Type == ActionTypeHttp {
-		httpConfig, d := r.mapHttpFieldsToState(ctx, automationAction)
+	case ActionTypeHttp:
+		httpConfig, d := r.mapHttpFieldsToState(ctx, action)
 		diags.Append(d...)
 		if !diags.HasError() {
 			model.Http = httpConfig
 		}
+	case "MANUAL":
+		manualConfig, d := r.mapManualFieldsToState(ctx, action)
+		diags.Append(d...)
+		if !diags.HasError() {
+			model.Manual = manualConfig
+		}
+	case "JIRA":
+		jiraConfig, d := r.mapJiraFieldsToState(ctx, action)
+		diags.Append(d...)
+		if !diags.HasError() {
+			model.Jira = jiraConfig
+		}
+	case "GITHUB":
+		githubConfig, d := r.mapGitHubFieldsToState(ctx, action)
+		diags.Append(d...)
+		if !diags.HasError() {
+			model.GitHub = githubConfig
+		}
+	case "DOC_LINK":
+		docLinkConfig, d := r.mapDocLinkFieldsToState(ctx, action)
+		diags.Append(d...)
+		if !diags.HasError() {
+			model.DocLink = docLinkConfig
+		}
+	case "GITLAB":
+		gitlabConfig, d := r.mapGitLabFieldsToState(ctx, action)
+		diags.Append(d...)
+		if !diags.HasError() {
+			model.GitLab = gitlabConfig
+		}
+	case "ANSIBLE":
+		ansibleConfig, d := r.mapAnsibleFieldsToState(ctx, action)
+		diags.Append(d...)
+		if !diags.HasError() {
+			model.Ansible = ansibleConfig
+		}
 	}
 
-	// Set the entire model to state
-	diags.Append(state.Set(ctx, model)...)
 	return diags
 }
 
@@ -476,6 +747,13 @@ func (r *automationActionResourceFramework) mapScriptFieldsToState(ctx context.C
 		scriptModel.Timeout = types.StringNull()
 	}
 
+	source := r.getFieldValue(action, "source")
+	if source != "" {
+		scriptModel.Source = types.StringValue(source)
+	} else {
+		scriptModel.Source = types.StringNull()
+	}
+
 	return scriptModel, diags
 }
 
@@ -485,6 +763,20 @@ func (r *automationActionResourceFramework) mapHttpFieldsToState(ctx context.Con
 	httpModel := HttpModel{
 		Host:   types.StringValue(r.getFieldValue(action, restapi.HttpHostFieldName)),
 		Method: types.StringValue(r.getFieldValue(action, restapi.HttpMethodFieldName)),
+	}
+
+	// Initialize all nested auth models as null by default
+	httpModel.BasicAuth = BasicAuthModel{
+		UserName: types.StringNull(),
+		Password: types.StringNull(),
+	}
+	httpModel.Token = BearerTokenModel{
+		BearerToken: types.StringNull(),
+	}
+	httpModel.ApiKey = ApiKeyModel{
+		Key:         types.StringNull(),
+		Value:       types.StringNull(),
+		KeyLocation: types.StringNull(),
 	}
 
 	// Add optional fields if they exist
@@ -506,9 +798,62 @@ func (r *automationActionResourceFramework) mapHttpFieldsToState(ctx context.Con
 		httpModel.Timeout = types.StringNull()
 	}
 
+	// Language
+	language := r.getFieldValue(action, "language")
+	if language != "" {
+		httpModel.Language = types.StringValue(language)
+	} else {
+		httpModel.Language = types.StringNull()
+	}
+
+	// Content Type
+	contentType := r.getFieldValue(action, "content_type")
+	if contentType != "" {
+		httpModel.ContentType = types.StringValue(contentType)
+	} else {
+		httpModel.ContentType = types.StringNull()
+	}
+
+	// Auth - parse JSON to determine auth type and populate appropriate model
+	authData := r.getFieldValue(action, "authen")
+	if authData != "" {
+		httpModel.Auth = types.StringValue(authData)
+
+		var authMap map[string]interface{}
+		err := json.Unmarshal([]byte(authData), &authMap)
+		if err == nil {
+			authType, _ := authMap["type"].(string)
+			switch authType {
+			case "basicAuth":
+				username, _ := authMap["username"].(string)
+				password, _ := authMap["password"].(string)
+				httpModel.BasicAuth = BasicAuthModel{
+					UserName: types.StringValue(username),
+					Password: types.StringValue(password),
+				}
+			case "bearerToken":
+				bearerToken, _ := authMap["bearerToken"].(string)
+				httpModel.Token = BearerTokenModel{
+					BearerToken: types.StringValue(bearerToken),
+				}
+			case "apiKey":
+				key, _ := authMap["apiKey"].(string)
+				value, _ := authMap["apiKeyValue"].(string)
+				location, _ := authMap["apiKeyAddTo"].(string)
+				httpModel.ApiKey = ApiKeyModel{
+					Key:         types.StringValue(key),
+					Value:       types.StringValue(value),
+					KeyLocation: types.StringValue(location),
+				}
+			}
+		}
+	} else {
+		httpModel.Auth = types.StringNull()
+	}
+
 	// Handle headers
 	headersData := r.getFieldValue(action, restapi.HttpHeaderFieldName)
-	if headersData != "" {
+	if headersData != "" && headersData != "{}" {
 		var headersMap map[string]interface{}
 		err := json.Unmarshal([]byte(headersData), &headersMap)
 		if err != nil {
@@ -516,28 +861,249 @@ func (r *automationActionResourceFramework) mapHttpFieldsToState(ctx context.Con
 				"Error unmarshaling HTTP headers",
 				fmt.Sprintf("Failed to unmarshal HTTP headers: %s", err),
 			)
+			httpModel.Headers = types.MapNull(types.StringType)
 			return httpModel, diags
 		}
 
-		elements := make(map[string]attr.Value)
-		for k, v := range headersMap {
-			if strVal, ok := v.(string); ok {
-				elements[k] = types.StringValue(strVal)
-			} else {
-				elements[k] = types.StringValue(fmt.Sprintf("%v", v))
+		if len(headersMap) > 0 {
+			elements := make(map[string]attr.Value, len(headersMap))
+			for k, v := range headersMap {
+				if strVal, ok := v.(string); ok {
+					elements[k] = types.StringValue(strVal)
+				} else {
+					elements[k] = types.StringValue(fmt.Sprintf("%v", v))
+				}
 			}
-		}
 
-		headersValue, d := types.MapValue(types.StringType, elements)
-		diags.Append(d...)
-		if !diags.HasError() {
-			httpModel.Headers = headersValue
+			httpModel.Headers = types.MapValueMust(types.StringType, elements)
+		} else {
+			httpModel.Headers = types.MapNull(types.StringType)
 		}
 	} else {
 		httpModel.Headers = types.MapNull(types.StringType)
 	}
 
 	return httpModel, diags
+}
+
+func (r *automationActionResourceFramework) mapManualFieldsToState(ctx context.Context, action *restapi.AutomationAction) (ManualModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	manualModel := ManualModel{
+		Content: types.StringValue(r.getFieldValue(action, "content")),
+	}
+
+	return manualModel, diags
+}
+
+func (r *automationActionResourceFramework) mapJiraFieldsToState(ctx context.Context, action *restapi.AutomationAction) (JiraModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	jiraModel := JiraModel{}
+
+	if project := r.getFieldValue(action, "project"); project != "" {
+		jiraModel.Project = types.StringValue(project)
+	} else {
+		jiraModel.Project = types.StringNull()
+	}
+
+	if operation := r.getFieldValue(action, "ticketActionType"); operation != "" {
+		jiraModel.Operation = types.StringValue(operation)
+	} else {
+		jiraModel.Operation = types.StringNull()
+	}
+
+	if issueType := r.getFieldValue(action, "issue_type"); issueType != "" {
+		jiraModel.IssueType = types.StringValue(issueType)
+	} else {
+		jiraModel.IssueType = types.StringNull()
+	}
+
+	if description := r.getFieldValue(action, "body"); description != "" {
+		jiraModel.Description = types.StringValue(description)
+	} else {
+		jiraModel.Description = types.StringNull()
+	}
+
+	if assignee := r.getFieldValue(action, "assignee"); assignee != "" {
+		jiraModel.Assignee = types.StringValue(assignee)
+	} else {
+		jiraModel.Assignee = types.StringNull()
+	}
+
+	if title := r.getFieldValue(action, "summary"); title != "" {
+		jiraModel.Title = types.StringValue(title)
+	} else {
+		jiraModel.Title = types.StringNull()
+	}
+
+	if labels := r.getFieldValue(action, "labels"); labels != "" {
+		jiraModel.Labels = types.StringValue(labels)
+	} else {
+		jiraModel.Labels = types.StringNull()
+	}
+
+	if comment := r.getFieldValue(action, "comment"); comment != "" {
+		jiraModel.Comment = types.StringValue(comment)
+	} else {
+		jiraModel.Comment = types.StringNull()
+	}
+
+	return jiraModel, diags
+}
+
+func (r *automationActionResourceFramework) mapGitHubFieldsToState(ctx context.Context, action *restapi.AutomationAction) (GitHubModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	githubModel := GitHubModel{}
+
+	if owner := r.getFieldValue(action, "owner"); owner != "" {
+		githubModel.Owner = types.StringValue(owner)
+	} else {
+		githubModel.Owner = types.StringNull()
+	}
+
+	if repo := r.getFieldValue(action, "repo"); repo != "" {
+		githubModel.Repo = types.StringValue(repo)
+	} else {
+		githubModel.Repo = types.StringNull()
+	}
+
+	if title := r.getFieldValue(action, "title"); title != "" {
+		githubModel.Title = types.StringValue(title)
+	} else {
+		githubModel.Title = types.StringNull()
+	}
+
+	if body := r.getFieldValue(action, "body"); body != "" {
+		githubModel.Body = types.StringValue(body)
+	} else {
+		githubModel.Body = types.StringNull()
+	}
+
+	if operation := r.getFieldValue(action, "ticketActionType"); operation != "" {
+		githubModel.Operation = types.StringValue(operation)
+	} else {
+		githubModel.Operation = types.StringNull()
+	}
+
+	if assignees := r.getFieldValue(action, "assignees"); assignees != "" {
+		githubModel.Assignees = types.StringValue(assignees)
+	} else {
+		githubModel.Assignees = types.StringNull()
+	}
+
+	if labels := r.getFieldValue(action, "labels"); labels != "" {
+		githubModel.Labels = types.StringValue(labels)
+	} else {
+		githubModel.Labels = types.StringNull()
+	}
+
+	if comment := r.getFieldValue(action, "comment"); comment != "" {
+		githubModel.Comment = types.StringValue(comment)
+	} else {
+		githubModel.Comment = types.StringNull()
+	}
+
+	return githubModel, diags
+}
+
+func (r *automationActionResourceFramework) mapDocLinkFieldsToState(ctx context.Context, action *restapi.AutomationAction) (DocLinkModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	docLinkModel := DocLinkModel{
+		Url: types.StringValue(r.getFieldValue(action, "url")),
+	}
+
+	return docLinkModel, diags
+}
+
+func (r *automationActionResourceFramework) mapGitLabFieldsToState(ctx context.Context, action *restapi.AutomationAction) (GitLabModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	gitlabModel := GitLabModel{}
+
+	if projectId := r.getFieldValue(action, "projectId"); projectId != "" {
+		gitlabModel.ProjectId = types.StringValue(projectId)
+	} else {
+		gitlabModel.ProjectId = types.StringNull()
+	}
+
+	if title := r.getFieldValue(action, "title"); title != "" {
+		gitlabModel.Title = types.StringValue(title)
+	} else {
+		gitlabModel.Title = types.StringNull()
+	}
+
+	if description := r.getFieldValue(action, "body"); description != "" {
+		gitlabModel.Description = types.StringValue(description)
+	} else {
+		gitlabModel.Description = types.StringNull()
+	}
+
+	if operation := r.getFieldValue(action, "ticketActionType"); operation != "" {
+		gitlabModel.Operation = types.StringValue(operation)
+	} else {
+		gitlabModel.Operation = types.StringNull()
+	}
+
+	if labels := r.getFieldValue(action, "labels"); labels != "" {
+		gitlabModel.Labels = types.StringValue(labels)
+	} else {
+		gitlabModel.Labels = types.StringNull()
+	}
+
+	if issueType := r.getFieldValue(action, "issue_type"); issueType != "" {
+		gitlabModel.IssueType = types.StringValue(issueType)
+	} else {
+		gitlabModel.IssueType = types.StringNull()
+	}
+
+	if comment := r.getFieldValue(action, "comment"); comment != "" {
+		gitlabModel.Comment = types.StringValue(comment)
+	} else {
+		gitlabModel.Comment = types.StringNull()
+	}
+
+	return gitlabModel, diags
+}
+
+func (r *automationActionResourceFramework) mapAnsibleFieldsToState(ctx context.Context, action *restapi.AutomationAction) (AnsibleModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	ansibleModel := AnsibleModel{}
+
+	if workflowId := r.getFieldValue(action, "workflowId"); workflowId != "" {
+		ansibleModel.WorkflowId = types.StringValue(workflowId)
+	} else {
+		ansibleModel.WorkflowId = types.StringNull()
+	}
+
+	if ansibleUrl := r.getFieldValue(action, "ansibleUrl"); ansibleUrl != "" {
+		ansibleModel.AnsibleUrl = types.StringValue(ansibleUrl)
+	} else {
+		ansibleModel.AnsibleUrl = types.StringNull()
+	}
+
+	if hostId := r.getFieldValue(action, "hostId"); hostId != "" {
+		ansibleModel.HostId = types.StringValue(hostId)
+	} else {
+		ansibleModel.HostId = types.StringNull()
+	}
+
+	if playbookId := r.getFieldValue(action, "playbookId"); playbookId != "" {
+		ansibleModel.PlaybookId = types.StringValue(playbookId)
+	} else {
+		ansibleModel.PlaybookId = types.StringNull()
+	}
+
+	if playbookFileName := r.getFieldValue(action, "playbookFileName"); playbookFileName != "" {
+		ansibleModel.PlaybookFileName = types.StringValue(playbookFileName)
+	} else {
+		ansibleModel.PlaybookFileName = types.StringNull()
+	}
+
+	return ansibleModel, diags
 }
 
 func (r *automationActionResourceFramework) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.AutomationAction, diag.Diagnostics) {
@@ -636,6 +1202,17 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 				Secured:     false,
 			})
 		}
+
+		// Source is optional
+		if !scriptModel.Source.IsNull() {
+			fields = append(fields, restapi.Field{
+				Name:        "source",
+				Description: "The source of the script",
+				Value:       scriptModel.Source.ValueString(),
+				Encoding:    AsciiEncoding,
+				Secured:     false,
+			})
+		}
 	} else if !model.Http.Host.IsNull() {
 		actionType = ActionTypeHttp
 		httpModel := model.Http
@@ -693,6 +1270,28 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 			})
 		}
 
+		// Language is optional
+		if !httpModel.Language.IsNull() {
+			fields = append(fields, restapi.Field{
+				Name:        "language",
+				Description: "The language for the HTTP request",
+				Value:       httpModel.Language.ValueString(),
+				Encoding:    AsciiEncoding,
+				Secured:     false,
+			})
+		}
+
+		// Content Type is optional
+		if !httpModel.ContentType.IsNull() {
+			fields = append(fields, restapi.Field{
+				Name:        "content_type",
+				Description: "The content type for the HTTP request",
+				Value:       httpModel.ContentType.ValueString(),
+				Encoding:    AsciiEncoding,
+				Secured:     false,
+			})
+		}
+
 		// Auth is optional - serialize as JSON based on auth type
 		var authValue string
 		if !httpModel.BasicAuth.UserName.IsNull() {
@@ -726,12 +1325,12 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 				return "", nil, diags
 			}
 			authValue = string(authJson)
-		} else if !httpModel.ApiKey.key.IsNull() {
+		} else if !httpModel.ApiKey.Key.IsNull() {
 			// API Key format: {"type":"apiKey","apiKey":"authorization","apiKeyValue":"somKey","apiKeyAddTo":"header"}
 			authMap := map[string]string{
 				"type":        "apiKey",
-				"apiKey":      httpModel.ApiKey.key.ValueString(),
-				"apiKeyValue": httpModel.ApiKey.value.ValueString(),
+				"apiKey":      httpModel.ApiKey.Key.ValueString(),
+				"apiKeyValue": httpModel.ApiKey.Value.ValueString(),
 				"apiKeyAddTo": httpModel.ApiKey.KeyLocation.ValueString(),
 			}
 			authJson, err := json.Marshal(authMap)
