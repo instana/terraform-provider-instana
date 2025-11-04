@@ -27,9 +27,23 @@ type AutomationActionModel struct {
 	Name           types.String `tfsdk:"name"`
 	Description    types.String `tfsdk:"description"`
 	Tags           types.List   `tfsdk:"tags"`
-	Script         types.List   `tfsdk:"script"`
-	Http           types.List   `tfsdk:"http"`
+	Script         ScriptModel  `tfsdk:"script"`
+	Http           HttpModel    `tfsdk:"http"`
+	Manual         ManualModel  `tfsdk:"manual"`
+	Jira           JiraModel    `tfsdk:"jira"`
+	GitHub         GitHubModel  `tfsdk:"github"`
+	DocLink        DocLinkModel `tfsdk:"doc_link"`
+	GitLab         GitLabModel  `tfsdk:"gitlab"`
+	Ansible        AnsibleModel `tfsdk:"ansible"`
 	InputParameter types.List   `tfsdk:"input_parameter"`
+}
+
+type AnsibleModel struct {
+	WorkflowId       types.String `tfsdk:"workflow_id"`
+	PlaybookId       types.String `tfsdk:"playbook_id"`
+	PlaybookFileName types.String `tfsdk:"playbook_file_name"`
+	AnsibleUrl       types.String `tfsdk:"url"`
+	HostId           types.String `tfsdk:"host_id"`
 }
 
 // ScriptModel represents the script configuration for an automation action
@@ -37,16 +51,77 @@ type ScriptModel struct {
 	Content     types.String `tfsdk:"content"`
 	Interpreter types.String `tfsdk:"interpreter"`
 	Timeout     types.String `tfsdk:"timeout"`
+	Source      types.String `tfsdk:"source"`
 }
 
 // HttpModel represents the HTTP configuration for an automation action
 type HttpModel struct {
-	Host             types.String `tfsdk:"host"`
-	Method           types.String `tfsdk:"method"`
-	Body             types.String `tfsdk:"body"`
-	Headers          types.Map    `tfsdk:"headers"`
-	IgnoreCertErrors types.Bool   `tfsdk:"ignore_certificate_errors"`
-	Timeout          types.String `tfsdk:"timeout"`
+	Host             types.String     `tfsdk:"host"`
+	Method           types.String     `tfsdk:"method"`
+	Body             types.String     `tfsdk:"body"`
+	Headers          types.Map        `tfsdk:"headers"`
+	IgnoreCertErrors types.Bool       `tfsdk:"ignore_certificate_errors"`
+	Timeout          types.String     `tfsdk:"timeout"`
+	Language         types.String     `tfsdk:"language"`
+	ContentType      types.String     `tfsdk:"content_type"`
+	BasicAuth        BasicAuthModel   `tfsdk:"basic_auth"`
+	Token            BearerTokenModel `tfsdk:"token"`
+	ApiKey           ApiKeyModel      `tfsdk:"api_key"`
+	Auth             types.String     `tfsdk:"auth"`
+}
+
+// BasicAuthModel represents the basic authentication configuration for an automation action
+type BasicAuthModel struct {
+	UserName types.String `tfsdk:"username"`
+	Password types.String `tfsdk:"password"`
+}
+type ApiKeyModel struct {
+	key         types.String `tfsdk:"key"`
+	value       types.String `tfsdk:"value"`
+	KeyLocation types.String `tfsdk:"key_location"`
+}
+type BearerTokenModel struct {
+	BearerToken types.String `tfsdk:"bearer_token"`
+}
+
+type ManualModel struct {
+	Content types.String `tfsdk:"content"`
+}
+
+type JiraModel struct {
+	Project     types.String `tfsdk:"project"`
+	Operation   types.String `tfsdk:"operation"`
+	IssueType   types.String `tfsdk:"issue_type"`
+	Description types.String `tfsdk:"description"`
+	Assignee    types.String `tfsdk:"assignee"`
+	Title       types.String `tfsdk:"title"`
+	Labels      types.String `tfsdk:"labels"`
+	Comment     types.String `tfsdk:"comment"`
+}
+
+type GitHubModel struct {
+	Owner     types.String `tfsdk:"owner"`
+	Repo      types.String `tfsdk:"repo"`
+	Title     types.String `tfsdk:"title"`
+	Body      types.String `tfsdk:"body"`
+	Operation types.String `tfsdk:"operation"`
+	Assignees types.String `tfsdk:"assignees"`
+	Labels    types.String `tfsdk:"labels"`
+	Comment   types.String `tfsdk:"comment"`
+}
+
+type DocLinkModel struct {
+	Url types.String `tfsdk:"url"`
+}
+
+type GitLabModel struct {
+	ProjectId   types.String `tfsdk:"project_id"`
+	Title       types.String `tfsdk:"title"`
+	Description types.String `tfsdk:"description"`
+	Operation   types.String `tfsdk:"operation"`
+	Labels      types.String `tfsdk:"labels"`
+	IssueType   types.String `tfsdk:"issue_type"`
+	Comment     types.String `tfsdk:"comment"`
 }
 
 // ParameterModel represents an input parameter for an automation action
@@ -88,65 +163,62 @@ func NewAutomationActionResourceHandleFramework() ResourceHandleFramework[*resta
 						Optional:    true,
 						Description: "The tags of the automation action.",
 					},
-				},
-				Blocks: map[string]schema.Block{
-					AutomationActionFieldScript: schema.ListNestedBlock{
+					AutomationActionFieldScript: schema.SingleNestedAttribute{
+						Optional:    true,
 						Description: "Script configuration for the automation action.",
-						NestedObject: schema.NestedBlockObject{
-							Attributes: map[string]schema.Attribute{
-								AutomationActionFieldContent: schema.StringAttribute{
-									Required:    true,
-									Description: "The script content.",
-								},
-								AutomationActionFieldInterpreter: schema.StringAttribute{
-									Optional:    true,
-									Description: "The script interpreter.",
-								},
-								AutomationActionFieldTimeout: schema.StringAttribute{
-									Optional:    true,
-									Description: "The timeout for script execution in seconds.",
-								},
+						Attributes: map[string]schema.Attribute{
+							AutomationActionFieldContent: schema.StringAttribute{
+								Required:    true,
+								Description: "The script content.",
+							},
+							AutomationActionFieldInterpreter: schema.StringAttribute{
+								Optional:    true,
+								Description: "The script interpreter.",
+							},
+							AutomationActionFieldTimeout: schema.StringAttribute{
+								Optional:    true,
+								Description: "The timeout for script execution in seconds.",
 							},
 						},
 					},
-					AutomationActionFieldHttp: schema.ListNestedBlock{
+					AutomationActionFieldHttp: schema.SingleNestedAttribute{
+						Optional:    true,
 						Description: "HTTP configuration for the automation action.",
-						NestedObject: schema.NestedBlockObject{
-							Attributes: map[string]schema.Attribute{
-								AutomationActionFieldHost: schema.StringAttribute{
-									Required:    true,
-									Description: "The URL of the HTTP request.",
+						Attributes: map[string]schema.Attribute{
+							AutomationActionFieldHost: schema.StringAttribute{
+								Required:    true,
+								Description: "The URL of the HTTP request.",
+							},
+							AutomationActionFieldMethod: schema.StringAttribute{
+								Required:    true,
+								Description: "The HTTP method.",
+								Validators: []validator.String{
+									stringvalidator.OneOf("GET", "POST", "PUT", "DELETE"),
 								},
-								AutomationActionFieldMethod: schema.StringAttribute{
-									Required:    true,
-									Description: "The HTTP method.",
-									Validators: []validator.String{
-										stringvalidator.OneOf("GET", "POST", "PUT", "DELETE"),
-									},
-								},
-								AutomationActionFieldBody: schema.StringAttribute{
-									Optional:    true,
-									Description: "The body of the HTTP request.",
-								},
-								AutomationActionFieldHeaders: schema.MapAttribute{
-									ElementType: types.StringType,
-									Optional:    true,
-									Description: "The headers of the HTTP request.",
-								},
-								AutomationActionFieldIgnoreCertErrors: schema.BoolAttribute{
-									Optional:    true,
-									Description: "Whether to ignore certificate errors for the request.",
-								},
-								AutomationActionFieldTimeout: schema.StringAttribute{
-									Optional:    true,
-									Description: "The timeout for HTTP request execution in seconds.",
-								},
+							},
+							AutomationActionFieldBody: schema.StringAttribute{
+								Optional:    true,
+								Description: "The body of the HTTP request.",
+							},
+							AutomationActionFieldHeaders: schema.MapAttribute{
+								ElementType: types.StringType,
+								Optional:    true,
+								Description: "The headers of the HTTP request.",
+							},
+							AutomationActionFieldIgnoreCertErrors: schema.BoolAttribute{
+								Optional:    true,
+								Description: "Whether to ignore certificate errors for the request.",
+							},
+							AutomationActionFieldTimeout: schema.StringAttribute{
+								Optional:    true,
+								Description: "The timeout for HTTP request execution in seconds.",
 							},
 						},
 					},
-					AutomationActionFieldInputParameter: schema.ListNestedBlock{
+					AutomationActionFieldInputParameter: schema.ListNestedAttribute{
+						Optional:    true,
 						Description: "Input parameters for the automation action.",
-						NestedObject: schema.NestedBlockObject{
+						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								AutomationActionParameterFieldName: schema.StringAttribute{
 									Required:    true,
@@ -253,48 +325,13 @@ func (r *automationActionResourceFramework) UpdateState(ctx context.Context, sta
 		diags.Append(d...)
 		if !diags.HasError() {
 			model.Script = scriptConfig
-			model.Http = types.ListNull(types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					AutomationActionFieldHost:             types.StringType,
-					AutomationActionFieldMethod:           types.StringType,
-					AutomationActionFieldBody:             types.StringType,
-					AutomationActionFieldHeaders:          types.MapType{ElemType: types.StringType},
-					AutomationActionFieldIgnoreCertErrors: types.BoolType,
-					AutomationActionFieldTimeout:          types.StringType,
-				},
-			})
 		}
 	} else if automationAction.Type == ActionTypeHttp {
 		httpConfig, d := r.mapHttpFieldsToState(ctx, automationAction)
 		diags.Append(d...)
 		if !diags.HasError() {
 			model.Http = httpConfig
-			model.Script = types.ListNull(types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					AutomationActionFieldContent:     types.StringType,
-					AutomationActionFieldInterpreter: types.StringType,
-					AutomationActionFieldTimeout:     types.StringType,
-				},
-			})
 		}
-	} else {
-		model.Script = types.ListNull(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				AutomationActionFieldContent:     types.StringType,
-				AutomationActionFieldInterpreter: types.StringType,
-				AutomationActionFieldTimeout:     types.StringType,
-			},
-		})
-		model.Http = types.ListNull(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				AutomationActionFieldHost:             types.StringType,
-				AutomationActionFieldMethod:           types.StringType,
-				AutomationActionFieldBody:             types.StringType,
-				AutomationActionFieldHeaders:          types.MapType{ElemType: types.StringType},
-				AutomationActionFieldIgnoreCertErrors: types.BoolType,
-				AutomationActionFieldTimeout:          types.StringType,
-			},
-		})
 	}
 
 	// Set the entire model to state
@@ -417,84 +454,56 @@ func (r *automationActionResourceFramework) getBoolFieldValueOrDefault(action *r
 	return defaultValue
 }
 
-func (r *automationActionResourceFramework) mapScriptFieldsToState(ctx context.Context, action *restapi.AutomationAction) (types.List, diag.Diagnostics) {
+func (r *automationActionResourceFramework) mapScriptFieldsToState(ctx context.Context, action *restapi.AutomationAction) (ScriptModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	scriptObj := map[string]attr.Value{
-		AutomationActionFieldContent: types.StringValue(r.getFieldValue(action, restapi.ScriptSshFieldName)),
+	scriptModel := ScriptModel{
+		Content: types.StringValue(r.getFieldValue(action, restapi.ScriptSshFieldName)),
 	}
 
 	// Add optional fields if they exist
 	interpreter := r.getFieldValue(action, restapi.SubtypeFieldName)
 	if interpreter != "" {
-		scriptObj[AutomationActionFieldInterpreter] = types.StringValue(interpreter)
+		scriptModel.Interpreter = types.StringValue(interpreter)
 	} else {
-		scriptObj[AutomationActionFieldInterpreter] = types.StringNull()
+		scriptModel.Interpreter = types.StringNull()
 	}
 
 	timeout := r.getFieldValue(action, restapi.TimeoutFieldName)
 	if timeout != "" {
-		scriptObj[AutomationActionFieldTimeout] = types.StringValue(timeout)
+		scriptModel.Timeout = types.StringValue(timeout)
 	} else {
-		scriptObj[AutomationActionFieldTimeout] = types.StringNull()
+		scriptModel.Timeout = types.StringNull()
 	}
 
-	objValue, d := types.ObjectValue(
-		map[string]attr.Type{
-			AutomationActionFieldContent:     types.StringType,
-			AutomationActionFieldInterpreter: types.StringType,
-			AutomationActionFieldTimeout:     types.StringType,
-		},
-		scriptObj,
-	)
-	diags.Append(d...)
-	if diags.HasError() {
-		return types.ListNull(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				AutomationActionFieldContent:     types.StringType,
-				AutomationActionFieldInterpreter: types.StringType,
-				AutomationActionFieldTimeout:     types.StringType,
-			},
-		}), diags
-	}
-
-	return types.ListValueMust(
-		types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				AutomationActionFieldContent:     types.StringType,
-				AutomationActionFieldInterpreter: types.StringType,
-				AutomationActionFieldTimeout:     types.StringType,
-			},
-		},
-		[]attr.Value{objValue},
-	), diags
+	return scriptModel, diags
 }
 
-func (r *automationActionResourceFramework) mapHttpFieldsToState(ctx context.Context, action *restapi.AutomationAction) (types.List, diag.Diagnostics) {
+func (r *automationActionResourceFramework) mapHttpFieldsToState(ctx context.Context, action *restapi.AutomationAction) (HttpModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	httpObj := map[string]attr.Value{
-		AutomationActionFieldHost:   types.StringValue(r.getFieldValue(action, restapi.HttpHostFieldName)),
-		AutomationActionFieldMethod: types.StringValue(r.getFieldValue(action, restapi.HttpMethodFieldName)),
+	httpModel := HttpModel{
+		Host:   types.StringValue(r.getFieldValue(action, restapi.HttpHostFieldName)),
+		Method: types.StringValue(r.getFieldValue(action, restapi.HttpMethodFieldName)),
 	}
 
 	// Add optional fields if they exist
 	body := r.getFieldValue(action, restapi.HttpBodyFieldName)
 	if body != "" {
-		httpObj[AutomationActionFieldBody] = types.StringValue(body)
+		httpModel.Body = types.StringValue(body)
 	} else {
-		httpObj[AutomationActionFieldBody] = types.StringNull()
+		httpModel.Body = types.StringNull()
 	}
 
-	httpObj[AutomationActionFieldIgnoreCertErrors] = types.BoolValue(
+	httpModel.IgnoreCertErrors = types.BoolValue(
 		r.getBoolFieldValueOrDefault(action, restapi.HttpIgnoreCertErrorsFieldName, false),
 	)
 
 	timeout := r.getFieldValue(action, restapi.TimeoutFieldName)
 	if timeout != "" {
-		httpObj[AutomationActionFieldTimeout] = types.StringValue(timeout)
+		httpModel.Timeout = types.StringValue(timeout)
 	} else {
-		httpObj[AutomationActionFieldTimeout] = types.StringNull()
+		httpModel.Timeout = types.StringNull()
 	}
 
 	// Handle headers
@@ -507,16 +516,7 @@ func (r *automationActionResourceFramework) mapHttpFieldsToState(ctx context.Con
 				"Error unmarshaling HTTP headers",
 				fmt.Sprintf("Failed to unmarshal HTTP headers: %s", err),
 			)
-			return types.ListNull(types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					AutomationActionFieldHost:             types.StringType,
-					AutomationActionFieldMethod:           types.StringType,
-					AutomationActionFieldBody:             types.StringType,
-					AutomationActionFieldHeaders:          types.MapType{ElemType: types.StringType},
-					AutomationActionFieldIgnoreCertErrors: types.BoolType,
-					AutomationActionFieldTimeout:          types.StringType,
-				},
-			}), diags
+			return httpModel, diags
 		}
 
 		elements := make(map[string]attr.Value)
@@ -531,50 +531,13 @@ func (r *automationActionResourceFramework) mapHttpFieldsToState(ctx context.Con
 		headersValue, d := types.MapValue(types.StringType, elements)
 		diags.Append(d...)
 		if !diags.HasError() {
-			httpObj[AutomationActionFieldHeaders] = headersValue
+			httpModel.Headers = headersValue
 		}
 	} else {
-		httpObj[AutomationActionFieldHeaders] = types.MapNull(types.StringType)
+		httpModel.Headers = types.MapNull(types.StringType)
 	}
 
-	objValue, d := types.ObjectValue(
-		map[string]attr.Type{
-			AutomationActionFieldHost:             types.StringType,
-			AutomationActionFieldMethod:           types.StringType,
-			AutomationActionFieldBody:             types.StringType,
-			AutomationActionFieldHeaders:          types.MapType{ElemType: types.StringType},
-			AutomationActionFieldIgnoreCertErrors: types.BoolType,
-			AutomationActionFieldTimeout:          types.StringType,
-		},
-		httpObj,
-	)
-	diags.Append(d...)
-	if diags.HasError() {
-		return types.ListNull(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				AutomationActionFieldHost:             types.StringType,
-				AutomationActionFieldMethod:           types.StringType,
-				AutomationActionFieldBody:             types.StringType,
-				AutomationActionFieldHeaders:          types.MapType{ElemType: types.StringType},
-				AutomationActionFieldIgnoreCertErrors: types.BoolType,
-				AutomationActionFieldTimeout:          types.StringType,
-			},
-		}), diags
-	}
-
-	return types.ListValueMust(
-		types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				AutomationActionFieldHost:             types.StringType,
-				AutomationActionFieldMethod:           types.StringType,
-				AutomationActionFieldBody:             types.StringType,
-				AutomationActionFieldHeaders:          types.MapType{ElemType: types.StringType},
-				AutomationActionFieldIgnoreCertErrors: types.BoolType,
-				AutomationActionFieldTimeout:          types.StringType,
-			},
-		},
-		[]attr.Value{objValue},
-	), diags
+	return httpModel, diags
 }
 
 func (r *automationActionResourceFramework) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.AutomationAction, diag.Diagnostics) {
@@ -636,145 +599,318 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 	var fields []restapi.Field
 
 	// Check if script configuration is provided
-	if !model.Script.IsNull() {
-		var scriptModels []ScriptModel
-		diags.Append(model.Script.ElementsAs(ctx, &scriptModels, false)...)
-		if diags.HasError() {
-			return "", nil, diags
-		}
+	if !model.Script.Content.IsNull() {
+		actionType = ActionTypeScript
+		scriptModel := model.Script
 
-		if len(scriptModels) > 0 {
-			actionType = ActionTypeScript
-			scriptModel := scriptModels[0]
+		// Map script fields
+		fields = make([]restapi.Field, 0)
 
-			// Map script fields
-			fields = make([]restapi.Field, 0)
+		// Content is required
+		fields = append(fields, restapi.Field{
+			Name:        restapi.ScriptSshFieldName,
+			Description: restapi.ScriptSshFieldDescription,
+			Value:       scriptModel.Content.ValueString(),
+			Encoding:    Base64Encoding,
+			Secured:     false,
+		})
 
-			// Content is required
+		// Interpreter is optional
+		if !scriptModel.Interpreter.IsNull() {
 			fields = append(fields, restapi.Field{
-				Name:        restapi.ScriptSshFieldName,
-				Description: restapi.ScriptSshFieldDescription,
-				Value:       scriptModel.Content.ValueString(),
-				Encoding:    Base64Encoding,
-				Secured:     false,
-			})
-
-			// Interpreter is optional
-			if !scriptModel.Interpreter.IsNull() {
-				fields = append(fields, restapi.Field{
-					Name:        restapi.SubtypeFieldName,
-					Description: restapi.SubtypeFieldDescription,
-					Value:       scriptModel.Interpreter.ValueString(),
-					Encoding:    AsciiEncoding,
-					Secured:     false,
-				})
-			}
-
-			// Timeout is optional
-			if !scriptModel.Timeout.IsNull() {
-				fields = append(fields, restapi.Field{
-					Name:        restapi.TimeoutFieldName,
-					Description: restapi.TimeoutFieldDescription,
-					Value:       scriptModel.Timeout.ValueString(),
-					Encoding:    AsciiEncoding,
-					Secured:     false,
-				})
-			}
-		}
-	} else if !model.Http.IsNull() {
-		var httpModels []HttpModel
-		diags.Append(model.Http.ElementsAs(ctx, &httpModels, false)...)
-		if diags.HasError() {
-			return "", nil, diags
-		}
-
-		if len(httpModels) > 0 {
-			actionType = ActionTypeHttp
-			httpModel := httpModels[0]
-
-			// Map HTTP fields
-			fields = make([]restapi.Field, 0)
-
-			// Host and method are required
-			fields = append(fields, restapi.Field{
-				Name:        restapi.HttpHostFieldName,
-				Description: restapi.HttpHostFieldDescription,
-				Value:       httpModel.Host.ValueString(),
+				Name:        restapi.SubtypeFieldName,
+				Description: restapi.SubtypeFieldDescription,
+				Value:       scriptModel.Interpreter.ValueString(),
 				Encoding:    AsciiEncoding,
 				Secured:     false,
 			})
+		}
 
+		// Timeout is optional
+		if !scriptModel.Timeout.IsNull() {
 			fields = append(fields, restapi.Field{
-				Name:        restapi.HttpMethodFieldName,
-				Description: restapi.HttpMethodFieldDescription,
-				Value:       httpModel.Method.ValueString(),
+				Name:        restapi.TimeoutFieldName,
+				Description: restapi.TimeoutFieldDescription,
+				Value:       scriptModel.Timeout.ValueString(),
 				Encoding:    AsciiEncoding,
 				Secured:     false,
 			})
+		}
+	} else if !model.Http.Host.IsNull() {
+		actionType = ActionTypeHttp
+		httpModel := model.Http
 
-			// Body is optional
-			if !httpModel.Body.IsNull() {
-				fields = append(fields, restapi.Field{
-					Name:        restapi.HttpBodyFieldName,
-					Description: restapi.HttpBodyFieldDescription,
-					Value:       httpModel.Body.ValueString(),
-					Encoding:    AsciiEncoding,
-					Secured:     false,
-				})
+		// Map HTTP fields
+		fields = make([]restapi.Field, 0)
+
+		// Host and method are required
+		fields = append(fields, restapi.Field{
+			Name:        restapi.HttpHostFieldName,
+			Description: restapi.HttpHostFieldDescription,
+			Value:       httpModel.Host.ValueString(),
+			Encoding:    AsciiEncoding,
+			Secured:     false,
+		})
+
+		fields = append(fields, restapi.Field{
+			Name:        restapi.HttpMethodFieldName,
+			Description: restapi.HttpMethodFieldDescription,
+			Value:       httpModel.Method.ValueString(),
+			Encoding:    AsciiEncoding,
+			Secured:     false,
+		})
+
+		// Body is optional
+		if !httpModel.Body.IsNull() {
+			fields = append(fields, restapi.Field{
+				Name:        restapi.HttpBodyFieldName,
+				Description: restapi.HttpBodyFieldDescription,
+				Value:       httpModel.Body.ValueString(),
+				Encoding:    AsciiEncoding,
+				Secured:     false,
+			})
+		}
+
+		// IgnoreCertErrors is optional
+		if !httpModel.IgnoreCertErrors.IsNull() {
+			fields = append(fields, restapi.Field{
+				Name:        restapi.HttpIgnoreCertErrorsFieldName,
+				Description: restapi.HttpIgnoreCertErrorsFieldDescription,
+				Value:       strconv.FormatBool(httpModel.IgnoreCertErrors.ValueBool()),
+				Encoding:    AsciiEncoding,
+				Secured:     false,
+			})
+		}
+
+		// Timeout is optional
+		if !httpModel.Timeout.IsNull() {
+			fields = append(fields, restapi.Field{
+				Name:        restapi.TimeoutFieldName,
+				Description: restapi.TimeoutFieldDescription,
+				Value:       httpModel.Timeout.ValueString(),
+				Encoding:    AsciiEncoding,
+				Secured:     false,
+			})
+		}
+
+		// Auth is optional - serialize as JSON based on auth type
+		var authValue string
+		if !httpModel.BasicAuth.UserName.IsNull() {
+			// Basic Auth format: {"type":"basicAuth","username":"@@userName@@","password":"@@password@@"}
+			authMap := map[string]string{
+				"type":     "basicAuth",
+				"username": httpModel.BasicAuth.UserName.ValueString(),
+				"password": httpModel.BasicAuth.Password.ValueString(),
+			}
+			authJson, err := json.Marshal(authMap)
+			if err != nil {
+				diags.AddError(
+					"Error marshaling basic auth",
+					fmt.Sprintf("Failed to marshal basic auth: %s", err),
+				)
+				return "", nil, diags
+			}
+			authValue = string(authJson)
+		} else if !httpModel.Token.BearerToken.IsNull() {
+			// Bearer Token format: {"type":"bearerToken","bearerToken":"@@bearerToken@@"}
+			authMap := map[string]string{
+				"type":        "bearerToken",
+				"bearerToken": httpModel.Token.BearerToken.ValueString(),
+			}
+			authJson, err := json.Marshal(authMap)
+			if err != nil {
+				diags.AddError(
+					"Error marshaling bearer token",
+					fmt.Sprintf("Failed to marshal bearer token: %s", err),
+				)
+				return "", nil, diags
+			}
+			authValue = string(authJson)
+		} else if !httpModel.ApiKey.key.IsNull() {
+			// API Key format: {"type":"apiKey","apiKey":"authorization","apiKeyValue":"somKey","apiKeyAddTo":"header"}
+			authMap := map[string]string{
+				"type":        "apiKey",
+				"apiKey":      httpModel.ApiKey.key.ValueString(),
+				"apiKeyValue": httpModel.ApiKey.value.ValueString(),
+				"apiKeyAddTo": httpModel.ApiKey.KeyLocation.ValueString(),
+			}
+			authJson, err := json.Marshal(authMap)
+			if err != nil {
+				diags.AddError(
+					"Error marshaling API key",
+					fmt.Sprintf("Failed to marshal API key: %s", err),
+				)
+				return "", nil, diags
+			}
+			authValue = string(authJson)
+		} else {
+			// No Auth format: {"type":"noAuth"}
+			authMap := map[string]string{
+				"type": "noAuth",
+			}
+			authJson, err := json.Marshal(authMap)
+			if err != nil {
+				diags.AddError(
+					"Error marshaling no auth",
+					fmt.Sprintf("Failed to marshal no auth: %s", err),
+				)
+				return "", nil, diags
+			}
+			authValue = string(authJson)
+		}
+
+		fields = append(fields, restapi.Field{
+			Name:        "authen",
+			Description: "Authentication for the HTTPS request",
+			Value:       authValue,
+			Encoding:    AsciiEncoding,
+			Secured:     false,
+		})
+
+		// Headers are optional
+		if !httpModel.Headers.IsNull() {
+			headersMap := make(map[string]string)
+			diags.Append(httpModel.Headers.ElementsAs(ctx, &headersMap, false)...)
+			if diags.HasError() {
+				return "", nil, diags
 			}
 
-			// IgnoreCertErrors is optional
-			if !httpModel.IgnoreCertErrors.IsNull() {
-				fields = append(fields, restapi.Field{
-					Name:        restapi.HttpIgnoreCertErrorsFieldName,
-					Description: restapi.HttpIgnoreCertErrorsFieldDescription,
-					Value:       strconv.FormatBool(httpModel.IgnoreCertErrors.ValueBool()),
-					Encoding:    AsciiEncoding,
-					Secured:     false,
-				})
+			headersJson, err := json.Marshal(headersMap)
+			if err != nil {
+				diags.AddError(
+					"Error marshaling HTTP headers",
+					fmt.Sprintf("Failed to marshal HTTP headers: %s", err),
+				)
+				return "", nil, diags
 			}
 
-			// Timeout is optional
-			if !httpModel.Timeout.IsNull() {
-				fields = append(fields, restapi.Field{
-					Name:        restapi.TimeoutFieldName,
-					Description: restapi.TimeoutFieldDescription,
-					Value:       httpModel.Timeout.ValueString(),
-					Encoding:    AsciiEncoding,
-					Secured:     false,
-				})
-			}
-
-			// Headers are optional
-			if !httpModel.Headers.IsNull() {
-				headersMap := make(map[string]string)
-				diags.Append(httpModel.Headers.ElementsAs(ctx, &headersMap, false)...)
-				if diags.HasError() {
-					return "", nil, diags
-				}
-
-				headersJson, err := json.Marshal(headersMap)
-				if err != nil {
-					diags.AddError(
-						"Error marshaling HTTP headers",
-						fmt.Sprintf("Failed to marshal HTTP headers: %s", err),
-					)
-					return "", nil, diags
-				}
-
-				fields = append(fields, restapi.Field{
-					Name:        restapi.HttpHeaderFieldName,
-					Description: restapi.HttpHeaderFieldDescription,
-					Value:       string(headersJson),
-					Encoding:    AsciiEncoding,
-					Secured:     false,
-				})
-			}
+			fields = append(fields, restapi.Field{
+				Name:        restapi.HttpHeaderFieldName,
+				Description: restapi.HttpHeaderFieldDescription,
+				Value:       string(headersJson),
+				Encoding:    AsciiEncoding,
+				Secured:     false,
+			})
+		}
+	} else if !model.Manual.Content.IsNull() {
+		actionType = "MANUAL"
+		fields = make([]restapi.Field, 0)
+		fields = append(fields, restapi.Field{
+			Name:        "content",
+			Description: "Content for manual action",
+			Value:       model.Manual.Content.ValueString(),
+			Encoding:    AsciiEncoding,
+			Secured:     false,
+		})
+	} else if !model.Jira.Project.IsNull() {
+		actionType = "JIRA"
+		fields = make([]restapi.Field, 0)
+		if !model.Jira.Project.IsNull() {
+			fields = append(fields, restapi.Field{Name: "project", Description: "jira project", Value: model.Jira.Project.ValueString(), Encoding: AsciiEncoding})
+		}
+		if !model.Jira.Operation.IsNull() {
+			fields = append(fields, restapi.Field{Name: "ticketActionType", Description: "jira ticket type", Value: model.Jira.Operation.ValueString(), Encoding: AsciiEncoding})
+		}
+		if !model.Jira.IssueType.IsNull() {
+			fields = append(fields, restapi.Field{Name: "issue_type", Description: "jira issue type", Value: model.Jira.IssueType.ValueString(), Encoding: AsciiEncoding})
+		}
+		if !model.Jira.Description.IsNull() {
+			fields = append(fields, restapi.Field{Name: "body", Description: "jira issue description", Value: model.Jira.Description.ValueString(), Encoding: AsciiEncoding})
+		}
+		if !model.Jira.Assignee.IsNull() {
+			fields = append(fields, restapi.Field{Name: "assignee", Description: "jira issue assignee", Value: model.Jira.Assignee.ValueString(), Encoding: AsciiEncoding})
+		}
+		if !model.Jira.Title.IsNull() {
+			fields = append(fields, restapi.Field{Name: "summary", Description: "jira issue summary", Value: model.Jira.Title.ValueString(), Encoding: AsciiEncoding})
+		}
+		if !model.Jira.Labels.IsNull() {
+			fields = append(fields, restapi.Field{Name: "labels", Description: "jira issue labels", Value: model.Jira.Labels.ValueString(), Encoding: AsciiEncoding})
+		}
+		if !model.GitHub.Comment.IsNull() {
+			fields = append(fields, restapi.Field{Name: "comment", Description: "jira issue comment", Value: model.GitHub.Comment.ValueString(), Encoding: AsciiEncoding})
+		}
+	} else if !model.GitHub.Owner.IsNull() {
+		actionType = "GITHUB"
+		fields = make([]restapi.Field, 0)
+		if !model.GitHub.Owner.IsNull() {
+			fields = append(fields, restapi.Field{Name: "owner", Description: "github issue owner/repo", Value: model.GitHub.Owner.ValueString(), Encoding: AsciiEncoding})
+		}
+		if !model.GitHub.Repo.IsNull() {
+			fields = append(fields, restapi.Field{Name: "repo", Description: "github issue repo", Value: model.GitHub.Repo.ValueString(), Encoding: AsciiEncoding})
+		}
+		if !model.GitHub.Title.IsNull() {
+			fields = append(fields, restapi.Field{Name: "title", Description: "github issue title", Value: model.GitHub.Title.ValueString(), Encoding: AsciiEncoding})
+		}
+		if !model.GitHub.Body.IsNull() {
+			fields = append(fields, restapi.Field{Name: "body", Description: "github issue body", Value: model.GitHub.Body.ValueString(), Encoding: AsciiEncoding})
+		}
+		if !model.GitHub.Operation.IsNull() {
+			fields = append(fields, restapi.Field{Name: "ticketActionType", Description: "github issue type", Value: model.GitHub.Operation.ValueString(), Encoding: AsciiEncoding})
+		}
+		if !model.GitHub.Assignees.IsNull() {
+			fields = append(fields, restapi.Field{Name: "assignees", Description: "github issue assignees", Value: model.GitHub.Assignees.ValueString(), Encoding: AsciiEncoding})
+		}
+		if !model.GitHub.Labels.IsNull() {
+			fields = append(fields, restapi.Field{Name: "labels", Description: "github issue labels", Value: model.GitHub.Labels.ValueString(), Encoding: AsciiEncoding})
+		}
+		if !model.GitHub.Labels.IsNull() {
+			fields = append(fields, restapi.Field{Name: "comment", Description: "github issue comment", Value: model.GitHub.Comment.ValueString(), Encoding: AsciiEncoding})
+		}
+	} else if !model.DocLink.Url.IsNull() {
+		actionType = "DOC_LINK"
+		fields = make([]restapi.Field, 0)
+		fields = append(fields, restapi.Field{
+			Name:        "url",
+			Description: "URL to remediation documentation",
+			Value:       model.DocLink.Url.ValueString(),
+			Encoding:    UTF8Encoding,
+		})
+	} else if !model.GitLab.ProjectId.IsNull() {
+		actionType = "GITLAB"
+		fields = make([]restapi.Field, 0)
+		if !model.GitLab.ProjectId.IsNull() {
+			fields = append(fields, restapi.Field{Name: "projectId", Description: "gitlab projectId", Value: model.GitLab.ProjectId.ValueString(), Encoding: AsciiEncoding})
+		}
+		if !model.GitLab.Title.IsNull() {
+			fields = append(fields, restapi.Field{Name: "title", Description: "gitlab issue title", Value: model.GitLab.Title.ValueString(), Encoding: AsciiEncoding})
+		}
+		if !model.GitLab.Description.IsNull() {
+			fields = append(fields, restapi.Field{Name: "body", Description: "gitlab issue description", Value: model.GitLab.Description.ValueString(), Encoding: AsciiEncoding})
+		}
+		if !model.GitLab.Operation.IsNull() {
+			fields = append(fields, restapi.Field{Name: "ticketActionType", Description: "gitlab ticket type", Value: model.GitLab.Operation.ValueString(), Encoding: AsciiEncoding})
+		}
+		if !model.GitLab.Labels.IsNull() {
+			fields = append(fields, restapi.Field{Name: "labels", Description: "github issue labels", Value: model.GitLab.Labels.ValueString(), Encoding: AsciiEncoding})
+		}
+		if !model.GitLab.IssueType.IsNull() {
+			fields = append(fields, restapi.Field{Name: "issue_type", Description: "gitlab issue type", Value: model.GitLab.IssueType.ValueString(), Encoding: AsciiEncoding})
+		}
+		if !model.GitLab.Labels.IsNull() {
+			fields = append(fields, restapi.Field{Name: "comment", Description: "gitlab issue comment", Value: model.GitLab.Comment.ValueString(), Encoding: AsciiEncoding})
+		}
+	} else if !model.Ansible.WorkflowId.IsNull() {
+		actionType = "ANSIBLE"
+		fields = make([]restapi.Field, 0)
+		if !model.Ansible.WorkflowId.IsNull() {
+			fields = append(fields, restapi.Field{Name: "workflowId", Description: "The workflow ID", Value: model.Ansible.WorkflowId.ValueString(), Encoding: AsciiEncoding})
+		}
+		if !model.Ansible.AnsibleUrl.IsNull() {
+			fields = append(fields, restapi.Field{Name: "ansibleUrl", Description: "The ansible url", Value: model.Ansible.AnsibleUrl.ValueString(), Encoding: AsciiEncoding})
+		}
+		if !model.Ansible.HostId.IsNull() {
+			fields = append(fields, restapi.Field{Name: "hostId", Description: "The host ID from which this action is created", Value: model.Ansible.HostId.ValueString(), Encoding: AsciiEncoding})
+		}
+		if !model.Ansible.PlaybookId.IsNull() {
+			fields = append(fields, restapi.Field{Name: "playbookId", Description: "The playbook ID", Value: model.Ansible.PlaybookId.ValueString(), Encoding: AsciiEncoding})
+		}
+		if !model.Ansible.PlaybookFileName.IsNull() {
+			fields = append(fields, restapi.Field{Name: "playbookFileName", Description: "The playbook filename", Value: model.Ansible.PlaybookFileName.ValueString(), Encoding: AsciiEncoding})
 		}
 	} else {
 		diags.AddError(
 			"Invalid action configuration",
-			"Either script or http configuration must be provided",
+			"One of script, http, manual, jira, github, doclink, gitlab, or ansible configuration must be provided",
 		)
 		return "", nil, diags
 	}
