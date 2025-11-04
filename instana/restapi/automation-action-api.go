@@ -23,6 +23,8 @@ type Parameter struct {
 	Value       string `json:"value"`
 	Required    bool   `json:"required"`
 	Hidden      bool   `json:"hidden"`
+	Secured     bool   `json:"secured"`
+	ValueType   string `json:"valueType"`
 }
 
 type Field struct {
