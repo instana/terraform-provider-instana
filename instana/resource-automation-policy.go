@@ -102,26 +102,26 @@ func (r *AutomationPolicyResource) mapTypeConfigurationsToSchema(policy *restapi
 func (r *AutomationPolicyResource) mapActionToSchema(typeConfiguration *restapi.TypeConfiguration) []interface{} {
 	result := make([]interface{}, len(typeConfiguration.Runnable.RunConfiguration.Actions))
 
-	i := 0
-	for _, v := range typeConfiguration.Runnable.RunConfiguration.Actions {
-		actionConfiguration := v
+	// i := 0
+	// for _, v := range typeConfiguration.Runnable.RunConfiguration.Actions {
+	// 	actionConfiguration := v
 
-		item := make(map[string]interface{})
-		item[AutomationPolicyFieldActionId] = actionConfiguration.Action.Id
-		item[AutomationPolicyFieldAgentId] = actionConfiguration.AgentId
-		item[AutomationPolicyFieldInputParameters] = r.mapParameterValuesToSchema(&actionConfiguration)
-		result[i] = item
+	// 	item := make(map[string]interface{})
+	// 	item[AutomationPolicyFieldActionId] = actionConfiguration.Action.Id
+	// 	item[AutomationPolicyFieldAgentId] = actionConfiguration.AgentId
+	// 	item[AutomationPolicyFieldInputParameters] = r.mapParameterValuesToSchema(&actionConfiguration)
+	// 	result[i] = item
 
-		i++
-	}
+	// 	i++
+	// }
 	return result
 }
 
 func (r *AutomationPolicyResource) mapParameterValuesToSchema(ac *restapi.ActionConfiguration) map[string]string {
 	parameterMap := make(map[string]string)
-	for _, ipv := range ac.InputParameterValues {
-		parameterMap[ipv.Name] = ipv.Value
-	}
+	// for _, ipv := range ac.InputParameterValues {
+	// 	parameterMap[ipv.Name] = ipv.Value
+	// }
 	return parameterMap
 }
 
@@ -219,22 +219,22 @@ func (r *AutomationPolicyResource) getRunnableFromTypeConfigurationSchema(typeCo
 	action := actions[0].(map[string]interface{})
 
 	actionId := action[AutomationPolicyFieldActionId].(string)
-	agentId := action[AutomationPolicyFieldAgentId].(string)
+	//agentId := action[AutomationPolicyFieldAgentId].(string)
 
 	return restapi.Runnable{
 		Id:   actionId,
 		Type: actionRunnable,
-		RunConfiguration: restapi.RunConfiguration{
-			Actions: []restapi.ActionConfiguration{
-				{
-					Action: restapi.Action{
-						Id: actionId,
-					},
-					AgentId:              agentId,
-					InputParameterValues: r.getInputParametersFromActionSchema(action),
-				},
-			},
-		},
+		// RunConfiguration: restapi.RunConfiguration{
+		// 	Actions: []restapi.ActionConfiguration{
+		// 		{
+		// 			Action: restapi.Action{
+		// 				Id: actionId,
+		// 			},
+		// 			AgentId:              agentId,
+		// 			InputParameterValues: r.getInputParametersFromActionSchema(action),
+		// 		},
+		// 	},
+		// },
 	}
 }
 
