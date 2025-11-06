@@ -21,25 +21,27 @@ const ResourceInstanaAutomationPolicyFramework = "automation_policy"
 
 // AutomationPolicyModel represents the data model for the automation policy resource
 type AutomationPolicyModel struct {
-	ID                types.String `tfsdk:"id"`
-	Name              types.String `tfsdk:"name"`
-	Description       types.String `tfsdk:"description"`
-	Tags              types.List   `tfsdk:"tags"`
-	Trigger           types.List   `tfsdk:"trigger"`
-	TypeConfiguration types.List   `tfsdk:"type_configuration"`
+	ID                types.String             `tfsdk:"id"`
+	Name              types.String             `tfsdk:"name"`
+	Description       types.String             `tfsdk:"description"`
+	Tags              types.List               `tfsdk:"tags"`
+	Trigger           TriggerModel             `tfsdk:"trigger"`
+	TypeConfiguration []TypeConfigurationModel `tfsdk:"type_configuration"`
 }
 
 // TriggerModel represents a trigger in the automation policy
 type TriggerModel struct {
-	ID   types.String `tfsdk:"id"`
-	Type types.String `tfsdk:"type"`
+	ID          types.String `tfsdk:"id"`
+	Type        types.String `tfsdk:"type"`
+	Name        types.String `tfsdk:"name"`
+	Description types.String `tfsdk:"description"`
 }
 
 // TypeConfigurationModel represents a type configuration in the automation policy
 type TypeConfigurationModel struct {
-	Name      types.String `tfsdk:"name"`
-	Condition types.List   `tfsdk:"condition"`
-	Action    types.List   `tfsdk:"action"`
+	Name      types.String        `tfsdk:"name"`
+	Condition *ConditionModel     `tfsdk:"condition"`
+	Action    []PolicyActionModel `tfsdk:"action"`
 }
 
 // ConditionModel represents a condition in the automation policy
@@ -47,11 +49,11 @@ type ConditionModel struct {
 	Query types.String `tfsdk:"query"`
 }
 
-// ActionModel represents an action in the automation policy
-type ActionModel struct {
-	ActionID        types.String `tfsdk:"action_id"`
-	AgentID         types.String `tfsdk:"agent_id"`
-	InputParameters types.Map    `tfsdk:"input_parameters"`
+// PolicyActionModel represents an action reference in the automation policy
+// This is different from AutomationActionModel - it only contains the reference and parameters
+type PolicyActionModel struct {
+	Action  AutomationActionModel `tfsdk:"action"`
+	AgentID types.String          `tfsdk:"agent_id"`
 }
 
 // NewAutomationPolicyResourceHandleFramework creates the resource handle for Automation Policies
@@ -82,29 +84,35 @@ func NewAutomationPolicyResourceHandleFramework() ResourceHandleFramework[*resta
 						Optional:    true,
 						Description: "The tags of the automation policy.",
 					},
-				},
-				Blocks: map[string]schema.Block{
-					AutomationPolicyFieldTrigger: schema.ListNestedBlock{
+					AutomationPolicyFieldTrigger: schema.SingleNestedAttribute{
+						Required:    true,
 						Description: "The trigger for the automation policy.",
-						NestedObject: schema.NestedBlockObject{
-							Attributes: map[string]schema.Attribute{
-								AutomationPolicyFieldId: schema.StringAttribute{
-									Required:    true,
-									Description: "Trigger (Instana event or Smart Alert) identifier.",
+						Attributes: map[string]schema.Attribute{
+							AutomationPolicyFieldId: schema.StringAttribute{
+								Required:    true,
+								Description: "Trigger (Instana event or Smart Alert) identifier.",
+							},
+							AutomationPolicyFieldType: schema.StringAttribute{
+								Required:    true,
+								Description: "Instana event or Smart Alert type.",
+								Validators: []validator.String{
+									stringvalidator.OneOf(supportedTriggerTypes...),
 								},
-								AutomationPolicyFieldType: schema.StringAttribute{
-									Required:    true,
-									Description: "Instana event or Smart Alert type.",
-									Validators: []validator.String{
-										stringvalidator.OneOf(supportedTriggerTypes...),
-									},
-								},
+							},
+							AutomationPolicyFieldName: schema.StringAttribute{
+								Optional:    true,
+								Description: "The name of the trigger.",
+							},
+							AutomationPolicyFieldDescription: schema.StringAttribute{
+								Optional:    true,
+								Description: "The description of the trigger.",
 							},
 						},
 					},
-					AutomationPolicyFieldTypeConfiguration: schema.ListNestedBlock{
+					AutomationPolicyFieldTypeConfiguration: schema.ListNestedAttribute{
+						Required:    true,
 						Description: "A list of configurations with the list of actions to run and the mode (automatic or manual).",
-						NestedObject: schema.NestedBlockObject{
+						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								AutomationPolicyFieldName: schema.StringAttribute{
 									Required:    true,
@@ -113,35 +121,29 @@ func NewAutomationPolicyResourceHandleFramework() ResourceHandleFramework[*resta
 										stringvalidator.OneOf(supportedPolicyTypes...),
 									},
 								},
-							},
-							Blocks: map[string]schema.Block{
-								AutomationPolicyFieldCondition: schema.ListNestedBlock{
+								AutomationPolicyFieldCondition: schema.SingleNestedAttribute{
+									Optional:    true,
 									Description: "The condition that selects a list of entities on which the policy is run. Only for automatic policy type.",
-									NestedObject: schema.NestedBlockObject{
-										Attributes: map[string]schema.Attribute{
-											AutomationPolicyFieldQuery: schema.StringAttribute{
-												Required:    true,
-												Description: "Dynamic Focus Query string that selects a list of entities on which the policy is run.",
-											},
+									Attributes: map[string]schema.Attribute{
+										AutomationPolicyFieldQuery: schema.StringAttribute{
+											Required:    true,
+											Description: "Dynamic Focus Query string that selects a list of entities on which the policy is run.",
 										},
 									},
 								},
-								AutomationPolicyFieldAction: schema.ListNestedBlock{
+								AutomationPolicyFieldAction: schema.ListNestedAttribute{
+									Required:    true,
 									Description: "The configuration for the automation action.",
-									NestedObject: schema.NestedBlockObject{
+									NestedObject: schema.NestedAttributeObject{
 										Attributes: map[string]schema.Attribute{
-											AutomationPolicyFieldActionId: schema.StringAttribute{
+											"action": schema.SingleNestedAttribute{
 												Required:    true,
-												Description: "The identifier for the automation action.",
+												Description: "The automation action configuration.",
+												Attributes:  GetAutomationActionSchemaAttributes(),
 											},
 											AutomationPolicyFieldAgentId: schema.StringAttribute{
 												Optional:    true,
 												Description: "The identifier of the agent host.",
-											},
-											AutomationPolicyFieldInputParameters: schema.MapAttribute{
-												ElementType: types.StringType,
-												Optional:    true,
-												Description: "Optional map with input parameters name and value.",
 											},
 										},
 									},
@@ -175,13 +177,21 @@ func (r *automationPolicyResourceFramework) SetComputedFields(_ context.Context,
 func (r *automationPolicyResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, policy *restapi.AutomationPolicy) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	// Create a model and populate it with values from the policy
-	model := AutomationPolicyModel{
-		ID:          types.StringValue(policy.ID),
-		Name:        types.StringValue(policy.Name),
-		Description: types.StringValue(policy.Description),
+	var model AutomationPolicyModel
+
+	// Read from plan to preserve user-configured values (especially for optional fields)
+	// This is important for fields that might not be returned by the API
+	if plan != nil {
+		diags.Append(plan.Get(ctx, &model)...)
+		if diags.HasError() {
+			return diags
+		}
 	}
 
+	// Update model with values from API response
+	model.ID = types.StringValue(policy.ID)
+	model.Name = types.StringValue(policy.Name)
+	model.Description = types.StringValue(policy.Description)
 	// Handle tags
 	if policy.Tags != nil {
 		tagsList, d := r.mapTagsToState(ctx, policy.Tags)
@@ -194,18 +204,10 @@ func (r *automationPolicyResourceFramework) UpdateState(ctx context.Context, sta
 	}
 
 	// Map trigger
-	trigger, d := r.mapTriggerToState(ctx, &policy.Trigger)
-	diags.Append(d...)
-	if !diags.HasError() {
-		model.Trigger = trigger
-	}
+	model.Trigger = r.mapTriggerToState(&policy.Trigger, model.Trigger)
 
 	// Map type configurations
-	typeConfigs, d := r.mapTypeConfigurationsToState(ctx, policy.TypeConfigurations)
-	diags.Append(d...)
-	if !diags.HasError() {
-		model.TypeConfiguration = typeConfigs
-	}
+	model.TypeConfiguration = r.mapTypeConfigurationsToState(ctx, policy.TypeConfigurations)
 
 	// Set the entire model to state
 	diags.Append(state.Set(ctx, model)...)
@@ -244,178 +246,94 @@ func (r *automationPolicyResourceFramework) mapTagsToState(ctx context.Context, 
 	}
 }
 
-func (r *automationPolicyResourceFramework) mapTriggerToState(ctx context.Context, trigger *restapi.Trigger) (types.List, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	triggerObj := map[string]attr.Value{
-		AutomationPolicyFieldId:   types.StringValue(trigger.Id),
-		AutomationPolicyFieldType: types.StringValue(trigger.Type),
+func (r *automationPolicyResourceFramework) mapTriggerToState(trigger *restapi.Trigger, triggerModel TriggerModel) TriggerModel {
+	if triggerModel.ID.IsNull() || triggerModel.ID.IsUnknown() {
+		triggerModel.ID = types.StringValue(trigger.Id)
+	}
+	if triggerModel.Type.IsNull() || triggerModel.Type.IsUnknown() {
+		triggerModel.Type = types.StringValue(trigger.Type)
 	}
 
-	objValue, d := types.ObjectValue(
-		map[string]attr.Type{
-			AutomationPolicyFieldId:   types.StringType,
-			AutomationPolicyFieldType: types.StringType,
-		},
-		triggerObj,
-	)
-	diags.Append(d...)
-	if diags.HasError() {
-		return types.ListNull(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				AutomationPolicyFieldId:   types.StringType,
-				AutomationPolicyFieldType: types.StringType,
-			},
-		}), diags
+	if triggerModel.Description.IsNull() || triggerModel.Description.IsUnknown() {
+		triggerModel.Description = types.StringValue(trigger.Description)
 	}
+	if triggerModel.Name.IsNull() || triggerModel.Name.IsUnknown() {
+		triggerModel.Name = types.StringValue(trigger.Name)
+	}
+	// The existing value from plan is already preserved in UpdateState function
 
-	return types.ListValueMust(
-		types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				AutomationPolicyFieldId:   types.StringType,
-				AutomationPolicyFieldType: types.StringType,
-			},
-		},
-		[]attr.Value{objValue},
-	), diags
+	return triggerModel
 }
 
-func (r *automationPolicyResourceFramework) mapTypeConfigurationsToState(ctx context.Context, typeConfigs []restapi.TypeConfiguration) (types.List, diag.Diagnostics) {
-	var diags diag.Diagnostics
-	elements := make([]attr.Value, len(typeConfigs))
+func (r *automationPolicyResourceFramework) mapTypeConfigurationsToState(ctx context.Context, typeConfigs []restapi.TypeConfiguration) []TypeConfigurationModel {
+	result := make([]TypeConfigurationModel, len(typeConfigs))
 
 	for i, typeConfig := range typeConfigs {
 		// Map condition
-		condition, d := r.mapConditionToState(ctx, typeConfig.Condition)
-		diags.Append(d...)
-		if diags.HasError() {
-			return types.ListNull(types.ObjectType{}), diags
+		var condition *ConditionModel
+		if typeConfig.Condition != nil && typeConfig.Condition.Query != "" {
+			condition = &ConditionModel{
+				Query: types.StringValue(typeConfig.Condition.Query),
+			}
 		}
 
 		// Map actions
-		actions, d := r.mapActionsToState(ctx, &typeConfig.Runnable)
-		diags.Append(d...)
-		if diags.HasError() {
-			return types.ListNull(types.ObjectType{}), diags
-		}
+		actions := r.mapActionsToState(ctx, &typeConfig.Runnable)
 
-		typeConfigObj := map[string]attr.Value{
-			AutomationPolicyFieldName:      types.StringValue(typeConfig.Name),
-			AutomationPolicyFieldCondition: condition,
-			AutomationPolicyFieldAction:    actions,
+		result[i] = TypeConfigurationModel{
+			Name:      types.StringValue(typeConfig.Name),
+			Condition: condition,
+			Action:    actions,
 		}
-
-		objValue, d := types.ObjectValue(
-			map[string]attr.Type{
-				AutomationPolicyFieldName:      types.StringType,
-				AutomationPolicyFieldCondition: types.ListType{ElemType: types.ObjectType{}},
-				AutomationPolicyFieldAction:    types.ListType{ElemType: types.ObjectType{}},
-			},
-			typeConfigObj,
-		)
-		diags.Append(d...)
-		if diags.HasError() {
-			return types.ListNull(types.ObjectType{}), diags
-		}
-
-		elements[i] = objValue
 	}
 
-	return types.ListValueMust(
-		types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				AutomationPolicyFieldName:      types.StringType,
-				AutomationPolicyFieldCondition: types.ListType{ElemType: types.ObjectType{}},
-				AutomationPolicyFieldAction:    types.ListType{ElemType: types.ObjectType{}},
-			},
-		},
-		elements,
-	), diags
+	return result
 }
 
-func (r *automationPolicyResourceFramework) mapConditionToState(ctx context.Context, condition *restapi.Condition) (types.List, diag.Diagnostics) {
-	var diags diag.Diagnostics
+func (r *automationPolicyResourceFramework) mapActionsToState(ctx context.Context, runnable *restapi.Runnable) []PolicyActionModel {
+	result := make([]PolicyActionModel, len(runnable.RunConfiguration.Actions))
 
-	if condition == nil || condition.Query == "" {
-		return types.ListValueMust(
-			types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					AutomationPolicyFieldQuery: types.StringType,
-				},
-			},
-			[]attr.Value{},
-		), diags
+	for i, actionPolicy := range runnable.RunConfiguration.Actions {
+		// Map the full automation action from the nested Action field
+		tags, _ := MapTagsToState(ctx, actionPolicy.Action.Tags)
+		inputParams, _ := MapInputParametersToState(ctx, actionPolicy.Action.InputParameters)
+
+		actionModel := AutomationActionModel{
+			ID:             types.StringValue(actionPolicy.Action.ID),
+			Name:           types.StringValue(actionPolicy.Action.Name),
+			Description:    types.StringValue(actionPolicy.Action.Description),
+			Tags:           tags,
+			InputParameter: inputParams,
+		}
+
+		// Map action type-specific fields using the common function
+		MapActionTypeFieldsToState(ctx, &actionPolicy.Action, &actionModel)
+
+		agentID := types.StringNull()
+		if actionPolicy.AgentId != "" {
+			agentID = types.StringValue(actionPolicy.AgentId)
+		}
+
+		result[i] = PolicyActionModel{
+			Action:  actionModel,
+			AgentID: agentID,
+		}
 	}
 
-	conditionObj := map[string]attr.Value{
-		AutomationPolicyFieldQuery: types.StringValue(condition.Query),
-	}
-
-	objValue, d := types.ObjectValue(
-		map[string]attr.Type{
-			AutomationPolicyFieldQuery: types.StringType,
-		},
-		conditionObj,
-	)
-	diags.Append(d...)
-	if diags.HasError() {
-		return types.ListNull(types.ObjectType{}), diags
-	}
-
-	return types.ListValueMust(
-		types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				AutomationPolicyFieldQuery: types.StringType,
-			},
-		},
-		[]attr.Value{objValue},
-	), diags
+	return result
 }
 
-func (r *automationPolicyResourceFramework) mapActionsToState(ctx context.Context, runnable *restapi.Runnable) (types.List, diag.Diagnostics) {
-	var diags diag.Diagnostics
-	elements := make([]attr.Value, len(runnable.RunConfiguration.Actions))
-
-	for i, action := range runnable.RunConfiguration.Actions {
-		// Map input parameters
-		inputParams, d := r.mapInputParametersToState(ctx, action.InputParameterValues)
-		diags.Append(d...)
-		if diags.HasError() {
-			return types.ListNull(types.ObjectType{}), diags
-		}
-
-		actionObj := map[string]attr.Value{
-			AutomationPolicyFieldActionId:        types.StringValue(action.Action.Id),
-			AutomationPolicyFieldAgentId:         types.StringValue(action.AgentId),
-			AutomationPolicyFieldInputParameters: inputParams,
-		}
-
-		objValue, d := types.ObjectValue(
-			map[string]attr.Type{
-				AutomationPolicyFieldActionId:        types.StringType,
-				AutomationPolicyFieldAgentId:         types.StringType,
-				AutomationPolicyFieldInputParameters: types.MapType{ElemType: types.StringType},
-			},
-			actionObj,
-		)
-		diags.Append(d...)
-		if diags.HasError() {
-			return types.ListNull(types.ObjectType{}), diags
-		}
-
-		elements[i] = objValue
+func (r *automationPolicyResourceFramework) mapInputParametersToStateMap(ctx context.Context, inputParams []restapi.Parameter) types.Map {
+	if len(inputParams) == 0 {
+		return types.MapNull(types.StringType)
 	}
 
-	return types.ListValueMust(
-		types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				AutomationPolicyFieldActionId:        types.StringType,
-				AutomationPolicyFieldAgentId:         types.StringType,
-				AutomationPolicyFieldInputParameters: types.MapType{ElemType: types.StringType},
-			},
-		},
-		elements,
-	), diags
+	elements := make(map[string]attr.Value)
+	for _, param := range inputParams {
+		elements[param.Name] = types.StringValue(param.Value)
+	}
+
+	return types.MapValueMust(types.StringType, elements)
 }
 
 func (r *automationPolicyResourceFramework) mapInputParametersToState(ctx context.Context, inputParams []restapi.InputParameterValue) (types.Map, diag.Diagnostics) {
@@ -481,44 +399,30 @@ func (r *automationPolicyResourceFramework) MapStateToDataObject(ctx context.Con
 	}, diags
 }
 
-func (r *automationPolicyResourceFramework) mapTriggerFromState(ctx context.Context, triggerList types.List) (restapi.Trigger, diag.Diagnostics) {
+func (r *automationPolicyResourceFramework) mapTriggerFromState(ctx context.Context, triggerModel TriggerModel) (restapi.Trigger, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	var trigger restapi.Trigger
 
-	if triggerList.IsNull() {
-		return trigger, diags
+	trigger := restapi.Trigger{
+		Id:   triggerModel.ID.ValueString(),
+		Type: triggerModel.Type.ValueString(),
 	}
 
-	var triggerModels []TriggerModel
-	diags.Append(triggerList.ElementsAs(ctx, &triggerModels, false)...)
-	if diags.HasError() {
-		return trigger, diags
+	// Map optional fields
+	if !triggerModel.Name.IsNull() {
+		trigger.Name = triggerModel.Name.ValueString()
 	}
 
-	if len(triggerModels) > 0 {
-		triggerModel := triggerModels[0]
-		trigger.Id = triggerModel.ID.ValueString()
-		trigger.Type = triggerModel.Type.ValueString()
+	if !triggerModel.Description.IsNull() {
+		trigger.Description = triggerModel.Description.ValueString()
 	}
 
 	return trigger, diags
 }
 
-func (r *automationPolicyResourceFramework) mapTypeConfigurationsFromState(ctx context.Context, typeConfigList types.List) ([]restapi.TypeConfiguration, diag.Diagnostics) {
+func (r *automationPolicyResourceFramework) mapTypeConfigurationsFromState(ctx context.Context, typeConfigModels []TypeConfigurationModel) ([]restapi.TypeConfiguration, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	var typeConfigurations []restapi.TypeConfiguration
 
-	if typeConfigList.IsNull() {
-		return typeConfigurations, diags
-	}
-
-	var typeConfigModels []TypeConfigurationModel
-	diags.Append(typeConfigList.ElementsAs(ctx, &typeConfigModels, false)...)
-	if diags.HasError() {
-		return typeConfigurations, diags
-	}
-
-	typeConfigurations = make([]restapi.TypeConfiguration, len(typeConfigModels))
+	typeConfigurations := make([]restapi.TypeConfiguration, len(typeConfigModels))
 	for i, typeConfigModel := range typeConfigModels {
 		// Map condition
 		condition, d := r.mapConditionFromState(ctx, typeConfigModel.Condition)
@@ -544,70 +448,85 @@ func (r *automationPolicyResourceFramework) mapTypeConfigurationsFromState(ctx c
 	return typeConfigurations, diags
 }
 
-func (r *automationPolicyResourceFramework) mapConditionFromState(ctx context.Context, conditionList types.List) (*restapi.Condition, diag.Diagnostics) {
+func (r *automationPolicyResourceFramework) mapConditionFromState(ctx context.Context, conditionModel *ConditionModel) (*restapi.Condition, diag.Diagnostics) {
 	var diags diag.Diagnostics
+
+	if conditionModel == nil {
+		return &restapi.Condition{Query: ""}, diags
+	}
+
 	condition := &restapi.Condition{
-		Query: "",
-	}
-
-	if conditionList.IsNull() {
-		return condition, diags
-	}
-
-	var conditionModels []ConditionModel
-	diags.Append(conditionList.ElementsAs(ctx, &conditionModels, false)...)
-	if diags.HasError() {
-		return condition, diags
-	}
-
-	if len(conditionModels) > 0 {
-		conditionModel := conditionModels[0]
-		condition.Query = conditionModel.Query.ValueString()
+		Query: conditionModel.Query.ValueString(),
 	}
 
 	return condition, diags
 }
 
-func (r *automationPolicyResourceFramework) mapRunnableFromState(ctx context.Context, actionList types.List) (restapi.Runnable, diag.Diagnostics) {
+func (r *automationPolicyResourceFramework) mapRunnableFromState(ctx context.Context, actionModels []PolicyActionModel) (restapi.Runnable, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	runnable := restapi.Runnable{
 		Type: actionRunnable,
 		RunConfiguration: restapi.RunConfiguration{
-			Actions: []restapi.ActionConfiguration{},
+			Actions: []restapi.AutomationActionPolicy{},
 		},
 	}
 
-	if actionList.IsNull() {
+	if len(actionModels) == 0 {
 		return runnable, diags
 	}
 
-	var actionModels []ActionModel
-	diags.Append(actionList.ElementsAs(ctx, &actionModels, false)...)
-	if diags.HasError() {
-		return runnable, diags
-	}
+	actions := make([]restapi.AutomationActionPolicy, len(actionModels))
+	for i, policyActionModel := range actionModels {
+		// Map the automation action from the model
+		actionModel := policyActionModel.Action
 
-	actions := make([]restapi.ActionConfiguration, len(actionModels))
-	for i, actionModel := range actionModels {
-		// Map input parameters
-		inputParams, d := r.mapInputParametersFromState(ctx, actionModel.InputParameters)
+		// Map input parameters from the action model
+		inputParams, d := MapInputParametersFromState(ctx, actionModel)
 		diags.Append(d...)
 		if diags.HasError() {
 			return runnable, diags
 		}
 
-		actionId := actionModel.ActionID.ValueString()
-		actions[i] = restapi.ActionConfiguration{
-			Action: restapi.Action{
-				Id: actionId,
-			},
-			AgentId:              actionModel.AgentID.ValueString(),
-			InputParameterValues: inputParams,
+		// Map action type and fields
+		actionType, fields, d := MapActionTypeAndFieldsFromState(ctx, actionModel)
+		diags.Append(d...)
+		if diags.HasError() {
+			return runnable, diags
+		}
+
+		// Create the automation action
+		automationAction := restapi.AutomationAction{
+			ID:              actionModel.ID.ValueString(),
+			Name:            actionModel.Name.ValueString(),
+			Description:     actionModel.Description.ValueString(),
+			Type:            actionType,
+			Fields:          fields,
+			InputParameters: inputParams,
+		}
+
+		// Map tags
+		if !actionModel.Tags.IsNull() {
+			tags, d := MapTagsFromState(ctx, actionModel.Tags)
+			diags.Append(d...)
+			if !diags.HasError() {
+				automationAction.Tags = tags
+			}
+		}
+
+		// Create the action policy
+		agentId := ""
+		if !policyActionModel.AgentID.IsNull() {
+			agentId = policyActionModel.AgentID.ValueString()
+		}
+
+		actions[i] = restapi.AutomationActionPolicy{
+			Action:  automationAction,
+			AgentId: agentId,
 		}
 
 		// Set the ID of the first action as the runnable ID
 		if i == 0 {
-			runnable.Id = actionId
+			runnable.Id = automationAction.ID
 		}
 	}
 

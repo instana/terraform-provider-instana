@@ -21,22 +21,7 @@ import (
 // ResourceInstanaAutomationActionFramework the name of the terraform-provider-instana resource to manage automation actions
 const ResourceInstanaAutomationActionFramework = "automation_action"
 
-// AutomationActionModel represents the data model for the automation action resource
-type AutomationActionModel struct {
-	ID             types.String  `tfsdk:"id"`
-	Name           types.String  `tfsdk:"name"`
-	Description    types.String  `tfsdk:"description"`
-	Tags           types.List    `tfsdk:"tags"`
-	Script         *ScriptModel  `tfsdk:"script"`
-	Http           *HttpModel    `tfsdk:"http"`
-	Manual         *ManualModel  `tfsdk:"manual"`
-	Jira           *JiraModel    `tfsdk:"jira"`
-	GitHub         *GitHubModel  `tfsdk:"github"`
-	DocLink        *DocLinkModel `tfsdk:"doc_link"`
-	GitLab         *GitLabModel  `tfsdk:"gitlab"`
-	Ansible        *AnsibleModel `tfsdk:"ansible"`
-	InputParameter types.List    `tfsdk:"input_parameter"`
-}
+// AutomationActionModel is now defined in resource-automation-action-mapping.go
 
 type AnsibleModel struct {
 	WorkflowId       types.String `tfsdk:"workflow_id"`
@@ -555,56 +540,8 @@ func (r *automationActionResourceFramework) UpdateState(ctx context.Context, sta
 func (r *automationActionResourceFramework) mapActionTypeFieldsToState(ctx context.Context, action *restapi.AutomationAction, model *AutomationActionModel) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	switch action.Type {
-	case ActionTypeScript:
-		scriptConfig, d := r.mapScriptFieldsToState(ctx, action)
-		diags.Append(d...)
-		if !diags.HasError() {
-			model.Script = &scriptConfig
-		}
-	case ActionTypeHttp:
-		httpConfig, d := r.mapHttpFieldsToState(ctx, action)
-		diags.Append(d...)
-		if !diags.HasError() {
-			model.Http = &httpConfig
-		}
-	case "MANUAL":
-		manualConfig, d := r.mapManualFieldsToState(ctx, action)
-		diags.Append(d...)
-		if !diags.HasError() {
-			model.Manual = &manualConfig
-		}
-	case "JIRA":
-		jiraConfig, d := r.mapJiraFieldsToState(ctx, action)
-		diags.Append(d...)
-		if !diags.HasError() {
-			model.Jira = &jiraConfig
-		}
-	case "GITHUB":
-		githubConfig, d := r.mapGitHubFieldsToState(ctx, action)
-		diags.Append(d...)
-		if !diags.HasError() {
-			model.GitHub = &githubConfig
-		}
-	case "DOC_LINK":
-		docLinkConfig, d := r.mapDocLinkFieldsToState(ctx, action)
-		diags.Append(d...)
-		if !diags.HasError() {
-			model.DocLink = &docLinkConfig
-		}
-	case "GITLAB":
-		gitlabConfig, d := r.mapGitLabFieldsToState(ctx, action)
-		diags.Append(d...)
-		if !diags.HasError() {
-			model.GitLab = &gitlabConfig
-		}
-	case "ANSIBLE":
-		ansibleConfig, d := r.mapAnsibleFieldsToState(ctx, action)
-		diags.Append(d...)
-		if !diags.HasError() {
-			model.Ansible = &ansibleConfig
-		}
-	}
+	// Use the common mapping function
+	MapActionTypeFieldsToState(ctx, action, model)
 
 	return diags
 }
@@ -1453,7 +1390,7 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 			fields = append(fields, restapi.Field{Name: "body", Description: "github issue body", Value: model.GitHub.Body.ValueString(), Encoding: AsciiEncoding})
 		}
 		if !model.GitHub.Operation.IsNull() {
-			fields = append(fields, restapi.Field{Name: "ticketActionType", Description: "github issue type", Value: model.GitHub.Operation.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: "ticketType", Description: "github issue type", Value: model.GitHub.Operation.ValueString(), Encoding: AsciiEncoding})
 		}
 		if !model.GitHub.Assignees.IsNull() {
 			fields = append(fields, restapi.Field{Name: "assignees", Description: "github issue assignees", Value: model.GitHub.Assignees.ValueString(), Encoding: AsciiEncoding})
