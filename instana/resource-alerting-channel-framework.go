@@ -23,22 +23,93 @@ const ResourceInstanaAlertingChannelFramework = "alerting_channel"
 
 // AlertingChannelModel represents the data model for the alerting channel resource
 type AlertingChannelModel struct {
-	ID                    types.String `tfsdk:"id"`
-	Name                  types.String `tfsdk:"name"`
-	Email                 types.List   `tfsdk:"email"`
-	OpsGenie              types.List   `tfsdk:"ops_genie"`
-	PagerDuty             types.List   `tfsdk:"pager_duty"`
-	Slack                 types.List   `tfsdk:"slack"`
-	Splunk                types.List   `tfsdk:"splunk"`
-	VictorOps             types.List   `tfsdk:"victor_ops"`
-	Webhook               types.List   `tfsdk:"webhook"`
-	Office365             types.List   `tfsdk:"office_365"`
-	GoogleChat            types.List   `tfsdk:"google_chat"`
-	ServiceNow            types.List   `tfsdk:"service_now"`
-	ServiceNowApplication types.List   `tfsdk:"service_now_application"`
-	PrometheusWebhook     types.List   `tfsdk:"prometheus_webhook"`
-	WebexTeamsWebhook     types.List   `tfsdk:"webex_teams_webhook"`
-	WatsonAIOpsWebhook    types.List   `tfsdk:"watson_aiops_webhook"`
+	ID                    types.String                `tfsdk:"id"`
+	Name                  types.String                `tfsdk:"name"`
+	Email                 *EmailModel                 `tfsdk:"email"`
+	OpsGenie              *OpsGenieModel              `tfsdk:"ops_genie"`
+	PagerDuty             *PagerDutyModel             `tfsdk:"pager_duty"`
+	Slack                 *SlackModel                 `tfsdk:"slack"`
+	Splunk                *SplunkModel                `tfsdk:"splunk"`
+	VictorOps             *VictorOpsModel             `tfsdk:"victor_ops"`
+	Webhook               *WebhookModel               `tfsdk:"webhook"`
+	Office365             types.List                  `tfsdk:"office_365"`
+	GoogleChat            types.List                  `tfsdk:"google_chat"`
+	ServiceNow            *ServiceNowModel            `tfsdk:"service_now"`
+	ServiceNowApplication *ServiceNowApplicationModel `tfsdk:"service_now_application"`
+	PrometheusWebhook     *PrometheusWebhookModel     `tfsdk:"prometheus_webhook"`
+	WebexTeamsWebhook     *WebhookModel               `tfsdk:"webex_teams_webhook"`
+	WatsonAIOpsWebhook    *WatsonAIOpsWebhookModel    `tfsdk:"watson_aiops_webhook"`
+}
+
+type PagerDutyModel struct {
+	ServiceIntegrationKey types.String `tfsdk:"service_integration_key"`
+}
+
+type SlackModel struct {
+	WebhookURL types.String `tfsdk:"webhook_url"`
+	IconURL    types.String `tfsdk:"icon_url"`
+	Channel    types.String `tfsdk:"channel"`
+}
+
+type SplunkModel struct {
+	URL   types.String `tfsdk:"url"`
+	Token types.String `tfsdk:"token"`
+}
+
+type VictorOpsModel struct {
+	APIKey     types.String `tfsdk:"api_key"`
+	RoutingKey types.String `tfsdk:"routing_key"`
+}
+
+type WebhookModel struct {
+	WebhookURLs types.Set `tfsdk:"webhook_urls"`
+	HTTPHeaders types.Map `tfsdk:"http_headers"`
+}
+
+type EmailModel struct {
+	Emails types.Set `tfsdk:"emails"`
+}
+
+type OpsGenieModel struct {
+	APIKey types.String `tfsdk:"api_key"`
+	Region types.String `tfsdk:"region"`
+	Tags   types.List   `tfsdk:"tags"`
+}
+type WatsonAIOpsWebhookModel struct {
+	WebhookURL  types.String `tfsdk:"webhook_url"`
+	HTTPHeaders types.List   `tfsdk:"http_headers"`
+}
+
+type PrometheusWebhookModel struct {
+	WebhookURL types.String `tfsdk:"webhook_url"`
+	Receiver   types.String `tfsdk:"receiver"`
+}
+
+type WebhookBasedModel struct {
+	WebhookURL types.String `tfsdk:"webhook_url"`
+}
+
+type ServiceNowApplicationModel struct {
+	ServiceNowURL                  types.String `tfsdk:"service_now_url"`
+	Username                       types.String `tfsdk:"username"`
+	Password                       types.String `tfsdk:"password"`
+	Tenant                         types.String `tfsdk:"tenant"`
+	Unit                           types.String `tfsdk:"unit"`
+	AutoCloseIncidents             types.Bool   `tfsdk:"auto_close_incidents"`
+	InstanaURL                     types.String `tfsdk:"instana_url"`
+	EnableSendInstanaNotes         types.Bool   `tfsdk:"enable_send_instana_notes"`
+	EnableSendServiceNowActivities types.Bool   `tfsdk:"enable_send_service_now_activities"`
+	EnableSendServiceNowWorkNotes  types.Bool   `tfsdk:"enable_send_service_now_work_notes"`
+	ManuallyClosedIncidents        types.Bool   `tfsdk:"manually_closed_incidents"`
+	ResolutionOfIncident           types.Bool   `tfsdk:"resolution_of_incident"`
+	SnowStatusOnCloseEvent         types.Int64  `tfsdk:"snow_status_on_close_event"`
+}
+
+type ServiceNowModel struct {
+	ServiceNowURL      types.String `tfsdk:"service_now_url"`
+	Username           types.String `tfsdk:"username"`
+	Password           types.String `tfsdk:"password"`
+	AutoCloseIncidents types.Bool   `tfsdk:"auto_close_incidents"`
 }
 
 // NewAlertingChannelResourceHandleFramework creates the resource handle for Alerting Channels
@@ -1138,19 +1209,14 @@ func (r *alertingChannelResourceFramework) mapEmailChannelFromState(ctx context.
 		return nil, diags
 	}
 
-	// Extract emails set from object
-	var emailObj struct {
-		Emails types.Set `tfsdk:"emails"`
-	}
-
-	diags.Append(emailElements[0].As(ctx, &emailObj, basetypes.ObjectAsOptions{})...)
+	diags.Append(emailElements[0].As(ctx, &EmailModel, basetypes.ObjectAsOptions{})...)
 	if diags.HasError() {
 		return nil, diags
 	}
 
 	// Convert emails set to string slice
 	var emails []string
-	diags.Append(emailObj.Emails.ElementsAs(ctx, &emails, false)...)
+	diags.Append(EmailModel.Emails.ElementsAs(ctx, &emails, false)...)
 	if diags.HasError() {
 		return nil, diags
 	}
@@ -1179,21 +1245,14 @@ func (r *alertingChannelResourceFramework) mapOpsGenieChannelFromState(ctx conte
 		return nil, diags
 	}
 
-	// Extract fields from object
-	var opsGenieObj struct {
-		APIKey types.String `tfsdk:"api_key"`
-		Region types.String `tfsdk:"region"`
-		Tags   types.List   `tfsdk:"tags"`
-	}
-
-	diags.Append(opsGenieElements[0].As(ctx, &opsGenieObj, basetypes.ObjectAsOptions{})...)
+	diags.Append(opsGenieElements[0].As(ctx, &OpsGenieModel, basetypes.ObjectAsOptions{})...)
 	if diags.HasError() {
 		return nil, diags
 	}
 
 	// Convert tags list to string slice
 	var tags []string
-	diags.Append(opsGenieObj.Tags.ElementsAs(ctx, &tags, false)...)
+	diags.Append(OpsGenieModel.Tags.ElementsAs(ctx, &tags, false)...)
 	if diags.HasError() {
 		return nil, diags
 	}
@@ -1202,8 +1261,8 @@ func (r *alertingChannelResourceFramework) mapOpsGenieChannelFromState(ctx conte
 	tagsString := strings.Join(tags, ",")
 
 	// Create alerting channel
-	apiKeyValue := opsGenieObj.APIKey.ValueString()
-	regionValue := opsGenieObj.Region.ValueString()
+	apiKeyValue := OpsGenieModel.APIKey.ValueString()
+	regionValue := OpsGenieModel.Region.ValueString()
 
 	return &restapi.AlertingChannel{
 		ID:     id,
@@ -1230,18 +1289,13 @@ func (r *alertingChannelResourceFramework) mapPagerDutyChannelFromState(ctx cont
 		return nil, diags
 	}
 
-	// Extract service integration key from object
-	var pagerDutyObj struct {
-		ServiceIntegrationKey types.String `tfsdk:"service_integration_key"`
-	}
-
-	diags.Append(pagerDutyElements[0].As(ctx, &pagerDutyObj, basetypes.ObjectAsOptions{})...)
+	diags.Append(pagerDutyElements[0].As(ctx, &PagerDutyModel, basetypes.ObjectAsOptions{})...)
 	if diags.HasError() {
 		return nil, diags
 	}
 
 	// Create alerting channel
-	serviceIntegrationKeyValue := pagerDutyObj.ServiceIntegrationKey.ValueString()
+	serviceIntegrationKeyValue := PagerDutyModel.ServiceIntegrationKey.ValueString()
 
 	return &restapi.AlertingChannel{
 		ID:                    id,
@@ -1266,20 +1320,13 @@ func (r *alertingChannelResourceFramework) mapSlackChannelFromState(ctx context.
 		return nil, diags
 	}
 
-	// Extract fields from object
-	var slackObj struct {
-		WebhookURL types.String `tfsdk:"webhook_url"`
-		IconURL    types.String `tfsdk:"icon_url"`
-		Channel    types.String `tfsdk:"channel"`
-	}
-
-	diags.Append(slackElements[0].As(ctx, &slackObj, basetypes.ObjectAsOptions{})...)
+	diags.Append(slackElements[0].As(ctx, &SlackModel, basetypes.ObjectAsOptions{})...)
 	if diags.HasError() {
 		return nil, diags
 	}
 
 	// Create alerting channel
-	webhookURLValue := slackObj.WebhookURL.ValueString()
+	webhookURLValue := SlackModel.WebhookURL.ValueString()
 
 	result := &restapi.AlertingChannel{
 		ID:         id,
@@ -1289,13 +1336,13 @@ func (r *alertingChannelResourceFramework) mapSlackChannelFromState(ctx context.
 	}
 
 	// Add optional fields if present
-	if !slackObj.IconURL.IsNull() {
-		iconURLValue := slackObj.IconURL.ValueString()
+	if !SlackModel.IconURL.IsNull() {
+		iconURLValue := SlackModel.IconURL.ValueString()
 		result.IconURL = &iconURLValue
 	}
 
-	if !slackObj.Channel.IsNull() {
-		channelValue := slackObj.Channel.ValueString()
+	if !SlackModel.Channel.IsNull() {
+		channelValue := SlackModel.Channel.ValueString()
 		result.Channel = &channelValue
 	}
 
@@ -1317,20 +1364,14 @@ func (r *alertingChannelResourceFramework) mapSplunkChannelFromState(ctx context
 		return nil, diags
 	}
 
-	// Extract fields from object
-	var splunkObj struct {
-		URL   types.String `tfsdk:"url"`
-		Token types.String `tfsdk:"token"`
-	}
-
-	diags.Append(splunkElements[0].As(ctx, &splunkObj, basetypes.ObjectAsOptions{})...)
+	diags.Append(splunkElements[0].As(ctx, &SplunkModel, basetypes.ObjectAsOptions{})...)
 	if diags.HasError() {
 		return nil, diags
 	}
 
 	// Create alerting channel
-	urlValue := splunkObj.URL.ValueString()
-	tokenValue := splunkObj.Token.ValueString()
+	urlValue := SplunkModel.URL.ValueString()
+	tokenValue := SplunkModel.Token.ValueString()
 
 	return &restapi.AlertingChannel{
 		ID:    id,
@@ -1356,20 +1397,14 @@ func (r *alertingChannelResourceFramework) mapVictorOpsChannelFromState(ctx cont
 		return nil, diags
 	}
 
-	// Extract fields from object
-	var victorOpsObj struct {
-		APIKey     types.String `tfsdk:"api_key"`
-		RoutingKey types.String `tfsdk:"routing_key"`
-	}
-
-	diags.Append(victorOpsElements[0].As(ctx, &victorOpsObj, basetypes.ObjectAsOptions{})...)
+	diags.Append(victorOpsElements[0].As(ctx, &VictorOpsModel, basetypes.ObjectAsOptions{})...)
 	if diags.HasError() {
 		return nil, diags
 	}
 
 	// Create alerting channel
-	apiKeyValue := victorOpsObj.APIKey.ValueString()
-	routingKeyValue := victorOpsObj.RoutingKey.ValueString()
+	apiKeyValue := VictorOpsModel.APIKey.ValueString()
+	routingKeyValue := VictorOpsModel.RoutingKey.ValueString()
 
 	return &restapi.AlertingChannel{
 		ID:         id,
@@ -1395,20 +1430,14 @@ func (r *alertingChannelResourceFramework) mapWebhookChannelFromState(ctx contex
 		return nil, diags
 	}
 
-	// Extract fields from object
-	var webhookObj struct {
-		WebhookURLs types.Set `tfsdk:"webhook_urls"`
-		HTTPHeaders types.Map `tfsdk:"http_headers"`
-	}
-
-	diags.Append(webhookElements[0].As(ctx, &webhookObj, basetypes.ObjectAsOptions{})...)
+	diags.Append(webhookElements[0].As(ctx, &WebhookModel, basetypes.ObjectAsOptions{})...)
 	if diags.HasError() {
 		return nil, diags
 	}
 
 	// Convert webhook URLs set to string slice
 	var webhookURLs []string
-	diags.Append(webhookObj.WebhookURLs.ElementsAs(ctx, &webhookURLs, false)...)
+	diags.Append(WebhookModel.WebhookURLs.ElementsAs(ctx, &webhookURLs, false)...)
 	if diags.HasError() {
 		return nil, diags
 	}
@@ -1422,9 +1451,9 @@ func (r *alertingChannelResourceFramework) mapWebhookChannelFromState(ctx contex
 	}
 
 	// Add HTTP headers if present
-	if !webhookObj.HTTPHeaders.IsNull() && !webhookObj.HTTPHeaders.IsUnknown() {
+	if !WebhookModel.HTTPHeaders.IsNull() && !WebhookModel.HTTPHeaders.IsUnknown() {
 		var httpHeaders map[string]string
-		diags.Append(webhookObj.HTTPHeaders.ElementsAs(ctx, &httpHeaders, false)...)
+		diags.Append(WebhookModel.HTTPHeaders.ElementsAs(ctx, &httpHeaders, false)...)
 		if diags.HasError() {
 			return nil, diags
 		}
@@ -1456,18 +1485,13 @@ func (r *alertingChannelResourceFramework) mapWebhookBasedChannelFromState(ctx c
 		return nil, diags
 	}
 
-	// Extract webhook URL from object
-	var webhookBasedObj struct {
-		WebhookURL types.String `tfsdk:"webhook_url"`
-	}
-
-	diags.Append(webhookBasedElements[0].As(ctx, &webhookBasedObj, basetypes.ObjectAsOptions{})...)
+	diags.Append(webhookBasedElements[0].As(ctx, &WebhookBasedModel, basetypes.ObjectAsOptions{})...)
 	if diags.HasError() {
 		return nil, diags
 	}
 
 	// Create alerting channel
-	webhookURLValue := webhookBasedObj.WebhookURL.ValueString()
+	webhookURLValue := WebhookBasedModel.WebhookURL.ValueString()
 
 	return &restapi.AlertingChannel{
 		ID:         id,
@@ -1491,26 +1515,19 @@ func (r *alertingChannelResourceFramework) mapServiceNowChannelFromState(ctx con
 		return nil, diags
 	}
 
-	var serviceNowObj struct {
-		ServiceNowURL      types.String `tfsdk:"service_now_url"`
-		Username           types.String `tfsdk:"username"`
-		Password           types.String `tfsdk:"password"`
-		AutoCloseIncidents types.Bool   `tfsdk:"auto_close_incidents"`
-	}
-
-	diags.Append(serviceNowElements[0].As(ctx, &serviceNowObj, basetypes.ObjectAsOptions{})...)
+	diags.Append(serviceNowElements[0].As(ctx, &ServiceNowModel, basetypes.ObjectAsOptions{})...)
 	if diags.HasError() {
 		return nil, diags
 	}
 
-	if serviceNowObj.Password.IsNull() || serviceNowObj.Password.IsUnknown() {
+	if ServiceNowModel.Password.IsNull() || ServiceNowModel.Password.IsUnknown() {
 		diags.AddError("Missing Password", "password must be specified when creating the resource")
 		return nil, diags
 	}
 
-	serviceNowURLValue := serviceNowObj.ServiceNowURL.ValueString()
-	usernameValue := serviceNowObj.Username.ValueString()
-	passwordValue := serviceNowObj.Password.ValueString()
+	serviceNowURLValue := ServiceNowModel.ServiceNowURL.ValueString()
+	usernameValue := ServiceNowModel.Username.ValueString()
+	passwordValue := ServiceNowModel.Password.ValueString()
 
 	result := &restapi.AlertingChannel{
 		ID:            id,
@@ -1521,8 +1538,8 @@ func (r *alertingChannelResourceFramework) mapServiceNowChannelFromState(ctx con
 		Password:      &passwordValue,
 	}
 
-	if !serviceNowObj.AutoCloseIncidents.IsNull() {
-		autoCloseValue := serviceNowObj.AutoCloseIncidents.ValueBool()
+	if !ServiceNowModel.AutoCloseIncidents.IsNull() {
+		autoCloseValue := ServiceNowModel.AutoCloseIncidents.ValueBool()
 		result.AutoCloseIncidents = &autoCloseValue
 	}
 
@@ -1543,37 +1560,21 @@ func (r *alertingChannelResourceFramework) mapServiceNowApplicationChannelFromSt
 		return nil, diags
 	}
 
-	var serviceNowEnhancedObj struct {
-		ServiceNowURL                  types.String `tfsdk:"service_now_url"`
-		Username                       types.String `tfsdk:"username"`
-		Password                       types.String `tfsdk:"password"`
-		Tenant                         types.String `tfsdk:"tenant"`
-		Unit                           types.String `tfsdk:"unit"`
-		AutoCloseIncidents             types.Bool   `tfsdk:"auto_close_incidents"`
-		InstanaURL                     types.String `tfsdk:"instana_url"`
-		EnableSendInstanaNotes         types.Bool   `tfsdk:"enable_send_instana_notes"`
-		EnableSendServiceNowActivities types.Bool   `tfsdk:"enable_send_service_now_activities"`
-		EnableSendServiceNowWorkNotes  types.Bool   `tfsdk:"enable_send_service_now_work_notes"`
-		ManuallyClosedIncidents        types.Bool   `tfsdk:"manually_closed_incidents"`
-		ResolutionOfIncident           types.Bool   `tfsdk:"resolution_of_incident"`
-		SnowStatusOnCloseEvent         types.Int64  `tfsdk:"snow_status_on_close_event"`
-	}
-
-	diags.Append(serviceNowEnhancedElements[0].As(ctx, &serviceNowEnhancedObj, basetypes.ObjectAsOptions{})...)
+	diags.Append(serviceNowEnhancedElements[0].As(ctx, &ServiceNowApplicationModel, basetypes.ObjectAsOptions{})...)
 	if diags.HasError() {
 		return nil, diags
 	}
 
-	if serviceNowEnhancedObj.Password.IsNull() || serviceNowEnhancedObj.Password.IsUnknown() {
+	if ServiceNowApplicationModel.Password.IsNull() || ServiceNowApplicationModel.Password.IsUnknown() {
 		diags.AddError("Missing Password", "password must be specified when creating the resource")
 		return nil, diags
 	}
 
-	serviceNowURLValue := serviceNowEnhancedObj.ServiceNowURL.ValueString()
-	usernameValue := serviceNowEnhancedObj.Username.ValueString()
-	passwordValue := serviceNowEnhancedObj.Password.ValueString()
-	tenantValue := serviceNowEnhancedObj.Tenant.ValueString()
-	unitValue := serviceNowEnhancedObj.Unit.ValueString()
+	serviceNowURLValue := ServiceNowApplicationModel.ServiceNowURL.ValueString()
+	usernameValue := ServiceNowApplicationModel.Username.ValueString()
+	passwordValue := ServiceNowApplicationModel.Password.ValueString()
+	tenantValue := ServiceNowApplicationModel.Tenant.ValueString()
+	unitValue := ServiceNowApplicationModel.Unit.ValueString()
 
 	result := &restapi.AlertingChannel{
 		ID:            id,
@@ -1587,43 +1588,43 @@ func (r *alertingChannelResourceFramework) mapServiceNowApplicationChannelFromSt
 	}
 
 	// Add optional fields
-	if !serviceNowEnhancedObj.AutoCloseIncidents.IsNull() {
-		autoCloseValue := serviceNowEnhancedObj.AutoCloseIncidents.ValueBool()
+	if !ServiceNowApplicationModel.AutoCloseIncidents.IsNull() {
+		autoCloseValue := ServiceNowApplicationModel.AutoCloseIncidents.ValueBool()
 		result.AutoCloseIncidents = &autoCloseValue
 	}
 
-	if !serviceNowEnhancedObj.InstanaURL.IsNull() {
-		instanaURLValue := serviceNowEnhancedObj.InstanaURL.ValueString()
+	if !ServiceNowApplicationModel.InstanaURL.IsNull() {
+		instanaURLValue := ServiceNowApplicationModel.InstanaURL.ValueString()
 		result.InstanaURL = &instanaURLValue
 	}
 
-	if !serviceNowEnhancedObj.EnableSendInstanaNotes.IsNull() {
-		enableSendInstanaNotesValue := serviceNowEnhancedObj.EnableSendInstanaNotes.ValueBool()
+	if !ServiceNowApplicationModel.EnableSendInstanaNotes.IsNull() {
+		enableSendInstanaNotesValue := ServiceNowApplicationModel.EnableSendInstanaNotes.ValueBool()
 		result.EnableSendInstanaNotes = &enableSendInstanaNotesValue
 	}
 
-	if !serviceNowEnhancedObj.EnableSendServiceNowActivities.IsNull() {
-		enableSendServiceNowActivitiesValue := serviceNowEnhancedObj.EnableSendServiceNowActivities.ValueBool()
+	if !ServiceNowApplicationModel.EnableSendServiceNowActivities.IsNull() {
+		enableSendServiceNowActivitiesValue := ServiceNowApplicationModel.EnableSendServiceNowActivities.ValueBool()
 		result.EnableSendServiceNowActivities = &enableSendServiceNowActivitiesValue
 	}
 
-	if !serviceNowEnhancedObj.EnableSendServiceNowWorkNotes.IsNull() {
-		enableSendServiceNowWorkNotesValue := serviceNowEnhancedObj.EnableSendServiceNowWorkNotes.ValueBool()
+	if !ServiceNowApplicationModel.EnableSendServiceNowWorkNotes.IsNull() {
+		enableSendServiceNowWorkNotesValue := ServiceNowApplicationModel.EnableSendServiceNowWorkNotes.ValueBool()
 		result.EnableSendServiceNowWorkNotes = &enableSendServiceNowWorkNotesValue
 	}
 
-	if !serviceNowEnhancedObj.ManuallyClosedIncidents.IsNull() {
-		manuallyClosedIncidentsValue := serviceNowEnhancedObj.ManuallyClosedIncidents.ValueBool()
+	if !ServiceNowApplicationModel.ManuallyClosedIncidents.IsNull() {
+		manuallyClosedIncidentsValue := ServiceNowApplicationModel.ManuallyClosedIncidents.ValueBool()
 		result.ManuallyClosedIncidents = &manuallyClosedIncidentsValue
 	}
 
-	if !serviceNowEnhancedObj.ResolutionOfIncident.IsNull() {
-		resolutionOfIncidentValue := serviceNowEnhancedObj.ResolutionOfIncident.ValueBool()
+	if !ServiceNowApplicationModel.ResolutionOfIncident.IsNull() {
+		resolutionOfIncidentValue := ServiceNowApplicationModel.ResolutionOfIncident.ValueBool()
 		result.ResolutionOfIncident = &resolutionOfIncidentValue
 	}
 
-	if !serviceNowEnhancedObj.SnowStatusOnCloseEvent.IsNull() {
-		snowStatusValue := int(serviceNowEnhancedObj.SnowStatusOnCloseEvent.ValueInt64())
+	if !ServiceNowApplicationModel.SnowStatusOnCloseEvent.IsNull() {
+		snowStatusValue := int(ServiceNowApplicationModel.SnowStatusOnCloseEvent.ValueInt64())
 		result.SnowStatusOnCloseEvent = &snowStatusValue
 	}
 
@@ -1644,17 +1645,12 @@ func (r *alertingChannelResourceFramework) mapPrometheusWebhookChannelFromState(
 		return nil, diags
 	}
 
-	var prometheusWebhookObj struct {
-		WebhookURL types.String `tfsdk:"webhook_url"`
-		Receiver   types.String `tfsdk:"receiver"`
-	}
-
-	diags.Append(prometheusWebhookElements[0].As(ctx, &prometheusWebhookObj, basetypes.ObjectAsOptions{})...)
+	diags.Append(prometheusWebhookElements[0].As(ctx, &PrometheusWebhookModel, basetypes.ObjectAsOptions{})...)
 	if diags.HasError() {
 		return nil, diags
 	}
 
-	webhookURLValue := prometheusWebhookObj.WebhookURL.ValueString()
+	webhookURLValue := PrometheusWebhookModel.WebhookURL.ValueString()
 
 	result := &restapi.AlertingChannel{
 		ID:         id,
@@ -1663,8 +1659,8 @@ func (r *alertingChannelResourceFramework) mapPrometheusWebhookChannelFromState(
 		WebhookURL: &webhookURLValue,
 	}
 
-	if !prometheusWebhookObj.Receiver.IsNull() {
-		receiverValue := prometheusWebhookObj.Receiver.ValueString()
+	if !PrometheusWebhookModel.Receiver.IsNull() {
+		receiverValue := PrometheusWebhookModel.Receiver.ValueString()
 		result.Receiver = &receiverValue
 	}
 
@@ -1685,17 +1681,12 @@ func (r *alertingChannelResourceFramework) mapWatsonAIOpsWebhookChannelFromState
 		return nil, diags
 	}
 
-	var watsonAIOpsWebhookObj struct {
-		WebhookURL  types.String `tfsdk:"webhook_url"`
-		HTTPHeaders types.List   `tfsdk:"http_headers"`
-	}
-
-	diags.Append(watsonAIOpsWebhookElements[0].As(ctx, &watsonAIOpsWebhookObj, basetypes.ObjectAsOptions{})...)
+	diags.Append(watsonAIOpsWebhookElements[0].As(ctx, &WatsonAIOpsWebhookModel, basetypes.ObjectAsOptions{})...)
 	if diags.HasError() {
 		return nil, diags
 	}
 
-	webhookURLValue := watsonAIOpsWebhookObj.WebhookURL.ValueString()
+	webhookURLValue := WatsonAIOpsWebhookModel.WebhookURL.ValueString()
 
 	result := &restapi.AlertingChannel{
 		ID:         id,
@@ -1705,9 +1696,9 @@ func (r *alertingChannelResourceFramework) mapWatsonAIOpsWebhookChannelFromState
 	}
 
 	// Add headers if present
-	if !watsonAIOpsWebhookObj.HTTPHeaders.IsNull() && !watsonAIOpsWebhookObj.HTTPHeaders.IsUnknown() {
+	if !WatsonAIOpsWebhookModel.HTTPHeaders.IsNull() && !WatsonAIOpsWebhookModel.HTTPHeaders.IsUnknown() {
 		var headers []string
-		diags.Append(watsonAIOpsWebhookObj.HTTPHeaders.ElementsAs(ctx, &headers, false)...)
+		diags.Append(WatsonAIOpsWebhookModel.HTTPHeaders.ElementsAs(ctx, &headers, false)...)
 		if diags.HasError() {
 			return nil, diags
 		}
