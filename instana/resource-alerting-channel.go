@@ -2,9 +2,10 @@ package instana
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/gessnerfl/terraform-provider-instana/tfutils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"strings"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -72,6 +73,49 @@ const (
 	AlertingChannelFieldChannelGoogleChat = "google_chat"
 	//AlertingChannelWebhookBasedFieldWebhookURL const for the webhookUrl field of the alerting channel
 	AlertingChannelWebhookBasedFieldWebhookURL = "webhook_url"
+
+	//AlertingChannelFieldChannelServiceNow const for schema field of the ServiceNow channel
+	AlertingChannelFieldChannelServiceNow = "service_now"
+	//AlertingChannelServiceNowFieldServiceNowURL const for the serviceNowUrl field of the ServiceNow alerting channel
+	AlertingChannelServiceNowFieldServiceNowURL = "service_now_url"
+	//AlertingChannelServiceNowFieldUsername const for the username field of the ServiceNow alerting channel
+	AlertingChannelServiceNowFieldUsername = "username"
+	//AlertingChannelServiceNowFieldPassword const for the password field of the ServiceNow alerting channel
+	AlertingChannelServiceNowFieldPassword = "password"
+	//AlertingChannelServiceNowFieldAutoCloseIncidents const for the autoCloseIncidents field of the ServiceNow alerting channel
+	AlertingChannelServiceNowFieldAutoCloseIncidents = "auto_close_incidents"
+
+	//AlertingChannelFieldChannelServiceNowApplication const for schema field of the ServiceNow Enhanced (ITSM) channel
+	AlertingChannelFieldChannelServiceNowApplication = "service_now_application"
+	//AlertingChannelServiceNowApplicationFieldTenant const for the tenant field of the ServiceNow Enhanced alerting channel
+	AlertingChannelServiceNowApplicationFieldTenant = "tenant"
+	//AlertingChannelServiceNowApplicationFieldUnit const for the unit field of the ServiceNow Enhanced alerting channel
+	AlertingChannelServiceNowApplicationFieldUnit = "unit"
+	//AlertingChannelServiceNowApplicationFieldInstanaURL const for the instanaUrl field of the ServiceNow Enhanced alerting channel
+	AlertingChannelServiceNowApplicationFieldInstanaURL = "instana_url"
+	//AlertingChannelServiceNowApplicationFieldEnableSendInstanaNotes const for the enableSendInstanaNotes field
+	AlertingChannelServiceNowApplicationFieldEnableSendInstanaNotes = "enable_send_instana_notes"
+	//AlertingChannelServiceNowApplicationFieldEnableSendServiceNowActivities const for the enableSendServiceNowActivities field
+	AlertingChannelServiceNowApplicationFieldEnableSendServiceNowActivities = "enable_send_service_now_activities"
+	//AlertingChannelServiceNowApplicationFieldEnableSendServiceNowWorkNotes const for the enableSendServiceNowWorkNotes field
+	AlertingChannelServiceNowApplicationFieldEnableSendServiceNowWorkNotes = "enable_send_service_now_work_notes"
+	//AlertingChannelServiceNowApplicationFieldManuallyClosedIncidents const for the manuallyClosedIncidents field
+	AlertingChannelServiceNowApplicationFieldManuallyClosedIncidents = "manually_closed_incidents"
+	//AlertingChannelServiceNowApplicationFieldResolutionOfIncident const for the resolutionOfIncident field
+	AlertingChannelServiceNowApplicationFieldResolutionOfIncident = "resolution_of_incident"
+	//AlertingChannelServiceNowApplicationFieldSnowStatusOnCloseEvent const for the snowStatusOnCloseEvent field
+	AlertingChannelServiceNowApplicationFieldSnowStatusOnCloseEvent = "snow_status_on_close_event"
+
+	//AlertingChannelFieldChannelPrometheusWebhook const for schema field of the Prometheus Webhook channel
+	AlertingChannelFieldChannelPrometheusWebhook = "prometheus_webhook"
+	//AlertingChannelPrometheusWebhookFieldReceiver const for the receiver field of the Prometheus Webhook alerting channel
+	AlertingChannelPrometheusWebhookFieldReceiver = "receiver"
+
+	//AlertingChannelFieldChannelWebexTeamsWebhook const for schema field of the Webex Teams Webhook channel
+	AlertingChannelFieldChannelWebexTeamsWebhook = "webex_teams_webhook"
+
+	//AlertingChannelFieldChannelWatsonAIOpsWebhook const for schema field of the Watson AIOps Webhook channel
+	AlertingChannelFieldChannelWatsonAIOpsWebhook = "watson_aiops_webhook"
 )
 
 var AlertingChannelTypeFields = []string{
@@ -84,6 +128,11 @@ var AlertingChannelTypeFields = []string{
 	AlertingChannelFieldChannelWebhook,
 	AlertingChannelFieldChannelOffice365,
 	AlertingChannelFieldChannelGoogleChat,
+	AlertingChannelFieldChannelServiceNow,
+	AlertingChannelFieldChannelServiceNowApplication,
+	AlertingChannelFieldChannelPrometheusWebhook,
+	AlertingChannelFieldChannelWebexTeamsWebhook,
+	AlertingChannelFieldChannelWatsonAIOpsWebhook,
 }
 
 // NewAlertingChannelResourceHandle creates the resource handle for Alerting Channels
