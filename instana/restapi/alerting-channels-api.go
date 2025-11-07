@@ -21,6 +21,23 @@ type AlertingChannel struct {
 	Token                 *string             `json:"token"`
 	WebhookURLs           []string            `json:"webhookUrls"`
 	Headers               []string            `json:"headers"`
+	// ServiceNow fields
+	ServiceNowURL      *string `json:"serviceNowUrl"`
+	Username           *string `json:"username"`
+	Password           *string `json:"password"`
+	AutoCloseIncidents *bool   `json:"autoCloseIncidents"`
+	// ServiceNow Enhanced (ITSM) fields
+	Tenant                         *string `json:"tenant"`
+	Unit                           *string `json:"unit"`
+	InstanaURL                     *string `json:"instanaUrl"`
+	EnableSendInstanaNotes         *bool   `json:"enableSendInstanaNotes"`
+	EnableSendServiceNowActivities *bool   `json:"enableSendServiceNowActivities"`
+	EnableSendServiceNowWorkNotes  *bool   `json:"enableSendServiceNowWorkNotes"`
+	ManuallyClosedIncidents        *bool   `json:"manuallyClosedIncidents"`
+	ResolutionOfIncident           *bool   `json:"resolutionOfIncident"`
+	SnowStatusOnCloseEvent         *int    `json:"snowStatusOnCloseEvent"`
+	// Prometheus Webhook fields
+	Receiver *string `json:"receiver"`
 }
 
 // GetIDForResourcePath implementation of the interface InstanaDataObject

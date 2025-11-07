@@ -23,17 +23,22 @@ const ResourceInstanaAlertingChannelFramework = "alerting_channel"
 
 // AlertingChannelModel represents the data model for the alerting channel resource
 type AlertingChannelModel struct {
-	ID         types.String `tfsdk:"id"`
-	Name       types.String `tfsdk:"name"`
-	Email      types.List   `tfsdk:"email"`
-	OpsGenie   types.List   `tfsdk:"ops_genie"`
-	PagerDuty  types.List   `tfsdk:"pager_duty"`
-	Slack      types.List   `tfsdk:"slack"`
-	Splunk     types.List   `tfsdk:"splunk"`
-	VictorOps  types.List   `tfsdk:"victor_ops"`
-	Webhook    types.List   `tfsdk:"webhook"`
-	Office365  types.List   `tfsdk:"office_365"`
-	GoogleChat types.List   `tfsdk:"google_chat"`
+	ID                    types.String `tfsdk:"id"`
+	Name                  types.String `tfsdk:"name"`
+	Email                 types.List   `tfsdk:"email"`
+	OpsGenie              types.List   `tfsdk:"ops_genie"`
+	PagerDuty             types.List   `tfsdk:"pager_duty"`
+	Slack                 types.List   `tfsdk:"slack"`
+	Splunk                types.List   `tfsdk:"splunk"`
+	VictorOps             types.List   `tfsdk:"victor_ops"`
+	Webhook               types.List   `tfsdk:"webhook"`
+	Office365             types.List   `tfsdk:"office_365"`
+	GoogleChat            types.List   `tfsdk:"google_chat"`
+	ServiceNow            types.List   `tfsdk:"service_now"`
+	ServiceNowApplication types.List   `tfsdk:"service_now_application"`
+	PrometheusWebhook     types.List   `tfsdk:"prometheus_webhook"`
+	WebexTeamsWebhook     types.List   `tfsdk:"webex_teams_webhook"`
+	WatsonAIOpsWebhook    types.List   `tfsdk:"watson_aiops_webhook"`
 }
 
 // NewAlertingChannelResourceHandleFramework creates the resource handle for Alerting Channels
@@ -192,6 +197,140 @@ func NewAlertingChannelResourceHandleFramework() ResourceHandleFramework[*restap
 							},
 						},
 					},
+					AlertingChannelFieldChannelServiceNow: schema.ListNestedBlock{
+						Description: "The configuration of the ServiceNow channel",
+						NestedObject: schema.NestedBlockObject{
+							Attributes: map[string]schema.Attribute{
+								AlertingChannelServiceNowFieldServiceNowURL: schema.StringAttribute{
+									Required:    true,
+									Description: "The ServiceNow URL of the ServiceNow alerting channel",
+								},
+								AlertingChannelServiceNowFieldUsername: schema.StringAttribute{
+									Required:    true,
+									Description: "The username of the ServiceNow alerting channel",
+								},
+								AlertingChannelServiceNowFieldPassword: schema.StringAttribute{
+									Optional:    true,
+									Sensitive:   true,
+									Description: "The password of the ServiceNow alerting channel",
+									PlanModifiers: []planmodifier.String{
+										// When the plan does not include the password, keep the value from state.
+										stringplanmodifier.UseStateForUnknown(),
+									},
+								},
+								AlertingChannelServiceNowFieldAutoCloseIncidents: schema.BoolAttribute{
+									Optional:    true,
+									Description: "Whether to automatically close incidents in ServiceNow",
+								},
+							},
+						},
+					},
+					AlertingChannelFieldChannelServiceNowApplication: schema.ListNestedBlock{
+						Description: "The configuration of the ServiceNow Enhanced (ITSM) channel",
+						NestedObject: schema.NestedBlockObject{
+							Attributes: map[string]schema.Attribute{
+								AlertingChannelServiceNowFieldServiceNowURL: schema.StringAttribute{
+									Required:    true,
+									Description: "The ServiceNow URL of the ServiceNow Enhanced alerting channel",
+								},
+								AlertingChannelServiceNowFieldUsername: schema.StringAttribute{
+									Required:    true,
+									Description: "The username of the ServiceNow Enhanced alerting channel",
+								},
+								AlertingChannelServiceNowFieldPassword: schema.StringAttribute{
+									Optional:    true,
+									Sensitive:   true,
+									Description: "The password of the ServiceNow Enhanced alerting channel",
+									PlanModifiers: []planmodifier.String{
+										// When the plan does not include the password, keep the value from state.
+										stringplanmodifier.UseStateForUnknown(),
+									},
+								},
+								AlertingChannelServiceNowApplicationFieldTenant: schema.StringAttribute{
+									Required:    true,
+									Description: "The tenant of the ServiceNow Enhanced alerting channel",
+								},
+								AlertingChannelServiceNowApplicationFieldUnit: schema.StringAttribute{
+									Required:    true,
+									Description: "The unit of the ServiceNow Enhanced alerting channel",
+								},
+								AlertingChannelServiceNowFieldAutoCloseIncidents: schema.BoolAttribute{
+									Optional:    true,
+									Description: "Whether to automatically close incidents in ServiceNow",
+								},
+								AlertingChannelServiceNowApplicationFieldInstanaURL: schema.StringAttribute{
+									Optional:    true,
+									Description: "The Instana URL for the ServiceNow Enhanced alerting channel",
+								},
+								AlertingChannelServiceNowApplicationFieldEnableSendInstanaNotes: schema.BoolAttribute{
+									Optional:    true,
+									Description: "Whether to send Instana notes to ServiceNow",
+								},
+								AlertingChannelServiceNowApplicationFieldEnableSendServiceNowActivities: schema.BoolAttribute{
+									Optional:    true,
+									Description: "Whether to send ServiceNow activities",
+								},
+								AlertingChannelServiceNowApplicationFieldEnableSendServiceNowWorkNotes: schema.BoolAttribute{
+									Optional:    true,
+									Description: "Whether to send ServiceNow work notes",
+								},
+								AlertingChannelServiceNowApplicationFieldManuallyClosedIncidents: schema.BoolAttribute{
+									Optional:    true,
+									Description: "Whether incidents are manually closed",
+								},
+								AlertingChannelServiceNowApplicationFieldResolutionOfIncident: schema.BoolAttribute{
+									Optional:    true,
+									Description: "Whether to resolve incidents",
+								},
+								AlertingChannelServiceNowApplicationFieldSnowStatusOnCloseEvent: schema.Int64Attribute{
+									Optional:    true,
+									Description: "The ServiceNow status code when closing events",
+								},
+							},
+						},
+					},
+					AlertingChannelFieldChannelPrometheusWebhook: schema.ListNestedBlock{
+						Description: "The configuration of the Prometheus Webhook channel",
+						NestedObject: schema.NestedBlockObject{
+							Attributes: map[string]schema.Attribute{
+								AlertingChannelWebhookBasedFieldWebhookURL: schema.StringAttribute{
+									Required:    true,
+									Description: "The webhook URL of the Prometheus Webhook alerting channel",
+								},
+								AlertingChannelPrometheusWebhookFieldReceiver: schema.StringAttribute{
+									Optional:    true,
+									Description: "The receiver of the Prometheus Webhook alerting channel",
+								},
+							},
+						},
+					},
+					AlertingChannelFieldChannelWebexTeamsWebhook: schema.ListNestedBlock{
+						Description: "The configuration of the Webex Teams Webhook channel",
+						NestedObject: schema.NestedBlockObject{
+							Attributes: map[string]schema.Attribute{
+								AlertingChannelWebhookBasedFieldWebhookURL: schema.StringAttribute{
+									Required:    true,
+									Description: "The webhook URL of the Webex Teams Webhook alerting channel",
+								},
+							},
+						},
+					},
+					AlertingChannelFieldChannelWatsonAIOpsWebhook: schema.ListNestedBlock{
+						Description: "The configuration of the Watson AIOps Webhook channel",
+						NestedObject: schema.NestedBlockObject{
+							Attributes: map[string]schema.Attribute{
+								AlertingChannelWebhookBasedFieldWebhookURL: schema.StringAttribute{
+									Required:    true,
+									Description: "The webhook URL of the Watson AIOps Webhook alerting channel",
+								},
+								AlertingChannelWebhookFieldHTTPHeaders: schema.ListAttribute{
+									Optional:    true,
+									Description: "The list of HTTP headers for the Watson AIOps Webhook alerting channel",
+									ElementType: types.StringType,
+								},
+							},
+						},
+					},
 				},
 			},
 			SchemaVersion: 1,
@@ -277,6 +416,48 @@ func (r *alertingChannelResourceFramework) UpdateState(ctx context.Context, stat
 			AlertingChannelWebhookBasedFieldWebhookURL: types.StringType,
 		},
 	})
+	model.ServiceNow = types.ListNull(types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			AlertingChannelServiceNowFieldServiceNowURL:      types.StringType,
+			AlertingChannelServiceNowFieldUsername:           types.StringType,
+			AlertingChannelServiceNowFieldPassword:           types.StringType,
+			AlertingChannelServiceNowFieldAutoCloseIncidents: types.BoolType,
+		},
+	})
+	model.ServiceNowApplication = types.ListNull(types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			AlertingChannelServiceNowFieldServiceNowURL:                             types.StringType,
+			AlertingChannelServiceNowFieldUsername:                                  types.StringType,
+			AlertingChannelServiceNowFieldPassword:                                  types.StringType,
+			AlertingChannelServiceNowApplicationFieldTenant:                         types.StringType,
+			AlertingChannelServiceNowApplicationFieldUnit:                           types.StringType,
+			AlertingChannelServiceNowFieldAutoCloseIncidents:                        types.BoolType,
+			AlertingChannelServiceNowApplicationFieldInstanaURL:                     types.StringType,
+			AlertingChannelServiceNowApplicationFieldEnableSendInstanaNotes:         types.BoolType,
+			AlertingChannelServiceNowApplicationFieldEnableSendServiceNowActivities: types.BoolType,
+			AlertingChannelServiceNowApplicationFieldEnableSendServiceNowWorkNotes:  types.BoolType,
+			AlertingChannelServiceNowApplicationFieldManuallyClosedIncidents:        types.BoolType,
+			AlertingChannelServiceNowApplicationFieldResolutionOfIncident:           types.BoolType,
+			AlertingChannelServiceNowApplicationFieldSnowStatusOnCloseEvent:         types.Int64Type,
+		},
+	})
+	model.PrometheusWebhook = types.ListNull(types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			AlertingChannelWebhookBasedFieldWebhookURL:    types.StringType,
+			AlertingChannelPrometheusWebhookFieldReceiver: types.StringType,
+		},
+	})
+	model.WebexTeamsWebhook = types.ListNull(types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			AlertingChannelWebhookBasedFieldWebhookURL: types.StringType,
+		},
+	})
+	model.WatsonAIOpsWebhook = types.ListNull(types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			AlertingChannelWebhookBasedFieldWebhookURL: types.StringType,
+			AlertingChannelWebhookFieldHTTPHeaders:     types.ListType{ElemType: types.StringType},
+		},
+	})
 
 	// Set the appropriate channel type based on the alerting channel kind
 	switch alertingChannel.Kind {
@@ -343,6 +524,41 @@ func (r *alertingChannelResourceFramework) UpdateState(ctx context.Context, stat
 			return diags
 		}
 		model.GoogleChat = googleChatChannel
+	case restapi.ServiceNowChannelType:
+		serviceNowChannel, serviceNowDiags := r.mapServiceNowChannelToState(ctx, alertingChannel)
+		if serviceNowDiags.HasError() {
+			diags.Append(serviceNowDiags...)
+			return diags
+		}
+		model.ServiceNow = serviceNowChannel
+	case restapi.ServiceNowApplicationChannelType:
+		serviceNowEnhancedChannel, serviceNowEnhancedDiags := r.mapServiceNowApplicationChannelToState(ctx, alertingChannel)
+		if serviceNowEnhancedDiags.HasError() {
+			diags.Append(serviceNowEnhancedDiags...)
+			return diags
+		}
+		model.ServiceNowApplication = serviceNowEnhancedChannel
+	case restapi.PrometheusWebhookChannelType:
+		prometheusWebhookChannel, prometheusWebhookDiags := r.mapPrometheusWebhookChannelToState(ctx, alertingChannel)
+		if prometheusWebhookDiags.HasError() {
+			diags.Append(prometheusWebhookDiags...)
+			return diags
+		}
+		model.PrometheusWebhook = prometheusWebhookChannel
+	case restapi.WebexTeamsWebhookChannelType:
+		webexTeamsWebhookChannel, webexTeamsWebhookDiags := r.mapWebhookBasedChannelToState(ctx, alertingChannel)
+		if webexTeamsWebhookDiags.HasError() {
+			diags.Append(webexTeamsWebhookDiags...)
+			return diags
+		}
+		model.WebexTeamsWebhook = webexTeamsWebhookChannel
+	case restapi.WatsonAIOpsWebhookChannelType:
+		watsonAIOpsWebhookChannel, watsonAIOpsWebhookDiags := r.mapWatsonAIOpsWebhookChannelToState(ctx, alertingChannel)
+		if watsonAIOpsWebhookDiags.HasError() {
+			diags.Append(watsonAIOpsWebhookDiags...)
+			return diags
+		}
+		model.WatsonAIOpsWebhook = watsonAIOpsWebhookChannel
 	default:
 		diags.AddError(
 			"Unsupported alerting channel type",
@@ -662,6 +878,239 @@ func (r *alertingChannelResourceFramework) mapWebhookBasedChannelToState(ctx con
 			},
 		},
 		[]attr.Value{webhookBasedObjVal},
+	)
+}
+
+func (r *alertingChannelResourceFramework) mapServiceNowChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (types.List, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Create ServiceNow channel object
+	serviceNowObj := map[string]attr.Value{
+		AlertingChannelServiceNowFieldServiceNowURL: setStringPointerToState(channel.ServiceNowURL),
+		AlertingChannelServiceNowFieldUsername:      setStringPointerToState(channel.Username),
+		AlertingChannelServiceNowFieldPassword:      setStringPointerToState(channel.Password),
+	}
+
+	// Add optional autoCloseIncidents field
+	if channel.AutoCloseIncidents != nil {
+		serviceNowObj[AlertingChannelServiceNowFieldAutoCloseIncidents] = types.BoolValue(*channel.AutoCloseIncidents)
+	} else {
+		serviceNowObj[AlertingChannelServiceNowFieldAutoCloseIncidents] = types.BoolNull()
+	}
+
+	serviceNowObjVal, serviceNowObjDiags := types.ObjectValue(
+		map[string]attr.Type{
+			AlertingChannelServiceNowFieldServiceNowURL:      types.StringType,
+			AlertingChannelServiceNowFieldUsername:           types.StringType,
+			AlertingChannelServiceNowFieldPassword:           types.StringType,
+			AlertingChannelServiceNowFieldAutoCloseIncidents: types.BoolType,
+		},
+		serviceNowObj,
+	)
+	diags.Append(serviceNowObjDiags...)
+	if diags.HasError() {
+		return types.ListNull(types.ObjectType{}), diags
+	}
+
+	return types.ListValue(
+		types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				AlertingChannelServiceNowFieldServiceNowURL:      types.StringType,
+				AlertingChannelServiceNowFieldUsername:           types.StringType,
+				AlertingChannelServiceNowFieldPassword:           types.StringType,
+				AlertingChannelServiceNowFieldAutoCloseIncidents: types.BoolType,
+			},
+		},
+		[]attr.Value{serviceNowObjVal},
+	)
+}
+
+func (r *alertingChannelResourceFramework) mapServiceNowApplicationChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (types.List, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Create ServiceNow Enhanced channel object with required fields
+	serviceNowEnhancedObj := map[string]attr.Value{
+		AlertingChannelServiceNowFieldServiceNowURL:     setStringPointerToState(channel.ServiceNowURL),
+		AlertingChannelServiceNowFieldUsername:          setStringPointerToState(channel.Username),
+		AlertingChannelServiceNowFieldPassword:          setStringPointerToState(channel.Password),
+		AlertingChannelServiceNowApplicationFieldTenant: setStringPointerToState(channel.Tenant),
+		AlertingChannelServiceNowApplicationFieldUnit:   setStringPointerToState(channel.Unit),
+	}
+
+	// Add optional boolean fields
+	if channel.AutoCloseIncidents != nil {
+		serviceNowEnhancedObj[AlertingChannelServiceNowFieldAutoCloseIncidents] = types.BoolValue(*channel.AutoCloseIncidents)
+	} else {
+		serviceNowEnhancedObj[AlertingChannelServiceNowFieldAutoCloseIncidents] = types.BoolNull()
+	}
+
+	if channel.EnableSendInstanaNotes != nil {
+		serviceNowEnhancedObj[AlertingChannelServiceNowApplicationFieldEnableSendInstanaNotes] = types.BoolValue(*channel.EnableSendInstanaNotes)
+	} else {
+		serviceNowEnhancedObj[AlertingChannelServiceNowApplicationFieldEnableSendInstanaNotes] = types.BoolNull()
+	}
+
+	if channel.EnableSendServiceNowActivities != nil {
+		serviceNowEnhancedObj[AlertingChannelServiceNowApplicationFieldEnableSendServiceNowActivities] = types.BoolValue(*channel.EnableSendServiceNowActivities)
+	} else {
+		serviceNowEnhancedObj[AlertingChannelServiceNowApplicationFieldEnableSendServiceNowActivities] = types.BoolNull()
+	}
+
+	if channel.EnableSendServiceNowWorkNotes != nil {
+		serviceNowEnhancedObj[AlertingChannelServiceNowApplicationFieldEnableSendServiceNowWorkNotes] = types.BoolValue(*channel.EnableSendServiceNowWorkNotes)
+	} else {
+		serviceNowEnhancedObj[AlertingChannelServiceNowApplicationFieldEnableSendServiceNowWorkNotes] = types.BoolNull()
+	}
+
+	if channel.ManuallyClosedIncidents != nil {
+		serviceNowEnhancedObj[AlertingChannelServiceNowApplicationFieldManuallyClosedIncidents] = types.BoolValue(*channel.ManuallyClosedIncidents)
+	} else {
+		serviceNowEnhancedObj[AlertingChannelServiceNowApplicationFieldManuallyClosedIncidents] = types.BoolNull()
+	}
+
+	if channel.ResolutionOfIncident != nil {
+		serviceNowEnhancedObj[AlertingChannelServiceNowApplicationFieldResolutionOfIncident] = types.BoolValue(*channel.ResolutionOfIncident)
+	} else {
+		serviceNowEnhancedObj[AlertingChannelServiceNowApplicationFieldResolutionOfIncident] = types.BoolNull()
+	}
+
+	// Add optional string field
+	if channel.InstanaURL != nil && *channel.InstanaURL != "" {
+		serviceNowEnhancedObj[AlertingChannelServiceNowApplicationFieldInstanaURL] = setStringPointerToState(channel.InstanaURL)
+	} else {
+		serviceNowEnhancedObj[AlertingChannelServiceNowApplicationFieldInstanaURL] = types.StringNull()
+	}
+
+	// Add optional int field
+	if channel.SnowStatusOnCloseEvent != nil {
+		serviceNowEnhancedObj[AlertingChannelServiceNowApplicationFieldSnowStatusOnCloseEvent] = types.Int64Value(int64(*channel.SnowStatusOnCloseEvent))
+	} else {
+		serviceNowEnhancedObj[AlertingChannelServiceNowApplicationFieldSnowStatusOnCloseEvent] = types.Int64Null()
+	}
+
+	serviceNowEnhancedObjVal, serviceNowEnhancedObjDiags := types.ObjectValue(
+		map[string]attr.Type{
+			AlertingChannelServiceNowFieldServiceNowURL:                             types.StringType,
+			AlertingChannelServiceNowFieldUsername:                                  types.StringType,
+			AlertingChannelServiceNowFieldPassword:                                  types.StringType,
+			AlertingChannelServiceNowApplicationFieldTenant:                         types.StringType,
+			AlertingChannelServiceNowApplicationFieldUnit:                           types.StringType,
+			AlertingChannelServiceNowFieldAutoCloseIncidents:                        types.BoolType,
+			AlertingChannelServiceNowApplicationFieldInstanaURL:                     types.StringType,
+			AlertingChannelServiceNowApplicationFieldEnableSendInstanaNotes:         types.BoolType,
+			AlertingChannelServiceNowApplicationFieldEnableSendServiceNowActivities: types.BoolType,
+			AlertingChannelServiceNowApplicationFieldEnableSendServiceNowWorkNotes:  types.BoolType,
+			AlertingChannelServiceNowApplicationFieldManuallyClosedIncidents:        types.BoolType,
+			AlertingChannelServiceNowApplicationFieldResolutionOfIncident:           types.BoolType,
+			AlertingChannelServiceNowApplicationFieldSnowStatusOnCloseEvent:         types.Int64Type,
+		},
+		serviceNowEnhancedObj,
+	)
+	diags.Append(serviceNowEnhancedObjDiags...)
+	if diags.HasError() {
+		return types.ListNull(types.ObjectType{}), diags
+	}
+
+	return types.ListValue(
+		types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				AlertingChannelServiceNowFieldServiceNowURL:                             types.StringType,
+				AlertingChannelServiceNowFieldUsername:                                  types.StringType,
+				AlertingChannelServiceNowFieldPassword:                                  types.StringType,
+				AlertingChannelServiceNowApplicationFieldTenant:                         types.StringType,
+				AlertingChannelServiceNowApplicationFieldUnit:                           types.StringType,
+				AlertingChannelServiceNowFieldAutoCloseIncidents:                        types.BoolType,
+				AlertingChannelServiceNowApplicationFieldInstanaURL:                     types.StringType,
+				AlertingChannelServiceNowApplicationFieldEnableSendInstanaNotes:         types.BoolType,
+				AlertingChannelServiceNowApplicationFieldEnableSendServiceNowActivities: types.BoolType,
+				AlertingChannelServiceNowApplicationFieldEnableSendServiceNowWorkNotes:  types.BoolType,
+				AlertingChannelServiceNowApplicationFieldManuallyClosedIncidents:        types.BoolType,
+				AlertingChannelServiceNowApplicationFieldResolutionOfIncident:           types.BoolType,
+				AlertingChannelServiceNowApplicationFieldSnowStatusOnCloseEvent:         types.Int64Type,
+			},
+		},
+		[]attr.Value{serviceNowEnhancedObjVal},
+	)
+}
+
+func (r *alertingChannelResourceFramework) mapPrometheusWebhookChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (types.List, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Create Prometheus Webhook channel object
+	prometheusWebhookObj := map[string]attr.Value{
+		AlertingChannelWebhookBasedFieldWebhookURL: setStringPointerToState(channel.WebhookURL),
+	}
+
+	// Add optional receiver field
+	if channel.Receiver != nil && *channel.Receiver != "" {
+		prometheusWebhookObj[AlertingChannelPrometheusWebhookFieldReceiver] = setStringPointerToState(channel.Receiver)
+	} else {
+		prometheusWebhookObj[AlertingChannelPrometheusWebhookFieldReceiver] = types.StringNull()
+	}
+
+	prometheusWebhookObjVal, prometheusWebhookObjDiags := types.ObjectValue(
+		map[string]attr.Type{
+			AlertingChannelWebhookBasedFieldWebhookURL:    types.StringType,
+			AlertingChannelPrometheusWebhookFieldReceiver: types.StringType,
+		},
+		prometheusWebhookObj,
+	)
+	diags.Append(prometheusWebhookObjDiags...)
+	if diags.HasError() {
+		return types.ListNull(types.ObjectType{}), diags
+	}
+
+	return types.ListValue(
+		types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				AlertingChannelWebhookBasedFieldWebhookURL:    types.StringType,
+				AlertingChannelPrometheusWebhookFieldReceiver: types.StringType,
+			},
+		},
+		[]attr.Value{prometheusWebhookObjVal},
+	)
+}
+
+func (r *alertingChannelResourceFramework) mapWatsonAIOpsWebhookChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (types.List, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Create Watson AIOps Webhook channel object
+	watsonAIOpsWebhookObj := map[string]attr.Value{
+		AlertingChannelWebhookBasedFieldWebhookURL: setStringPointerToState(channel.WebhookURL),
+	}
+
+	// Add optional headers field
+	if channel.Headers != nil && len(channel.Headers) > 0 {
+		headersList, headersDiags := types.ListValueFrom(ctx, types.StringType, channel.Headers)
+		if headersDiags.HasError() {
+			diags.Append(headersDiags...)
+			return types.ListNull(types.ObjectType{}), diags
+		}
+		watsonAIOpsWebhookObj[AlertingChannelWebhookFieldHTTPHeaders] = headersList
+	} else {
+		watsonAIOpsWebhookObj[AlertingChannelWebhookFieldHTTPHeaders] = types.ListNull(types.StringType)
+	}
+
+	watsonAIOpsWebhookObjVal, watsonAIOpsWebhookObjDiags := types.ObjectValue(
+		map[string]attr.Type{
+			AlertingChannelWebhookBasedFieldWebhookURL: types.StringType,
+			AlertingChannelWebhookFieldHTTPHeaders:     types.ListType{ElemType: types.StringType},
+		},
+		watsonAIOpsWebhookObj,
+	)
+	diags.Append(watsonAIOpsWebhookObjDiags...)
+	if diags.HasError() {
+		return types.ListNull(types.ObjectType{}), diags
+	}
+
+	return types.ListValue(
+		types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				AlertingChannelWebhookBasedFieldWebhookURL: types.StringType,
+				AlertingChannelWebhookFieldHTTPHeaders:     types.ListType{ElemType: types.StringType},
+			},
+		},
+		[]attr.Value{watsonAIOpsWebhookObjVal},
 	)
 }
 
@@ -1028,6 +1477,246 @@ func (r *alertingChannelResourceFramework) mapWebhookBasedChannelFromState(ctx c
 	}, nil
 }
 
+func (r *alertingChannelResourceFramework) mapServiceNowChannelFromState(ctx context.Context, id string, name string, serviceNowList types.List) (*restapi.AlertingChannel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if len(serviceNowList.Elements()) == 0 {
+		diags.AddError("Invalid ServiceNow Channel Configuration", "ServiceNow channel configuration is empty")
+		return nil, diags
+	}
+
+	var serviceNowElements []types.Object
+	diags.Append(serviceNowList.ElementsAs(ctx, &serviceNowElements, false)...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	var serviceNowObj struct {
+		ServiceNowURL      types.String `tfsdk:"service_now_url"`
+		Username           types.String `tfsdk:"username"`
+		Password           types.String `tfsdk:"password"`
+		AutoCloseIncidents types.Bool   `tfsdk:"auto_close_incidents"`
+	}
+
+	diags.Append(serviceNowElements[0].As(ctx, &serviceNowObj, basetypes.ObjectAsOptions{})...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	if serviceNowObj.Password.IsNull() || serviceNowObj.Password.IsUnknown() {
+		diags.AddError("Missing Password", "password must be specified when creating the resource")
+		return nil, diags
+	}
+
+	serviceNowURLValue := serviceNowObj.ServiceNowURL.ValueString()
+	usernameValue := serviceNowObj.Username.ValueString()
+	passwordValue := serviceNowObj.Password.ValueString()
+
+	result := &restapi.AlertingChannel{
+		ID:            id,
+		Name:          name,
+		Kind:          restapi.ServiceNowChannelType,
+		ServiceNowURL: &serviceNowURLValue,
+		Username:      &usernameValue,
+		Password:      &passwordValue,
+	}
+
+	if !serviceNowObj.AutoCloseIncidents.IsNull() {
+		autoCloseValue := serviceNowObj.AutoCloseIncidents.ValueBool()
+		result.AutoCloseIncidents = &autoCloseValue
+	}
+
+	return result, nil
+}
+
+func (r *alertingChannelResourceFramework) mapServiceNowApplicationChannelFromState(ctx context.Context, id string, name string, serviceNowEnhancedList types.List) (*restapi.AlertingChannel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if len(serviceNowEnhancedList.Elements()) == 0 {
+		diags.AddError("Invalid ServiceNow Enhanced Channel Configuration", "ServiceNow Enhanced channel configuration is empty")
+		return nil, diags
+	}
+
+	var serviceNowEnhancedElements []types.Object
+	diags.Append(serviceNowEnhancedList.ElementsAs(ctx, &serviceNowEnhancedElements, false)...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	var serviceNowEnhancedObj struct {
+		ServiceNowURL                  types.String `tfsdk:"service_now_url"`
+		Username                       types.String `tfsdk:"username"`
+		Password                       types.String `tfsdk:"password"`
+		Tenant                         types.String `tfsdk:"tenant"`
+		Unit                           types.String `tfsdk:"unit"`
+		AutoCloseIncidents             types.Bool   `tfsdk:"auto_close_incidents"`
+		InstanaURL                     types.String `tfsdk:"instana_url"`
+		EnableSendInstanaNotes         types.Bool   `tfsdk:"enable_send_instana_notes"`
+		EnableSendServiceNowActivities types.Bool   `tfsdk:"enable_send_service_now_activities"`
+		EnableSendServiceNowWorkNotes  types.Bool   `tfsdk:"enable_send_service_now_work_notes"`
+		ManuallyClosedIncidents        types.Bool   `tfsdk:"manually_closed_incidents"`
+		ResolutionOfIncident           types.Bool   `tfsdk:"resolution_of_incident"`
+		SnowStatusOnCloseEvent         types.Int64  `tfsdk:"snow_status_on_close_event"`
+	}
+
+	diags.Append(serviceNowEnhancedElements[0].As(ctx, &serviceNowEnhancedObj, basetypes.ObjectAsOptions{})...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	if serviceNowEnhancedObj.Password.IsNull() || serviceNowEnhancedObj.Password.IsUnknown() {
+		diags.AddError("Missing Password", "password must be specified when creating the resource")
+		return nil, diags
+	}
+
+	serviceNowURLValue := serviceNowEnhancedObj.ServiceNowURL.ValueString()
+	usernameValue := serviceNowEnhancedObj.Username.ValueString()
+	passwordValue := serviceNowEnhancedObj.Password.ValueString()
+	tenantValue := serviceNowEnhancedObj.Tenant.ValueString()
+	unitValue := serviceNowEnhancedObj.Unit.ValueString()
+
+	result := &restapi.AlertingChannel{
+		ID:            id,
+		Name:          name,
+		Kind:          restapi.ServiceNowApplicationChannelType,
+		ServiceNowURL: &serviceNowURLValue,
+		Username:      &usernameValue,
+		Password:      &passwordValue,
+		Tenant:        &tenantValue,
+		Unit:          &unitValue,
+	}
+
+	// Add optional fields
+	if !serviceNowEnhancedObj.AutoCloseIncidents.IsNull() {
+		autoCloseValue := serviceNowEnhancedObj.AutoCloseIncidents.ValueBool()
+		result.AutoCloseIncidents = &autoCloseValue
+	}
+
+	if !serviceNowEnhancedObj.InstanaURL.IsNull() {
+		instanaURLValue := serviceNowEnhancedObj.InstanaURL.ValueString()
+		result.InstanaURL = &instanaURLValue
+	}
+
+	if !serviceNowEnhancedObj.EnableSendInstanaNotes.IsNull() {
+		enableSendInstanaNotesValue := serviceNowEnhancedObj.EnableSendInstanaNotes.ValueBool()
+		result.EnableSendInstanaNotes = &enableSendInstanaNotesValue
+	}
+
+	if !serviceNowEnhancedObj.EnableSendServiceNowActivities.IsNull() {
+		enableSendServiceNowActivitiesValue := serviceNowEnhancedObj.EnableSendServiceNowActivities.ValueBool()
+		result.EnableSendServiceNowActivities = &enableSendServiceNowActivitiesValue
+	}
+
+	if !serviceNowEnhancedObj.EnableSendServiceNowWorkNotes.IsNull() {
+		enableSendServiceNowWorkNotesValue := serviceNowEnhancedObj.EnableSendServiceNowWorkNotes.ValueBool()
+		result.EnableSendServiceNowWorkNotes = &enableSendServiceNowWorkNotesValue
+	}
+
+	if !serviceNowEnhancedObj.ManuallyClosedIncidents.IsNull() {
+		manuallyClosedIncidentsValue := serviceNowEnhancedObj.ManuallyClosedIncidents.ValueBool()
+		result.ManuallyClosedIncidents = &manuallyClosedIncidentsValue
+	}
+
+	if !serviceNowEnhancedObj.ResolutionOfIncident.IsNull() {
+		resolutionOfIncidentValue := serviceNowEnhancedObj.ResolutionOfIncident.ValueBool()
+		result.ResolutionOfIncident = &resolutionOfIncidentValue
+	}
+
+	if !serviceNowEnhancedObj.SnowStatusOnCloseEvent.IsNull() {
+		snowStatusValue := int(serviceNowEnhancedObj.SnowStatusOnCloseEvent.ValueInt64())
+		result.SnowStatusOnCloseEvent = &snowStatusValue
+	}
+
+	return result, nil
+}
+
+func (r *alertingChannelResourceFramework) mapPrometheusWebhookChannelFromState(ctx context.Context, id string, name string, prometheusWebhookList types.List) (*restapi.AlertingChannel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if len(prometheusWebhookList.Elements()) == 0 {
+		diags.AddError("Invalid Prometheus Webhook Channel Configuration", "Prometheus Webhook channel configuration is empty")
+		return nil, diags
+	}
+
+	var prometheusWebhookElements []types.Object
+	diags.Append(prometheusWebhookList.ElementsAs(ctx, &prometheusWebhookElements, false)...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	var prometheusWebhookObj struct {
+		WebhookURL types.String `tfsdk:"webhook_url"`
+		Receiver   types.String `tfsdk:"receiver"`
+	}
+
+	diags.Append(prometheusWebhookElements[0].As(ctx, &prometheusWebhookObj, basetypes.ObjectAsOptions{})...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	webhookURLValue := prometheusWebhookObj.WebhookURL.ValueString()
+
+	result := &restapi.AlertingChannel{
+		ID:         id,
+		Name:       name,
+		Kind:       restapi.PrometheusWebhookChannelType,
+		WebhookURL: &webhookURLValue,
+	}
+
+	if !prometheusWebhookObj.Receiver.IsNull() {
+		receiverValue := prometheusWebhookObj.Receiver.ValueString()
+		result.Receiver = &receiverValue
+	}
+
+	return result, nil
+}
+
+func (r *alertingChannelResourceFramework) mapWatsonAIOpsWebhookChannelFromState(ctx context.Context, id string, name string, watsonAIOpsWebhookList types.List) (*restapi.AlertingChannel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if len(watsonAIOpsWebhookList.Elements()) == 0 {
+		diags.AddError("Invalid Watson AIOps Webhook Channel Configuration", "Watson AIOps Webhook channel configuration is empty")
+		return nil, diags
+	}
+
+	var watsonAIOpsWebhookElements []types.Object
+	diags.Append(watsonAIOpsWebhookList.ElementsAs(ctx, &watsonAIOpsWebhookElements, false)...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	var watsonAIOpsWebhookObj struct {
+		WebhookURL  types.String `tfsdk:"webhook_url"`
+		HTTPHeaders types.List   `tfsdk:"http_headers"`
+	}
+
+	diags.Append(watsonAIOpsWebhookElements[0].As(ctx, &watsonAIOpsWebhookObj, basetypes.ObjectAsOptions{})...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	webhookURLValue := watsonAIOpsWebhookObj.WebhookURL.ValueString()
+
+	result := &restapi.AlertingChannel{
+		ID:         id,
+		Name:       name,
+		Kind:       restapi.WatsonAIOpsWebhookChannelType,
+		WebhookURL: &webhookURLValue,
+	}
+
+	// Add headers if present
+	if !watsonAIOpsWebhookObj.HTTPHeaders.IsNull() && !watsonAIOpsWebhookObj.HTTPHeaders.IsUnknown() {
+		var headers []string
+		diags.Append(watsonAIOpsWebhookObj.HTTPHeaders.ElementsAs(ctx, &headers, false)...)
+		if diags.HasError() {
+			return nil, diags
+		}
+		result.Headers = headers
+	}
+
+	return result, nil
+}
+
 func (r *alertingChannelResourceFramework) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.AlertingChannel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var model AlertingChannelModel
@@ -1087,6 +1776,26 @@ func (r *alertingChannelResourceFramework) MapStateToDataObject(ctx context.Cont
 
 	if !model.GoogleChat.IsNull() && !model.GoogleChat.IsUnknown() && len(model.GoogleChat.Elements()) > 0 {
 		return r.mapWebhookBasedChannelFromState(ctx, id, name, model.GoogleChat, restapi.GoogleChatChannelType)
+	}
+
+	if !model.ServiceNow.IsNull() && !model.ServiceNow.IsUnknown() && len(model.ServiceNow.Elements()) > 0 {
+		return r.mapServiceNowChannelFromState(ctx, id, name, model.ServiceNow)
+	}
+
+	if !model.ServiceNowApplication.IsNull() && !model.ServiceNowApplication.IsUnknown() && len(model.ServiceNowApplication.Elements()) > 0 {
+		return r.mapServiceNowApplicationChannelFromState(ctx, id, name, model.ServiceNowApplication)
+	}
+
+	if !model.PrometheusWebhook.IsNull() && !model.PrometheusWebhook.IsUnknown() && len(model.PrometheusWebhook.Elements()) > 0 {
+		return r.mapPrometheusWebhookChannelFromState(ctx, id, name, model.PrometheusWebhook)
+	}
+
+	if !model.WebexTeamsWebhook.IsNull() && !model.WebexTeamsWebhook.IsUnknown() && len(model.WebexTeamsWebhook.Elements()) > 0 {
+		return r.mapWebhookBasedChannelFromState(ctx, id, name, model.WebexTeamsWebhook, restapi.WebexTeamsWebhookChannelType)
+	}
+
+	if !model.WatsonAIOpsWebhook.IsNull() && !model.WatsonAIOpsWebhook.IsUnknown() && len(model.WatsonAIOpsWebhook.Elements()) > 0 {
+		return r.mapWatsonAIOpsWebhookChannelFromState(ctx, id, name, model.WatsonAIOpsWebhook)
 	}
 
 	diags.AddError(
