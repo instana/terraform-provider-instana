@@ -241,7 +241,7 @@ func NewSloAlertConfigResourceHandleFramework() resourcehandle.ResourceHandleFra
 							},
 						},
 					},
-					"custom_payload_fields": GetCustomPayloadFieldsSchema(),
+					"custom_payload_fields": shared.GetCustomPayloadFieldsSchema(),
 				},
 			},
 			SchemaVersion: 1,
