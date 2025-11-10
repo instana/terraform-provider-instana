@@ -90,25 +90,25 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 		metaData: ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaWebsiteAlertConfigFramework,
 			Schema: schema.Schema{
-				Description: "This resource manages Website Alert Configurations in Instana.",
+				Description: WebsiteAlertConfigDescResource,
 				Attributes: map[string]schema.Attribute{
 					"id": schema.StringAttribute{
 						Computed:    true,
-						Description: "The ID of the Website Alert Configuration.",
+						Description: WebsiteAlertConfigDescID,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
 					"name": schema.StringAttribute{
 						Required:    true,
-						Description: "The name of the Website Alert Configuration.",
+						Description: WebsiteAlertConfigDescName,
 						Validators: []validator.String{
 							stringvalidator.LengthBetween(0, 256),
 						},
 					},
 					"description": schema.StringAttribute{
 						Required:    true,
-						Description: "The description of the Website Alert Configuration.",
+						Description: WebsiteAlertConfigDescDescription,
 						Validators: []validator.String{
 							stringvalidator.LengthBetween(0, 65536),
 						},
@@ -116,7 +116,7 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 					"severity": schema.StringAttribute{
 						Optional:    true,
 						Computed:    true,
-						Description: "The severity of the alert when triggered.",
+						Description: WebsiteAlertConfigDescSeverity,
 						Validators: []validator.String{
 							stringvalidator.OneOf("warning", "critical"),
 						},
@@ -124,33 +124,33 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 					"triggering": schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Description: "Flag to indicate whether also an Incident is triggered or not.",
+						Description: WebsiteAlertConfigDescTriggering,
 						Default:     booldefault.StaticBool(false),
 					},
 					"website_id": schema.StringAttribute{
 						Required:    true,
-						Description: "Unique ID of the website.",
+						Description: WebsiteAlertConfigDescWebsiteID,
 						Validators: []validator.String{
 							stringvalidator.LengthBetween(0, 64),
 						},
 					},
 					"tag_filter": schema.StringAttribute{
 						Optional:    true,
-						Description: "The tag filter expression for the Website Alert Configuration.",
+						Description: WebsiteAlertConfigDescTagFilter,
 					},
 					"alert_channel_ids": schema.SetAttribute{
 						Optional:    true,
-						Description: "List of IDs of alert channels defined in Instana.",
+						Description: WebsiteAlertConfigDescAlertChannelIDs,
 						ElementType: types.StringType,
 					},
 					"granularity": schema.Int64Attribute{
 						Optional:    true,
 						Computed:    true,
-						Description: "The evaluation granularity used for detection of violations of the defined threshold.",
+						Description: WebsiteAlertConfigDescGranularity,
 						Default:     int64default.StaticInt64(600000),
 					},
 					ApplicationAlertConfigFieldRules: schema.ListNestedAttribute{
-						Description: "A list of rules where each rule is associated with multiple thresholds and their corresponding severity levels.",
+						Description: WebsiteAlertConfigDescRules,
 						Optional:    true,
 						Computed:    true,
 						NestedObject: schema.NestedAttributeObject{
@@ -158,27 +158,27 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 								"operator": schema.StringAttribute{
 									Optional:    true,
 									Computed:    true,
-									Description: "The operator to apply for threshold comparison",
+									Description: WebsiteAlertConfigDescRuleOperator,
 									Validators: []validator.String{
 										stringvalidator.OneOf(">", ">=", "<", "<="),
 									},
 								},
 								"rule": schema.SingleNestedAttribute{
-									Description: "Indicates the type of rule this alert configuration is about.",
+									Description: WebsiteAlertConfigDescRule,
 									Optional:    true,
 									Computed:    true,
 									Attributes: map[string]schema.Attribute{
 										"slowness": schema.SingleNestedAttribute{
-											Description: "Rule based on the slowness of the configured alert configuration target.",
+											Description: WebsiteAlertConfigDescRuleSlowness,
 											Optional:    true,
 											Attributes: map[string]schema.Attribute{
 												"metric_name": schema.StringAttribute{
 													Required:    true,
-													Description: "The metric name of the website alert rule.",
+													Description: WebsiteAlertConfigDescRuleMetricName,
 												},
 												"aggregation": schema.StringAttribute{
 													Required:    true,
-													Description: "The aggregation function of the website alert rule.",
+													Description: WebsiteAlertConfigDescRuleAggregation,
 													Validators: []validator.String{
 														stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
 													},
@@ -186,72 +186,72 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 											},
 										},
 										"specific_js_error": schema.SingleNestedAttribute{
-											Description: "Rule based on a specific javascript error of the configured alert configuration target.",
+											Description: WebsiteAlertConfigDescRuleSpecificJsError,
 											Optional:    true,
 											Attributes: map[string]schema.Attribute{
 												"metric_name": schema.StringAttribute{
 													Required:    true,
-													Description: "The metric name of the website alert rule.",
+													Description: WebsiteAlertConfigDescRuleMetricName,
 												},
 												"aggregation": schema.StringAttribute{
 													Optional:    true,
-													Description: "The aggregation function of the website alert rule.",
+													Description: WebsiteAlertConfigDescRuleAggregation,
 													Validators: []validator.String{
 														stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
 													},
 												},
 												"operator": schema.StringAttribute{
 													Required:    true,
-													Description: "The operator which will be applied to evaluate this rule.",
+													Description: WebsiteAlertConfigDescRuleOperatorEval,
 													Validators: []validator.String{
 														stringvalidator.OneOf("EQUALS", "DOES_NOT_EQUAL", "CONTAINS", "DOES_NOT_CONTAIN"),
 													},
 												},
 												"value": schema.StringAttribute{
 													Optional:    true,
-													Description: "The value identify the specific javascript error.",
+													Description: WebsiteAlertConfigDescRuleValueJsError,
 												},
 											},
 										},
 										"status_code": schema.SingleNestedAttribute{
-											Description: "Rule based on the HTTP status code of the configured alert configuration target.",
+											Description: WebsiteAlertConfigDescRuleStatusCode,
 											Optional:    true,
 											Attributes: map[string]schema.Attribute{
 												"metric_name": schema.StringAttribute{
 													Required:    true,
-													Description: "The metric name of the website alert rule.",
+													Description: WebsiteAlertConfigDescRuleMetricName,
 												},
 												"aggregation": schema.StringAttribute{
 													Optional:    true,
-													Description: "The aggregation function of the website alert rule.",
+													Description: WebsiteAlertConfigDescRuleAggregation,
 													Validators: []validator.String{
 														stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
 													},
 												},
 												"operator": schema.StringAttribute{
 													Required:    true,
-													Description: "The operator which will be applied to evaluate this rule.",
+													Description: WebsiteAlertConfigDescRuleOperatorEval,
 													Validators: []validator.String{
 														stringvalidator.OneOf("EQUALS", "DOES_NOT_EQUAL", "CONTAINS", "DOES_NOT_CONTAIN"),
 													},
 												},
 												"value": schema.StringAttribute{
 													Required:    true,
-													Description: "The value identify the specific http status code.",
+													Description: WebsiteAlertConfigDescRuleValueStatusCode,
 												},
 											},
 										},
 										"throughput": schema.SingleNestedAttribute{
-											Description: "Rule based on the throughput of the configured alert configuration target.",
+											Description: WebsiteAlertConfigDescRuleThroughput,
 											Optional:    true,
 											Attributes: map[string]schema.Attribute{
 												"metric_name": schema.StringAttribute{
 													Required:    true,
-													Description: "The metric name of the website alert rule.",
+													Description: WebsiteAlertConfigDescRuleMetricName,
 												},
 												"aggregation": schema.StringAttribute{
 													Optional:    true,
-													Description: "The aggregation function of the website alert rule.",
+													Description: WebsiteAlertConfigDescRuleAggregation,
 													Validators: []validator.String{
 														stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
 													},
@@ -261,7 +261,7 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 									},
 								},
 								ApplicationAlertConfigFieldThreshold: schema.SingleNestedAttribute{
-									Description: "Threshold configuration for different severity levels",
+									Description: WebsiteAlertConfigDescThreshold,
 									Optional:    true,
 									Computed:    true,
 									Attributes: map[string]schema.Attribute{
@@ -276,20 +276,20 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 				Blocks: map[string]schema.Block{
 					"custom_payload_fields": GetCustomPayloadFieldsSchema(),
 					"threshold": schema.SingleNestedBlock{
-						Description: "Threshold configuration for different severity levels",
+						Description: WebsiteAlertConfigDescThreshold,
 						Blocks: map[string]schema.Block{
 							"static": schema.SingleNestedBlock{
-								Description: "Static threshold definition.",
+								Description: WebsiteAlertConfigDescThresholdStatic,
 								Attributes: map[string]schema.Attribute{
 									"operator": schema.StringAttribute{
-										Description: "Comparison operator for the static threshold.",
+										Description: WebsiteAlertConfigDescThresholdOperator,
 										Optional:    true,
 										Validators: []validator.String{
 											stringvalidator.OneOf([]string{">=", ">", "<=", "<", "=="}...),
 										},
 									},
 									"value": schema.Int64Attribute{
-										Description: "The numeric value for the static threshold.",
+										Description: WebsiteAlertConfigDescThresholdValue,
 										Optional:    true,
 									},
 								},
@@ -298,25 +298,25 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 								},
 							},
 							"adaptive_baseline": schema.SingleNestedBlock{
-								Description: "Static threshold definition.",
+								Description: WebsiteAlertConfigDescThresholdAdaptive,
 								Attributes: map[string]schema.Attribute{
 									"operator": schema.StringAttribute{
-										Description: "Comparison operator for the static threshold.",
+										Description: WebsiteAlertConfigDescThresholdOperator,
 										Optional:    true,
 										Validators: []validator.String{
 											stringvalidator.OneOf([]string{">=", ">", "<=", "<", "=="}...),
 										},
 									},
 									"deviation_factor": schema.Float32Attribute{
-										Description: "The numeric value for the deviation factor.",
+										Description: WebsiteAlertConfigDescThresholdDeviationFactor,
 										Optional:    true,
 									},
 									"adaptability": schema.Float32Attribute{
-										Description: "The numeric value for the adaptability.",
+										Description: WebsiteAlertConfigDescThresholdAdaptability,
 										Optional:    true,
 									},
 									"seasonality": schema.StringAttribute{
-										Description: "Value for the seasonality.",
+										Description: WebsiteAlertConfigDescThresholdSeasonality,
 										Optional:    true,
 									},
 								},
@@ -328,20 +328,20 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 						},
 					},
 					"rule": schema.SingleNestedBlock{
-						Description: "Indicates the type of rule this alert configuration is about.",
+						Description: WebsiteAlertConfigDescRule,
 						Blocks: map[string]schema.Block{
 							"slowness": schema.SingleNestedBlock{
-								Description: "Rule based on the slowness of the configured alert configuration target.",
+								Description: WebsiteAlertConfigDescRuleSlowness,
 								Attributes: map[string]schema.Attribute{
 									"metric_name": schema.StringAttribute{
 										Optional:    true,
 										Computed:    true,
-										Description: "The metric name of the website alert rule.",
+										Description: WebsiteAlertConfigDescRuleMetricName,
 									},
 									"aggregation": schema.StringAttribute{
 										Optional:    true,
 										Computed:    true,
-										Description: "The aggregation function of the website alert rule.",
+										Description: WebsiteAlertConfigDescRuleAggregation,
 										Validators: []validator.String{
 											stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
 										},
@@ -352,17 +352,17 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 								},
 							},
 							"specific_js_error": schema.SingleNestedBlock{
-								Description: "Rule based on a specific javascript error of the configured alert configuration target.",
+								Description: WebsiteAlertConfigDescRuleSpecificJsError,
 								Attributes: map[string]schema.Attribute{
 									"metric_name": schema.StringAttribute{
 										Optional:    true,
 										Computed:    true,
-										Description: "The metric name of the website alert rule.",
+										Description: WebsiteAlertConfigDescRuleMetricName,
 									},
 									"aggregation": schema.StringAttribute{
 										Optional:    true,
 										Computed:    true,
-										Description: "The aggregation function of the website alert rule.",
+										Description: WebsiteAlertConfigDescRuleAggregation,
 										Validators: []validator.String{
 											stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
 										},
@@ -370,7 +370,7 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 									"operator": schema.StringAttribute{
 										Optional:    true,
 										Computed:    true,
-										Description: "The operator which will be applied to evaluate this rule.",
+										Description: WebsiteAlertConfigDescRuleOperatorEval,
 										Validators: []validator.String{
 											stringvalidator.OneOf("EQUALS", "DOES_NOT_EQUAL", "CONTAINS", "DOES_NOT_CONTAIN"),
 										},
@@ -378,7 +378,7 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 									"value": schema.StringAttribute{
 										Optional:    true,
 										Computed:    true,
-										Description: "The value identify the specific javascript error.",
+										Description: WebsiteAlertConfigDescRuleValueJsError,
 									},
 								},
 								PlanModifiers: []planmodifier.Object{
@@ -386,17 +386,17 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 								},
 							},
 							"status_code": schema.SingleNestedBlock{
-								Description: "Rule based on the HTTP status code of the configured alert configuration target.",
+								Description: WebsiteAlertConfigDescRuleStatusCode,
 								Attributes: map[string]schema.Attribute{
 									"metric_name": schema.StringAttribute{
 										Optional:    true,
 										Computed:    true,
-										Description: "The metric name of the website alert rule.",
+										Description: WebsiteAlertConfigDescRuleMetricName,
 									},
 									"aggregation": schema.StringAttribute{
 										Optional:    true,
 										Computed:    true,
-										Description: "The aggregation function of the website alert rule.",
+										Description: WebsiteAlertConfigDescRuleAggregation,
 										Validators: []validator.String{
 											stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
 										},
@@ -404,7 +404,7 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 									"operator": schema.StringAttribute{
 										Optional:    true,
 										Computed:    true,
-										Description: "The operator which will be applied to evaluate this rule.",
+										Description: WebsiteAlertConfigDescRuleOperatorEval,
 										Validators: []validator.String{
 											stringvalidator.OneOf("EQUALS", "DOES_NOT_EQUAL", "CONTAINS", "DOES_NOT_CONTAIN"),
 										},
@@ -412,7 +412,7 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 									"value": schema.StringAttribute{
 										Optional:    true,
 										Computed:    true,
-										Description: "The value identify the specific http status code.",
+										Description: WebsiteAlertConfigDescRuleValueStatusCode,
 									},
 								},
 								PlanModifiers: []planmodifier.Object{
@@ -420,17 +420,17 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 								},
 							},
 							"throughput": schema.SingleNestedBlock{
-								Description: "Rule based on the throughput of the configured alert configuration target.",
+								Description: WebsiteAlertConfigDescRuleThroughput,
 								Attributes: map[string]schema.Attribute{
 									"metric_name": schema.StringAttribute{
 										Optional:    true,
 										Computed:    true,
-										Description: "The metric name of the website alert rule.",
+										Description: WebsiteAlertConfigDescRuleMetricName,
 									},
 									"aggregation": schema.StringAttribute{
 										Optional:    true,
 										Computed:    true,
-										Description: "The aggregation function of the website alert rule.",
+										Description: WebsiteAlertConfigDescRuleAggregation,
 										Validators: []validator.String{
 											stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99"),
 										},
@@ -443,20 +443,20 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 						},
 					},
 					"time_threshold": schema.SingleNestedBlock{
-						Description: "Indicates the type of violation of the defined threshold.",
+						Description: WebsiteAlertConfigDescTimeThreshold,
 						Blocks: map[string]schema.Block{
 							"user_impact_of_violations_in_sequence": schema.SingleNestedBlock{
-								Description: "Time threshold base on user impact of violations in sequence.",
+								Description: WebsiteAlertConfigDescTimeThresholdUserImpact,
 								Attributes: map[string]schema.Attribute{
 									"time_window": schema.Int64Attribute{
 										Optional:    true,
 										Computed:    true,
-										Description: "The time window if the time threshold.",
+										Description: WebsiteAlertConfigDescTimeThresholdTimeWindow,
 									},
 									"impact_measurement_method": schema.StringAttribute{
 										Optional:    true,
 										Computed:    true,
-										Description: "The impact method of the time threshold based on user impact of violations in sequence.",
+										Description: WebsiteAlertConfigDescTimeThresholdImpactMethod,
 										Validators: []validator.String{
 											stringvalidator.OneOf("AGGREGATED", "PER_WINDOW"),
 										},
@@ -464,37 +464,37 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 									"user_percentage": schema.Float64Attribute{
 										Optional:    true,
 										Computed:    true,
-										Description: "The percentage of impacted users of the time threshold based on user impact of violations in sequence.",
+										Description: WebsiteAlertConfigDescTimeThresholdUserPercentage,
 									},
 									"users": schema.Int64Attribute{
 										Optional:    true,
 										Computed:    true,
-										Description: "The number of impacted users of the time threshold based on user impact of violations in sequence.",
+										Description: WebsiteAlertConfigDescTimeThresholdUsers,
 									},
 								},
 							},
 							"violations_in_period": schema.SingleNestedBlock{
-								Description: "Time threshold base on violations in period.",
+								Description: WebsiteAlertConfigDescTimeThresholdViolationsInPeriod,
 								Attributes: map[string]schema.Attribute{
 									"time_window": schema.Int64Attribute{
 										Optional:    true,
 										Computed:    true,
-										Description: "The time window if the time threshold.",
+										Description: WebsiteAlertConfigDescTimeThresholdTimeWindow,
 									},
 									"violations": schema.Int64Attribute{
 										Optional:    true,
 										Computed:    true,
-										Description: "The violations appeared in the period.",
+										Description: WebsiteAlertConfigDescTimeThresholdViolations,
 									},
 								},
 							},
 							"violations_in_sequence": schema.SingleNestedBlock{
-								Description: "Time threshold base on violations in sequence.",
+								Description: WebsiteAlertConfigDescTimeThresholdViolationsInSequence,
 								Attributes: map[string]schema.Attribute{
 									"time_window": schema.Int64Attribute{
 										Optional:    true,
 										Computed:    true,
-										Description: "The time window if the time threshold.",
+										Description: WebsiteAlertConfigDescTimeThresholdTimeWindow,
 									},
 								},
 							},
@@ -544,7 +544,7 @@ func (r *websiteAlertConfigResourceFramework) MapStateToDataObject(ctx context.C
 		severityVal, err := ConvertSeverityFromTerraformToInstanaAPIRepresentation(model.Severity.ValueString())
 		severity = &severityVal
 		if err != nil {
-			diags.AddError("Error converting severity", err.Error())
+			diags.AddError(WebsiteAlertConfigErrConvertSeverity, err.Error())
 			return nil, diags
 		}
 	}
@@ -555,7 +555,7 @@ func (r *websiteAlertConfigResourceFramework) MapStateToDataObject(ctx context.C
 		parser := tagfilter.NewParser()
 		expr, err := parser.Parse(model.TagFilter.ValueString())
 		if err != nil {
-			diags.AddError("Error parsing tag filter", err.Error())
+			diags.AddError(WebsiteAlertConfigErrParseTagFilter, err.Error())
 			return nil, diags
 		}
 		mapper := tagfilter.NewMapper()
@@ -703,7 +703,7 @@ func (r *websiteAlertConfigResourceFramework) mapRuleFromModel(ctx context.Conte
 		return r.mapThroughputRule(ctx, diags, *ruleModel.Throughput)
 	}
 
-	diags.AddError("Invalid rule configuration", "Exactly one rule type configuration is required")
+	diags.AddError(WebsiteAlertConfigErrInvalidRuleConfig, WebsiteAlertConfigErrInvalidRuleConfigMsg)
 	return nil, diags
 }
 
@@ -823,7 +823,7 @@ func (r *websiteAlertConfigResourceFramework) mapTimeThresholdFromModel(ctx cont
 
 	// Check if time threshold is set
 	if model.TimeThreshold == nil {
-		diags.AddError("Time threshold is required", "Website alert config time threshold is required")
+		diags.AddError(WebsiteAlertConfigErrTimeThresholdRequired, WebsiteAlertConfigErrTimeThresholdRequiredMsg)
 		return nil, diags
 	}
 	timeThresholdModel := *model.TimeThreshold
@@ -890,7 +890,7 @@ func (r *websiteAlertConfigResourceFramework) mapTimeThresholdFromModel(ctx cont
 		}, diags
 	}
 
-	diags.AddError("Invalid time threshold configuration", "Exactly one time threshold type configuration is required")
+	diags.AddError(WebsiteAlertConfigErrInvalidTimeThresholdConfig, WebsiteAlertConfigErrInvalidTimeThresholdConfigMsg)
 	return nil, diags
 }
 
@@ -900,7 +900,7 @@ func (r *websiteAlertConfigResourceFramework) UpdateState(ctx context.Context, s
 	// Convert severity from API representation to Terraform representation
 	severity, err := ConvertSeverityFromInstanaAPIToTerraformRepresentation(*apiObject.Severity)
 	if err != nil {
-		diags.AddError("Error converting severity", err.Error())
+		diags.AddError(WebsiteAlertConfigErrConvertSeverity, err.Error())
 		return diags
 	}
 
@@ -920,8 +920,8 @@ func (r *websiteAlertConfigResourceFramework) UpdateState(ctx context.Context, s
 		filterExprStr, err := tagfilter.MapTagFilterToNormalizedString(apiObject.TagFilterExpression)
 		if err != nil {
 			diags.AddError(
-				"Error mapping filter expression",
-				fmt.Sprintf("Failed to map filter expression: %s", err),
+				WebsiteAlertConfigErrMapFilterExpression,
+				fmt.Sprintf(WebsiteAlertConfigErrMapFilterExpressionMsg, err),
 			)
 			return diags
 		}

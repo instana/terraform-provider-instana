@@ -53,24 +53,24 @@ func NewApplicationConfigResourceHandleFramework() ResourceHandleFramework[*rest
 		metaData: ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaApplicationConfigFramework,
 			Schema: schema.Schema{
-				Description: "This resource manages application configurations in Instana.",
+				Description: ApplicationConfigDescResource,
 				Attributes: map[string]schema.Attribute{
 					"id": schema.StringAttribute{
 						Computed:    true,
-						Description: "The ID of the application configuration.",
+						Description: ApplicationConfigDescID,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
 					ApplicationConfigFieldLabel: schema.StringAttribute{
 						Required:    true,
-						Description: "The label of the application config",
+						Description: ApplicationConfigDescLabel,
 					},
 					ApplicationConfigFieldScope: schema.StringAttribute{
 						Optional:    true,
 						Computed:    true,
 						Default:     stringdefault.StaticString(string(restapi.ApplicationConfigScopeIncludeNoDownstream)),
-						Description: "The scope of the application config",
+						Description: ApplicationConfigDescScope,
 						Validators: []validator.String{
 							stringvalidator.OneOf(restapi.SupportedApplicationConfigScopes.ToStringSlice()...),
 						},
@@ -79,7 +79,7 @@ func NewApplicationConfigResourceHandleFramework() ResourceHandleFramework[*rest
 						Optional:    true,
 						Computed:    true,
 						Default:     stringdefault.StaticString(string(restapi.BoundaryScopeDefault)),
-						Description: "The boundary scope of the application config",
+						Description: ApplicationConfigDescBoundaryScope,
 						Validators: []validator.String{
 							stringvalidator.OneOf(restapi.SupportedApplicationConfigBoundaryScopes.ToStringSlice()...),
 						},
@@ -90,30 +90,30 @@ func NewApplicationConfigResourceHandleFramework() ResourceHandleFramework[*rest
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
-						Description: "The tag filter expression",
+						Description: ApplicationConfigDescTagFilter,
 					},
 					ApplicationConfigFieldAccessRules: schema.ListNestedAttribute{
 						Required:    true,
-						Description: "The access rules applied to the application config",
+						Description: ApplicationConfigDescAccessRules,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"access_type": schema.StringAttribute{
 									Required:    true,
-									Description: "The access type of the given access rule",
+									Description: ApplicationConfigDescAccessType,
 									Validators: []validator.String{
 										stringvalidator.OneOf(restapi.SupportedAccessTypes.ToStringSlice()...),
 									},
 								},
 								"related_id": schema.StringAttribute{
 									Optional:    true,
-									Description: "The id of the related entity (user, api_token, etc.) of the given access rule",
+									Description: ApplicationConfigDescRelatedID,
 									Validators: []validator.String{
 										stringvalidator.LengthBetween(0, 64),
 									},
 								},
 								"relation_type": schema.StringAttribute{
 									Required:    true,
-									Description: "The relation type of the given access rule",
+									Description: ApplicationConfigDescRelationType,
 									Validators: []validator.String{
 										stringvalidator.OneOf(restapi.SupportedRelationTypes.ToStringSlice()...),
 									},
@@ -161,7 +161,7 @@ func (r *applicationConfigResourceFramework) UpdateState(ctx context.Context, st
 		if err != nil {
 			return diag.Diagnostics{
 				diag.NewErrorDiagnostic(
-					"Error converting tag filter",
+					ApplicationConfigErrConvertingTagFilter,
 					fmt.Sprintf("Failed to convert tag filter: %s", err),
 				),
 			}
@@ -272,7 +272,7 @@ func (r *applicationConfigResourceFramework) MapStateToDataObject(ctx context.Co
 		expr, err := parser.Parse(tagFilterStr)
 		if err != nil {
 			diags.AddError(
-				"Error parsing tag filter",
+				ApplicationConfigErrParsingTagFilter,
 				fmt.Sprintf("Failed to parse tag filter: %s", err),
 			)
 			return nil, diags
@@ -329,14 +329,14 @@ func (r *applicationConfigResourceFramework) mapAccessRulesFromState(ctx context
 				accessType = str
 			} else {
 				diags.AddError(
-					"Invalid attribute type",
+					ApplicationConfigErrInvalidAttributeType,
 					"access_type must be a string",
 				)
 				return accessRules, diags
 			}
 		} else {
 			diags.AddError(
-				"Missing attribute",
+				ApplicationConfigErrMissingAttribute,
 				"access_type attribute is required for access rule",
 			)
 			return accessRules, diags
@@ -348,14 +348,14 @@ func (r *applicationConfigResourceFramework) mapAccessRulesFromState(ctx context
 				relationType = str
 			} else {
 				diags.AddError(
-					"Invalid attribute type",
+					ApplicationConfigErrInvalidAttributeType,
 					"relation_type must be a string",
 				)
 				return accessRules, diags
 			}
 		} else {
 			diags.AddError(
-				"Missing attribute",
+				ApplicationConfigErrMissingAttribute,
 				"relation_type attribute is required for access rule",
 			)
 			return accessRules, diags

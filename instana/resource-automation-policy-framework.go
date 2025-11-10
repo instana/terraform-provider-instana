@@ -65,88 +65,88 @@ func NewAutomationPolicyResourceHandleFramework() ResourceHandleFramework[*resta
 		metaData: ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaAutomationPolicyFramework,
 			Schema: schema.Schema{
-				Description: "This resource manages automation policies in Instana.",
+				Description: AutomationPolicyDescResource,
 				Attributes: map[string]schema.Attribute{
 					"id": schema.StringAttribute{
 						Computed:    true,
-						Description: "The ID of the automation policy.",
+						Description: AutomationPolicyDescID,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
 					AutomationPolicyFieldName: schema.StringAttribute{
 						Required:    true,
-						Description: "The name of the automation policy.",
+						Description: AutomationPolicyDescName,
 					},
 					AutomationPolicyFieldDescription: schema.StringAttribute{
 						Required:    true,
-						Description: "The description of the automation policy.",
+						Description: AutomationPolicyDescDescription,
 					},
 					AutomationPolicyFieldTags: schema.ListAttribute{
 						ElementType: types.StringType,
 						Optional:    true,
-						Description: "The tags of the automation policy.",
+						Description: AutomationPolicyDescTags,
 					},
 					AutomationPolicyFieldTrigger: schema.SingleNestedAttribute{
 						Required:    true,
-						Description: "The trigger for the automation policy.",
+						Description: AutomationPolicyDescTrigger,
 						Attributes: map[string]schema.Attribute{
 							AutomationPolicyFieldId: schema.StringAttribute{
 								Required:    true,
-								Description: "Trigger (Instana event or Smart Alert) identifier.",
+								Description: AutomationPolicyDescTriggerID,
 							},
 							AutomationPolicyFieldType: schema.StringAttribute{
 								Required:    true,
-								Description: "Instana event or Smart Alert type.",
+								Description: AutomationPolicyDescTriggerType,
 								Validators: []validator.String{
 									stringvalidator.OneOf(supportedTriggerTypes...),
 								},
 							},
 							AutomationPolicyFieldName: schema.StringAttribute{
 								Optional:    true,
-								Description: "The name of the trigger.",
+								Description: AutomationPolicyDescTriggerName,
 							},
 							AutomationPolicyFieldDescription: schema.StringAttribute{
 								Optional:    true,
-								Description: "The description of the trigger.",
+								Description: AutomationPolicyDescTriggerDescription,
 							},
 						},
 					},
 					AutomationPolicyFieldTypeConfiguration: schema.ListNestedAttribute{
 						Required:    true,
-						Description: "A list of configurations with the list of actions to run and the mode (automatic or manual).",
+						Description: AutomationPolicyDescTypeConfiguration,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								AutomationPolicyFieldName: schema.StringAttribute{
 									Required:    true,
-									Description: "The policy type.",
+									Description: AutomationPolicyDescTypeConfigurationName,
 									Validators: []validator.String{
 										stringvalidator.OneOf(supportedPolicyTypes...),
 									},
 								},
 								AutomationPolicyFieldCondition: schema.SingleNestedAttribute{
 									Optional:    true,
-									Description: "The condition that selects a list of entities on which the policy is run. Only for automatic policy type.",
+									Description: AutomationPolicyDescCondition,
 									Attributes: map[string]schema.Attribute{
 										AutomationPolicyFieldQuery: schema.StringAttribute{
 											Required:    true,
-											Description: "Dynamic Focus Query string that selects a list of entities on which the policy is run.",
+											Description: AutomationPolicyDescConditionQuery,
 										},
 									},
 								},
 								AutomationPolicyFieldAction: schema.ListNestedAttribute{
 									Required:    true,
-									Description: "The configuration for the automation action.",
+									Description: AutomationPolicyDescAction,
 									NestedObject: schema.NestedAttributeObject{
 										Attributes: map[string]schema.Attribute{
 											"action": schema.SingleNestedAttribute{
 												Required:    true,
-												Description: "The automation action configuration.",
+												Description: AutomationPolicyDescActionAction,
 												Attributes:  GetAutomationActionSchemaAttributes(),
 											},
 											AutomationPolicyFieldAgentId: schema.StringAttribute{
 												Optional:    true,
-												Description: "The identifier of the agent host.",
+												Description: AutomationPolicyDescActionAgentID,
 											},
 										},
 									},
@@ -233,8 +233,8 @@ func (r *automationPolicyResourceFramework) mapTagsToState(ctx context.Context, 
 				elements[i] = types.StringValue(strTag)
 			} else {
 				diags.AddError(
-					"Error mapping tags",
-					fmt.Sprintf("Tag at index %d is not a string", i),
+					AutomationPolicyErrMappingTags,
+					fmt.Sprintf(AutomationPolicyErrTagNotString, i),
 				)
 				return types.ListNull(types.StringType), diags
 			}
@@ -242,8 +242,8 @@ func (r *automationPolicyResourceFramework) mapTagsToState(ctx context.Context, 
 		return types.ListValueMust(types.StringType, elements), diags
 	default:
 		diags.AddError(
-			"Error mapping tags",
-			"Tags are not in the expected format",
+			AutomationPolicyErrMappingTags,
+			AutomationPolicyErrTagsFormat,
 		)
 		return types.ListNull(types.StringType), diags
 	}

@@ -108,103 +108,103 @@ func NewLogAlertConfigResourceHandleFramework() ResourceHandleFramework[*restapi
 		metaData: ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaLogAlertConfigFramework,
 			Schema: schema.Schema{
-				Description: "This resource manages log alert configurations in Instana.",
+				Description: LogAlertConfigDescResource,
 				Attributes: map[string]schema.Attribute{
 					"id": schema.StringAttribute{
 						Computed:    true,
-						Description: "The ID of the log alert configuration.",
+						Description: LogAlertConfigDescID,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
 					LogAlertConfigFieldName: schema.StringAttribute{
 						Required:    true,
-						Description: "Name for the Log alert configuration",
+						Description: LogAlertConfigDescName,
 						Validators: []validator.String{
 							stringvalidator.LengthBetween(0, 256),
 						},
 					},
 					LogAlertConfigFieldDescription: schema.StringAttribute{
 						Required:    true,
-						Description: "The description text of the Log alert config",
+						Description: LogAlertConfigDescDescription,
 						Validators: []validator.String{
 							stringvalidator.LengthBetween(0, 65536),
 						},
 					},
 					LogAlertConfigFieldGracePeriod: schema.Int64Attribute{
 						Optional:    true,
-						Description: "The duration in milliseconds for which an alert remains open after conditions are no longer violated, with the alert auto-closing once the grace period expires.",
+						Description: LogAlertConfigDescGracePeriod,
 					},
 					LogAlertConfigFieldGranularity: schema.Int64Attribute{
 						Optional:    true,
-						Description: "The evaluation granularity used for detection of violations of the defined threshold. In other words, it defines the size of the tumbling window used",
+						Description: LogAlertConfigDescGranularity,
 						Validators: []validator.Int64{
 							int64validator.OneOf(int64(restapi.Granularity60000), int64(restapi.Granularity300000), int64(restapi.Granularity600000), int64(restapi.Granularity900000), int64(restapi.Granularity1200000), int64(restapi.Granularity1800000)),
 						},
 					},
 					LogAlertConfigFieldTagFilter: schema.StringAttribute{
 						Required:    true,
-						Description: "The tag filter expression used for this log alert",
+						Description: LogAlertConfigDescTagFilter,
 					},
 				},
 				Blocks: map[string]schema.Block{
 					LogAlertConfigFieldAlertChannels: schema.ListNestedBlock{
-						Description: "Set of alert channel IDs associated with the severity.",
+						Description: LogAlertConfigDescAlertChannels,
 						NestedObject: schema.NestedBlockObject{
 							Attributes: map[string]schema.Attribute{
 								ResourceFieldThresholdRuleWarningSeverity: schema.ListAttribute{
 									Optional:    true,
-									Description: "List of IDs of alert channels defined in Instana.",
+									Description: LogAlertConfigDescAlertChannelIDs,
 									ElementType: types.StringType,
 								},
 								ResourceFieldThresholdRuleCriticalSeverity: schema.ListAttribute{
 									Optional:    true,
-									Description: "List of IDs of alert channels defined in Instana.",
+									Description: LogAlertConfigDescAlertChannelIDs,
 									ElementType: types.StringType,
 								},
 							},
 						},
 					},
 					LogAlertConfigFieldGroupBy: schema.ListNestedBlock{
-						Description: "The grouping tags used to group the metric results.",
+						Description: LogAlertConfigDescGroupBy,
 						NestedObject: schema.NestedBlockObject{
 							Attributes: map[string]schema.Attribute{
 								LogAlertConfigFieldGroupByTagName: schema.StringAttribute{
 									Required:    true,
-									Description: "The tag name used for grouping",
+									Description: LogAlertConfigDescGroupByTagName,
 								},
 								LogAlertConfigFieldGroupByKey: schema.StringAttribute{
 									Optional:    true,
-									Description: "The key used for grouping",
+									Description: LogAlertConfigDescGroupByKey,
 								},
 							},
 						},
 					},
 					LogAlertConfigFieldRules: schema.ListNestedBlock{
-						Description: "Configuration for the log alert rule",
+						Description: LogAlertConfigDescRules,
 						NestedObject: schema.NestedBlockObject{
 							Attributes: map[string]schema.Attribute{
 								LogAlertConfigFieldMetricName: schema.StringAttribute{
 									Required:    true,
-									Description: "The metric name of the log alert rule",
+									Description: LogAlertConfigDescMetricName,
 								},
 								LogAlertConfigFieldAlertType: schema.StringAttribute{
 									Optional:    true,
-									Description: "The type of the log alert rule (only 'log.count' is supported)",
+									Description: LogAlertConfigDescAlertType,
 									Validators: []validator.String{
 										stringvalidator.OneOf(LogAlertTypeLogCount),
 									},
 								},
 								LogAlertConfigFieldAggregation: schema.StringAttribute{
 									Optional:    true,
-									Description: "The aggregation method to use for the log alert (only 'SUM' is supported)",
+									Description: LogAlertConfigDescAggregation,
 									Validators: []validator.String{
 										stringvalidator.OneOf(string(restapi.SumAggregation)),
 									},
 								},
 								LogAlertConfigFieldThresholdOperator: schema.StringAttribute{
 									Required:    true,
-									Description: "The operator which will be applied to evaluate the threshold",
+									Description: LogAlertConfigDescThresholdOperator,
 									Validators: []validator.String{
 										stringvalidator.OneOf(restapi.SupportedThresholdOperators.ToStringSlice()...),
 									},
@@ -212,7 +212,7 @@ func NewLogAlertConfigResourceHandleFramework() ResourceHandleFramework[*restapi
 							},
 							Blocks: map[string]schema.Block{
 								LogAlertConfigFieldThreshold: schema.ListNestedBlock{
-									Description: "Threshold configuration for different severity levels",
+									Description: LogAlertConfigDescThreshold,
 									NestedObject: schema.NestedBlockObject{
 										Blocks: map[string]schema.Block{
 											LogAlertConfigFieldWarning:  StaticThresholdBlockSchema(),
@@ -230,13 +230,13 @@ func NewLogAlertConfigResourceHandleFramework() ResourceHandleFramework[*restapi
 						},
 					},
 					LogAlertConfigFieldTimeThreshold: schema.SingleNestedBlock{
-						Description: "Indicates the type of violation of the defined threshold.",
+						Description: LogAlertConfigDescTimeThreshold,
 						Blocks: map[string]schema.Block{
 							"violations_in_sequence": schema.SingleNestedBlock{
-								Description: "Time threshold base on violations in sequence",
+								Description: LogAlertConfigDescViolationsInSequence,
 								Attributes: map[string]schema.Attribute{
 									"time_window": schema.Int64Attribute{
-										Description: "Time window in milliseconds.",
+										Description: LogAlertConfigDescTimeWindow,
 										Required:    true,
 									},
 								},
@@ -290,8 +290,8 @@ func (r *logAlertConfigResourceFramework) UpdateState(ctx context.Context, state
 		normalizedTagFilterString, err := tagfilter.MapTagFilterToNormalizedString(config.TagFilterExpression)
 		if err != nil {
 			diags.AddError(
-				"Error normalizing tag filter",
-				"Could not normalize tag filter: "+err.Error(),
+				LogAlertConfigErrNormalizingTagFilter,
+				LogAlertConfigErrNormalizingTagFilterMsg+err.Error(),
 			)
 			return diags
 		}
@@ -382,8 +382,8 @@ func (r *logAlertConfigResourceFramework) MapStateToDataObject(ctx context.Conte
 		tagFilter, err = r.mapTagFilterExpressionFromState(model.TagFilter.ValueString())
 		if err != nil {
 			diags.AddError(
-				"Error parsing tag filter",
-				"Could not parse tag filter: "+err.Error(),
+				LogAlertConfigErrParsingTagFilter,
+				LogAlertConfigErrParsingTagFilterMsg+err.Error(),
 			)
 			return nil, diags
 		}

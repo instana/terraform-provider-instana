@@ -59,47 +59,47 @@ func NewCustomDashboardResourceHandleFramework() ResourceHandleFramework[*restap
 		metaData: ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaCustomDashboardFramework,
 			Schema: schema.Schema{
-				Description: "This resource manages custom dashboards in Instana.",
+				Description: CustomDashboardDescResource,
 				Attributes: map[string]schema.Attribute{
 					"id": schema.StringAttribute{
 						Computed:    true,
-						Description: "The ID of the custom dashboard.",
+						Description: CustomDashboardDescID,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
 					CustomDashboardFieldTitle: schema.StringAttribute{
 						Required:    true,
-						Description: "The title of the custom dashboard.",
+						Description: CustomDashboardDescTitle,
 					},
 					CustomDashboardFieldWidgets: schema.StringAttribute{
 						Required:    true,
-						Description: "The json array containing the widgets configured for the custom dashboard.",
+						Description: CustomDashboardDescWidgets,
 						// Note: In Plugin Framework, we handle JSON normalization in the resource methods
 					},
 				},
 				Blocks: map[string]schema.Block{
 					CustomDashboardFieldAccessRule: schema.ListNestedBlock{
-						Description: "The access rules applied to the custom dashboard.",
+						Description: CustomDashboardDescAccessRule,
 						NestedObject: schema.NestedBlockObject{
 							Attributes: map[string]schema.Attribute{
 								CustomDashboardFieldAccessRuleAccessType: schema.StringAttribute{
 									Required:    true,
-									Description: "The access type of the given access rule.",
+									Description: CustomDashboardDescAccessRuleAccessType,
 									Validators: []validator.String{
 										stringvalidator.OneOf(restapi.SupportedAccessTypes.ToStringSlice()...),
 									},
 								},
 								CustomDashboardFieldAccessRuleRelatedID: schema.StringAttribute{
 									Optional:    true,
-									Description: "The id of the related entity (user, api_token, etc.) of the given access rule.",
+									Description: CustomDashboardDescAccessRuleRelatedID,
 									Validators: []validator.String{
 										stringvalidator.LengthBetween(0, 64),
 									},
 								},
 								CustomDashboardFieldAccessRuleRelationType: schema.StringAttribute{
 									Required:    true,
-									Description: "The relation type of the given access rule.",
+									Description: CustomDashboardDescAccessRuleRelationType,
 									Validators: []validator.String{
 										stringvalidator.OneOf(restapi.SupportedRelationTypes.ToStringSlice()...),
 									},
@@ -151,8 +151,8 @@ func (r *customDashboardResourceFramework) UpdateState(ctx context.Context, stat
 		widgetsBytes, err := dashboard.Widgets.MarshalJSON()
 		if err != nil {
 			diags.AddError(
-				"Error marshaling widgets",
-				fmt.Sprintf("Failed to marshal widgets: %s", err),
+				CustomDashboardErrMarshalWidgets,
+				fmt.Sprintf(CustomDashboardErrMarshalWidgetsFailed, err),
 			)
 			return diags
 		}

@@ -10,28 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// DataSourceInstanaBuiltinEventFramework the name of the terraform-provider-instana data source to read builtin events
-const DataSourceInstanaBuiltinEventFramework = "builtin_event_spec"
-
-const (
-	//BuiltinEventSpecificationFieldName constant value for the schema field name
-	BuiltinEventSpecificationFieldName = "name"
-	//BuiltinEventSpecificationFieldDescription constant value for the schema field description
-	BuiltinEventSpecificationFieldDescription = "description"
-	//BuiltinEventSpecificationFieldShortPluginID constant value for the schema field short_plugin_id
-	BuiltinEventSpecificationFieldShortPluginID = "short_plugin_id"
-	//BuiltinEventSpecificationFieldSeverity constant value for the schema field severity
-	BuiltinEventSpecificationFieldSeverity = "severity"
-	//BuiltinEventSpecificationFieldSeverityCode constant value for the schema field severity_code
-	BuiltinEventSpecificationFieldSeverityCode = "severity_code"
-	//BuiltinEventSpecificationFieldTriggering constant value for the schema field triggering
-	BuiltinEventSpecificationFieldTriggering = "triggering"
-	//BuiltinEventSpecificationFieldEnabled constant value for the schema field enabled
-	BuiltinEventSpecificationFieldEnabled = "enabled"
-	//DataSourceBuiltinEvent the name of the terraform-provider-instana data sourcefor builtin event specifications
-	DataSourceBuiltinEvent = "instana_builtin_event_spec"
-	//
-)
+// Constants are now defined in data-source-builtin-event-constants.go
 
 // BuiltinEventDataSourceModel represents the data model for the builtin event data source
 type BuiltinEventDataSourceModel struct {
@@ -60,38 +39,38 @@ func (d *builtinEventDataSourceFramework) Metadata(_ context.Context, req dataso
 
 func (d *builtinEventDataSourceFramework) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Data source for an Instana builtin event specification. Builtin events are predefined events in Instana.",
+		Description: BuiltinEventDescDataSource,
 		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				Description: "The ID of the builtin event.",
+			BuiltinEventFieldID: schema.StringAttribute{
+				Description: BuiltinEventDescID,
 				Computed:    true,
 			},
 			BuiltinEventSpecificationFieldName: schema.StringAttribute{
-				Description: "The name of the builtin event.",
+				Description: BuiltinEventDescName,
 				Required:    true,
 			},
 			BuiltinEventSpecificationFieldDescription: schema.StringAttribute{
-				Description: "The description text of the builtin event.",
+				Description: BuiltinEventDescDescription,
 				Computed:    true,
 			},
 			BuiltinEventSpecificationFieldShortPluginID: schema.StringAttribute{
-				Description: "The plugin id for which the builtin event is created.",
+				Description: BuiltinEventDescShortPluginID,
 				Required:    true,
 			},
 			BuiltinEventSpecificationFieldSeverity: schema.StringAttribute{
-				Description: "The severity (WARNING, CRITICAL, etc.) of the builtin event.",
+				Description: BuiltinEventDescSeverity,
 				Computed:    true,
 			},
 			BuiltinEventSpecificationFieldSeverityCode: schema.Int64Attribute{
-				Description: "The severity code used by Instana API (5, 10, etc.) of the builtin event.",
+				Description: BuiltinEventDescSeverityCode,
 				Computed:    true,
 			},
 			BuiltinEventSpecificationFieldTriggering: schema.BoolAttribute{
-				Description: "Indicates if an incident is triggered the builtin event or not.",
+				Description: BuiltinEventDescTriggering,
 				Computed:    true,
 			},
 			BuiltinEventSpecificationFieldEnabled: schema.BoolAttribute{
-				Description: "Indicates if the builtin event is enabled or not.",
+				Description: BuiltinEventDescEnabled,
 				Computed:    true,
 			},
 		},
@@ -106,8 +85,8 @@ func (d *builtinEventDataSourceFramework) Configure(_ context.Context, req datas
 	providerMeta, ok := req.ProviderData.(*ProviderMeta)
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *ProviderMeta, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			BuiltinEventErrUnexpectedConfigureType,
+			fmt.Sprintf(BuiltinEventErrUnexpectedConfigureTypeDetail, req.ProviderData),
 		)
 		return
 	}
@@ -130,8 +109,8 @@ func (d *builtinEventDataSourceFramework) Read(ctx context.Context, req datasour
 	events, err := d.instanaAPI.BuiltinEventSpecifications().GetAll()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error reading builtin events",
-			fmt.Sprintf("Could not read builtin events: %s", err),
+			BuiltinEventErrReadingEvents,
+			fmt.Sprintf(BuiltinEventErrReadingEventsDetail, err),
 		)
 		return
 	}
@@ -147,8 +126,8 @@ func (d *builtinEventDataSourceFramework) Read(ctx context.Context, req datasour
 
 	if matchingEvent == nil {
 		resp.Diagnostics.AddError(
-			"Builtin event not found",
-			fmt.Sprintf("No built in event found for name '%s' and short plugin ID '%s'", name, shortPluginID),
+			BuiltinEventErrNotFound,
+			fmt.Sprintf(BuiltinEventErrNotFoundDetail, name, shortPluginID),
 		)
 		return
 	}
@@ -163,8 +142,8 @@ func (d *builtinEventDataSourceFramework) Read(ctx context.Context, req datasour
 	severity, err := ConvertSeverityFromInstanaAPIToTerraformRepresentation(matchingEvent.Severity)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error converting severity",
-			fmt.Sprintf("Could not convert severity: %s", err),
+			BuiltinEventErrConvertingSeverity,
+			fmt.Sprintf(BuiltinEventErrConvertingSeverityDetail, err),
 		)
 		return
 	}

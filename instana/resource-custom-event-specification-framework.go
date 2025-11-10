@@ -183,53 +183,53 @@ func (r *customEventSpecificationResourceFramework) GetRestResource(api restapi.
 // createCustomEventSpecificationSchema creates the schema for the custom event specification resource
 func createCustomEventSpecificationSchema() schema.Schema {
 	return schema.Schema{
-		Description: "This resource represents a custom event specification in Instana",
+		Description: CustomEventSpecificationResourceDescResource,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Description: "The ID of the custom event specification",
+				Description: CustomEventSpecificationResourceDescID,
 				Computed:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"name": schema.StringAttribute{
-				Description: "The name of the custom event specification",
+				Description: CustomEventSpecificationResourceDescName,
 				Required:    true,
 			},
 			"entity_type": schema.StringAttribute{
-				Description: "The entity type of the custom event specification",
+				Description: CustomEventSpecificationResourceDescEntityType,
 				Required:    true,
 			},
 			"query": schema.StringAttribute{
-				Description: "The query of the custom event specification",
+				Description: CustomEventSpecificationResourceDescQuery,
 				Optional:    true,
 				Computed:    true,
 				Default:     stringdefault.StaticString(""),
 			},
 			"triggering": schema.BoolAttribute{
-				Description: "Indicates if the custom event specification is triggering",
+				Description: CustomEventSpecificationResourceDescTriggering,
 				Optional:    true,
 				Computed:    true,
 				Default:     booldefault.StaticBool(false),
 			},
 			"description": schema.StringAttribute{
-				Description: "The description of the custom event specification",
+				Description: CustomEventSpecificationResourceDescDescription,
 				Optional:    true,
 				Computed:    true,
 				Default:     stringdefault.StaticString(""),
 			},
 			"expiration_time": schema.Int64Attribute{
-				Description: "The expiration time of the custom event specification",
+				Description: CustomEventSpecificationResourceDescExpirationTime,
 				Optional:    true,
 			},
 			"enabled": schema.BoolAttribute{
-				Description: "Indicates if the custom event specification is enabled",
+				Description: CustomEventSpecificationResourceDescEnabled,
 				Optional:    true,
 				Computed:    true,
 				Default:     booldefault.StaticBool(true),
 			},
 			"rule_logical_operator": schema.StringAttribute{
-				Description: "The logical operator for the rules (AND, OR)",
+				Description: CustomEventSpecificationResourceDescRuleLogicalOperator,
 				Optional:    true,
 				Computed:    true,
 				Default:     stringdefault.StaticString("AND"),
@@ -240,197 +240,197 @@ func createCustomEventSpecificationSchema() schema.Schema {
 		},
 		Blocks: map[string]schema.Block{
 			"rules": schema.SingleNestedBlock{
-				Description: "The rules of the custom event specification",
+				Description: CustomEventSpecificationResourceDescRules,
 				Blocks: map[string]schema.Block{
 					"entity_count": schema.ListNestedBlock{
-						Description: "Entity count rules",
+						Description: CustomEventSpecificationResourceDescEntityCountRules,
 						NestedObject: schema.NestedBlockObject{
 							Attributes: map[string]schema.Attribute{
 								"severity": schema.StringAttribute{
-									Description: "The severity of the rule (warning, critical)",
+									Description: CustomEventSpecificationResourceDescSeverity,
 									Required:    true,
 									Validators: []validator.String{
 										stringvalidator.OneOf("warning", "critical"),
 									},
 								},
 								"condition_operator": schema.StringAttribute{
-									Description: "The condition operator of the rule",
+									Description: CustomEventSpecificationResourceDescConditionOperator,
 									Required:    true,
 								},
 								"condition_value": schema.Float64Attribute{
-									Description: "The condition value of the rule",
+									Description: CustomEventSpecificationResourceDescConditionValue,
 									Required:    true,
 								},
 							},
 						},
 					},
 					"entity_count_verification": schema.ListNestedBlock{
-						Description: "Entity count verification rules",
+						Description: CustomEventSpecificationResourceDescEntityCountVerification,
 						NestedObject: schema.NestedBlockObject{
 							Attributes: map[string]schema.Attribute{
 								"severity": schema.StringAttribute{
-									Description: "The severity of the rule (warning, critical)",
+									Description: CustomEventSpecificationResourceDescSeverity,
 									Required:    true,
 									Validators: []validator.String{
 										stringvalidator.OneOf("warning", "critical"),
 									},
 								},
 								"condition_operator": schema.StringAttribute{
-									Description: "The condition operator of the rule",
+									Description: CustomEventSpecificationResourceDescConditionOperator,
 									Required:    true,
 								},
 								"condition_value": schema.Float64Attribute{
-									Description: "The condition value of the rule",
+									Description: CustomEventSpecificationResourceDescConditionValue,
 									Required:    true,
 								},
 								"matching_entity_type": schema.StringAttribute{
-									Description: "The matching entity type of the rule",
+									Description: CustomEventSpecificationResourceDescMatchingEntityType,
 									Required:    true,
 								},
 								"matching_operator": schema.StringAttribute{
-									Description: "The matching operator of the rule",
+									Description: CustomEventSpecificationResourceDescMatchingOperator,
 									Required:    true,
 								},
 								"matching_entity_label": schema.StringAttribute{
-									Description: "The matching entity label of the rule",
+									Description: CustomEventSpecificationResourceDescMatchingEntityLabel,
 									Required:    true,
 								},
 							},
 						},
 					},
 					"entity_verification": schema.ListNestedBlock{
-						Description: "Entity verification rules",
+						Description: CustomEventSpecificationResourceDescEntityVerification,
 						NestedObject: schema.NestedBlockObject{
 							Attributes: map[string]schema.Attribute{
 								"severity": schema.StringAttribute{
-									Description: "The severity of the rule (warning, critical)",
+									Description: CustomEventSpecificationResourceDescSeverity,
 									Required:    true,
 									Validators: []validator.String{
 										stringvalidator.OneOf("warning", "critical"),
 									},
 								},
 								"matching_entity_type": schema.StringAttribute{
-									Description: "The matching entity type of the rule",
+									Description: CustomEventSpecificationResourceDescMatchingEntityType,
 									Required:    true,
 								},
 								"matching_operator": schema.StringAttribute{
-									Description: "The matching operator of the rule",
+									Description: CustomEventSpecificationResourceDescMatchingOperator,
 									Required:    true,
 								},
 								"matching_entity_label": schema.StringAttribute{
-									Description: "The matching entity label of the rule",
+									Description: CustomEventSpecificationResourceDescMatchingEntityLabel,
 									Required:    true,
 								},
 								"offline_duration": schema.Int64Attribute{
-									Description: "The offline duration of the rule",
+									Description: CustomEventSpecificationResourceDescOfflineDuration,
 									Required:    true,
 								},
 							},
 						},
 					},
 					"host_availability": schema.ListNestedBlock{
-						Description: "Host availability rules",
+						Description: CustomEventSpecificationResourceDescHostAvailability,
 						NestedObject: schema.NestedBlockObject{
 							Attributes: map[string]schema.Attribute{
 								"severity": schema.StringAttribute{
-									Description: "The severity of the rule (warning, critical)",
+									Description: CustomEventSpecificationResourceDescSeverity,
 									Required:    true,
 									Validators: []validator.String{
 										stringvalidator.OneOf("warning", "critical"),
 									},
 								},
 								"offline_duration": schema.Int64Attribute{
-									Description: "The offline duration of the rule",
+									Description: CustomEventSpecificationResourceDescOfflineDuration,
 									Required:    true,
 								},
 								"close_after": schema.Int64Attribute{
-									Description: "The close after duration of the rule",
+									Description: CustomEventSpecificationResourceDescCloseAfter,
 									Optional:    true,
 								},
 								"tag_filter": schema.StringAttribute{
-									Description: "The tag filter of the rule",
+									Description: CustomEventSpecificationResourceDescTagFilter,
 									Optional:    true,
 								},
 							},
 						},
 					},
 					"system": schema.ListNestedBlock{
-						Description: "System rules",
+						Description: CustomEventSpecificationResourceDescSystemRules,
 						NestedObject: schema.NestedBlockObject{
 							Attributes: map[string]schema.Attribute{
 								"severity": schema.StringAttribute{
-									Description: "The severity of the rule (warning, critical)",
+									Description: CustomEventSpecificationResourceDescSeverity,
 									Required:    true,
 									Validators: []validator.String{
 										stringvalidator.OneOf("warning", "critical"),
 									},
 								},
 								"system_rule_id": schema.StringAttribute{
-									Description: "The system rule ID",
+									Description: CustomEventSpecificationResourceDescSystemRuleID,
 									Required:    true,
 								},
 							},
 						},
 					},
 					"threshold": schema.ListNestedBlock{
-						Description: "Threshold rules",
+						Description: CustomEventSpecificationResourceDescThresholdRules,
 						NestedObject: schema.NestedBlockObject{
 							Attributes: map[string]schema.Attribute{
 								"severity": schema.StringAttribute{
-									Description: "The severity of the rule (warning, critical)",
+									Description: CustomEventSpecificationResourceDescSeverity,
 									Required:    true,
 									Validators: []validator.String{
 										stringvalidator.OneOf("warning", "critical"),
 									},
 								},
 								"metric_name": schema.StringAttribute{
-									Description: "The metric name of the rule",
+									Description: CustomEventSpecificationResourceDescMetricName,
 									Required:    true,
 								},
 								"rollup": schema.Int64Attribute{
-									Description: "The rollup of the rule",
+									Description: CustomEventSpecificationResourceDescRollup,
 									Required:    true,
 								},
 								"window": schema.Int64Attribute{
-									Description: "The window of the rule",
+									Description: CustomEventSpecificationResourceDescWindow,
 									Required:    true,
 								},
 								"aggregation": schema.StringAttribute{
-									Description: "The aggregation of the rule",
+									Description: CustomEventSpecificationResourceDescAggregation,
 									Required:    true,
 								},
 								"condition_operator": schema.StringAttribute{
-									Description: "The condition operator of the rule",
+									Description: CustomEventSpecificationResourceDescConditionOperator,
 									Required:    true,
 								},
 								"condition_value": schema.Float64Attribute{
-									Description: "The condition value of the rule",
+									Description: CustomEventSpecificationResourceDescConditionValue,
 									Required:    true,
 								},
 							},
 							Blocks: map[string]schema.Block{
 								"metric_pattern": schema.ListNestedBlock{
-									Description: "The metric pattern of the rule",
+									Description: CustomEventSpecificationResourceDescMetricPattern,
 									NestedObject: schema.NestedBlockObject{
 										Attributes: map[string]schema.Attribute{
 											"prefix": schema.StringAttribute{
-												Description: "The prefix of the metric pattern",
+												Description: CustomEventSpecificationResourceDescMetricPatternPrefix,
 												Required:    true,
 											},
 											"postfix": schema.StringAttribute{
-												Description: "The postfix of the metric pattern",
+												Description: CustomEventSpecificationResourceDescMetricPatternPostfix,
 												Optional:    true,
 												Computed:    true,
 												Default:     stringdefault.StaticString(""),
 											},
 											"placeholder": schema.StringAttribute{
-												Description: "The placeholder of the metric pattern",
+												Description: CustomEventSpecificationResourceDescMetricPatternPlaceholder,
 												Optional:    true,
 												Computed:    true,
 												Default:     stringdefault.StaticString(""),
 											},
 											"operator": schema.StringAttribute{
-												Description: "The operator of the metric pattern",
+												Description: CustomEventSpecificationResourceDescMetricPatternOperator,
 												Optional:    true,
 												Computed:    true,
 												Default:     stringdefault.StaticString("EQUALS"),
@@ -1010,8 +1010,8 @@ func (r *customEventSpecificationResourceFramework) MapStateToDataObject(ctx con
 					expr, err := parser.Parse(tagFilterStr)
 					if err != nil {
 						diags.AddError(
-							"Error parsing tag filter",
-							fmt.Sprintf("Failed to parse tag filter: %s", err),
+							CustomEventSpecificationResourceErrParseTagFilter,
+							fmt.Sprintf(CustomEventSpecificationResourceErrParseTagFilterMsg, err),
 						)
 						return nil, diags
 					}

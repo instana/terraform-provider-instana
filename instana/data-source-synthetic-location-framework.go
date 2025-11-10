@@ -11,19 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// DataSourceInstanaSyntheticLocationFramework the name of the terraform-provider-instana data source to read synthetic locations
-const DataSourceInstanaSyntheticLocationFramework = "synthetic_location"
-
-const (
-	//SyntheticLocationFieldLabel constant value for the schema field label
-	SyntheticLocationFieldLabel = "label"
-	//SyntheticLocationFieldDescription constant value for the computed schema field description
-	SyntheticLocationFieldDescription = "description"
-	//SyntheticLocationFieldLocationType constant value for the schema field location_type
-	SyntheticLocationFieldLocationType = "location_type"
-	//DataSourceSyntheticLocation the name of the terraform-provider-instana data sourcefor synthetic location specifications
-	DataSourceSyntheticLocation = "instana_synthetic_location"
-)
+// Constants are now defined in data-source-synthetic-location-constants.go
 
 // SyntheticLocationDataSourceModel represents the data model for the synthetic location data source
 type SyntheticLocationDataSourceModel struct {
@@ -48,23 +36,23 @@ func (d *syntheticLocationDataSourceFramework) Metadata(_ context.Context, req d
 
 func (d *syntheticLocationDataSourceFramework) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Data source for Instana synthetic locations. Synthetic locations are the locations from which synthetic tests are executed.",
+		Description: SyntheticLocationDescDataSource,
 		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				Description: "The ID of the synthetic location.",
+			SyntheticLocationFieldID: schema.StringAttribute{
+				Description: SyntheticLocationDescID,
 				Computed:    true,
 			},
 			SyntheticLocationFieldLabel: schema.StringAttribute{
-				Description: "Friendly name of the Synthetic Location",
+				Description: SyntheticLocationDescLabel,
 				Optional:    true,
 			},
 			SyntheticLocationFieldDescription: schema.StringAttribute{
-				Description: "The description of the Synthetic location",
+				Description: SyntheticLocationDescDescription,
 				Optional:    true,
 				Computed:    true,
 			},
 			SyntheticLocationFieldLocationType: schema.StringAttribute{
-				Description: "Indicates if the location is public or private",
+				Description: SyntheticLocationDescLocationType,
 				Optional:    true,
 				Validators:  []validator.String{
 					// We'll implement custom validators in the Configure method
@@ -82,8 +70,8 @@ func (d *syntheticLocationDataSourceFramework) Configure(_ context.Context, req 
 	providerMeta, ok := req.ProviderData.(*ProviderMeta)
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *ProviderMeta, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			SyntheticLocationErrUnexpectedConfigureType,
+			fmt.Sprintf(SyntheticLocationErrUnexpectedConfigureTypeDetail, req.ProviderData),
 		)
 		return
 	}
@@ -102,8 +90,8 @@ func (d *syntheticLocationDataSourceFramework) Read(ctx context.Context, req dat
 	syntheticLocations, err := d.instanaAPI.SyntheticLocation().GetAll()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error reading synthetic locations",
-			fmt.Sprintf("Could not read synthetic locations: %s", err),
+			SyntheticLocationErrReadingLocations,
+			fmt.Sprintf(SyntheticLocationErrReadingLocationsDetail, err),
 		)
 		return
 	}
@@ -122,8 +110,8 @@ func (d *syntheticLocationDataSourceFramework) Read(ctx context.Context, req dat
 
 	if matchingLocation == nil {
 		resp.Diagnostics.AddError(
-			"No matching synthetic location found",
-			fmt.Sprintf("No synthetic location found with label '%s' and location type '%s'", label, locationType),
+			SyntheticLocationErrNotFound,
+			fmt.Sprintf(SyntheticLocationErrNotFoundDetail, label, locationType),
 		)
 		return
 	}

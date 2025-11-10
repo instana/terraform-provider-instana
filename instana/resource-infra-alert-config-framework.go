@@ -124,80 +124,80 @@ func NewInfraAlertConfigResourceHandleFramework() ResourceHandleFramework[*resta
 		metaData: ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaInfraAlertConfigFramework,
 			Schema: schema.Schema{
-				Description: "This resource represents an infrastructure alert configuration in Instana",
+				Description: InfraAlertConfigDescResource,
 				Attributes: map[string]schema.Attribute{
 					"id": schema.StringAttribute{
-						Description: "The ID of the infrastructure alert configuration",
+						Description: InfraAlertConfigDescID,
 						Computed:    true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
 					"name": schema.StringAttribute{
-						Description: "The name of the infrastructure alert configuration",
+						Description: InfraAlertConfigDescName,
 						Required:    true,
 					},
 					"description": schema.StringAttribute{
-						Description: "The description of the infrastructure alert configuration",
+						Description: InfraAlertConfigDescDescription,
 						Optional:    true,
 					},
 					"tag_filter": schema.StringAttribute{
-						Description: "The tag filter expression for the infrastructure alert configuration",
+						Description: InfraAlertConfigDescTagFilter,
 						Optional:    true,
 					},
 					"group_by": schema.ListAttribute{
-						Description: "The list of tags to group by",
+						Description: InfraAlertConfigDescGroupBy,
 						Optional:    true,
 						ElementType: types.StringType,
 					},
 					"granularity": schema.Int64Attribute{
-						Description: "The granularity of the infrastructure alert configuration",
+						Description: InfraAlertConfigDescGranularity,
 						Required:    true,
 					},
 
 					"evaluation_type": schema.StringAttribute{
-						Description: "The evaluation type of the infrastructure alert configuration",
+						Description: InfraAlertConfigDescEvaluationType,
 						Required:    true,
 					},
 				},
 				Blocks: map[string]schema.Block{
 					"rules": schema.ListNestedBlock{
-						Description: "The rules configuration",
+						Description: InfraAlertConfigDescRules,
 						//Optional:    true,
 						NestedObject: schema.NestedBlockObject{
 							Blocks: map[string]schema.Block{
 								"generic_rule": schema.SingleNestedBlock{
-									Description: "The generic rule configuration",
+									Description: InfraAlertConfigDescGenericRule,
 
 									Attributes: map[string]schema.Attribute{
 										"metric_name": schema.StringAttribute{
-											Description: "The metric name for the generic rule",
+											Description: InfraAlertConfigDescMetricName,
 											Required:    true,
 										},
 										"entity_type": schema.StringAttribute{
-											Description: "The entity type for the generic rule",
+											Description: InfraAlertConfigDescEntityType,
 											Required:    true,
 										},
 										"aggregation": schema.StringAttribute{
-											Description: "The aggregation for the generic rule",
+											Description: InfraAlertConfigDescAggregation,
 											Required:    true,
 										},
 										"cross_series_aggregation": schema.StringAttribute{
-											Description: "The cross series aggregation for the generic rule",
+											Description: InfraAlertConfigDescCrossSeriesAggregation,
 											Required:    true,
 										},
 										"regex": schema.BoolAttribute{
-											Description: "Whether regex is enabled for the generic rule",
+											Description: InfraAlertConfigDescRegex,
 											Required:    true,
 										},
 										"threshold_operator": schema.StringAttribute{
-											Description: "The threshold operator for the generic rule",
+											Description: InfraAlertConfigDescThresholdOperator,
 											Required:    true,
 										},
 									},
 									Blocks: map[string]schema.Block{
 										"threshold": schema.ListNestedBlock{
-											Description: "Threshold configuration for different severity levels",
+											Description: InfraAlertConfigDescThreshold,
 											NestedObject: schema.NestedBlockObject{
 												Blocks: map[string]schema.Block{
 													"warning":  StaticAndAdaptiveThresholdBlockSchema(),
@@ -215,31 +215,31 @@ func NewInfraAlertConfigResourceHandleFramework() ResourceHandleFramework[*resta
 					},
 					"custom_payload_field": GetCustomPayloadFieldsSchema(),
 					"time_threshold": schema.SingleNestedBlock{
-						Description: "Indicates the type of violation of the defined threshold.",
+						Description: InfraAlertConfigDescTimeThreshold,
 						Blocks: map[string]schema.Block{
 							"violations_in_sequence": schema.SingleNestedBlock{
-								Description: "Time threshold base on violations in sequence",
+								Description: InfraAlertConfigDescViolationsInSequence,
 								Attributes: map[string]schema.Attribute{
 									"time_window": schema.Int64Attribute{
 										Required:    true,
-										Description: "The time window if the time threshold",
+										Description: InfraAlertConfigDescTimeWindow,
 									},
 								},
 							},
 						},
 					},
 					"alert_channels": schema.ListNestedBlock{
-						Description: "Set of alert channel IDs associated with the severity.",
+						Description: InfraAlertConfigDescAlertChannels,
 						NestedObject: schema.NestedBlockObject{
 							Attributes: map[string]schema.Attribute{
 								ResourceFieldThresholdRuleWarningSeverity: schema.ListAttribute{
 									Optional:    true,
-									Description: "List of IDs of alert channels defined in Instana.",
+									Description: InfraAlertConfigDescAlertChannelIDs,
 									ElementType: types.StringType,
 								},
 								ResourceFieldThresholdRuleCriticalSeverity: schema.ListAttribute{
 									Optional:    true,
-									Description: "List of IDs of alert channels defined in Instana.",
+									Description: InfraAlertConfigDescAlertChannelIDs,
 									ElementType: types.StringType,
 								},
 							},
@@ -283,8 +283,8 @@ func (r *infraAlertConfigResourceFramework) UpdateState(ctx context.Context, sta
 		tagFilterString, err := tagfilter.MapTagFilterToNormalizedString(resource.TagFilterExpression)
 		if err != nil {
 			diags.AddError(
-				"Error mapping tag filter",
-				fmt.Sprintf("Failed to map tag filter: %s", err),
+				InfraAlertConfigErrMappingTagFilter,
+				fmt.Sprintf(InfraAlertConfigErrMappingTagFilterMsg, err),
 			)
 			return diags
 		}
@@ -492,8 +492,8 @@ func (r *infraAlertConfigResourceFramework) MapStateToDataObject(ctx context.Con
 		expr, err := parser.Parse(tagFilterStr)
 		if err != nil {
 			diags.AddError(
-				"Error parsing tag filter",
-				fmt.Sprintf("Failed to parse tag filter: %s", err),
+				InfraAlertConfigErrParsingTagFilter,
+				fmt.Sprintf(InfraAlertConfigErrParsingTagFilterMsg, err),
 			)
 			return nil, diags
 		}
