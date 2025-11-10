@@ -411,6 +411,15 @@ func (r *alertingChannelResourceFramework) SetComputedFields(_ context.Context, 
 func (r *alertingChannelResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, alertingChannel *restapi.AlertingChannel) diag.Diagnostics {
 	var diags diag.Diagnostics
 
+	// Get the plan model to preserve sensitive fields
+	var planModel AlertingChannelModel
+	if plan != nil {
+		diags.Append(plan.Get(ctx, &planModel)...)
+		if diags.HasError() {
+			return diags
+		}
+	}
+
 	// Create a model and populate it with values from the alerting channel
 	model := AlertingChannelModel{
 		ID:   types.StringValue(alertingChannel.ID),
@@ -486,14 +495,14 @@ func (r *alertingChannelResourceFramework) UpdateState(ctx context.Context, stat
 		}
 		model.GoogleChat = googleChatChannel
 	case restapi.ServiceNowChannelType:
-		serviceNowChannel, serviceNowDiags := r.mapServiceNowChannelToState(ctx, alertingChannel)
+		serviceNowChannel, serviceNowDiags := r.mapServiceNowChannelToState(ctx, alertingChannel, planModel.ServiceNow)
 		if serviceNowDiags.HasError() {
 			diags.Append(serviceNowDiags...)
 			return diags
 		}
 		model.ServiceNow = serviceNowChannel
 	case restapi.ServiceNowApplicationChannelType:
-		serviceNowEnhancedChannel, serviceNowEnhancedDiags := r.mapServiceNowApplicationChannelToState(ctx, alertingChannel)
+		serviceNowEnhancedChannel, serviceNowEnhancedDiags := r.mapServiceNowApplicationChannelToState(ctx, alertingChannel, planModel.ServiceNowApplication)
 		if serviceNowEnhancedDiags.HasError() {
 			diags.Append(serviceNowEnhancedDiags...)
 			return diags
@@ -670,14 +679,20 @@ func (r *alertingChannelResourceFramework) mapWebhookBasedChannelToState(ctx con
 	}, diags
 }
 
-func (r *alertingChannelResourceFramework) mapServiceNowChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*ServiceNowModel, diag.Diagnostics) {
+func (r *alertingChannelResourceFramework) mapServiceNowChannelToState(ctx context.Context, channel *restapi.AlertingChannel, planModel *ServiceNowModel) (*ServiceNowModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Create ServiceNow model
 	model := &ServiceNowModel{
 		ServiceNowURL: setStringPointerToState(channel.ServiceNowURL),
 		Username:      setStringPointerToState(channel.Username),
-		Password:      setStringPointerToState(channel.Password),
+	}
+
+	// Preserve password from plan since API doesn't return it
+	if planModel != nil && !planModel.Password.IsNull() {
+		model.Password = planModel.Password
+	} else {
+		model.Password = types.StringNull()
 	}
 
 	// Add optional autoCloseIncidents field
@@ -690,16 +705,22 @@ func (r *alertingChannelResourceFramework) mapServiceNowChannelToState(ctx conte
 	return model, diags
 }
 
-func (r *alertingChannelResourceFramework) mapServiceNowApplicationChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*ServiceNowApplicationModel, diag.Diagnostics) {
+func (r *alertingChannelResourceFramework) mapServiceNowApplicationChannelToState(ctx context.Context, channel *restapi.AlertingChannel, planModel *ServiceNowApplicationModel) (*ServiceNowApplicationModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Create ServiceNow Enhanced model with required fields
 	model := &ServiceNowApplicationModel{
 		ServiceNowURL: setStringPointerToState(channel.ServiceNowURL),
 		Username:      setStringPointerToState(channel.Username),
-		Password:      setStringPointerToState(channel.Password),
 		Tenant:        setStringPointerToState(channel.Tenant),
 		Unit:          setStringPointerToState(channel.Unit),
+	}
+
+	// Preserve password from plan since API doesn't return it
+	if planModel != nil && !planModel.Password.IsNull() {
+		model.Password = planModel.Password
+	} else {
+		model.Password = types.StringNull()
 	}
 
 	// Add optional boolean fields
@@ -1126,8 +1147,10 @@ func (r *alertingChannelResourceFramework) MapStateToDataObject(ctx context.Cont
 
 	// Get current state from plan or state
 	if plan != nil {
+		log.Printf("Model from plan")
 		diags.Append(plan.Get(ctx, &model)...)
-	} else if state != nil {
+	} else {
+		log.Printf("Model from state")
 		diags.Append(state.Get(ctx, &model)...)
 	}
 

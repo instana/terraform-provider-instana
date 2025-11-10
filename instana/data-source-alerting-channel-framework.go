@@ -440,14 +440,14 @@ func (d *alertingChannelDataSourceFramework) Read(ctx context.Context, req datas
 		}
 		data.GoogleChat = googleChatChannel
 	case restapi.ServiceNowChannelType:
-		serviceNowChannel, serviceNowDiags := resourceHandle.mapServiceNowChannelToState(ctx, matchingChannel)
+		serviceNowChannel, serviceNowDiags := resourceHandle.mapServiceNowChannelToState(ctx, matchingChannel, nil)
 		if serviceNowDiags.HasError() {
 			resp.Diagnostics.Append(serviceNowDiags...)
 			return
 		}
 		data.ServiceNow = serviceNowChannel
 	case restapi.ServiceNowApplicationChannelType:
-		serviceNowApplicationChannel, serviceNowApplicationDiags := resourceHandle.mapServiceNowApplicationChannelToState(ctx, matchingChannel)
+		serviceNowApplicationChannel, serviceNowApplicationDiags := resourceHandle.mapServiceNowApplicationChannelToState(ctx, matchingChannel, nil)
 		if serviceNowApplicationDiags.HasError() {
 			resp.Diagnostics.Append(serviceNowApplicationDiags...)
 			return
