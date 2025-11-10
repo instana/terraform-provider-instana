@@ -8,46 +8,14 @@ import (
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// ResourceMetaDataFramework the metadata of a terraform ResourceHandleFramework
-type ResourceMetaDataFramework struct {
-	ResourceName       string
-	Schema             schema.Schema
-	SchemaVersion      int64
-	SkipIDGeneration   bool
-	ResourceIDField    *string
-	CreateOnly         bool
-	DeprecationMessage string
-}
-
-// ResourceHandleFramework resource specific implementation which provides metadata and maps data from/to terraform state.
-// Together with TerraformResourceFramework terraform schema resources can be created
-type ResourceHandleFramework[T restapi.InstanaDataObject] interface {
-	// MetaData returns the metadata of this ResourceHandleFramework
-	MetaData() *resourcehandle.ResourceMetaDataFramework
-
-	// GetRestResource provides the restapi.RestResource used by the ResourceHandleFramework
-	GetRestResource(api restapi.InstanaAPI) restapi.RestResource[T]
-
-	// UpdateState updates the state of the resource with the input data from the Instana API
-	UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, obj T) diag.Diagnostics
-
-	// MapStateToDataObject maps the current state to the API model of the Instana API
-	MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (T, diag.Diagnostics)
-
-	// SetComputedFields calculate and set the calculated value of computed fields of the given resource
-	SetComputedFields(ctx context.Context, plan *tfsdk.Plan) diag.Diagnostics
-}
-
 // NewTerraformResourceFramework creates a new terraform resource for the given handle
-func NewTerraformResourceFramework[T restapi.InstanaDataObject](handle ResourceHandleFramework[T]) TerraformResourceFramework {
+func NewTerraformResourceFramework[T restapi.InstanaDataObject](handle resourcehandle.ResourceHandleFramework[T]) TerraformResourceFramework {
 	return &terraformResourceImplFramework[T]{
 		resourceHandle: handle,
 	}
@@ -61,7 +29,7 @@ type TerraformResourceFramework interface {
 }
 
 type terraformResourceImplFramework[T restapi.InstanaDataObject] struct {
-	resourceHandle ResourceHandleFramework[T]
+	resourceHandle resourcehandle.ResourceHandleFramework[T]
 	providerMeta   *restapi.ProviderMeta
 }
 
@@ -108,7 +76,7 @@ func (r *terraformResourceImplFramework[T]) Create(ctx context.Context, req reso
 	// Generate ID if needed
 	if !r.resourceHandle.MetaData().SkipIDGeneration {
 		// Set ID in state
-		id := RandomID()
+		id := util.RandomID()
 		resp.Diagnostics.Append(req.Plan.SetAttribute(ctx, path.Root("id"), types.StringValue(id))...)
 		if resp.Diagnostics.HasError() {
 			return

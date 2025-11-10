@@ -8,6 +8,7 @@ import (
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
+	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -337,98 +338,98 @@ func (r *alertingChannelResourceFramework) UpdateState(ctx context.Context, stat
 	// Set the appropriate channel type based on the alerting channel kind
 	switch alertingChannel.Kind {
 	case restapi.EmailChannelType:
-		emailChannel, emailDiags := r.mapEmailChannelToState(ctx, alertingChannel)
+		emailChannel, emailDiags := shared.MapEmailChannelToState(ctx, alertingChannel)
 		if emailDiags.HasError() {
 			diags.Append(emailDiags...)
 			return diags
 		}
 		model.Email = emailChannel
 	case restapi.OpsGenieChannelType:
-		opsGenieChannel, opsGenieDiags := r.mapOpsGenieChannelToState(ctx, alertingChannel)
+		opsGenieChannel, opsGenieDiags := shared.MapOpsGenieChannelToState(ctx, alertingChannel)
 		if opsGenieDiags.HasError() {
 			diags.Append(opsGenieDiags...)
 			return diags
 		}
 		model.OpsGenie = opsGenieChannel
 	case restapi.PagerDutyChannelType:
-		pagerDutyChannel, pagerDutyDiags := r.mapPagerDutyChannelToState(ctx, alertingChannel)
+		pagerDutyChannel, pagerDutyDiags := shared.MapPagerDutyChannelToState(ctx, alertingChannel)
 		if pagerDutyDiags.HasError() {
 			diags.Append(pagerDutyDiags...)
 			return diags
 		}
 		model.PagerDuty = pagerDutyChannel
 	case restapi.SlackChannelType:
-		slackChannel, slackDiags := r.mapSlackChannelToState(ctx, alertingChannel)
+		slackChannel, slackDiags := shared.MapSlackChannelToState(ctx, alertingChannel)
 		if slackDiags.HasError() {
 			diags.Append(slackDiags...)
 			return diags
 		}
 		model.Slack = slackChannel
 	case restapi.SplunkChannelType:
-		splunkChannel, splunkDiags := r.mapSplunkChannelToState(ctx, alertingChannel)
+		splunkChannel, splunkDiags := shared.MapSplunkChannelToState(ctx, alertingChannel)
 		if splunkDiags.HasError() {
 			diags.Append(splunkDiags...)
 			return diags
 		}
 		model.Splunk = splunkChannel
 	case restapi.VictorOpsChannelType:
-		victorOpsChannel, victorOpsDiags := r.mapVictorOpsChannelToState(ctx, alertingChannel)
+		victorOpsChannel, victorOpsDiags := shared.MapVictorOpsChannelToState(ctx, alertingChannel)
 		if victorOpsDiags.HasError() {
 			diags.Append(victorOpsDiags...)
 			return diags
 		}
 		model.VictorOps = victorOpsChannel
 	case restapi.WebhookChannelType:
-		webhookChannel, webhookDiags := r.mapWebhookChannelToState(ctx, alertingChannel)
+		webhookChannel, webhookDiags := shared.MapWebhookChannelToState(ctx, alertingChannel)
 		if webhookDiags.HasError() {
 			diags.Append(webhookDiags...)
 			return diags
 		}
 		model.Webhook = webhookChannel
 	case restapi.Office365ChannelType:
-		office365Channel, office365Diags := r.mapWebhookBasedChannelToState(ctx, alertingChannel)
+		office365Channel, office365Diags := shared.MapWebhookBasedChannelToState(ctx, alertingChannel)
 		if office365Diags.HasError() {
 			diags.Append(office365Diags...)
 			return diags
 		}
 		model.Office365 = office365Channel
 	case restapi.GoogleChatChannelType:
-		googleChatChannel, googleChatDiags := r.mapWebhookBasedChannelToState(ctx, alertingChannel)
+		googleChatChannel, googleChatDiags := shared.MapWebhookBasedChannelToState(ctx, alertingChannel)
 		if googleChatDiags.HasError() {
 			diags.Append(googleChatDiags...)
 			return diags
 		}
 		model.GoogleChat = googleChatChannel
 	case restapi.ServiceNowChannelType:
-		serviceNowChannel, serviceNowDiags := r.mapServiceNowChannelToState(ctx, alertingChannel)
+		serviceNowChannel, serviceNowDiags := shared.MapServiceNowChannelToState(ctx, alertingChannel)
 		if serviceNowDiags.HasError() {
 			diags.Append(serviceNowDiags...)
 			return diags
 		}
 		model.ServiceNow = serviceNowChannel
 	case restapi.ServiceNowApplicationChannelType:
-		serviceNowEnhancedChannel, serviceNowEnhancedDiags := r.mapServiceNowApplicationChannelToState(ctx, alertingChannel)
+		serviceNowEnhancedChannel, serviceNowEnhancedDiags := shared.MapServiceNowApplicationChannelToState(ctx, alertingChannel)
 		if serviceNowEnhancedDiags.HasError() {
 			diags.Append(serviceNowEnhancedDiags...)
 			return diags
 		}
 		model.ServiceNowApplication = serviceNowEnhancedChannel
 	case restapi.PrometheusWebhookChannelType:
-		prometheusWebhookChannel, prometheusWebhookDiags := r.mapPrometheusWebhookChannelToState(ctx, alertingChannel)
+		prometheusWebhookChannel, prometheusWebhookDiags := shared.MapPrometheusWebhookChannelToState(ctx, alertingChannel)
 		if prometheusWebhookDiags.HasError() {
 			diags.Append(prometheusWebhookDiags...)
 			return diags
 		}
 		model.PrometheusWebhook = prometheusWebhookChannel
 	case restapi.WebexTeamsWebhookChannelType:
-		webexTeamsWebhookChannel, webexTeamsWebhookDiags := r.mapWebhookBasedChannelToState(ctx, alertingChannel)
+		webexTeamsWebhookChannel, webexTeamsWebhookDiags := shared.MapWebhookBasedChannelToState(ctx, alertingChannel)
 		if webexTeamsWebhookDiags.HasError() {
 			diags.Append(webexTeamsWebhookDiags...)
 			return diags
 		}
 		model.WebexTeamsWebhook = webexTeamsWebhookChannel
 	case restapi.WatsonAIOpsWebhookChannelType:
-		watsonAIOpsWebhookChannel, watsonAIOpsWebhookDiags := r.mapWatsonAIOpsWebhookChannelToState(ctx, alertingChannel)
+		watsonAIOpsWebhookChannel, watsonAIOpsWebhookDiags := shared.MapWatsonAIOpsWebhookChannelToState(ctx, alertingChannel)
 		if watsonAIOpsWebhookDiags.HasError() {
 			diags.Append(watsonAIOpsWebhookDiags...)
 			return diags
@@ -447,7 +448,7 @@ func (r *alertingChannelResourceFramework) UpdateState(ctx context.Context, stat
 	return diags
 }
 
-func (r *alertingChannelResourceFramework) mapEmailChannelFromState(ctx context.Context, id string, name string, email *EmailModel) (*restapi.AlertingChannel, diag.Diagnostics) {
+func (r *alertingChannelResourceFramework) mapEmailChannelFromState(ctx context.Context, id string, name string, email *shared.EmailModel) (*restapi.AlertingChannel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Convert emails set to string slice
@@ -466,7 +467,7 @@ func (r *alertingChannelResourceFramework) mapEmailChannelFromState(ctx context.
 	}, nil
 }
 
-func (r *alertingChannelResourceFramework) mapOpsGenieChannelFromState(ctx context.Context, id string, name string, opsGenie *OpsGenieModel) (*restapi.AlertingChannel, diag.Diagnostics) {
+func (r *alertingChannelResourceFramework) mapOpsGenieChannelFromState(ctx context.Context, id string, name string, opsGenie *shared.OpsGenieModel) (*restapi.AlertingChannel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Convert tags list to string slice
@@ -493,7 +494,7 @@ func (r *alertingChannelResourceFramework) mapOpsGenieChannelFromState(ctx conte
 	}, nil
 }
 
-func (r *alertingChannelResourceFramework) mapPagerDutyChannelFromState(ctx context.Context, id string, name string, pagerDuty *PagerDutyModel) (*restapi.AlertingChannel, diag.Diagnostics) {
+func (r *alertingChannelResourceFramework) mapPagerDutyChannelFromState(ctx context.Context, id string, name string, pagerDuty *shared.PagerDutyModel) (*restapi.AlertingChannel, diag.Diagnostics) {
 	// Create alerting channel
 	serviceIntegrationKeyValue := pagerDuty.ServiceIntegrationKey.ValueString()
 
@@ -505,7 +506,7 @@ func (r *alertingChannelResourceFramework) mapPagerDutyChannelFromState(ctx cont
 	}, nil
 }
 
-func (r *alertingChannelResourceFramework) mapSlackChannelFromState(ctx context.Context, id string, name string, slack *SlackModel) (*restapi.AlertingChannel, diag.Diagnostics) {
+func (r *alertingChannelResourceFramework) mapSlackChannelFromState(ctx context.Context, id string, name string, slack *shared.SlackModel) (*restapi.AlertingChannel, diag.Diagnostics) {
 	// Create alerting channel
 	webhookURLValue := slack.WebhookURL.ValueString()
 
@@ -530,7 +531,7 @@ func (r *alertingChannelResourceFramework) mapSlackChannelFromState(ctx context.
 	return result, nil
 }
 
-func (r *alertingChannelResourceFramework) mapSplunkChannelFromState(ctx context.Context, id string, name string, splunk *SplunkModel) (*restapi.AlertingChannel, diag.Diagnostics) {
+func (r *alertingChannelResourceFramework) mapSplunkChannelFromState(ctx context.Context, id string, name string, splunk *shared.SplunkModel) (*restapi.AlertingChannel, diag.Diagnostics) {
 	// Create alerting channel
 	urlValue := splunk.URL.ValueString()
 	tokenValue := splunk.Token.ValueString()
@@ -544,7 +545,7 @@ func (r *alertingChannelResourceFramework) mapSplunkChannelFromState(ctx context
 	}, nil
 }
 
-func (r *alertingChannelResourceFramework) mapVictorOpsChannelFromState(ctx context.Context, id string, name string, victorOps *VictorOpsModel) (*restapi.AlertingChannel, diag.Diagnostics) {
+func (r *alertingChannelResourceFramework) mapVictorOpsChannelFromState(ctx context.Context, id string, name string, victorOps *shared.VictorOpsModel) (*restapi.AlertingChannel, diag.Diagnostics) {
 	// Create alerting channel
 	apiKeyValue := victorOps.APIKey.ValueString()
 	routingKeyValue := victorOps.RoutingKey.ValueString()
@@ -558,7 +559,7 @@ func (r *alertingChannelResourceFramework) mapVictorOpsChannelFromState(ctx cont
 	}, nil
 }
 
-func (r *alertingChannelResourceFramework) mapWebhookChannelFromState(ctx context.Context, id string, name string, webhook *WebhookModel) (*restapi.AlertingChannel, diag.Diagnostics) {
+func (r *alertingChannelResourceFramework) mapWebhookChannelFromState(ctx context.Context, id string, name string, webhook *shared.WebhookModel) (*restapi.AlertingChannel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Convert webhook URLs set to string slice
@@ -596,7 +597,7 @@ func (r *alertingChannelResourceFramework) mapWebhookChannelFromState(ctx contex
 	return result, nil
 }
 
-func (r *alertingChannelResourceFramework) mapWebhookBasedChannelFromState(ctx context.Context, id string, name string, webhookBased *WebhookBasedModel, channelType restapi.AlertingChannelType) (*restapi.AlertingChannel, diag.Diagnostics) {
+func (r *alertingChannelResourceFramework) mapWebhookBasedChannelFromState(ctx context.Context, id string, name string, webhookBased *shared.WebhookBasedModel, channelType restapi.AlertingChannelType) (*restapi.AlertingChannel, diag.Diagnostics) {
 	// Create alerting channel
 	webhookURLValue := webhookBased.WebhookURL.ValueString()
 
@@ -608,7 +609,7 @@ func (r *alertingChannelResourceFramework) mapWebhookBasedChannelFromState(ctx c
 	}, nil
 }
 
-func (r *alertingChannelResourceFramework) mapServiceNowChannelFromState(ctx context.Context, id string, name string, serviceNow *ServiceNowModel) (*restapi.AlertingChannel, diag.Diagnostics) {
+func (r *alertingChannelResourceFramework) mapServiceNowChannelFromState(ctx context.Context, id string, name string, serviceNow *shared.ServiceNowModel) (*restapi.AlertingChannel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if serviceNow.Password.IsNull() || serviceNow.Password.IsUnknown() {
@@ -638,7 +639,7 @@ func (r *alertingChannelResourceFramework) mapServiceNowChannelFromState(ctx con
 	return result, nil
 }
 
-func (r *alertingChannelResourceFramework) mapServiceNowApplicationChannelFromState(ctx context.Context, id string, name string, serviceNowApp *ServiceNowApplicationModel) (*restapi.AlertingChannel, diag.Diagnostics) {
+func (r *alertingChannelResourceFramework) mapServiceNowApplicationChannelFromState(ctx context.Context, id string, name string, serviceNowApp *shared.ServiceNowApplicationModel) (*restapi.AlertingChannel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if serviceNowApp.Password.IsNull() || serviceNowApp.Password.IsUnknown() {
@@ -718,7 +719,7 @@ func (r *alertingChannelResourceFramework) mapServiceNowApplicationChannelFromSt
 	return result, nil
 }
 
-func (r *alertingChannelResourceFramework) mapPrometheusWebhookChannelFromState(ctx context.Context, id string, name string, prometheusWebhook *PrometheusWebhookModel) (*restapi.AlertingChannel, diag.Diagnostics) {
+func (r *alertingChannelResourceFramework) mapPrometheusWebhookChannelFromState(ctx context.Context, id string, name string, prometheusWebhook *shared.PrometheusWebhookModel) (*restapi.AlertingChannel, diag.Diagnostics) {
 	webhookURLValue := prometheusWebhook.WebhookURL.ValueString()
 
 	result := &restapi.AlertingChannel{
@@ -736,7 +737,7 @@ func (r *alertingChannelResourceFramework) mapPrometheusWebhookChannelFromState(
 	return result, nil
 }
 
-func (r *alertingChannelResourceFramework) mapWatsonAIOpsWebhookChannelFromState(ctx context.Context, id string, name string, watsonAIOpsWebhook *WatsonAIOpsWebhookModel) (*restapi.AlertingChannel, diag.Diagnostics) {
+func (r *alertingChannelResourceFramework) mapWatsonAIOpsWebhookChannelFromState(ctx context.Context, id string, name string, watsonAIOpsWebhook *shared.WatsonAIOpsWebhookModel) (*restapi.AlertingChannel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	webhookURLValue := watsonAIOpsWebhook.WebhookURL.ValueString()

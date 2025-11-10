@@ -153,8 +153,8 @@ type ApplicationModel struct {
 
 // ApplicationThresholdModel represents a threshold in the application alert config
 type ApplicationThresholdModel struct {
-	Static           *StaticTypeModel       `tfsdk:"static"`
-	AdaptiveBaseline *AdaptiveBaselineModel `tfsdk:"adaptive_baseline"`
+	Static           *shared.StaticTypeModel       `tfsdk:"static"`
+	AdaptiveBaseline *shared.AdaptiveBaselineModel `tfsdk:"adaptive_baseline"`
 }
 
 // ServiceModel represents a service in the application alert config
@@ -394,7 +394,7 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 							},
 						},
 					},
-					DefaultCustomPayloadFieldsName: GetCustomPayloadFieldsSchema(),
+					shared.DefaultCustomPayloadFieldsName: shared.GetCustomPayloadFieldsSchema(),
 					ApplicationAlertConfigFieldRule: schema.ListNestedBlock{
 						Description: "Indicates the type of rule this alert configuration is about.",
 						NestedObject: schema.NestedBlockObject{
@@ -1684,7 +1684,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 
 	// Handle severity (deprecated but supported for backward compatibility)
 	if data.Severity > 0 {
-		severity, err := ConvertSeverityFromInstanaAPIToTerraformRepresentation(data.Severity)
+		severity, err := util.ConvertSeverityFromInstanaAPIToTerraformRepresentation(data.Severity)
 		if err == nil {
 			model.Severity = types.StringValue(severity)
 		}

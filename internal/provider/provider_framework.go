@@ -6,6 +6,7 @@ import (
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/internal/datasources"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
 	"github.com/gessnerfl/terraform-provider-instana/internal/resources/alertingchannel"
 	"github.com/gessnerfl/terraform-provider-instana/internal/resources/alertingconfig"
 	"github.com/gessnerfl/terraform-provider-instana/internal/resources/apitoken"
@@ -195,7 +196,7 @@ func (p *InstanaProvider) Resources(_ context.Context) []func() resource.Resourc
 }
 
 // Helper function to wrap resource handles
-func addResouceHandle[T restapi.InstanaDataObject](handleFunc func() ResourceHandleFramework[T]) func() resource.Resource {
+func addResouceHandle[T restapi.InstanaDataObject](handleFunc func() resourcehandle.ResourceHandleFramework[T]) func() resource.Resource {
 	return func() resource.Resource {
 		return NewTerraformResourceFramework(handleFunc())
 	}

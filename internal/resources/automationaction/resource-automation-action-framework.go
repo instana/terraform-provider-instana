@@ -434,7 +434,7 @@ func (r *automationActionResourceFramework) UpdateState(ctx context.Context, sta
 	return diags
 }
 
-func (r *automationActionResourceFramework) mapActionTypeFieldsToState(ctx context.Context, action *restapi.AutomationAction, model *AutomationActionModel) diag.Diagnostics {
+func (r *automationActionResourceFramework) mapActionTypeFieldsToState(ctx context.Context, action *restapi.AutomationAction, model *shared.AutomationActionModel) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	// Use the common mapping function
@@ -558,7 +558,7 @@ func (r *automationActionResourceFramework) getBoolFieldValueOrDefault(action *r
 	return defaultValue
 }
 
-func (r *automationActionResourceFramework) mapScriptFieldsToState(ctx context.Context, action *restapi.AutomationAction) (ScriptModel, diag.Diagnostics) {
+func (r *automationActionResourceFramework) mapScriptFieldsToState(ctx context.Context, action *restapi.AutomationAction) (shared.ScriptModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	scriptModel := shared.ScriptModel{
@@ -590,7 +590,7 @@ func (r *automationActionResourceFramework) mapScriptFieldsToState(ctx context.C
 	return scriptModel, diags
 }
 
-func (r *automationActionResourceFramework) mapHttpFieldsToState(ctx context.Context, action *restapi.AutomationAction) (HttpModel, diag.Diagnostics) {
+func (r *automationActionResourceFramework) mapHttpFieldsToState(ctx context.Context, action *restapi.AutomationAction) (shared.HttpModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	httpModel := shared.HttpModel{
@@ -649,7 +649,7 @@ func (r *automationActionResourceFramework) mapHttpFieldsToState(ctx context.Con
 				username, _ := authMap["username"].(string)
 				password, _ := authMap["password"].(string)
 				httpModel.Auth = &shared.AuthModel{
-					shared.BasicAuth: &shared.BasicAuthModel{
+					BasicAuth: &shared.BasicAuthModel{
 						UserName: types.StringValue(username),
 						Password: types.StringValue(password),
 					},
@@ -713,7 +713,7 @@ func (r *automationActionResourceFramework) mapHttpFieldsToState(ctx context.Con
 	return httpModel, diags
 }
 
-func (r *automationActionResourceFramework) mapManualFieldsToState(ctx context.Context, action *restapi.AutomationAction) (ManualModel, diag.Diagnostics) {
+func (r *automationActionResourceFramework) mapManualFieldsToState(ctx context.Context, action *restapi.AutomationAction) (shared.ManualModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	manualModel := shared.ManualModel{
@@ -723,7 +723,7 @@ func (r *automationActionResourceFramework) mapManualFieldsToState(ctx context.C
 	return manualModel, diags
 }
 
-func (r *automationActionResourceFramework) mapJiraFieldsToState(ctx context.Context, action *restapi.AutomationAction) (JiraModel, diag.Diagnostics) {
+func (r *automationActionResourceFramework) mapJiraFieldsToState(ctx context.Context, action *restapi.AutomationAction) (shared.JiraModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	jiraModel := shared.JiraModel{}
@@ -779,7 +779,7 @@ func (r *automationActionResourceFramework) mapJiraFieldsToState(ctx context.Con
 	return jiraModel, diags
 }
 
-func (r *automationActionResourceFramework) mapGitHubFieldsToState(ctx context.Context, action *restapi.AutomationAction) (GitHubModel, diag.Diagnostics) {
+func (r *automationActionResourceFramework) mapGitHubFieldsToState(ctx context.Context, action *restapi.AutomationAction) (shared.GitHubModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	githubModel := shared.GitHubModel{}
@@ -835,7 +835,7 @@ func (r *automationActionResourceFramework) mapGitHubFieldsToState(ctx context.C
 	return githubModel, diags
 }
 
-func (r *automationActionResourceFramework) mapDocLinkFieldsToState(ctx context.Context, action *restapi.AutomationAction) (DocLinkModel, diag.Diagnostics) {
+func (r *automationActionResourceFramework) mapDocLinkFieldsToState(ctx context.Context, action *restapi.AutomationAction) (shared.DocLinkModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	docLinkModel := shared.DocLinkModel{
@@ -845,7 +845,7 @@ func (r *automationActionResourceFramework) mapDocLinkFieldsToState(ctx context.
 	return docLinkModel, diags
 }
 
-func (r *automationActionResourceFramework) mapGitLabFieldsToState(ctx context.Context, action *restapi.AutomationAction) (GitLabModel, diag.Diagnostics) {
+func (r *automationActionResourceFramework) mapGitLabFieldsToState(ctx context.Context, action *restapi.AutomationAction) (shared.GitLabModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	gitlabModel := shared.GitLabModel{}
@@ -895,7 +895,7 @@ func (r *automationActionResourceFramework) mapGitLabFieldsToState(ctx context.C
 	return gitlabModel, diags
 }
 
-func (r *automationActionResourceFramework) mapAnsibleFieldsToState(ctx context.Context, action *restapi.AutomationAction) (AnsibleModel, diag.Diagnostics) {
+func (r *automationActionResourceFramework) mapAnsibleFieldsToState(ctx context.Context, action *restapi.AutomationAction) (shared.AnsibleModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	ansibleModel := shared.AnsibleModel{}
@@ -986,14 +986,14 @@ func (r *automationActionResourceFramework) MapStateToDataObject(ctx context.Con
 	}, diags
 }
 
-func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.Context, model AutomationActionModel) (string, []restapi.Field, diag.Diagnostics) {
+func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.Context, model shared.AutomationActionModel) (string, []restapi.Field, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var actionType string
 	var fields []restapi.Field
 
 	// Check if script configuration is provided
 	if model.Script != nil && !model.Script.Content.IsNull() {
-		actionType = ActionTypeScript
+		actionType = shared.ActionTypeScript
 		scriptModel := *model.Script
 
 		// Map script fields
@@ -1004,7 +1004,7 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 			Name:        restapi.ScriptSshFieldName,
 			Description: restapi.ScriptSshFieldDescription,
 			Value:       scriptModel.Content.ValueString(),
-			Encoding:    Base64Encoding,
+			Encoding:    shared.Base64Encoding,
 			Secured:     false,
 		})
 
@@ -1014,7 +1014,7 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 				Name:        restapi.SubtypeFieldName,
 				Description: restapi.SubtypeFieldDescription,
 				Value:       scriptModel.Interpreter.ValueString(),
-				Encoding:    AsciiEncoding,
+				Encoding:    shared.AsciiEncoding,
 				Secured:     false,
 			})
 		}
@@ -1025,7 +1025,7 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 				Name:        restapi.TimeoutFieldName,
 				Description: restapi.TimeoutFieldDescription,
 				Value:       scriptModel.Timeout.ValueString(),
-				Encoding:    AsciiEncoding,
+				Encoding:    shared.AsciiEncoding,
 				Secured:     false,
 			})
 		}
@@ -1036,12 +1036,12 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 				Name:        AutomationActionFieldSource,
 				Description: AutomationActionDescFieldSource,
 				Value:       scriptModel.Source.ValueString(),
-				Encoding:    AsciiEncoding,
+				Encoding:    shared.AsciiEncoding,
 				Secured:     false,
 			})
 		}
 	} else if model.Http != nil && !model.Http.Host.IsNull() {
-		actionType = ActionTypeHttp
+		actionType = shared.ActionTypeHttp
 		httpModel := *model.Http
 
 		// Map HTTP fields
@@ -1052,7 +1052,7 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 			Name:        restapi.HttpHostFieldName,
 			Description: restapi.HttpHostFieldDescription,
 			Value:       httpModel.Host.ValueString(),
-			Encoding:    AsciiEncoding,
+			Encoding:    shared.AsciiEncoding,
 			Secured:     false,
 		})
 
@@ -1060,7 +1060,7 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 			Name:        restapi.HttpMethodFieldName,
 			Description: restapi.HttpMethodFieldDescription,
 			Value:       httpModel.Method.ValueString(),
-			Encoding:    AsciiEncoding,
+			Encoding:    shared.AsciiEncoding,
 			Secured:     false,
 		})
 
@@ -1070,7 +1070,7 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 				Name:        restapi.HttpBodyFieldName,
 				Description: restapi.HttpBodyFieldDescription,
 				Value:       httpModel.Body.ValueString(),
-				Encoding:    AsciiEncoding,
+				Encoding:    shared.AsciiEncoding,
 				Secured:     false,
 			})
 		}
@@ -1081,7 +1081,7 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 				Name:        restapi.HttpIgnoreCertErrorsFieldName,
 				Description: restapi.HttpIgnoreCertErrorsFieldDescription,
 				Value:       strconv.FormatBool(httpModel.IgnoreCertErrors.ValueBool()),
-				Encoding:    AsciiEncoding,
+				Encoding:    shared.AsciiEncoding,
 				Secured:     false,
 			})
 		}
@@ -1092,7 +1092,7 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 				Name:        restapi.TimeoutFieldName,
 				Description: restapi.TimeoutFieldDescription,
 				Value:       httpModel.Timeout.ValueString(),
-				Encoding:    AsciiEncoding,
+				Encoding:    shared.AsciiEncoding,
 				Secured:     false,
 			})
 		}
@@ -1103,7 +1103,7 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 				Name:        AutomationActionFieldLanguage,
 				Description: AutomationActionDescFieldLanguage,
 				Value:       httpModel.Language.ValueString(),
-				Encoding:    AsciiEncoding,
+				Encoding:    shared.AsciiEncoding,
 				Secured:     false,
 			})
 		}
@@ -1114,7 +1114,7 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 				Name:        AutomationActionFieldContentType,
 				Description: AutomationActionDescFieldContentType,
 				Value:       httpModel.ContentType.ValueString(),
-				Encoding:    AsciiEncoding,
+				Encoding:    shared.AsciiEncoding,
 				Secured:     false,
 			})
 		}
@@ -1205,7 +1205,7 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 			Name:        AutomationActionAPIFieldAuthen,
 			Description: AutomationActionDescFieldAuthen,
 			Value:       authValue,
-			Encoding:    AsciiEncoding,
+			Encoding:    shared.AsciiEncoding,
 			Secured:     false,
 		})
 
@@ -1230,7 +1230,7 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 				Name:        restapi.HttpHeaderFieldName,
 				Description: restapi.HttpHeaderFieldDescription,
 				Value:       string(headersJson),
-				Encoding:    AsciiEncoding,
+				Encoding:    shared.AsciiEncoding,
 				Secured:     false,
 			})
 		}
@@ -1241,62 +1241,62 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 			Name:        AutomationActionFieldContent,
 			Description: AutomationActionDescAPIFieldContent,
 			Value:       model.Manual.Content.ValueString(),
-			Encoding:    AsciiEncoding,
+			Encoding:    shared.AsciiEncoding,
 			Secured:     false,
 		})
 	} else if model.Jira != nil && !model.Jira.Project.IsNull() {
 		actionType = AutomationActionTypeJira
 		fields = make([]restapi.Field, 0)
 		if !model.Jira.Project.IsNull() {
-			fields = append(fields, restapi.Field{Name: AutomationActionFieldProject, Description: AutomationActionDescAPIFieldProject, Value: model.Jira.Project.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldProject, Description: AutomationActionDescAPIFieldProject, Value: model.Jira.Project.ValueString(), Encoding: shared.AsciiEncoding})
 		}
 		if !model.Jira.Operation.IsNull() {
-			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldTicketActionType, Description: AutomationActionDescAPIFieldTicketActionType, Value: model.Jira.Operation.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldTicketActionType, Description: AutomationActionDescAPIFieldTicketActionType, Value: model.Jira.Operation.ValueString(), Encoding: shared.AsciiEncoding})
 		}
 		if !model.Jira.IssueType.IsNull() {
-			fields = append(fields, restapi.Field{Name: AutomationActionFieldIssueType, Description: AutomationActionDescAPIFieldIssueType, Value: model.Jira.IssueType.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldIssueType, Description: AutomationActionDescAPIFieldIssueType, Value: model.Jira.IssueType.ValueString(), Encoding: shared.AsciiEncoding})
 		}
 		if !model.Jira.Description.IsNull() {
-			fields = append(fields, restapi.Field{Name: AutomationActionFieldBody, Description: AutomationActionDescAPIFieldBody, Value: model.Jira.Description.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldBody, Description: AutomationActionDescAPIFieldBody, Value: model.Jira.Description.ValueString(), Encoding: shared.AsciiEncoding})
 		}
 		if !model.Jira.Assignee.IsNull() {
-			fields = append(fields, restapi.Field{Name: AutomationActionFieldAssignee, Description: AutomationActionDescAPIFieldAssignee, Value: model.Jira.Assignee.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldAssignee, Description: AutomationActionDescAPIFieldAssignee, Value: model.Jira.Assignee.ValueString(), Encoding: shared.AsciiEncoding})
 		}
 		if !model.Jira.Title.IsNull() {
-			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldSummary, Description: AutomationActionDescAPIFieldSummary, Value: model.Jira.Title.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldSummary, Description: AutomationActionDescAPIFieldSummary, Value: model.Jira.Title.ValueString(), Encoding: shared.AsciiEncoding})
 		}
 		if !model.Jira.Labels.IsNull() {
-			fields = append(fields, restapi.Field{Name: AutomationActionFieldLabels, Description: AutomationActionDescAPIFieldLabels, Value: model.Jira.Labels.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldLabels, Description: AutomationActionDescAPIFieldLabels, Value: model.Jira.Labels.ValueString(), Encoding: shared.AsciiEncoding})
 		}
 		if !model.Jira.Comment.IsNull() {
-			fields = append(fields, restapi.Field{Name: AutomationActionFieldComment, Description: AutomationActionDescAPIFieldComment, Value: model.Jira.Comment.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldComment, Description: AutomationActionDescAPIFieldComment, Value: model.Jira.Comment.ValueString(), Encoding: shared.AsciiEncoding})
 		}
 	} else if model.GitHub != nil && !model.GitHub.Owner.IsNull() {
 		actionType = AutomationActionTypeGitHub
 		fields = make([]restapi.Field, 0)
 		if !model.GitHub.Owner.IsNull() {
-			fields = append(fields, restapi.Field{Name: AutomationActionFieldOwner, Description: AutomationActionDescAPIFieldOwner, Value: model.GitHub.Owner.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldOwner, Description: AutomationActionDescAPIFieldOwner, Value: model.GitHub.Owner.ValueString(), Encoding: shared.AsciiEncoding})
 		}
 		if !model.GitHub.Repo.IsNull() {
-			fields = append(fields, restapi.Field{Name: AutomationActionFieldRepo, Description: AutomationActionDescAPIFieldRepo, Value: model.GitHub.Repo.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldRepo, Description: AutomationActionDescAPIFieldRepo, Value: model.GitHub.Repo.ValueString(), Encoding: shared.AsciiEncoding})
 		}
 		if !model.GitHub.Title.IsNull() {
-			fields = append(fields, restapi.Field{Name: AutomationActionFieldTitle, Description: AutomationActionDescAPIFieldTitle, Value: model.GitHub.Title.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldTitle, Description: AutomationActionDescAPIFieldTitle, Value: model.GitHub.Title.ValueString(), Encoding: shared.AsciiEncoding})
 		}
 		if !model.GitHub.Body.IsNull() {
-			fields = append(fields, restapi.Field{Name: AutomationActionFieldBody, Description: AutomationActionDescAPIFieldGitHubBody, Value: model.GitHub.Body.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldBody, Description: AutomationActionDescAPIFieldGitHubBody, Value: model.GitHub.Body.ValueString(), Encoding: shared.AsciiEncoding})
 		}
 		if !model.GitHub.Operation.IsNull() {
-			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldTicketType, Description: AutomationActionDescAPIFieldTicketType, Value: model.GitHub.Operation.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldTicketType, Description: AutomationActionDescAPIFieldTicketType, Value: model.GitHub.Operation.ValueString(), Encoding: shared.AsciiEncoding})
 		}
 		if !model.GitHub.Assignees.IsNull() {
-			fields = append(fields, restapi.Field{Name: AutomationActionFieldAssignees, Description: AutomationActionDescAPIFieldAssignees, Value: model.GitHub.Assignees.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldAssignees, Description: AutomationActionDescAPIFieldAssignees, Value: model.GitHub.Assignees.ValueString(), Encoding: shared.AsciiEncoding})
 		}
 		if !model.GitHub.Labels.IsNull() {
-			fields = append(fields, restapi.Field{Name: AutomationActionFieldLabels, Description: AutomationActionDescAPIFieldGitHubLabels, Value: model.GitHub.Labels.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldLabels, Description: AutomationActionDescAPIFieldGitHubLabels, Value: model.GitHub.Labels.ValueString(), Encoding: shared.AsciiEncoding})
 		}
 		if !model.GitHub.Comment.IsNull() {
-			fields = append(fields, restapi.Field{Name: AutomationActionFieldComment, Description: AutomationActionDescAPIFieldGitHubComment, Value: model.GitHub.Comment.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldComment, Description: AutomationActionDescAPIFieldGitHubComment, Value: model.GitHub.Comment.ValueString(), Encoding: shared.AsciiEncoding})
 		}
 	} else if model.DocLink != nil && !model.DocLink.Url.IsNull() {
 		actionType = AutomationActionTypeDocLink
@@ -1305,49 +1305,49 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 			Name:        AutomationActionFieldUrl,
 			Description: AutomationActionDescFieldUrl,
 			Value:       model.DocLink.Url.ValueString(),
-			Encoding:    UTF8Encoding,
+			Encoding:    shared.UTF8Encoding,
 		})
 	} else if model.GitLab != nil && !model.GitLab.ProjectId.IsNull() {
 		actionType = AutomationActionTypeGitLab
 		fields = make([]restapi.Field, 0)
 		if !model.GitLab.ProjectId.IsNull() {
-			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldProjectId, Description: AutomationActionDescAPIFieldProjectId, Value: model.GitLab.ProjectId.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldProjectId, Description: AutomationActionDescAPIFieldProjectId, Value: model.GitLab.ProjectId.ValueString(), Encoding: shared.AsciiEncoding})
 		}
 		if !model.GitLab.Title.IsNull() {
-			fields = append(fields, restapi.Field{Name: AutomationActionFieldTitle, Description: AutomationActionDescAPIFieldGitLabTitle, Value: model.GitLab.Title.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldTitle, Description: AutomationActionDescAPIFieldGitLabTitle, Value: model.GitLab.Title.ValueString(), Encoding: shared.AsciiEncoding})
 		}
 		if !model.GitLab.Description.IsNull() {
-			fields = append(fields, restapi.Field{Name: AutomationActionFieldBody, Description: AutomationActionDescAPIFieldGitLabBody, Value: model.GitLab.Description.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldBody, Description: AutomationActionDescAPIFieldGitLabBody, Value: model.GitLab.Description.ValueString(), Encoding: shared.AsciiEncoding})
 		}
 		if !model.GitLab.Operation.IsNull() {
-			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldTicketActionType, Description: AutomationActionDescAPIFieldGitLabTicketActionType, Value: model.GitLab.Operation.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldTicketActionType, Description: AutomationActionDescAPIFieldGitLabTicketActionType, Value: model.GitLab.Operation.ValueString(), Encoding: shared.AsciiEncoding})
 		}
 		if !model.GitLab.Labels.IsNull() {
-			fields = append(fields, restapi.Field{Name: AutomationActionFieldLabels, Description: AutomationActionDescAPIFieldGitLabLabels, Value: model.GitLab.Labels.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldLabels, Description: AutomationActionDescAPIFieldGitLabLabels, Value: model.GitLab.Labels.ValueString(), Encoding: shared.AsciiEncoding})
 		}
 		if !model.GitLab.IssueType.IsNull() {
-			fields = append(fields, restapi.Field{Name: AutomationActionFieldIssueType, Description: AutomationActionDescAPIFieldGitLabIssueType, Value: model.GitLab.IssueType.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldIssueType, Description: AutomationActionDescAPIFieldGitLabIssueType, Value: model.GitLab.IssueType.ValueString(), Encoding: shared.AsciiEncoding})
 		}
 		if !model.GitLab.Comment.IsNull() {
-			fields = append(fields, restapi.Field{Name: AutomationActionFieldComment, Description: AutomationActionDescAPIFieldGitLabComment, Value: model.GitLab.Comment.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldComment, Description: AutomationActionDescAPIFieldGitLabComment, Value: model.GitLab.Comment.ValueString(), Encoding: shared.AsciiEncoding})
 		}
 	} else if model.Ansible != nil && !model.Ansible.WorkflowId.IsNull() {
 		actionType = AutomationActionTypeAnsible
 		fields = make([]restapi.Field, 0)
 		if !model.Ansible.WorkflowId.IsNull() {
-			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldWorkflowId, Description: AutomationActionDescAPIFieldWorkflowId, Value: model.Ansible.WorkflowId.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldWorkflowId, Description: AutomationActionDescAPIFieldWorkflowId, Value: model.Ansible.WorkflowId.ValueString(), Encoding: shared.AsciiEncoding})
 		}
 		if !model.Ansible.AnsibleUrl.IsNull() {
-			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldAnsibleUrl, Description: AutomationActionDescAPIFieldAnsibleUrl, Value: model.Ansible.AnsibleUrl.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldAnsibleUrl, Description: AutomationActionDescAPIFieldAnsibleUrl, Value: model.Ansible.AnsibleUrl.ValueString(), Encoding: shared.AsciiEncoding})
 		}
 		if !model.Ansible.HostId.IsNull() {
-			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldHostId, Description: AutomationActionDescAPIFieldHostId, Value: model.Ansible.HostId.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldHostId, Description: AutomationActionDescAPIFieldHostId, Value: model.Ansible.HostId.ValueString(), Encoding: shared.AsciiEncoding})
 		}
 		if !model.Ansible.PlaybookId.IsNull() {
-			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldPlaybookId, Description: AutomationActionDescAPIFieldPlaybookId, Value: model.Ansible.PlaybookId.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldPlaybookId, Description: AutomationActionDescAPIFieldPlaybookId, Value: model.Ansible.PlaybookId.ValueString(), Encoding: shared.AsciiEncoding})
 		}
 		if !model.Ansible.PlaybookFileName.IsNull() {
-			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldPlaybookFileName, Description: AutomationActionDescAPIFieldPlaybookFileName, Value: model.Ansible.PlaybookFileName.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldPlaybookFileName, Description: AutomationActionDescAPIFieldPlaybookFileName, Value: model.Ansible.PlaybookFileName.ValueString(), Encoding: shared.AsciiEncoding})
 		}
 	} else {
 		diags.AddError(
@@ -1360,7 +1360,7 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 	return actionType, fields, diags
 }
 
-func (r *automationActionResourceFramework) mapInputParametersFromState(ctx context.Context, model AutomationActionModel) ([]restapi.Parameter, diag.Diagnostics) {
+func (r *automationActionResourceFramework) mapInputParametersFromState(ctx context.Context, model shared.AutomationActionModel) ([]restapi.Parameter, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var parameters []restapi.Parameter
 
