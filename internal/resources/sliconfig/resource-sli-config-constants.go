@@ -79,5 +79,3 @@ const (
 	// SliConfigErrMappingSliEntityMsg is the error message for mapping SLI entity
 	SliConfigErrMappingSliEntityMsg = "Failed to map SLI entity: %s"
 )
-
-// Made with Bob

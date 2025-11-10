@@ -201,5 +201,3 @@ func addResouceHandle[T restapi.InstanaDataObject](handleFunc func() resourcehan
 		return NewTerraformResourceFramework(handleFunc())
 	}
 }
-
-// Made with Bob

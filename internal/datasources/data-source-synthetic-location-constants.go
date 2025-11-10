@@ -43,7 +43,7 @@ const (
 	// SyntheticLocationErrUnexpectedConfigureType error message for unexpected configure type
 	SyntheticLocationErrUnexpectedConfigureType = "Unexpected Data Source Configure Type"
 	// SyntheticLocationErrUnexpectedConfigureTypeDetail error message detail for unexpected configure type
-	SyntheticLocationErrUnexpectedConfigureTypeDetail = "Expected *ProviderMeta, got: %T. Please report this issue to the provider developers."
+	SyntheticLocationErrUnexpectedConfigureTypeDetail = "Expected *restapi.ProviderMeta, got: %T. Please report this issue to the provider developers."
 	// SyntheticLocationErrReadingLocations error message for reading synthetic locations
 	SyntheticLocationErrReadingLocations = "Error reading synthetic locations"
 	// SyntheticLocationErrReadingLocationsDetail error message detail for reading synthetic locations
@@ -53,5 +53,3 @@ const (
 	// SyntheticLocationErrNotFoundDetail error message detail for synthetic location not found
 	SyntheticLocationErrNotFoundDetail = "No synthetic location found with label '%s' and location type '%s'"
 )
-
-// Made with Bob

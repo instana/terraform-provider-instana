@@ -612,5 +612,3 @@ func (r *sloAlertConfigResourceFramework) MapStateToDataObject(ctx context.Conte
 }
 
 // This section intentionally left empty to remove conflicting functions
-
-// Made with Bob

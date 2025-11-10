@@ -10,5 +10,3 @@ func TestProviderFramework(t *testing.T) {
 		t.Fatal("provider is nil")
 	}
 }
-
-// Made with Bob

@@ -41,5 +41,3 @@ const (
 	// AlertingConfigDescEventFilterRuleIDs description for the event_filter_rule_ids field
 	AlertingConfigDescEventFilterRuleIDs = "Configures the list of Rule IDs which should trigger an alert."
 )
-
-// Made with Bob

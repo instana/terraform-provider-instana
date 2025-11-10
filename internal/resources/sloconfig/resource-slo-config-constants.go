@@ -155,5 +155,3 @@ const (
 	// SloConfigErrUnsupportedTimeWindowType is the error message for unsupported time window type
 	SloConfigErrUnsupportedTimeWindowType = "Unsupported time window type: %s"
 )
-
-// Made with Bob

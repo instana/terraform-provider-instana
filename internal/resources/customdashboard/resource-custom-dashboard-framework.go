@@ -289,5 +289,3 @@ func (r *customDashboardResourceFramework) mapAccessRulesFromState(ctx context.C
 
 	return accessRules, diags
 }
-
-// Made with Bob

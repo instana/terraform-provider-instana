@@ -306,5 +306,3 @@ func ArrayToStateSet(elements []string) (types.Set, diag.Diagnostics) {
 	setVal, diags := types.SetValue(types.StringType, elems)
 	return setVal, diags
 }
-
-// Made with Bob

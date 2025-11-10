@@ -11,5 +11,3 @@ type ApplicationAlertRuleWithThresholds struct {
 type ThresholdValue struct {
 	Value float64 `json:"value"`
 }
-
-// Made with Bob

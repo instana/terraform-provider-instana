@@ -297,5 +297,3 @@ func (r *sloCorrectionConfigResourceFramework) UpdateState(ctx context.Context, 
 	diags.Append(state.Set(ctx, model)...)
 	return diags
 }
-
-// Made with Bob

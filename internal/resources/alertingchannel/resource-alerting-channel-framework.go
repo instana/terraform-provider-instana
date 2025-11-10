@@ -851,5 +851,3 @@ func (r *alertingChannelResourceFramework) MapStateToDataObject(ctx context.Cont
 	)
 	return nil, diags
 }
-
-// Made with Bob

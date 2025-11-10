@@ -22,5 +22,3 @@ type SchedulingModel struct {
 	DurationUnit  types.String `tfsdk:"duration_unit"`
 	RecurrentRule types.String `tfsdk:"recurrent_rule"`
 }
-
-// Made with Bob

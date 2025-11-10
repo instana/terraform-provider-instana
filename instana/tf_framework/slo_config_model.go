@@ -111,5 +111,3 @@ type SloTimeWindowModel struct {
 	Rolling *SloRollingTimeWindowModel `tfsdk:"rolling"`
 	Fixed   *SloFixedTimeWindowModel   `tfsdk:"fixed"`
 }
-
-// Made with Bob

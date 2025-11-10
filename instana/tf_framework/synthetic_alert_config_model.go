@@ -31,5 +31,3 @@ type SyntheticAlertTimeThresholdModel struct {
 	Type            types.String `tfsdk:"type"`
 	ViolationsCount types.Int64  `tfsdk:"violations_count"`
 }
-
-// Made with Bob

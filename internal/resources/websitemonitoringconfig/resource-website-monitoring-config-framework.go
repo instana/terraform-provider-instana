@@ -108,5 +108,3 @@ func (r *websiteMonitoringConfigResourceFramework) UpdateState(ctx context.Conte
 	diags.Append(state.Set(ctx, &model)...)
 	return diags
 }
-
-// Made with Bob

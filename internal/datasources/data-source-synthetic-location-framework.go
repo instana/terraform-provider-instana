@@ -125,5 +125,3 @@ func (d *syntheticLocationDataSourceFramework) Read(ctx context.Context, req dat
 	// Set the data in the response
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
-
-// Made with Bob

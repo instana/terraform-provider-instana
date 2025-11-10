@@ -44,5 +44,3 @@ type HttpScriptConfigModel struct {
 	Timeout           types.String `tfsdk:"timeout"`
 	Script            types.String `tfsdk:"script"`
 }
-
-// Made with Bob

@@ -59,7 +59,7 @@ const (
 	// HostAgentErrUnexpectedConfigureType error message for unexpected configure type
 	HostAgentErrUnexpectedConfigureType = "Unexpected Data Source Configure Type"
 	// HostAgentErrUnexpectedConfigureTypeDetail error message detail for unexpected configure type
-	HostAgentErrUnexpectedConfigureTypeDetail = "Expected *ProviderMeta, got: %T. Please report this issue to the provider developers."
+	HostAgentErrUnexpectedConfigureTypeDetail = "Expected *restapi.ProviderMeta, got: %T. Please report this issue to the provider developers."
 	// HostAgentErrReadingAgents error message for reading host agents
 	HostAgentErrReadingAgents = "Error reading host agents"
 	// HostAgentErrReadingAgentsDetail error message detail for reading host agents
@@ -71,5 +71,3 @@ const (
 	// HostAgentQueryParamQuery query parameter name
 	HostAgentQueryParamQuery = "query"
 )
-
-// Made with Bob

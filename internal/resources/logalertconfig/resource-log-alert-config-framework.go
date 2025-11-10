@@ -920,5 +920,3 @@ func (r *logAlertConfigResourceFramework) mapRulesFromState(ctx context.Context,
 }
 
 // mapThresholdRuleFromState and MapThresholdsFromState have been moved to threshold-mapping-framework.go
-
-// Made with Bob

@@ -38,5 +38,3 @@ type ResourceHandleFramework[T restapi.InstanaDataObject] interface {
 	// SetComputedFields calculate and set the calculated value of computed fields of the given resource
 	SetComputedFields(ctx context.Context, plan *tfsdk.Plan) diag.Diagnostics
 }
-
-// Made with Bob

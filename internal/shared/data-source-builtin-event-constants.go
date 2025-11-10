@@ -52,7 +52,7 @@ const (
 	// BuiltinEventErrUnexpectedConfigureType error message for unexpected configure type
 	BuiltinEventErrUnexpectedConfigureType = "Unexpected Data Source Configure Type"
 	// BuiltinEventErrUnexpectedConfigureTypeDetail error message detail for unexpected configure type
-	BuiltinEventErrUnexpectedConfigureTypeDetail = "Expected *ProviderMeta, got: %T. Please report this issue to the provider developers."
+	BuiltinEventErrUnexpectedConfigureTypeDetail = "Expected *restapi.ProviderMeta, got: %T. Please report this issue to the provider developers."
 	// BuiltinEventErrReadingEvents error message for reading builtin events
 	BuiltinEventErrReadingEvents = "Error reading builtin events"
 	// BuiltinEventErrReadingEventsDetail error message detail for reading builtin events
@@ -66,5 +66,3 @@ const (
 	// BuiltinEventErrConvertingSeverityDetail error message detail for converting severity
 	BuiltinEventErrConvertingSeverityDetail = "Could not convert severity: %s"
 )
-
-// Made with Bob

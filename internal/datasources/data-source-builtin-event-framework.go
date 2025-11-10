@@ -158,5 +158,3 @@ func (d *builtinEventDataSourceFramework) Read(ctx context.Context, req datasour
 	// Set the data in the response
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
-
-// Made with Bob

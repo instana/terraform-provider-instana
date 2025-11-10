@@ -33,5 +33,3 @@ const (
 	InfraAlertConfigErrParsingTagFilter    = "Error parsing tag filter"
 	InfraAlertConfigErrParsingTagFilterMsg = "Failed to parse tag filter: %s"
 )
-
-// Made with Bob

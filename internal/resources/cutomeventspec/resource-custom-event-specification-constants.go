@@ -45,5 +45,3 @@ const (
 	CustomEventSpecificationResourceErrParseTagFilter    = "Error parsing tag filter"
 	CustomEventSpecificationResourceErrParseTagFilterMsg = "Failed to parse tag filter: %s"
 )
-
-// Made with Bob

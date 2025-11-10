@@ -1075,8 +1075,6 @@ func MapAnsibleFieldsToState(action *restapi.AutomationAction) AnsibleModel {
 	return ansibleModel
 }
 
-// Made with Bob
-
 // MapActionTypeAndFieldsFromState determines action type and maps type-specific fields from state to API
 func MapActionTypeAndFieldsFromState(ctx context.Context, model AutomationActionModel) (string, []restapi.Field, diag.Diagnostics) {
 	var diags diag.Diagnostics
