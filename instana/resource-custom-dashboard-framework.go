@@ -21,6 +21,23 @@ import (
 // ResourceInstanaCustomDashboardFramework the name of the terraform-provider-instana resource to manage custom dashboards
 const ResourceInstanaCustomDashboardFramework = "custom_dashboard"
 
+const (
+	//CustomDashboardFieldTitle constant value for the schema field title
+	CustomDashboardFieldTitle = "title"
+	//CustomDashboardFieldFullTitle constant value for the computed schema field full_title
+	CustomDashboardFieldFullTitle = "full_title"
+	//CustomDashboardFieldAccessRule constant value for the schema field access_rule
+	CustomDashboardFieldAccessRule = "access_rule"
+	//CustomDashboardFieldAccessRuleAccessType constant value for the schema field access_rule.access_type
+	CustomDashboardFieldAccessRuleAccessType = "access_type"
+	//CustomDashboardFieldAccessRuleRelatedID constant value for the schema field access_rule.related_id
+	CustomDashboardFieldAccessRuleRelatedID = "related_id"
+	//CustomDashboardFieldAccessRuleRelationType constant value for the schema field access_rule.relation_type
+	CustomDashboardFieldAccessRuleRelationType = "relation_type"
+	//CustomDashboardFieldWidgets constant value for the schema field widgets
+	CustomDashboardFieldWidgets = "widgets"
+)
+
 // CustomDashboardModel represents the data model for the custom dashboard resource
 type CustomDashboardModel struct {
 	ID          types.String `tfsdk:"id"`

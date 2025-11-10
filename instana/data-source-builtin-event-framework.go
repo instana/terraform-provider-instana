@@ -13,6 +13,26 @@ import (
 // DataSourceInstanaBuiltinEventFramework the name of the terraform-provider-instana data source to read builtin events
 const DataSourceInstanaBuiltinEventFramework = "builtin_event_spec"
 
+const (
+	//BuiltinEventSpecificationFieldName constant value for the schema field name
+	BuiltinEventSpecificationFieldName = "name"
+	//BuiltinEventSpecificationFieldDescription constant value for the schema field description
+	BuiltinEventSpecificationFieldDescription = "description"
+	//BuiltinEventSpecificationFieldShortPluginID constant value for the schema field short_plugin_id
+	BuiltinEventSpecificationFieldShortPluginID = "short_plugin_id"
+	//BuiltinEventSpecificationFieldSeverity constant value for the schema field severity
+	BuiltinEventSpecificationFieldSeverity = "severity"
+	//BuiltinEventSpecificationFieldSeverityCode constant value for the schema field severity_code
+	BuiltinEventSpecificationFieldSeverityCode = "severity_code"
+	//BuiltinEventSpecificationFieldTriggering constant value for the schema field triggering
+	BuiltinEventSpecificationFieldTriggering = "triggering"
+	//BuiltinEventSpecificationFieldEnabled constant value for the schema field enabled
+	BuiltinEventSpecificationFieldEnabled = "enabled"
+	//DataSourceBuiltinEvent the name of the terraform-provider-instana data sourcefor builtin event specifications
+	DataSourceBuiltinEvent = "instana_builtin_event_spec"
+	//
+)
+
 // BuiltinEventDataSourceModel represents the data model for the builtin event data source
 type BuiltinEventDataSourceModel struct {
 	ID            types.String `tfsdk:"id"`
