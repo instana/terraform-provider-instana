@@ -22,6 +22,37 @@ import (
 // ResourceInstanaSloAlertConfigFramework the name of the terraform-provider-instana resource to manage SLO Alert configurations
 const ResourceInstanaSloAlertConfigFramework = "slo_alert_config"
 
+const (
+	//Slo Alert Config Field names for Terraform
+	SloAlertConfigFieldName                            = "name"
+	SloAlertConfigFieldFullName                        = "full_name"
+	SloAlertConfigFieldDescription                     = "description"
+	SloAlertConfigFieldSeverity                        = "severity"
+	SloAlertConfigFieldTriggering                      = "triggering"
+	SloAlertConfigFieldAlertType                       = "alert_type"
+	SloAlertConfigFieldThreshold                       = "threshold"
+	SloAlertConfigFieldThresholdType                   = "type"
+	SloAlertConfigFieldThresholdOperator               = "operator"
+	SloAlertConfigFieldThresholdValue                  = "value"
+	SloAlertConfigFieldSloIds                          = "slo_ids"
+	SloAlertConfigFieldAlertChannelIds                 = "alert_channel_ids"
+	SloAlertConfigFieldTimeThreshold                   = "time_threshold"
+	SloAlertConfigFieldTimeThresholdWarmUp             = "warm_up"
+	SloAlertConfigFieldTimeThresholdCoolDown           = "cool_down"
+	SloAlertConfigFieldEnabled                         = "enabled"
+	SloAlertConfigFieldBurnRateConfig                  = "burn_rate_config"
+	SloAlertConfigFieldBurnRateConfigDuration          = "duration"
+	SloAlertConfigFieldBurnRateConfigThresholdValue    = "threshold_value"
+	SloAlertConfigFieldBurnRateConfigThresholdOperator = "threshold_operator"
+	SloAlertConfigFieldBurnRateConfigDurationUnitType  = "duration_unit_type"
+	SloAlertConfigFieldBurnRateConfigAlertWindowType   = "alert_window_type"
+
+	// Slo Alert Types for Terraform
+	SloAlertConfigStatus      = "status"
+	SloAlertConfigErrorBudget = "error_budget"
+	SloAlertConfigBurnRateV2  = "burn_rate_v2"
+)
+
 // SloAlertConfigModel represents the data model for SLO Alert configuration
 type SloAlertConfigModel struct {
 	ID              types.String `tfsdk:"id"`

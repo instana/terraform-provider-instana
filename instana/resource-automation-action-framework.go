@@ -21,6 +21,15 @@ import (
 // ResourceInstanaAutomationActionFramework the name of the terraform-provider-instana resource to manage automation actions
 const ResourceInstanaAutomationActionFramework = "automation_action"
 
+// action types
+const ActionTypeScript = "SCRIPT"
+const ActionTypeHttp = "HTTP"
+
+// encodings
+const AsciiEncoding = "ascii"
+const Base64Encoding = "base64"
+const UTF8Encoding = "UTF8"
+
 // AutomationActionModel is now defined in resource-automation-action-mapping.go
 
 type AnsibleModel struct {

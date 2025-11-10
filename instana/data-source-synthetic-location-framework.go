@@ -14,6 +14,17 @@ import (
 // DataSourceInstanaSyntheticLocationFramework the name of the terraform-provider-instana data source to read synthetic locations
 const DataSourceInstanaSyntheticLocationFramework = "synthetic_location"
 
+const (
+	//SyntheticLocationFieldLabel constant value for the schema field label
+	SyntheticLocationFieldLabel = "label"
+	//SyntheticLocationFieldDescription constant value for the computed schema field description
+	SyntheticLocationFieldDescription = "description"
+	//SyntheticLocationFieldLocationType constant value for the schema field location_type
+	SyntheticLocationFieldLocationType = "location_type"
+	//DataSourceSyntheticLocation the name of the terraform-provider-instana data sourcefor synthetic location specifications
+	DataSourceSyntheticLocation = "instana_synthetic_location"
+)
+
 // SyntheticLocationDataSourceModel represents the data model for the synthetic location data source
 type SyntheticLocationDataSourceModel struct {
 	ID           types.String `tfsdk:"id"`

@@ -22,6 +22,62 @@ import (
 // ResourceInstanaSliConfigFramework the name of the terraform-provider-instana resource to manage SLI configurations
 const ResourceInstanaSliConfigFramework = "sli_config"
 
+const (
+	//SliConfigFieldName constant value for the schema field name
+	SliConfigFieldName = "name"
+	//SliConfigFieldFullName constant value for schema field full_name
+	SliConfigFieldFullName = "full_name"
+	//SliConfigFieldInitialEvaluationTimestamp constant value for the schema field initial_evaluation_timestamp
+	SliConfigFieldInitialEvaluationTimestamp = "initial_evaluation_timestamp"
+	//SliConfigFieldMetricConfiguration constant value for the schema field metric_configuration
+	SliConfigFieldMetricConfiguration = "metric_configuration"
+	//SliConfigFieldMetricName constant value for the schema field metric_configuration.metric_name
+	SliConfigFieldMetricName = "metric_name"
+	//SliConfigFieldMetricAggregation constant value for the schema field metric_configuration.aggregation
+	SliConfigFieldMetricAggregation = "aggregation"
+	//SliConfigFieldMetricThreshold constant value for the schema field metric_configuration.threshold
+	SliConfigFieldMetricThreshold = "threshold"
+	//SliConfigFieldSliEntity constant value for the schema field sli_entity
+	SliConfigFieldSliEntity = "sli_entity"
+	//SliConfigFieldSliEntityApplicationTimeBased constant value for the schema field sli_entity.application
+	SliConfigFieldSliEntityApplicationTimeBased = "application_time_based"
+	//SliConfigFieldSliEntityApplicationEventBased constant value for the schema field sli_entity.availability
+	SliConfigFieldSliEntityApplicationEventBased = "application_event_based"
+	//SliConfigFieldSliEntityWebsiteEventBased constant value for the schema field sli_entity.website_event_based
+	SliConfigFieldSliEntityWebsiteEventBased = "website_event_based"
+	//SliConfigFieldSliEntityWebsiteTimeBased constant value for the schema field sli_entity.website_time_based
+	SliConfigFieldSliEntityWebsiteTimeBased = "website_time_based"
+	//SliConfigFieldApplicationID constant value for the schema field sli_entity.*.application_id
+	SliConfigFieldApplicationID = "application_id"
+	//SliConfigFieldServiceID constant value for the schema field sli_entity.*.service_id
+	SliConfigFieldServiceID = "service_id"
+	//SliConfigFieldEndpointID constant value for the schema field sli_entity.*.endpoint_id
+	SliConfigFieldEndpointID = "endpoint_id"
+	//SliConfigFieldWebsiteID constant value for the schema field sli_entity.*.website_id
+	SliConfigFieldWebsiteID = "website_id"
+	//SliConfigFieldBeaconType constant value for the schema field sli_entity.*.beacon_Type
+	SliConfigFieldBeaconType = "beacon_type"
+	//SliConfigFieldBoundaryScope constant value for the schema field sli_entity.boundary_scope
+	SliConfigFieldBoundaryScope = "boundary_scope"
+	//SliConfigFieldBadEventFilterExpression constant value for the schema field sli_entity.*.bad_event_filter_expression
+	SliConfigFieldBadEventFilterExpression = "bad_event_filter_expression"
+	//SliConfigFieldFilterExpression constant value for the schema field sli_entity.*.filter_expression
+	SliConfigFieldFilterExpression = "filter_expression"
+	//SliConfigFieldGoodEventFilterExpression constant value for the schema field sli_entity.*.good_event_filter_expression
+	SliConfigFieldGoodEventFilterExpression = "good_event_filter_expression"
+	//SliConfigFieldIncludeInternal constant value for the schema field sli_entity.*.good_event_filter_expression
+	SliConfigFieldIncludeInternal = "include_internal"
+	//SliConfigFieldIncludeSynthetic constant value for the schema field sli_entity.*.good_event_filter_expression
+	SliConfigFieldIncludeSynthetic = "include_synthetic"
+)
+
+var sliConfigSliEntityTypeKeys = []string{
+	"sli_entity.0.application_event_based",
+	"sli_entity.0.application_time_based",
+	"sli_entity.0.website_event_based",
+	"sli_entity.0.website_time_based",
+}
+
 // SliConfigModel represents the data model for SLI configuration
 type SliConfigModel struct {
 	ID                         types.String `tfsdk:"id"`

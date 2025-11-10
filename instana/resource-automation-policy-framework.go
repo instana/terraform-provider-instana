@@ -19,6 +19,9 @@ import (
 // ResourceInstanaAutomationPolicyFramework the name of the terraform-provider-instana resource to manage automation policies
 const ResourceInstanaAutomationPolicyFramework = "automation_policy"
 
+// runnable types
+const actionRunnable = "action"
+
 // AutomationPolicyModel represents the data model for the automation policy resource
 type AutomationPolicyModel struct {
 	ID                types.String             `tfsdk:"id"`

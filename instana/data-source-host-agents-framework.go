@@ -14,6 +14,18 @@ import (
 // DataSourceInstanaHostAgentsFramework the name of the terraform-provider-instana data source to read host agents
 const DataSourceInstanaHostAgentsFramework = "host_agents"
 
+const (
+	DataSourceHostAgents = "instana_host_agents"
+
+	HostAgentFieldFilter     = "filter"
+	HostAgentFieldItems      = "items"
+	HostAgentFieldHost       = "host"
+	HostAgentFieldLabel      = "label"
+	HostAgentFieldSnapshotId = "snapshot_id"
+	HostAgentFieldPlugin     = "plugin"
+	HostAgentFieldTags       = "tags"
+)
+
 // HostAgentDataSourceModel represents the data model for a single host agent
 type HostAgentDataSourceModel struct {
 	SnapshotID types.String   `tfsdk:"snapshot_id"`

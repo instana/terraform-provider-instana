@@ -20,6 +20,31 @@ import (
 // ResourceInstanaAlertingConfigFramework the name of the terraform-provider-instana resource to manage alerting configurations
 const ResourceInstanaAlertingConfigFramework = "alerting_config"
 
+const (
+	//AlertingConfigFieldAlertName constant value for the schema field alert_name
+	AlertingConfigFieldAlertName = "alert_name"
+	//AlertingConfigFieldFullAlertName constant value for the schema field full_alert_name
+	AlertingConfigFieldFullAlertName = "full_alert_name"
+	//AlertingConfigFieldIntegrationIds constant value for the schema field integration_ids
+	AlertingConfigFieldIntegrationIds = "integration_ids"
+	//AlertingConfigFieldEventFilterQuery constant value for the schema field event_filter_query
+	AlertingConfigFieldEventFilterQuery = "event_filter_query"
+	//AlertingConfigFieldEventFilterEventTypes constant value for the schema field event_filter_event_types
+	AlertingConfigFieldEventFilterEventTypes = "event_filter_event_types"
+	//AlertingConfigFieldEventFilterRuleIDs constant value for the schema field event_filter_rule_ids
+	AlertingConfigFieldEventFilterRuleIDs = "event_filter_rule_ids"
+)
+
+var supportedEventTypes = convertSupportedEventTypesToStringSlice()
+
+func convertSupportedEventTypesToStringSlice() []string {
+	result := make([]string, len(restapi.SupportedAlertEventTypes))
+	for i, t := range restapi.SupportedAlertEventTypes {
+		result[i] = string(t)
+	}
+	return result
+}
+
 // AlertingConfigModel represents the data model for the alerting configuration resource
 type AlertingConfigModel struct {
 	ID                    types.String `tfsdk:"id"`

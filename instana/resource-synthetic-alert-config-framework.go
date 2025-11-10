@@ -22,6 +22,38 @@ import (
 // ResourceInstanaSyntheticAlertConfigFramework the name of the terraform-provider-instana resource to manage synthetic alert configurations
 const ResourceInstanaSyntheticAlertConfigFramework = "synthetic_alert_config"
 
+const (
+	// SyntheticAlertConfigFieldName constant value for the schema field name
+	SyntheticAlertConfigFieldName = "name"
+	// SyntheticAlertConfigFieldName constant value for the schema field full name
+	SyntheticAlertConfigFieldFullName = "full_name"
+	// SyntheticAlertConfigFieldDescription constant value for the schema field description
+	SyntheticAlertConfigFieldDescription = "description"
+	// SyntheticAlertConfigFieldSyntheticTestIds constant value for the schema field synthetic_test_ids
+	SyntheticAlertConfigFieldSyntheticTestIds = "synthetic_test_ids"
+	// SyntheticAlertConfigFieldSeverity constant value for the schema field severity
+	SyntheticAlertConfigFieldSeverity = "severity"
+	// SyntheticAlertConfigFieldTagFilter constant value for the schema field tag_filter
+	SyntheticAlertConfigFieldTagFilter = "tag_filter"
+	// SyntheticAlertConfigFieldRule constant value for the schema field rule
+	SyntheticAlertConfigFieldRule = "rule"
+	// SyntheticAlertConfigFieldAlertChannelIds constant value for the schema field alert_channel_ids
+	SyntheticAlertConfigFieldAlertChannelIds = "alert_channel_ids"
+	// SyntheticAlertConfigFieldTimeThreshold constant value for the schema field time_threshold
+	SyntheticAlertConfigFieldTimeThreshold = "time_threshold"
+	// SyntheticAlertConfigFieldGracePeriod constant value for the schema field grace_period
+	SyntheticAlertConfigFieldGracePeriod = "grace_period"
+
+	// Rule fields
+	SyntheticAlertRuleFieldAlertType   = "alert_type"
+	SyntheticAlertRuleFieldMetricName  = "metric_name"
+	SyntheticAlertRuleFieldAggregation = "aggregation"
+
+	// TimeThreshold fields
+	SyntheticAlertTimeThresholdFieldType            = "type"
+	SyntheticAlertTimeThresholdFieldViolationsCount = "violations_count"
+)
+
 // SyntheticAlertConfigModel represents the data model for the Synthetic Alert Config resource
 type SyntheticAlertConfigModel struct {
 	ID                  types.String `tfsdk:"id"`
@@ -453,6 +485,17 @@ func (r *syntheticAlertConfigResourceFramework) UpdateState(ctx context.Context,
 	// Set the entire model to state
 	diags.Append(state.Set(ctx, model)...)
 	return diags
+}
+
+func mapTagFilterExpressionFromSchema(input string) (*restapi.TagFilter, error) {
+	parser := tagfilter.NewParser()
+	expr, err := parser.Parse(input)
+	if err != nil {
+		return nil, err
+	}
+
+	mapper := tagfilter.NewMapper()
+	return mapper.ToAPIModel(expr), nil
 }
 
 // Made with Bob

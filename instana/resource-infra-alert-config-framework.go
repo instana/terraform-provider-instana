@@ -20,6 +20,33 @@ import (
 // ResourceInstanaInfraAlertConfigFramework the name of the terraform-provider-instana resource to manage infrastructure alert configurations
 const ResourceInstanaInfraAlertConfigFramework = "infrastructure_alert_config"
 
+const (
+	InfraAlertConfigFieldName                  = "name"
+	InfraAlertConfigFieldFullName              = "full_name"
+	InfraAlertConfigFieldDescription           = "description"
+	InfraAlertConfigFieldAlertChannels         = "alert_channels"
+	ResourceFieldThresholdRuleWarningSeverity  = "warning"
+	ResourceFieldThresholdRuleCriticalSeverity = "critical"
+	InfraAlertConfigFieldGroupBy               = "group_by"
+	InfraAlertConfigFieldGranularity           = "granularity"
+	InfraAlertConfigFieldTagFilter             = "tag_filter"
+	InfraAlertConfigFieldEvaluationType        = "evaluation_type"
+
+	InfraAlertConfigFieldRules       = "rules"
+	InfraAlertConfigFieldGenericRule = "generic_rule"
+
+	InfraAlertConfigFieldMetricName             = "metric_name"
+	InfraAlertConfigFieldEntityType             = "entity_type"
+	InfraAlertConfigFieldAggregation            = "aggregation"
+	InfraAlertConfigFieldCrossSeriesAggregation = "cross_series_aggregation"
+	InfraAlertConfigFieldRegex                  = "regex"
+	InfraAlertConfigFieldThresholdOperator      = "threshold_operator"
+
+	InfraAlertConfigFieldTimeThreshold                     = "time_threshold"
+	InfraAlertConfigFieldTimeThresholdTimeWindow           = "time_window"
+	InfraAlertConfigFieldTimeThresholdViolationsInSequence = "violations_in_sequence"
+)
+
 // InfraAlertConfigModel represents the data model for infrastructure alert configuration
 type InfraAlertConfigModel struct {
 	ID                 types.String             `tfsdk:"id"`

@@ -22,6 +22,36 @@ import (
 // ResourceInstanaLogAlertConfigFramework the name of the terraform-provider-instana resource to manage log alert configurations
 const ResourceInstanaLogAlertConfigFramework = "log_alert_config"
 
+const (
+	LogAlertConfigFieldName           = "name"
+	LogAlertConfigFieldDescription    = "description"
+	LogAlertConfigFieldAlertChannels  = "alert_channels"
+	LogAlertConfigFieldGracePeriod    = "grace_period"
+	LogAlertConfigFieldGroupBy        = "group_by"
+	LogAlertConfigFieldGroupByTagName = "tag_name"
+	LogAlertConfigFieldGroupByKey     = "key"
+	LogAlertConfigFieldGranularity    = "granularity"
+	LogAlertConfigFieldTagFilter      = "tag_filter"
+
+	LogAlertConfigFieldRules             = "rules"
+	LogAlertConfigFieldAlertType         = "alert_type"
+	LogAlertConfigFieldMetricName        = "metric_name"
+	LogAlertConfigFieldAggregation       = "aggregation"
+	LogAlertConfigFieldThresholdOperator = "threshold_operator"
+	LogAlertConfigFieldThreshold         = "threshold"
+	LogAlertConfigFieldWarning           = "warning"
+	LogAlertConfigFieldCritical          = "critical"
+	LogAlertConfigFieldType              = "type"
+	LogAlertConfigFieldValue             = "value"
+
+	// LogAlertTypeLogCount is the constant for the log count alert type
+	LogAlertTypeLogCount = "log.count"
+
+	LogAlertConfigFieldTimeThreshold                     = "time_threshold"
+	LogAlertConfigFieldTimeThresholdTimeWindow           = "time_window"
+	LogAlertConfigFieldTimeThresholdViolationsInSequence = "violations_in_sequence"
+)
+
 // LogAlertConfigModel represents the data model for the log alert configuration resource
 type LogAlertConfigModel struct {
 	ID                  types.String        `tfsdk:"id"`
