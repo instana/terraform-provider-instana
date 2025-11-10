@@ -5,7 +5,7 @@ import (
 	"flag"
 	"log"
 
-	"github.com/gessnerfl/terraform-provider-instana/instana"
+	"github.com/gessnerfl/terraform-provider-instana/internal/provider"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 )
 
@@ -36,7 +36,7 @@ func main() {
 		Debug:   debug,
 	}
 
-	err := providerserver.Serve(context.Background(), instana.New(version), opts)
+	err := providerserver.Serve(context.Background(), provider.New(version), opts)
 
 	if err != nil {
 		log.Fatal(err.Error())
