@@ -1,4 +1,4 @@
-package instana
+package cutomeventspec
 
 // Resource description constants
 const (

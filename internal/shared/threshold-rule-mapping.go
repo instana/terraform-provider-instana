@@ -2,6 +2,7 @@ package shared
 
 import (
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
+	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -176,7 +177,7 @@ func (t *thresholdRuleMapperImpl) mapThresholdConfigFromSchema(config map[string
 		if baselineSet.Len() > 0 {
 			baseline := make([][]float64, baselineSet.Len())
 			for i, val := range baselineSet.List() {
-				baseline[i] = ConvertInterfaceSlice[float64](val.(*schema.Set).List())
+				baseline[i] = util.ConvertInterfaceSlice[float64](val.(*schema.Set).List())
 			}
 			baselinePtr = &baseline
 		}

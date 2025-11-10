@@ -1,4 +1,4 @@
-package instana
+package synthetictest
 
 const (
 	// Resource description constants

@@ -1,4 +1,4 @@
-package instana
+package group
 
 // Resource description constants
 const (

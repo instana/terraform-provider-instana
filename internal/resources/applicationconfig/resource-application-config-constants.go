@@ -1,4 +1,4 @@
-package instana
+package applicationconfig
 
 // Description constants for Application Config resource
 const (

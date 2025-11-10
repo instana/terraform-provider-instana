@@ -6,6 +6,26 @@ import (
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/internal/datasources"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resources/alertingchannel"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resources/alertingconfig"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resources/apitoken"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resources/applicationalertconfig"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resources/applicationconfig"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resources/automationaction"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resources/automationpolicy"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resources/customdashboard"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resources/cutomeventspec"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resources/group"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resources/infralertconfig"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resources/logalertconfig"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resources/sliconfig"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resources/sloalertconfig"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resources/sloconfig"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resources/slocorrectionconfig"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resources/syntheticalertconfig"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resources/synthetictest"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resources/websitealertconfig"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resources/websitemonitoringconfig"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -19,16 +39,20 @@ var (
 	_ provider.Provider = &InstanaProvider{}
 )
 
+// SchemaFieldAPIToken the name of the provider configuration option for the api token
+const SchemaFieldAPIToken = "api_token"
+
+// SchemaFieldEndpoint the name of the provider configuration option for the instana endpoint
+const SchemaFieldEndpoint = "endpoint"
+
+// SchemaFieldTlsSkipVerify flag to deactivate skip tls verification
+const SchemaFieldTlsSkipVerify = "tls_skip_verify"
+
 // InstanaProviderModel describes the provider data model
 type InstanaProviderModel struct {
 	APIToken      types.String `tfsdk:"api_token"`
 	Endpoint      types.String `tfsdk:"endpoint"`
 	TLSSkipVerify types.Bool   `tfsdk:"tls_skip_verify"`
-}
-
-// ProviderMeta data structure for the metadata which is configured and provided to the resources by this provider
-type ProviderMeta struct {
-	InstanaAPI restapi.InstanaAPI
 }
 
 // InstanaProvider is the provider implementation
@@ -121,10 +145,10 @@ func (p *InstanaProvider) Configure(ctx context.Context, req provider.ConfigureR
 	instanaAPI := restapi.NewInstanaAPI(apiToken, endpoint, skipTlsVerify)
 
 	// Make the Instana client available during DataSource and Resource Configure methods
-	resp.DataSourceData = &ProviderMeta{
+	resp.DataSourceData = &restapi.ProviderMeta{
 		InstanaAPI: instanaAPI,
 	}
-	resp.ResourceData = &ProviderMeta{
+	resp.ResourceData = &restapi.ProviderMeta{
 		InstanaAPI: instanaAPI,
 	}
 }
@@ -133,12 +157,12 @@ func (p *InstanaProvider) Configure(ctx context.Context, req provider.ConfigureR
 func (p *InstanaProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		// Add data sources here when implemented
-		NewAlertingChannelDataSourceFramework,
-		NewAutomationActionDataSourceFramework,
-		NewBuiltinEventDataSourceFramework,
-		NewCustomEventSpecificationDataSourceFramework,
-		NewHostAgentsDataSourceFramework,
-		NewSyntheticLocationDataSourceFramework,
+		datasources.NewAlertingChannelDataSourceFramework,
+		datasources.NewAutomationActionDataSourceFramework,
+		datasources.NewBuiltinEventDataSourceFramework,
+		datasources.NewCustomEventSpecificationDataSourceFramework,
+		datasources.NewHostAgentsDataSourceFramework,
+		datasources.NewSyntheticLocationDataSourceFramework,
 	}
 }
 
@@ -146,27 +170,27 @@ func (p *InstanaProvider) DataSources(_ context.Context) []func() datasource.Dat
 func (p *InstanaProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		// Add resources here -
-		addResouceHandle(datasources.NewAlertingConfigResourceHandleFramework),
-		addResouceHandle(datasources.NewLogAlertConfigResourceHandleFramework),
-		addResouceHandle(datasources.NewAlertingChannelResourceHandleFramework),
-		addResouceHandle(datasources.NewAPITokenResourceHandleFramework),
-		addResouceHandle(datasources.NewApplicationAlertConfigResourceHandleFramework),
-		addResouceHandle(datasources.NewGlobalApplicationAlertConfigResourceHandleFramework),
-		addResouceHandle(datasources.NewApplicationConfigResourceHandleFramework),
-		addResouceHandle(datasources.NewAutomationActionResourceHandleFramework),
-		addResouceHandle(datasources.NewAutomationPolicyResourceHandleFramework),
-		addResouceHandle(datasources.NewCustomDashboardResourceHandleFramework),
-		addResouceHandle(datasources.NewCustomEventSpecificationResourceHandleFramework),
-		addResouceHandle(datasources.NewInfraAlertConfigResourceHandleFramework),
-		addResouceHandle(datasources.NewGroupResourceHandleFramework),
-		addResouceHandle(datasources.NewSliConfigResourceHandleFramework),
-		addResouceHandle(datasources.NewSloAlertConfigResourceHandleFramework),
-		addResouceHandle(datasources.NewSloCorrectionConfigResourceHandleFramework),
-		addResouceHandle(datasources.NewSyntheticAlertConfigResourceHandleFramework),
-		addResouceHandle(datasources.NewSyntheticTestResourceHandleFramework),
-		addResouceHandle(datasources.NewWebsiteAlertConfigResourceHandleFramework),
-		addResouceHandle(datasources.NewWebsiteMonitoringConfigResourceHandleFramework),
-		addResouceHandle(datasources.NewSloConfigResourceHandleFramework),
+		addResouceHandle(alertingconfig.NewAlertingConfigResourceHandleFramework),
+		addResouceHandle(logalertconfig.NewLogAlertConfigResourceHandleFramework),
+		addResouceHandle(alertingchannel.NewAlertingChannelResourceHandleFramework),
+		addResouceHandle(apitoken.NewAPITokenResourceHandleFramework),
+		addResouceHandle(applicationalertconfig.NewApplicationAlertConfigResourceHandleFramework),
+		addResouceHandle(applicationalertconfig.NewGlobalApplicationAlertConfigResourceHandleFramework),
+		addResouceHandle(applicationconfig.NewApplicationConfigResourceHandleFramework),
+		addResouceHandle(automationaction.NewAutomationActionResourceHandleFramework),
+		addResouceHandle(automationpolicy.NewAutomationPolicyResourceHandleFramework),
+		addResouceHandle(customdashboard.NewCustomDashboardResourceHandleFramework),
+		addResouceHandle(cutomeventspec.NewCustomEventSpecificationResourceHandleFramework),
+		addResouceHandle(infralertconfig.NewInfraAlertConfigResourceHandleFramework),
+		addResouceHandle(group.NewGroupResourceHandleFramework),
+		addResouceHandle(sliconfig.NewSliConfigResourceHandleFramework),
+		addResouceHandle(sloalertconfig.NewSloAlertConfigResourceHandleFramework),
+		addResouceHandle(slocorrectionconfig.NewSloCorrectionConfigResourceHandleFramework),
+		addResouceHandle(syntheticalertconfig.NewSyntheticAlertConfigResourceHandleFramework),
+		addResouceHandle(synthetictest.NewSyntheticTestResourceHandleFramework),
+		addResouceHandle(websitealertconfig.NewWebsiteAlertConfigResourceHandleFramework),
+		addResouceHandle(websitemonitoringconfig.NewWebsiteMonitoringConfigResourceHandleFramework),
+		addResouceHandle(sloconfig.NewSloConfigResourceHandleFramework),
 	}
 }
 

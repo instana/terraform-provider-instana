@@ -7,6 +7,9 @@ import (
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/instana/tagfilter"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
+	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
+	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -236,9 +239,9 @@ type ThresholdConfigRuleModel struct {
 }
 
 // NewApplicationAlertConfigResourceHandleFramework creates the resource handle for Application Alert Configuration
-func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[*restapi.ApplicationAlertConfig] {
+func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.ApplicationAlertConfig] {
 	return &applicationAlertConfigResourceFramework{
-		metaData: ResourceMetaDataFramework{
+		metaData: resourcehandle.ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaApplicationAlertConfigFramework,
 			Schema: schema.Schema{
 				Description: "This resource manages application alert configurations in Instana.",
@@ -724,8 +727,8 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 									Description: "Threshold configuration for different severity levels",
 									NestedObject: schema.NestedBlockObject{
 										Blocks: map[string]schema.Block{
-											LogAlertConfigFieldWarning:  StaticAndAdaptiveThresholdBlockSchema(),
-											LogAlertConfigFieldCritical: StaticAndAdaptiveThresholdBlockSchema(),
+											shared.LogAlertConfigFieldWarning:  shared.StaticAndAdaptiveThresholdBlockSchema(),
+											shared.LogAlertConfigFieldCritical: shared.StaticAndAdaptiveThresholdBlockSchema(),
 										},
 									},
 									Validators: []validator.List{
@@ -735,7 +738,7 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 							},
 						},
 					},
-					ResourceFieldThreshold: schema.SingleNestedBlock{
+					ApplicationAlertConfigFieldThreshold: schema.SingleNestedBlock{
 						Description: "Threshold configuration for different severity levels",
 						Blocks: map[string]schema.Block{
 							"static": schema.SingleNestedBlock{
@@ -840,9 +843,9 @@ func NewApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[
 }
 
 // NewGlobalApplicationAlertConfigResourceHandleFramework creates the resource handle for Global Application Alert Configuration
-func NewGlobalApplicationAlertConfigResourceHandleFramework() ResourceHandleFramework[*restapi.ApplicationAlertConfig] {
+func NewGlobalApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.ApplicationAlertConfig] {
 	return &applicationAlertConfigResourceFramework{
-		metaData: ResourceMetaDataFramework{
+		metaData: resourcehandle.ResourceMetaDataFramework{
 			ResourceName:  ResourceInstanaGlobalApplicationAlertConfigFramework,
 			Schema:        NewApplicationAlertConfigResourceHandleFramework().MetaData().Schema,
 			SchemaVersion: 1,
@@ -852,11 +855,11 @@ func NewGlobalApplicationAlertConfigResourceHandleFramework() ResourceHandleFram
 }
 
 type applicationAlertConfigResourceFramework struct {
-	metaData ResourceMetaDataFramework
+	metaData resourcehandle.ResourceMetaDataFramework
 	isGlobal bool
 }
 
-func (r *applicationAlertConfigResourceFramework) MetaData() *ResourceMetaDataFramework {
+func (r *applicationAlertConfigResourceFramework) MetaData() *resourcehandle.ResourceMetaDataFramework {
 	return &r.metaData
 }
 
@@ -1089,7 +1092,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 	if !model.CustomPayloadFields.IsNull() && !model.CustomPayloadFields.IsUnknown() {
 		var customerPayloadFields []restapi.CustomPayloadField[any]
 		var payloadDiags diag.Diagnostics
-		customerPayloadFields, payloadDiags = MapCustomPayloadFieldsToAPIObject(ctx, model.CustomPayloadFields)
+		customerPayloadFields, payloadDiags = shared.MapCustomPayloadFieldsToAPIObject(ctx, model.CustomPayloadFields)
 		if payloadDiags.HasError() {
 			diags.Append(payloadDiags...)
 			return nil, diags
@@ -1549,7 +1552,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 			var thresholdDiags diag.Diagnostics
 
 			if !ruleWithThreshold.Thresholds.IsNull() && !ruleWithThreshold.Thresholds.IsUnknown() {
-				thresholdMap, thresholdDiags = MapThresholdsFromState(ctx, ruleWithThreshold.Thresholds)
+				thresholdMap, thresholdDiags = shared.MapThresholdsFromState(ctx, ruleWithThreshold.Thresholds)
 				diags.Append(thresholdDiags...)
 				if diags.HasError() {
 					return nil, diags
@@ -1659,7 +1662,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 
 	// Handle grace period
 	if data.GracePeriod != nil {
-		model.GracePeriod = setInt64PointerToState(data.GracePeriod)
+		model.GracePeriod = util.SetInt64PointerToState(data.GracePeriod)
 	}
 
 	// Handle tag filter
@@ -1673,7 +1676,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 			return diags
 		}
 
-		model.TagFilter = util.setStringPointerToState(normalizedTagFilterString)
+		model.TagFilter = util.SetStringPointerToState(normalizedTagFilterString)
 
 	} else {
 		model.TagFilter = types.StringNull()
@@ -1798,7 +1801,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 
 	log.Printf("Before custom payload stage")
 	// Handle custom payload fields
-	customPayloadFieldsList, payloadDiags := CustomPayloadFieldsToTerraform(ctx, data.CustomerPayloadFields)
+	customPayloadFieldsList, payloadDiags := shared.CustomPayloadFieldsToTerraform(ctx, data.CustomerPayloadFields)
 	if payloadDiags.HasError() {
 		return payloadDiags
 	}
@@ -1817,17 +1820,17 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 		}
 
 		if data.Threshold.Type == "staticThreshold" {
-			staticModel := StaticTypeModel{
+			staticModel := shared.StaticTypeModel{
 				Operator: types.StringValue(string(data.Threshold.Operator)),
-				Value:    setInt64PointerToState(data.Threshold.Value),
+				Value:    util.SetInt64PointerToState(data.Threshold.Value),
 			}
 			applicationModel.Static = &staticModel
 		}
 		if data.Threshold.Type == "adaptiveBaseline" {
-			adaptiveBaselineModel := AdaptiveBaselineModel{
+			adaptiveBaselineModel := shared.AdaptiveBaselineModel{
 				Operator:        types.StringValue(string(data.Threshold.Operator)),
-				DeviationFactor: setFloat32PointerToState(data.Threshold.DeviationFactor),
-				Adaptability:    setFloat32PointerToState(data.Threshold.Adaptability),
+				DeviationFactor: util.SetFloat32PointerToState(data.Threshold.DeviationFactor),
+				Adaptability:    util.SetFloat32PointerToState(data.Threshold.Adaptability),
 				Seasonality:     types.StringValue(string(*data.Threshold.Seasonality)),
 			}
 			applicationModel.AdaptiveBaseline = &adaptiveBaselineModel
@@ -2388,27 +2391,27 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 
 			// Map warning threshold
 			warningThreshold, isWarningThresholdPresent := ruleWithThreshold.Thresholds[restapi.WarningSeverity]
-			warningThresholdList, warningDiags := MapThresholdToState(ctx, isWarningThresholdPresent, &warningThreshold, []string{"static", "adaptiveBaseline"})
+			warningThresholdList, warningDiags := shared.MapThresholdToState(ctx, isWarningThresholdPresent, &warningThreshold, []string{"static", "adaptiveBaseline"})
 			diags.Append(warningDiags...)
 			if diags.HasError() {
 				return diags
 			}
-			thresholdObj[LogAlertConfigFieldWarning] = warningThresholdList
+			thresholdObj[shared.LogAlertConfigFieldWarning] = warningThresholdList
 
 			// Map critical threshold
 			criticalThreshold, isCriticalThresholdPresent := ruleWithThreshold.Thresholds[restapi.CriticalSeverity]
-			criticalThresholdList, criticalDiags := MapThresholdToState(ctx, isCriticalThresholdPresent, &criticalThreshold, []string{"static", "adaptiveBaseline"})
+			criticalThresholdList, criticalDiags := shared.MapThresholdToState(ctx, isCriticalThresholdPresent, &criticalThreshold, []string{"static", "adaptiveBaseline"})
 			diags.Append(criticalDiags...)
 			if diags.HasError() {
 				return diags
 			}
-			thresholdObj[LogAlertConfigFieldCritical] = criticalThresholdList
+			thresholdObj[shared.LogAlertConfigFieldCritical] = criticalThresholdList
 
 			// Create threshold object value
 			thresholdObjVal, thresholdObjDiags := types.ObjectValue(
 				map[string]attr.Type{
-					LogAlertConfigFieldWarning:  GetStaticAndAdaptiveThresholdAttrListTypes(),
-					LogAlertConfigFieldCritical: GetStaticAndAdaptiveThresholdAttrListTypes(),
+					shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
+					shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
 				},
 				thresholdObj,
 			)
@@ -2421,8 +2424,8 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 			thresholdList, thresholdListDiags := types.ListValue(
 				types.ObjectType{
 					AttrTypes: map[string]attr.Type{
-						LogAlertConfigFieldWarning:  GetStaticAndAdaptiveThresholdAttrListTypes(),
-						LogAlertConfigFieldCritical: GetStaticAndAdaptiveThresholdAttrListTypes(),
+						shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
+						shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
 					},
 				},
 				[]attr.Value{thresholdObjVal},
@@ -2453,8 +2456,8 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 				"threshold": types.ListType{
 					ElemType: types.ObjectType{
 						AttrTypes: map[string]attr.Type{
-							LogAlertConfigFieldWarning:  GetStaticAndAdaptiveThresholdAttrListTypes(),
-							LogAlertConfigFieldCritical: GetStaticAndAdaptiveThresholdAttrListTypes(),
+							shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
+							shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
 						},
 					},
 				},
@@ -2481,8 +2484,8 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 				"thresholds": types.ListType{
 					ElemType: types.ObjectType{
 						AttrTypes: map[string]attr.Type{
-							LogAlertConfigFieldWarning:  GetStaticAndAdaptiveThresholdAttrListTypes(),
-							LogAlertConfigFieldCritical: GetStaticAndAdaptiveThresholdAttrListTypes(),
+							shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
+							shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
 						},
 					},
 				},
@@ -2504,8 +2507,8 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 				"threshold": types.ListType{
 					ElemType: types.ObjectType{
 						AttrTypes: map[string]attr.Type{
-							LogAlertConfigFieldWarning:  GetStaticAndAdaptiveThresholdAttrListTypes(),
-							LogAlertConfigFieldCritical: GetStaticAndAdaptiveThresholdAttrListTypes(),
+							shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
+							shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
 						},
 					},
 				},

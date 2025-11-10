@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
+	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -79,9 +81,9 @@ type GroupPermissionSetModel struct {
 }
 
 // NewGroupResourceHandleFramework creates the resource handle for RBAC Groups
-func NewGroupResourceHandleFramework() ResourceHandleFramework[*restapi.Group] {
+func NewGroupResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.Group] {
 	return &groupResourceFramework{
-		metaData: ResourceMetaDataFramework{
+		metaData: resourcehandle.ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaGroupFramework,
 			Schema: schema.Schema{
 				Description: GroupDescResource,
@@ -168,10 +170,10 @@ func NewGroupResourceHandleFramework() ResourceHandleFramework[*restapi.Group] {
 }
 
 type groupResourceFramework struct {
-	metaData ResourceMetaDataFramework
+	metaData resourcehandle.ResourceMetaDataFramework
 }
 
-func (r *groupResourceFramework) MetaData() *ResourceMetaDataFramework {
+func (r *groupResourceFramework) MetaData() *resourcehandle.ResourceMetaDataFramework {
 	return &r.metaData
 }
 
@@ -198,7 +200,7 @@ func (r *groupResourceFramework) UpdateState(ctx context.Context, state *tfsdk.S
 				UserID: types.StringValue(member.UserID),
 			}
 
-			memberModel.Email = util.setStringPointerToState(member.Email)
+			memberModel.Email = util.SetStringPointerToState(member.Email)
 
 			memberObj, memberDiags := types.ObjectValueFrom(ctx, map[string]attr.Type{
 				"user_id": types.StringType,

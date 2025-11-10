@@ -7,6 +7,9 @@ import (
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/instana/tagfilter"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
+	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
+	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -82,12 +85,14 @@ const (
 	WebsiteAlertConfigFieldTimeThresholdViolationsInSequence = "violations_in_sequence"
 	//WebsiteAlertConfigFieldTriggering constant value for field triggering of resource instana_website_alert_config
 	WebsiteAlertConfigFieldTriggering = "triggering"
+	WebsiteAlertConfigFieldRules      = "rules"
+	WebsiteAlertConfigFieldThreshold  = "threshold"
 )
 
 // NewWebsiteAlertConfigResourceHandleFramework creates the resource handle for Website Alert Configs
-func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*restapi.WebsiteAlertConfig] {
+func NewWebsiteAlertConfigResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.WebsiteAlertConfig] {
 	return &websiteAlertConfigResourceFramework{
-		metaData: ResourceMetaDataFramework{
+		metaData: resourcehandle.ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaWebsiteAlertConfigFramework,
 			Schema: schema.Schema{
 				Description: WebsiteAlertConfigDescResource,
@@ -149,7 +154,7 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 						Description: WebsiteAlertConfigDescGranularity,
 						Default:     int64default.StaticInt64(600000),
 					},
-					ApplicationAlertConfigFieldRules: schema.ListNestedAttribute{
+					WebsiteAlertConfigFieldRules: schema.ListNestedAttribute{
 						Description: WebsiteAlertConfigDescRules,
 						Optional:    true,
 						Computed:    true,
@@ -260,13 +265,13 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 										},
 									},
 								},
-								ApplicationAlertConfigFieldThreshold: schema.SingleNestedAttribute{
+								WebsiteAlertConfigFieldThreshold: schema.SingleNestedAttribute{
 									Description: WebsiteAlertConfigDescThreshold,
 									Optional:    true,
 									Computed:    true,
 									Attributes: map[string]schema.Attribute{
-										LogAlertConfigFieldWarning:  AllThresholdAttributeSchema(),
-										LogAlertConfigFieldCritical: AllThresholdAttributeSchema(),
+										shared.LogAlertConfigFieldWarning:  shared.AllThresholdAttributeSchema(),
+										shared.LogAlertConfigFieldCritical: shared.AllThresholdAttributeSchema(),
 									},
 								},
 							},
@@ -274,7 +279,7 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 					},
 				},
 				Blocks: map[string]schema.Block{
-					"custom_payload_fields": GetCustomPayloadFieldsSchema(),
+					"custom_payload_fields": shared.GetCustomPayloadFieldsSchema(),
 					"threshold": schema.SingleNestedBlock{
 						Description: WebsiteAlertConfigDescThreshold,
 						Blocks: map[string]schema.Block{
@@ -324,7 +329,7 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 									objectplanmodifier.UseStateForUnknown(),
 								},
 							},
-							"historic_baseline": HistoricBaselineBlockSchema(),
+							"historic_baseline": shared.HistoricBaselineBlockSchema(),
 						},
 					},
 					"rule": schema.SingleNestedBlock{
@@ -508,10 +513,10 @@ func NewWebsiteAlertConfigResourceHandleFramework() ResourceHandleFramework[*res
 }
 
 type websiteAlertConfigResourceFramework struct {
-	metaData ResourceMetaDataFramework
+	metaData resourcehandle.ResourceMetaDataFramework
 }
 
-func (r *websiteAlertConfigResourceFramework) MetaData() *ResourceMetaDataFramework {
+func (r *websiteAlertConfigResourceFramework) MetaData() *resourcehandle.ResourceMetaDataFramework {
 	return &r.metaData
 }
 
@@ -541,7 +546,7 @@ func (r *websiteAlertConfigResourceFramework) MapStateToDataObject(ctx context.C
 	var severity *int
 	// Convert severity from Terraform representation to API representation
 	if !model.Severity.IsNull() && !model.Severity.IsUnknown() {
-		severityVal, err := ConvertSeverityFromTerraformToInstanaAPIRepresentation(model.Severity.ValueString())
+		severityVal, err := util.ConvertSeverityFromTerraformToInstanaAPIRepresentation(model.Severity.ValueString())
 		severity = &severityVal
 		if err != nil {
 			diags.AddError(WebsiteAlertConfigErrConvertSeverity, err.Error())
@@ -586,7 +591,7 @@ func (r *websiteAlertConfigResourceFramework) MapStateToDataObject(ctx context.C
 	// }
 	if !model.CustomPayloadFields.IsNull() && !model.CustomPayloadFields.IsUnknown() {
 		var payloadDiags diag.Diagnostics
-		customPayloadFields, payloadDiags = MapCustomPayloadFieldsToAPIObject(ctx, model.CustomPayloadFields)
+		customPayloadFields, payloadDiags = shared.MapCustomPayloadFieldsToAPIObject(ctx, model.CustomPayloadFields)
 		if payloadDiags.HasError() {
 			diags.Append(payloadDiags...)
 			return nil, diags
@@ -648,7 +653,7 @@ func (r *websiteAlertConfigResourceFramework) MapStateToDataObject(ctx context.C
 
 			// Only process if we have a valid rule
 			if websiteAlertRule != nil {
-				thresholdMap, thresholdDiags := MapThresholdsAllPluginFromState(ctx, i.Thresholds)
+				thresholdMap, thresholdDiags := shared.MapThresholdsAllPluginFromState(ctx, i.Thresholds)
 				diags.Append(thresholdDiags...)
 				if diags.HasError() {
 					return nil, diags
@@ -811,7 +816,7 @@ func (r *websiteAlertConfigResourceFramework) mapThresholdFromModel(ctx context.
 		threshold.DeviationFactor = &deviationFactor
 		seasonality := restapi.ThresholdSeasonality(model.Threshold.HistoricBaseline.Seasonality.ValueString())
 		threshold.Seasonality = &seasonality
-		baseline, _ := mapBaselineFromState(ctx, model.Threshold.HistoricBaseline.Baseline)
+		baseline, _ := shared.MapBaselineFromState(ctx, model.Threshold.HistoricBaseline.Baseline)
 		threshold.Baseline = baseline
 
 	}
@@ -898,7 +903,7 @@ func (r *websiteAlertConfigResourceFramework) UpdateState(ctx context.Context, s
 	var diags diag.Diagnostics
 
 	// Convert severity from API representation to Terraform representation
-	severity, err := ConvertSeverityFromInstanaAPIToTerraformRepresentation(*apiObject.Severity)
+	severity, err := util.ConvertSeverityFromInstanaAPIToTerraformRepresentation(*apiObject.Severity)
 	if err != nil {
 		diags.AddError(WebsiteAlertConfigErrConvertSeverity, err.Error())
 		return diags
@@ -925,7 +930,7 @@ func (r *websiteAlertConfigResourceFramework) UpdateState(ctx context.Context, s
 			)
 			return diags
 		}
-		model.TagFilter = util.setStringPointerToState(filterExprStr)
+		model.TagFilter = util.SetStringPointerToState(filterExprStr)
 	} else {
 		model.TagFilter = types.StringNull()
 	}
@@ -1046,7 +1051,7 @@ func (r *websiteAlertConfigResourceFramework) UpdateState(ctx context.Context, s
 	model.Rules = rulesListValue
 
 	//map custom paylaod
-	customPayloadFieldsList, payloadDiags := CustomPayloadFieldsToTerraform(ctx, apiObject.CustomerPayloadFields)
+	customPayloadFieldsList, payloadDiags := shared.CustomPayloadFieldsToTerraform(ctx, apiObject.CustomerPayloadFields)
 	if payloadDiags.HasError() {
 		diags.Append(payloadDiags...)
 		return diags
@@ -1070,19 +1075,19 @@ func (r *websiteAlertConfigResourceFramework) mapTimeThresholdToState(timeThresh
 	switch timeThreshold.Type {
 	case "violationsInSequence":
 		websiteTimeThresholdModel.ViolationsInSequence = &WebsiteViolationsInSequenceModel{
-			TimeWindow: setInt64PointerToState(timeThreshold.TimeWindow),
+			TimeWindow: util.SetInt64PointerToState(timeThreshold.TimeWindow),
 		}
 	case "userImpactOfViolationsInSequence":
 		websiteTimeThresholdModel.UserImpactOfViolationsInSequence = &WebsiteUserImpactOfViolationsInSequenceModel{
-			TimeWindow:              setInt64PointerToState(timeThreshold.TimeWindow),
+			TimeWindow:              util.SetInt64PointerToState(timeThreshold.TimeWindow),
 			ImpactMeasurementMethod: types.StringValue(string(*timeThreshold.ImpactMeasurementMethod)),
-			UserPercentage:          setFloat64PointerToState(timeThreshold.UserPercentage),
-			Users:                   setInt64PointerToState(timeThreshold.Users),
+			UserPercentage:          util.SetFloat64PointerToState(timeThreshold.UserPercentage),
+			Users:                   util.SetInt64PointerToState(timeThreshold.Users),
 		}
 	case "violationsInPeriod":
 		websiteTimeThresholdModel.ViolationsInPeriod = &WebsiteViolationsInPeriodModel{
-			TimeWindow: setInt64PointerToState(timeThreshold.TimeWindow),
-			Violations: setInt64PointerToState(timeThreshold.Violations),
+			TimeWindow: util.SetInt64PointerToState(timeThreshold.TimeWindow),
+			Violations: util.SetInt64PointerToState(timeThreshold.Violations),
 		}
 	}
 	return &websiteTimeThresholdModel
@@ -1101,30 +1106,30 @@ func (r *websiteAlertConfigResourceFramework) mapThresholdToState(ctx context.Co
 	thresholdVal := *threshold
 
 	if thresholdVal.Type == "staticThreshold" {
-		staticModel := StaticTypeModel{
+		staticModel := shared.StaticTypeModel{
 			Operator: types.StringValue(string(thresholdVal.Operator)),
-			Value:    setInt64PointerToState(thresholdVal.Value),
+			Value:    util.SetInt64PointerToState(thresholdVal.Value),
 		}
 		websiteThresholdModel.Static = &staticModel
 	}
 	if thresholdVal.Type == "adaptiveBaseline" {
-		adaptiveBaselineModel := AdaptiveBaselineModel{
+		adaptiveBaselineModel := shared.AdaptiveBaselineModel{
 			Operator:        types.StringValue(string(thresholdVal.Operator)),
-			DeviationFactor: setFloat32PointerToState(thresholdVal.DeviationFactor),
-			Adaptability:    setFloat32PointerToState(thresholdVal.Adaptability),
+			DeviationFactor: util.SetFloat32PointerToState(thresholdVal.DeviationFactor),
+			Adaptability:    util.SetFloat32PointerToState(thresholdVal.Adaptability),
 			Seasonality:     types.StringValue(string(*thresholdVal.Seasonality)),
 		}
 		websiteThresholdModel.AdaptiveBaseline = &adaptiveBaselineModel
 	}
 	if thresholdVal.Type == "historicBaseline" {
-		historicBaselineModel := HistoricBaselineModel{
-			Deviation:   setFloat32PointerToState(thresholdVal.DeviationFactor),
+		historicBaselineModel := shared.HistoricBaselineModel{
+			Deviation:   util.SetFloat32PointerToState(thresholdVal.DeviationFactor),
 			Seasonality: types.StringValue(string(*thresholdVal.Seasonality)),
 		}
 		thresholdRules := restapi.ThresholdRule{
 			Baseline: thresholdVal.Baseline,
 		}
-		historicBaselineModel.Baseline, _ = mapBaseline(&thresholdRules)
+		historicBaselineModel.Baseline, _ = shared.MapBaseline(&thresholdRules)
 		websiteThresholdModel.HistoricBaseline = &historicBaselineModel
 	}
 
@@ -1162,7 +1167,7 @@ func (r *websiteAlertConfigResourceFramework) mapRuleToState(ctx context.Context
 			MetricName:  types.StringValue(rule.MetricName),
 			Aggregation: types.StringValue(string(*rule.Aggregation)),
 			Operator:    types.StringValue(string(*rule.Operator)),
-			Value:       util.setStringPointerToState(rule.Value),
+			Value:       util.SetStringPointerToState(rule.Value),
 		}
 		websiteAlertRuleModel.SpecificJsError = &websiteAlertRuleConfigModel
 
@@ -1179,9 +1184,9 @@ func (r *websiteAlertConfigResourceFramework) mapRulesToState(ctx context.Contex
 		warningThreshold, isWarningThresholdPresent := i.Thresholds[restapi.WarningSeverity]
 		criticalThreshold, isCriticalThresholdPresent := i.Thresholds[restapi.CriticalSeverity]
 
-		thresholdPluginModel := ThresholdAllPluginModel{
-			Warning:  MapAllThresholdPluginToState(ctx, &warningThreshold, isWarningThresholdPresent),
-			Critical: MapAllThresholdPluginToState(ctx, &criticalThreshold, isCriticalThresholdPresent),
+		thresholdPluginModel := shared.ThresholdAllPluginModel{
+			Warning:  shared.MapAllThresholdPluginToState(ctx, &warningThreshold, isWarningThresholdPresent),
+			Critical: shared.MapAllThresholdPluginToState(ctx, &criticalThreshold, isCriticalThresholdPresent),
 		}
 		ruleModel := RuleWithThresholdPluginModel{
 			Rule:              r.mapRuleToState(ctx, i.Rule),

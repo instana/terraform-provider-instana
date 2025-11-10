@@ -1,4 +1,4 @@
-package instana
+package automationpolicy
 
 // Resource description
 const AutomationPolicyDescResource = "This resource manages automation policies in Instana."

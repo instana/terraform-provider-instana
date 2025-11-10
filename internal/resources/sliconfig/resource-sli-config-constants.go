@@ -1,4 +1,4 @@
-package instana
+package sliconfig
 
 // Resource description constants
 const (

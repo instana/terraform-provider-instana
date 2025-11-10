@@ -6,6 +6,8 @@ import (
 	"fmt"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
+	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/gessnerfl/terraform-provider-instana/utils"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -54,9 +56,9 @@ type AccessRuleModel struct {
 }
 
 // NewCustomDashboardResourceHandleFramework creates the resource handle for Custom Dashboards
-func NewCustomDashboardResourceHandleFramework() ResourceHandleFramework[*restapi.CustomDashboard] {
+func NewCustomDashboardResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.CustomDashboard] {
 	return &customDashboardResourceFramework{
-		metaData: ResourceMetaDataFramework{
+		metaData: resourcehandle.ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaCustomDashboardFramework,
 			Schema: schema.Schema{
 				Description: CustomDashboardDescResource,
@@ -115,10 +117,10 @@ func NewCustomDashboardResourceHandleFramework() ResourceHandleFramework[*restap
 }
 
 type customDashboardResourceFramework struct {
-	metaData ResourceMetaDataFramework
+	metaData resourcehandle.ResourceMetaDataFramework
 }
 
-func (r *customDashboardResourceFramework) MetaData() *ResourceMetaDataFramework {
+func (r *customDashboardResourceFramework) MetaData() *resourcehandle.ResourceMetaDataFramework {
 	return &r.metaData
 }
 
@@ -156,7 +158,7 @@ func (r *customDashboardResourceFramework) UpdateState(ctx context.Context, stat
 			)
 			return diags
 		}
-		model.Widgets = types.StringValue(NormalizeJSONString(string(widgetsBytes)))
+		model.Widgets = types.StringValue(util.NormalizeJSONString(string(widgetsBytes)))
 
 		// Map access rules
 		accessRules, d := r.mapAccessRulesToState(ctx, dashboard.AccessRules)
@@ -182,7 +184,7 @@ func (r *customDashboardResourceFramework) mapAccessRulesToState(ctx context.Con
 		}
 
 		// Handle related ID
-		ruleObj[CustomDashboardFieldAccessRuleRelatedID] = util.setStringPointerToState(rule.RelatedID)
+		ruleObj[CustomDashboardFieldAccessRuleRelatedID] = util.SetStringPointerToState(rule.RelatedID)
 
 		objValue, d := types.ObjectValue(
 			map[string]attr.Type{
@@ -243,7 +245,7 @@ func (r *customDashboardResourceFramework) MapStateToDataObject(ctx context.Cont
 	// Map widgets - normalize the JSON
 	var widgets json.RawMessage
 	if !model.Widgets.IsNull() {
-		normalizedWidgets := NormalizeJSONString(model.Widgets.ValueString())
+		normalizedWidgets := util.NormalizeJSONString(model.Widgets.ValueString())
 		widgets = json.RawMessage(normalizedWidgets)
 	}
 

@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -30,7 +31,7 @@ type ResourceMetaDataFramework struct {
 // Together with TerraformResourceFramework terraform schema resources can be created
 type ResourceHandleFramework[T restapi.InstanaDataObject] interface {
 	// MetaData returns the metadata of this ResourceHandleFramework
-	MetaData() *ResourceMetaDataFramework
+	MetaData() *resourcehandle.ResourceMetaDataFramework
 
 	// GetRestResource provides the restapi.RestResource used by the ResourceHandleFramework
 	GetRestResource(api restapi.InstanaAPI) restapi.RestResource[T]
@@ -61,7 +62,7 @@ type TerraformResourceFramework interface {
 
 type terraformResourceImplFramework[T restapi.InstanaDataObject] struct {
 	resourceHandle ResourceHandleFramework[T]
-	providerMeta   *ProviderMeta
+	providerMeta   *restapi.ProviderMeta
 }
 
 // Metadata returns the resource type name
@@ -82,11 +83,11 @@ func (r *terraformResourceImplFramework[T]) Configure(_ context.Context, req res
 		return
 	}
 
-	providerMeta, ok := req.ProviderData.(*ProviderMeta)
+	providerMeta, ok := req.ProviderData.(*restapi.ProviderMeta)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *ProviderMeta, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *restapi.ProviderMeta, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 		return
 	}

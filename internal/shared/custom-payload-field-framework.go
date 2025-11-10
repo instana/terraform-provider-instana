@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
+	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -163,7 +164,7 @@ func CustomPayloadFieldsToTerraform(ctx context.Context, fields []restapi.Custom
 
 			dynamicAttrs["tag_name"] = types.StringValue(dynamicValue.TagName)
 
-			dynamicAttrs["key"] = util.setStringPointerToState(dynamicValue.Key)
+			dynamicAttrs["key"] = util.SetStringPointerToState(dynamicValue.Key)
 
 			// Create the dynamic value object
 			dynamicObj, d := types.ObjectValue(GetDynamicValueType().AttrTypes, dynamicAttrs)

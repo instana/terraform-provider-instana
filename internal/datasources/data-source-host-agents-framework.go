@@ -92,7 +92,7 @@ func (d *hostAgentsDataSourceFramework) Configure(_ context.Context, req datasou
 		return
 	}
 
-	providerMeta, ok := req.ProviderData.(*ProviderMeta)
+	providerMeta, ok := req.ProviderData.(*restapi.ProviderMeta)
 	if !ok {
 		resp.Diagnostics.AddError(
 			HostAgentErrUnexpectedConfigureType,

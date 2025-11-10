@@ -5,6 +5,9 @@ import (
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/instana/tagfilter"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
+	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
+	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -50,9 +53,9 @@ type SyntheticAlertTimeThresholdModel struct {
 }
 
 // NewSyntheticAlertConfigResourceHandleFramework creates the resource handle for Synthetic Alert Configuration
-func NewSyntheticAlertConfigResourceHandleFramework() ResourceHandleFramework[*restapi.SyntheticAlertConfig] {
+func NewSyntheticAlertConfigResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.SyntheticAlertConfig] {
 	return &syntheticAlertConfigResourceFramework{
-		metaData: ResourceMetaDataFramework{
+		metaData: resourcehandle.ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaSyntheticAlertConfigFramework,
 			Schema: schema.Schema{
 				Description: SyntheticAlertConfigDescResource,
@@ -160,7 +163,7 @@ func NewSyntheticAlertConfigResourceHandleFramework() ResourceHandleFramework[*r
 							listvalidator.SizeBetween(1, 1),
 						},
 					},
-					SyntheticAlertConfigFieldCustomPayloadField: GetCustomPayloadFieldsSchema(),
+					SyntheticAlertConfigFieldCustomPayloadField: shared.GetCustomPayloadFieldsSchema(),
 				},
 			},
 			SchemaVersion: 1,
@@ -169,10 +172,10 @@ func NewSyntheticAlertConfigResourceHandleFramework() ResourceHandleFramework[*r
 }
 
 type syntheticAlertConfigResourceFramework struct {
-	metaData ResourceMetaDataFramework
+	metaData resourcehandle.ResourceMetaDataFramework
 }
 
-func (r *syntheticAlertConfigResourceFramework) MetaData() *ResourceMetaDataFramework {
+func (r *syntheticAlertConfigResourceFramework) MetaData() *resourcehandle.ResourceMetaDataFramework {
 	return &r.metaData
 }
 
@@ -291,7 +294,7 @@ func (r *syntheticAlertConfigResourceFramework) MapStateToDataObject(ctx context
 	var customerPayloadFields []restapi.CustomPayloadField[any]
 	if !model.CustomPayloadFields.IsNull() {
 		var payloadDiags diag.Diagnostics
-		customerPayloadFields, payloadDiags = MapCustomPayloadFieldsToAPIObject(ctx, model.CustomPayloadFields)
+		customerPayloadFields, payloadDiags = shared.MapCustomPayloadFieldsToAPIObject(ctx, model.CustomPayloadFields)
 		if payloadDiags.HasError() {
 			diags.Append(payloadDiags...)
 			return nil, diags
@@ -353,7 +356,7 @@ func (r *syntheticAlertConfigResourceFramework) UpdateState(ctx context.Context,
 			return diags
 		}
 		if normalizedTagFilterString != nil {
-			model.TagFilter = util.setStringPointerToState(normalizedTagFilterString)
+			model.TagFilter = util.SetStringPointerToState(normalizedTagFilterString)
 		} else {
 			model.TagFilter = types.StringNull()
 		}
@@ -442,7 +445,7 @@ func (r *syntheticAlertConfigResourceFramework) UpdateState(ctx context.Context,
 	model.AlertChannelIds = alertChannelIdsSet
 
 	// Map custom payload fields
-	customPayloadFieldsList, payloadDiags := CustomPayloadFieldsToTerraform(ctx, apiObject.CustomerPayloadFields)
+	customPayloadFieldsList, payloadDiags := shared.CustomPayloadFieldsToTerraform(ctx, apiObject.CustomerPayloadFields)
 	if payloadDiags.HasError() {
 		diags.Append(payloadDiags...)
 		return diags

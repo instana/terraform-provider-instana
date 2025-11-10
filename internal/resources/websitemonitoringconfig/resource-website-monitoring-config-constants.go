@@ -1,4 +1,4 @@
-package instana
+package websitemonitoringconfig
 
 const (
 	// Resource description constants

@@ -1,4 +1,4 @@
-package instana
+package logalertconfig
 
 // Resource description constants
 const (

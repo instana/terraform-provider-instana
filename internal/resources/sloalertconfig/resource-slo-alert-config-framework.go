@@ -6,6 +6,8 @@ import (
 	"strconv"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
+	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
 	"github.com/hashicorp/terraform-plugin-framework-validators/float64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -100,13 +102,13 @@ type SloAlertCustomPayloadFieldModel struct {
 }
 
 type sloAlertConfigResourceFramework struct {
-	metaData ResourceMetaDataFramework
+	metaData resourcehandle.ResourceMetaDataFramework
 }
 
 // NewSloAlertConfigResourceHandleFramework creates the resource handle for SLO Alert configuration
-func NewSloAlertConfigResourceHandleFramework() ResourceHandleFramework[*restapi.SloAlertConfig] {
+func NewSloAlertConfigResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.SloAlertConfig] {
 	return &sloAlertConfigResourceFramework{
-		metaData: ResourceMetaDataFramework{
+		metaData: resourcehandle.ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaSloAlertConfigFramework,
 			Schema: schema.Schema{
 				Description: SloAlertConfigDescResource,
@@ -248,7 +250,7 @@ func NewSloAlertConfigResourceHandleFramework() ResourceHandleFramework[*restapi
 	}
 }
 
-func (r *sloAlertConfigResourceFramework) MetaData() *ResourceMetaDataFramework {
+func (r *sloAlertConfigResourceFramework) MetaData() *resourcehandle.ResourceMetaDataFramework {
 	return &r.metaData
 }
 
@@ -405,7 +407,7 @@ func (r *sloAlertConfigResourceFramework) UpdateState(ctx context.Context, state
 	}
 
 	// Map custom payload fields using the reusable function
-	customPayloadFieldsList, payloadDiags := CustomPayloadFieldsToTerraform(ctx, sloAlertConfig.CustomerPayloadFields)
+	customPayloadFieldsList, payloadDiags := shared.CustomPayloadFieldsToTerraform(ctx, sloAlertConfig.CustomerPayloadFields)
 	if payloadDiags.HasError() {
 		diags.Append(payloadDiags...)
 		return diags
@@ -584,7 +586,7 @@ func (r *sloAlertConfigResourceFramework) MapStateToDataObject(ctx context.Conte
 	var customPayloadFields []restapi.CustomPayloadField[any]
 	if !model.CustomPayload.IsNull() && !model.CustomPayload.IsUnknown() {
 		var payloadDiags diag.Diagnostics
-		customPayloadFields, payloadDiags = MapCustomPayloadFieldsToAPIObject(ctx, model.CustomPayload)
+		customPayloadFields, payloadDiags = shared.MapCustomPayloadFieldsToAPIObject(ctx, model.CustomPayload)
 		if payloadDiags.HasError() {
 			diags.Append(payloadDiags...)
 			return nil, diags

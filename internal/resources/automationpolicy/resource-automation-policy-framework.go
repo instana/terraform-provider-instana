@@ -5,6 +5,8 @@ import (
 	"fmt"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
+	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -55,14 +57,14 @@ type ConditionModel struct {
 // PolicyActionModel represents an action reference in the automation policy
 // This is different from AutomationActionModel - it only contains the reference and parameters
 type PolicyActionModel struct {
-	Action  AutomationActionModel `tfsdk:"action"`
-	AgentID types.String          `tfsdk:"agent_id"`
+	Action  shared.AutomationActionModel `tfsdk:"action"`
+	AgentID types.String                 `tfsdk:"agent_id"`
 }
 
 // NewAutomationPolicyResourceHandleFramework creates the resource handle for Automation Policies
-func NewAutomationPolicyResourceHandleFramework() ResourceHandleFramework[*restapi.AutomationPolicy] {
+func NewAutomationPolicyResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.AutomationPolicy] {
 	return &automationPolicyResourceFramework{
-		metaData: ResourceMetaDataFramework{
+		metaData: resourcehandle.ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaAutomationPolicyFramework,
 			Schema: schema.Schema{
 				Description: AutomationPolicyDescResource,
@@ -74,67 +76,67 @@ func NewAutomationPolicyResourceHandleFramework() ResourceHandleFramework[*resta
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
-					AutomationPolicyFieldName: schema.StringAttribute{
+					shared.AutomationPolicyFieldName: schema.StringAttribute{
 						Required:    true,
 						Description: AutomationPolicyDescName,
 					},
-					AutomationPolicyFieldDescription: schema.StringAttribute{
+					shared.AutomationPolicyFieldDescription: schema.StringAttribute{
 						Required:    true,
 						Description: AutomationPolicyDescDescription,
 					},
-					AutomationPolicyFieldTags: schema.ListAttribute{
+					shared.AutomationPolicyFieldTags: schema.ListAttribute{
 						ElementType: types.StringType,
 						Optional:    true,
 						Description: AutomationPolicyDescTags,
 					},
-					AutomationPolicyFieldTrigger: schema.SingleNestedAttribute{
+					shared.AutomationPolicyFieldTrigger: schema.SingleNestedAttribute{
 						Required:    true,
 						Description: AutomationPolicyDescTrigger,
 						Attributes: map[string]schema.Attribute{
-							AutomationPolicyFieldId: schema.StringAttribute{
+							shared.AutomationPolicyFieldId: schema.StringAttribute{
 								Required:    true,
 								Description: AutomationPolicyDescTriggerID,
 							},
-							AutomationPolicyFieldType: schema.StringAttribute{
+							shared.AutomationPolicyFieldType: schema.StringAttribute{
 								Required:    true,
 								Description: AutomationPolicyDescTriggerType,
 								Validators: []validator.String{
-									stringvalidator.OneOf(supportedTriggerTypes...),
+									stringvalidator.OneOf(shared.SupportedTriggerTypes...),
 								},
 							},
-							AutomationPolicyFieldName: schema.StringAttribute{
+							shared.AutomationPolicyFieldName: schema.StringAttribute{
 								Optional:    true,
 								Description: AutomationPolicyDescTriggerName,
 							},
-							AutomationPolicyFieldDescription: schema.StringAttribute{
+							shared.AutomationPolicyFieldDescription: schema.StringAttribute{
 								Optional:    true,
 								Description: AutomationPolicyDescTriggerDescription,
 							},
 						},
 					},
-					AutomationPolicyFieldTypeConfiguration: schema.ListNestedAttribute{
+					shared.AutomationPolicyFieldTypeConfiguration: schema.ListNestedAttribute{
 						Required:    true,
 						Description: AutomationPolicyDescTypeConfiguration,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
-								AutomationPolicyFieldName: schema.StringAttribute{
+								shared.AutomationPolicyFieldName: schema.StringAttribute{
 									Required:    true,
 									Description: AutomationPolicyDescTypeConfigurationName,
 									Validators: []validator.String{
-										stringvalidator.OneOf(supportedPolicyTypes...),
+										stringvalidator.OneOf(shared.SupportedPolicyTypes...),
 									},
 								},
-								AutomationPolicyFieldCondition: schema.SingleNestedAttribute{
+								shared.AutomationPolicyFieldCondition: schema.SingleNestedAttribute{
 									Optional:    true,
 									Description: AutomationPolicyDescCondition,
 									Attributes: map[string]schema.Attribute{
-										AutomationPolicyFieldQuery: schema.StringAttribute{
+										shared.AutomationPolicyFieldQuery: schema.StringAttribute{
 											Required:    true,
 											Description: AutomationPolicyDescConditionQuery,
 										},
 									},
 								},
-								AutomationPolicyFieldAction: schema.ListNestedAttribute{
+								shared.AutomationPolicyFieldAction: schema.ListNestedAttribute{
 									Required:    true,
 									Description: AutomationPolicyDescAction,
 									NestedObject: schema.NestedAttributeObject{
@@ -142,9 +144,9 @@ func NewAutomationPolicyResourceHandleFramework() ResourceHandleFramework[*resta
 											"action": schema.SingleNestedAttribute{
 												Required:    true,
 												Description: AutomationPolicyDescActionAction,
-												Attributes:  GetAutomationActionSchemaAttributes(),
+												Attributes:  shared.GetAutomationActionSchemaAttributes(),
 											},
-											AutomationPolicyFieldAgentId: schema.StringAttribute{
+											shared.AutomationPolicyFieldAgentId: schema.StringAttribute{
 												Optional:    true,
 												Description: AutomationPolicyDescActionAgentID,
 											},
@@ -162,10 +164,10 @@ func NewAutomationPolicyResourceHandleFramework() ResourceHandleFramework[*resta
 }
 
 type automationPolicyResourceFramework struct {
-	metaData ResourceMetaDataFramework
+	metaData resourcehandle.ResourceMetaDataFramework
 }
 
-func (r *automationPolicyResourceFramework) MetaData() *ResourceMetaDataFramework {
+func (r *automationPolicyResourceFramework) MetaData() *resourcehandle.ResourceMetaDataFramework {
 	return &r.metaData
 }
 
@@ -298,10 +300,10 @@ func (r *automationPolicyResourceFramework) mapActionsToState(ctx context.Contex
 
 	for i, actionPolicy := range runnable.RunConfiguration.Actions {
 		// Map the full automation action from the nested Action field
-		tags, _ := MapTagsToState(ctx, actionPolicy.Action.Tags)
-		inputParams, _ := MapInputParametersToState(ctx, actionPolicy.Action.InputParameters)
+		tags, _ := shared.MapTagsToState(ctx, actionPolicy.Action.Tags)
+		inputParams, _ := shared.MapInputParametersToState(ctx, actionPolicy.Action.InputParameters)
 
-		actionModel := AutomationActionModel{
+		actionModel := shared.AutomationActionModel{
 			ID:             types.StringValue(actionPolicy.Action.ID),
 			Name:           types.StringValue(actionPolicy.Action.Name),
 			Description:    types.StringValue(actionPolicy.Action.Description),
@@ -310,7 +312,7 @@ func (r *automationPolicyResourceFramework) mapActionsToState(ctx context.Contex
 		}
 
 		// Map action type-specific fields using the common function
-		MapActionTypeFieldsToState(ctx, &actionPolicy.Action, &actionModel)
+		shared.MapActionTypeFieldsToState(ctx, &actionPolicy.Action, &actionModel)
 
 		agentID := types.StringNull()
 		if actionPolicy.AgentId != "" {
@@ -484,14 +486,14 @@ func (r *automationPolicyResourceFramework) mapRunnableFromState(ctx context.Con
 		actionModel := policyActionModel.Action
 
 		// Map input parameters from the action model
-		inputParams, d := MapInputParametersFromState(ctx, actionModel)
+		inputParams, d := shared.MapInputParametersFromState(ctx, actionModel)
 		diags.Append(d...)
 		if diags.HasError() {
 			return runnable, diags
 		}
 
 		// Map action type and fields
-		actionType, fields, d := MapActionTypeAndFieldsFromState(ctx, actionModel)
+		actionType, fields, d := shared.MapActionTypeAndFieldsFromState(ctx, actionModel)
 		diags.Append(d...)
 		if diags.HasError() {
 			return runnable, diags
@@ -509,7 +511,7 @@ func (r *automationPolicyResourceFramework) mapRunnableFromState(ctx context.Con
 
 		// Map tags
 		if !actionModel.Tags.IsNull() {
-			tags, d := MapTagsFromState(ctx, actionModel.Tags)
+			tags, d := shared.MapTagsFromState(ctx, actionModel.Tags)
 			diags.Append(d...)
 			if !diags.HasError() {
 				automationAction.Tags = tags

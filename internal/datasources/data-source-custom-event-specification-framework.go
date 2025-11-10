@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
+	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -82,7 +83,7 @@ func (d *customEventSpecificationDataSourceFramework) Configure(_ context.Contex
 		return
 	}
 
-	providerMeta, ok := req.ProviderData.(*ProviderMeta)
+	providerMeta, ok := req.ProviderData.(*restapi.ProviderMeta)
 	if !ok {
 		resp.Diagnostics.AddError(
 			CustomEventSpecificationErrUnexpectedConfigureType,
@@ -136,14 +137,14 @@ func (d *customEventSpecificationDataSourceFramework) Read(ctx context.Context, 
 	data.ID = types.StringValue(matchingSpec.ID)
 
 	// Handle description which is a pointer
-	data.Description = util.setStringPointerToState(matchingSpec.Description)
+	data.Description = util.SetStringPointerToState(matchingSpec.Description)
 
 	// Handle query which is a pointer
-	data.Query = util.setStringPointerToState(matchingSpec.Query)
+	data.Query = util.SetStringPointerToState(matchingSpec.Query)
 
 	// Handle expiration time which is a pointer
 	if matchingSpec.ExpirationTime != nil {
-		data.ExpirationTime = setInt64PointerToState(matchingSpec.ExpirationTime)
+		data.ExpirationTime = util.SetInt64PointerToState(matchingSpec.ExpirationTime)
 	} else {
 		data.ExpirationTime = types.Int64Null()
 	}

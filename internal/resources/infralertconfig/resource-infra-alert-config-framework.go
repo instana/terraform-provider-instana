@@ -6,6 +6,9 @@ import (
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/instana/tagfilter"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
+	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
+	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -119,9 +122,9 @@ type InfraHistoricBaselineThresholdModel struct {
 }
 
 // NewInfraAlertConfigResourceHandleFramework creates a new instance of the infrastructure alert configuration resource
-func NewInfraAlertConfigResourceHandleFramework() ResourceHandleFramework[*restapi.InfraAlertConfig] {
+func NewInfraAlertConfigResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.InfraAlertConfig] {
 	return &infraAlertConfigResourceFramework{
-		metaData: ResourceMetaDataFramework{
+		metaData: resourcehandle.ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaInfraAlertConfigFramework,
 			Schema: schema.Schema{
 				Description: InfraAlertConfigDescResource,
@@ -200,8 +203,8 @@ func NewInfraAlertConfigResourceHandleFramework() ResourceHandleFramework[*resta
 											Description: InfraAlertConfigDescThreshold,
 											NestedObject: schema.NestedBlockObject{
 												Blocks: map[string]schema.Block{
-													"warning":  StaticAndAdaptiveThresholdBlockSchema(),
-													"critical": StaticAndAdaptiveThresholdBlockSchema(),
+													"warning":  shared.StaticAndAdaptiveThresholdBlockSchema(),
+													"critical": shared.StaticAndAdaptiveThresholdBlockSchema(),
 												},
 											},
 											Validators: []validator.List{
@@ -213,7 +216,7 @@ func NewInfraAlertConfigResourceHandleFramework() ResourceHandleFramework[*resta
 							},
 						},
 					},
-					"custom_payload_field": GetCustomPayloadFieldsSchema(),
+					"custom_payload_field": shared.GetCustomPayloadFieldsSchema(),
 					"time_threshold": schema.SingleNestedBlock{
 						Description: InfraAlertConfigDescTimeThreshold,
 						Blocks: map[string]schema.Block{
@@ -253,10 +256,10 @@ func NewInfraAlertConfigResourceHandleFramework() ResourceHandleFramework[*resta
 }
 
 type infraAlertConfigResourceFramework struct {
-	metaData ResourceMetaDataFramework
+	metaData resourcehandle.ResourceMetaDataFramework
 }
 
-func (r *infraAlertConfigResourceFramework) MetaData() *ResourceMetaDataFramework {
+func (r *infraAlertConfigResourceFramework) MetaData() *resourcehandle.ResourceMetaDataFramework {
 	return &r.metaData
 }
 
@@ -288,7 +291,7 @@ func (r *infraAlertConfigResourceFramework) UpdateState(ctx context.Context, sta
 			)
 			return diags
 		}
-		model.TagFilter = util.setStringPointerToState(tagFilterString)
+		model.TagFilter = util.SetStringPointerToState(tagFilterString)
 
 	} else {
 		model.TagFilter = types.StringNull()
@@ -306,7 +309,7 @@ func (r *infraAlertConfigResourceFramework) UpdateState(ctx context.Context, sta
 	}
 
 	// Map alert channels if present
-	alertChannelsList, alertChannelsDiags := MapAlertChannelsToState(ctx, resource.AlertChannels)
+	alertChannelsList, alertChannelsDiags := shared.MapAlertChannelsToState(ctx, resource.AlertChannels)
 	if alertChannelsDiags.HasError() {
 		diags.Append(alertChannelsDiags...)
 		return diags
@@ -318,7 +321,7 @@ func (r *infraAlertConfigResourceFramework) UpdateState(ctx context.Context, sta
 	model.TimeThreshold = r.mapTimeThresholdToState(ctx, resource.TimeThreshold)
 
 	// Map custom payload fields if present
-	customPayloadFieldsList, payloadDiags := CustomPayloadFieldsToTerraform(ctx, resource.CustomerPayloadFields)
+	customPayloadFieldsList, payloadDiags := shared.CustomPayloadFieldsToTerraform(ctx, resource.CustomerPayloadFields)
 	if payloadDiags.HasError() {
 		diags.Append(payloadDiags...)
 		return diags
@@ -342,7 +345,7 @@ func (r *infraAlertConfigResourceFramework) UpdateState(ctx context.Context, sta
 
 		// Map warning threshold
 		warningThreshold, isWarningThresholdPresent := resource.Rules[0].Thresholds[restapi.WarningSeverity]
-		warningThresholdList, warningDiags := MapThresholdToState(ctx, isWarningThresholdPresent, &warningThreshold, []string{"static", "adaptiveBaseline"})
+		warningThresholdList, warningDiags := shared.MapThresholdToState(ctx, isWarningThresholdPresent, &warningThreshold, []string{"static", "adaptiveBaseline"})
 		diags.Append(warningDiags...)
 		if diags.HasError() {
 			return diags
@@ -351,7 +354,7 @@ func (r *infraAlertConfigResourceFramework) UpdateState(ctx context.Context, sta
 
 		// Map critical threshold
 		criticalThreshold, isCriticalThresholdPresent := resource.Rules[0].Thresholds[restapi.CriticalSeverity]
-		criticalThresholdList, criticalDiags := MapThresholdToState(ctx, isCriticalThresholdPresent, &criticalThreshold, []string{"static", "adaptiveBaseline"})
+		criticalThresholdList, criticalDiags := shared.MapThresholdToState(ctx, isCriticalThresholdPresent, &criticalThreshold, []string{"static", "adaptiveBaseline"})
 		diags.Append(criticalDiags...)
 		if diags.HasError() {
 			return diags
@@ -361,8 +364,8 @@ func (r *infraAlertConfigResourceFramework) UpdateState(ctx context.Context, sta
 
 		// Convert threshold rule model to object
 		thresholdRuleObj, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
-			LogAlertConfigFieldWarning:  GetStaticAndAdaptiveThresholdAttrListTypes(),
-			LogAlertConfigFieldCritical: GetStaticAndAdaptiveThresholdAttrListTypes(),
+			shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
+			shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
 		}, thresholdRuleModel)
 		if diags.HasError() {
 			return diags
@@ -371,16 +374,16 @@ func (r *infraAlertConfigResourceFramework) UpdateState(ctx context.Context, sta
 		// Set threshold rule in generic rule model
 		genericRuleModel.ThresholdRule = types.ListValueMust(types.ObjectType{
 			AttrTypes: map[string]attr.Type{
-				LogAlertConfigFieldWarning:  GetStaticAndAdaptiveThresholdAttrListTypes(),
-				LogAlertConfigFieldCritical: GetStaticAndAdaptiveThresholdAttrListTypes(),
+				shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
+				shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
 			},
 		}, []attr.Value{thresholdRuleObj})
 
 		// Convert generic rule model to object
 		thresholdListType := types.ListType{ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
-				LogAlertConfigFieldWarning:  GetStaticAndAdaptiveThresholdAttrListTypes(),
-				LogAlertConfigFieldCritical: GetStaticAndAdaptiveThresholdAttrListTypes(),
+				shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
+				shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
 			},
 		}}
 		// genericRuleObj, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
@@ -515,7 +518,7 @@ func (r *infraAlertConfigResourceFramework) MapStateToDataObject(ctx context.Con
 	alertChannels := make(map[restapi.AlertSeverity][]string)
 	if !model.AlertChannels.IsNull() {
 		var alertChannelsDiags diag.Diagnostics
-		alertChannels, alertChannelsDiags = MapAlertChannelsFromState(ctx, model.AlertChannels)
+		alertChannels, alertChannelsDiags = shared.MapAlertChannelsFromState(ctx, model.AlertChannels)
 		if alertChannelsDiags.HasError() {
 			diags.Append(alertChannelsDiags...)
 			return nil, diags
@@ -590,7 +593,7 @@ func (r *infraAlertConfigResourceFramework) MapStateToDataObject(ctx context.Con
 				// Map thresholds
 				var thresholdDiags diag.Diagnostics
 				if !genericRuleModel.ThresholdRule.IsNull() && !genericRuleModel.ThresholdRule.IsUnknown() {
-					ruleWithThreshold.Thresholds, thresholdDiags = MapThresholdsFromState(ctx, genericRuleModel.ThresholdRule)
+					ruleWithThreshold.Thresholds, thresholdDiags = shared.MapThresholdsFromState(ctx, genericRuleModel.ThresholdRule)
 					diags.Append(thresholdDiags...)
 					if diags.HasError() {
 						return nil, diags

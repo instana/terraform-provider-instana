@@ -1,4 +1,4 @@
-package instana
+package automationaction
 
 // Resource description
 const AutomationActionDescResource = "This resource manages automation actions in Instana."
@@ -215,3 +215,49 @@ const AutomationActionDescAPIFieldPlaybookId = "The playbook ID"
 const AutomationActionDescAPIFieldPlaybookFileName = "The playbook filename"
 
 // Made with Bob
+const (
+	AutomationActionFieldName           = "name"
+	AutomationActionFieldDescription    = "description"
+	AutomationActionFieldTags           = "tags"
+	AutomationActionFieldTimeout        = "timeout"
+	AutomationActionFieldType           = "type"
+	AutomationActionFieldInputParameter = "input_parameter"
+
+	// script constants
+	AutomationActionFieldScript      = "script"
+	AutomationActionFieldContent     = "content"
+	AutomationActionFieldInterpreter = "interpreter"
+
+	// http constants
+	AutomationActionFieldHttp             = "http"
+	AutomationActionFieldMethod           = "method"
+	AutomationActionFieldHost             = "host"
+	AutomationActionFieldHeaders          = "headers"
+	AutomationActionFieldBody             = "body"
+	AutomationActionFieldIgnoreCertErrors = "ignore_certificate_errors"
+
+	// input parameter constants
+	AutomationActionParameterFieldName        = "name"
+	AutomationActionParameterFieldLabel       = "label"
+	AutomationActionParameterFieldDescription = "description"
+	AutomationActionParameterFieldType        = "type"
+	AutomationActionParameterFieldValue       = "value"
+	AutomationActionParameterFieldRequired    = "required"
+	AutomationActionParameterFieldHidden      = "hidden"
+)
+
+// Description constants for automation action fields
+const (
+	// AutomationActionDescDataSource description for the data source
+	AutomationActionDescDataSource = "Data source for an Instana automation action. Automation actions are used to execute scripts or HTTP requests."
+	// AutomationActionDescID description for the ID field
+	AutomationActionDescID = "The ID of the automation action."
+	// AutomationActionDescName description for the name field
+	AutomationActionDescName = "The name of the automation action."
+	// AutomationActionDescDescription description for the description field
+	AutomationActionDescDescription = "The description of the automation action."
+	// AutomationActionDescType description for the type field
+	AutomationActionDescType = "The type of the automation action."
+	// AutomationActionDescTags description for the tags field
+	AutomationActionDescTags = "The tags of the automation action."
+)

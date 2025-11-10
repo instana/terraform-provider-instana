@@ -5,10 +5,10 @@ import (
 	"fmt"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
+	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
 )
 
 // DataSourceInstanaAlertingChannelFramework the name of the terraform-provider-instana data source to read alerting channel
@@ -16,8 +16,8 @@ const DataSourceInstanaAlertingChannelFramework = "alerting_channel"
 
 // AlertingChannelDataSourceModel represents the data model for the alerting channel data source
 type AlertingChannelDataSourceModel struct {
-	ID                    types.String                                `tfsdk:"id"`
-	Name                  types.String                                `tfsdk:"name"`
+	ID                    types.String                       `tfsdk:"id"`
+	Name                  types.String                       `tfsdk:"name"`
 	Email                 *shared.EmailModel                 `tfsdk:"email"`
 	OpsGenie              *shared.OpsGenieModel              `tfsdk:"ops_genie"`
 	PagerDuty             *shared.PagerDutyModel             `tfsdk:"pager_duty"`
@@ -36,7 +36,7 @@ type AlertingChannelDataSourceModel struct {
 
 // NewAlertingChannelDataSourceFramework creates a new data source for alerting channel
 func NewAlertingChannelDataSourceFramework() datasource.DataSource {
-	return &alertingChannelDataSourceFramework{}
+	return &AlertingChannelDataSourceFramework{}
 }
 
 type AlertingChannelDataSourceFramework struct {
@@ -317,11 +317,11 @@ func (d *AlertingChannelDataSourceFramework) Configure(_ context.Context, req da
 		return
 	}
 
-	providerMeta, ok := req.ProviderData.(*ProviderMeta)
+	providerMeta, ok := req.ProviderData.(*restapi.ProviderMeta)
 	if !ok {
 		resp.Diagnostics.AddError(
 			AlertingChannelErrUnexpectedConfigureType,
-			fmt.Sprintf("Expected *ProviderMeta, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *restapi.ProviderMeta, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 		return
 	}
@@ -378,7 +378,7 @@ func (d *AlertingChannelDataSourceFramework) Read(ctx context.Context, req datas
 	// Set the appropriate channel type based on the alerting channel kind
 	switch matchingChannel.Kind {
 	case restapi.EmailChannelType:
-		emailChannel, emailDiags := shared.MapEmailChannelToState(ctx, matchingChannel))
+		emailChannel, emailDiags := shared.MapEmailChannelToState(ctx, matchingChannel)
 		if emailDiags.HasError() {
 			resp.Diagnostics.Append(emailDiags...)
 			return

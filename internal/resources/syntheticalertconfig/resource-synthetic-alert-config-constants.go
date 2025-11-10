@@ -1,4 +1,4 @@
-package shared
+package syntheticalertconfig
 
 // Resource name constants
 const (

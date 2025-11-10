@@ -33,7 +33,7 @@ const (
 	// AutomationActionErrUnexpectedConfigureType error message for unexpected configure type
 	AutomationActionErrUnexpectedConfigureType = "Unexpected Data Source Configure Type"
 	// AutomationActionErrUnexpectedConfigureTypeDetail error message detail for unexpected configure type
-	AutomationActionErrUnexpectedConfigureTypeDetail = "Expected *ProviderMeta, got: %T. Please report this issue to the provider developers."
+	AutomationActionErrUnexpectedConfigureTypeDetail = "Expected *restapi.ProviderMeta, got: %T. Please report this issue to the provider developers."
 	// AutomationActionErrReadingActions error message for reading automation actions
 	AutomationActionErrReadingActions = "Error reading automation actions"
 	// AutomationActionErrReadingActionsDetail error message detail for reading automation actions
@@ -44,4 +44,33 @@ const (
 	AutomationActionErrNotFoundDetail = "No automation action found with name '%s' and type '%s'"
 )
 
-// Made with Bob
+const (
+	AutomationActionFieldName           = "name"
+	AutomationActionFieldDescription    = "description"
+	AutomationActionFieldTags           = "tags"
+	AutomationActionFieldTimeout        = "timeout"
+	AutomationActionFieldType           = "type"
+	AutomationActionFieldInputParameter = "input_parameter"
+
+	// script constants
+	AutomationActionFieldScript      = "script"
+	AutomationActionFieldContent     = "content"
+	AutomationActionFieldInterpreter = "interpreter"
+
+	// http constants
+	AutomationActionFieldHttp             = "http"
+	AutomationActionFieldMethod           = "method"
+	AutomationActionFieldHost             = "host"
+	AutomationActionFieldHeaders          = "headers"
+	AutomationActionFieldBody             = "body"
+	AutomationActionFieldIgnoreCertErrors = "ignore_certificate_errors"
+
+	// input parameter constants
+	AutomationActionParameterFieldName        = "name"
+	AutomationActionParameterFieldLabel       = "label"
+	AutomationActionParameterFieldDescription = "description"
+	AutomationActionParameterFieldType        = "type"
+	AutomationActionParameterFieldValue       = "value"
+	AutomationActionParameterFieldRequired    = "required"
+	AutomationActionParameterFieldHidden      = "hidden"
+)

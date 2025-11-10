@@ -6,6 +6,8 @@ import (
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/instana/tagfilter"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
+	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -48,9 +50,9 @@ type ApplicationConfigModel struct {
 }
 
 // NewApplicationConfigResourceHandleFramework creates the resource handle for Application Configuration
-func NewApplicationConfigResourceHandleFramework() ResourceHandleFramework[*restapi.ApplicationConfig] {
+func NewApplicationConfigResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.ApplicationConfig] {
 	return &applicationConfigResourceFramework{
-		metaData: ResourceMetaDataFramework{
+		metaData: resourcehandle.ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaApplicationConfigFramework,
 			Schema: schema.Schema{
 				Description: ApplicationConfigDescResource,
@@ -129,10 +131,10 @@ func NewApplicationConfigResourceHandleFramework() ResourceHandleFramework[*rest
 }
 
 type applicationConfigResourceFramework struct {
-	metaData ResourceMetaDataFramework
+	metaData resourcehandle.ResourceMetaDataFramework
 }
 
-func (r *applicationConfigResourceFramework) MetaData() *ResourceMetaDataFramework {
+func (r *applicationConfigResourceFramework) MetaData() *resourcehandle.ResourceMetaDataFramework {
 	return &r.metaData
 }
 
@@ -166,7 +168,7 @@ func (r *applicationConfigResourceFramework) UpdateState(ctx context.Context, st
 				),
 			}
 		}
-		model.TagFilter = util.setStringPointerToState(normalizedTagFilterString)
+		model.TagFilter = util.SetStringPointerToState(normalizedTagFilterString)
 
 	} else {
 		model.TagFilter = types.StringNull()
@@ -211,7 +213,7 @@ func (r *applicationConfigResourceFramework) mapAccessRulesToState(ctx context.C
 		}
 
 		// Handle related ID
-		ruleMap["related_id"] = util.setStringPointerToState(rule.RelatedID)
+		ruleMap["related_id"] = util.SetStringPointerToState(rule.RelatedID)
 
 		// Create object value
 		objValue, d := types.ObjectValue(

@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
+	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -442,14 +443,14 @@ func mapHistoricBaselineToState(ctx context.Context, threshold *restapi.Threshol
 
 	// Map deviation factor
 	if threshold.DeviationFactor != nil {
-		historicObj[ThresholdFieldHistoricBaselineDeviation] = setFloat32PointerToState(threshold.DeviationFactor)
+		historicObj[ThresholdFieldHistoricBaselineDeviation] = util.SetFloat32PointerToState(threshold.DeviationFactor)
 	} else {
 		historicObj[ThresholdFieldHistoricBaselineDeviation] = types.Float32Value(1.0)
 	}
 
 	// Map baseline
 	if threshold.Baseline != nil {
-		baselineSet, baselineDiags := mapBaseline(threshold)
+		baselineSet, baselineDiags := MapBaseline(threshold)
 		diags.Append(baselineDiags...)
 		if diags.HasError() {
 			return types.ListNull(types.ObjectType{}), diags
@@ -487,7 +488,7 @@ func mapHistoricBaselineToState(ctx context.Context, threshold *restapi.Threshol
 	)
 }
 
-func mapBaseline(threshold *restapi.ThresholdRule) (basetypes.ListValue, diag.Diagnostics) {
+func MapBaseline(threshold *restapi.ThresholdRule) (basetypes.ListValue, diag.Diagnostics) {
 	var baselineDiags diag.Diagnostics
 	baselineListValues := []attr.Value{}
 	for _, baselineArray := range *threshold.Baseline {
@@ -516,32 +517,6 @@ func mapBaseline(threshold *restapi.ThresholdRule) (basetypes.ListValue, diag.Di
 	return baselineSet, baselineDiags
 }
 
-// mapBaselineFromState converts a Terraform List of List (baseline data) to API format
-func mapBaselineFromState(ctx context.Context, baselineList types.List) (*[][]float64, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	// Get the outer list elements (each element is itself a list of float64)
-	var outerListElements []types.List
-	diags.Append(baselineList.ElementsAs(ctx, &outerListElements, false)...)
-	if diags.HasError() {
-		return nil, diags
-	}
-
-	// Convert to [][]float64
-	baseline := make([][]float64, 0, len(outerListElements))
-	for _, innerList := range outerListElements {
-		// Get the inner list elements (float64 values)
-		var innerValues []float64
-		diags.Append(innerList.ElementsAs(ctx, &innerValues, false)...)
-		if diags.HasError() {
-			return nil, diags
-		}
-		baseline = append(baseline, innerValues)
-	}
-
-	return &baseline, diags
-}
-
 // mapAdaptiveBaselineToState maps an adaptive baseline threshold to Terraform state
 func mapAdaptiveBaselineToState(ctx context.Context, threshold *restapi.ThresholdRule) (types.List, diag.Diagnostics) {
 	var diags diag.Diagnostics
@@ -558,12 +533,12 @@ func mapAdaptiveBaselineToState(ctx context.Context, threshold *restapi.Threshol
 
 	// Map deviation factor
 	if threshold.DeviationFactor != nil {
-		adaptiveObj[ThresholdFieldAdaptiveBaselineDeviation] = setFloat32PointerToState(threshold.DeviationFactor)
+		adaptiveObj[ThresholdFieldAdaptiveBaselineDeviation] = util.SetFloat32PointerToState(threshold.DeviationFactor)
 	} else {
 		adaptiveObj[ThresholdFieldAdaptiveBaselineDeviation] = types.Float32Value(1.0)
 	}
 
-	adaptiveObj[ThresholdFieldAdaptiveBaselineAdaptability] = setFloat32PointerToState(threshold.Adaptability)
+	adaptiveObj[ThresholdFieldAdaptiveBaselineAdaptability] = util.SetFloat32PointerToState(threshold.Adaptability)
 
 	// Create adaptive baseline object value
 	adaptiveObjVal, adaptiveObjDiags := types.ObjectValue(
@@ -810,7 +785,7 @@ func mapHistoricBaselineFromState(ctx context.Context, historicList types.List) 
 
 	// Set baseline
 	if !historicObj.Baseline.IsNull() && !historicObj.Baseline.IsUnknown() {
-		baseline, baselineDiags := mapBaselineFromState(ctx, historicObj.Baseline)
+		baseline, baselineDiags := MapBaselineFromState(ctx, historicObj.Baseline)
 		diags.Append(baselineDiags...)
 		if diags.HasError() {
 			return nil, diags
