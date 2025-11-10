@@ -19,40 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
-// ResourceInstanaSyntheticAlertConfigFramework the name of the terraform-provider-instana resource to manage synthetic alert configurations
-const ResourceInstanaSyntheticAlertConfigFramework = "synthetic_alert_config"
-
-const (
-	// SyntheticAlertConfigFieldName constant value for the schema field name
-	SyntheticAlertConfigFieldName = "name"
-	// SyntheticAlertConfigFieldName constant value for the schema field full name
-	SyntheticAlertConfigFieldFullName = "full_name"
-	// SyntheticAlertConfigFieldDescription constant value for the schema field description
-	SyntheticAlertConfigFieldDescription = "description"
-	// SyntheticAlertConfigFieldSyntheticTestIds constant value for the schema field synthetic_test_ids
-	SyntheticAlertConfigFieldSyntheticTestIds = "synthetic_test_ids"
-	// SyntheticAlertConfigFieldSeverity constant value for the schema field severity
-	SyntheticAlertConfigFieldSeverity = "severity"
-	// SyntheticAlertConfigFieldTagFilter constant value for the schema field tag_filter
-	SyntheticAlertConfigFieldTagFilter = "tag_filter"
-	// SyntheticAlertConfigFieldRule constant value for the schema field rule
-	SyntheticAlertConfigFieldRule = "rule"
-	// SyntheticAlertConfigFieldAlertChannelIds constant value for the schema field alert_channel_ids
-	SyntheticAlertConfigFieldAlertChannelIds = "alert_channel_ids"
-	// SyntheticAlertConfigFieldTimeThreshold constant value for the schema field time_threshold
-	SyntheticAlertConfigFieldTimeThreshold = "time_threshold"
-	// SyntheticAlertConfigFieldGracePeriod constant value for the schema field grace_period
-	SyntheticAlertConfigFieldGracePeriod = "grace_period"
-
-	// Rule fields
-	SyntheticAlertRuleFieldAlertType   = "alert_type"
-	SyntheticAlertRuleFieldMetricName  = "metric_name"
-	SyntheticAlertRuleFieldAggregation = "aggregation"
-
-	// TimeThreshold fields
-	SyntheticAlertTimeThresholdFieldType            = "type"
-	SyntheticAlertTimeThresholdFieldViolationsCount = "violations_count"
-)
+// Constants are now defined in resource-synthetic-alert-config-constants.go
 
 // SyntheticAlertConfigModel represents the data model for the Synthetic Alert Config resource
 type SyntheticAlertConfigModel struct {
@@ -88,79 +55,79 @@ func NewSyntheticAlertConfigResourceHandleFramework() ResourceHandleFramework[*r
 		metaData: ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaSyntheticAlertConfigFramework,
 			Schema: schema.Schema{
-				Description: "This resource manages Synthetic Alert Configurations in Instana.",
+				Description: SyntheticAlertConfigDescResource,
 				Attributes: map[string]schema.Attribute{
-					"id": schema.StringAttribute{
+					SyntheticAlertConfigFieldID: schema.StringAttribute{
 						Computed:    true,
-						Description: "The ID of the Synthetic Alert Config.",
+						Description: SyntheticAlertConfigDescID,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
-					"name": schema.StringAttribute{
+					SyntheticAlertConfigFieldName: schema.StringAttribute{
 						Required:    true,
-						Description: "The name of the Synthetic Alert Config.",
+						Description: SyntheticAlertConfigDescName,
 						Validators: []validator.String{
 							stringvalidator.LengthBetween(1, 256),
 						},
 					},
-					"description": schema.StringAttribute{
+					SyntheticAlertConfigFieldDescription: schema.StringAttribute{
 						Required:    true,
-						Description: "The description of the Synthetic Alert Config.",
+						Description: SyntheticAlertConfigDescDescription,
 						Validators: []validator.String{
 							stringvalidator.LengthBetween(0, 1024),
 						},
 					},
-					"synthetic_test_ids": schema.SetAttribute{
+					SyntheticAlertConfigFieldSyntheticTestIds: schema.SetAttribute{
 						Required:    true,
-						Description: "A set of Synthetic Test IDs that this alert config applies to.",
+						Description: SyntheticAlertConfigDescSyntheticTestIds,
 						ElementType: types.StringType,
 					},
-					"severity": schema.Int64Attribute{
+					SyntheticAlertConfigFieldSeverity: schema.Int64Attribute{
 						Optional:    true,
-						Description: "The severity of the alert (5=critical, 10=warning).",
+						Description: SyntheticAlertConfigDescSeverity,
 						Validators: []validator.Int64{
 							int64validator.OneOf(5, 10),
 						},
 					},
-					"tag_filter": schema.StringAttribute{
+					SyntheticAlertConfigFieldTagFilter: schema.StringAttribute{
 						Optional:    true,
-						Description: "The tag filter expression used for this synthetic alert.",
+						Description: SyntheticAlertConfigDescTagFilter,
 					},
-					"alert_channel_ids": schema.SetAttribute{
+					SyntheticAlertConfigFieldAlertChannelIds: schema.SetAttribute{
 						Required:    true,
-						Description: "A set of Alert Channel IDs.",
+						Description: SyntheticAlertConfigDescAlertChannelIds,
 						ElementType: types.StringType,
 					},
-					"grace_period": schema.Int64Attribute{
+					SyntheticAlertConfigFieldGracePeriod: schema.Int64Attribute{
 						Optional:    true,
-						Description: "The duration in milliseconds for which an alert remains open after conditions are no longer violated.",
+						Description: SyntheticAlertConfigDescGracePeriod,
 					},
 				},
 				Blocks: map[string]schema.Block{
-					"rule": schema.ListNestedBlock{
-						Description: "Configuration for the synthetic alert rule.",
+					SyntheticAlertConfigFieldRule: schema.ListNestedBlock{
+						Description: SyntheticAlertConfigDescRule,
 						NestedObject: schema.NestedBlockObject{
 							Attributes: map[string]schema.Attribute{
-								"alert_type": schema.StringAttribute{
+								SyntheticAlertRuleFieldAlertType: schema.StringAttribute{
 									Required:    true,
-									Description: "The type of the alert rule (e.g., failure).",
+									Description: SyntheticAlertConfigDescRuleAlertType,
 									Validators: []validator.String{
-										stringvalidator.OneOf("failure"),
+										stringvalidator.OneOf(SyntheticAlertConfigValidAlertType),
 									},
 								},
-								"metric_name": schema.StringAttribute{
+								SyntheticAlertRuleFieldMetricName: schema.StringAttribute{
 									Required:    true,
-									Description: "The metric name to monitor (e.g., status).",
+									Description: SyntheticAlertConfigDescRuleMetricName,
 									Validators: []validator.String{
 										stringvalidator.LengthBetween(1, 256),
 									},
 								},
-								"aggregation": schema.StringAttribute{
+								SyntheticAlertRuleFieldAggregation: schema.StringAttribute{
 									Optional:    true,
-									Description: "The aggregation method {SUM,MEAN,MAX,MIN,P25,P50,P75,P90,P95,P98,P99,P99_9,P99_99,DISTINCT_COUNT,SUM_POSITIVE,PER_SECOND,INCREASE}.",
+									Description: SyntheticAlertConfigDescRuleAggregation,
 									Validators: []validator.String{
-										stringvalidator.OneOf("SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99", "P99_9", "P99_99", "DISTINCT_COUNT", "SUM_POSITIVE", "PER_SECOND", "INCREASE"),
+										stringvalidator.OneOf(AggregationTypeSum, AggregationTypeMean, AggregationTypeMax, AggregationTypeMin, AggregationTypeP25, AggregationTypeP50, AggregationTypeP75, AggregationTypeP90, AggregationTypeP95, AggregationTypeP98, AggregationTypeP99, AggregationTypeP99_9, AggregationTypeP99_99, AggregationTypeDistinctCount, AggregationTypeSumPositive, AggregationTypePerSecond, AggregationTypeIncrease),
 									},
 								},
 							},
@@ -169,20 +136,20 @@ func NewSyntheticAlertConfigResourceHandleFramework() ResourceHandleFramework[*r
 							listvalidator.SizeBetween(1, 1),
 						},
 					},
-					"time_threshold": schema.ListNestedBlock{
-						Description: "Configuration for the time threshold.",
+					SyntheticAlertConfigFieldTimeThreshold: schema.ListNestedBlock{
+						Description: SyntheticAlertConfigDescTimeThreshold,
 						NestedObject: schema.NestedBlockObject{
 							Attributes: map[string]schema.Attribute{
-								"type": schema.StringAttribute{
+								SyntheticAlertTimeThresholdFieldType: schema.StringAttribute{
 									Required:    true,
-									Description: "The type of the time threshold (only violationsInSequence is supported).",
+									Description: SyntheticAlertConfigDescTimeThresholdType,
 									Validators: []validator.String{
-										stringvalidator.OneOf("violationsInSequence"),
+										stringvalidator.OneOf(SyntheticAlertConfigValidTimeThresholdType),
 									},
 								},
-								"violations_count": schema.Int64Attribute{
+								SyntheticAlertTimeThresholdFieldViolationsCount: schema.Int64Attribute{
 									Required:    true,
-									Description: "The number of violations required to trigger the alert (value between 1 and 12).",
+									Description: SyntheticAlertConfigDescTimeThresholdViolationsCount,
 									Validators: []validator.Int64{
 										int64validator.Between(1, 12),
 									},
@@ -193,7 +160,7 @@ func NewSyntheticAlertConfigResourceHandleFramework() ResourceHandleFramework[*r
 							listvalidator.SizeBetween(1, 1),
 						},
 					},
-					"custom_payload_field": GetCustomPayloadFieldsSchema(),
+					SyntheticAlertConfigFieldCustomPayloadField: GetCustomPayloadFieldsSchema(),
 				},
 			},
 			SchemaVersion: 1,
@@ -307,15 +274,15 @@ func (r *syntheticAlertConfigResourceFramework) MapStateToDataObject(ctx context
 		tagFilter, err = mapTagFilterExpressionFromSchema(model.TagFilter.ValueString())
 		if err != nil {
 			diags.AddError(
-				"Error parsing tag filter",
-				"Could not parse tag filter: "+err.Error(),
+				SyntheticAlertConfigErrParsingTagFilter,
+				SyntheticAlertConfigErrParsingTagFilterDetail+err.Error(),
 			)
 			return nil, diags
 		}
 	} else {
-		operator := restapi.LogicalOperatorType("AND")
+		operator := restapi.LogicalOperatorType(TagFilterLogicalOperatorAnd)
 		tagFilter = &restapi.TagFilter{
-			Type:            "EXPRESSION",
+			Type:            TagFilterTypeExpression,
 			LogicalOperator: &operator,
 			Elements:        []*restapi.TagFilter{},
 		}
@@ -380,8 +347,8 @@ func (r *syntheticAlertConfigResourceFramework) UpdateState(ctx context.Context,
 		normalizedTagFilterString, err := tagfilter.MapTagFilterToNormalizedString(apiObject.TagFilterExpression)
 		if err != nil {
 			diags.AddError(
-				"Error normalizing tag filter",
-				"Could not normalize tag filter: "+err.Error(),
+				SyntheticAlertConfigErrNormalizingTagFilter,
+				SyntheticAlertConfigErrNormalizingTagFilterDetail+err.Error(),
 			)
 			return diags
 		}
@@ -397,20 +364,20 @@ func (r *syntheticAlertConfigResourceFramework) UpdateState(ctx context.Context,
 
 	// Map rule
 	ruleObj := map[string]attr.Value{
-		"alert_type":  types.StringValue(apiObject.Rule.AlertType),
-		"metric_name": types.StringValue(apiObject.Rule.MetricName),
+		SyntheticAlertRuleFieldAlertType:  types.StringValue(apiObject.Rule.AlertType),
+		SyntheticAlertRuleFieldMetricName: types.StringValue(apiObject.Rule.MetricName),
 	}
 
 	if apiObject.Rule.Aggregation != "" {
-		ruleObj["aggregation"] = types.StringValue(apiObject.Rule.Aggregation)
+		ruleObj[SyntheticAlertRuleFieldAggregation] = types.StringValue(apiObject.Rule.Aggregation)
 	} else {
-		ruleObj["aggregation"] = types.StringNull()
+		ruleObj[SyntheticAlertRuleFieldAggregation] = types.StringNull()
 	}
 
 	ruleType := map[string]attr.Type{
-		"alert_type":  types.StringType,
-		"metric_name": types.StringType,
-		"aggregation": types.StringType,
+		SyntheticAlertRuleFieldAlertType:   types.StringType,
+		SyntheticAlertRuleFieldMetricName:  types.StringType,
+		SyntheticAlertRuleFieldAggregation: types.StringType,
 	}
 
 	ruleValue, ruleDiags := types.ObjectValue(ruleType, ruleObj)
@@ -432,13 +399,13 @@ func (r *syntheticAlertConfigResourceFramework) UpdateState(ctx context.Context,
 
 	// Map time threshold
 	timeThresholdObj := map[string]attr.Value{
-		"type":             types.StringValue(apiObject.TimeThreshold.Type),
-		"violations_count": types.Int64Value(int64(apiObject.TimeThreshold.ViolationsCount)),
+		SyntheticAlertTimeThresholdFieldType:            types.StringValue(apiObject.TimeThreshold.Type),
+		SyntheticAlertTimeThresholdFieldViolationsCount: types.Int64Value(int64(apiObject.TimeThreshold.ViolationsCount)),
 	}
 
 	timeThresholdType := map[string]attr.Type{
-		"type":             types.StringType,
-		"violations_count": types.Int64Type,
+		SyntheticAlertTimeThresholdFieldType:            types.StringType,
+		SyntheticAlertTimeThresholdFieldViolationsCount: types.Int64Type,
 	}
 
 	timeThresholdValue, timeThresholdDiags := types.ObjectValue(timeThresholdType, timeThresholdObj)

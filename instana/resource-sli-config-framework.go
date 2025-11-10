@@ -183,18 +183,18 @@ func NewSliConfigResourceHandleFramework() ResourceHandleFramework[*restapi.SliC
 		metaData: ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaSliConfigFramework,
 			Schema: schema.Schema{
-				Description: "This resource manages SLI configurations in Instana.",
+				Description: SliConfigDescResource,
 				Attributes: map[string]schema.Attribute{
 					"id": schema.StringAttribute{
 						Computed:    true,
-						Description: "The ID of the SLI configuration.",
+						Description: SliConfigDescID,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
 					"name": schema.StringAttribute{
 						Required:    true,
-						Description: "The name of the SLI config",
+						Description: SliConfigDescName,
 						Validators: []validator.String{
 							stringvalidator.LengthBetween(0, 256),
 						},
@@ -202,21 +202,21 @@ func NewSliConfigResourceHandleFramework() ResourceHandleFramework[*restapi.SliC
 					"initial_evaluation_timestamp": schema.Int64Attribute{
 						Optional:    true,
 						Computed:    true,
-						Description: "Initial evaluation timestamp for the SLI config",
+						Description: SliConfigDescInitialEvaluationTimestamp,
 					},
 				},
 				Blocks: map[string]schema.Block{
 					"metric_configuration": schema.ListNestedBlock{
-						Description: "Metric configuration for the SLI config",
+						Description: SliConfigDescMetricConfiguration,
 						NestedObject: schema.NestedBlockObject{
 							Attributes: map[string]schema.Attribute{
 								"metric_name": schema.StringAttribute{
 									Required:    true,
-									Description: "The metric name for the metric configuration",
+									Description: SliConfigDescMetricName,
 								},
 								"aggregation": schema.StringAttribute{
 									Required:    true,
-									Description: "The aggregation type for the metric configuration (SUM, MEAN, MAX, MIN, P25, P50, P75, P90, P95, P98, P99, P99_9, P99_99, DISTRIBUTION, DISTINCT_COUNT, SUM_POSITIVE, PER_SECOND)",
+									Description: SliConfigDescAggregation,
 									Validators: []validator.String{
 										stringvalidator.OneOf(
 											"SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99", "P99_9", "P99_99", "DISTRIBUTION", "DISTINCT_COUNT", "SUM_POSITIVE", "PER_SECOND",
@@ -225,7 +225,7 @@ func NewSliConfigResourceHandleFramework() ResourceHandleFramework[*restapi.SliC
 								},
 								"threshold": schema.Float64Attribute{
 									Required:    true,
-									Description: "The threshold for the metric configuration",
+									Description: SliConfigDescThreshold,
 									Validators: []validator.Float64{
 										float64validator.AtLeast(0.000001),
 									},
@@ -234,28 +234,28 @@ func NewSliConfigResourceHandleFramework() ResourceHandleFramework[*restapi.SliC
 						},
 					},
 					"sli_entity": schema.ListNestedBlock{
-						Description: "The entity to use for the SLI config.",
+						Description: SliConfigDescSliEntity,
 						NestedObject: schema.NestedBlockObject{
 							Blocks: map[string]schema.Block{
 								"application_time_based": schema.ListNestedBlock{
-									Description: "The SLI entity of type application to use for the SLI config",
+									Description: SliConfigDescApplicationTimeBased,
 									NestedObject: schema.NestedBlockObject{
 										Attributes: map[string]schema.Attribute{
 											"application_id": schema.StringAttribute{
 												Required:    true, // might be optional
-												Description: "The application ID of the entity",
+												Description: SliConfigDescApplicationID,
 											},
 											"service_id": schema.StringAttribute{
 												Optional:    true,
-												Description: "The service ID of the entity",
+												Description: SliConfigDescServiceID,
 											},
 											"endpoint_id": schema.StringAttribute{
 												Optional:    true,
-												Description: "The endpoint ID of the entity",
+												Description: SliConfigDescEndpointID,
 											},
 											"boundary_scope": schema.StringAttribute{
 												Required:    true,
-												Description: "The boundary scope for the entity configuration (ALL, INBOUND)",
+												Description: SliConfigDescBoundaryScope,
 												Validators: []validator.String{
 													stringvalidator.OneOf("ALL", "INBOUND"),
 												},
@@ -264,66 +264,66 @@ func NewSliConfigResourceHandleFramework() ResourceHandleFramework[*restapi.SliC
 									},
 								},
 								"application_event_based": schema.ListNestedBlock{
-									Description: "The SLI entity of type availability to use for the SLI config",
+									Description: SliConfigDescApplicationEventBased,
 									NestedObject: schema.NestedBlockObject{
 										Attributes: map[string]schema.Attribute{
 											"application_id": schema.StringAttribute{
 												Required:    true,
-												Description: "The application ID of the entity",
+												Description: SliConfigDescApplicationID,
 											},
 											"boundary_scope": schema.StringAttribute{
 												Required:    true,
-												Description: "The boundary scope for the entity configuration (ALL, INBOUND)",
+												Description: SliConfigDescBoundaryScope,
 												Validators: []validator.String{
 													stringvalidator.OneOf("ALL", "INBOUND"),
 												},
 											},
 											"bad_event_filter_expression": schema.StringAttribute{
 												Required:    true,
-												Description: "The tag filter expression for bad events",
+												Description: SliConfigDescBadEventFilterExpression,
 											},
 											"good_event_filter_expression": schema.StringAttribute{
 												Required:    true,
-												Description: "The tag filter expression for good events",
+												Description: SliConfigDescGoodEventFilterExpression,
 											},
 											"include_internal": schema.BoolAttribute{
 												Optional:    true,
-												Description: "Optional flag to indicate whether also internal calls are included",
+												Description: SliConfigDescIncludeInternal,
 											},
 											"include_synthetic": schema.BoolAttribute{
 												Optional:    true,
-												Description: "Optional flag to indicate whether also synthetic calls are included in the scope or not",
+												Description: SliConfigDescIncludeSynthetic,
 											},
 											"endpoint_id": schema.StringAttribute{
 												Optional:    true,
-												Description: "Specifies the ID of the Endpoint to be monitored by the availability-based application SLO",
+												Description: SliConfigDescEndpointIDAvailability,
 											},
 											"service_id": schema.StringAttribute{
 												Optional:    true,
-												Description: "Identifies the service to be monitored by the availability-based application SLO",
+												Description: SliConfigDescServiceIDAvailability,
 											},
 										},
 									},
 								},
 								"website_event_based": schema.ListNestedBlock{
-									Description: "The SLI entity of type websiteEventBased to use for the SLI config",
+									Description: SliConfigDescWebsiteEventBased,
 									NestedObject: schema.NestedBlockObject{
 										Attributes: map[string]schema.Attribute{
 											"website_id": schema.StringAttribute{
 												Required:    true,
-												Description: "The website ID of the entity",
+												Description: SliConfigDescWebsiteID,
 											},
 											"bad_event_filter_expression": schema.StringAttribute{
 												Required:    true,
-												Description: "The tag filter expression for bad events",
+												Description: SliConfigDescBadEventFilterExpression,
 											},
 											"good_event_filter_expression": schema.StringAttribute{
 												Required:    true,
-												Description: "The tag filter expression for good events",
+												Description: SliConfigDescGoodEventFilterExpression,
 											},
 											"beacon_type": schema.StringAttribute{
 												Required:    true,
-												Description: "The beacon type for the entity configuration (pageLoad, resourceLoad, httpRequest, error, custom, pageChange)",
+												Description: SliConfigDescBeaconType,
 												Validators: []validator.String{
 													stringvalidator.OneOf("pageLoad", "resourceLoad", "httpRequest", "error", "custom", "pageChange"),
 												},
@@ -332,20 +332,20 @@ func NewSliConfigResourceHandleFramework() ResourceHandleFramework[*restapi.SliC
 									},
 								},
 								"website_time_based": schema.ListNestedBlock{
-									Description: "The SLI entity of type websiteTimeBased to use for the SLI config",
+									Description: SliConfigDescWebsiteTimeBased,
 									NestedObject: schema.NestedBlockObject{
 										Attributes: map[string]schema.Attribute{
 											"website_id": schema.StringAttribute{
 												Required:    true,
-												Description: "The website ID of the entity",
+												Description: SliConfigDescWebsiteID,
 											},
 											"filter_expression": schema.StringAttribute{
 												Optional:    true,
-												Description: "The tag filter expression",
+												Description: SliConfigDescFilterExpression,
 											},
 											"beacon_type": schema.StringAttribute{
 												Required:    true,
-												Description: "The beacon type for the entity configuration (pageLoad, resourceLoad, httpRequest, error, custom, pageChange)",
+												Description: SliConfigDescBeaconType,
 												Validators: []validator.String{
 													stringvalidator.OneOf("pageLoad", "resourceLoad", "httpRequest", "error", "custom", "pageChange"),
 												},
@@ -438,8 +438,8 @@ func (r *sliConfigResourceFramework) UpdateState(ctx context.Context, state *tfs
 		sliEntityModel.WebsiteTimeBased, entityDiags = r.mapWebsiteTimeBasedToState(ctx, sliConfig.SliEntity)
 	default:
 		diags.AddError(
-			"Unsupported SLI entity type",
-			fmt.Sprintf("Unsupported SLI entity type: %s", sliConfig.SliEntity.Type),
+			SliConfigErrUnsupportedEntityType,
+			fmt.Sprintf(SliConfigErrUnsupportedEntityTypeMsg, sliConfig.SliEntity.Type),
 		)
 		return diags
 	}
@@ -516,8 +516,8 @@ func (r *sliConfigResourceFramework) mapApplicationEventBasedToState(ctx context
 		goodEventFilterStr, err := tagfilter.MapTagFilterToNormalizedString(sliEntity.GoodEventFilterExpression)
 		if err != nil {
 			diags.AddError(
-				"Error mapping good event filter expression",
-				fmt.Sprintf("Failed to map good event filter expression: %s", err),
+				SliConfigErrMappingGoodEventFilter,
+				fmt.Sprintf(SliConfigErrMappingGoodEventFilterMsg, err),
 			)
 			return types.ListNull(types.ObjectType{}), diags
 		}
@@ -531,8 +531,8 @@ func (r *sliConfigResourceFramework) mapApplicationEventBasedToState(ctx context
 		badEventFilterStr, err := tagfilter.MapTagFilterToNormalizedString(sliEntity.BadEventFilterExpression)
 		if err != nil {
 			diags.AddError(
-				"Error mapping bad event filter expression",
-				fmt.Sprintf("Failed to map bad event filter expression: %s", err),
+				SliConfigErrMappingBadEventFilter,
+				fmt.Sprintf(SliConfigErrMappingBadEventFilterMsg, err),
 			)
 			return types.ListNull(types.ObjectType{}), diags
 		}
@@ -585,8 +585,8 @@ func (r *sliConfigResourceFramework) mapWebsiteEventBasedToState(ctx context.Con
 		goodEventFilterStr, err := tagfilter.MapTagFilterToNormalizedString(sliEntity.GoodEventFilterExpression)
 		if err != nil {
 			diags.AddError(
-				"Error mapping good event filter expression",
-				fmt.Sprintf("Failed to map good event filter expression: %s", err),
+				SliConfigErrMappingGoodEventFilter,
+				fmt.Sprintf(SliConfigErrMappingGoodEventFilterMsg, err),
 			)
 			return types.ListNull(types.ObjectType{}), diags
 		}
@@ -600,8 +600,8 @@ func (r *sliConfigResourceFramework) mapWebsiteEventBasedToState(ctx context.Con
 		badEventFilterStr, err := tagfilter.MapTagFilterToNormalizedString(sliEntity.BadEventFilterExpression)
 		if err != nil {
 			diags.AddError(
-				"Error mapping bad event filter expression",
-				fmt.Sprintf("Failed to map bad event filter expression: %s", err),
+				SliConfigErrMappingBadEventFilter,
+				fmt.Sprintf(SliConfigErrMappingBadEventFilterMsg, err),
 			)
 			return types.ListNull(types.ObjectType{}), diags
 		}
@@ -637,8 +637,8 @@ func (r *sliConfigResourceFramework) mapWebsiteTimeBasedToState(ctx context.Cont
 		filterExprStr, err := tagfilter.MapTagFilterToNormalizedString(sliEntity.FilterExpression)
 		if err != nil {
 			diags.AddError(
-				"Error mapping filter expression",
-				fmt.Sprintf("Failed to map filter expression: %s", err),
+				SliConfigErrMappingFilterExpression,
+				fmt.Sprintf(SliConfigErrMappingFilterExpressionMsg, err),
 			)
 			return types.ListNull(types.ObjectType{}), diags
 		}
@@ -738,8 +738,8 @@ func (r *sliConfigResourceFramework) MapStateToDataObject(ctx context.Context, p
 
 	if entityErr != nil {
 		diags.AddError(
-			"Error mapping SLI entity",
-			fmt.Sprintf("Failed to map SLI entity: %s", entityErr),
+			SliConfigErrMappingSliEntity,
+			fmt.Sprintf(SliConfigErrMappingSliEntityMsg, entityErr),
 		)
 		return nil, diags
 	}

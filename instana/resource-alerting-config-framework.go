@@ -17,23 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// ResourceInstanaAlertingConfigFramework the name of the terraform-provider-instana resource to manage alerting configurations
-const ResourceInstanaAlertingConfigFramework = "alerting_config"
-
-const (
-	//AlertingConfigFieldAlertName constant value for the schema field alert_name
-	AlertingConfigFieldAlertName = "alert_name"
-	//AlertingConfigFieldFullAlertName constant value for the schema field full_alert_name
-	AlertingConfigFieldFullAlertName = "full_alert_name"
-	//AlertingConfigFieldIntegrationIds constant value for the schema field integration_ids
-	AlertingConfigFieldIntegrationIds = "integration_ids"
-	//AlertingConfigFieldEventFilterQuery constant value for the schema field event_filter_query
-	AlertingConfigFieldEventFilterQuery = "event_filter_query"
-	//AlertingConfigFieldEventFilterEventTypes constant value for the schema field event_filter_event_types
-	AlertingConfigFieldEventFilterEventTypes = "event_filter_event_types"
-	//AlertingConfigFieldEventFilterRuleIDs constant value for the schema field event_filter_rule_ids
-	AlertingConfigFieldEventFilterRuleIDs = "event_filter_rule_ids"
-)
+// Constants are now defined in resource-alerting-config-constants.go
 
 var supportedEventTypes = convertSupportedEventTypesToStringSlice()
 
@@ -68,25 +52,25 @@ func NewAlertingConfigResourceHandleFramework() ResourceHandleFramework[*restapi
 		metaData: ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaAlertingConfigFramework,
 			Schema: schema.Schema{
-				Description: "This resource manages alerting configurations in Instana.",
+				Description: AlertingConfigDescResource,
 				Attributes: map[string]schema.Attribute{
-					"id": schema.StringAttribute{
+					AlertingConfigFieldID: schema.StringAttribute{
 						Computed:    true,
-						Description: "The ID of the alerting configuration.",
+						Description: AlertingConfigDescID,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
 					AlertingConfigFieldAlertName: schema.StringAttribute{
 						Required:    true,
-						Description: "Configures the alert name of the alerting configuration",
+						Description: AlertingConfigDescAlertName,
 						Validators: []validator.String{
 							stringvalidator.LengthBetween(1, 256),
 						},
 					},
 					AlertingConfigFieldIntegrationIds: schema.SetAttribute{
 						Required:    true,
-						Description: "Configures the list of Integration IDs (Alerting Channels).",
+						Description: AlertingConfigDescIntegrationIds,
 						ElementType: types.StringType,
 						Validators: []validator.Set{
 							setvalidator.SizeBetween(0, 1024),
@@ -94,14 +78,14 @@ func NewAlertingConfigResourceHandleFramework() ResourceHandleFramework[*restapi
 					},
 					AlertingConfigFieldEventFilterQuery: schema.StringAttribute{
 						Optional:    true,
-						Description: "Configures a filter query to to filter rules or event types for a limited set of entities",
+						Description: AlertingConfigDescEventFilterQuery,
 						Validators: []validator.String{
 							stringvalidator.LengthBetween(0, 2048),
 						},
 					},
 					AlertingConfigFieldEventFilterEventTypes: schema.SetAttribute{
 						Optional:    true,
-						Description: "Configures the list of Event Types IDs which should trigger an alert.",
+						Description: AlertingConfigDescEventFilterEventTypes,
 						ElementType: types.StringType,
 						Validators: []validator.Set{
 							setvalidator.ValueStringsAre(
@@ -114,7 +98,7 @@ func NewAlertingConfigResourceHandleFramework() ResourceHandleFramework[*restapi
 					},
 					AlertingConfigFieldEventFilterRuleIDs: schema.SetAttribute{
 						Optional:    true,
-						Description: "Configures the list of Rule IDs which should trigger an alert.",
+						Description: AlertingConfigDescEventFilterRuleIDs,
 						ElementType: types.StringType,
 						Validators: []validator.Set{
 							setvalidator.SizeBetween(0, 1024),

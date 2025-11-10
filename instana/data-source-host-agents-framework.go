@@ -11,20 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// DataSourceInstanaHostAgentsFramework the name of the terraform-provider-instana data source to read host agents
-const DataSourceInstanaHostAgentsFramework = "host_agents"
-
-const (
-	DataSourceHostAgents = "instana_host_agents"
-
-	HostAgentFieldFilter     = "filter"
-	HostAgentFieldItems      = "items"
-	HostAgentFieldHost       = "host"
-	HostAgentFieldLabel      = "label"
-	HostAgentFieldSnapshotId = "snapshot_id"
-	HostAgentFieldPlugin     = "plugin"
-	HostAgentFieldTags       = "tags"
-)
+// Constants are now defined in data-source-host-agents-constants.go
 
 // HostAgentDataSourceModel represents the data model for a single host agent
 type HostAgentDataSourceModel struct {
@@ -57,39 +44,39 @@ func (d *hostAgentsDataSourceFramework) Metadata(_ context.Context, req datasour
 
 func (d *hostAgentsDataSourceFramework) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Data source for Instana host agents. Host agents are the Instana agents installed on hosts.",
+		Description: HostAgentDescDataSource,
 		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				Description: "The ID of the data source.",
+			HostAgentFieldID: schema.StringAttribute{
+				Description: HostAgentDescID,
 				Computed:    true,
 			},
 			HostAgentFieldFilter: schema.StringAttribute{
-				Description: "Dynamic Focus Query filter.",
+				Description: HostAgentDescFilter,
 				Required:    true,
 			},
 			HostAgentFieldItems: schema.ListNestedAttribute{
-				Description: "A list of host agents.",
+				Description: HostAgentDescItems,
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						HostAgentFieldSnapshotId: schema.StringAttribute{
-							Description: "The snapshot ID of the host agent.",
+							Description: HostAgentDescSnapshotID,
 							Computed:    true,
 						},
 						HostAgentFieldLabel: schema.StringAttribute{
-							Description: "The label of the host agent.",
+							Description: HostAgentDescLabel,
 							Computed:    true,
 						},
 						HostAgentFieldHost: schema.StringAttribute{
-							Description: "The host identifier of the host agent.",
+							Description: HostAgentDescHost,
 							Computed:    true,
 						},
 						HostAgentFieldPlugin: schema.StringAttribute{
-							Description: "The plugin of the host agent.",
+							Description: HostAgentDescPlugin,
 							Computed:    true,
 						},
 						HostAgentFieldTags: schema.ListAttribute{
-							Description: "The tags of the host agent.",
+							Description: HostAgentDescTags,
 							Computed:    true,
 							ElementType: types.StringType,
 						},
@@ -108,8 +95,8 @@ func (d *hostAgentsDataSourceFramework) Configure(_ context.Context, req datasou
 	providerMeta, ok := req.ProviderData.(*ProviderMeta)
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *ProviderMeta, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			HostAgentErrUnexpectedConfigureType,
+			fmt.Sprintf(HostAgentErrUnexpectedConfigureTypeDetail, req.ProviderData),
 		)
 		return
 	}
@@ -126,14 +113,14 @@ func (d *hostAgentsDataSourceFramework) Read(ctx context.Context, req datasource
 
 	// Get the filter from the configuration
 	filter := data.Filter.ValueString()
-	queryParams := map[string]string{"query": filter}
+	queryParams := map[string]string{HostAgentQueryParamQuery: filter}
 
 	// Get host agents by query
 	hostAgents, err := d.instanaAPI.HostAgents().GetByQuery(queryParams)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error reading host agents",
-			fmt.Sprintf("Could not read host agents: %s", err),
+			HostAgentErrReadingAgents,
+			fmt.Sprintf(HostAgentErrReadingAgentsDetail, err),
 		)
 		return
 	}

@@ -61,69 +61,69 @@ func NewSloCorrectionConfigResourceHandleFramework() ResourceHandleFramework[*re
 		metaData: ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaSloCorrectionConfigFramework,
 			Schema: schema.Schema{
-				Description: "This resource manages SLO Correction Configurations in Instana.",
+				Description: SloCorrectionConfigDescResource,
 				Attributes: map[string]schema.Attribute{
 					"id": schema.StringAttribute{
 						Computed:    true,
-						Description: "The ID of the SLO Correction Config.",
+						Description: SloCorrectionConfigDescID,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
 					"name": schema.StringAttribute{
 						Required:    true,
-						Description: "The name of the SLO Correction Config.",
+						Description: SloCorrectionConfigDescName,
 						Validators: []validator.String{
 							stringvalidator.LengthBetween(0, 256),
 						},
 					},
 					"description": schema.StringAttribute{
 						Required:    true,
-						Description: "The description of the SLO Correction Config.",
+						Description: SloCorrectionConfigDescDescription,
 					},
 					"active": schema.BoolAttribute{
 						Required:    true,
-						Description: "Indicates whether the Correction Config is active.",
+						Description: SloCorrectionConfigDescActive,
 					},
 					"slo_ids": schema.SetAttribute{
 						Required:    true,
-						Description: "A set of SLO IDs that this correction config applies to.",
+						Description: SloCorrectionConfigDescSloIds,
 						ElementType: types.StringType,
 					},
 					"tags": schema.SetAttribute{
 						Optional:    true,
-						Description: "A list of tags to be associated with the SLO Correction Config.",
+						Description: SloCorrectionConfigDescTags,
 						ElementType: types.StringType,
 					},
 				},
 				Blocks: map[string]schema.Block{
 					"scheduling": schema.ListNestedBlock{
-						Description: "Scheduling configuration for the SLO Correction Config.",
+						Description: SloCorrectionConfigDescScheduling,
 						NestedObject: schema.NestedBlockObject{
 							Attributes: map[string]schema.Attribute{
 								"start_time": schema.Int64Attribute{
 									Required:    true,
-									Description: "The start time of the scheduling in Unix timestamp in milliseconds.",
+									Description: SloCorrectionConfigDescStartTime,
 								},
 								"duration": schema.Int64Attribute{
 									Required:    true,
-									Description: "The duration of the scheduling in the specified unit.",
+									Description: SloCorrectionConfigDescDuration,
 								},
 								"duration_unit": schema.StringAttribute{
 									Required:    true,
-									Description: "The unit of the duration (e.g.,'minute' 'hour', 'day').",
+									Description: SloCorrectionConfigDescDurationUnit,
 									Validators: []validator.String{
 										stringvalidator.OneOf("millisecond", "second", "minute", "hour", "day", "week", "month"),
 									},
 								},
 								"recurrent_rule": schema.StringAttribute{
 									Optional:    true,
-									Description: "Recurrent rule for scheduling, if applicable.",
+									Description: SloCorrectionConfigDescRecurrentRule,
 								},
 								"recurrent": schema.BoolAttribute{
 									Optional:    true,
 									Computed:    true,
-									Description: "Indicates whether the Rule is reccurrent",
+									Description: SloCorrectionConfigDescRecurrent,
 								},
 							},
 						},

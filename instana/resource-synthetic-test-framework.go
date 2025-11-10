@@ -30,25 +30,25 @@ func NewSyntheticTestResourceHandleFramework() ResourceHandleFramework[*restapi.
 		metaData: ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaSyntheticTestFramework,
 			Schema: schema.Schema{
-				Description: "This resource manages Synthetic Tests in Instana.",
+				Description: SyntheticTestDescResource,
 				Attributes: map[string]schema.Attribute{
 					"id": schema.StringAttribute{
 						Computed:    true,
-						Description: "The ID of the Synthetic Test.",
+						Description: SyntheticTestDescID,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
 					"label": schema.StringAttribute{
 						Required:    true,
-						Description: "Friendly name of the Synthetic test.",
+						Description: SyntheticTestDescLabel,
 						Validators: []validator.String{
 							stringvalidator.LengthBetween(0, 128),
 						},
 					},
 					"description": schema.StringAttribute{
 						Optional:    true,
-						Description: "The description of the Synthetic test.",
+						Description: SyntheticTestDescDescription,
 						Validators: []validator.String{
 							stringvalidator.LengthBetween(0, 512),
 						},
@@ -56,27 +56,27 @@ func NewSyntheticTestResourceHandleFramework() ResourceHandleFramework[*restapi.
 					"active": schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Description: "Indicates if the Synthetic test is started or not.",
+						Description: SyntheticTestDescActive,
 						Default:     booldefault.StaticBool(true),
 					},
 					"application_id": schema.StringAttribute{
 						Optional:    true,
-						Description: "Unique identifier of the Application Perspective.",
+						Description: SyntheticTestDescApplicationID,
 					},
 					"custom_properties": schema.MapAttribute{
 						Optional:    true,
-						Description: "Name/value pairs to provide additional information of the Synthetic test.",
+						Description: SyntheticTestDescCustomProperties,
 						ElementType: types.StringType,
 					},
 					"locations": schema.SetAttribute{
 						Required:    true,
-						Description: "Array of the PoP location IDs.",
+						Description: SyntheticTestDescLocations,
 						ElementType: types.StringType,
 					},
 					"playback_mode": schema.StringAttribute{
 						Optional:    true,
 						Computed:    true,
-						Description: "Defines how the Synthetic test should be executed across multiple PoPs.",
+						Description: SyntheticTestDescPlaybackMode,
 						Default:     stringdefault.StaticString("Simultaneous"),
 						Validators: []validator.String{
 							stringvalidator.OneOf("Simultaneous", "Staggered"),
@@ -85,7 +85,7 @@ func NewSyntheticTestResourceHandleFramework() ResourceHandleFramework[*restapi.
 					"test_frequency": schema.Int64Attribute{
 						Optional:    true,
 						Computed:    true,
-						Description: "How often the playback for a Synthetic test is scheduled.",
+						Description: SyntheticTestDescTestFrequency,
 						Default:     int64default.StaticInt64(15),
 						Validators: []validator.Int64{
 							int64Validator{
@@ -97,19 +97,19 @@ func NewSyntheticTestResourceHandleFramework() ResourceHandleFramework[*restapi.
 				},
 				Blocks: map[string]schema.Block{
 					"http_action": schema.ListNestedBlock{
-						Description: "The configuration of the synthetic alert of type http action.",
+						Description: SyntheticTestDescHttpAction,
 						NestedObject: schema.NestedBlockObject{
 							Attributes: map[string]schema.Attribute{
 								"mark_synthetic_call": schema.BoolAttribute{
 									Optional:    true,
 									Computed:    true,
-									Description: "Flag used to control if HTTP calls will be marked as synthetic calls.",
+									Description: SyntheticTestDescMarkSyntheticCall,
 									Default:     booldefault.StaticBool(false),
 								},
 								"retries": schema.Int64Attribute{
 									Optional:    true,
 									Computed:    true,
-									Description: "Indicates how many attempts will be allowed to get a successful connection.",
+									Description: SyntheticTestDescRetries,
 									Default:     int64default.StaticInt64(0),
 									Validators: []validator.Int64{
 										int64Validator{
@@ -121,7 +121,7 @@ func NewSyntheticTestResourceHandleFramework() ResourceHandleFramework[*restapi.
 								"retry_interval": schema.Int64Attribute{
 									Optional:    true,
 									Computed:    true,
-									Description: "The time interval between retries in seconds.",
+									Description: SyntheticTestDescRetryInterval,
 									Default:     int64default.StaticInt64(1),
 									Validators: []validator.Int64{
 										int64Validator{
@@ -132,72 +132,72 @@ func NewSyntheticTestResourceHandleFramework() ResourceHandleFramework[*restapi.
 								},
 								"timeout": schema.StringAttribute{
 									Optional:    true,
-									Description: "The timeout to be used by the PoP playback engines running the test.",
+									Description: SyntheticTestDescTimeout,
 								},
 								"url": schema.StringAttribute{
 									Optional:    true,
-									Description: "The URL which is being tested.",
+									Description: SyntheticTestDescURL,
 									Validators: []validator.String{
-										stringvalidator.RegexMatches(regexp.MustCompile(`^https?://[^\s/$.?#].[^\s]*$`), "must be a valid URL with HTTP or HTTPS scheme"),
+										stringvalidator.RegexMatches(regexp.MustCompile(`^https?://[^\s/$.?#].[^\s]*$`), SyntheticTestValidatorURLRegex),
 									},
 								},
 								"operation": schema.StringAttribute{
 									Optional:    true,
-									Description: "The HTTP operation.",
+									Description: SyntheticTestDescOperation,
 									Validators: []validator.String{
 										stringvalidator.OneOf("GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT", "DELETE"),
 									},
 								},
 								"headers": schema.MapAttribute{
 									Optional:    true,
-									Description: "An object with header/value pairs.",
+									Description: SyntheticTestDescHeaders,
 									ElementType: types.StringType,
 								},
 								"body": schema.StringAttribute{
 									Optional:    true,
-									Description: "The body content to send with the operation.",
+									Description: SyntheticTestDescBody,
 								},
 								"validation_string": schema.StringAttribute{
 									Optional:    true,
-									Description: "An expression to be evaluated.",
+									Description: SyntheticTestDescValidationString,
 								},
 								"follow_redirect": schema.BoolAttribute{
 									Optional:    true,
 									Computed:    true,
-									Description: "A boolean type, true by default; to allow redirect.",
+									Description: SyntheticTestDescFollowRedirect,
 									Default:     booldefault.StaticBool(false),
 								},
 								"allow_insecure": schema.BoolAttribute{
 									Optional:    true,
 									Computed:    true,
-									Description: "A boolean type, if set to true then allow insecure certificates.",
+									Description: SyntheticTestDescAllowInsecure,
 									Default:     booldefault.StaticBool(false),
 								},
 								"expect_status": schema.Int64Attribute{
 									Optional:    true,
-									Description: "An integer type, by default, the Synthetic passes for any 2XX status code.",
+									Description: SyntheticTestDescExpectStatus,
 								},
 								"expect_match": schema.StringAttribute{
 									Optional:    true,
-									Description: "An optional regular expression string to be used to check the test response.",
+									Description: SyntheticTestDescExpectMatch,
 								},
 							},
 						},
 					},
 					"http_script": schema.ListNestedBlock{
-						Description: "The configuration of the synthetic alert of type http script.",
+						Description: SyntheticTestDescHttpScript,
 						NestedObject: schema.NestedBlockObject{
 							Attributes: map[string]schema.Attribute{
 								"mark_synthetic_call": schema.BoolAttribute{
 									Optional:    true,
 									Computed:    true,
-									Description: "Flag used to control if HTTP calls will be marked as synthetic calls.",
+									Description: SyntheticTestDescMarkSyntheticCall,
 									Default:     booldefault.StaticBool(false),
 								},
 								"retries": schema.Int64Attribute{
 									Optional:    true,
 									Computed:    true,
-									Description: "Indicates how many attempts will be allowed to get a successful connection.",
+									Description: SyntheticTestDescRetries,
 									Default:     int64default.StaticInt64(0),
 									Validators: []validator.Int64{
 										int64Validator{
@@ -209,7 +209,7 @@ func NewSyntheticTestResourceHandleFramework() ResourceHandleFramework[*restapi.
 								"retry_interval": schema.Int64Attribute{
 									Optional:    true,
 									Computed:    true,
-									Description: "The time interval between retries in seconds.",
+									Description: SyntheticTestDescRetryInterval,
 									Default:     int64default.StaticInt64(1),
 									Validators: []validator.Int64{
 										int64Validator{
@@ -220,11 +220,11 @@ func NewSyntheticTestResourceHandleFramework() ResourceHandleFramework[*restapi.
 								},
 								"timeout": schema.StringAttribute{
 									Optional:    true,
-									Description: "The timeout to be used by the PoP playback engines running the test.",
+									Description: SyntheticTestDescTimeout,
 								},
 								"script": schema.StringAttribute{
 									Required:    true,
-									Description: "The Javascript content in plain text.",
+									Description: SyntheticTestDescScript,
 								},
 							},
 						},
@@ -356,13 +356,13 @@ func (r *syntheticTestResourceFramework) mapConfigurationFromModel(ctx context.C
 
 	// Check if either http_action or http_script is set
 	if (model.HttpAction.IsNull() || model.HttpAction.IsUnknown()) && (model.HttpScript.IsNull() || model.HttpScript.IsUnknown()) {
-		diags.AddError("Configuration required", "Either http_action or http_script configuration must be provided")
+		diags.AddError(SyntheticTestErrConfigRequired, SyntheticTestErrConfigRequiredMsg)
 		return restapi.SyntheticTestConfig{}, diags
 	}
 
 	// Check if both http_action and http_script are set
 	if (!model.HttpAction.IsNull() && !model.HttpAction.IsUnknown()) && (!model.HttpScript.IsNull() && !model.HttpScript.IsUnknown()) {
-		diags.AddError("Invalid configuration", "Only one of http_action or http_script configuration can be provided")
+		diags.AddError(SyntheticTestErrInvalidConfig, SyntheticTestErrInvalidConfigMsg)
 		return restapi.SyntheticTestConfig{}, diags
 	}
 
@@ -375,7 +375,7 @@ func (r *syntheticTestResourceFramework) mapConfigurationFromModel(ctx context.C
 		}
 
 		if len(httpActionModels) != 1 {
-			diags.AddError("Invalid HTTP Action configuration", "Exactly one HTTP Action configuration is required")
+			diags.AddError(SyntheticTestErrInvalidHttpAction, SyntheticTestErrInvalidHttpActionMsg)
 			return restapi.SyntheticTestConfig{}, diags
 		}
 
@@ -424,7 +424,7 @@ func (r *syntheticTestResourceFramework) mapConfigurationFromModel(ctx context.C
 		}
 
 		if len(httpScriptModels) != 1 {
-			diags.AddError("Invalid HTTP Script configuration", "Exactly one HTTP Script configuration is required")
+			diags.AddError(SyntheticTestErrInvalidHttpScript, SyntheticTestErrInvalidHttpScriptMsg)
 			return restapi.SyntheticTestConfig{}, diags
 		}
 
@@ -441,7 +441,7 @@ func (r *syntheticTestResourceFramework) mapConfigurationFromModel(ctx context.C
 	}
 
 	// This should never happen due to the checks above
-	diags.AddError("Invalid configuration", "No valid configuration provided")
+	diags.AddError(SyntheticTestErrNoValidConfig, SyntheticTestErrNoValidConfigMsg)
 	return restapi.SyntheticTestConfig{}, diags
 }
 

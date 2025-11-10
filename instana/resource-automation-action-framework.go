@@ -143,133 +143,133 @@ func NewAutomationActionResourceHandleFramework() ResourceHandleFramework[*resta
 		metaData: ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaAutomationActionFramework,
 			Schema: schema.Schema{
-				Description: "This resource manages automation actions in Instana.",
+				Description: AutomationActionDescResource,
 				Attributes: map[string]schema.Attribute{
 					"id": schema.StringAttribute{
 						Computed:    true,
-						Description: "The ID of the automation action.",
+						Description: AutomationActionDescID,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
 					AutomationActionFieldName: schema.StringAttribute{
 						Required:    true,
-						Description: "The name of the automation action.",
+						Description: AutomationActionDescName,
 					},
 					AutomationActionFieldDescription: schema.StringAttribute{
 						Required:    true,
-						Description: "The description of the automation action.",
+						Description: AutomationActionDescDescription,
 					},
 					AutomationActionFieldTags: schema.ListAttribute{
 						ElementType: types.StringType,
 						Optional:    true,
-						Description: "The tags of the automation action.",
+						Description: AutomationActionDescTags,
 					},
 					AutomationActionFieldScript: schema.SingleNestedAttribute{
 						Optional:    true,
-						Description: "Script configuration for the automation action.",
+						Description: AutomationActionDescScript,
 						Attributes: map[string]schema.Attribute{
 							AutomationActionFieldContent: schema.StringAttribute{
 								Required:    true,
-								Description: "The script content.",
+								Description: AutomationActionDescScriptContent,
 							},
 							AutomationActionFieldInterpreter: schema.StringAttribute{
 								Optional:    true,
-								Description: "The script interpreter.",
+								Description: AutomationActionDescScriptInterpreter,
 							},
 							AutomationActionFieldTimeout: schema.StringAttribute{
 								Optional:    true,
-								Description: "The timeout for script execution in seconds.",
+								Description: AutomationActionDescScriptTimeout,
 							},
-							"source": schema.StringAttribute{
+							AutomationActionFieldSource: schema.StringAttribute{
 								Optional:    true,
-								Description: "The source of the script.",
+								Description: AutomationActionDescScriptSource,
 							},
 						},
 					},
 					AutomationActionFieldHttp: schema.SingleNestedAttribute{
 						Optional:    true,
-						Description: "HTTP configuration for the automation action.",
+						Description: AutomationActionDescHttp,
 						Attributes: map[string]schema.Attribute{
 							AutomationActionFieldHost: schema.StringAttribute{
 								Required:    true,
-								Description: "The URL of the HTTP request.",
+								Description: AutomationActionDescHttpHost,
 							},
 							AutomationActionFieldMethod: schema.StringAttribute{
 								Required:    true,
-								Description: "The HTTP method.",
+								Description: AutomationActionDescHttpMethod,
 								Validators: []validator.String{
 									stringvalidator.OneOf("GET", "POST", "PUT", "DELETE"),
 								},
 							},
 							AutomationActionFieldBody: schema.StringAttribute{
 								Optional:    true,
-								Description: "The body of the HTTP request.",
+								Description: AutomationActionDescHttpBody,
 							},
 							AutomationActionFieldHeaders: schema.MapAttribute{
 								ElementType: types.StringType,
 								Optional:    true,
-								Description: "The headers of the HTTP request.",
+								Description: AutomationActionDescHttpHeaders,
 							},
 							AutomationActionFieldIgnoreCertErrors: schema.BoolAttribute{
 								Optional:    true,
-								Description: "Whether to ignore certificate errors for the request.",
+								Description: AutomationActionDescHttpIgnoreCertErrors,
 							},
 							AutomationActionFieldTimeout: schema.StringAttribute{
 								Optional:    true,
-								Description: "The timeout for HTTP request execution in seconds.",
+								Description: AutomationActionDescHttpTimeout,
 							},
-							"language": schema.StringAttribute{
+							AutomationActionFieldLanguage: schema.StringAttribute{
 								Optional:    true,
-								Description: "The language for the HTTP request.",
+								Description: AutomationActionDescHttpLanguage,
 							},
-							"content_type": schema.StringAttribute{
+							AutomationActionFieldContentType: schema.StringAttribute{
 								Optional:    true,
-								Description: "The content type for the HTTP request.",
+								Description: AutomationActionDescHttpContentType,
 							},
-							"auth": schema.SingleNestedAttribute{
+							AutomationActionFieldAuth: schema.SingleNestedAttribute{
 								Optional:    true,
-								Description: "Authentication configuration for the HTTP request.",
+								Description: AutomationActionDescHttpAuth,
 								Attributes: map[string]schema.Attribute{
-									"basic_auth": schema.SingleNestedAttribute{
+									AutomationActionFieldBasicAuth: schema.SingleNestedAttribute{
 										Optional:    true,
-										Description: "Basic authentication configuration.",
+										Description: AutomationActionDescHttpAuthBasic,
 										Attributes: map[string]schema.Attribute{
-											"username": schema.StringAttribute{
+											AutomationActionFieldUsername: schema.StringAttribute{
 												Required:    true,
-												Description: "The username for basic authentication.",
+												Description: AutomationActionDescHttpAuthBasicUsername,
 											},
-											"password": schema.StringAttribute{
+											AutomationActionFieldPassword: schema.StringAttribute{
 												Required:    true,
-												Description: "The password for basic authentication.",
+												Description: AutomationActionDescHttpAuthBasicPassword,
 											},
 										},
 									},
-									"token": schema.SingleNestedAttribute{
+									AutomationActionFieldToken: schema.SingleNestedAttribute{
 										Optional:    true,
-										Description: "Bearer token authentication configuration.",
+										Description: AutomationActionDescHttpAuthToken,
 										Attributes: map[string]schema.Attribute{
-											"bearer_token": schema.StringAttribute{
+											AutomationActionFieldBearerToken: schema.StringAttribute{
 												Required:    true,
-												Description: "The bearer token for authentication.",
+												Description: AutomationActionDescHttpAuthBearerToken,
 											},
 										},
 									},
-									"api_key": schema.SingleNestedAttribute{
+									AutomationActionFieldApiKey: schema.SingleNestedAttribute{
 										Optional:    true,
-										Description: "API key authentication configuration.",
+										Description: AutomationActionDescHttpAuthApiKey,
 										Attributes: map[string]schema.Attribute{
-											"key": schema.StringAttribute{
+											AutomationActionFieldKey: schema.StringAttribute{
 												Required:    true,
-												Description: "The API key name.",
+												Description: AutomationActionDescHttpAuthApiKeyKey,
 											},
-											"value": schema.StringAttribute{
+											AutomationActionFieldValue: schema.StringAttribute{
 												Required:    true,
-												Description: "The API key value.",
+												Description: AutomationActionDescHttpAuthApiKeyValue,
 											},
-											"key_location": schema.StringAttribute{
+											AutomationActionFieldKeyLocation: schema.StringAttribute{
 												Required:    true,
-												Description: "Where to add the API key (header or query).",
+												Description: AutomationActionDescHttpAuthApiKeyLocation,
 											},
 										},
 									},
@@ -277,197 +277,197 @@ func NewAutomationActionResourceHandleFramework() ResourceHandleFramework[*resta
 							},
 						},
 					},
-					"manual": schema.SingleNestedAttribute{
+					AutomationActionFieldManual: schema.SingleNestedAttribute{
 						Optional:    true,
-						Description: "Manual action configuration.",
+						Description: AutomationActionDescManual,
 						Attributes: map[string]schema.Attribute{
-							"content": schema.StringAttribute{
+							AutomationActionFieldContent: schema.StringAttribute{
 								Required:    true,
-								Description: "The content for the manual action.",
+								Description: AutomationActionDescManualContent,
 							},
 						},
 					},
-					"jira": schema.SingleNestedAttribute{
+					AutomationActionFieldJira: schema.SingleNestedAttribute{
 						Optional:    true,
-						Description: "Jira action configuration.",
+						Description: AutomationActionDescJira,
 						Attributes: map[string]schema.Attribute{
-							"project": schema.StringAttribute{
+							AutomationActionFieldProject: schema.StringAttribute{
 								Optional:    true,
-								Description: "The Jira project.",
+								Description: AutomationActionDescJiraProject,
 							},
-							"operation": schema.StringAttribute{
+							AutomationActionFieldOperation: schema.StringAttribute{
 								Optional:    true,
-								Description: "The Jira operation type.",
+								Description: AutomationActionDescJiraOperation,
 							},
-							"issue_type": schema.StringAttribute{
+							AutomationActionFieldIssueType: schema.StringAttribute{
 								Optional:    true,
-								Description: "The Jira issue type.",
+								Description: AutomationActionDescJiraIssueType,
 							},
-							"description": schema.StringAttribute{
+							AutomationActionFieldDescription: schema.StringAttribute{
 								Optional:    true,
-								Description: "The Jira issue description.",
+								Description: AutomationActionDescJiraDescription,
 							},
-							"assignee": schema.StringAttribute{
+							AutomationActionFieldAssignee: schema.StringAttribute{
 								Optional:    true,
-								Description: "The Jira issue assignee.",
+								Description: AutomationActionDescJiraAssignee,
 							},
-							"title": schema.StringAttribute{
+							AutomationActionFieldTitle: schema.StringAttribute{
 								Optional:    true,
-								Description: "The Jira issue title.",
+								Description: AutomationActionDescJiraTitle,
 							},
-							"labels": schema.StringAttribute{
+							AutomationActionFieldLabels: schema.StringAttribute{
 								Optional:    true,
-								Description: "The Jira issue labels.",
+								Description: AutomationActionDescJiraLabels,
 							},
-							"comment": schema.StringAttribute{
+							AutomationActionFieldComment: schema.StringAttribute{
 								Optional:    true,
-								Description: "The Jira issue comment.",
+								Description: AutomationActionDescJiraComment,
 							},
 						},
 					},
-					"github": schema.SingleNestedAttribute{
+					AutomationActionFieldGitHub: schema.SingleNestedAttribute{
 						Optional:    true,
-						Description: "GitHub action configuration.",
+						Description: AutomationActionDescGitHub,
 						Attributes: map[string]schema.Attribute{
-							"owner": schema.StringAttribute{
+							AutomationActionFieldOwner: schema.StringAttribute{
 								Optional:    true,
-								Description: "The GitHub repository owner.",
+								Description: AutomationActionDescGitHubOwner,
 							},
-							"repo": schema.StringAttribute{
+							AutomationActionFieldRepo: schema.StringAttribute{
 								Optional:    true,
-								Description: "The GitHub repository name.",
+								Description: AutomationActionDescGitHubRepo,
 							},
-							"title": schema.StringAttribute{
+							AutomationActionFieldTitle: schema.StringAttribute{
 								Optional:    true,
-								Description: "The GitHub issue title.",
+								Description: AutomationActionDescGitHubTitle,
 							},
-							"body": schema.StringAttribute{
+							AutomationActionFieldBody: schema.StringAttribute{
 								Optional:    true,
-								Description: "The GitHub issue body.",
+								Description: AutomationActionDescGitHubBody,
 							},
-							"operation": schema.StringAttribute{
+							AutomationActionFieldOperation: schema.StringAttribute{
 								Optional:    true,
-								Description: "The GitHub operation type.",
+								Description: AutomationActionDescGitHubOperation,
 							},
-							"assignees": schema.StringAttribute{
+							AutomationActionFieldAssignees: schema.StringAttribute{
 								Optional:    true,
-								Description: "The GitHub issue assignees.",
+								Description: AutomationActionDescGitHubAssignees,
 							},
-							"labels": schema.StringAttribute{
+							AutomationActionFieldLabels: schema.StringAttribute{
 								Optional:    true,
-								Description: "The GitHub issue labels.",
+								Description: AutomationActionDescGitHubLabels,
 							},
-							"comment": schema.StringAttribute{
+							AutomationActionFieldComment: schema.StringAttribute{
 								Optional:    true,
-								Description: "The GitHub issue comment.",
+								Description: AutomationActionDescGitHubComment,
 							},
 						},
 					},
-					"doc_link": schema.SingleNestedAttribute{
+					AutomationActionFieldDocLink: schema.SingleNestedAttribute{
 						Optional:    true,
-						Description: "Documentation link action configuration.",
+						Description: AutomationActionDescDocLink,
 						Attributes: map[string]schema.Attribute{
-							"url": schema.StringAttribute{
+							AutomationActionFieldUrl: schema.StringAttribute{
 								Required:    true,
-								Description: "The URL to the documentation.",
+								Description: AutomationActionDescDocLinkUrl,
 							},
 						},
 					},
-					"gitlab": schema.SingleNestedAttribute{
+					AutomationActionFieldGitLab: schema.SingleNestedAttribute{
 						Optional:    true,
-						Description: "GitLab action configuration.",
+						Description: AutomationActionDescGitLab,
 						Attributes: map[string]schema.Attribute{
-							"project_id": schema.StringAttribute{
+							AutomationActionFieldProjectId: schema.StringAttribute{
 								Optional:    true,
-								Description: "The GitLab project ID.",
+								Description: AutomationActionDescGitLabProjectId,
 							},
-							"title": schema.StringAttribute{
+							AutomationActionFieldTitle: schema.StringAttribute{
 								Optional:    true,
-								Description: "The GitLab issue title.",
+								Description: AutomationActionDescGitLabTitle,
 							},
-							"description": schema.StringAttribute{
+							AutomationActionFieldDescription: schema.StringAttribute{
 								Optional:    true,
-								Description: "The GitLab issue description.",
+								Description: AutomationActionDescGitLabDescription,
 							},
-							"operation": schema.StringAttribute{
+							AutomationActionFieldOperation: schema.StringAttribute{
 								Optional:    true,
-								Description: "The GitLab operation type.",
+								Description: AutomationActionDescGitLabOperation,
 							},
-							"labels": schema.StringAttribute{
+							AutomationActionFieldLabels: schema.StringAttribute{
 								Optional:    true,
-								Description: "The GitLab issue labels.",
+								Description: AutomationActionDescGitLabLabels,
 							},
-							"issue_type": schema.StringAttribute{
+							AutomationActionFieldIssueType: schema.StringAttribute{
 								Optional:    true,
-								Description: "The GitLab issue type.",
+								Description: AutomationActionDescGitLabIssueType,
 							},
-							"comment": schema.StringAttribute{
+							AutomationActionFieldComment: schema.StringAttribute{
 								Optional:    true,
-								Description: "The GitLab issue comment.",
+								Description: AutomationActionDescGitLabComment,
 							},
 						},
 					},
-					"ansible": schema.SingleNestedAttribute{
+					AutomationActionFieldAnsible: schema.SingleNestedAttribute{
 						Optional:    true,
-						Description: "Ansible action configuration.",
+						Description: AutomationActionDescAnsible,
 						Attributes: map[string]schema.Attribute{
-							"workflow_id": schema.StringAttribute{
+							AutomationActionFieldWorkflowId: schema.StringAttribute{
 								Optional:    true,
-								Description: "The Ansible workflow ID.",
+								Description: AutomationActionDescAnsibleWorkflowId,
 							},
-							"playbook_id": schema.StringAttribute{
+							AutomationActionFieldPlaybookId: schema.StringAttribute{
 								Optional:    true,
-								Description: "The Ansible playbook ID.",
+								Description: AutomationActionDescAnsiblePlaybookId,
 							},
-							"playbook_file_name": schema.StringAttribute{
+							AutomationActionFieldPlaybookFileName: schema.StringAttribute{
 								Optional:    true,
-								Description: "The Ansible playbook file name.",
+								Description: AutomationActionDescAnsiblePlaybookFileName,
 							},
-							"url": schema.StringAttribute{
+							AutomationActionFieldUrl: schema.StringAttribute{
 								Optional:    true,
-								Description: "The Ansible URL.",
+								Description: AutomationActionDescAnsibleUrl,
 							},
-							"host_id": schema.StringAttribute{
+							AutomationActionFieldHostId: schema.StringAttribute{
 								Optional:    true,
-								Description: "The host ID from which this action is created.",
+								Description: AutomationActionDescAnsibleHostId,
 							},
 						},
 					},
 					AutomationActionFieldInputParameter: schema.ListNestedAttribute{
 						Optional:    true,
-						Description: "Input parameters for the automation action.",
+						Description: AutomationActionDescInputParameter,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								AutomationActionParameterFieldName: schema.StringAttribute{
 									Required:    true,
-									Description: "The name of the parameter.",
+									Description: AutomationActionDescParameterName,
 								},
 								AutomationActionParameterFieldDescription: schema.StringAttribute{
 									Required:    true,
-									Description: "The description of the parameter.",
+									Description: AutomationActionDescParameterDescription,
 								},
 								AutomationActionParameterFieldLabel: schema.StringAttribute{
 									Required:    true,
-									Description: "The label of the parameter.",
+									Description: AutomationActionDescParameterLabel,
 								},
 								AutomationActionParameterFieldRequired: schema.BoolAttribute{
 									Required:    true,
-									Description: "Whether the parameter is required.",
+									Description: AutomationActionDescParameterRequired,
 								},
 								AutomationActionParameterFieldHidden: schema.BoolAttribute{
 									Required:    true,
-									Description: "Whether the parameter is hidden.",
+									Description: AutomationActionDescParameterHidden,
 								},
 								AutomationActionParameterFieldType: schema.StringAttribute{
 									Required:    true,
-									Description: "The type of the parameter.",
+									Description: AutomationActionDescParameterType,
 									Validators: []validator.String{
 										stringvalidator.OneOf("static", "dynamic", "vault"),
 									},
 								},
 								AutomationActionParameterFieldValue: schema.StringAttribute{
 									Required:    true,
-									Description: "The value of the parameter.",
+									Description: AutomationActionDescParameterValue,
 								},
 							},
 						},
@@ -571,8 +571,8 @@ func (r *automationActionResourceFramework) mapTagsToState(ctx context.Context, 
 				elements[i] = types.StringValue(strTag)
 			} else {
 				diags.AddError(
-					"Error mapping tags",
-					fmt.Sprintf("Tag at index %d is not a string", i),
+					AutomationActionErrMappingTags,
+					fmt.Sprintf(AutomationActionErrTagNotString, i),
 				)
 				return types.ListNull(types.StringType), diags
 			}
@@ -580,8 +580,8 @@ func (r *automationActionResourceFramework) mapTagsToState(ctx context.Context, 
 		return types.ListValueMust(types.StringType, elements), diags
 	default:
 		diags.AddError(
-			"Error mapping tags",
-			"Tags are not in the expected format",
+			AutomationActionErrMappingTags,
+			AutomationActionErrTagsFormat,
 		)
 		return types.ListNull(types.StringType), diags
 	}
@@ -692,7 +692,7 @@ func (r *automationActionResourceFramework) mapScriptFieldsToState(ctx context.C
 		scriptModel.Timeout = types.StringNull()
 	}
 
-	source := r.getFieldValue(action, "source")
+	source := r.getFieldValue(action, AutomationActionFieldSource)
 	if source != "" {
 		scriptModel.Source = types.StringValue(source)
 	} else {
@@ -732,7 +732,7 @@ func (r *automationActionResourceFramework) mapHttpFieldsToState(ctx context.Con
 	}
 
 	// Language
-	language := r.getFieldValue(action, "language")
+	language := r.getFieldValue(action, AutomationActionFieldLanguage)
 	if language != "" {
 		httpModel.Language = types.StringValue(language)
 	} else {
@@ -740,7 +740,7 @@ func (r *automationActionResourceFramework) mapHttpFieldsToState(ctx context.Con
 	}
 
 	// Content Type
-	contentType := r.getFieldValue(action, "content_type")
+	contentType := r.getFieldValue(action, AutomationActionFieldContentType)
 	if contentType != "" {
 		httpModel.ContentType = types.StringValue(contentType)
 	} else {
@@ -748,7 +748,7 @@ func (r *automationActionResourceFramework) mapHttpFieldsToState(ctx context.Con
 	}
 
 	// Auth - parse JSON to determine auth type and populate appropriate model
-	authData := r.getFieldValue(action, "authen")
+	authData := r.getFieldValue(action, AutomationActionAPIFieldAuthen)
 	if authData != "" {
 		var authMap map[string]interface{}
 		err := json.Unmarshal([]byte(authData), &authMap)
@@ -757,7 +757,7 @@ func (r *automationActionResourceFramework) mapHttpFieldsToState(ctx context.Con
 
 			// Only create AuthModel if it's an actual auth type (not noAuth)
 			switch authType {
-			case "basicAuth":
+			case AutomationActionAuthTypeBasicAuth:
 				username, _ := authMap["username"].(string)
 				password, _ := authMap["password"].(string)
 				httpModel.Auth = &AuthModel{
@@ -766,14 +766,14 @@ func (r *automationActionResourceFramework) mapHttpFieldsToState(ctx context.Con
 						Password: types.StringValue(password),
 					},
 				}
-			case "bearerToken":
+			case AutomationActionAuthTypeBearerToken:
 				bearerToken, _ := authMap["bearerToken"].(string)
 				httpModel.Auth = &AuthModel{
 					Token: &BearerTokenModel{
 						BearerToken: types.StringValue(bearerToken),
 					},
 				}
-			case "apiKey":
+			case AutomationActionAuthTypeApiKey:
 				key, _ := authMap["apiKey"].(string)
 				value, _ := authMap["apiKeyValue"].(string)
 				location, _ := authMap["apiKeyAddTo"].(string)
@@ -797,8 +797,8 @@ func (r *automationActionResourceFramework) mapHttpFieldsToState(ctx context.Con
 		err := json.Unmarshal([]byte(headersData), &headersMap)
 		if err != nil {
 			diags.AddError(
-				"Error unmarshaling HTTP headers",
-				fmt.Sprintf("Failed to unmarshal HTTP headers: %s", err),
+				AutomationActionErrUnmarshalHeaders,
+				fmt.Sprintf(AutomationActionErrUnmarshalHeadersFailed, err),
 			)
 			httpModel.Headers = types.MapNull(types.StringType)
 			return httpModel, diags
@@ -829,7 +829,7 @@ func (r *automationActionResourceFramework) mapManualFieldsToState(ctx context.C
 	var diags diag.Diagnostics
 
 	manualModel := ManualModel{
-		Content: types.StringValue(r.getFieldValue(action, "content")),
+		Content: types.StringValue(r.getFieldValue(action, AutomationActionFieldContent)),
 	}
 
 	return manualModel, diags
@@ -840,49 +840,49 @@ func (r *automationActionResourceFramework) mapJiraFieldsToState(ctx context.Con
 
 	jiraModel := JiraModel{}
 
-	if project := r.getFieldValue(action, "project"); project != "" {
+	if project := r.getFieldValue(action, AutomationActionFieldProject); project != "" {
 		jiraModel.Project = types.StringValue(project)
 	} else {
 		jiraModel.Project = types.StringNull()
 	}
 
-	if operation := r.getFieldValue(action, "ticketActionType"); operation != "" {
+	if operation := r.getFieldValue(action, AutomationActionAPIFieldTicketActionType); operation != "" {
 		jiraModel.Operation = types.StringValue(operation)
 	} else {
 		jiraModel.Operation = types.StringNull()
 	}
 
-	if issueType := r.getFieldValue(action, "issue_type"); issueType != "" {
+	if issueType := r.getFieldValue(action, AutomationActionFieldIssueType); issueType != "" {
 		jiraModel.IssueType = types.StringValue(issueType)
 	} else {
 		jiraModel.IssueType = types.StringNull()
 	}
 
-	if description := r.getFieldValue(action, "body"); description != "" {
+	if description := r.getFieldValue(action, AutomationActionFieldBody); description != "" {
 		jiraModel.Description = types.StringValue(description)
 	} else {
 		jiraModel.Description = types.StringNull()
 	}
 
-	if assignee := r.getFieldValue(action, "assignee"); assignee != "" {
+	if assignee := r.getFieldValue(action, AutomationActionFieldAssignee); assignee != "" {
 		jiraModel.Assignee = types.StringValue(assignee)
 	} else {
 		jiraModel.Assignee = types.StringNull()
 	}
 
-	if title := r.getFieldValue(action, "summary"); title != "" {
+	if title := r.getFieldValue(action, AutomationActionAPIFieldSummary); title != "" {
 		jiraModel.Title = types.StringValue(title)
 	} else {
 		jiraModel.Title = types.StringNull()
 	}
 
-	if labels := r.getFieldValue(action, "labels"); labels != "" {
+	if labels := r.getFieldValue(action, AutomationActionFieldLabels); labels != "" {
 		jiraModel.Labels = types.StringValue(labels)
 	} else {
 		jiraModel.Labels = types.StringNull()
 	}
 
-	if comment := r.getFieldValue(action, "comment"); comment != "" {
+	if comment := r.getFieldValue(action, AutomationActionFieldComment); comment != "" {
 		jiraModel.Comment = types.StringValue(comment)
 	} else {
 		jiraModel.Comment = types.StringNull()
@@ -896,49 +896,49 @@ func (r *automationActionResourceFramework) mapGitHubFieldsToState(ctx context.C
 
 	githubModel := GitHubModel{}
 
-	if owner := r.getFieldValue(action, "owner"); owner != "" {
+	if owner := r.getFieldValue(action, AutomationActionFieldOwner); owner != "" {
 		githubModel.Owner = types.StringValue(owner)
 	} else {
 		githubModel.Owner = types.StringNull()
 	}
 
-	if repo := r.getFieldValue(action, "repo"); repo != "" {
+	if repo := r.getFieldValue(action, AutomationActionFieldRepo); repo != "" {
 		githubModel.Repo = types.StringValue(repo)
 	} else {
 		githubModel.Repo = types.StringNull()
 	}
 
-	if title := r.getFieldValue(action, "title"); title != "" {
+	if title := r.getFieldValue(action, AutomationActionFieldTitle); title != "" {
 		githubModel.Title = types.StringValue(title)
 	} else {
 		githubModel.Title = types.StringNull()
 	}
 
-	if body := r.getFieldValue(action, "body"); body != "" {
+	if body := r.getFieldValue(action, AutomationActionFieldBody); body != "" {
 		githubModel.Body = types.StringValue(body)
 	} else {
 		githubModel.Body = types.StringNull()
 	}
 
-	if operation := r.getFieldValue(action, "ticketActionType"); operation != "" {
+	if operation := r.getFieldValue(action, AutomationActionAPIFieldTicketActionType); operation != "" {
 		githubModel.Operation = types.StringValue(operation)
 	} else {
 		githubModel.Operation = types.StringNull()
 	}
 
-	if assignees := r.getFieldValue(action, "assignees"); assignees != "" {
+	if assignees := r.getFieldValue(action, AutomationActionFieldAssignees); assignees != "" {
 		githubModel.Assignees = types.StringValue(assignees)
 	} else {
 		githubModel.Assignees = types.StringNull()
 	}
 
-	if labels := r.getFieldValue(action, "labels"); labels != "" {
+	if labels := r.getFieldValue(action, AutomationActionFieldLabels); labels != "" {
 		githubModel.Labels = types.StringValue(labels)
 	} else {
 		githubModel.Labels = types.StringNull()
 	}
 
-	if comment := r.getFieldValue(action, "comment"); comment != "" {
+	if comment := r.getFieldValue(action, AutomationActionFieldComment); comment != "" {
 		githubModel.Comment = types.StringValue(comment)
 	} else {
 		githubModel.Comment = types.StringNull()
@@ -951,7 +951,7 @@ func (r *automationActionResourceFramework) mapDocLinkFieldsToState(ctx context.
 	var diags diag.Diagnostics
 
 	docLinkModel := DocLinkModel{
-		Url: types.StringValue(r.getFieldValue(action, "url")),
+		Url: types.StringValue(r.getFieldValue(action, AutomationActionFieldUrl)),
 	}
 
 	return docLinkModel, diags
@@ -962,43 +962,43 @@ func (r *automationActionResourceFramework) mapGitLabFieldsToState(ctx context.C
 
 	gitlabModel := GitLabModel{}
 
-	if projectId := r.getFieldValue(action, "projectId"); projectId != "" {
+	if projectId := r.getFieldValue(action, AutomationActionAPIFieldProjectId); projectId != "" {
 		gitlabModel.ProjectId = types.StringValue(projectId)
 	} else {
 		gitlabModel.ProjectId = types.StringNull()
 	}
 
-	if title := r.getFieldValue(action, "title"); title != "" {
+	if title := r.getFieldValue(action, AutomationActionFieldTitle); title != "" {
 		gitlabModel.Title = types.StringValue(title)
 	} else {
 		gitlabModel.Title = types.StringNull()
 	}
 
-	if description := r.getFieldValue(action, "body"); description != "" {
+	if description := r.getFieldValue(action, AutomationActionFieldBody); description != "" {
 		gitlabModel.Description = types.StringValue(description)
 	} else {
 		gitlabModel.Description = types.StringNull()
 	}
 
-	if operation := r.getFieldValue(action, "ticketActionType"); operation != "" {
+	if operation := r.getFieldValue(action, AutomationActionAPIFieldTicketActionType); operation != "" {
 		gitlabModel.Operation = types.StringValue(operation)
 	} else {
 		gitlabModel.Operation = types.StringNull()
 	}
 
-	if labels := r.getFieldValue(action, "labels"); labels != "" {
+	if labels := r.getFieldValue(action, AutomationActionFieldLabels); labels != "" {
 		gitlabModel.Labels = types.StringValue(labels)
 	} else {
 		gitlabModel.Labels = types.StringNull()
 	}
 
-	if issueType := r.getFieldValue(action, "issue_type"); issueType != "" {
+	if issueType := r.getFieldValue(action, AutomationActionFieldIssueType); issueType != "" {
 		gitlabModel.IssueType = types.StringValue(issueType)
 	} else {
 		gitlabModel.IssueType = types.StringNull()
 	}
 
-	if comment := r.getFieldValue(action, "comment"); comment != "" {
+	if comment := r.getFieldValue(action, AutomationActionFieldComment); comment != "" {
 		gitlabModel.Comment = types.StringValue(comment)
 	} else {
 		gitlabModel.Comment = types.StringNull()
@@ -1012,31 +1012,31 @@ func (r *automationActionResourceFramework) mapAnsibleFieldsToState(ctx context.
 
 	ansibleModel := AnsibleModel{}
 
-	if workflowId := r.getFieldValue(action, "workflowId"); workflowId != "" {
+	if workflowId := r.getFieldValue(action, AutomationActionAPIFieldWorkflowId); workflowId != "" {
 		ansibleModel.WorkflowId = types.StringValue(workflowId)
 	} else {
 		ansibleModel.WorkflowId = types.StringNull()
 	}
 
-	if ansibleUrl := r.getFieldValue(action, "ansibleUrl"); ansibleUrl != "" {
+	if ansibleUrl := r.getFieldValue(action, AutomationActionAPIFieldAnsibleUrl); ansibleUrl != "" {
 		ansibleModel.AnsibleUrl = types.StringValue(ansibleUrl)
 	} else {
 		ansibleModel.AnsibleUrl = types.StringNull()
 	}
 
-	if hostId := r.getFieldValue(action, "hostId"); hostId != "" {
+	if hostId := r.getFieldValue(action, AutomationActionAPIFieldHostId); hostId != "" {
 		ansibleModel.HostId = types.StringValue(hostId)
 	} else {
 		ansibleModel.HostId = types.StringNull()
 	}
 
-	if playbookId := r.getFieldValue(action, "playbookId"); playbookId != "" {
+	if playbookId := r.getFieldValue(action, AutomationActionAPIFieldPlaybookId); playbookId != "" {
 		ansibleModel.PlaybookId = types.StringValue(playbookId)
 	} else {
 		ansibleModel.PlaybookId = types.StringNull()
 	}
 
-	if playbookFileName := r.getFieldValue(action, "playbookFileName"); playbookFileName != "" {
+	if playbookFileName := r.getFieldValue(action, AutomationActionAPIFieldPlaybookFileName); playbookFileName != "" {
 		ansibleModel.PlaybookFileName = types.StringValue(playbookFileName)
 	} else {
 		ansibleModel.PlaybookFileName = types.StringNull()
@@ -1145,8 +1145,8 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 		// Source is optional
 		if !scriptModel.Source.IsNull() {
 			fields = append(fields, restapi.Field{
-				Name:        "source",
-				Description: "The source of the script",
+				Name:        AutomationActionFieldSource,
+				Description: AutomationActionDescFieldSource,
 				Value:       scriptModel.Source.ValueString(),
 				Encoding:    AsciiEncoding,
 				Secured:     false,
@@ -1212,8 +1212,8 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 		// Language is optional
 		if !httpModel.Language.IsNull() {
 			fields = append(fields, restapi.Field{
-				Name:        "language",
-				Description: "The language for the HTTP request",
+				Name:        AutomationActionFieldLanguage,
+				Description: AutomationActionDescFieldLanguage,
 				Value:       httpModel.Language.ValueString(),
 				Encoding:    AsciiEncoding,
 				Secured:     false,
@@ -1223,8 +1223,8 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 		// Content Type is optional
 		if !httpModel.ContentType.IsNull() {
 			fields = append(fields, restapi.Field{
-				Name:        "content_type",
-				Description: "The content type for the HTTP request",
+				Name:        AutomationActionFieldContentType,
+				Description: AutomationActionDescFieldContentType,
 				Value:       httpModel.ContentType.ValueString(),
 				Encoding:    AsciiEncoding,
 				Secured:     false,
@@ -1237,15 +1237,15 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 			if httpModel.Auth.BasicAuth != nil && !httpModel.Auth.BasicAuth.UserName.IsNull() {
 				// Basic Auth format: {"type":"basicAuth","username":"@@userName@@","password":"@@password@@"}
 				authMap := map[string]string{
-					"type":     "basicAuth",
+					"type":     AutomationActionAuthTypeBasicAuth,
 					"username": httpModel.Auth.BasicAuth.UserName.ValueString(),
 					"password": httpModel.Auth.BasicAuth.Password.ValueString(),
 				}
 				authJson, err := json.Marshal(authMap)
 				if err != nil {
 					diags.AddError(
-						"Error marshaling basic auth",
-						fmt.Sprintf("Failed to marshal basic auth: %s", err),
+						AutomationActionErrMarshalBasicAuth,
+						fmt.Sprintf(AutomationActionErrMarshalBasicAuthFailed, err),
 					)
 					return "", nil, diags
 				}
@@ -1253,14 +1253,14 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 			} else if httpModel.Auth.Token != nil && !httpModel.Auth.Token.BearerToken.IsNull() {
 				// Bearer Token format: {"type":"bearerToken","bearerToken":"@@bearerToken@@"}
 				authMap := map[string]string{
-					"type":        "bearerToken",
+					"type":        AutomationActionAuthTypeBearerToken,
 					"bearerToken": httpModel.Auth.Token.BearerToken.ValueString(),
 				}
 				authJson, err := json.Marshal(authMap)
 				if err != nil {
 					diags.AddError(
-						"Error marshaling bearer token",
-						fmt.Sprintf("Failed to marshal bearer token: %s", err),
+						AutomationActionErrMarshalBearerToken,
+						fmt.Sprintf(AutomationActionErrMarshalBearerTokenFailed, err),
 					)
 					return "", nil, diags
 				}
@@ -1268,7 +1268,7 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 			} else if httpModel.Auth.ApiKey != nil && !httpModel.Auth.ApiKey.Key.IsNull() {
 				// API Key format: {"type":"apiKey","apiKey":"authorization","apiKeyValue":"somKey","apiKeyAddTo":"header"}
 				authMap := map[string]string{
-					"type":        "apiKey",
+					"type":        AutomationActionAuthTypeApiKey,
 					"apiKey":      httpModel.Auth.ApiKey.Key.ValueString(),
 					"apiKeyValue": httpModel.Auth.ApiKey.Value.ValueString(),
 					"apiKeyAddTo": httpModel.Auth.ApiKey.KeyLocation.ValueString(),
@@ -1276,8 +1276,8 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 				authJson, err := json.Marshal(authMap)
 				if err != nil {
 					diags.AddError(
-						"Error marshaling API key",
-						fmt.Sprintf("Failed to marshal API key: %s", err),
+						AutomationActionErrMarshalApiKey,
+						fmt.Sprintf(AutomationActionErrMarshalApiKeyFailed, err),
 					)
 					return "", nil, diags
 				}
@@ -1285,13 +1285,13 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 			} else {
 				// No Auth format: {"type":"noAuth"}
 				authMap := map[string]string{
-					"type": "noAuth",
+					"type": AutomationActionAuthTypeNoAuth,
 				}
 				authJson, err := json.Marshal(authMap)
 				if err != nil {
 					diags.AddError(
-						"Error marshaling no auth",
-						fmt.Sprintf("Failed to marshal no auth: %s", err),
+						AutomationActionErrMarshalNoAuth,
+						fmt.Sprintf(AutomationActionErrMarshalNoAuthFailed, err),
 					)
 					return "", nil, diags
 				}
@@ -1300,13 +1300,13 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 		} else {
 			// No Auth format: {"type":"noAuth"}
 			authMap := map[string]string{
-				"type": "noAuth",
+				"type": AutomationActionAuthTypeNoAuth,
 			}
 			authJson, err := json.Marshal(authMap)
 			if err != nil {
 				diags.AddError(
-					"Error marshaling no auth",
-					fmt.Sprintf("Failed to marshal no auth: %s", err),
+					AutomationActionErrMarshalNoAuth,
+					fmt.Sprintf(AutomationActionErrMarshalNoAuthFailed, err),
 				)
 				return "", nil, diags
 			}
@@ -1314,8 +1314,8 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 		}
 
 		fields = append(fields, restapi.Field{
-			Name:        "authen",
-			Description: "Authentication for the HTTPS request",
+			Name:        AutomationActionAPIFieldAuthen,
+			Description: AutomationActionDescFieldAuthen,
 			Value:       authValue,
 			Encoding:    AsciiEncoding,
 			Secured:     false,
@@ -1332,8 +1332,8 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 			headersJson, err := json.Marshal(headersMap)
 			if err != nil {
 				diags.AddError(
-					"Error marshaling HTTP headers",
-					fmt.Sprintf("Failed to marshal HTTP headers: %s", err),
+					AutomationActionErrMarshalHeaders,
+					fmt.Sprintf(AutomationActionErrMarshalHeadersFailed, err),
 				)
 				return "", nil, diags
 			}
@@ -1347,124 +1347,124 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 			})
 		}
 	} else if model.Manual != nil && !model.Manual.Content.IsNull() {
-		actionType = "MANUAL"
+		actionType = AutomationActionTypeManual
 		fields = make([]restapi.Field, 0)
 		fields = append(fields, restapi.Field{
-			Name:        "content",
-			Description: "Content for manual action",
+			Name:        AutomationActionFieldContent,
+			Description: AutomationActionDescAPIFieldContent,
 			Value:       model.Manual.Content.ValueString(),
 			Encoding:    AsciiEncoding,
 			Secured:     false,
 		})
 	} else if model.Jira != nil && !model.Jira.Project.IsNull() {
-		actionType = "JIRA"
+		actionType = AutomationActionTypeJira
 		fields = make([]restapi.Field, 0)
 		if !model.Jira.Project.IsNull() {
-			fields = append(fields, restapi.Field{Name: "project", Description: "jira project", Value: model.Jira.Project.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldProject, Description: AutomationActionDescAPIFieldProject, Value: model.Jira.Project.ValueString(), Encoding: AsciiEncoding})
 		}
 		if !model.Jira.Operation.IsNull() {
-			fields = append(fields, restapi.Field{Name: "ticketActionType", Description: "jira ticket type", Value: model.Jira.Operation.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldTicketActionType, Description: AutomationActionDescAPIFieldTicketActionType, Value: model.Jira.Operation.ValueString(), Encoding: AsciiEncoding})
 		}
 		if !model.Jira.IssueType.IsNull() {
-			fields = append(fields, restapi.Field{Name: "issue_type", Description: "jira issue type", Value: model.Jira.IssueType.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldIssueType, Description: AutomationActionDescAPIFieldIssueType, Value: model.Jira.IssueType.ValueString(), Encoding: AsciiEncoding})
 		}
 		if !model.Jira.Description.IsNull() {
-			fields = append(fields, restapi.Field{Name: "body", Description: "jira issue description", Value: model.Jira.Description.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldBody, Description: AutomationActionDescAPIFieldBody, Value: model.Jira.Description.ValueString(), Encoding: AsciiEncoding})
 		}
 		if !model.Jira.Assignee.IsNull() {
-			fields = append(fields, restapi.Field{Name: "assignee", Description: "jira issue assignee", Value: model.Jira.Assignee.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldAssignee, Description: AutomationActionDescAPIFieldAssignee, Value: model.Jira.Assignee.ValueString(), Encoding: AsciiEncoding})
 		}
 		if !model.Jira.Title.IsNull() {
-			fields = append(fields, restapi.Field{Name: "summary", Description: "jira issue summary", Value: model.Jira.Title.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldSummary, Description: AutomationActionDescAPIFieldSummary, Value: model.Jira.Title.ValueString(), Encoding: AsciiEncoding})
 		}
 		if !model.Jira.Labels.IsNull() {
-			fields = append(fields, restapi.Field{Name: "labels", Description: "jira issue labels", Value: model.Jira.Labels.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldLabels, Description: AutomationActionDescAPIFieldLabels, Value: model.Jira.Labels.ValueString(), Encoding: AsciiEncoding})
 		}
 		if !model.Jira.Comment.IsNull() {
-			fields = append(fields, restapi.Field{Name: "comment", Description: "jira issue comment", Value: model.Jira.Comment.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldComment, Description: AutomationActionDescAPIFieldComment, Value: model.Jira.Comment.ValueString(), Encoding: AsciiEncoding})
 		}
 	} else if model.GitHub != nil && !model.GitHub.Owner.IsNull() {
-		actionType = "GITHUB"
+		actionType = AutomationActionTypeGitHub
 		fields = make([]restapi.Field, 0)
 		if !model.GitHub.Owner.IsNull() {
-			fields = append(fields, restapi.Field{Name: "owner", Description: "github issue owner/repo", Value: model.GitHub.Owner.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldOwner, Description: AutomationActionDescAPIFieldOwner, Value: model.GitHub.Owner.ValueString(), Encoding: AsciiEncoding})
 		}
 		if !model.GitHub.Repo.IsNull() {
-			fields = append(fields, restapi.Field{Name: "repo", Description: "github issue repo", Value: model.GitHub.Repo.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldRepo, Description: AutomationActionDescAPIFieldRepo, Value: model.GitHub.Repo.ValueString(), Encoding: AsciiEncoding})
 		}
 		if !model.GitHub.Title.IsNull() {
-			fields = append(fields, restapi.Field{Name: "title", Description: "github issue title", Value: model.GitHub.Title.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldTitle, Description: AutomationActionDescAPIFieldTitle, Value: model.GitHub.Title.ValueString(), Encoding: AsciiEncoding})
 		}
 		if !model.GitHub.Body.IsNull() {
-			fields = append(fields, restapi.Field{Name: "body", Description: "github issue body", Value: model.GitHub.Body.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldBody, Description: AutomationActionDescAPIFieldGitHubBody, Value: model.GitHub.Body.ValueString(), Encoding: AsciiEncoding})
 		}
 		if !model.GitHub.Operation.IsNull() {
-			fields = append(fields, restapi.Field{Name: "ticketType", Description: "github issue type", Value: model.GitHub.Operation.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldTicketType, Description: AutomationActionDescAPIFieldTicketType, Value: model.GitHub.Operation.ValueString(), Encoding: AsciiEncoding})
 		}
 		if !model.GitHub.Assignees.IsNull() {
-			fields = append(fields, restapi.Field{Name: "assignees", Description: "github issue assignees", Value: model.GitHub.Assignees.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldAssignees, Description: AutomationActionDescAPIFieldAssignees, Value: model.GitHub.Assignees.ValueString(), Encoding: AsciiEncoding})
 		}
 		if !model.GitHub.Labels.IsNull() {
-			fields = append(fields, restapi.Field{Name: "labels", Description: "github issue labels", Value: model.GitHub.Labels.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldLabels, Description: AutomationActionDescAPIFieldGitHubLabels, Value: model.GitHub.Labels.ValueString(), Encoding: AsciiEncoding})
 		}
 		if !model.GitHub.Comment.IsNull() {
-			fields = append(fields, restapi.Field{Name: "comment", Description: "github issue comment", Value: model.GitHub.Comment.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldComment, Description: AutomationActionDescAPIFieldGitHubComment, Value: model.GitHub.Comment.ValueString(), Encoding: AsciiEncoding})
 		}
 	} else if model.DocLink != nil && !model.DocLink.Url.IsNull() {
-		actionType = "DOC_LINK"
+		actionType = AutomationActionTypeDocLink
 		fields = make([]restapi.Field, 0)
 		fields = append(fields, restapi.Field{
-			Name:        "url",
-			Description: "URL to remediation documentation",
+			Name:        AutomationActionFieldUrl,
+			Description: AutomationActionDescFieldUrl,
 			Value:       model.DocLink.Url.ValueString(),
 			Encoding:    UTF8Encoding,
 		})
 	} else if model.GitLab != nil && !model.GitLab.ProjectId.IsNull() {
-		actionType = "GITLAB"
+		actionType = AutomationActionTypeGitLab
 		fields = make([]restapi.Field, 0)
 		if !model.GitLab.ProjectId.IsNull() {
-			fields = append(fields, restapi.Field{Name: "projectId", Description: "gitlab projectId", Value: model.GitLab.ProjectId.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldProjectId, Description: AutomationActionDescAPIFieldProjectId, Value: model.GitLab.ProjectId.ValueString(), Encoding: AsciiEncoding})
 		}
 		if !model.GitLab.Title.IsNull() {
-			fields = append(fields, restapi.Field{Name: "title", Description: "gitlab issue title", Value: model.GitLab.Title.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldTitle, Description: AutomationActionDescAPIFieldGitLabTitle, Value: model.GitLab.Title.ValueString(), Encoding: AsciiEncoding})
 		}
 		if !model.GitLab.Description.IsNull() {
-			fields = append(fields, restapi.Field{Name: "body", Description: "gitlab issue description", Value: model.GitLab.Description.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldBody, Description: AutomationActionDescAPIFieldGitLabBody, Value: model.GitLab.Description.ValueString(), Encoding: AsciiEncoding})
 		}
 		if !model.GitLab.Operation.IsNull() {
-			fields = append(fields, restapi.Field{Name: "ticketActionType", Description: "gitlab ticket type", Value: model.GitLab.Operation.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldTicketActionType, Description: AutomationActionDescAPIFieldGitLabTicketActionType, Value: model.GitLab.Operation.ValueString(), Encoding: AsciiEncoding})
 		}
 		if !model.GitLab.Labels.IsNull() {
-			fields = append(fields, restapi.Field{Name: "labels", Description: "github issue labels", Value: model.GitLab.Labels.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldLabels, Description: AutomationActionDescAPIFieldGitLabLabels, Value: model.GitLab.Labels.ValueString(), Encoding: AsciiEncoding})
 		}
 		if !model.GitLab.IssueType.IsNull() {
-			fields = append(fields, restapi.Field{Name: "issue_type", Description: "gitlab issue type", Value: model.GitLab.IssueType.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldIssueType, Description: AutomationActionDescAPIFieldGitLabIssueType, Value: model.GitLab.IssueType.ValueString(), Encoding: AsciiEncoding})
 		}
-		if !model.GitLab.Labels.IsNull() {
-			fields = append(fields, restapi.Field{Name: "comment", Description: "gitlab issue comment", Value: model.GitLab.Comment.ValueString(), Encoding: AsciiEncoding})
+		if !model.GitLab.Comment.IsNull() {
+			fields = append(fields, restapi.Field{Name: AutomationActionFieldComment, Description: AutomationActionDescAPIFieldGitLabComment, Value: model.GitLab.Comment.ValueString(), Encoding: AsciiEncoding})
 		}
 	} else if model.Ansible != nil && !model.Ansible.WorkflowId.IsNull() {
-		actionType = "ANSIBLE"
+		actionType = AutomationActionTypeAnsible
 		fields = make([]restapi.Field, 0)
 		if !model.Ansible.WorkflowId.IsNull() {
-			fields = append(fields, restapi.Field{Name: "workflowId", Description: "The workflow ID", Value: model.Ansible.WorkflowId.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldWorkflowId, Description: AutomationActionDescAPIFieldWorkflowId, Value: model.Ansible.WorkflowId.ValueString(), Encoding: AsciiEncoding})
 		}
 		if !model.Ansible.AnsibleUrl.IsNull() {
-			fields = append(fields, restapi.Field{Name: "ansibleUrl", Description: "The ansible url", Value: model.Ansible.AnsibleUrl.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldAnsibleUrl, Description: AutomationActionDescAPIFieldAnsibleUrl, Value: model.Ansible.AnsibleUrl.ValueString(), Encoding: AsciiEncoding})
 		}
 		if !model.Ansible.HostId.IsNull() {
-			fields = append(fields, restapi.Field{Name: "hostId", Description: "The host ID from which this action is created", Value: model.Ansible.HostId.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldHostId, Description: AutomationActionDescAPIFieldHostId, Value: model.Ansible.HostId.ValueString(), Encoding: AsciiEncoding})
 		}
 		if !model.Ansible.PlaybookId.IsNull() {
-			fields = append(fields, restapi.Field{Name: "playbookId", Description: "The playbook ID", Value: model.Ansible.PlaybookId.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldPlaybookId, Description: AutomationActionDescAPIFieldPlaybookId, Value: model.Ansible.PlaybookId.ValueString(), Encoding: AsciiEncoding})
 		}
 		if !model.Ansible.PlaybookFileName.IsNull() {
-			fields = append(fields, restapi.Field{Name: "playbookFileName", Description: "The playbook filename", Value: model.Ansible.PlaybookFileName.ValueString(), Encoding: AsciiEncoding})
+			fields = append(fields, restapi.Field{Name: AutomationActionAPIFieldPlaybookFileName, Description: AutomationActionDescAPIFieldPlaybookFileName, Value: model.Ansible.PlaybookFileName.ValueString(), Encoding: AsciiEncoding})
 		}
 	} else {
 		diags.AddError(
-			"Invalid action configuration",
-			"One of script, http, manual, jira, github, doclink, gitlab, or ansible configuration must be provided",
+			AutomationActionErrInvalidConfig,
+			AutomationActionErrInvalidConfigMsg,
 		)
 		return "", nil, diags
 	}

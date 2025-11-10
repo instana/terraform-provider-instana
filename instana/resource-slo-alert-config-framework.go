@@ -109,78 +109,78 @@ func NewSloAlertConfigResourceHandleFramework() ResourceHandleFramework[*restapi
 		metaData: ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaSloAlertConfigFramework,
 			Schema: schema.Schema{
-				Description: "This resource manages SLO Alert configurations in Instana.",
+				Description: SloAlertConfigDescResource,
 				Attributes: map[string]schema.Attribute{
 					"id": schema.StringAttribute{
 						Computed:    true,
-						Description: "The ID of the SLO Alert configuration.",
+						Description: SloAlertConfigDescID,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
 					"name": schema.StringAttribute{
 						Required:    true,
-						Description: "The name of the SLO Alert config",
+						Description: SloAlertConfigDescName,
 						Validators: []validator.String{
 							stringvalidator.LengthBetween(0, 256),
 						},
 					},
 					"description": schema.StringAttribute{
 						Required:    true,
-						Description: "The description of the SLO Alert config",
+						Description: SloAlertConfigDescDescription,
 					},
 					"severity": schema.Int64Attribute{
 						Required:    true,
-						Description: "The severity of the alert when triggered",
+						Description: SloAlertConfigDescSeverity,
 					},
 					"triggering": schema.BoolAttribute{
 						Optional:    true,
-						Description: "Optional flag to indicate whether also an Incident is triggered or not. The default is false",
+						Description: SloAlertConfigDescTriggering,
 					},
 					"enabled": schema.BoolAttribute{
 						Optional:    true,
-						Description: "Optional flag to indicate whether this Alert is Enabled",
+						Description: SloAlertConfigDescEnabled,
 					},
 					"alert_type": schema.StringAttribute{
 						Required:    true,
-						Description: "What do you want to be alerted on? (Type of Smart Alert: status, error_budget, burn_rate_v2)",
+						Description: SloAlertConfigDescAlertType,
 						Validators: []validator.String{
 							stringvalidator.OneOf("status", "error_budget", "burn_rate_v2"),
 						},
 					},
 					"slo_ids": schema.SetAttribute{
 						Required:    true,
-						Description: "The SLO IDs that are monitored",
+						Description: SloAlertConfigDescSloIds,
 						ElementType: types.StringType,
 					},
 					"alert_channel_ids": schema.SetAttribute{
 						Required:    true,
-						Description: "The IDs of the Alert Channels",
+						Description: SloAlertConfigDescAlertChannelIds,
 						ElementType: types.StringType,
 					},
 				},
 				Blocks: map[string]schema.Block{
 					"threshold": schema.ListNestedBlock{
-						Description: "Indicates the type of violation of the defined threshold.",
+						Description: SloAlertConfigDescThreshold,
 						NestedObject: schema.NestedBlockObject{
 							Attributes: map[string]schema.Attribute{
 								"type": schema.StringAttribute{
 									Optional:    true,
-									Description: "The type of threshold (should be staticThreshold).",
+									Description: SloAlertConfigDescThresholdType,
 									Validators: []validator.String{
 										stringvalidator.OneOf("staticThreshold"),
 									},
 								},
 								"operator": schema.StringAttribute{
 									Required:    true,
-									Description: "The operator used to evaluate this rule.",
+									Description: SloAlertConfigDescThresholdOperator,
 									Validators: []validator.String{
 										stringvalidator.OneOf(">", ">=", "=", "<=", "<"),
 									},
 								},
 								"value": schema.Float64Attribute{
 									Required:    true,
-									Description: "The threshold value for the alert condition.",
+									Description: SloAlertConfigDescThresholdValue,
 									Validators: []validator.Float64{
 										float64validator.AtLeast(0.000001),
 									},
@@ -189,19 +189,19 @@ func NewSloAlertConfigResourceHandleFramework() ResourceHandleFramework[*restapi
 						},
 					},
 					"time_threshold": schema.ListNestedBlock{
-						Description: "Defines the time threshold for triggering and suppressing alerts.",
+						Description: SloAlertConfigDescTimeThreshold,
 						NestedObject: schema.NestedBlockObject{
 							Attributes: map[string]schema.Attribute{
 								"warm_up": schema.Int64Attribute{
 									Required:    true,
-									Description: "The duration for which the condition must be violated for the alert to be triggered (in ms).",
+									Description: SloAlertConfigDescTimeThresholdWarmUp,
 									Validators: []validator.Int64{
 										int64validator.AtLeast(1),
 									},
 								},
 								"cool_down": schema.Int64Attribute{
 									Required:    true,
-									Description: "The duration for which the condition must remain suppressed for the alert to end (in ms).",
+									Description: SloAlertConfigDescTimeThresholdCoolDown,
 									Validators: []validator.Int64{
 										int64validator.AtLeast(1),
 									},
@@ -210,31 +210,31 @@ func NewSloAlertConfigResourceHandleFramework() ResourceHandleFramework[*restapi
 						},
 					},
 					"burn_rate_config": schema.ListNestedBlock{
-						Description: "List of burn rate configs fields.",
+						Description: SloAlertConfigDescBurnRateConfig,
 						NestedObject: schema.NestedBlockObject{
 							Attributes: map[string]schema.Attribute{
 								"alert_window_type": schema.StringAttribute{
 									Required:    true,
-									Description: "The alert window type for the burn rate config.",
+									Description: SloAlertConfigDescBurnRateAlertWindowType,
 								},
 								"duration": schema.StringAttribute{
 									Required:    true,
-									Description: "The duration for the burn rate config.",
+									Description: SloAlertConfigDescBurnRateDuration,
 								},
 								"duration_unit_type": schema.StringAttribute{
 									Required:    true,
-									Description: "The duration unit type for the burn rate config.",
+									Description: SloAlertConfigDescBurnRateDurationUnitType,
 								},
 								"threshold_operator": schema.StringAttribute{
 									Required:    true,
-									Description: "The threshold operator for the burn rate config.",
+									Description: SloAlertConfigDescBurnRateThresholdOperator,
 									Validators: []validator.String{
 										stringvalidator.OneOf(">", ">=", "=", "<=", "<"),
 									},
 								},
 								"threshold_value": schema.StringAttribute{
 									Required:    true,
-									Description: "The threshold value for the burn rate config.",
+									Description: SloAlertConfigDescBurnRateThresholdValue,
 								},
 							},
 						},
@@ -465,8 +465,8 @@ func (r *sloAlertConfigResourceFramework) MapStateToDataObject(ctx context.Conte
 		apiMetric = "BURN_RATE_V2"
 	default:
 		diags.AddError(
-			"Error mapping alert type",
-			fmt.Sprintf("Invalid alert_type: %s", terraformAlertType),
+			SloAlertConfigErrMappingAlertType,
+			fmt.Sprintf(SloAlertConfigErrInvalidAlertType, terraformAlertType),
 		)
 		return nil, diags
 	}
@@ -553,8 +553,8 @@ func (r *sloAlertConfigResourceFramework) MapStateToDataObject(ctx context.Conte
 			duration, err := strconv.Atoi(burnRateConfigModel.Duration.ValueString())
 			if err != nil {
 				diags.AddError(
-					"Error parsing duration",
-					fmt.Sprintf("Failed to parse duration: %s", err),
+					SloAlertConfigErrParsingDuration,
+					fmt.Sprintf(SloAlertConfigErrParsingDurationMsg, err),
 				)
 				return nil, diags
 			}
@@ -562,8 +562,8 @@ func (r *sloAlertConfigResourceFramework) MapStateToDataObject(ctx context.Conte
 			value, err := strconv.ParseFloat(burnRateConfigModel.ThresholdValue.ValueString(), 64)
 			if err != nil {
 				diags.AddError(
-					"Error parsing threshold value",
-					fmt.Sprintf("Failed to parse threshold value: %s", err),
+					SloAlertConfigErrParsingThresholdValue,
+					fmt.Sprintf(SloAlertConfigErrParsingThresholdValueMsg, err),
 				)
 				return nil, diags
 			}

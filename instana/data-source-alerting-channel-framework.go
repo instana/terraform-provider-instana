@@ -48,22 +48,22 @@ func (d *alertingChannelDataSourceFramework) Metadata(_ context.Context, req dat
 
 func (d *alertingChannelDataSourceFramework) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Data source for an Instana alerting channel. Alerting channels are used to send notifications when alerts are triggered.",
+		Description: AlertingChannelDescDataSource,
 		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				Description: "The ID of the alerting channel.",
+			AlertingChannelDataSourceFieldID: schema.StringAttribute{
+				Description: AlertingChannelDescID,
 				Computed:    true,
 			},
 			AlertingChannelFieldName: schema.StringAttribute{
-				Description: "The name of the alerting channel.",
+				Description: AlertingChannelDescName,
 				Required:    true,
 			},
 			AlertingChannelFieldChannelEmail: schema.SingleNestedAttribute{
 				Computed:    true,
-				Description: "The configuration of the Email channel",
+				Description: AlertingChannelDescEmail,
 				Attributes: map[string]schema.Attribute{
 					AlertingChannelEmailFieldEmails: schema.SetAttribute{
-						Description: "The list of emails of the Email alerting channel",
+						Description: AlertingChannelDescEmailEmails,
 						Computed:    true,
 						ElementType: types.StringType,
 					},
@@ -71,30 +71,30 @@ func (d *alertingChannelDataSourceFramework) Schema(_ context.Context, _ datasou
 			},
 			AlertingChannelFieldChannelOpsGenie: schema.SingleNestedAttribute{
 				Computed:    true,
-				Description: "The configuration of the Ops Genie channel",
+				Description: AlertingChannelDescOpsGenie,
 				Attributes: map[string]schema.Attribute{
 					AlertingChannelOpsGenieFieldAPIKey: schema.StringAttribute{
-						Description: "The OpsGenie API Key of the OpsGenie alerting channel",
+						Description: AlertingChannelDescOpsGenieAPIKey,
 						Computed:    true,
 						Sensitive:   true,
 					},
 					AlertingChannelOpsGenieFieldTags: schema.ListAttribute{
-						Description: "The OpsGenie tags of the OpsGenie alerting channel",
+						Description: AlertingChannelDescOpsGenieTags,
 						Computed:    true,
 						ElementType: types.StringType,
 					},
 					AlertingChannelOpsGenieFieldRegion: schema.StringAttribute{
-						Description: "The OpsGenie region of the OpsGenie alerting channel",
+						Description: AlertingChannelDescOpsGenieRegion,
 						Computed:    true,
 					},
 				},
 			},
 			AlertingChannelFieldChannelPageDuty: schema.SingleNestedAttribute{
 				Computed:    true,
-				Description: "The configuration of the Pager Duty channel",
+				Description: AlertingChannelDescPagerDuty,
 				Attributes: map[string]schema.Attribute{
 					AlertingChannelPagerDutyFieldServiceIntegrationKey: schema.StringAttribute{
-						Description: "The Service Integration Key of the PagerDuty alerting channel",
+						Description: AlertingChannelDescPagerDutyServiceIntegrationKey,
 						Computed:    true,
 						Sensitive:   true,
 					},
@@ -102,33 +102,33 @@ func (d *alertingChannelDataSourceFramework) Schema(_ context.Context, _ datasou
 			},
 			AlertingChannelFieldChannelSlack: schema.SingleNestedAttribute{
 				Computed:    true,
-				Description: "The configuration of the Slack channel",
+				Description: AlertingChannelDescSlack,
 				Attributes: map[string]schema.Attribute{
 					AlertingChannelSlackFieldWebhookURL: schema.StringAttribute{
-						Description: "The webhook URL of the Slack alerting channel",
+						Description: AlertingChannelDescSlackWebhookURL,
 						Computed:    true,
 						Sensitive:   true,
 					},
 					AlertingChannelSlackFieldIconURL: schema.StringAttribute{
-						Description: "The icon URL of the Slack alerting channel",
+						Description: AlertingChannelDescSlackIconURL,
 						Computed:    true,
 					},
 					AlertingChannelSlackFieldChannel: schema.StringAttribute{
-						Description: "The Slack channel of the Slack alerting channel",
+						Description: AlertingChannelDescSlackChannel,
 						Computed:    true,
 					},
 				},
 			},
 			AlertingChannelFieldChannelSplunk: schema.SingleNestedAttribute{
 				Computed:    true,
-				Description: "The configuration of the Splunk channel",
+				Description: AlertingChannelDescSplunk,
 				Attributes: map[string]schema.Attribute{
 					AlertingChannelSplunkFieldURL: schema.StringAttribute{
-						Description: "The URL of the Splunk alerting channel",
+						Description: AlertingChannelDescSplunkURL,
 						Computed:    true,
 					},
 					AlertingChannelSplunkFieldToken: schema.StringAttribute{
-						Description: "The token of the Splunk alerting channel",
+						Description: AlertingChannelDescSplunkToken,
 						Computed:    true,
 						Sensitive:   true,
 					},
@@ -136,30 +136,30 @@ func (d *alertingChannelDataSourceFramework) Schema(_ context.Context, _ datasou
 			},
 			AlertingChannelFieldChannelVictorOps: schema.SingleNestedAttribute{
 				Computed:    true,
-				Description: "The configuration of the VictorOps channel",
+				Description: AlertingChannelDescVictorOps,
 				Attributes: map[string]schema.Attribute{
 					AlertingChannelVictorOpsFieldAPIKey: schema.StringAttribute{
-						Description: "The API Key of the VictorOps alerting channel",
+						Description: AlertingChannelDescVictorOpsAPIKey,
 						Computed:    true,
 						Sensitive:   true,
 					},
 					AlertingChannelVictorOpsFieldRoutingKey: schema.StringAttribute{
-						Description: "The Routing Key of the VictorOps alerting channel",
+						Description: AlertingChannelDescVictorOpsRoutingKey,
 						Computed:    true,
 					},
 				},
 			},
 			AlertingChannelFieldChannelWebhook: schema.SingleNestedAttribute{
 				Computed:    true,
-				Description: "The configuration of the Webhook channel",
+				Description: AlertingChannelDescWebhook,
 				Attributes: map[string]schema.Attribute{
 					AlertingChannelWebhookFieldWebhookURLs: schema.SetAttribute{
-						Description: "The list of webhook urls of the Webhook alerting channel",
+						Description: AlertingChannelDescWebhookWebhookURLs,
 						Computed:    true,
 						ElementType: types.StringType,
 					},
 					AlertingChannelWebhookFieldHTTPHeaders: schema.MapAttribute{
-						Description: "The optional map of HTTP headers of the Webhook alerting channel",
+						Description: AlertingChannelDescWebhookHTTPHeaders,
 						Computed:    true,
 						ElementType: types.StringType,
 					},
@@ -167,10 +167,10 @@ func (d *alertingChannelDataSourceFramework) Schema(_ context.Context, _ datasou
 			},
 			AlertingChannelFieldChannelOffice365: schema.SingleNestedAttribute{
 				Computed:    true,
-				Description: "The configuration of the Office 365 channel",
+				Description: AlertingChannelDescOffice365,
 				Attributes: map[string]schema.Attribute{
 					AlertingChannelWebhookBasedFieldWebhookURL: schema.StringAttribute{
-						Description: "The webhook URL of the Office 365 alerting channel",
+						Description: AlertingChannelDescOffice365WebhookURL,
 						Computed:    true,
 						Sensitive:   true,
 					},
@@ -178,10 +178,10 @@ func (d *alertingChannelDataSourceFramework) Schema(_ context.Context, _ datasou
 			},
 			AlertingChannelFieldChannelGoogleChat: schema.SingleNestedAttribute{
 				Computed:    true,
-				Description: "The configuration of the Google Chat channel",
+				Description: AlertingChannelDescGoogleChat,
 				Attributes: map[string]schema.Attribute{
 					AlertingChannelWebhookBasedFieldWebhookURL: schema.StringAttribute{
-						Description: "The webhook URL of the Google Chat alerting channel",
+						Description: AlertingChannelDescGoogleChatWebhookURL,
 						Computed:    true,
 						Sensitive:   true,
 					},
@@ -189,103 +189,103 @@ func (d *alertingChannelDataSourceFramework) Schema(_ context.Context, _ datasou
 			},
 			AlertingChannelFieldChannelServiceNow: schema.SingleNestedAttribute{
 				Computed:    true,
-				Description: "The configuration of the ServiceNow channel",
+				Description: AlertingChannelDescServiceNow,
 				Attributes: map[string]schema.Attribute{
 					AlertingChannelServiceNowFieldServiceNowURL: schema.StringAttribute{
-						Description: "The ServiceNow URL of the ServiceNow alerting channel",
+						Description: AlertingChannelDescServiceNowURL,
 						Computed:    true,
 					},
 					AlertingChannelServiceNowFieldUsername: schema.StringAttribute{
-						Description: "The username of the ServiceNow alerting channel",
+						Description: AlertingChannelDescServiceNowUsername,
 						Computed:    true,
 					},
 					AlertingChannelServiceNowFieldPassword: schema.StringAttribute{
-						Description: "The password of the ServiceNow alerting channel",
+						Description: AlertingChannelDescServiceNowPassword,
 						Computed:    true,
 						Sensitive:   true,
 					},
 					AlertingChannelServiceNowFieldAutoCloseIncidents: schema.BoolAttribute{
-						Description: "Whether to automatically close incidents when alerts are resolved",
+						Description: AlertingChannelDescServiceNowAutoCloseIncidents,
 						Computed:    true,
 					},
 				},
 			},
 			AlertingChannelFieldChannelServiceNowApplication: schema.SingleNestedAttribute{
 				Computed:    true,
-				Description: "The configuration of the ServiceNow ITSM (Enhanced) channel",
+				Description: AlertingChannelDescServiceNowApplication,
 				Attributes: map[string]schema.Attribute{
 					AlertingChannelServiceNowFieldServiceNowURL: schema.StringAttribute{
-						Description: "The ServiceNow URL of the ServiceNow ITSM (Enhanced) alerting channel",
+						Description: AlertingChannelDescServiceNowApplicationURL,
 						Computed:    true,
 					},
 					AlertingChannelServiceNowFieldUsername: schema.StringAttribute{
-						Description: "The username of the ServiceNow ITSM (Enhanced) alerting channel",
+						Description: AlertingChannelDescServiceNowApplicationUsername,
 						Computed:    true,
 					},
 					AlertingChannelServiceNowFieldPassword: schema.StringAttribute{
-						Description: "The password of the ServiceNow ITSM (Enhanced) alerting channel",
+						Description: AlertingChannelDescServiceNowApplicationPassword,
 						Computed:    true,
 						Sensitive:   true,
 					},
 					AlertingChannelServiceNowApplicationFieldTenant: schema.StringAttribute{
-						Description: "The tenant of the ServiceNow ITSM (Enhanced) alerting channel",
+						Description: AlertingChannelDescServiceNowApplicationTenant,
 						Computed:    true,
 					},
 					AlertingChannelServiceNowApplicationFieldUnit: schema.StringAttribute{
-						Description: "The unit of the ServiceNow ITSM (Enhanced) alerting channel",
+						Description: AlertingChannelDescServiceNowApplicationUnit,
 						Computed:    true,
 					},
 					AlertingChannelServiceNowApplicationFieldInstanaURL: schema.StringAttribute{
-						Description: "The Instana URL of the ServiceNow ITSM (Enhanced) alerting channel",
+						Description: AlertingChannelDescServiceNowApplicationInstanaURL,
 						Computed:    true,
 					},
 					AlertingChannelServiceNowApplicationFieldEnableSendInstanaNotes: schema.BoolAttribute{
-						Description: "Whether to enable sending Instana notes",
+						Description: AlertingChannelDescServiceNowApplicationEnableSendInstanaNotes,
 						Computed:    true,
 					},
 					AlertingChannelServiceNowApplicationFieldEnableSendServiceNowActivities: schema.BoolAttribute{
-						Description: "Whether to enable sending ServiceNow activities",
+						Description: AlertingChannelDescServiceNowApplicationEnableSendServiceNowActivities,
 						Computed:    true,
 					},
 					AlertingChannelServiceNowApplicationFieldEnableSendServiceNowWorkNotes: schema.BoolAttribute{
-						Description: "Whether to enable sending ServiceNow work notes",
+						Description: AlertingChannelDescServiceNowApplicationEnableSendServiceNowWorkNotes,
 						Computed:    true,
 					},
 					AlertingChannelServiceNowApplicationFieldManuallyClosedIncidents: schema.BoolAttribute{
-						Description: "Whether incidents are manually closed",
+						Description: AlertingChannelDescServiceNowApplicationManuallyClosedIncidents,
 						Computed:    true,
 					},
 					AlertingChannelServiceNowApplicationFieldResolutionOfIncident: schema.StringAttribute{
-						Description: "The resolution of incident",
+						Description: AlertingChannelDescServiceNowApplicationResolutionOfIncident,
 						Computed:    true,
 					},
 					AlertingChannelServiceNowApplicationFieldSnowStatusOnCloseEvent: schema.StringAttribute{
-						Description: "The ServiceNow status on close event",
+						Description: AlertingChannelDescServiceNowApplicationSnowStatusOnCloseEvent,
 						Computed:    true,
 					},
 				},
 			},
 			AlertingChannelFieldChannelPrometheusWebhook: schema.SingleNestedAttribute{
 				Computed:    true,
-				Description: "The configuration of the Prometheus Webhook channel",
+				Description: AlertingChannelDescPrometheusWebhook,
 				Attributes: map[string]schema.Attribute{
 					AlertingChannelWebhookBasedFieldWebhookURL: schema.StringAttribute{
-						Description: "The webhook URL of the Prometheus Webhook alerting channel",
+						Description: AlertingChannelDescPrometheusWebhookWebhookURL,
 						Computed:    true,
 						Sensitive:   true,
 					},
 					AlertingChannelPrometheusWebhookFieldReceiver: schema.StringAttribute{
-						Description: "The receiver of the Prometheus Webhook alerting channel",
+						Description: AlertingChannelDescPrometheusWebhookReceiver,
 						Computed:    true,
 					},
 				},
 			},
 			AlertingChannelFieldChannelWebexTeamsWebhook: schema.SingleNestedAttribute{
 				Computed:    true,
-				Description: "The configuration of the Webex Teams Webhook channel",
+				Description: AlertingChannelDescWebexTeamsWebhook,
 				Attributes: map[string]schema.Attribute{
 					AlertingChannelWebhookBasedFieldWebhookURL: schema.StringAttribute{
-						Description: "The webhook URL of the Webex Teams Webhook alerting channel",
+						Description: AlertingChannelDescWebexTeamsWebhookWebhookURL,
 						Computed:    true,
 						Sensitive:   true,
 					},
@@ -293,15 +293,15 @@ func (d *alertingChannelDataSourceFramework) Schema(_ context.Context, _ datasou
 			},
 			AlertingChannelFieldChannelWatsonAIOpsWebhook: schema.SingleNestedAttribute{
 				Computed:    true,
-				Description: "The configuration of the IBM Cloud Pack (Watson AIOps) Webhook channel",
+				Description: AlertingChannelDescWatsonAIOpsWebhook,
 				Attributes: map[string]schema.Attribute{
 					AlertingChannelWebhookBasedFieldWebhookURL: schema.StringAttribute{
-						Description: "The webhook URL of the IBM Cloud Pack (Watson AIOps) Webhook alerting channel",
+						Description: AlertingChannelDescWatsonAIOpsWebhookWebhookURL,
 						Computed:    true,
 						Sensitive:   true,
 					},
 					AlertingChannelWebhookFieldHTTPHeaders: schema.ListAttribute{
-						Description: "The list of HTTP headers for the IBM Cloud Pack (Watson AIOps) Webhook alerting channel",
+						Description: AlertingChannelDescWatsonAIOpsWebhookHTTPHeaders,
 						Computed:    true,
 						ElementType: types.StringType,
 					},
@@ -319,7 +319,7 @@ func (d *alertingChannelDataSourceFramework) Configure(_ context.Context, req da
 	providerMeta, ok := req.ProviderData.(*ProviderMeta)
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
+			AlertingChannelErrUnexpectedConfigureType,
 			fmt.Sprintf("Expected *ProviderMeta, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 		return
@@ -342,7 +342,7 @@ func (d *alertingChannelDataSourceFramework) Read(ctx context.Context, req datas
 	channels, err := d.instanaAPI.AlertingChannels().GetAll()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error reading alerting channels",
+			AlertingChannelErrReadingChannels,
 			fmt.Sprintf("Could not read alerting channels: %s", err),
 		)
 		return
@@ -359,7 +359,7 @@ func (d *alertingChannelDataSourceFramework) Read(ctx context.Context, req datas
 
 	if matchingChannel == nil {
 		resp.Diagnostics.AddError(
-			"Alerting channel not found",
+			AlertingChannelErrChannelNotFound,
 			fmt.Sprintf("No alerting channel found with name: %s", name),
 		)
 		return
@@ -476,7 +476,7 @@ func (d *alertingChannelDataSourceFramework) Read(ctx context.Context, req datas
 		data.WatsonAIOpsWebhook = watsonAIOpsWebhookChannel
 	default:
 		resp.Diagnostics.AddError(
-			"Unsupported alerting channel type",
+			AlertingChannelErrUnsupportedChannelType,
 			fmt.Sprintf("Received unsupported alerting channel of type %s", matchingChannel.Kind),
 		)
 		return

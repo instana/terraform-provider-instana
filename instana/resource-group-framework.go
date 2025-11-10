@@ -84,72 +84,72 @@ func NewGroupResourceHandleFramework() ResourceHandleFramework[*restapi.Group] {
 		metaData: ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaGroupFramework,
 			Schema: schema.Schema{
-				Description: "This resource manages RBAC groups in Instana.",
+				Description: GroupDescResource,
 				Attributes: map[string]schema.Attribute{
 					"id": schema.StringAttribute{
 						Computed:    true,
-						Description: "The ID of the group.",
+						Description: GroupDescID,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
 					"name": schema.StringAttribute{
 						Required:    true,
-						Description: "The name of the Group",
+						Description: GroupDescName,
 					},
 				},
 				Blocks: map[string]schema.Block{
 					"member": schema.SetNestedBlock{
-						Description: "The members of the group",
+						Description: GroupDescMembers,
 						NestedObject: schema.NestedBlockObject{
 							Attributes: map[string]schema.Attribute{
 								"user_id": schema.StringAttribute{
 									Required:    true,
-									Description: "The user id of the group member",
+									Description: GroupDescMemberUserID,
 								},
 								"email": schema.StringAttribute{
 									Optional:    true,
-									Description: "The email address of the group member",
+									Description: GroupDescMemberEmail,
 								},
 							},
 						},
 					},
 					"permission_set": schema.ListNestedBlock{
-						Description: "The permission set of the group",
+						Description: GroupDescPermissionSet,
 						NestedObject: schema.NestedBlockObject{
 							Attributes: map[string]schema.Attribute{
 								"application_ids": schema.SetAttribute{
 									Optional:    true,
-									Description: "The scope bindings to restrict access to applications",
+									Description: GroupDescPermissionSetApplicationIDs,
 									ElementType: types.StringType,
 								},
 								"infra_dfq_filter": schema.StringAttribute{
 									Optional:    true,
-									Description: "The scope binding for the dynamic filter query to restrict access to infrastructure assets",
+									Description: GroupDescPermissionSetInfraDFQFilter,
 								},
 								"kubernetes_cluster_uuids": schema.SetAttribute{
 									Optional:    true,
-									Description: "The scope bindings to restrict access to Kubernetes Clusters",
+									Description: GroupDescPermissionSetKubernetesClusterUUIDs,
 									ElementType: types.StringType,
 								},
 								"kubernetes_namespaces_uuids": schema.SetAttribute{
 									Optional:    true,
-									Description: "The scope bindings to restrict access to Kubernetes namespaces",
+									Description: GroupDescPermissionSetKubernetesNamespaceUIDs,
 									ElementType: types.StringType,
 								},
 								"mobile_app_ids": schema.SetAttribute{
 									Optional:    true,
-									Description: "The scope bindings to restrict access to mobile apps",
+									Description: GroupDescPermissionSetMobileAppIDs,
 									ElementType: types.StringType,
 								},
 								"website_ids": schema.SetAttribute{
 									Optional:    true,
-									Description: "The scope bindings to restrict access to websites",
+									Description: GroupDescPermissionSetWebsiteIDs,
 									ElementType: types.StringType,
 								},
 								"permissions": schema.SetAttribute{
 									Optional:    true,
-									Description: "The permissions assigned which should be assigned to the users of the group",
+									Description: GroupDescPermissionSetPermissions,
 									ElementType: types.StringType,
 									Validators: []validator.Set{
 										setvalidator.ValueStringsAre(

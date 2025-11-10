@@ -10,8 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// DataSourceInstanaCustomEventSpecificationFramework the name of the terraform-provider-instana data source to read custom event specifications
-const DataSourceInstanaCustomEventSpecificationFramework = "custom_event_spec"
+// Constants are now defined in data-source-custom-event-specification-constants.go
 
 // CustomEventSpecificationDataSourceModel represents the data model for the custom event specification data source
 type CustomEventSpecificationDataSourceModel struct {
@@ -40,38 +39,38 @@ func (d *customEventSpecificationDataSourceFramework) Metadata(_ context.Context
 
 func (d *customEventSpecificationDataSourceFramework) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Data source for an Instana custom event specification. Custom events are user-defined events in Instana.",
+		Description: CustomEventSpecificationDescDataSource,
 		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				Description: "The ID of the custom event specification.",
+			CustomEventSpecificationFieldID: schema.StringAttribute{
+				Description: CustomEventSpecificationDescID,
 				Computed:    true,
 			},
 			CustomEventSpecificationFieldName: schema.StringAttribute{
-				Description: "The name of the custom event specification.",
+				Description: CustomEventSpecificationDescName,
 				Required:    true,
 			},
 			CustomEventSpecificationFieldDescription: schema.StringAttribute{
-				Description: "The description of the custom event specification.",
+				Description: CustomEventSpecificationDescDescription,
 				Computed:    true,
 			},
 			CustomEventSpecificationFieldEntityType: schema.StringAttribute{
-				Description: "The entity type for which the custom event specification is created.",
+				Description: CustomEventSpecificationDescEntityType,
 				Required:    true,
 			},
 			CustomEventSpecificationFieldTriggering: schema.BoolAttribute{
-				Description: "Indicates if an incident is triggered the custom event or not.",
+				Description: CustomEventSpecificationDescTriggering,
 				Computed:    true,
 			},
 			CustomEventSpecificationFieldEnabled: schema.BoolAttribute{
-				Description: "Indicates if the custom event is enabled or not.",
+				Description: CustomEventSpecificationDescEnabled,
 				Computed:    true,
 			},
 			CustomEventSpecificationFieldQuery: schema.StringAttribute{
-				Description: "Dynamic focus query for the custom event specification.",
+				Description: CustomEventSpecificationDescQuery,
 				Computed:    true,
 			},
 			CustomEventSpecificationFieldExpirationTime: schema.Int64Attribute{
-				Description: "The expiration time (grace period) to wait before the issue is closed.",
+				Description: CustomEventSpecificationDescExpirationTime,
 				Computed:    true,
 			},
 		},
@@ -86,8 +85,8 @@ func (d *customEventSpecificationDataSourceFramework) Configure(_ context.Contex
 	providerMeta, ok := req.ProviderData.(*ProviderMeta)
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *ProviderMeta, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			CustomEventSpecificationErrUnexpectedConfigureType,
+			fmt.Sprintf(CustomEventSpecificationErrUnexpectedConfigureTypeDetail, req.ProviderData),
 		)
 		return
 	}
@@ -110,8 +109,8 @@ func (d *customEventSpecificationDataSourceFramework) Read(ctx context.Context, 
 	specs, err := d.instanaAPI.CustomEventSpecifications().GetAll()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error reading custom event specifications",
-			fmt.Sprintf("Could not read custom event specifications: %s", err),
+			CustomEventSpecificationErrReadingSpecs,
+			fmt.Sprintf(CustomEventSpecificationErrReadingSpecsDetail, err),
 		)
 		return
 	}
@@ -127,8 +126,8 @@ func (d *customEventSpecificationDataSourceFramework) Read(ctx context.Context, 
 
 	if matchingSpec == nil {
 		resp.Diagnostics.AddError(
-			"Custom event specification not found",
-			fmt.Sprintf("No custom event specification found for name '%s' and entity type '%s'", name, entityType),
+			CustomEventSpecificationErrNotFound,
+			fmt.Sprintf(CustomEventSpecificationErrNotFoundDetail, name, entityType),
 		)
 		return
 	}

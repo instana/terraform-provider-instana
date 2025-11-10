@@ -31,22 +31,22 @@ func NewWebsiteMonitoringConfigResourceHandleFramework() ResourceHandleFramework
 		metaData: ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaWebsiteMonitoringConfigFramework,
 			Schema: schema.Schema{
-				Description: "This resource manages Website Monitoring Configurations in Instana.",
+				Description: WebsiteMonitoringConfigDescResource,
 				Attributes: map[string]schema.Attribute{
 					"id": schema.StringAttribute{
 						Computed:    true,
-						Description: "The ID of the Website Monitoring Configuration.",
+						Description: WebsiteMonitoringConfigDescID,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
 					"name": schema.StringAttribute{
 						Required:    true,
-						Description: "Configures the name of the website monitoring configuration.",
+						Description: WebsiteMonitoringConfigDescName,
 					},
 					"app_name": schema.StringAttribute{
 						Computed:    true,
-						Description: "Configures the calculated app name of the website monitoring configuration.",
+						Description: WebsiteMonitoringConfigDescAppName,
 					},
 				},
 			},
