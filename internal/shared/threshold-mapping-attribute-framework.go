@@ -5,9 +5,14 @@ import (
 	"log"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
+	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+)
+
+const (
+	LogAlertConfigFieldValue = "value"
 )
 
 type ThresholdPluginModel struct {
@@ -205,7 +210,7 @@ func MapThresholdRulePluginFromState(ctx context.Context, thresholdObj *Threshol
 		seasonality := restapi.ThresholdSeasonality(adaptiveVal.Seasonality.ValueString())
 		deviationFactor := float32(adaptiveVal.DeviationFactor.ValueFloat32())
 		adaptability := adaptiveVal.Adaptability.ValueFloat32()
-		operator := setStringPointerFromState(adaptiveVal.Operator)
+		operator := util.SetStringPointerFromState(adaptiveVal.Operator)
 		return &restapi.ThresholdRule{
 			Type:            "adaptiveBaseline",
 			Seasonality:     &seasonality,
@@ -282,7 +287,7 @@ func MapThresholdRuleAllPluginFromState(ctx context.Context, thresholdObj *Thres
 		seasonality := restapi.ThresholdSeasonality(adaptiveVal.Seasonality.ValueString())
 		deviationFactor := float32(adaptiveVal.DeviationFactor.ValueFloat32())
 		adaptability := adaptiveVal.Adaptability.ValueFloat32()
-		operator := setStringPointerFromState(adaptiveVal.Operator)
+		operator := util.SetStringPointerFromState(adaptiveVal.Operator)
 		return &restapi.ThresholdRule{
 			Type:            "adaptiveBaseline",
 			Seasonality:     &seasonality,
@@ -299,7 +304,7 @@ func MapThresholdRuleAllPluginFromState(ctx context.Context, thresholdObj *Thres
 		baselineVal := thresholdObj.HistoricBaseline
 		seasonality := restapi.ThresholdSeasonality(baselineVal.Seasonality.ValueString())
 		deviationFactor := float32(baselineVal.Deviation.ValueFloat32())
-		baseline, _ := mapBaselineFromState(ctx, baselineVal.Baseline)
+		baseline, _ := MapBaselineFromState(ctx, baselineVal.Baseline)
 		return &restapi.ThresholdRule{
 			Type:            "historicBaseline",
 			Seasonality:     &seasonality,
@@ -308,6 +313,32 @@ func MapThresholdRuleAllPluginFromState(ctx context.Context, thresholdObj *Thres
 		}, diags
 	}
 	return nil, diags
+}
+
+// mapBaselineFromState converts a Terraform List of List (baseline data) to API format
+func MapBaselineFromState(ctx context.Context, baselineList types.List) (*[][]float64, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Get the outer list elements (each element is itself a list of float64)
+	var outerListElements []types.List
+	diags.Append(baselineList.ElementsAs(ctx, &outerListElements, false)...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	// Convert to [][]float64
+	baseline := make([][]float64, 0, len(outerListElements))
+	for _, innerList := range outerListElements {
+		// Get the inner list elements (float64 values)
+		var innerValues []float64
+		diags.Append(innerList.ElementsAs(ctx, &innerValues, false)...)
+		if diags.HasError() {
+			return nil, diags
+		}
+		baseline = append(baseline, innerValues)
+	}
+
+	return &baseline, diags
 }
 
 // MapThresholdToState maps a threshold rule to a Terraform state representation - used for nested attribute instead of block object
@@ -319,17 +350,17 @@ func MapThresholdPluginToState(ctx context.Context, threshold *restapi.Threshold
 	switch threshold.Type {
 	case "adaptiveBaseline":
 		adaptiveBaselineModel := AdaptiveBaselineModel{
-			Operator:        util.setStringPointerToState(threshold.Operator),
-			DeviationFactor: setFloat32PointerToState(threshold.DeviationFactor),
-			Adaptability:    setFloat32PointerToState(threshold.Adaptability),
+			Operator:        util.SetStringPointerToState(threshold.Operator),
+			DeviationFactor: util.SetFloat32PointerToState(threshold.DeviationFactor),
+			Adaptability:    util.SetFloat32PointerToState(threshold.Adaptability),
 			Seasonality:     types.StringValue(string(*threshold.Seasonality)),
 		}
 		thresholdTypeModel.AdaptiveBaseline = &adaptiveBaselineModel
 	default:
 		// Default to static threshold for all other types
 		static := StaticTypeModel{
-			Operator: util.setStringPointerToState(threshold.Operator),
-			Value:    setInt64PointerToState(threshold.Value),
+			Operator: util.SetStringPointerToState(threshold.Operator),
+			Value:    util.SetInt64PointerToState(threshold.Value),
 		}
 		thresholdTypeModel.Static = &static
 	}
@@ -346,25 +377,25 @@ func MapAllThresholdPluginToState(ctx context.Context, threshold *restapi.Thresh
 	switch threshold.Type {
 	case "adaptiveBaseline":
 		adaptiveBaselineModel := AdaptiveBaselineModel{
-			Operator:        util.setStringPointerToState(threshold.Operator),
-			DeviationFactor: setFloat32PointerToState(threshold.DeviationFactor),
-			Adaptability:    setFloat32PointerToState(threshold.Adaptability),
+			Operator:        util.SetStringPointerToState(threshold.Operator),
+			DeviationFactor: util.SetFloat32PointerToState(threshold.DeviationFactor),
+			Adaptability:    util.SetFloat32PointerToState(threshold.Adaptability),
 			Seasonality:     types.StringValue(string(*threshold.Seasonality)),
 		}
 		thresholdTypeModel.AdaptiveBaseline = &adaptiveBaselineModel
 	case "historicBaseline":
 		historicBaselineModel := HistoricBaselineModel{
 			//Baseline:    threshold.Baseline,
-			Deviation:   setFloat32PointerToState(threshold.DeviationFactor),
+			Deviation:   util.SetFloat32PointerToState(threshold.DeviationFactor),
 			Seasonality: types.StringValue(string(*threshold.Seasonality)),
 		}
-		historicBaselineModel.Baseline, _ = mapBaseline(threshold)
+		historicBaselineModel.Baseline, _ = MapBaseline(threshold)
 		thresholdTypeModel.HistoricBaseline = &historicBaselineModel
 	default:
 		// Default to static threshold for all other types
 		static := StaticTypeModel{
-			Operator: util.setStringPointerToState(threshold.Operator),
-			Value:    setInt64PointerToState(threshold.Value),
+			Operator: util.SetStringPointerToState(threshold.Operator),
+			Value:    util.SetInt64PointerToState(threshold.Value),
 		}
 		thresholdTypeModel.Static = &static
 	}

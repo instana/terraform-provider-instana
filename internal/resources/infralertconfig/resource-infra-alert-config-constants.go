@@ -1,4 +1,4 @@
-package instana
+package infralertconfig
 
 // Resource description constants
 const (

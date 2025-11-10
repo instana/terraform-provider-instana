@@ -5,6 +5,9 @@ import (
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/instana/tagfilter"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
+	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
+	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -103,9 +106,9 @@ type ThresholdModel struct {
 }
 
 // NewLogAlertConfigResourceHandleFramework creates the resource handle for Log Alert Configuration
-func NewLogAlertConfigResourceHandleFramework() ResourceHandleFramework[*restapi.LogAlertConfig] {
+func NewLogAlertConfigResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.LogAlertConfig] {
 	return &logAlertConfigResourceFramework{
-		metaData: ResourceMetaDataFramework{
+		metaData: resourcehandle.ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaLogAlertConfigFramework,
 			Schema: schema.Schema{
 				Description: LogAlertConfigDescResource,
@@ -152,12 +155,12 @@ func NewLogAlertConfigResourceHandleFramework() ResourceHandleFramework[*restapi
 						Description: LogAlertConfigDescAlertChannels,
 						NestedObject: schema.NestedBlockObject{
 							Attributes: map[string]schema.Attribute{
-								ResourceFieldThresholdRuleWarningSeverity: schema.ListAttribute{
+								shared.ThresholdFieldWarning: schema.ListAttribute{
 									Optional:    true,
 									Description: LogAlertConfigDescAlertChannelIDs,
 									ElementType: types.StringType,
 								},
-								ResourceFieldThresholdRuleCriticalSeverity: schema.ListAttribute{
+								shared.ThresholdFieldCritical: schema.ListAttribute{
 									Optional:    true,
 									Description: LogAlertConfigDescAlertChannelIDs,
 									ElementType: types.StringType,
@@ -215,8 +218,8 @@ func NewLogAlertConfigResourceHandleFramework() ResourceHandleFramework[*restapi
 									Description: LogAlertConfigDescThreshold,
 									NestedObject: schema.NestedBlockObject{
 										Blocks: map[string]schema.Block{
-											LogAlertConfigFieldWarning:  StaticThresholdBlockSchema(),
-											LogAlertConfigFieldCritical: StaticThresholdBlockSchema(),
+											LogAlertConfigFieldWarning:  shared.StaticThresholdBlockSchema(),
+											LogAlertConfigFieldCritical: shared.StaticThresholdBlockSchema(),
 										},
 									},
 									Validators: []validator.List{
@@ -243,7 +246,7 @@ func NewLogAlertConfigResourceHandleFramework() ResourceHandleFramework[*restapi
 							},
 						},
 					},
-					DefaultCustomPayloadFieldsName: GetCustomPayloadFieldsSchema(),
+					shared.DefaultCustomPayloadFieldsName: shared.GetCustomPayloadFieldsSchema(),
 				},
 			},
 			SchemaVersion: 1,
@@ -252,10 +255,10 @@ func NewLogAlertConfigResourceHandleFramework() ResourceHandleFramework[*restapi
 }
 
 type logAlertConfigResourceFramework struct {
-	metaData ResourceMetaDataFramework
+	metaData resourcehandle.ResourceMetaDataFramework
 }
 
-func (r *logAlertConfigResourceFramework) MetaData() *ResourceMetaDataFramework {
+func (r *logAlertConfigResourceFramework) MetaData() *resourcehandle.ResourceMetaDataFramework {
 	return &r.metaData
 }
 
@@ -295,7 +298,7 @@ func (r *logAlertConfigResourceFramework) UpdateState(ctx context.Context, state
 			)
 			return diags
 		}
-		model.TagFilter = util.setStringPointerToState(normalizedTagFilterString)
+		model.TagFilter = util.SetStringPointerToState(normalizedTagFilterString)
 	} else {
 		model.TagFilter = types.StringNull()
 	}
@@ -318,7 +321,7 @@ func (r *logAlertConfigResourceFramework) UpdateState(ctx context.Context, state
 	}
 
 	// Set alert channels
-	alertChannelsList, alertChannelsDiags := MapAlertChannelsToState(ctx, config.AlertChannels)
+	alertChannelsList, alertChannelsDiags := shared.MapAlertChannelsToState(ctx, config.AlertChannels)
 	if alertChannelsDiags.HasError() {
 		diags.Append(alertChannelsDiags...)
 		return diags
@@ -342,7 +345,7 @@ func (r *logAlertConfigResourceFramework) UpdateState(ctx context.Context, state
 	model.Rules = rulesList
 
 	// Set custom payload fields
-	customPayloadFieldsList, payloadDiags := CustomPayloadFieldsToTerraform(ctx, config.CustomerPayloadFields)
+	customPayloadFieldsList, payloadDiags := shared.CustomPayloadFieldsToTerraform(ctx, config.CustomerPayloadFields)
 	if payloadDiags.HasError() {
 		diags.Append(payloadDiags...)
 		return diags
@@ -404,7 +407,7 @@ func (r *logAlertConfigResourceFramework) MapStateToDataObject(ctx context.Conte
 	alertChannels := make(map[restapi.AlertSeverity][]string)
 	if !model.AlertChannels.IsNull() {
 		var alertChannelsDiags diag.Diagnostics
-		alertChannels, alertChannelsDiags = MapAlertChannelsFromState(ctx, model.AlertChannels)
+		alertChannels, alertChannelsDiags = shared.MapAlertChannelsFromState(ctx, model.AlertChannels)
 		if alertChannelsDiags.HasError() {
 			diags.Append(alertChannelsDiags...)
 			return nil, diags
@@ -440,7 +443,7 @@ func (r *logAlertConfigResourceFramework) MapStateToDataObject(ctx context.Conte
 	var customerPayloadFields []restapi.CustomPayloadField[any]
 	if !model.CustomPayloadFields.IsNull() {
 		var payloadDiags diag.Diagnostics
-		customerPayloadFields, payloadDiags = MapCustomPayloadFieldsToAPIObject(ctx, model.CustomPayloadFields)
+		customerPayloadFields, payloadDiags = shared.MapCustomPayloadFieldsToAPIObject(ctx, model.CustomPayloadFields)
 		if payloadDiags.HasError() {
 			diags.Append(payloadDiags...)
 			return nil, diags
@@ -683,7 +686,7 @@ func (r *logAlertConfigResourceFramework) mapRulesToState(ctx context.Context, r
 
 		// Map warning threshold
 		warningThreshold, isWarningThresholdPresent := ruleWithThreshold.Thresholds[restapi.WarningSeverity]
-		warningThresholdList, warningDiags := MapThresholdToState(ctx, isWarningThresholdPresent, &warningThreshold, []string{"static"})
+		warningThresholdList, warningDiags := shared.MapThresholdToState(ctx, isWarningThresholdPresent, &warningThreshold, []string{"static"})
 		diags.Append(warningDiags...)
 		if diags.HasError() {
 			return types.ListNull(types.ObjectType{}), diags
@@ -692,7 +695,7 @@ func (r *logAlertConfigResourceFramework) mapRulesToState(ctx context.Context, r
 
 		// Map critical threshold
 		criticalThreshold, isCriticalThresholdPresent := ruleWithThreshold.Thresholds[restapi.CriticalSeverity]
-		criticalThresholdList, criticalDiags := MapThresholdToState(ctx, isCriticalThresholdPresent, &criticalThreshold, []string{"static"})
+		criticalThresholdList, criticalDiags := shared.MapThresholdToState(ctx, isCriticalThresholdPresent, &criticalThreshold, []string{"static"})
 		diags.Append(criticalDiags...)
 		if diags.HasError() {
 			return types.ListNull(types.ObjectType{}), diags
@@ -702,8 +705,8 @@ func (r *logAlertConfigResourceFramework) mapRulesToState(ctx context.Context, r
 		// Create threshold object value
 		thresholdObjVal, thresholdObjDiags := types.ObjectValue(
 			map[string]attr.Type{
-				LogAlertConfigFieldWarning:  GetStaticThresholdAttrListTypes(),
-				LogAlertConfigFieldCritical: GetStaticThresholdAttrListTypes(),
+				LogAlertConfigFieldWarning:  shared.GetStaticThresholdAttrListTypes(),
+				LogAlertConfigFieldCritical: shared.GetStaticThresholdAttrListTypes(),
 			},
 			thresholdObj,
 		)
@@ -716,8 +719,8 @@ func (r *logAlertConfigResourceFramework) mapRulesToState(ctx context.Context, r
 		thresholdList, thresholdListDiags := types.ListValue(
 			types.ObjectType{
 				AttrTypes: map[string]attr.Type{
-					LogAlertConfigFieldWarning:  GetStaticThresholdAttrListTypes(),
-					LogAlertConfigFieldCritical: GetStaticThresholdAttrListTypes(),
+					LogAlertConfigFieldWarning:  shared.GetStaticThresholdAttrListTypes(),
+					LogAlertConfigFieldCritical: shared.GetStaticThresholdAttrListTypes(),
 				},
 			},
 			[]attr.Value{thresholdObjVal},
@@ -739,8 +742,8 @@ func (r *logAlertConfigResourceFramework) mapRulesToState(ctx context.Context, r
 				LogAlertConfigFieldThreshold: types.ListType{
 					ElemType: types.ObjectType{
 						AttrTypes: map[string]attr.Type{
-							LogAlertConfigFieldWarning:  GetStaticThresholdAttrListTypes(),
-							LogAlertConfigFieldCritical: GetStaticThresholdAttrListTypes(),
+							LogAlertConfigFieldWarning:  shared.GetStaticThresholdAttrListTypes(),
+							LogAlertConfigFieldCritical: shared.GetStaticThresholdAttrListTypes(),
 						},
 					},
 				},
@@ -765,8 +768,8 @@ func (r *logAlertConfigResourceFramework) mapRulesToState(ctx context.Context, r
 				LogAlertConfigFieldThreshold: types.ListType{
 					ElemType: types.ObjectType{
 						AttrTypes: map[string]attr.Type{
-							LogAlertConfigFieldWarning:  GetStaticThresholdAttrListTypes(),
-							LogAlertConfigFieldCritical: GetStaticThresholdAttrListTypes(),
+							LogAlertConfigFieldWarning:  shared.GetStaticThresholdAttrListTypes(),
+							LogAlertConfigFieldCritical: shared.GetStaticThresholdAttrListTypes(),
 						},
 					},
 				},
@@ -823,7 +826,7 @@ func (r *logAlertConfigResourceFramework) mapThresholdRuleToState(ctx context.Co
 	}
 
 	thresholdObjVal, thresholdObjDiags := types.ObjectValue(
-		GetStaticThresholdAttrTypes(),
+		shared.GetStaticThresholdAttrTypes(),
 		thresholdObj,
 	)
 	diags.Append(thresholdObjDiags...)
@@ -833,7 +836,7 @@ func (r *logAlertConfigResourceFramework) mapThresholdRuleToState(ctx context.Co
 
 	return types.ListValue(
 		types.ObjectType{
-			AttrTypes: GetStaticThresholdAttrTypes(),
+			AttrTypes: shared.GetStaticThresholdAttrTypes(),
 		},
 		[]attr.Value{thresholdObjVal},
 	)
@@ -896,7 +899,7 @@ func (r *logAlertConfigResourceFramework) mapRulesFromState(ctx context.Context,
 		var thresholdDiags diag.Diagnostics
 
 		if !rule.Threshold.IsNull() && !rule.Threshold.IsUnknown() {
-			thresholdMap, thresholdDiags = MapThresholdsFromState(ctx, rule.Threshold)
+			thresholdMap, thresholdDiags = shared.MapThresholdsFromState(ctx, rule.Threshold)
 			diags.Append(thresholdDiags...)
 			if diags.HasError() {
 				return nil, diags

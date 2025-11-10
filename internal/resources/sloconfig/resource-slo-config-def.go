@@ -1,8 +1,9 @@
-package shared
+package sloconfig
 
 import (
 	"fmt"
 
+	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -445,8 +446,8 @@ var (
 					MaxItems:    1,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
-							"good_event_filter_expression": RequiredTagFilterExpressionSchema,
-							"bad_event_filter_expression":  OptionalTagFilterExpressionSchema,
+							"good_event_filter_expression": shared.RequiredTagFilterExpressionSchema,
+							"bad_event_filter_expression":  shared.OptionalTagFilterExpressionSchema,
 						},
 					},
 					ExactlyOneOf: sloConfigIndicatorTypeKeys,

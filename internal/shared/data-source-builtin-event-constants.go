@@ -1,13 +1,5 @@
 package shared
 
-// Data source name constants
-const (
-	// DataSourceInstanaBuiltinEventFramework the name of the terraform-provider-instana data source to read builtin events
-	DataSourceInstanaBuiltinEventFramework = "builtin_event_spec"
-	// DataSourceBuiltinEvent the name of the terraform-provider-instana data source for builtin event specifications
-	DataSourceBuiltinEvent = "instana_builtin_event_spec"
-)
-
 // Field name constants for builtin event specification
 const (
 	// BuiltinEventSpecificationFieldName constant value for the schema field name
@@ -23,7 +15,8 @@ const (
 	// BuiltinEventSpecificationFieldTriggering constant value for the schema field triggering
 	BuiltinEventSpecificationFieldTriggering = "triggering"
 	// BuiltinEventSpecificationFieldEnabled constant value for the schema field enabled
-	BuiltinEventSpecificationFieldEnabled = "enabled"
+	BuiltinEventSpecificationFieldEnabled  = "enabled"
+	DataSourceInstanaBuiltinEventFramework = "builtin_event_spec"
 )
 
 // Field ID constant

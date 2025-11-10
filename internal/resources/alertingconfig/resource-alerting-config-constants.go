@@ -1,4 +1,4 @@
-package instana
+package alertingconfig
 
 // Resource name constants
 const (

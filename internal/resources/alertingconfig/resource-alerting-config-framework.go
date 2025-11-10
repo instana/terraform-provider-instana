@@ -5,6 +5,9 @@ import (
 	"strings"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
+	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
+	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -47,9 +50,9 @@ type DynamicValueModel struct {
 }
 
 // NewAlertingConfigResourceHandleFramework creates the resource handle for Alerting Configuration
-func NewAlertingConfigResourceHandleFramework() ResourceHandleFramework[*restapi.AlertingConfiguration] {
+func NewAlertingConfigResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.AlertingConfiguration] {
 	return &alertingConfigResourceFramework{
-		metaData: ResourceMetaDataFramework{
+		metaData: resourcehandle.ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaAlertingConfigFramework,
 			Schema: schema.Schema{
 				Description: AlertingConfigDescResource,
@@ -109,7 +112,7 @@ func NewAlertingConfigResourceHandleFramework() ResourceHandleFramework[*restapi
 					},
 				},
 				Blocks: map[string]schema.Block{
-					DefaultCustomPayloadFieldsName: GetCustomPayloadFieldsSchema(),
+					shared.DefaultCustomPayloadFieldsName: shared.GetCustomPayloadFieldsSchema(),
 				},
 			},
 			SchemaVersion: 2,
@@ -118,10 +121,10 @@ func NewAlertingConfigResourceHandleFramework() ResourceHandleFramework[*restapi
 }
 
 type alertingConfigResourceFramework struct {
-	metaData ResourceMetaDataFramework
+	metaData resourcehandle.ResourceMetaDataFramework
 }
 
-func (r *alertingConfigResourceFramework) MetaData() *ResourceMetaDataFramework {
+func (r *alertingConfigResourceFramework) MetaData() *resourcehandle.ResourceMetaDataFramework {
 	return &r.metaData
 }
 
@@ -150,7 +153,7 @@ func (r *alertingConfigResourceFramework) UpdateState(ctx context.Context, state
 	model.IntegrationIDs = integrationIDs
 
 	// Set event filter query
-	model.EventFilterQuery = util.setStringPointerToState(config.EventFilteringConfiguration.Query)
+	model.EventFilterQuery = util.SetStringPointerToState(config.EventFilteringConfiguration.Query)
 
 	// Set event filter event types
 	eventTypes := r.convertEventTypesToHarmonizedStringRepresentation(config.EventFilteringConfiguration.EventTypes)
@@ -178,7 +181,7 @@ func (r *alertingConfigResourceFramework) UpdateState(ctx context.Context, state
 	// Convert custom payload fields to the appropriate Terraform types
 	// Using the utility function from tfutils package for better maintainability and reusability
 	// This handles both static string and dynamic custom payload field types
-	customPayloadFieldsList, payloadDiags := CustomPayloadFieldsToTerraform(ctx, config.CustomerPayloadFields)
+	customPayloadFieldsList, payloadDiags := shared.CustomPayloadFieldsToTerraform(ctx, config.CustomerPayloadFields)
 	if payloadDiags.HasError() {
 		return payloadDiags
 	}
@@ -256,7 +259,7 @@ func (r *alertingConfigResourceFramework) MapStateToDataObject(ctx context.Conte
 	var customerPayloadFields []restapi.CustomPayloadField[any]
 	if !model.CustomPayloadFields.IsNull() {
 		var payloadDiags diag.Diagnostics
-		customerPayloadFields, payloadDiags = MapCustomPayloadFieldsToAPIObject(ctx, model.CustomPayloadFields)
+		customerPayloadFields, payloadDiags = shared.MapCustomPayloadFieldsToAPIObject(ctx, model.CustomPayloadFields)
 		if payloadDiags.HasError() {
 			diags.Append(payloadDiags...)
 			return nil, diags

@@ -1,4 +1,4 @@
-package instana
+package apitoken
 
 // Description constants for API Token resource
 const (

@@ -1,4 +1,4 @@
-package instana
+package websitealertconfig
 
 const (
 	// Resource description constants

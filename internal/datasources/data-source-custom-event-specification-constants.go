@@ -39,7 +39,7 @@ const (
 	// CustomEventSpecificationErrUnexpectedConfigureType error message for unexpected configure type
 	CustomEventSpecificationErrUnexpectedConfigureType = "Unexpected Data Source Configure Type"
 	// CustomEventSpecificationErrUnexpectedConfigureTypeDetail error message detail for unexpected configure type
-	CustomEventSpecificationErrUnexpectedConfigureTypeDetail = "Expected *ProviderMeta, got: %T. Please report this issue to the provider developers."
+	CustomEventSpecificationErrUnexpectedConfigureTypeDetail = "Expected *restapi.ProviderMeta, got: %T. Please report this issue to the provider developers."
 	// CustomEventSpecificationErrReadingSpecs error message for reading custom event specifications
 	CustomEventSpecificationErrReadingSpecs = "Error reading custom event specifications"
 	// CustomEventSpecificationErrReadingSpecsDetail error message detail for reading custom event specifications
@@ -50,4 +50,41 @@ const (
 	CustomEventSpecificationErrNotFoundDetail = "No custom event specification found for name '%s' and entity type '%s'"
 )
 
-// Made with Bob
+const (
+	CustomEventSpecificationFieldName           = "name"
+	CustomEventSpecificationFieldEntityType     = "entity_type"
+	CustomEventSpecificationFieldQuery          = "query"
+	CustomEventSpecificationFieldTriggering     = "triggering"
+	CustomEventSpecificationFieldDescription    = "description"
+	CustomEventSpecificationFieldExpirationTime = "expiration_time"
+	CustomEventSpecificationFieldEnabled        = "enabled"
+
+	CustomEventSpecificationFieldRuleLogicalOperator         = "rule_logical_operator"
+	CustomEventSpecificationFieldRules                       = "rules"
+	CustomEventSpecificationFieldEntityCountRule             = "entity_count"
+	CustomEventSpecificationFieldEntityCountVerificationRule = "entity_count_verification"
+	CustomEventSpecificationFieldEntityVerificationRule      = "entity_verification"
+	CustomEventSpecificationFieldHostAvailabilityRule        = "host_availability"
+	CustomEventSpecificationFieldSystemRule                  = "system"
+	CustomEventSpecificationFieldThresholdRule               = "threshold"
+
+	CustomEventSpecificationRuleFieldSeverity                          = "severity"
+	CustomEventSpecificationRuleFieldMatchingEntityType                = "matching_entity_type"
+	CustomEventSpecificationRuleFieldMatchingOperator                  = "matching_operator"
+	CustomEventSpecificationRuleFieldMatchingEntityLabel               = "matching_entity_label"
+	CustomEventSpecificationRuleFieldOfflineDuration                   = "offline_duration"
+	CustomEventSpecificationSystemRuleFieldSystemRuleId                = "system_rule_id"
+	CustomEventSpecificationThresholdRuleFieldMetricName               = "metric_name"
+	CustomEventSpecificationThresholdRuleFieldRollup                   = "rollup"
+	CustomEventSpecificationThresholdRuleFieldWindow                   = "window"
+	CustomEventSpecificationThresholdRuleFieldAggregation              = "aggregation"
+	CustomEventSpecificationRuleFieldConditionOperator                 = "condition_operator"
+	CustomEventSpecificationRuleFieldConditionValue                    = "condition_value"
+	CustomEventSpecificationThresholdRuleFieldMetricPattern            = "metric_pattern"
+	CustomEventSpecificationThresholdRuleFieldMetricPatternPrefix      = "prefix"
+	CustomEventSpecificationThresholdRuleFieldMetricPatternPostfix     = "postfix"
+	CustomEventSpecificationThresholdRuleFieldMetricPatternPlaceholder = "placeholder"
+	CustomEventSpecificationThresholdRuleFieldMetricPatternOperator    = "operator"
+	CustomEventSpecificationHostAvailabilityRuleFieldMetricCloseAfter  = "close_after"
+	CustomEventSpecificationHostAvailabilityRuleFieldTagFilter         = "tag_filter"
+)

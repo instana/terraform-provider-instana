@@ -1,4 +1,4 @@
-package instana
+package sloalertconfig
 
 // Resource description constants
 const (

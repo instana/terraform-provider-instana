@@ -69,7 +69,7 @@ func (d *automationActionDataSourceFramework) Configure(_ context.Context, req d
 		return
 	}
 
-	providerMeta, ok := req.ProviderData.(*ProviderMeta)
+	providerMeta, ok := req.ProviderData.(*restapi.ProviderMeta)
 	if !ok {
 		resp.Diagnostics.AddError(
 			AutomationActionErrUnexpectedConfigureType,

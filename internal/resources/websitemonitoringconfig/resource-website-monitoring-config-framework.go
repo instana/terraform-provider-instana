@@ -5,6 +5,7 @@ import (
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/instana/tf_framework"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -26,9 +27,9 @@ const (
 )
 
 // NewWebsiteMonitoringConfigResourceHandleFramework creates the resource handle for Website Monitoring Configurations
-func NewWebsiteMonitoringConfigResourceHandleFramework() ResourceHandleFramework[*restapi.WebsiteMonitoringConfig] {
+func NewWebsiteMonitoringConfigResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.WebsiteMonitoringConfig] {
 	return &websiteMonitoringConfigResourceFramework{
-		metaData: ResourceMetaDataFramework{
+		metaData: resourcehandle.ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaWebsiteMonitoringConfigFramework,
 			Schema: schema.Schema{
 				Description: WebsiteMonitoringConfigDescResource,
@@ -56,10 +57,10 @@ func NewWebsiteMonitoringConfigResourceHandleFramework() ResourceHandleFramework
 }
 
 type websiteMonitoringConfigResourceFramework struct {
-	metaData ResourceMetaDataFramework
+	metaData resourcehandle.ResourceMetaDataFramework
 }
 
-func (r *websiteMonitoringConfigResourceFramework) MetaData() *ResourceMetaDataFramework {
+func (r *websiteMonitoringConfigResourceFramework) MetaData() *resourcehandle.ResourceMetaDataFramework {
 	return &r.metaData
 }
 

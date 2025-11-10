@@ -6,6 +6,8 @@ import (
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/instana/tagfilter"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
+	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -134,9 +136,9 @@ const ResourceInstanaSloConfigFramework = "slo_config"
 const SloConfigFieldRbacTags = "rbac_tags"
 
 // NewSloConfigResourceHandleFramework creates the resource handle for SLO Config
-func NewSloConfigResourceHandleFramework() ResourceHandleFramework[*restapi.SloConfig] {
+func NewSloConfigResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.SloConfig] {
 	return &sloConfigResourceFramework{
-		metaData: ResourceMetaDataFramework{
+		metaData: resourcehandle.ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaSloConfigFramework,
 			Schema: schema.Schema{
 				Description: SloConfigDescResource,
@@ -376,10 +378,10 @@ func NewSloConfigResourceHandleFramework() ResourceHandleFramework[*restapi.SloC
 }
 
 type sloConfigResourceFramework struct {
-	metaData ResourceMetaDataFramework
+	metaData resourcehandle.ResourceMetaDataFramework
 }
 
-func (r *sloConfigResourceFramework) MetaData() *ResourceMetaDataFramework {
+func (r *sloConfigResourceFramework) MetaData() *resourcehandle.ResourceMetaDataFramework {
 	return &r.metaData
 }
 
@@ -389,7 +391,7 @@ func (r *sloConfigResourceFramework) GetRestResource(api restapi.InstanaAPI) res
 
 func (r *sloConfigResourceFramework) SetComputedFields(ctx context.Context, plan *tfsdk.Plan) diag.Diagnostics {
 	var diags diag.Diagnostics
-	diags.Append(plan.SetAttribute(ctx, path.Root("id"), types.StringValue(SloConfigFromTerraformIdPrefix+RandomID()))...)
+	diags.Append(plan.SetAttribute(ctx, path.Root("id"), types.StringValue(SloConfigFromTerraformIdPrefix+util.RandomID()))...)
 	return diags
 }
 
@@ -553,9 +555,9 @@ func (r *sloConfigResourceFramework) mapEntityFromState(ctx context.Context, ent
 			return restapi.SloEntity{}, diags
 		}
 		applicationIdStr := applicationModel.ApplicationID.ValueString()
-		serviceID := setStringPointerFromState(applicationModel.ServiceID)
-		endpointID := setStringPointerFromState(applicationModel.EndpointID)
-		boundaryScope := setStringPointerFromState(applicationModel.BoundaryScope)
+		serviceID := util.SetStringPointerFromState(applicationModel.ServiceID)
+		endpointID := util.SetStringPointerFromState(applicationModel.EndpointID)
+		boundaryScope := util.SetStringPointerFromState(applicationModel.BoundaryScope)
 		includeInternal := applicationModel.IncludeInternal.ValueBool()
 		includeSynthetic := applicationModel.IncludeSynthetic.ValueBool()
 
@@ -592,8 +594,8 @@ func (r *sloConfigResourceFramework) mapEntityFromState(ctx context.Context, ent
 			return restapi.SloEntity{}, diags
 		}
 
-		websiteIdStr := setStringPointerFromState(websiteModel.WebsiteID)
-		beaconTypeStr := setStringPointerFromState(websiteModel.BeaconType)
+		websiteIdStr := util.SetStringPointerFromState(websiteModel.WebsiteID)
+		beaconTypeStr := util.SetStringPointerFromState(websiteModel.BeaconType)
 
 		websiteEntityObj := restapi.SloEntity{
 			Type:       SloConfigWebsiteEntity,
@@ -953,12 +955,12 @@ func (r *sloConfigResourceFramework) mapApplicationEntityToState(ctx context.Con
 
 	// Create application entity object
 	appEntityObj := ApplicationEntityModel{
-		ApplicationID:    util.setStringPointerToState(entity.ApplicationID),
-		BoundaryScope:    util.setStringPointerToState(entity.BoundaryScope),
-		IncludeInternal:  setBoolPointerToState(entity.IncludeInternal),
-		IncludeSynthetic: setBoolPointerToState(entity.IncludeSynthetic),
-		ServiceID:        util.setStringPointerToState(entity.ServiceID),
-		EndpointID:       util.setStringPointerToState(entity.EndpointID),
+		ApplicationID:    util.SetStringPointerToState(entity.ApplicationID),
+		BoundaryScope:    util.SetStringPointerToState(entity.BoundaryScope),
+		IncludeInternal:  util.SetBoolPointerToState(entity.IncludeInternal),
+		IncludeSynthetic: util.SetBoolPointerToState(entity.IncludeSynthetic),
+		ServiceID:        util.SetStringPointerToState(entity.ServiceID),
+		EndpointID:       util.SetStringPointerToState(entity.EndpointID),
 	}
 
 	// Handle filter expression
@@ -971,7 +973,7 @@ func (r *sloConfigResourceFramework) mapApplicationEntityToState(ctx context.Con
 			)
 			return ApplicationEntityModel{}, diags
 		}
-		appEntityObj.FilterExpression = util.setStringPointerToState(filterExpression)
+		appEntityObj.FilterExpression = util.SetStringPointerToState(filterExpression)
 
 	}
 
@@ -983,8 +985,8 @@ func (r *sloConfigResourceFramework) mapWebsiteEntityToState(ctx context.Context
 
 	// Create website entity object
 	websiteEntityObj := WebsiteEntityModel{
-		WebsiteID:  util.setStringPointerToState(entity.WebsiteId),
-		BeaconType: util.setStringPointerToState(entity.BeaconType),
+		WebsiteID:  util.SetStringPointerToState(entity.WebsiteId),
+		BeaconType: util.SetStringPointerToState(entity.BeaconType),
 	}
 	// Handle filter expression
 	if entity.FilterExpression != nil {
@@ -996,7 +998,7 @@ func (r *sloConfigResourceFramework) mapWebsiteEntityToState(ctx context.Context
 			)
 			return WebsiteEntityModel{}, diags
 		}
-		websiteEntityObj.FilterExpression = util.setStringPointerToState(filterExpression)
+		websiteEntityObj.FilterExpression = util.SetStringPointerToState(filterExpression)
 
 	}
 
@@ -1028,7 +1030,7 @@ func (r *sloConfigResourceFramework) mapSyntheticEntityToState(ctx context.Conte
 			)
 			return SyntheticEntityModel{}, diags
 		}
-		syntheticEntityObj.FilterExpression = util.setStringPointerToState(filterExpression)
+		syntheticEntityObj.FilterExpression = util.SetStringPointerToState(filterExpression)
 
 	}
 
@@ -1054,7 +1056,7 @@ func (r *sloConfigResourceFramework) mapIndicatorToState(ctx context.Context, ap
 	case indicator.Type == SloConfigAPIIndicatorMeasurementTypeTimeBased && indicator.Blueprint == SloConfigAPIIndicatorBlueprintLatency:
 		model := &TimeBasedLatencyIndicatorModel{
 			Threshold:   types.Float64Value(indicator.Threshold),
-			Aggregation: util.setStringPointerToState(indicator.Aggregation),
+			Aggregation: util.SetStringPointerToState(indicator.Aggregation),
 		}
 		indicatorModel.TimeBasedLatencyIndicatorModel = model
 
@@ -1067,7 +1069,7 @@ func (r *sloConfigResourceFramework) mapIndicatorToState(ctx context.Context, ap
 	case indicator.Type == SloConfigAPIIndicatorMeasurementTypeTimeBased && indicator.Blueprint == SloConfigAPIIndicatorBlueprintAvailability:
 		model := &TimeBasedAvailabilityIndicatorModel{
 			Threshold:   types.Float64Value(indicator.Threshold),
-			Aggregation: util.setStringPointerToState(indicator.Aggregation),
+			Aggregation: util.SetStringPointerToState(indicator.Aggregation),
 		}
 		indicatorModel.TimeBasedAvailabilityIndicatorModel = model
 
@@ -1077,9 +1079,9 @@ func (r *sloConfigResourceFramework) mapIndicatorToState(ctx context.Context, ap
 
 	case indicator.Blueprint == SloConfigAPIIndicatorBlueprintTraffic:
 		model := &TrafficIndicatorModel{
-			TrafficType: util.setStringPointerToState(indicator.TrafficType),
+			TrafficType: util.SetStringPointerToState(indicator.TrafficType),
 			Threshold:   types.Float64Value(indicator.Threshold),
-			Aggregation: util.setStringPointerToState(indicator.Aggregation),
+			Aggregation: util.SetStringPointerToState(indicator.Aggregation),
 		}
 		indicatorModel.TrafficIndicatorModel = model
 
@@ -1095,7 +1097,7 @@ func (r *sloConfigResourceFramework) mapIndicatorToState(ctx context.Context, ap
 				)
 				return IndicatorModel{}, diags
 			}
-			model.GoodEventFilterExpression = util.setStringPointerToState(goodEventFilterExpression)
+			model.GoodEventFilterExpression = util.SetStringPointerToState(goodEventFilterExpression)
 
 		}
 
@@ -1108,7 +1110,7 @@ func (r *sloConfigResourceFramework) mapIndicatorToState(ctx context.Context, ap
 				)
 				return IndicatorModel{}, diags
 			}
-			model.BadEventFilterExpression = util.setStringPointerToState(badEventFilterExpression)
+			model.BadEventFilterExpression = util.SetStringPointerToState(badEventFilterExpression)
 
 		}
 

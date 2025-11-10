@@ -67,7 +67,7 @@ func (d *syntheticLocationDataSourceFramework) Configure(_ context.Context, req 
 		return
 	}
 
-	providerMeta, ok := req.ProviderData.(*ProviderMeta)
+	providerMeta, ok := req.ProviderData.(*restapi.ProviderMeta)
 	if !ok {
 		resp.Diagnostics.AddError(
 			SyntheticLocationErrUnexpectedConfigureType,

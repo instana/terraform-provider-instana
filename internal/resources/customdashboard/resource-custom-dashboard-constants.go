@@ -1,4 +1,4 @@
-package instana
+package customdashboard
 
 // Resource description
 const CustomDashboardDescResource = "This resource manages custom dashboards in Instana."

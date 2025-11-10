@@ -5,7 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-var supportedTriggerTypes = []string{
+var SupportedTriggerTypes = []string{
 	"customEvent",
 	"builtinEvent",
 	"applicationSmartAlert",
@@ -18,7 +18,7 @@ var supportedTriggerTypes = []string{
 	"sloSmartAlert",
 }
 
-var supportedPolicyTypes = []string{
+var SupportedPolicyTypes = []string{
 	"manual",
 	"automatic",
 }
@@ -58,7 +58,7 @@ var (
 					Type:         schema.TypeString,
 					Required:     true,
 					Description:  "Instana event or Smart Alert type.",
-					ValidateFunc: validation.StringInSlice(supportedTriggerTypes, false),
+					ValidateFunc: validation.StringInSlice(SupportedTriggerTypes, false),
 				},
 			},
 		},
@@ -118,7 +118,7 @@ var (
 					Type:         schema.TypeString,
 					Required:     true,
 					Description:  "The policy type.",
-					ValidateFunc: validation.StringInSlice(supportedPolicyTypes, false),
+					ValidateFunc: validation.StringInSlice(SupportedPolicyTypes, false),
 				},
 				AutomationPolicyFieldCondition: automationPolicyConditionSchema,
 				AutomationPolicyFieldAction:    automationPolicyActionSchema,

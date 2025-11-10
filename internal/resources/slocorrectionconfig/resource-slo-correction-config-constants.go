@@ -1,4 +1,4 @@
-package shared
+package slocorrectionconfig
 
 const (
 	// Resource description constants

@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
+	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -240,9 +242,9 @@ type APITokenModel struct {
 }
 
 // NewAPITokenResourceHandleFramework creates the resource handle for API Tokens
-func NewAPITokenResourceHandleFramework() ResourceHandleFramework[*restapi.APIToken] {
+func NewAPITokenResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.APIToken] {
 	return &apiTokenResourceFramework{
-		metaData: ResourceMetaDataFramework{
+		metaData: resourcehandle.ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaAPITokenFramework,
 			Schema: schema.Schema{
 				Description: APITokenDescResource,
@@ -788,10 +790,10 @@ func NewAPITokenResourceHandleFramework() ResourceHandleFramework[*restapi.APITo
 }
 
 type apiTokenResourceFramework struct {
-	metaData ResourceMetaDataFramework
+	metaData resourcehandle.ResourceMetaDataFramework
 }
 
-func (r *apiTokenResourceFramework) MetaData() *ResourceMetaDataFramework {
+func (r *apiTokenResourceFramework) MetaData() *resourcehandle.ResourceMetaDataFramework {
 	return &r.metaData
 }
 
@@ -801,8 +803,8 @@ func (r *apiTokenResourceFramework) GetRestResource(api restapi.InstanaAPI) rest
 
 func (r *apiTokenResourceFramework) SetComputedFields(ctx context.Context, plan *tfsdk.Plan) diag.Diagnostics {
 	var diags diag.Diagnostics
-	diags.Append(plan.SetAttribute(ctx, path.Root("internal_id"), types.StringValue(RandomID()))...)
-	diags.Append(plan.SetAttribute(ctx, path.Root("access_granting_token"), types.StringValue(RandomID()))...)
+	diags.Append(plan.SetAttribute(ctx, path.Root("internal_id"), types.StringValue(util.RandomID()))...)
+	diags.Append(plan.SetAttribute(ctx, path.Root("access_granting_token"), types.StringValue(util.RandomID()))...)
 	return diags
 }
 

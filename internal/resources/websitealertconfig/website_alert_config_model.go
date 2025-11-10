@@ -1,4 +1,4 @@
-package shared
+package websitealertconfig
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"

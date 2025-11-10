@@ -60,6 +60,9 @@ type WebhookBasedModel struct {
 	WebhookURL types.String `tfsdk:"webhook_url"`
 }
 
+const ResourceFieldThresholdRuleWarningSeverity = "warning"
+const ResourceFieldThresholdRuleCriticalSeverity = "critical"
+
 type ServiceNowApplicationModel struct {
 	ServiceNowURL                  types.String `tfsdk:"service_now_url"`
 	Username                       types.String `tfsdk:"username"`
@@ -199,20 +202,20 @@ func MapAlertChannelsFromState(ctx context.Context, alertChannelsList types.List
 	return alertChannelsMap, diags
 }
 
-func MapWebhookBasedChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*alertingchannel.WebhookBasedModel, diag.Diagnostics) {
+func MapWebhookBasedChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*WebhookBasedModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Create and return webhook-based model
-	return &alertingchannel.WebhookBasedModel{
+	return &WebhookBasedModel{
 		WebhookURL: util.SetStringPointerToState(channel.WebhookURL),
 	}, diags
 }
 
-func MapServiceNowChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*alertingchannel.ServiceNowModel, diag.Diagnostics) {
+func MapServiceNowChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*ServiceNowModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Create ServiceNow model
-	model := &alertingchannel.ServiceNowModel{
+	model := &ServiceNowModel{
 		ServiceNowURL: util.SetStringPointerToState(channel.ServiceNowURL),
 		Username:      util.SetStringPointerToState(channel.Username),
 	}
@@ -234,11 +237,11 @@ func MapServiceNowChannelToState(ctx context.Context, channel *restapi.AlertingC
 	return model, diags
 }
 
-func MapServiceNowApplicationChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*alertingchannel.ServiceNowApplicationModel, diag.Diagnostics) {
+func MapServiceNowApplicationChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*ServiceNowApplicationModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Create ServiceNow Enhanced model with required fields
-	model := &alertingchannel.ServiceNowApplicationModel{
+	model := &ServiceNowApplicationModel{
 		ServiceNowURL: util.SetStringPointerToState(channel.ServiceNowURL),
 		Username:      util.SetStringPointerToState(channel.Username),
 		Tenant:        util.SetStringPointerToState(channel.Tenant),
@@ -306,11 +309,11 @@ func MapServiceNowApplicationChannelToState(ctx context.Context, channel *restap
 	return model, diags
 }
 
-func MapPrometheusWebhookChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*alertingchannel.PrometheusWebhookModel, diag.Diagnostics) {
+func MapPrometheusWebhookChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*PrometheusWebhookModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Create Prometheus Webhook model
-	model := &alertingchannel.PrometheusWebhookModel{
+	model := &PrometheusWebhookModel{
 		WebhookURL: util.SetStringPointerToState(channel.WebhookURL),
 	}
 
@@ -324,11 +327,11 @@ func MapPrometheusWebhookChannelToState(ctx context.Context, channel *restapi.Al
 	return model, diags
 }
 
-func MapWatsonAIOpsWebhookChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*alertingchannel.WatsonAIOpsWebhookModel, diag.Diagnostics) {
+func MapWatsonAIOpsWebhookChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*WatsonAIOpsWebhookModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Create Watson AIOps Webhook model
-	model := &alertingchannel.WatsonAIOpsWebhookModel{
+	model := &WatsonAIOpsWebhookModel{
 		WebhookURL: util.SetStringPointerToState(channel.WebhookURL),
 	}
 
@@ -346,7 +349,7 @@ func MapWatsonAIOpsWebhookChannelToState(ctx context.Context, channel *restapi.A
 
 	return model, diags
 }
-func MapEmailChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*alertingchannel.EmailModel, diag.Diagnostics) {
+func MapEmailChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*EmailModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Create email set
@@ -357,12 +360,12 @@ func MapEmailChannelToState(ctx context.Context, channel *restapi.AlertingChanne
 	}
 
 	// Create and return email model
-	return &alertingchannel.EmailModel{
+	return &EmailModel{
 		Emails: emailsSet,
 	}, diags
 }
 
-func MapOpsGenieChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*alertingchannel.OpsGenieModel, diag.Diagnostics) {
+func MapOpsGenieChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*OpsGenieModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Convert comma-separated tags to slice
@@ -376,27 +379,27 @@ func MapOpsGenieChannelToState(ctx context.Context, channel *restapi.AlertingCha
 	}
 
 	// Create and return OpsGenie model
-	return &alertingchannel.OpsGenieModel{
+	return &OpsGenieModel{
 		APIKey: util.SetStringPointerToState(channel.APIKey),
 		Region: util.SetStringPointerToState(channel.Region),
 		Tags:   tagsList,
 	}, diags
 }
 
-func MapPagerDutyChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*alertingchannel.PagerDutyModel, diag.Diagnostics) {
+func MapPagerDutyChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*PagerDutyModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Create and return PagerDuty model
-	return &alertingchannel.PagerDutyModel{
+	return &PagerDutyModel{
 		ServiceIntegrationKey: util.SetStringPointerToState(channel.ServiceIntegrationKey),
 	}, diags
 }
 
-func MapSlackChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*alertingchannel.SlackModel, diag.Diagnostics) {
+func MapSlackChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*SlackModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Create Slack model
-	model := &alertingchannel.SlackModel{
+	model := &SlackModel{
 		WebhookURL: util.SetStringPointerToState(channel.WebhookURL),
 	}
 
@@ -416,27 +419,27 @@ func MapSlackChannelToState(ctx context.Context, channel *restapi.AlertingChanne
 	return model, diags
 }
 
-func MapSplunkChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*alertingchannel.SplunkModel, diag.Diagnostics) {
+func MapSplunkChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*SplunkModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Create and return Splunk model
-	return &alertingchannel.SplunkModel{
+	return &SplunkModel{
 		URL:   util.SetStringPointerToState(channel.URL),
 		Token: util.SetStringPointerToState(channel.Token),
 	}, diags
 }
 
-func MapVictorOpsChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*alertingchannel.VictorOpsModel, diag.Diagnostics) {
+func MapVictorOpsChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*VictorOpsModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Create and return VictorOps model
-	return &alertingchannel.VictorOpsModel{
+	return &VictorOpsModel{
 		APIKey:     util.SetStringPointerToState(channel.APIKey),
 		RoutingKey: util.SetStringPointerToState(channel.RoutingKey),
 	}, diags
 }
 
-func MapWebhookChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*alertingchannel.WebhookModel, diag.Diagnostics) {
+func MapWebhookChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*WebhookModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Create webhook URLs set
@@ -455,7 +458,7 @@ func MapWebhookChannelToState(ctx context.Context, channel *restapi.AlertingChan
 	}
 
 	// Create and return Webhook model
-	return &alertingchannel.WebhookModel{
+	return &WebhookModel{
 		WebhookURLs: webhookURLsSet,
 		HTTPHeaders: headersMap,
 	}, diags

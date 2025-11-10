@@ -7,6 +7,8 @@ import (
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/instana/tf_framework"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
+	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -25,9 +27,9 @@ import (
 const ResourceInstanaSyntheticTestFramework = "synthetic_test"
 
 // NewSyntheticTestResourceHandleFramework creates the resource handle for Synthetic Tests
-func NewSyntheticTestResourceHandleFramework() ResourceHandleFramework[*restapi.SyntheticTest] {
+func NewSyntheticTestResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.SyntheticTest] {
 	return &syntheticTestResourceFramework{
-		metaData: ResourceMetaDataFramework{
+		metaData: resourcehandle.ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaSyntheticTestFramework,
 			Schema: schema.Schema{
 				Description: SyntheticTestDescResource,
@@ -267,10 +269,10 @@ func (v int64Validator) ValidateInt64(ctx context.Context, req validator.Int64Re
 var urlRegex = `^https?://[^\s/$.?#].[^\s]*$`
 
 type syntheticTestResourceFramework struct {
-	metaData ResourceMetaDataFramework
+	metaData resourcehandle.ResourceMetaDataFramework
 }
 
-func (r *syntheticTestResourceFramework) MetaData() *ResourceMetaDataFramework {
+func (r *syntheticTestResourceFramework) MetaData() *resourcehandle.ResourceMetaDataFramework {
 	return &r.metaData
 }
 
@@ -457,14 +459,14 @@ func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state 
 	}
 
 	// Map description
-	model.Description = util.setStringPointerToState(apiObject.Description)
+	model.Description = util.SetStringPointerToState(apiObject.Description)
 
 	// Map application ID
-	model.ApplicationID = util.setStringPointerToState(apiObject.ApplicationID)
+	model.ApplicationID = util.SetStringPointerToState(apiObject.ApplicationID)
 
 	// Map test frequency
 	if apiObject.TestFrequency != nil {
-		model.TestFrequency = setInt64PointerToState(apiObject.TestFrequency)
+		model.TestFrequency = util.SetInt64PointerToState(apiObject.TestFrequency)
 	} else {
 		model.TestFrequency = types.Int64Null()
 	}
@@ -500,15 +502,15 @@ func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state 
 		}
 
 		// Map optional fields
-		httpActionModel.Timeout = util.setStringPointerToState(apiObject.Configuration.Timeout)
+		httpActionModel.Timeout = util.SetStringPointerToState(apiObject.Configuration.Timeout)
 
-		httpActionModel.URL = util.setStringPointerToState(apiObject.Configuration.URL)
+		httpActionModel.URL = util.SetStringPointerToState(apiObject.Configuration.URL)
 
-		httpActionModel.Operation = util.setStringPointerToState(apiObject.Configuration.Operation)
+		httpActionModel.Operation = util.SetStringPointerToState(apiObject.Configuration.Operation)
 
-		httpActionModel.Body = util.setStringPointerToState(apiObject.Configuration.Body)
+		httpActionModel.Body = util.SetStringPointerToState(apiObject.Configuration.Body)
 
-		httpActionModel.ValidationString = util.setStringPointerToState(apiObject.Configuration.ValidationString)
+		httpActionModel.ValidationString = util.SetStringPointerToState(apiObject.Configuration.ValidationString)
 
 		if apiObject.Configuration.FollowRedirect != nil {
 			httpActionModel.FollowRedirect = types.BoolValue(*apiObject.Configuration.FollowRedirect)
@@ -517,9 +519,9 @@ func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state 
 			httpActionModel.AllowInsecure = types.BoolValue(*apiObject.Configuration.AllowInsecure)
 		}
 		if apiObject.Configuration.ExpectStatus != nil {
-			httpActionModel.ExpectStatus = setInt64PointerToState(apiObject.Configuration.ExpectStatus)
+			httpActionModel.ExpectStatus = util.SetInt64PointerToState(apiObject.Configuration.ExpectStatus)
 		}
-		httpActionModel.ExpectMatch = util.setStringPointerToState(apiObject.Configuration.ExpectMatch)
+		httpActionModel.ExpectMatch = util.SetStringPointerToState(apiObject.Configuration.ExpectMatch)
 
 		// Map headers
 		if apiObject.Configuration.Headers != nil && len(apiObject.Configuration.Headers) > 0 {
@@ -588,9 +590,9 @@ func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state 
 		}
 
 		// Map optional fields
-		httpScriptModel.Timeout = util.setStringPointerToState(apiObject.Configuration.Timeout)
+		httpScriptModel.Timeout = util.SetStringPointerToState(apiObject.Configuration.Timeout)
 
-		httpScriptModel.Script = util.setStringPointerToState(apiObject.Configuration.Script)
+		httpScriptModel.Script = util.SetStringPointerToState(apiObject.Configuration.Script)
 
 		// Create object for http_script
 		httpScriptObj, _ := types.ObjectValueFrom(ctx, map[string]attr.Type{

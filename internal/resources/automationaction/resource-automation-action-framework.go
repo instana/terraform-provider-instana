@@ -7,6 +7,8 @@ import (
 	"strconv"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
+	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -21,126 +23,12 @@ import (
 // ResourceInstanaAutomationActionFramework the name of the terraform-provider-instana resource to manage automation actions
 const ResourceInstanaAutomationActionFramework = "automation_action"
 
-// action types
-const ActionTypeScript = "SCRIPT"
-const ActionTypeHttp = "HTTP"
-
-// encodings
-const AsciiEncoding = "ascii"
-const Base64Encoding = "base64"
-const UTF8Encoding = "UTF8"
-
 // AutomationActionModel is now defined in resource-automation-action-mapping.go
 
-type AnsibleModel struct {
-	WorkflowId       types.String `tfsdk:"workflow_id"`
-	PlaybookId       types.String `tfsdk:"playbook_id"`
-	PlaybookFileName types.String `tfsdk:"playbook_file_name"`
-	AnsibleUrl       types.String `tfsdk:"url"`
-	HostId           types.String `tfsdk:"host_id"`
-}
-
-// ScriptModel represents the script configuration for an automation action
-type ScriptModel struct {
-	Content     types.String `tfsdk:"content"`
-	Interpreter types.String `tfsdk:"interpreter"`
-	Timeout     types.String `tfsdk:"timeout"`
-	Source      types.String `tfsdk:"source"`
-}
-
-// HttpModel represents the HTTP configuration for an automation action
-type HttpModel struct {
-	Host             types.String `tfsdk:"host"`
-	Method           types.String `tfsdk:"method"`
-	Body             types.String `tfsdk:"body"`
-	Headers          types.Map    `tfsdk:"headers"`
-	IgnoreCertErrors types.Bool   `tfsdk:"ignore_certificate_errors"`
-	Timeout          types.String `tfsdk:"timeout"`
-	Language         types.String `tfsdk:"language"`
-	ContentType      types.String `tfsdk:"content_type"`
-	Auth             *AuthModel   `tfsdk:"auth"`
-}
-
-// AuthModel represents the authentication configuration for HTTP requests
-type AuthModel struct {
-	BasicAuth *BasicAuthModel   `tfsdk:"basic_auth"`
-	Token     *BearerTokenModel `tfsdk:"token"`
-	ApiKey    *ApiKeyModel      `tfsdk:"api_key"`
-}
-
-// BasicAuthModel represents the basic authentication configuration
-type BasicAuthModel struct {
-	UserName types.String `tfsdk:"username"`
-	Password types.String `tfsdk:"password"`
-}
-
-// ApiKeyModel represents the API key authentication configuration
-type ApiKeyModel struct {
-	Key         types.String `tfsdk:"key"`
-	Value       types.String `tfsdk:"value"`
-	KeyLocation types.String `tfsdk:"key_location"`
-}
-
-// BearerTokenModel represents the bearer token authentication configuration
-type BearerTokenModel struct {
-	BearerToken types.String `tfsdk:"bearer_token"`
-}
-
-type ManualModel struct {
-	Content types.String `tfsdk:"content"`
-}
-
-type JiraModel struct {
-	Project     types.String `tfsdk:"project"`
-	Operation   types.String `tfsdk:"operation"`
-	IssueType   types.String `tfsdk:"issue_type"`
-	Description types.String `tfsdk:"description"`
-	Assignee    types.String `tfsdk:"assignee"`
-	Title       types.String `tfsdk:"title"`
-	Labels      types.String `tfsdk:"labels"`
-	Comment     types.String `tfsdk:"comment"`
-}
-
-type GitHubModel struct {
-	Owner     types.String `tfsdk:"owner"`
-	Repo      types.String `tfsdk:"repo"`
-	Title     types.String `tfsdk:"title"`
-	Body      types.String `tfsdk:"body"`
-	Operation types.String `tfsdk:"operation"`
-	Assignees types.String `tfsdk:"assignees"`
-	Labels    types.String `tfsdk:"labels"`
-	Comment   types.String `tfsdk:"comment"`
-}
-
-type DocLinkModel struct {
-	Url types.String `tfsdk:"url"`
-}
-
-type GitLabModel struct {
-	ProjectId   types.String `tfsdk:"project_id"`
-	Title       types.String `tfsdk:"title"`
-	Description types.String `tfsdk:"description"`
-	Operation   types.String `tfsdk:"operation"`
-	Labels      types.String `tfsdk:"labels"`
-	IssueType   types.String `tfsdk:"issue_type"`
-	Comment     types.String `tfsdk:"comment"`
-}
-
-// ParameterModel represents an input parameter for an automation action
-type ParameterModel struct {
-	Name        types.String `tfsdk:"name"`
-	Description types.String `tfsdk:"description"`
-	Label       types.String `tfsdk:"label"`
-	Required    types.Bool   `tfsdk:"required"`
-	Hidden      types.Bool   `tfsdk:"hidden"`
-	Type        types.String `tfsdk:"type"`
-	Value       types.String `tfsdk:"value"`
-}
-
 // NewAutomationActionResourceHandleFramework creates the resource handle for Automation Actions
-func NewAutomationActionResourceHandleFramework() ResourceHandleFramework[*restapi.AutomationAction] {
+func NewAutomationActionResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.AutomationAction] {
 	return &automationActionResourceFramework{
-		metaData: ResourceMetaDataFramework{
+		metaData: resourcehandle.ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaAutomationActionFramework,
 			Schema: schema.Schema{
 				Description: AutomationActionDescResource,
@@ -480,10 +368,10 @@ func NewAutomationActionResourceHandleFramework() ResourceHandleFramework[*resta
 }
 
 type automationActionResourceFramework struct {
-	metaData ResourceMetaDataFramework
+	metaData resourcehandle.ResourceMetaDataFramework
 }
 
-func (r *automationActionResourceFramework) MetaData() *ResourceMetaDataFramework {
+func (r *automationActionResourceFramework) MetaData() *resourcehandle.ResourceMetaDataFramework {
 	return &r.metaData
 }
 
@@ -499,7 +387,7 @@ func (r *automationActionResourceFramework) UpdateState(ctx context.Context, sta
 	var diags diag.Diagnostics
 
 	// Create a model and populate it with values from the API response
-	model := AutomationActionModel{
+	model := shared.AutomationActionModel{
 		ID:          types.StringValue(automationAction.ID),
 		Name:        types.StringValue(automationAction.Name),
 		Description: types.StringValue(automationAction.Description),
@@ -550,7 +438,7 @@ func (r *automationActionResourceFramework) mapActionTypeFieldsToState(ctx conte
 	var diags diag.Diagnostics
 
 	// Use the common mapping function
-	MapActionTypeFieldsToState(ctx, action, model)
+	shared.MapActionTypeFieldsToState(ctx, action, model)
 
 	return diags
 }
@@ -673,7 +561,7 @@ func (r *automationActionResourceFramework) getBoolFieldValueOrDefault(action *r
 func (r *automationActionResourceFramework) mapScriptFieldsToState(ctx context.Context, action *restapi.AutomationAction) (ScriptModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	scriptModel := ScriptModel{
+	scriptModel := shared.ScriptModel{
 		Content: types.StringValue(r.getFieldValue(action, restapi.ScriptSshFieldName)),
 	}
 
@@ -705,7 +593,7 @@ func (r *automationActionResourceFramework) mapScriptFieldsToState(ctx context.C
 func (r *automationActionResourceFramework) mapHttpFieldsToState(ctx context.Context, action *restapi.AutomationAction) (HttpModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	httpModel := HttpModel{
+	httpModel := shared.HttpModel{
 		Host:   types.StringValue(r.getFieldValue(action, restapi.HttpHostFieldName)),
 		Method: types.StringValue(r.getFieldValue(action, restapi.HttpMethodFieldName)),
 	}
@@ -760,16 +648,16 @@ func (r *automationActionResourceFramework) mapHttpFieldsToState(ctx context.Con
 			case AutomationActionAuthTypeBasicAuth:
 				username, _ := authMap["username"].(string)
 				password, _ := authMap["password"].(string)
-				httpModel.Auth = &AuthModel{
-					BasicAuth: &BasicAuthModel{
+				httpModel.Auth = &shared.AuthModel{
+					shared.BasicAuth: &shared.BasicAuthModel{
 						UserName: types.StringValue(username),
 						Password: types.StringValue(password),
 					},
 				}
 			case AutomationActionAuthTypeBearerToken:
 				bearerToken, _ := authMap["bearerToken"].(string)
-				httpModel.Auth = &AuthModel{
-					Token: &BearerTokenModel{
+				httpModel.Auth = &shared.AuthModel{
+					Token: &shared.BearerTokenModel{
 						BearerToken: types.StringValue(bearerToken),
 					},
 				}
@@ -777,8 +665,8 @@ func (r *automationActionResourceFramework) mapHttpFieldsToState(ctx context.Con
 				key, _ := authMap["apiKey"].(string)
 				value, _ := authMap["apiKeyValue"].(string)
 				location, _ := authMap["apiKeyAddTo"].(string)
-				httpModel.Auth = &AuthModel{
-					ApiKey: &ApiKeyModel{
+				httpModel.Auth = &shared.AuthModel{
+					ApiKey: &shared.ApiKeyModel{
 						Key:         types.StringValue(key),
 						Value:       types.StringValue(value),
 						KeyLocation: types.StringValue(location),
@@ -828,7 +716,7 @@ func (r *automationActionResourceFramework) mapHttpFieldsToState(ctx context.Con
 func (r *automationActionResourceFramework) mapManualFieldsToState(ctx context.Context, action *restapi.AutomationAction) (ManualModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	manualModel := ManualModel{
+	manualModel := shared.ManualModel{
 		Content: types.StringValue(r.getFieldValue(action, AutomationActionFieldContent)),
 	}
 
@@ -838,7 +726,7 @@ func (r *automationActionResourceFramework) mapManualFieldsToState(ctx context.C
 func (r *automationActionResourceFramework) mapJiraFieldsToState(ctx context.Context, action *restapi.AutomationAction) (JiraModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	jiraModel := JiraModel{}
+	jiraModel := shared.JiraModel{}
 
 	if project := r.getFieldValue(action, AutomationActionFieldProject); project != "" {
 		jiraModel.Project = types.StringValue(project)
@@ -894,7 +782,7 @@ func (r *automationActionResourceFramework) mapJiraFieldsToState(ctx context.Con
 func (r *automationActionResourceFramework) mapGitHubFieldsToState(ctx context.Context, action *restapi.AutomationAction) (GitHubModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	githubModel := GitHubModel{}
+	githubModel := shared.GitHubModel{}
 
 	if owner := r.getFieldValue(action, AutomationActionFieldOwner); owner != "" {
 		githubModel.Owner = types.StringValue(owner)
@@ -950,7 +838,7 @@ func (r *automationActionResourceFramework) mapGitHubFieldsToState(ctx context.C
 func (r *automationActionResourceFramework) mapDocLinkFieldsToState(ctx context.Context, action *restapi.AutomationAction) (DocLinkModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	docLinkModel := DocLinkModel{
+	docLinkModel := shared.DocLinkModel{
 		Url: types.StringValue(r.getFieldValue(action, AutomationActionFieldUrl)),
 	}
 
@@ -960,7 +848,7 @@ func (r *automationActionResourceFramework) mapDocLinkFieldsToState(ctx context.
 func (r *automationActionResourceFramework) mapGitLabFieldsToState(ctx context.Context, action *restapi.AutomationAction) (GitLabModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	gitlabModel := GitLabModel{}
+	gitlabModel := shared.GitLabModel{}
 
 	if projectId := r.getFieldValue(action, AutomationActionAPIFieldProjectId); projectId != "" {
 		gitlabModel.ProjectId = types.StringValue(projectId)
@@ -1010,7 +898,7 @@ func (r *automationActionResourceFramework) mapGitLabFieldsToState(ctx context.C
 func (r *automationActionResourceFramework) mapAnsibleFieldsToState(ctx context.Context, action *restapi.AutomationAction) (AnsibleModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	ansibleModel := AnsibleModel{}
+	ansibleModel := shared.AnsibleModel{}
 
 	if workflowId := r.getFieldValue(action, AutomationActionAPIFieldWorkflowId); workflowId != "" {
 		ansibleModel.WorkflowId = types.StringValue(workflowId)
@@ -1047,7 +935,7 @@ func (r *automationActionResourceFramework) mapAnsibleFieldsToState(ctx context.
 
 func (r *automationActionResourceFramework) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.AutomationAction, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	var model AutomationActionModel
+	var model shared.AutomationActionModel
 
 	// Get current state from plan or state
 	if plan != nil {
@@ -1480,7 +1368,7 @@ func (r *automationActionResourceFramework) mapInputParametersFromState(ctx cont
 		return parameters, diags
 	}
 
-	var parameterModels []ParameterModel
+	var parameterModels []shared.ParameterModel
 	diags.Append(model.InputParameter.ElementsAs(ctx, &parameterModels, false)...)
 	if diags.HasError() {
 		return nil, diags
@@ -1502,7 +1390,7 @@ func (r *automationActionResourceFramework) mapInputParametersFromState(ctx cont
 	return parameters, diags
 }
 
-func (r *automationActionResourceFramework) mapTagsFromState(ctx context.Context, model AutomationActionModel) (interface{}, diag.Diagnostics) {
+func (r *automationActionResourceFramework) mapTagsFromState(ctx context.Context, model shared.AutomationActionModel) (interface{}, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if model.Tags.IsNull() {

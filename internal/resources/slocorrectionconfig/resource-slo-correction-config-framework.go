@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -56,9 +57,9 @@ type SchedulingModel struct {
 }
 
 // NewSloCorrectionConfigResourceHandleFramework creates the resource handle for SLO Correction Config
-func NewSloCorrectionConfigResourceHandleFramework() ResourceHandleFramework[*restapi.SloCorrectionConfig] {
+func NewSloCorrectionConfigResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.SloCorrectionConfig] {
 	return &sloCorrectionConfigResourceFramework{
-		metaData: ResourceMetaDataFramework{
+		metaData: resourcehandle.ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaSloCorrectionConfigFramework,
 			Schema: schema.Schema{
 				Description: SloCorrectionConfigDescResource,
@@ -136,10 +137,10 @@ func NewSloCorrectionConfigResourceHandleFramework() ResourceHandleFramework[*re
 }
 
 type sloCorrectionConfigResourceFramework struct {
-	metaData ResourceMetaDataFramework
+	metaData resourcehandle.ResourceMetaDataFramework
 }
 
-func (r *sloCorrectionConfigResourceFramework) MetaData() *ResourceMetaDataFramework {
+func (r *sloCorrectionConfigResourceFramework) MetaData() *resourcehandle.ResourceMetaDataFramework {
 	return &r.metaData
 }
 

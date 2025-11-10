@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
-	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -19,20 +18,134 @@ import (
 
 // AutomationActionModel represents the data model for an automation action
 type AutomationActionModel struct {
-	ID             types.String         `tfsdk:"id"`
-	Name           types.String         `tfsdk:"name"`
-	Description    types.String         `tfsdk:"description"`
-	Tags           types.List           `tfsdk:"tags"`
-	Script         *shared.ScriptModel  `tfsdk:"script"`
-	Http           *shared.HttpModel    `tfsdk:"http"`
-	Manual         *shared.ManualModel  `tfsdk:"manual"`
-	Jira           *shared.JiraModel    `tfsdk:"jira"`
-	GitHub         *shared.GitHubModel  `tfsdk:"github"`
-	DocLink        *shared.DocLinkModel `tfsdk:"doc_link"`
-	GitLab         *shared.GitLabModel  `tfsdk:"gitlab"`
-	Ansible        *shared.AnsibleModel `tfsdk:"ansible"`
-	InputParameter types.List           `tfsdk:"input_parameter"`
+	ID             types.String  `tfsdk:"id"`
+	Name           types.String  `tfsdk:"name"`
+	Description    types.String  `tfsdk:"description"`
+	Tags           types.List    `tfsdk:"tags"`
+	Script         *ScriptModel  `tfsdk:"script"`
+	Http           *HttpModel    `tfsdk:"http"`
+	Manual         *ManualModel  `tfsdk:"manual"`
+	Jira           *JiraModel    `tfsdk:"jira"`
+	GitHub         *GitHubModel  `tfsdk:"github"`
+	DocLink        *DocLinkModel `tfsdk:"doc_link"`
+	GitLab         *GitLabModel  `tfsdk:"gitlab"`
+	Ansible        *AnsibleModel `tfsdk:"ansible"`
+	InputParameter types.List    `tfsdk:"input_parameter"`
 }
+
+type AnsibleModel struct {
+	WorkflowId       types.String `tfsdk:"workflow_id"`
+	PlaybookId       types.String `tfsdk:"playbook_id"`
+	PlaybookFileName types.String `tfsdk:"playbook_file_name"`
+	AnsibleUrl       types.String `tfsdk:"url"`
+	HostId           types.String `tfsdk:"host_id"`
+}
+
+// ScriptModel represents the script configuration for an automation action
+type ScriptModel struct {
+	Content     types.String `tfsdk:"content"`
+	Interpreter types.String `tfsdk:"interpreter"`
+	Timeout     types.String `tfsdk:"timeout"`
+	Source      types.String `tfsdk:"source"`
+}
+
+// HttpModel represents the HTTP configuration for an automation action
+type HttpModel struct {
+	Host             types.String `tfsdk:"host"`
+	Method           types.String `tfsdk:"method"`
+	Body             types.String `tfsdk:"body"`
+	Headers          types.Map    `tfsdk:"headers"`
+	IgnoreCertErrors types.Bool   `tfsdk:"ignore_certificate_errors"`
+	Timeout          types.String `tfsdk:"timeout"`
+	Language         types.String `tfsdk:"language"`
+	ContentType      types.String `tfsdk:"content_type"`
+	Auth             *AuthModel   `tfsdk:"auth"`
+}
+
+// AuthModel represents the authentication configuration for HTTP requests
+type AuthModel struct {
+	BasicAuth *BasicAuthModel   `tfsdk:"basic_auth"`
+	Token     *BearerTokenModel `tfsdk:"token"`
+	ApiKey    *ApiKeyModel      `tfsdk:"api_key"`
+}
+
+// BasicAuthModel represents the basic authentication configuration
+type BasicAuthModel struct {
+	UserName types.String `tfsdk:"username"`
+	Password types.String `tfsdk:"password"`
+}
+
+// ApiKeyModel represents the API key authentication configuration
+type ApiKeyModel struct {
+	Key         types.String `tfsdk:"key"`
+	Value       types.String `tfsdk:"value"`
+	KeyLocation types.String `tfsdk:"key_location"`
+}
+
+// BearerTokenModel represents the bearer token authentication configuration
+type BearerTokenModel struct {
+	BearerToken types.String `tfsdk:"bearer_token"`
+}
+
+type ManualModel struct {
+	Content types.String `tfsdk:"content"`
+}
+
+type JiraModel struct {
+	Project     types.String `tfsdk:"project"`
+	Operation   types.String `tfsdk:"operation"`
+	IssueType   types.String `tfsdk:"issue_type"`
+	Description types.String `tfsdk:"description"`
+	Assignee    types.String `tfsdk:"assignee"`
+	Title       types.String `tfsdk:"title"`
+	Labels      types.String `tfsdk:"labels"`
+	Comment     types.String `tfsdk:"comment"`
+}
+
+type GitHubModel struct {
+	Owner     types.String `tfsdk:"owner"`
+	Repo      types.String `tfsdk:"repo"`
+	Title     types.String `tfsdk:"title"`
+	Body      types.String `tfsdk:"body"`
+	Operation types.String `tfsdk:"operation"`
+	Assignees types.String `tfsdk:"assignees"`
+	Labels    types.String `tfsdk:"labels"`
+	Comment   types.String `tfsdk:"comment"`
+}
+
+type DocLinkModel struct {
+	Url types.String `tfsdk:"url"`
+}
+
+type GitLabModel struct {
+	ProjectId   types.String `tfsdk:"project_id"`
+	Title       types.String `tfsdk:"title"`
+	Description types.String `tfsdk:"description"`
+	Operation   types.String `tfsdk:"operation"`
+	Labels      types.String `tfsdk:"labels"`
+	IssueType   types.String `tfsdk:"issue_type"`
+	Comment     types.String `tfsdk:"comment"`
+}
+
+// ParameterModel represents an input parameter for an automation action
+type ParameterModel struct {
+	Name        types.String `tfsdk:"name"`
+	Description types.String `tfsdk:"description"`
+	Label       types.String `tfsdk:"label"`
+	Required    types.Bool   `tfsdk:"required"`
+	Hidden      types.Bool   `tfsdk:"hidden"`
+	Type        types.String `tfsdk:"type"`
+	Value       types.String `tfsdk:"value"`
+}
+
+// action types
+const ActionTypeScript = "SCRIPT"
+const ActionTypeHttp = "HTTP"
+
+// encodings
+const AsciiEncoding = "ascii"
+const Base64Encoding = "base64"
+const UTF8Encoding = "UTF8"
 
 // Common mapping functions
 

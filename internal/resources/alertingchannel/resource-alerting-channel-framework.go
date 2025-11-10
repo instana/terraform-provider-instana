@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
-	"github.com/gessnerfl/terraform-provider-instana/internal/provider"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -19,10 +19,10 @@ import (
 )
 
 // NewAlertingChannelResourceHandleFramework creates the resource handle for Alerting Channels
-func NewAlertingChannelResourceHandleFramework() provider.ResourceHandleFramework[*restapi.AlertingChannel] {
+func NewAlertingChannelResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.AlertingChannel] {
 	supportedOpsGenieRegions := []string{"EU", "US"}
 	return &alertingChannelResourceFramework{
-		metaData: provider.ResourceMetaDataFramework{
+		metaData: resourcehandle.ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaAlertingChannelFramework,
 			Schema: schema.Schema{
 				Description: "This resource manages alerting channels in Instana.",
@@ -298,10 +298,10 @@ func NewAlertingChannelResourceHandleFramework() provider.ResourceHandleFramewor
 }
 
 type alertingChannelResourceFramework struct {
-	metaData provider.ResourceMetaDataFramework
+	metaData resourcehandle.ResourceMetaDataFramework
 }
 
-func (r *alertingChannelResourceFramework) MetaData() *provider.ResourceMetaDataFramework {
+func (r *alertingChannelResourceFramework) MetaData() *resourcehandle.ResourceMetaDataFramework {
 	return &r.metaData
 }
 

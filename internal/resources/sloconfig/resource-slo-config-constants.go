@@ -1,4 +1,4 @@
-package instana
+package sloconfig
 
 // Resource description constants
 const (
