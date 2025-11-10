@@ -3,6 +3,7 @@ package instana
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
@@ -973,6 +974,7 @@ func (r *alertingChannelResourceFramework) mapServiceNowChannelFromState(ctx con
 		diags.AddError("Missing Password", "password must be specified when creating the resource")
 		return nil, diags
 	}
+	log.Printf("passwordValue: %s", serviceNow.Password.ValueString())
 
 	serviceNowURLValue := serviceNow.ServiceNowURL.ValueString()
 	usernameValue := serviceNow.Username.ValueString()
@@ -1003,6 +1005,8 @@ func (r *alertingChannelResourceFramework) mapServiceNowApplicationChannelFromSt
 		return nil, diags
 	}
 
+	log.Printf("passwordValue: %s", serviceNowApp.Password.ValueString())
+
 	serviceNowURLValue := serviceNowApp.ServiceNowURL.ValueString()
 	usernameValue := serviceNowApp.Username.ValueString()
 	passwordValue := serviceNowApp.Password.ValueString()
@@ -1026,9 +1030,16 @@ func (r *alertingChannelResourceFramework) mapServiceNowApplicationChannelFromSt
 		result.AutoCloseIncidents = &autoCloseValue
 	}
 
-	if !serviceNowApp.InstanaURL.IsNull() {
+	log.Printf("Inatna url : user %v", serviceNowApp.InstanaURL.ValueString())
+	if !serviceNowApp.InstanaURL.IsNull() && !serviceNowApp.InstanaURL.IsUnknown() {
 		instanaURLValue := serviceNowApp.InstanaURL.ValueString()
 		result.InstanaURL = &instanaURLValue
+	} else {
+		diags.AddError(
+			"InstanaURL is required",
+			"InstanaURL is required when creating the resource",
+		)
+		return result, diags
 	}
 
 	if !serviceNowApp.EnableSendInstanaNotes.IsNull() {
@@ -1061,6 +1072,8 @@ func (r *alertingChannelResourceFramework) mapServiceNowApplicationChannelFromSt
 		result.SnowStatusOnCloseEvent = &snowStatusValue
 	}
 
+	log.Printf("[DEBUG] mapServiceNowApplicationChannelFromState: %v", result)
+	log.Printf("[DEBUG] intana url: %v", *result.InstanaURL)
 	return result, nil
 }
 
