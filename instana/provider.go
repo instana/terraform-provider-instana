@@ -24,16 +24,6 @@ type ProviderMeta struct {
 	InstanaAPI restapi.InstanaAPI
 }
 
-// Provider interface implementation of hashicorp terraform provider
-func Provider() *schema.Provider {
-	return &schema.Provider{
-		Schema:               providerSchema(),
-		ResourcesMap:         providerResources(),
-		DataSourcesMap:       providerDataSources(),
-		ConfigureContextFunc: providerConfigure,
-	}
-}
-
 func providerSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		SchemaFieldAPIToken: {
