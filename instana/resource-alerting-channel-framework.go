@@ -270,7 +270,6 @@ func NewAlertingChannelResourceHandleFramework() ResourceHandleFramework[*restap
 							},
 							AlertingChannelServiceNowFieldPassword: schema.StringAttribute{
 								Optional:    true,
-								Sensitive:   true,
 								Description: "The password of the ServiceNow alerting channel",
 								PlanModifiers: []planmodifier.String{
 									// When the plan does not include the password, keep the value from state.
@@ -297,7 +296,6 @@ func NewAlertingChannelResourceHandleFramework() ResourceHandleFramework[*restap
 							},
 							AlertingChannelServiceNowFieldPassword: schema.StringAttribute{
 								Optional:    true,
-								Sensitive:   true,
 								Description: "The password of the ServiceNow Enhanced alerting channel",
 								PlanModifiers: []planmodifier.String{
 									// When the plan does not include the password, keep the value from state.
@@ -411,7 +409,7 @@ func (r *alertingChannelResourceFramework) SetComputedFields(_ context.Context, 
 func (r *alertingChannelResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, alertingChannel *restapi.AlertingChannel) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	// Get the plan model to preserve sensitive fields
+	// Get the plan model to preserve optional values in the response
 	var planModel AlertingChannelModel
 	if plan != nil {
 		diags.Append(plan.Get(ctx, &planModel)...)
@@ -495,14 +493,14 @@ func (r *alertingChannelResourceFramework) UpdateState(ctx context.Context, stat
 		}
 		model.GoogleChat = googleChatChannel
 	case restapi.ServiceNowChannelType:
-		serviceNowChannel, serviceNowDiags := r.mapServiceNowChannelToState(ctx, alertingChannel, planModel.ServiceNow)
+		serviceNowChannel, serviceNowDiags := r.mapServiceNowChannelToState(ctx, alertingChannel)
 		if serviceNowDiags.HasError() {
 			diags.Append(serviceNowDiags...)
 			return diags
 		}
 		model.ServiceNow = serviceNowChannel
 	case restapi.ServiceNowApplicationChannelType:
-		serviceNowEnhancedChannel, serviceNowEnhancedDiags := r.mapServiceNowApplicationChannelToState(ctx, alertingChannel, planModel.ServiceNowApplication)
+		serviceNowEnhancedChannel, serviceNowEnhancedDiags := r.mapServiceNowApplicationChannelToState(ctx, alertingChannel)
 		if serviceNowEnhancedDiags.HasError() {
 			diags.Append(serviceNowEnhancedDiags...)
 			return diags
@@ -679,7 +677,7 @@ func (r *alertingChannelResourceFramework) mapWebhookBasedChannelToState(ctx con
 	}, diags
 }
 
-func (r *alertingChannelResourceFramework) mapServiceNowChannelToState(ctx context.Context, channel *restapi.AlertingChannel, planModel *ServiceNowModel) (*ServiceNowModel, diag.Diagnostics) {
+func (r *alertingChannelResourceFramework) mapServiceNowChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*ServiceNowModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Create ServiceNow model
@@ -688,9 +686,9 @@ func (r *alertingChannelResourceFramework) mapServiceNowChannelToState(ctx conte
 		Username:      setStringPointerToState(channel.Username),
 	}
 
-	// Preserve password from plan since API doesn't return it
-	if planModel != nil && !planModel.Password.IsNull() {
-		model.Password = planModel.Password
+	// Use password from API response if available
+	if channel.Password != nil && *channel.Password != "" {
+		model.Password = types.StringValue(*channel.Password)
 	} else {
 		model.Password = types.StringNull()
 	}
@@ -705,7 +703,7 @@ func (r *alertingChannelResourceFramework) mapServiceNowChannelToState(ctx conte
 	return model, diags
 }
 
-func (r *alertingChannelResourceFramework) mapServiceNowApplicationChannelToState(ctx context.Context, channel *restapi.AlertingChannel, planModel *ServiceNowApplicationModel) (*ServiceNowApplicationModel, diag.Diagnostics) {
+func (r *alertingChannelResourceFramework) mapServiceNowApplicationChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*ServiceNowApplicationModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Create ServiceNow Enhanced model with required fields
@@ -716,9 +714,9 @@ func (r *alertingChannelResourceFramework) mapServiceNowApplicationChannelToStat
 		Unit:          setStringPointerToState(channel.Unit),
 	}
 
-	// Preserve password from plan since API doesn't return it
-	if planModel != nil && !planModel.Password.IsNull() {
-		model.Password = planModel.Password
+	// Use password from API response if available
+	if channel.Password != nil && *channel.Password != "" {
+		model.Password = types.StringValue(*channel.Password)
 	} else {
 		model.Password = types.StringNull()
 	}
