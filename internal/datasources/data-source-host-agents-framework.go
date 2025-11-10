@@ -150,5 +150,3 @@ func (d *hostAgentsDataSourceFramework) Read(ctx context.Context, req datasource
 	// Set the data in the response
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
-
-// Made with Bob

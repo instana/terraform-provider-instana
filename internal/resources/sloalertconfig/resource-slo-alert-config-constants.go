@@ -65,5 +65,3 @@ const (
 	// SloAlertConfigErrParsingThresholdValueMsg is the error message for parsing threshold value
 	SloAlertConfigErrParsingThresholdValueMsg = "Failed to parse threshold value: %s"
 )
-
-// Made with Bob

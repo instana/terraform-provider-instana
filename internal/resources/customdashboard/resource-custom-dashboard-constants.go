@@ -19,5 +19,3 @@ const CustomDashboardDescAccessRuleRelationType = "The relation type of the give
 // Error messages
 const CustomDashboardErrMarshalWidgets = "Error marshaling widgets"
 const CustomDashboardErrMarshalWidgetsFailed = "Failed to marshal widgets: %s"
-
-// Made with Bob

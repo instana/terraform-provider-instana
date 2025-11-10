@@ -96,5 +96,3 @@ type WebsiteThresholdModel struct {
 	AdaptiveBaseline *shared.AdaptiveBaselineModel `tfsdk:"adaptive_baseline"`
 	HistoricBaseline *shared.HistoricBaselineModel `tfsdk:"historic_baseline"`
 }
-
-// Made with Bob

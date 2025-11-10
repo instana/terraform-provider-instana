@@ -48,5 +48,3 @@ const (
 	// Validator description constants
 	SyntheticTestValidatorURLRegex = "must be a valid URL with HTTP or HTTPS scheme"
 )
-
-// Made with Bob

@@ -467,5 +467,3 @@ func mapTagFilterExpressionFromSchema(input string) (*restapi.TagFilter, error) 
 	mapper := tagfilter.NewMapper()
 	return mapper.ToAPIModel(expr), nil
 }
-
-// Made with Bob

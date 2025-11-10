@@ -32,5 +32,3 @@ const (
 	LogAlertConfigErrParsingTagFilter        = "Error parsing tag filter"
 	LogAlertConfigErrParsingTagFilterMsg     = "Could not parse tag filter: %s"
 )
-
-// Made with Bob

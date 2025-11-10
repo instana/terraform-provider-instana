@@ -16,5 +16,3 @@ const (
 	SloCorrectionConfigDescRecurrentRule = "Recurrent rule for scheduling, if applicable."
 	SloCorrectionConfigDescRecurrent     = "Indicates whether the Rule is reccurrent"
 )
-
-// Made with Bob

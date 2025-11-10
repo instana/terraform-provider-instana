@@ -10,5 +10,3 @@ type WebsiteMonitoringConfigModel struct {
 	Name    types.String `tfsdk:"name"`
 	AppName types.String `tfsdk:"app_name"`
 }
-
-// Made with Bob

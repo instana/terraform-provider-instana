@@ -136,5 +136,3 @@ const (
 	// TagFilterLogicalOperatorAnd logical operator value
 	TagFilterLogicalOperatorAnd = "AND"
 )
-
-// Made with Bob

@@ -172,5 +172,3 @@ const (
 	//AlertingChannelFieldChannelWatsonAIOpsWebhook const for schema field of the Watson AIOps Webhook channel
 	AlertingChannelFieldChannelWatsonAIOpsWebhook = "watson_aiops_webhook"
 )
-
-// Made with Bob

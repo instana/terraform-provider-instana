@@ -296,5 +296,3 @@ func (r *alertingConfigResourceFramework) readEventTypesFromStrings(input []stri
 	}
 	return result
 }
-
-// Made with Bob

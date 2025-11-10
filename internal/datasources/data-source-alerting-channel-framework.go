@@ -486,5 +486,3 @@ func (d *AlertingChannelDataSourceFramework) Read(ctx context.Context, req datas
 	// Set the data in the response
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
-
-// Made with Bob

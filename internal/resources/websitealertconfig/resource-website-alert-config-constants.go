@@ -60,5 +60,3 @@ const (
 	WebsiteAlertConfigErrInvalidTimeThresholdConfig    = "Invalid time threshold configuration"
 	WebsiteAlertConfigErrInvalidTimeThresholdConfigMsg = "Exactly one time threshold type configuration is required"
 )
-
-// Made with Bob

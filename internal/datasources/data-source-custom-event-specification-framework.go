@@ -155,5 +155,3 @@ func (d *customEventSpecificationDataSourceFramework) Read(ctx context.Context, 
 	// Set the data in the response
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
-
-// Made with Bob

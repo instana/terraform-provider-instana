@@ -19,5 +19,3 @@ const (
 	ApplicationConfigErrInvalidAttributeType = "Invalid attribute type"
 	ApplicationConfigErrMissingAttribute     = "Missing attribute"
 )
-
-// Made with Bob

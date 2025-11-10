@@ -17,5 +17,3 @@ const (
 	GroupDescPermissionSetWebsiteIDs              = "The scope bindings to restrict access to websites"
 	GroupDescPermissionSetPermissions             = "The permissions assigned which should be assigned to the users of the group"
 )
-
-// Made with Bob

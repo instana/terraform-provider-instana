@@ -657,5 +657,3 @@ func getBoolPointerFromFrameworkType(value types.Bool) *bool {
 	b := value.ValueBool()
 	return &b
 }
-
-// Made with Bob

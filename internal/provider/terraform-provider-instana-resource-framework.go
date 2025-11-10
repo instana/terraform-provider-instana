@@ -243,5 +243,3 @@ func (r *terraformResourceImplFramework[T]) ImportState(ctx context.Context, req
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), types.StringValue(req.ID))...)
 	}
 }
-
-// Made with Bob

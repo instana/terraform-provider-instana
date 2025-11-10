@@ -409,5 +409,3 @@ func StaticOnlyCustomPayloadFieldsToTerraform(ctx context.Context, fields []rest
 		},
 	}, tfFields)
 }
-
-// Made with Bob

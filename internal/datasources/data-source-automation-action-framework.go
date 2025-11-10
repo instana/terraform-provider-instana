@@ -151,5 +151,3 @@ func (d *automationActionDataSourceFramework) Read(ctx context.Context, req data
 	// Set the data in the response
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
-
-// Made with Bob

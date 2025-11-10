@@ -386,5 +386,3 @@ func (r *applicationConfigResourceFramework) mapAccessRulesFromState(ctx context
 
 	return accessRules, diags
 }
-
-// Made with Bob

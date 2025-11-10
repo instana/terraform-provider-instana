@@ -522,7 +522,3 @@ func (r *groupResourceFramework) MapStateToDataObject(ctx context.Context, plan 
 		PermissionSet: permissionSet,
 	}, diags
 }
-
-// Made with Bob
-
-// Made with Bob

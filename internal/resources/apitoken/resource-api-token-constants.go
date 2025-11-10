@@ -93,5 +93,3 @@ const (
 	APITokenDescCanConfigureServiceLevelSmartAlerts       = "Configures if the API token is allowed to configure service level smart alerts"
 	APITokenDescCanConfigureServiceLevels                 = "Configures if the API token is allowed to configure service levels"
 )
-
-// Made with Bob

@@ -579,5 +579,3 @@ func (r *automationPolicyResourceFramework) mapTagsFromState(ctx context.Context
 
 	return tags, diags
 }
-
-// Made with Bob

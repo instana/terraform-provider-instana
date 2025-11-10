@@ -33,5 +33,3 @@ const AutomationPolicyDescActionAgentID = "The identifier of the agent host."
 const AutomationPolicyErrMappingTags = "Error mapping tags"
 const AutomationPolicyErrTagNotString = "Tag at index %d is not a string"
 const AutomationPolicyErrTagsFormat = "Tags are not in the expected format"
-
-// Made with Bob

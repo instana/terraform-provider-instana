@@ -1025,5 +1025,3 @@ func (r *apiTokenResourceFramework) MapStateToDataObject(ctx context.Context, pl
 
 	return apiToken, diags
 }
-
-// Made with Bob

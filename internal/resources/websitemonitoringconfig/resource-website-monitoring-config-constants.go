@@ -7,5 +7,3 @@ const (
 	WebsiteMonitoringConfigDescName     = "Configures the name of the website monitoring configuration."
 	WebsiteMonitoringConfigDescAppName  = "Configures the calculated app name of the website monitoring configuration."
 )
-
-// Made with Bob

@@ -42,5 +42,3 @@ func main() {
 		log.Fatal(err.Error())
 	}
 }
-
-// Made with Bob

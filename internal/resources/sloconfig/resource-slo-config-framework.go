@@ -1176,5 +1176,3 @@ func (r *sloConfigResourceFramework) mapTimeWindowToState(ctx context.Context, a
 
 	return timeWindowModel, diags
 }
-
-// Made with Bob

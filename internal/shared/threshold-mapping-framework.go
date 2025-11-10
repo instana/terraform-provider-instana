@@ -852,8 +852,6 @@ func mapAdaptiveBaselineFromState(ctx context.Context, adaptiveList types.List) 
 	return thresholdRule, diags
 }
 
-// Made with Bob
-
 // MapThresholdsFromState maps thresholds from Terraform state to a map of AlertSeverity to ThresholdRule
 func MapThresholdsFromState(ctx context.Context, thresholdList types.List) (map[restapi.AlertSeverity]restapi.ThresholdRule, diag.Diagnostics) {
 	var diags diag.Diagnostics

@@ -214,7 +214,6 @@ const AutomationActionDescAPIFieldHostId = "The host ID from which this action i
 const AutomationActionDescAPIFieldPlaybookId = "The playbook ID"
 const AutomationActionDescAPIFieldPlaybookFileName = "The playbook filename"
 
-// Made with Bob
 const (
 	AutomationActionFieldName           = "name"
 	AutomationActionFieldDescription    = "description"
