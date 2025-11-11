@@ -82,7 +82,7 @@ package shared
 // }
 
 // func (ds *alertingChannelDataSource) read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-// 	providerMeta := meta.(*ProviderMeta)
+// 	providerMeta := meta.(*restapi.ProviderMeta)
 // 	instanaAPI := providerMeta.InstanaAPI
 
 // 	name := d.Get(AlertingChannelFieldName).(string)

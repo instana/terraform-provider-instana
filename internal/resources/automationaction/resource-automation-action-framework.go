@@ -20,11 +20,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// ResourceInstanaAutomationActionFramework the name of the terraform-provider-instana resource to manage automation actions
-const ResourceInstanaAutomationActionFramework = "automation_action"
-
-// AutomationActionModel is now defined in resource-automation-action-mapping.go
-
 // NewAutomationActionResourceHandleFramework creates the resource handle for Automation Actions
 func NewAutomationActionResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.AutomationAction] {
 	return &automationActionResourceFramework{

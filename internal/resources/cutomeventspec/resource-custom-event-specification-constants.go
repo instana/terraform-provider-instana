@@ -45,3 +45,45 @@ const (
 	CustomEventSpecificationResourceErrParseTagFilter    = "Error parsing tag filter"
 	CustomEventSpecificationResourceErrParseTagFilterMsg = "Failed to parse tag filter: %s"
 )
+
+// ResourceInstanaCustomEventSpecificationFramework the name of the terraform-provider-instana resource to manage custom event specifications
+const ResourceInstanaCustomEventSpecificationFramework = "custom_event_specification"
+
+const (
+	CustomEventSpecificationFieldName           = "name"
+	CustomEventSpecificationFieldEntityType     = "entity_type"
+	CustomEventSpecificationFieldQuery          = "query"
+	CustomEventSpecificationFieldTriggering     = "triggering"
+	CustomEventSpecificationFieldDescription    = "description"
+	CustomEventSpecificationFieldExpirationTime = "expiration_time"
+	CustomEventSpecificationFieldEnabled        = "enabled"
+
+	CustomEventSpecificationFieldRuleLogicalOperator         = "rule_logical_operator"
+	CustomEventSpecificationFieldRules                       = "rules"
+	CustomEventSpecificationFieldEntityCountRule             = "entity_count"
+	CustomEventSpecificationFieldEntityCountVerificationRule = "entity_count_verification"
+	CustomEventSpecificationFieldEntityVerificationRule      = "entity_verification"
+	CustomEventSpecificationFieldHostAvailabilityRule        = "host_availability"
+	CustomEventSpecificationFieldSystemRule                  = "system"
+	CustomEventSpecificationFieldThresholdRule               = "threshold"
+
+	CustomEventSpecificationRuleFieldSeverity                          = "severity"
+	CustomEventSpecificationRuleFieldMatchingEntityType                = "matching_entity_type"
+	CustomEventSpecificationRuleFieldMatchingOperator                  = "matching_operator"
+	CustomEventSpecificationRuleFieldMatchingEntityLabel               = "matching_entity_label"
+	CustomEventSpecificationRuleFieldOfflineDuration                   = "offline_duration"
+	CustomEventSpecificationSystemRuleFieldSystemRuleId                = "system_rule_id"
+	CustomEventSpecificationThresholdRuleFieldMetricName               = "metric_name"
+	CustomEventSpecificationThresholdRuleFieldRollup                   = "rollup"
+	CustomEventSpecificationThresholdRuleFieldWindow                   = "window"
+	CustomEventSpecificationThresholdRuleFieldAggregation              = "aggregation"
+	CustomEventSpecificationRuleFieldConditionOperator                 = "condition_operator"
+	CustomEventSpecificationRuleFieldConditionValue                    = "condition_value"
+	CustomEventSpecificationThresholdRuleFieldMetricPattern            = "metric_pattern"
+	CustomEventSpecificationThresholdRuleFieldMetricPatternPrefix      = "prefix"
+	CustomEventSpecificationThresholdRuleFieldMetricPatternPostfix     = "postfix"
+	CustomEventSpecificationThresholdRuleFieldMetricPatternPlaceholder = "placeholder"
+	CustomEventSpecificationThresholdRuleFieldMetricPatternOperator    = "operator"
+	CustomEventSpecificationHostAvailabilityRuleFieldMetricCloseAfter  = "close_after"
+	CustomEventSpecificationHostAvailabilityRuleFieldTagFilter         = "tag_filter"
+)

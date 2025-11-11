@@ -19,68 +19,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
-// ResourceInstanaGroupFramework the name of the terraform-provider-instana resource to manage groups for role based access control
-const ResourceInstanaGroupFramework = "rbac_group"
-
-//nolint:gosec
-const (
-	//GroupFieldName constant value for the schema field name
-	GroupFieldName = "name"
-	//GroupFieldFullName constant value for the schema field full_name
-	GroupFieldFullName = "full_name"
-	//GroupFieldMembers constant value for the schema field members
-	GroupFieldMembers = "member"
-	//GroupFieldMemberEmail constant value for the schema field email
-	GroupFieldMemberEmail = "email"
-	//GroupFieldMemberUserID constant value for the schema field user_id
-	GroupFieldMemberUserID = "user_id"
-	//GroupFieldPermissionSet constant value for the schema field permission_set
-	GroupFieldPermissionSet = "permission_set"
-	//GroupFieldPermissionSetApplicationIDs constant value for the schema field application_ids
-	GroupFieldPermissionSetApplicationIDs = "application_ids"
-	//GroupFieldPermissionSetInfraDFQFilter constant value for the schema field infra_dfq_filter
-	GroupFieldPermissionSetInfraDFQFilter = "infra_dfq_filter"
-	//GroupFieldPermissionSetKubernetesClusterUUIDs constant value for the schema field kubernetes_cluster_uuids
-	GroupFieldPermissionSetKubernetesClusterUUIDs = "kubernetes_cluster_uuids"
-	//GroupFieldPermissionSetKubernetesNamespaceUIDs constant value for the schema field kubernetes_namespaces_uuids
-	GroupFieldPermissionSetKubernetesNamespaceUIDs = "kubernetes_namespaces_uuids"
-	//GroupFieldPermissionSetMobileAppIDs constant value for the schema field mobile_app_ids
-	GroupFieldPermissionSetMobileAppIDs = "mobile_app_ids"
-	//GroupFieldPermissionSetWebsiteIDs constant value for the schema field website_ids
-	GroupFieldPermissionSetWebsiteIDs = "website_ids"
-	//GroupFieldPermissionSetPermissions constant value for the schema field permissions
-	GroupFieldPermissionSetPermissions = "permissions"
-
-	groupMaxNumberOfSetElements = 1024
-
-	msgStateCannotBeRead = "WARN: %s state cannot be read\n"
-)
-
-// GroupModel represents the data model for RBAC Group
-type GroupModel struct {
-	ID            types.String `tfsdk:"id"`
-	Name          types.String `tfsdk:"name"`
-	Members       types.Set    `tfsdk:"member"`
-	PermissionSet types.Object `tfsdk:"permission_set"`
-}
-
-// GroupMemberModel represents a member in the group
-type GroupMemberModel struct {
-	UserID types.String `tfsdk:"user_id"`
-	Email  types.String `tfsdk:"email"`
-}
-
-// GroupPermissionSetModel represents the permission set for the group
-type GroupPermissionSetModel struct {
-	ApplicationIDs          types.Set    `tfsdk:"application_ids"`
-	InfraDFQFilter          types.String `tfsdk:"infra_dfq_filter"`
-	KubernetesClusterUUIDs  types.Set    `tfsdk:"kubernetes_cluster_uuids"`
-	KubernetesNamespaceUIDs types.Set    `tfsdk:"kubernetes_namespaces_uuids"`
-	MobileAppIDs            types.Set    `tfsdk:"mobile_app_ids"`
-	WebsiteIDs              types.Set    `tfsdk:"website_ids"`
-	Permissions             types.Set    `tfsdk:"permissions"`
-}
-
 // NewGroupResourceHandleFramework creates the resource handle for RBAC Groups
 func NewGroupResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.Group] {
 	return &groupResourceFramework{

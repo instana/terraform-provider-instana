@@ -18,44 +18,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
-// ResourceInstanaSloCorrectionConfigFramework the name of the terraform-provider-instana resource to manage SLO correction configurations
-const ResourceInstanaSloCorrectionConfigFramework = "slo_correction_config"
-
-const (
-	// Slo Correction Config Field names for Terraform
-	SloCorrectionConfigFieldName                    = "name"
-	SloCorrectionConfigFieldFullName                = "full_name"
-	SloCorrectionConfigFieldDescription             = "description"
-	SloCorrectionConfigFieldActive                  = "active"
-	SloCorrectionConfigFieldScheduling              = "scheduling"
-	SloCorrectionConfigFieldSloIds                  = "slo_ids"
-	SloCorrectionConfigFieldTags                    = "tags"
-	SloCorrectionConfigFieldSchedulingStartTime     = "start_time"
-	SloCorrectionConfigFieldSchedulingDuration      = "duration"
-	SloCorrectionConfigFieldSchedulingDurationUnit  = "duration_unit"
-	SloCorrectionConfigFieldSchedulingRecurrentRule = "recurrent_rule"
-)
-
-// SloCorrectionConfigModel represents the data model for the SLO Correction Config resource
-type SloCorrectionConfigModel struct {
-	ID          types.String `tfsdk:"id"`
-	Name        types.String `tfsdk:"name"`
-	Description types.String `tfsdk:"description"`
-	Active      types.Bool   `tfsdk:"active"`
-	Scheduling  types.Object `tfsdk:"scheduling"`
-	SloIds      types.Set    `tfsdk:"slo_ids"`
-	Tags        types.Set    `tfsdk:"tags"`
-}
-
-// SchedulingModel represents the scheduling configuration for SLO Correction Config
-type SchedulingModel struct {
-	StartTime     types.Int64  `tfsdk:"start_time"`
-	Duration      types.Int64  `tfsdk:"duration"`
-	DurationUnit  types.String `tfsdk:"duration_unit"`
-	RecurrentRule types.String `tfsdk:"recurrent_rule"`
-	Recurrent     types.Bool   `tfsdk:"recurrent"`
-}
-
 // NewSloCorrectionConfigResourceHandleFramework creates the resource handle for SLO Correction Config
 func NewSloCorrectionConfigResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.SloCorrectionConfig] {
 	return &sloCorrectionConfigResourceFramework{
@@ -229,11 +191,15 @@ func (r *sloCorrectionConfigResourceFramework) UpdateState(ctx context.Context, 
 	}
 
 	// Map scheduling
+	recurrentRuleValue := types.StringNull()
+	if apiObject.Scheduling.RecurrentRule != "" {
+		recurrentRuleValue = types.StringValue(apiObject.Scheduling.RecurrentRule)
+	}
 	schedulingObj := map[string]attr.Value{
 		"start_time":     types.Int64Value(apiObject.Scheduling.StartTime),
 		"duration":       types.Int64Value(int64(apiObject.Scheduling.Duration)),
 		"duration_unit":  types.StringValue(string(apiObject.Scheduling.DurationUnit)),
-		"recurrent_rule": types.StringValue(apiObject.Scheduling.RecurrentRule),
+		"recurrent_rule": recurrentRuleValue,
 		"recurrent":      types.BoolValue(apiObject.Scheduling.Recurrent),
 	}
 

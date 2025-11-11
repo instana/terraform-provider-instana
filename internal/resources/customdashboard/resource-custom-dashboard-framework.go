@@ -20,41 +20,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// ResourceInstanaCustomDashboardFramework the name of the terraform-provider-instana resource to manage custom dashboards
-const ResourceInstanaCustomDashboardFramework = "custom_dashboard"
-
-const (
-	//CustomDashboardFieldTitle constant value for the schema field title
-	CustomDashboardFieldTitle = "title"
-	//CustomDashboardFieldFullTitle constant value for the computed schema field full_title
-	CustomDashboardFieldFullTitle = "full_title"
-	//CustomDashboardFieldAccessRule constant value for the schema field access_rule
-	CustomDashboardFieldAccessRule = "access_rule"
-	//CustomDashboardFieldAccessRuleAccessType constant value for the schema field access_rule.access_type
-	CustomDashboardFieldAccessRuleAccessType = "access_type"
-	//CustomDashboardFieldAccessRuleRelatedID constant value for the schema field access_rule.related_id
-	CustomDashboardFieldAccessRuleRelatedID = "related_id"
-	//CustomDashboardFieldAccessRuleRelationType constant value for the schema field access_rule.relation_type
-	CustomDashboardFieldAccessRuleRelationType = "relation_type"
-	//CustomDashboardFieldWidgets constant value for the schema field widgets
-	CustomDashboardFieldWidgets = "widgets"
-)
-
-// CustomDashboardModel represents the data model for the custom dashboard resource
-type CustomDashboardModel struct {
-	ID          types.String `tfsdk:"id"`
-	Title       types.String `tfsdk:"title"`
-	AccessRules types.List   `tfsdk:"access_rule"`
-	Widgets     types.String `tfsdk:"widgets"`
-}
-
-// AccessRuleModel represents an access rule in the custom dashboard
-type AccessRuleModel struct {
-	AccessType   types.String `tfsdk:"access_type"`
-	RelatedID    types.String `tfsdk:"related_id"`
-	RelationType types.String `tfsdk:"relation_type"`
-}
-
 // NewCustomDashboardResourceHandleFramework creates the resource handle for Custom Dashboards
 func NewCustomDashboardResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.CustomDashboard] {
 	return &customDashboardResourceFramework{
