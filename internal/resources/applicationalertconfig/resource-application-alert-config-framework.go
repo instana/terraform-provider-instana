@@ -335,73 +335,15 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 						Description: "Optional flag to indicate whether also an Incident is triggered or not. The default is false",
 					},
 					shared.DefaultCustomPayloadFieldsName: shared.GetCustomPayloadFieldsSchema(),
-				},
-				Blocks: map[string]schema.Block{
-					ApplicationAlertConfigFieldApplications: schema.SetNestedBlock{
-						Description: "Selection of applications in scope.",
-						NestedObject: schema.NestedBlockObject{
-							Attributes: map[string]schema.Attribute{
-								ApplicationAlertConfigFieldApplicationsApplicationID: schema.StringAttribute{
-									Required:    true,
-									Description: "ID of the included application",
-									Validators: []validator.String{
-										stringvalidator.LengthBetween(0, 64),
-									},
-								},
-								ApplicationAlertConfigFieldApplicationsInclusive: schema.BoolAttribute{
-									Required:    true,
-									Description: "Defines whether this node and his child nodes are included (true) or excluded (false)",
-								},
-							},
-							Blocks: map[string]schema.Block{
-								ApplicationAlertConfigFieldApplicationsServices: schema.SetNestedBlock{
-									Description: "Selection of services in scope.",
-									NestedObject: schema.NestedBlockObject{
-										Attributes: map[string]schema.Attribute{
-											ApplicationAlertConfigFieldApplicationsServicesServiceID: schema.StringAttribute{
-												Required:    true,
-												Description: "ID of the included service",
-												Validators: []validator.String{
-													stringvalidator.LengthBetween(0, 64),
-												},
-											},
-											ApplicationAlertConfigFieldApplicationsInclusive: schema.BoolAttribute{
-												Required:    true,
-												Description: "Defines whether this node and his child nodes are included (true) or excluded (false)",
-											},
-										},
-										Blocks: map[string]schema.Block{
-											ApplicationAlertConfigFieldApplicationsServicesEndpoints: schema.SetNestedBlock{
-												Description: "Selection of endpoints in scope.",
-												NestedObject: schema.NestedBlockObject{
-													Attributes: map[string]schema.Attribute{
-														ApplicationAlertConfigFieldApplicationsServicesEndpointsEndpointID: schema.StringAttribute{
-															Required:    true,
-															Description: "ID of the included endpoint",
-															Validators: []validator.String{
-																stringvalidator.LengthBetween(0, 64),
-															},
-														},
-														ApplicationAlertConfigFieldApplicationsInclusive: schema.BoolAttribute{
-															Required:    true,
-															Description: "Defines whether this node and his child nodes are included (true) or excluded (false)",
-														},
-													},
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-					ApplicationAlertConfigFieldRule: schema.ListNestedBlock{
+					ApplicationAlertConfigFieldRule: schema.ListNestedAttribute{
 						Description: "Indicates the type of rule this alert configuration is about.",
-						NestedObject: schema.NestedBlockObject{
-							Blocks: map[string]schema.Block{
-								ApplicationAlertConfigFieldRuleErrorRate: schema.ListNestedBlock{
+						Optional:    true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								ApplicationAlertConfigFieldRuleErrorRate: schema.ListNestedAttribute{
 									Description: "Rule based on the error rate of the configured alert configuration target",
-									NestedObject: schema.NestedBlockObject{
+									Optional:    true,
+									NestedObject: schema.NestedAttributeObject{
 										Attributes: map[string]schema.Attribute{
 											ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
 												Optional:    true,
@@ -419,9 +361,10 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 										},
 									},
 								},
-								ApplicationAlertConfigFieldRuleErrors: schema.ListNestedBlock{
+								ApplicationAlertConfigFieldRuleErrors: schema.ListNestedAttribute{
 									Description: "Rule based on the number of errors of the configured alert configuration target",
-									NestedObject: schema.NestedBlockObject{
+									Optional:    true,
+									NestedObject: schema.NestedAttributeObject{
 										Attributes: map[string]schema.Attribute{
 											ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
 												Optional:    true,
@@ -439,9 +382,10 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 										},
 									},
 								},
-								ApplicationAlertConfigFieldRuleLogs: schema.ListNestedBlock{
+								ApplicationAlertConfigFieldRuleLogs: schema.ListNestedAttribute{
 									Description: "Rule based on logs of the configured alert configuration target",
-									NestedObject: schema.NestedBlockObject{
+									Optional:    true,
+									NestedObject: schema.NestedAttributeObject{
 										Attributes: map[string]schema.Attribute{
 											ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
 												Optional:    true,
@@ -480,9 +424,10 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 										},
 									},
 								},
-								ApplicationAlertConfigFieldRuleSlowness: schema.ListNestedBlock{
+								ApplicationAlertConfigFieldRuleSlowness: schema.ListNestedAttribute{
 									Description: "Rule based on the slowness of the configured alert configuration target",
-									NestedObject: schema.NestedBlockObject{
+									Optional:    true,
+									NestedObject: schema.NestedAttributeObject{
 										Attributes: map[string]schema.Attribute{
 											ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
 												Optional:    true,
@@ -500,9 +445,10 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 										},
 									},
 								},
-								ApplicationAlertConfigFieldRuleStatusCode: schema.ListNestedBlock{
+								ApplicationAlertConfigFieldRuleStatusCode: schema.ListNestedAttribute{
 									Description: "Rule based on the HTTP status code of the configured alert configuration target",
-									NestedObject: schema.NestedBlockObject{
+									Optional:    true,
+									NestedObject: schema.NestedAttributeObject{
 										Attributes: map[string]schema.Attribute{
 											ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
 												Optional:    true,
@@ -530,9 +476,10 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 										},
 									},
 								},
-								ApplicationAlertConfigFieldRuleThroughput: schema.ListNestedBlock{
+								ApplicationAlertConfigFieldRuleThroughput: schema.ListNestedAttribute{
 									Description: "Rule based on the throughput of the configured alert configuration target",
-									NestedObject: schema.NestedBlockObject{
+									Optional:    true,
+									NestedObject: schema.NestedAttributeObject{
 										Attributes: map[string]schema.Attribute{
 											ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
 												Optional:    true,
@@ -552,10 +499,14 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 								},
 							},
 						},
+						Validators: []validator.List{
+							listvalidator.SizeAtMost(1),
+						},
 					},
-					ApplicationAlertConfigFieldRules: schema.ListNestedBlock{
+					ApplicationAlertConfigFieldRules: schema.ListNestedAttribute{
 						Description: "A list of rules where each rule is associated with multiple thresholds and their corresponding severity levels.",
-						NestedObject: schema.NestedBlockObject{
+						Optional:    true,
+						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								ApplicationAlertConfigFieldThresholdOperator: schema.StringAttribute{
 									Optional:    true,
@@ -565,14 +516,27 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 										stringvalidator.OneOf(">", ">=", "<", "<="),
 									},
 								},
-							},
-							Blocks: map[string]schema.Block{
-								ApplicationAlertConfigFieldRule: schema.SingleNestedBlock{
+								ApplicationAlertConfigFieldThreshold: schema.ListNestedAttribute{
+									Description: "Threshold configuration for different severity levels",
+									Optional:    true,
+									NestedObject: schema.NestedAttributeObject{
+										Attributes: map[string]schema.Attribute{
+											shared.LogAlertConfigFieldWarning:  shared.StaticAndAdaptiveThresholdBlockSchema(),
+											shared.LogAlertConfigFieldCritical: shared.StaticAndAdaptiveThresholdBlockSchema(),
+										},
+									},
+									Validators: []validator.List{
+										listvalidator.SizeAtMost(1),
+									},
+								},
+								ApplicationAlertConfigFieldRule: schema.SingleNestedAttribute{
 									Description: "The rule configuration",
-									Blocks: map[string]schema.Block{
-										ApplicationAlertConfigFieldRuleErrorRate: schema.ListNestedBlock{
+									Optional:    true,
+									Attributes: map[string]schema.Attribute{
+										ApplicationAlertConfigFieldRuleErrorRate: schema.ListNestedAttribute{
 											Description: "Rule based on the error rate of the configured alert configuration target",
-											NestedObject: schema.NestedBlockObject{
+											Optional:    true,
+											NestedObject: schema.NestedAttributeObject{
 												Attributes: map[string]schema.Attribute{
 													ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
 														Optional:    true,
@@ -590,9 +554,10 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 												},
 											},
 										},
-										ApplicationAlertConfigFieldRuleErrors: schema.ListNestedBlock{
+										ApplicationAlertConfigFieldRuleErrors: schema.ListNestedAttribute{
 											Description: "Rule based on the number of errors of the configured alert configuration target",
-											NestedObject: schema.NestedBlockObject{
+											Optional:    true,
+											NestedObject: schema.NestedAttributeObject{
 												Attributes: map[string]schema.Attribute{
 													ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
 														Optional:    true,
@@ -610,9 +575,10 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 												},
 											},
 										},
-										ApplicationAlertConfigFieldRuleLogs: schema.ListNestedBlock{
+										ApplicationAlertConfigFieldRuleLogs: schema.ListNestedAttribute{
 											Description: "Rule based on logs of the configured alert configuration target",
-											NestedObject: schema.NestedBlockObject{
+											Optional:    true,
+											NestedObject: schema.NestedAttributeObject{
 												Attributes: map[string]schema.Attribute{
 													ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
 														Optional:    true,
@@ -651,9 +617,10 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 												},
 											},
 										},
-										ApplicationAlertConfigFieldRuleSlowness: schema.ListNestedBlock{
+										ApplicationAlertConfigFieldRuleSlowness: schema.ListNestedAttribute{
 											Description: "Rule based on the slowness of the configured alert configuration target",
-											NestedObject: schema.NestedBlockObject{
+											Optional:    true,
+											NestedObject: schema.NestedAttributeObject{
 												Attributes: map[string]schema.Attribute{
 													ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
 														Optional:    true,
@@ -671,9 +638,10 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 												},
 											},
 										},
-										ApplicationAlertConfigFieldRuleStatusCode: schema.ListNestedBlock{
+										ApplicationAlertConfigFieldRuleStatusCode: schema.ListNestedAttribute{
 											Description: "Rule based on the HTTP status code of the configured alert configuration target",
-											NestedObject: schema.NestedBlockObject{
+											Optional:    true,
+											NestedObject: schema.NestedAttributeObject{
 												Attributes: map[string]schema.Attribute{
 													ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
 														Optional:    true,
@@ -701,9 +669,10 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 												},
 											},
 										},
-										ApplicationAlertConfigFieldRuleThroughput: schema.ListNestedBlock{
+										ApplicationAlertConfigFieldRuleThroughput: schema.ListNestedAttribute{
 											Description: "Rule based on the throughput of the configured alert configuration target",
-											NestedObject: schema.NestedBlockObject{
+											Optional:    true,
+											NestedObject: schema.NestedAttributeObject{
 												Attributes: map[string]schema.Attribute{
 													ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
 														Optional:    true,
@@ -723,26 +692,131 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 										},
 									},
 								},
-								ApplicationAlertConfigFieldThreshold: schema.ListNestedBlock{
-									Description: "Threshold configuration for different severity levels",
-									NestedObject: schema.NestedBlockObject{
-										Blocks: map[string]schema.Block{
-											shared.LogAlertConfigFieldWarning:  shared.StaticAndAdaptiveThresholdBlockSchema(),
-											shared.LogAlertConfigFieldCritical: shared.StaticAndAdaptiveThresholdBlockSchema(),
+							},
+						},
+					},
+					ApplicationAlertConfigFieldTimeThreshold: schema.ListNestedAttribute{
+						Description: "Indicates the type of violation of the defined threshold.",
+						Optional:    true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								ApplicationAlertConfigFieldTimeThresholdRequestImpact: schema.ListNestedAttribute{
+									Description: "Time threshold base on request impact",
+									Optional:    true,
+									NestedObject: schema.NestedAttributeObject{
+										Attributes: map[string]schema.Attribute{
+											ApplicationAlertConfigFieldTimeThresholdTimeWindow: schema.Int64Attribute{
+												Required:    true,
+												Description: "The time window if the time threshold",
+											},
+											ApplicationAlertConfigFieldTimeThresholdRequestImpactRequests: schema.Int64Attribute{
+												Required:    true,
+												Description: "The number of requests in the given window",
+											},
 										},
 									},
-									Validators: []validator.List{
-										listvalidator.SizeAtMost(1),
+								},
+								ApplicationAlertConfigFieldTimeThresholdViolationsInPeriod: schema.ListNestedAttribute{
+									Description: "Time threshold base on violations in period",
+									Optional:    true,
+									NestedObject: schema.NestedAttributeObject{
+										Attributes: map[string]schema.Attribute{
+											ApplicationAlertConfigFieldTimeThresholdTimeWindow: schema.Int64Attribute{
+												Required:    true,
+												Description: "The time window if the time threshold",
+											},
+											ApplicationAlertConfigFieldTimeThresholdViolationsInPeriodViolations: schema.Int64Attribute{
+												Required:    true,
+												Description: "The violations appeared in the period",
+												Validators:  []validator.Int64{
+													// TODO: Add validator for range 1-12
+												},
+											},
+										},
+									},
+								},
+								ApplicationAlertConfigFieldTimeThresholdViolationsInSequence: schema.ListNestedAttribute{
+									Description: "Time threshold base on violations in sequence",
+									Optional:    true,
+									NestedObject: schema.NestedAttributeObject{
+										Attributes: map[string]schema.Attribute{
+											ApplicationAlertConfigFieldTimeThresholdTimeWindow: schema.Int64Attribute{
+												Required:    true,
+												Description: "The time window if the time threshold",
+											},
+										},
+									},
+								},
+							},
+						},
+						Validators: []validator.List{
+							listvalidator.SizeAtMost(1),
+						},
+					},
+					ApplicationAlertConfigFieldApplications: schema.SetNestedAttribute{
+						Description: "Selection of applications in scope.",
+						Optional:    true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								ApplicationAlertConfigFieldApplicationsApplicationID: schema.StringAttribute{
+									Required:    true,
+									Description: "ID of the included application",
+									Validators: []validator.String{
+										stringvalidator.LengthBetween(0, 64),
+									},
+								},
+								ApplicationAlertConfigFieldApplicationsInclusive: schema.BoolAttribute{
+									Required:    true,
+									Description: "Defines whether this node and his child nodes are included (true) or excluded (false)",
+								},
+								ApplicationAlertConfigFieldApplicationsServices: schema.SetNestedAttribute{
+									Description: "Selection of services in scope.",
+									Optional:    true,
+									NestedObject: schema.NestedAttributeObject{
+										Attributes: map[string]schema.Attribute{
+											ApplicationAlertConfigFieldApplicationsServicesServiceID: schema.StringAttribute{
+												Required:    true,
+												Description: "ID of the included service",
+												Validators: []validator.String{
+													stringvalidator.LengthBetween(0, 64),
+												},
+											},
+											ApplicationAlertConfigFieldApplicationsInclusive: schema.BoolAttribute{
+												Required:    true,
+												Description: "Defines whether this node and his child nodes are included (true) or excluded (false)",
+											},
+											ApplicationAlertConfigFieldApplicationsServicesEndpoints: schema.SetNestedAttribute{
+												Description: "Selection of endpoints in scope.",
+												Optional:    true,
+												NestedObject: schema.NestedAttributeObject{
+													Attributes: map[string]schema.Attribute{
+														ApplicationAlertConfigFieldApplicationsServicesEndpointsEndpointID: schema.StringAttribute{
+															Required:    true,
+															Description: "ID of the included endpoint",
+															Validators: []validator.String{
+																stringvalidator.LengthBetween(0, 64),
+															},
+														},
+														ApplicationAlertConfigFieldApplicationsInclusive: schema.BoolAttribute{
+															Required:    true,
+															Description: "Defines whether this node and his child nodes are included (true) or excluded (false)",
+														},
+													},
+												},
+											},
+										},
 									},
 								},
 							},
 						},
 					},
-					ApplicationAlertConfigFieldThreshold: schema.SingleNestedBlock{
+					ApplicationAlertConfigFieldThreshold: schema.SingleNestedAttribute{
 						Description: "Threshold configuration for different severity levels",
-						Blocks: map[string]schema.Block{
-							"static": schema.SingleNestedBlock{
+						Optional:    true,
+						Attributes: map[string]schema.Attribute{
+							"static": schema.SingleNestedAttribute{
 								Description: "Static threshold definition.",
+								Optional:    true,
 								Attributes: map[string]schema.Attribute{
 									"operator": schema.StringAttribute{
 										Description: "Comparison operator for the static threshold.",
@@ -757,11 +831,12 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 									},
 								},
 							},
-							"adaptive_baseline": schema.SingleNestedBlock{
-								Description: "Static threshold definition.",
+							"adaptive_baseline": schema.SingleNestedAttribute{
+								Description: "Adaptive baseline threshold definition.",
+								Optional:    true,
 								Attributes: map[string]schema.Attribute{
 									"operator": schema.StringAttribute{
-										Description: "Comparison operator for the static threshold.",
+										Description: "Comparison operator for the adaptive baseline threshold.",
 										Optional:    true,
 										Validators: []validator.String{
 											stringvalidator.OneOf([]string{">=", ">", "<=", "<", "=="}...),
@@ -778,57 +853,6 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 									"seasonality": schema.StringAttribute{
 										Description: "Value for the seasonality.",
 										Optional:    true,
-									},
-								},
-							},
-						},
-					},
-					ApplicationAlertConfigFieldTimeThreshold: schema.ListNestedBlock{
-						Description: "Indicates the type of violation of the defined threshold.",
-						NestedObject: schema.NestedBlockObject{
-							Blocks: map[string]schema.Block{
-								ApplicationAlertConfigFieldTimeThresholdRequestImpact: schema.ListNestedBlock{
-									Description: "Time threshold base on request impact",
-									NestedObject: schema.NestedBlockObject{
-										Attributes: map[string]schema.Attribute{
-											ApplicationAlertConfigFieldTimeThresholdTimeWindow: schema.Int64Attribute{
-												Required:    true,
-												Description: "The time window if the time threshold",
-											},
-											ApplicationAlertConfigFieldTimeThresholdRequestImpactRequests: schema.Int64Attribute{
-												Required:    true,
-												Description: "The number of requests in the given window",
-											},
-										},
-									},
-								},
-								ApplicationAlertConfigFieldTimeThresholdViolationsInPeriod: schema.ListNestedBlock{
-									Description: "Time threshold base on violations in period",
-									NestedObject: schema.NestedBlockObject{
-										Attributes: map[string]schema.Attribute{
-											ApplicationAlertConfigFieldTimeThresholdTimeWindow: schema.Int64Attribute{
-												Required:    true,
-												Description: "The time window if the time threshold",
-											},
-											ApplicationAlertConfigFieldTimeThresholdViolationsInPeriodViolations: schema.Int64Attribute{
-												Required:    true,
-												Description: "The violations appeared in the period",
-												Validators:  []validator.Int64{
-													// TODO: Add validator for range 1-12
-												},
-											},
-										},
-									},
-								},
-								ApplicationAlertConfigFieldTimeThresholdViolationsInSequence: schema.ListNestedBlock{
-									Description: "Time threshold base on violations in sequence",
-									NestedObject: schema.NestedBlockObject{
-										Attributes: map[string]schema.Attribute{
-											ApplicationAlertConfigFieldTimeThresholdTimeWindow: schema.Int64Attribute{
-												Required:    true,
-												Description: "The time window if the time threshold",
-											},
-										},
 									},
 								},
 							},

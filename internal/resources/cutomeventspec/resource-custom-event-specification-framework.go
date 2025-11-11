@@ -239,10 +239,9 @@ func createCustomEventSpecificationSchema() schema.Schema {
 					stringvalidator.OneOf("AND", "OR"),
 				},
 			},
-		},
-		Blocks: map[string]schema.Block{
-			"rules": schema.SingleNestedBlock{
+			"rules": schema.SingleNestedAttribute{
 				Description: CustomEventSpecificationResourceDescRules,
+				Optional:    true,
 				Attributes: map[string]schema.Attribute{
 					"entity_count": schema.ListNestedAttribute{
 						Description: CustomEventSpecificationResourceDescEntityCountRules,

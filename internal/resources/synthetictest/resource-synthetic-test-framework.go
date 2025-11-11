@@ -229,7 +229,6 @@ func NewSyntheticTestResourceHandleFramework() resourcehandle.ResourceHandleFram
 						},
 					},
 				},
-				Blocks: map[string]schema.Block{},
 			},
 			SchemaVersion: 0,
 		},

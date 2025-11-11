@@ -241,7 +241,6 @@ func NewSloAlertConfigResourceHandleFramework() resourcehandle.ResourceHandleFra
 						},
 					},
 				},
-				Blocks: map[string]schema.Block{},
 			},
 			SchemaVersion: 1,
 			CreateOnly:    false,
