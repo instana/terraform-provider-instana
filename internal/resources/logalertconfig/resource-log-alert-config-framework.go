@@ -561,9 +561,19 @@ func (r *logAlertConfigResourceFramework) mapTimeThresholdToState1(ctx context.C
 func (r *logAlertConfigResourceFramework) mapRulesToState(ctx context.Context, rules []restapi.RuleWithThreshold[restapi.LogAlertRule]) (types.Object, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
+	// Define the attribute types for static threshold (matching StaticThresholdAttributeSchema)
+	staticThresholdAttrTypes := map[string]attr.Type{
+		"static": types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"operator": types.StringType,
+				"value":    types.Int64Type,
+			},
+		},
+	}
+
 	thresholdAttrTypes := map[string]attr.Type{
-		LogAlertConfigFieldWarning:  types.ObjectType{AttrTypes: shared.GetStaticThresholdAttrTypes()},
-		LogAlertConfigFieldCritical: types.ObjectType{AttrTypes: shared.GetStaticThresholdAttrTypes()},
+		LogAlertConfigFieldWarning:  types.ObjectType{AttrTypes: staticThresholdAttrTypes},
+		LogAlertConfigFieldCritical: types.ObjectType{AttrTypes: staticThresholdAttrTypes},
 	}
 
 	ruleAttrTypes := map[string]attr.Type{
@@ -625,14 +635,14 @@ func (r *logAlertConfigResourceFramework) mapRulesToState(ctx context.Context, r
 		warningStaticObj := map[string]attr.Value{
 			"static": staticInnerObj,
 		}
-		warningObj, warnDiags := types.ObjectValue(shared.GetStaticThresholdAttrTypes(), warningStaticObj)
+		warningObj, warnDiags := types.ObjectValue(staticThresholdAttrTypes, warningStaticObj)
 		diags.Append(warnDiags...)
 		if diags.HasError() {
 			return types.ObjectNull(ruleAttrTypes), diags
 		}
 		thresholdObj[LogAlertConfigFieldWarning] = warningObj
 	} else {
-		thresholdObj[LogAlertConfigFieldWarning] = types.ObjectNull(shared.GetStaticThresholdAttrTypes())
+		thresholdObj[LogAlertConfigFieldWarning] = types.ObjectNull(staticThresholdAttrTypes)
 	}
 
 	// Map critical threshold - convert to object
@@ -656,14 +666,14 @@ func (r *logAlertConfigResourceFramework) mapRulesToState(ctx context.Context, r
 		criticalStaticObj := map[string]attr.Value{
 			"static": staticInnerObj,
 		}
-		criticalObj, critDiags := types.ObjectValue(shared.GetStaticThresholdAttrTypes(), criticalStaticObj)
+		criticalObj, critDiags := types.ObjectValue(staticThresholdAttrTypes, criticalStaticObj)
 		diags.Append(critDiags...)
 		if diags.HasError() {
 			return types.ObjectNull(ruleAttrTypes), diags
 		}
 		thresholdObj[LogAlertConfigFieldCritical] = criticalObj
 	} else {
-		thresholdObj[LogAlertConfigFieldCritical] = types.ObjectNull(shared.GetStaticThresholdAttrTypes())
+		thresholdObj[LogAlertConfigFieldCritical] = types.ObjectNull(staticThresholdAttrTypes)
 	}
 
 	// Create threshold object value
