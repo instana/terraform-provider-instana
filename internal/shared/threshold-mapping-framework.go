@@ -80,10 +80,11 @@ func AdaptiveBlockSchema() schema.SingleNestedAttribute {
 }
 
 // StaticThresholdBlockSchema returns the schema for static threshold configuration
-func StaticThresholdBlockSchema() schema.ListNestedBlock {
-	return schema.ListNestedBlock{
+func StaticThresholdBlockSchema() schema.ListNestedAttribute {
+	return schema.ListNestedAttribute{
 		Description: "Warning threshold configuration",
-		NestedObject: schema.NestedBlockObject{
+		Optional:    true,
+		NestedObject: schema.NestedAttributeObject{
 			Attributes: map[string]schema.Attribute{
 				ThresholdFieldStatic: StaticBlockSchema(),
 			},
@@ -92,10 +93,11 @@ func StaticThresholdBlockSchema() schema.ListNestedBlock {
 }
 
 // define a static and adaptive schema for threshold configuration
-func StaticAndAdaptiveThresholdBlockSchema() schema.ListNestedBlock {
-	return schema.ListNestedBlock{
+func StaticAndAdaptiveThresholdBlockSchema() schema.ListNestedAttribute {
+	return schema.ListNestedAttribute{
 		Description: "Threshold configuration",
-		NestedObject: schema.NestedBlockObject{
+		Optional:    true,
+		NestedObject: schema.NestedAttributeObject{
 			Attributes: map[string]schema.Attribute{
 				ThresholdFieldStatic:           StaticBlockSchema(),
 				ThresholdFieldAdaptiveBaseline: AdaptiveBlockSchema(),
@@ -105,16 +107,15 @@ func StaticAndAdaptiveThresholdBlockSchema() schema.ListNestedBlock {
 }
 
 // define a static and adaptive schema for threshold configuration
-func AllThresholdBlockSchema() schema.ListNestedBlock {
-	return schema.ListNestedBlock{
+func AllThresholdBlockSchema() schema.ListNestedAttribute {
+	return schema.ListNestedAttribute{
 		Description: "Threshold configuration",
-		NestedObject: schema.NestedBlockObject{
+		Optional:    true,
+		NestedObject: schema.NestedAttributeObject{
 			Attributes: map[string]schema.Attribute{
 				ThresholdFieldStatic:           StaticBlockSchema(),
 				ThresholdFieldAdaptiveBaseline: AdaptiveBlockSchema(),
-			},
-			Blocks: map[string]schema.Block{
-				ThresholdFieldHistoricBaseline: HistoricBaselineBlockSchema(),
+				ThresholdFieldHistoricBaseline: HistoricThresholdBlockSchema(),
 			},
 		},
 	}

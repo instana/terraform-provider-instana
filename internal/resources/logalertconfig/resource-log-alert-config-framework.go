@@ -222,13 +222,13 @@ func NewLogAlertConfigResourceHandleFramework() resourcehandle.ResourceHandleFra
 							},
 						},
 					},
-				},
-				Blocks: map[string]schema.Block{
-					LogAlertConfigFieldTimeThreshold: schema.SingleNestedBlock{
+					LogAlertConfigFieldTimeThreshold: schema.SingleNestedAttribute{
 						Description: LogAlertConfigDescTimeThreshold,
-						Blocks: map[string]schema.Block{
-							"violations_in_sequence": schema.SingleNestedBlock{
+						Optional:    true,
+						Attributes: map[string]schema.Attribute{
+							"violations_in_sequence": schema.SingleNestedAttribute{
 								Description: LogAlertConfigDescViolationsInSequence,
+								Optional:    true,
 								Attributes: map[string]schema.Attribute{
 									"time_window": schema.Int64Attribute{
 										Description: LogAlertConfigDescTimeWindow,

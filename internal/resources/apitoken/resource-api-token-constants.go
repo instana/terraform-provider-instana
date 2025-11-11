@@ -93,3 +93,131 @@ const (
 	APITokenDescCanConfigureServiceLevelSmartAlerts       = "Configures if the API token is allowed to configure service level smart alerts"
 	APITokenDescCanConfigureServiceLevels                 = "Configures if the API token is allowed to configure service levels"
 )
+
+// ResourceInstanaAPITokenFramework the name of the terraform-provider-instana resource to manage API tokens
+const ResourceInstanaAPITokenFramework = "api_token"
+
+const (
+	// ResourceInstanaAPIToken the name of the terraform-provider-instana resource to manage API tokens
+	ResourceInstanaAPIToken = "instana_api_token"
+
+	//APITokenFieldAccessGrantingToken constant value for the schema field access_granting_token
+	APITokenFieldAccessGrantingToken = "access_granting_token"
+	//APITokenFieldInternalID constant value for the schema field internal_id
+	APITokenFieldInternalID = "internal_id"
+	//APITokenFieldName constant value for the schema field name
+	APITokenFieldName = "name"
+	//APITokenFieldFullName constant value for the schema field full_name
+	APITokenFieldFullName = "full_name"
+	//APITokenFieldCanConfigureServiceMapping constant value for the schema field can_configure_service_mapping
+	APITokenFieldCanConfigureServiceMapping = "can_configure_service_mapping"
+	//APITokenFieldCanConfigureEumApplications constant value for the schema field can_configure_eum_applications
+	APITokenFieldCanConfigureEumApplications = "can_configure_eum_applications"
+	//APITokenFieldCanConfigureMobileAppMonitoring constant value for the schema field can_configure_mobile_app_monitoring
+	APITokenFieldCanConfigureMobileAppMonitoring = "can_configure_mobile_app_monitoring"
+	//APITokenFieldCanConfigureUsers constant value for the schema field can_configure_users
+	APITokenFieldCanConfigureUsers = "can_configure_users"
+	//APITokenFieldCanInstallNewAgents constant value for the schema field can_install_new_agents
+	APITokenFieldCanInstallNewAgents = "can_install_new_agents"
+	//APITokenFieldCanConfigureIntegrations constant value for the schema field can_configure_integrations
+	APITokenFieldCanConfigureIntegrations           = "can_configure_integrations"
+	APITokenFieldCanConfigureEventsAndAlerts        = "can_configure_events_and_alerts"
+	APITokenFieldCanConfigureMaintenanceWindows     = "can_configure_maintenance_windows"
+	APITokenFieldCanConfigureApplicationSmartAlerts = "can_configure_application_smart_alerts"
+	APITokenFieldCanConfigureWebsiteSmartAlerts     = "can_configure_website_smart_alerts"
+	APITokenFieldCanConfigureMobileAppSmartAlerts   = "can_configure_mobile_app_smart_alerts"
+	//APITokenFieldCanConfigureAPITokens constant value for the schema field can_configure_api_tokens
+	APITokenFieldCanConfigureAPITokens = "can_configure_api_tokens"
+	//APITokenFieldCanConfigureAgentRunMode constant value for the schema field can_configure_agent_run_mode
+	APITokenFieldCanConfigureAgentRunMode = "can_configure_agent_run_mode"
+	//APITokenFieldCanViewAuditLog constant value for the schema field can_view_audit_log
+	APITokenFieldCanViewAuditLog = "can_view_audit_log"
+	//APITokenFieldCanConfigureAgents constant value for the schema field can_configure_agents
+	APITokenFieldCanConfigureAgents = "can_configure_agents"
+	//APITokenFieldCanConfigureAuthenticationMethods constant value for the schema field can_configure_authentication_methods
+	APITokenFieldCanConfigureAuthenticationMethods = "can_configure_authentication_methods"
+	//APITokenFieldCanConfigureApplications constant value for the schema field can_configure_applications
+	APITokenFieldCanConfigureApplications = "can_configure_applications"
+	//APITokenFieldCanConfigureTeams constant value for the schema field can_configure_teams
+	APITokenFieldCanConfigureTeams = "can_configure_teams"
+	//APITokenFieldCanConfigureReleases constant value for the schema field can_configure_releases
+	APITokenFieldCanConfigureReleases = "can_configure_releases"
+	//APITokenFieldCanConfigureLogManagement constant value for the schema field can_configure_log_management
+	APITokenFieldCanConfigureLogManagement = "can_configure_log_management"
+	//APITokenFieldCanCreatePublicCustomDashboards constant value for the schema field can_create_public_custom_dashboards
+	APITokenFieldCanCreatePublicCustomDashboards = "can_create_public_custom_dashboards"
+	//APITokenFieldCanViewLogs constant value for the schema field can_view_logs
+	APITokenFieldCanViewLogs = "can_view_logs"
+	//APITokenFieldCanViewTraceDetails constant value for the schema field can_view_trace_details
+	APITokenFieldCanViewTraceDetails = "can_view_trace_details"
+	//APITokenFieldCanConfigureSessionSettings constant value for the schema field can_configure_session_settings
+	APITokenFieldCanConfigureSessionSettings = "can_configure_session_settings"
+	//APITokenFieldCanConfigureGlobalAlertPayload constant value for the schema field can_configure_global_alert_payload
+	APITokenFieldCanConfigureGlobalAlertPayload           = "can_configure_global_alert_payload"
+	APITokenFieldCanConfigureGlobalApplicationSmartAlerts = "can_configure_global_application_smart_alerts"
+	APITokenFieldCanConfigureGlobalSyntheticSmartAlerts   = "can_configure_global_synthetic_smart_alerts"
+	APITokenFieldCanConfigureGlobalInfraSmartAlerts       = "can_configure_global_infra_smart_alerts"
+	APITokenFieldCanConfigureGlobalLogSmartAlerts         = "can_configure_global_log_smart_alerts"
+	//APITokenFieldCanViewAccountAndBillingInformation constant value for the schema field can_view_account_and_billing_information
+	APITokenFieldCanViewAccountAndBillingInformation = "can_view_account_and_billing_information"
+	//APITokenFieldCanEditAllAccessibleCustomDashboards constant value for the schema field can_edit_all_accessible_custom_dashboards
+	APITokenFieldCanEditAllAccessibleCustomDashboards = "can_edit_all_accessible_custom_dashboards"
+
+	// New permission fields
+	APITokenFieldLimitedApplicationsScope       = "limited_applications_scope"
+	APITokenFieldLimitedBizOpsScope             = "limited_biz_ops_scope"
+	APITokenFieldLimitedWebsitesScope           = "limited_websites_scope"
+	APITokenFieldLimitedKubernetesScope         = "limited_kubernetes_scope"
+	APITokenFieldLimitedMobileAppsScope         = "limited_mobile_apps_scope"
+	APITokenFieldLimitedInfrastructureScope     = "limited_infrastructure_scope"
+	APITokenFieldLimitedSyntheticsScope         = "limited_synthetics_scope"
+	APITokenFieldLimitedVsphereScope            = "limited_vsphere_scope"
+	APITokenFieldLimitedPhmcScope               = "limited_phmc_scope"
+	APITokenFieldLimitedPvcScope                = "limited_pvc_scope"
+	APITokenFieldLimitedZhmcScope               = "limited_zhmc_scope"
+	APITokenFieldLimitedPcfScope                = "limited_pcf_scope"
+	APITokenFieldLimitedOpenstackScope          = "limited_openstack_scope"
+	APITokenFieldLimitedAutomationScope         = "limited_automation_scope"
+	APITokenFieldLimitedLogsScope               = "limited_logs_scope"
+	APITokenFieldLimitedNutanixScope            = "limited_nutanix_scope"
+	APITokenFieldLimitedXenServerScope          = "limited_xen_server_scope"
+	APITokenFieldLimitedWindowsHypervisorScope  = "limited_windows_hypervisor_scope"
+	APITokenFieldLimitedAlertChannelsScope      = "limited_alert_channels_scope"
+	APITokenFieldLimitedLinuxKvmHypervisorScope = "limited_linux_kvm_hypervisor_scope"
+
+	APITokenFieldLimitedServiceLevelScope = "limited_service_level_scope"
+	APITokenFieldLimitedAiGatewayScope    = "limited_ai_gateway_scope"
+
+	APITokenFieldCanConfigurePersonalAPITokens             = "can_configure_personal_api_tokens"
+	APITokenFieldCanConfigureDatabaseManagement            = "can_configure_database_management"
+	APITokenFieldCanConfigureAutomationActions             = "can_configure_automation_actions"
+	APITokenFieldCanConfigureAutomationPolicies            = "can_configure_automation_policies"
+	APITokenFieldCanRunAutomationActions                   = "can_run_automation_actions"
+	APITokenFieldCanDeleteAutomationActionHistory          = "can_delete_automation_action_history"
+	APITokenFieldCanConfigureSyntheticTests                = "can_configure_synthetic_tests"
+	APITokenFieldCanConfigureSyntheticLocations            = "can_configure_synthetic_locations"
+	APITokenFieldCanConfigureSyntheticCredentials          = "can_configure_synthetic_credentials"
+	APITokenFieldCanViewSyntheticTests                     = "can_view_synthetic_tests"
+	APITokenFieldCanViewSyntheticLocations                 = "can_view_synthetic_locations"
+	APITokenFieldCanViewSyntheticTestResults               = "can_view_synthetic_test_results"
+	APITokenFieldCanUseSyntheticCredentials                = "can_use_synthetic_credentials"
+	APITokenFieldCanConfigureBizops                        = "can_configure_bizops"
+	APITokenFieldCanViewBusinessProcesses                  = "can_view_business_processes"
+	APITokenFieldCanViewBusinessProcessDetails             = "can_view_business_process_details"
+	APITokenFieldCanViewBusinessActivities                 = "can_view_business_activities"
+	APITokenFieldCanViewBizAlerts                          = "can_view_biz_alerts"
+	APITokenFieldCanDeleteLogs                             = "can_delete_logs"
+	APITokenFieldCanCreateHeapDump                         = "can_create_heap_dump"
+	APITokenFieldCanCreateThreadDump                       = "can_create_thread_dump"
+	APITokenFieldCanManuallyCloseIssue                     = "can_manually_close_issue"
+	APITokenFieldCanViewLogVolume                          = "can_view_log_volume"
+	APITokenFieldCanConfigureLogRetentionPeriod            = "can_configure_log_retention_period"
+	APITokenFieldCanConfigureSubtraces                     = "can_configure_subtraces"
+	APITokenFieldCanInvokeAlertChannel                     = "can_invoke_alert_channel"
+	APITokenFieldCanConfigureLlm                           = "can_configure_llm"
+	APITokenFieldCanConfigureAiAgents                      = "can_configure_ai_agents"
+	APITokenFieldCanConfigureApdex                         = "can_configure_apdex"
+	APITokenFieldCanConfigureServiceLevelCorrectionWindows = "can_configure_service_level_correction_windows"
+	APITokenFieldCanConfigureServiceLevelSmartAlerts       = "can_configure_service_level_smart_alerts"
+	APITokenFieldCanConfigureServiceLevels                 = "can_configure_service_levels"
+)

@@ -96,36 +96,33 @@ func NewSloCorrectionConfigResourceHandleFramework() resourcehandle.ResourceHand
 						Description: SloCorrectionConfigDescTags,
 						ElementType: types.StringType,
 					},
-				},
-				Blocks: map[string]schema.Block{
-					"scheduling": schema.ListNestedBlock{
+					"scheduling": schema.SingleNestedAttribute{
+						Required:    true,
 						Description: SloCorrectionConfigDescScheduling,
-						NestedObject: schema.NestedBlockObject{
-							Attributes: map[string]schema.Attribute{
-								"start_time": schema.Int64Attribute{
-									Required:    true,
-									Description: SloCorrectionConfigDescStartTime,
+						Attributes: map[string]schema.Attribute{
+							"start_time": schema.Int64Attribute{
+								Required:    true,
+								Description: SloCorrectionConfigDescStartTime,
+							},
+							"duration": schema.Int64Attribute{
+								Required:    true,
+								Description: SloCorrectionConfigDescDuration,
+							},
+							"duration_unit": schema.StringAttribute{
+								Required:    true,
+								Description: SloCorrectionConfigDescDurationUnit,
+								Validators: []validator.String{
+									stringvalidator.OneOf("millisecond", "second", "minute", "hour", "day", "week", "month"),
 								},
-								"duration": schema.Int64Attribute{
-									Required:    true,
-									Description: SloCorrectionConfigDescDuration,
-								},
-								"duration_unit": schema.StringAttribute{
-									Required:    true,
-									Description: SloCorrectionConfigDescDurationUnit,
-									Validators: []validator.String{
-										stringvalidator.OneOf("millisecond", "second", "minute", "hour", "day", "week", "month"),
-									},
-								},
-								"recurrent_rule": schema.StringAttribute{
-									Optional:    true,
-									Description: SloCorrectionConfigDescRecurrentRule,
-								},
-								"recurrent": schema.BoolAttribute{
-									Optional:    true,
-									Computed:    true,
-									Description: SloCorrectionConfigDescRecurrent,
-								},
+							},
+							"recurrent_rule": schema.StringAttribute{
+								Optional:    true,
+								Description: SloCorrectionConfigDescRecurrentRule,
+							},
+							"recurrent": schema.BoolAttribute{
+								Optional:    true,
+								Computed:    true,
+								Description: SloCorrectionConfigDescRecurrent,
 							},
 						},
 					},

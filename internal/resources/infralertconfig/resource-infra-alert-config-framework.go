@@ -222,13 +222,13 @@ func NewInfraAlertConfigResourceHandleFramework() resourcehandle.ResourceHandleF
 							},
 						},
 					},
-				},
-				Blocks: map[string]schema.Block{
-					"time_threshold": schema.SingleNestedBlock{
+					"time_threshold": schema.SingleNestedAttribute{
 						Description: InfraAlertConfigDescTimeThreshold,
-						Blocks: map[string]schema.Block{
-							"violations_in_sequence": schema.SingleNestedBlock{
+						Optional:    true,
+						Attributes: map[string]schema.Attribute{
+							"violations_in_sequence": schema.SingleNestedAttribute{
 								Description: InfraAlertConfigDescViolationsInSequence,
+								Optional:    true,
 								Attributes: map[string]schema.Attribute{
 									"time_window": schema.Int64Attribute{
 										Required:    true,

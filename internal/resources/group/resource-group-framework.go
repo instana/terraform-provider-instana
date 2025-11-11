@@ -145,11 +145,10 @@ func NewGroupResourceHandleFramework() resourcehandle.ResourceHandleFramework[*r
 							},
 						},
 					},
-				},
-				Blocks: map[string]schema.Block{
-					"member": schema.SetNestedBlock{
+					"member": schema.SetNestedAttribute{
 						Description: GroupDescMembers,
-						NestedObject: schema.NestedBlockObject{
+						Optional:    true,
+						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"user_id": schema.StringAttribute{
 									Required:    true,

@@ -179,13 +179,13 @@ func NewSloConfigResourceHandleFramework() resourcehandle.ResourceHandleFramewor
 							},
 						},
 					},
-				},
-				Blocks: map[string]schema.Block{
-					SloConfigFieldSloEntity: schema.SingleNestedBlock{
+					SloConfigFieldSloEntity: schema.SingleNestedAttribute{
 						Description: SloConfigDescEntity,
-						Blocks: map[string]schema.Block{
-							SloConfigApplicationEntity: schema.SingleNestedBlock{
+						Optional:    true,
+						Attributes: map[string]schema.Attribute{
+							SloConfigApplicationEntity: schema.SingleNestedAttribute{
 								Description: SloConfigDescApplicationEntity,
+								Optional:    true,
 								Attributes: map[string]schema.Attribute{
 									SloConfigFieldApplicationID: schema.StringAttribute{
 										Optional:    true,
@@ -217,8 +217,9 @@ func NewSloConfigResourceHandleFramework() resourcehandle.ResourceHandleFramewor
 									},
 								},
 							},
-							SloConfigWebsiteEntity: schema.SingleNestedBlock{
+							SloConfigWebsiteEntity: schema.SingleNestedAttribute{
 								Description: SloConfigDescWebsiteEntity,
+								Optional:    true,
 								Attributes: map[string]schema.Attribute{
 									SloConfigFieldWebsiteID: schema.StringAttribute{
 										Optional:    true,
@@ -234,8 +235,9 @@ func NewSloConfigResourceHandleFramework() resourcehandle.ResourceHandleFramewor
 									},
 								},
 							},
-							SloConfigSyntheticEntity: schema.SingleNestedBlock{
+							SloConfigSyntheticEntity: schema.SingleNestedAttribute{
 								Description: SloConfigDescSyntheticEntity,
+								Optional:    true,
 								Attributes: map[string]schema.Attribute{
 									SloConfigFieldSyntheticTestIDs: schema.ListAttribute{
 										ElementType: types.StringType,
@@ -250,11 +252,13 @@ func NewSloConfigResourceHandleFramework() resourcehandle.ResourceHandleFramewor
 							},
 						},
 					},
-					SloConfigFieldSloIndicator: schema.SingleNestedBlock{
+					SloConfigFieldSloIndicator: schema.SingleNestedAttribute{
 						Description: SloConfigDescIndicator,
-						Blocks: map[string]schema.Block{
-							"time_based_latency": schema.SingleNestedBlock{
+						Optional:    true,
+						Attributes: map[string]schema.Attribute{
+							"time_based_latency": schema.SingleNestedAttribute{
 								Description: SloConfigDescTimeBasedLatency,
+								Optional:    true,
 								Attributes: map[string]schema.Attribute{
 									"threshold": schema.Float64Attribute{
 										Optional:    true,
@@ -266,8 +270,9 @@ func NewSloConfigResourceHandleFramework() resourcehandle.ResourceHandleFramewor
 									},
 								},
 							},
-							"event_based_latency": schema.SingleNestedBlock{
+							"event_based_latency": schema.SingleNestedAttribute{
 								Description: SloConfigDescEventBasedLatency,
+								Optional:    true,
 								Attributes: map[string]schema.Attribute{
 									"threshold": schema.Float64Attribute{
 										Optional:    true,
@@ -275,8 +280,9 @@ func NewSloConfigResourceHandleFramework() resourcehandle.ResourceHandleFramewor
 									},
 								},
 							},
-							"time_based_availability": schema.SingleNestedBlock{
+							"time_based_availability": schema.SingleNestedAttribute{
 								Description: SloConfigDescTimeBasedAvailability,
+								Optional:    true,
 								Attributes: map[string]schema.Attribute{
 									"threshold": schema.Float64Attribute{
 										Optional:    true,
@@ -288,11 +294,14 @@ func NewSloConfigResourceHandleFramework() resourcehandle.ResourceHandleFramewor
 									},
 								},
 							},
-							"event_based_availability": schema.SingleNestedBlock{
+							"event_based_availability": schema.SingleNestedAttribute{
 								Description: SloConfigDescEventBasedAvailability,
+								Optional:    true,
+								Attributes:  map[string]schema.Attribute{},
 							},
-							"traffic": schema.SingleNestedBlock{
+							"traffic": schema.SingleNestedAttribute{
 								Description: SloConfigDescTraffic,
+								Optional:    true,
 								Attributes: map[string]schema.Attribute{
 									"traffic_type": schema.StringAttribute{
 										Optional:    true,
@@ -311,8 +320,9 @@ func NewSloConfigResourceHandleFramework() resourcehandle.ResourceHandleFramewor
 									},
 								},
 							},
-							"custom": schema.SingleNestedBlock{
+							"custom": schema.SingleNestedAttribute{
 								Description: SloConfigDescCustom,
+								Optional:    true,
 								Attributes: map[string]schema.Attribute{
 									"good_event_filter_expression": schema.StringAttribute{
 										Optional:    true,
@@ -326,11 +336,13 @@ func NewSloConfigResourceHandleFramework() resourcehandle.ResourceHandleFramewor
 							},
 						},
 					},
-					SloConfigFieldSloTimeWindow: schema.SingleNestedBlock{
+					SloConfigFieldSloTimeWindow: schema.SingleNestedAttribute{
 						Description: SloConfigDescTimeWindow,
-						Blocks: map[string]schema.Block{
-							"rolling": schema.SingleNestedBlock{
+						Optional:    true,
+						Attributes: map[string]schema.Attribute{
+							"rolling": schema.SingleNestedAttribute{
 								Description: SloConfigDescRollingTimeWindow,
+								Optional:    true,
 								Attributes: map[string]schema.Attribute{
 									"duration": schema.Int64Attribute{
 										Optional:    true,
@@ -346,8 +358,9 @@ func NewSloConfigResourceHandleFramework() resourcehandle.ResourceHandleFramewor
 									},
 								},
 							},
-							"fixed": schema.SingleNestedBlock{
+							"fixed": schema.SingleNestedAttribute{
 								Description: SloConfigDescFixedTimeWindow,
+								Optional:    true,
 								Attributes: map[string]schema.Attribute{
 									"duration": schema.Int64Attribute{
 										Optional:    true,
