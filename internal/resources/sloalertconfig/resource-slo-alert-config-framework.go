@@ -8,7 +8,6 @@ import (
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
 	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
-	"github.com/hashicorp/terraform-plugin-framework-validators/float64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -99,9 +98,6 @@ func NewSloAlertConfigResourceHandleFramework() resourcehandle.ResourceHandleFra
 							"value": schema.Float64Attribute{
 								Required:    true,
 								Description: SloAlertConfigDescThresholdValue,
-								Validators: []validator.Float64{
-									float64validator.AtLeast(0.000001),
-								},
 							},
 						},
 					},
