@@ -79,11 +79,10 @@ func NewCustomDashboardResourceHandleFramework() resourcehandle.ResourceHandleFr
 						Description: CustomDashboardDescWidgets,
 						// Note: In Plugin Framework, we handle JSON normalization in the resource methods
 					},
-				},
-				Blocks: map[string]schema.Block{
-					CustomDashboardFieldAccessRule: schema.ListNestedBlock{
+					CustomDashboardFieldAccessRule: schema.ListNestedAttribute{
 						Description: CustomDashboardDescAccessRule,
-						NestedObject: schema.NestedBlockObject{
+						Optional:    true,
+						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								CustomDashboardFieldAccessRuleAccessType: schema.StringAttribute{
 									Required:    true,

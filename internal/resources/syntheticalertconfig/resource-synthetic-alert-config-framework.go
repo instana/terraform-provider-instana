@@ -9,7 +9,6 @@ import (
 	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
 	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -32,9 +31,9 @@ type SyntheticAlertConfigModel struct {
 	SyntheticTestIds    types.Set    `tfsdk:"synthetic_test_ids"`
 	Severity            types.Int64  `tfsdk:"severity"`
 	TagFilter           types.String `tfsdk:"tag_filter"`
-	Rule                types.List   `tfsdk:"rule"`
+	Rule                types.Object `tfsdk:"rule"`
 	AlertChannelIds     types.Set    `tfsdk:"alert_channel_ids"`
-	TimeThreshold       types.List   `tfsdk:"time_threshold"`
+	TimeThreshold       types.Object `tfsdk:"time_threshold"`
 	GracePeriod         types.Int64  `tfsdk:"grace_period"`
 	CustomPayloadFields types.List   `tfsdk:"custom_payload_field"`
 }
@@ -106,64 +105,54 @@ func NewSyntheticAlertConfigResourceHandleFramework() resourcehandle.ResourceHan
 						Optional:    true,
 						Description: SyntheticAlertConfigDescGracePeriod,
 					},
-				},
-				Blocks: map[string]schema.Block{
-					SyntheticAlertConfigFieldRule: schema.ListNestedBlock{
-						Description: SyntheticAlertConfigDescRule,
-						NestedObject: schema.NestedBlockObject{
-							Attributes: map[string]schema.Attribute{
-								SyntheticAlertRuleFieldAlertType: schema.StringAttribute{
-									Required:    true,
-									Description: SyntheticAlertConfigDescRuleAlertType,
-									Validators: []validator.String{
-										stringvalidator.OneOf(SyntheticAlertConfigValidAlertType),
-									},
-								},
-								SyntheticAlertRuleFieldMetricName: schema.StringAttribute{
-									Required:    true,
-									Description: SyntheticAlertConfigDescRuleMetricName,
-									Validators: []validator.String{
-										stringvalidator.LengthBetween(1, 256),
-									},
-								},
-								SyntheticAlertRuleFieldAggregation: schema.StringAttribute{
-									Optional:    true,
-									Description: SyntheticAlertConfigDescRuleAggregation,
-									Validators: []validator.String{
-										stringvalidator.OneOf(AggregationTypeSum, AggregationTypeMean, AggregationTypeMax, AggregationTypeMin, AggregationTypeP25, AggregationTypeP50, AggregationTypeP75, AggregationTypeP90, AggregationTypeP95, AggregationTypeP98, AggregationTypeP99, AggregationTypeP99_9, AggregationTypeP99_99, AggregationTypeDistinctCount, AggregationTypeSumPositive, AggregationTypePerSecond, AggregationTypeIncrease),
-									},
-								},
-							},
-						},
-						Validators: []validator.List{
-							listvalidator.SizeBetween(1, 1),
-						},
-					},
-					SyntheticAlertConfigFieldTimeThreshold: schema.ListNestedBlock{
-						Description: SyntheticAlertConfigDescTimeThreshold,
-						NestedObject: schema.NestedBlockObject{
-							Attributes: map[string]schema.Attribute{
-								SyntheticAlertTimeThresholdFieldType: schema.StringAttribute{
-									Required:    true,
-									Description: SyntheticAlertConfigDescTimeThresholdType,
-									Validators: []validator.String{
-										stringvalidator.OneOf(SyntheticAlertConfigValidTimeThresholdType),
-									},
-								},
-								SyntheticAlertTimeThresholdFieldViolationsCount: schema.Int64Attribute{
-									Required:    true,
-									Description: SyntheticAlertConfigDescTimeThresholdViolationsCount,
-									Validators: []validator.Int64{
-										int64validator.Between(1, 12),
-									},
-								},
-							},
-						},
-						Validators: []validator.List{
-							listvalidator.SizeBetween(1, 1),
-						},
-					},
 					SyntheticAlertConfigFieldCustomPayloadField: shared.GetCustomPayloadFieldsSchema(),
+					SyntheticAlertConfigFieldRule: schema.SingleNestedAttribute{
+						Description: SyntheticAlertConfigDescRule,
+						Required:    true,
+						Attributes: map[string]schema.Attribute{
+							SyntheticAlertRuleFieldAlertType: schema.StringAttribute{
+								Required:    true,
+								Description: SyntheticAlertConfigDescRuleAlertType,
+								Validators: []validator.String{
+									stringvalidator.OneOf(SyntheticAlertConfigValidAlertType),
+								},
+							},
+							SyntheticAlertRuleFieldMetricName: schema.StringAttribute{
+								Required:    true,
+								Description: SyntheticAlertConfigDescRuleMetricName,
+								Validators: []validator.String{
+									stringvalidator.LengthBetween(1, 256),
+								},
+							},
+							SyntheticAlertRuleFieldAggregation: schema.StringAttribute{
+								Optional:    true,
+								Description: SyntheticAlertConfigDescRuleAggregation,
+								Validators: []validator.String{
+									stringvalidator.OneOf(AggregationTypeSum, AggregationTypeMean, AggregationTypeMax, AggregationTypeMin, AggregationTypeP25, AggregationTypeP50, AggregationTypeP75, AggregationTypeP90, AggregationTypeP95, AggregationTypeP98, AggregationTypeP99, AggregationTypeP99_9, AggregationTypeP99_99, AggregationTypeDistinctCount, AggregationTypeSumPositive, AggregationTypePerSecond, AggregationTypeIncrease),
+								},
+							},
+						},
+					},
+					SyntheticAlertConfigFieldTimeThreshold: schema.SingleNestedAttribute{
+						Description: SyntheticAlertConfigDescTimeThreshold,
+						Required:    true,
+						Attributes: map[string]schema.Attribute{
+							SyntheticAlertTimeThresholdFieldType: schema.StringAttribute{
+								Required:    true,
+								Description: SyntheticAlertConfigDescTimeThresholdType,
+								Validators: []validator.String{
+									stringvalidator.OneOf(SyntheticAlertConfigValidTimeThresholdType),
+								},
+							},
+							SyntheticAlertTimeThresholdFieldViolationsCount: schema.Int64Attribute{
+								Required:    true,
+								Description: SyntheticAlertConfigDescTimeThresholdViolationsCount,
+								Validators: []validator.Int64{
+									int64validator.Between(1, 12),
+								},
+							},
+						},
+					},
 				},
 			},
 			SchemaVersion: 1,
@@ -204,51 +193,35 @@ func (r *syntheticAlertConfigResourceFramework) MapStateToDataObject(ctx context
 
 	// Map rule
 	var rule restapi.SyntheticAlertRule
-	if !model.Rule.IsNull() {
-		var ruleElements []types.Object
-		diags.Append(model.Rule.ElementsAs(ctx, &ruleElements, false)...)
+	if !model.Rule.IsNull() && !model.Rule.IsUnknown() {
+		var ruleModel SyntheticAlertRuleModel
+		diags.Append(model.Rule.As(ctx, &ruleModel, basetypes.ObjectAsOptions{})...)
 		if diags.HasError() {
 			return nil, diags
 		}
 
-		if len(ruleElements) > 0 {
-			var ruleModel SyntheticAlertRuleModel
-			diags.Append(ruleElements[0].As(ctx, &ruleModel, basetypes.ObjectAsOptions{})...)
-			if diags.HasError() {
-				return nil, diags
-			}
+		rule = restapi.SyntheticAlertRule{
+			AlertType:  ruleModel.AlertType.ValueString(),
+			MetricName: ruleModel.MetricName.ValueString(),
+		}
 
-			rule = restapi.SyntheticAlertRule{
-				AlertType:  ruleModel.AlertType.ValueString(),
-				MetricName: ruleModel.MetricName.ValueString(),
-			}
-
-			if !ruleModel.Aggregation.IsNull() {
-				rule.Aggregation = ruleModel.Aggregation.ValueString()
-			}
+		if !ruleModel.Aggregation.IsNull() {
+			rule.Aggregation = ruleModel.Aggregation.ValueString()
 		}
 	}
 
 	// Map time threshold
 	var timeThreshold restapi.SyntheticAlertTimeThreshold
-	if !model.TimeThreshold.IsNull() {
-		var timeThresholdElements []types.Object
-		diags.Append(model.TimeThreshold.ElementsAs(ctx, &timeThresholdElements, false)...)
+	if !model.TimeThreshold.IsNull() && !model.TimeThreshold.IsUnknown() {
+		var timeThresholdModel SyntheticAlertTimeThresholdModel
+		diags.Append(model.TimeThreshold.As(ctx, &timeThresholdModel, basetypes.ObjectAsOptions{})...)
 		if diags.HasError() {
 			return nil, diags
 		}
 
-		if len(timeThresholdElements) > 0 {
-			var timeThresholdModel SyntheticAlertTimeThresholdModel
-			diags.Append(timeThresholdElements[0].As(ctx, &timeThresholdModel, basetypes.ObjectAsOptions{})...)
-			if diags.HasError() {
-				return nil, diags
-			}
-
-			timeThreshold = restapi.SyntheticAlertTimeThreshold{
-				Type:            timeThresholdModel.Type.ValueString(),
-				ViolationsCount: int(timeThresholdModel.ViolationsCount.ValueInt64()),
-			}
+		timeThreshold = restapi.SyntheticAlertTimeThreshold{
+			Type:            timeThresholdModel.Type.ValueString(),
+			ViolationsCount: int(timeThresholdModel.ViolationsCount.ValueInt64()),
 		}
 	}
 
@@ -389,16 +362,7 @@ func (r *syntheticAlertConfigResourceFramework) UpdateState(ctx context.Context,
 		return diags
 	}
 
-	ruleList, ruleListDiags := types.ListValue(
-		types.ObjectType{AttrTypes: ruleType},
-		[]attr.Value{ruleValue},
-	)
-	diags.Append(ruleListDiags...)
-	if diags.HasError() {
-		return diags
-	}
-
-	model.Rule = ruleList
+	model.Rule = ruleValue
 
 	// Map time threshold
 	timeThresholdObj := map[string]attr.Value{
@@ -417,16 +381,7 @@ func (r *syntheticAlertConfigResourceFramework) UpdateState(ctx context.Context,
 		return diags
 	}
 
-	timeThresholdList, timeThresholdListDiags := types.ListValue(
-		types.ObjectType{AttrTypes: timeThresholdType},
-		[]attr.Value{timeThresholdValue},
-	)
-	diags.Append(timeThresholdListDiags...)
-	if diags.HasError() {
-		return diags
-	}
-
-	model.TimeThreshold = timeThresholdList
+	model.TimeThreshold = timeThresholdValue
 
 	// Map synthetic test IDs
 	syntheticTestIdsSet, syntheticTestIdsDiags := types.SetValueFrom(ctx, types.StringType, apiObject.SyntheticTestIds)

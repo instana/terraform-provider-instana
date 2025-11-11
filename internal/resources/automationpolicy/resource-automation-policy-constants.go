@@ -17,6 +17,12 @@ const AutomationPolicyDescTriggerID = "Trigger (Instana event or Smart Alert) id
 const AutomationPolicyDescTriggerType = "Instana event or Smart Alert type."
 const AutomationPolicyDescTriggerName = "The name of the trigger."
 const AutomationPolicyDescTriggerDescription = "The description of the trigger."
+const AutomationPolicyDescTriggerScheduling = "The scheduling configuration for the trigger."
+const AutomationPolicyDescTriggerSchedulingStartTime = "Unix timestamp in milliseconds for the start time."
+const AutomationPolicyDescTriggerSchedulingDuration = "Duration value."
+const AutomationPolicyDescTriggerSchedulingDurationUnit = "Duration unit (MINUTE, HOUR, DAY)."
+const AutomationPolicyDescTriggerSchedulingRecurrentRule = "Recurrent rule for scheduling."
+const AutomationPolicyDescTriggerSchedulingRecurrent = "Whether the scheduling is recurrent."
 
 // Field descriptions - Type Configuration
 const AutomationPolicyDescTypeConfiguration = "A list of configurations with the list of actions to run and the mode (automatic or manual)."

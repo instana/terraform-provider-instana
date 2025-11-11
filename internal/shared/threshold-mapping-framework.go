@@ -6,13 +6,11 @@ import (
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/internal/util"
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -42,45 +40,40 @@ type StaticTypeModel struct {
 	Value    types.Int64  `tfsdk:"value"`
 }
 
-// StaticThresholdBlockSchema returns the schema for static block configuration
-func StaticBlockSchema() schema.ListNestedBlock {
-	return schema.ListNestedBlock{
+// StaticBlockSchema returns the schema for static block configuration
+func StaticBlockSchema() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
 		Description: "Static threshold configuration",
-		NestedObject: schema.NestedBlockObject{
-			Attributes: map[string]schema.Attribute{
-				LogAlertConfigFieldValue: schema.Int64Attribute{
-					Optional:    true,
-					Computed:    true,
-					Description: "The value of the threshold",
-				},
+		Optional:    true,
+		Attributes: map[string]schema.Attribute{
+			LogAlertConfigFieldValue: schema.Int64Attribute{
+				Optional:    true,
+				Computed:    true,
+				Description: "The value of the threshold",
 			},
-		},
-		Validators: []validator.List{
-			listvalidator.SizeBetween(0, 1),
 		},
 	}
 }
 
-func AdaptiveBlockSchema() schema.ListNestedBlock {
-	return schema.ListNestedBlock{
+func AdaptiveBlockSchema() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
 		Description: "Threshold configuration",
-		NestedObject: schema.NestedBlockObject{
-			Attributes: map[string]schema.Attribute{
-				ThresholdFieldAdaptiveBaselineDeviation: schema.Float32Attribute{
-					Optional:    true,
-					Computed:    true,
-					Description: "The deviation factor for the adaptive baseline threshold",
-				},
-				ThresholdFieldAdaptiveBaselineAdaptability: schema.Float32Attribute{
-					Optional:    true,
-					Computed:    true,
-					Description: "The adaptability for the adaptive baseline threshold",
-				},
-				ThresholdFieldAdaptiveBaselineSeasonality: schema.StringAttribute{
-					Optional:    true,
-					Computed:    true,
-					Description: "The seasonality for the adaptive baseline threshold",
-				},
+		Optional:    true,
+		Attributes: map[string]schema.Attribute{
+			ThresholdFieldAdaptiveBaselineDeviation: schema.Float32Attribute{
+				Optional:    true,
+				Computed:    true,
+				Description: "The deviation factor for the adaptive baseline threshold",
+			},
+			ThresholdFieldAdaptiveBaselineAdaptability: schema.Float32Attribute{
+				Optional:    true,
+				Computed:    true,
+				Description: "The adaptability for the adaptive baseline threshold",
+			},
+			ThresholdFieldAdaptiveBaselineSeasonality: schema.StringAttribute{
+				Optional:    true,
+				Computed:    true,
+				Description: "The seasonality for the adaptive baseline threshold",
 			},
 		},
 	}
@@ -91,7 +84,7 @@ func StaticThresholdBlockSchema() schema.ListNestedBlock {
 	return schema.ListNestedBlock{
 		Description: "Warning threshold configuration",
 		NestedObject: schema.NestedBlockObject{
-			Blocks: map[string]schema.Block{
+			Attributes: map[string]schema.Attribute{
 				ThresholdFieldStatic: StaticBlockSchema(),
 			},
 		},
@@ -103,7 +96,7 @@ func StaticAndAdaptiveThresholdBlockSchema() schema.ListNestedBlock {
 	return schema.ListNestedBlock{
 		Description: "Threshold configuration",
 		NestedObject: schema.NestedBlockObject{
-			Blocks: map[string]schema.Block{
+			Attributes: map[string]schema.Attribute{
 				ThresholdFieldStatic:           StaticBlockSchema(),
 				ThresholdFieldAdaptiveBaseline: AdaptiveBlockSchema(),
 			},
@@ -116,9 +109,11 @@ func AllThresholdBlockSchema() schema.ListNestedBlock {
 	return schema.ListNestedBlock{
 		Description: "Threshold configuration",
 		NestedObject: schema.NestedBlockObject{
-			Blocks: map[string]schema.Block{
+			Attributes: map[string]schema.Attribute{
 				ThresholdFieldStatic:           StaticBlockSchema(),
 				ThresholdFieldAdaptiveBaseline: AdaptiveBlockSchema(),
+			},
+			Blocks: map[string]schema.Block{
 				ThresholdFieldHistoricBaseline: HistoricBaselineBlockSchema(),
 			},
 		},
@@ -169,48 +164,59 @@ func HistoricBaselineBlockSchema() schema.SingleNestedBlock {
 }
 
 // AdaptiveBaselineBlockSchema returns the schema for adaptive baseline configuration
-func AdaptiveBaselineBlockSchema() schema.ListNestedBlock {
-	return schema.ListNestedBlock{
+func AdaptiveBaselineBlockSchema() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
 		Description: "Adaptive baseline threshold configuration",
-		NestedObject: schema.NestedBlockObject{
-			Attributes: map[string]schema.Attribute{
-				ThresholdFieldAdaptiveBaselineDeviation: schema.Float32Attribute{
-					Required:    true,
-					Description: "The deviation factor for the adaptive baseline threshold",
-				},
-				ThresholdFieldAdaptiveBaselineAdaptability: schema.Float32Attribute{
-					Required:    true,
-					Description: "The adaptability factor for the adaptive baseline threshold",
-				},
-				ThresholdFieldAdaptiveBaselineSeasonality: schema.StringAttribute{
-					Required:    true,
-					Description: "The seasonality of the adaptive baseline threshold (DAILY or WEEKLY)",
-				},
+		Optional:    true,
+		Attributes: map[string]schema.Attribute{
+			ThresholdFieldAdaptiveBaselineDeviation: schema.Float32Attribute{
+				Required:    true,
+				Description: "The deviation factor for the adaptive baseline threshold",
+			},
+			ThresholdFieldAdaptiveBaselineAdaptability: schema.Float32Attribute{
+				Required:    true,
+				Description: "The adaptability factor for the adaptive baseline threshold",
+			},
+			ThresholdFieldAdaptiveBaselineSeasonality: schema.StringAttribute{
+				Required:    true,
+				Description: "The seasonality of the adaptive baseline threshold (DAILY or WEEKLY)",
 			},
 		},
 	}
 }
 
 // HistoricThresholdBlockSchema returns the schema for historic threshold configuration
-func HistoricThresholdBlockSchema() schema.ListNestedBlock {
-	return schema.ListNestedBlock{
+func HistoricThresholdBlockSchema() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
 		Description: "Historic baseline threshold configuration",
-		NestedObject: schema.NestedBlockObject{
-			Blocks: map[string]schema.Block{
-				ThresholdFieldHistoricBaseline: HistoricBaselineBlockSchema(),
+		Optional:    true,
+		Attributes: map[string]schema.Attribute{
+			ThresholdFieldHistoricBaselineDeviation: schema.Float32Attribute{
+				Optional:    true,
+				Description: "The deviation factor for the historic baseline threshold",
+			},
+			ThresholdFieldHistoricBaselineSeasonality: schema.StringAttribute{
+				Optional:    true,
+				Description: "The seasonality of the historic baseline threshold (DAILY or WEEKLY)",
+			},
+			ThresholdFieldHistoricBaselineBaseline: schema.ListAttribute{
+				Optional:    true,
+				Description: "The baseline of the historic baseline threshold",
+				ElementType: types.ListType{
+					ElemType: types.Float64Type,
+				},
 			},
 		},
 	}
 }
 
 // AdaptiveThresholdBlockSchema returns the schema for adaptive threshold configuration
-func AdaptiveThresholdBlockSchema() schema.ListNestedBlock {
-	return schema.ListNestedBlock{
+func AdaptiveThresholdBlockSchema() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
 		Description: "Adaptive baseline threshold configuration",
-		NestedObject: schema.NestedBlockObject{
-			Blocks: map[string]schema.Block{
-				ThresholdFieldAdaptiveBaseline: AdaptiveBaselineBlockSchema(),
-			},
+		Optional:    true,
+		Attributes: map[string]schema.Attribute{
+			ThresholdFieldAdaptiveBaseline: AdaptiveBaselineBlockSchema(),
 		},
 	}
 }

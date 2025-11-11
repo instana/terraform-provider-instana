@@ -243,10 +243,11 @@ func createCustomEventSpecificationSchema() schema.Schema {
 		Blocks: map[string]schema.Block{
 			"rules": schema.SingleNestedBlock{
 				Description: CustomEventSpecificationResourceDescRules,
-				Blocks: map[string]schema.Block{
-					"entity_count": schema.ListNestedBlock{
+				Attributes: map[string]schema.Attribute{
+					"entity_count": schema.ListNestedAttribute{
 						Description: CustomEventSpecificationResourceDescEntityCountRules,
-						NestedObject: schema.NestedBlockObject{
+						Optional:    true,
+						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"severity": schema.StringAttribute{
 									Description: CustomEventSpecificationResourceDescSeverity,
@@ -266,9 +267,10 @@ func createCustomEventSpecificationSchema() schema.Schema {
 							},
 						},
 					},
-					"entity_count_verification": schema.ListNestedBlock{
+					"entity_count_verification": schema.ListNestedAttribute{
 						Description: CustomEventSpecificationResourceDescEntityCountVerification,
-						NestedObject: schema.NestedBlockObject{
+						Optional:    true,
+						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"severity": schema.StringAttribute{
 									Description: CustomEventSpecificationResourceDescSeverity,
@@ -300,9 +302,10 @@ func createCustomEventSpecificationSchema() schema.Schema {
 							},
 						},
 					},
-					"entity_verification": schema.ListNestedBlock{
+					"entity_verification": schema.ListNestedAttribute{
 						Description: CustomEventSpecificationResourceDescEntityVerification,
-						NestedObject: schema.NestedBlockObject{
+						Optional:    true,
+						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"severity": schema.StringAttribute{
 									Description: CustomEventSpecificationResourceDescSeverity,
@@ -330,9 +333,10 @@ func createCustomEventSpecificationSchema() schema.Schema {
 							},
 						},
 					},
-					"host_availability": schema.ListNestedBlock{
+					"host_availability": schema.ListNestedAttribute{
 						Description: CustomEventSpecificationResourceDescHostAvailability,
-						NestedObject: schema.NestedBlockObject{
+						Optional:    true,
+						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"severity": schema.StringAttribute{
 									Description: CustomEventSpecificationResourceDescSeverity,
@@ -356,9 +360,10 @@ func createCustomEventSpecificationSchema() schema.Schema {
 							},
 						},
 					},
-					"system": schema.ListNestedBlock{
+					"system": schema.ListNestedAttribute{
 						Description: CustomEventSpecificationResourceDescSystemRules,
-						NestedObject: schema.NestedBlockObject{
+						Optional:    true,
+						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"severity": schema.StringAttribute{
 									Description: CustomEventSpecificationResourceDescSeverity,
@@ -374,9 +379,10 @@ func createCustomEventSpecificationSchema() schema.Schema {
 							},
 						},
 					},
-					"threshold": schema.ListNestedBlock{
+					"threshold": schema.ListNestedAttribute{
 						Description: CustomEventSpecificationResourceDescThresholdRules,
-						NestedObject: schema.NestedBlockObject{
+						Optional:    true,
+						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"severity": schema.StringAttribute{
 									Description: CustomEventSpecificationResourceDescSeverity,
@@ -409,11 +415,10 @@ func createCustomEventSpecificationSchema() schema.Schema {
 									Description: CustomEventSpecificationResourceDescConditionValue,
 									Required:    true,
 								},
-							},
-							Blocks: map[string]schema.Block{
-								"metric_pattern": schema.ListNestedBlock{
+								"metric_pattern": schema.ListNestedAttribute{
 									Description: CustomEventSpecificationResourceDescMetricPattern,
-									NestedObject: schema.NestedBlockObject{
+									Optional:    true,
+									NestedObject: schema.NestedAttributeObject{
 										Attributes: map[string]schema.Attribute{
 											"prefix": schema.StringAttribute{
 												Description: CustomEventSpecificationResourceDescMetricPatternPrefix,

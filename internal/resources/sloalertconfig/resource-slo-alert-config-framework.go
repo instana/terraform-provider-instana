@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 // ResourceInstanaSloAlertConfigFramework the name of the terraform-provider-instana resource to manage SLO Alert configurations
@@ -64,10 +65,10 @@ type SloAlertConfigModel struct {
 	Triggering      types.Bool   `tfsdk:"triggering"`
 	Enabled         types.Bool   `tfsdk:"enabled"`
 	AlertType       types.String `tfsdk:"alert_type"`
-	Threshold       types.List   `tfsdk:"threshold"`
+	Threshold       types.Object `tfsdk:"threshold"`
 	SloIds          types.Set    `tfsdk:"slo_ids"`
 	AlertChannelIds types.Set    `tfsdk:"alert_channel_ids"`
-	TimeThreshold   types.List   `tfsdk:"time_threshold"`
+	TimeThreshold   types.Object `tfsdk:"time_threshold"`
 	BurnRateConfig  types.List   `tfsdk:"burn_rate_config"`
 	CustomPayload   types.List   `tfsdk:"custom_payload_fields"`
 }
@@ -160,60 +161,58 @@ func NewSloAlertConfigResourceHandleFramework() resourcehandle.ResourceHandleFra
 						Description: SloAlertConfigDescAlertChannelIds,
 						ElementType: types.StringType,
 					},
-				},
-				Blocks: map[string]schema.Block{
-					"threshold": schema.ListNestedBlock{
+					"custom_payload_fields": shared.GetCustomPayloadFieldsSchema(),
+					"threshold": schema.SingleNestedAttribute{
+						Optional:    true,
 						Description: SloAlertConfigDescThreshold,
-						NestedObject: schema.NestedBlockObject{
-							Attributes: map[string]schema.Attribute{
-								"type": schema.StringAttribute{
-									Optional:    true,
-									Description: SloAlertConfigDescThresholdType,
-									Validators: []validator.String{
-										stringvalidator.OneOf("staticThreshold"),
-									},
+						Attributes: map[string]schema.Attribute{
+							"type": schema.StringAttribute{
+								Optional:    true,
+								Description: SloAlertConfigDescThresholdType,
+								Validators: []validator.String{
+									stringvalidator.OneOf("staticThreshold"),
 								},
-								"operator": schema.StringAttribute{
-									Required:    true,
-									Description: SloAlertConfigDescThresholdOperator,
-									Validators: []validator.String{
-										stringvalidator.OneOf(">", ">=", "=", "<=", "<"),
-									},
+							},
+							"operator": schema.StringAttribute{
+								Required:    true,
+								Description: SloAlertConfigDescThresholdOperator,
+								Validators: []validator.String{
+									stringvalidator.OneOf(">", ">=", "=", "<=", "<"),
 								},
-								"value": schema.Float64Attribute{
-									Required:    true,
-									Description: SloAlertConfigDescThresholdValue,
-									Validators: []validator.Float64{
-										float64validator.AtLeast(0.000001),
-									},
+							},
+							"value": schema.Float64Attribute{
+								Required:    true,
+								Description: SloAlertConfigDescThresholdValue,
+								Validators: []validator.Float64{
+									float64validator.AtLeast(0.000001),
 								},
 							},
 						},
 					},
-					"time_threshold": schema.ListNestedBlock{
+					"time_threshold": schema.SingleNestedAttribute{
+						Required:    true,
 						Description: SloAlertConfigDescTimeThreshold,
-						NestedObject: schema.NestedBlockObject{
-							Attributes: map[string]schema.Attribute{
-								"warm_up": schema.Int64Attribute{
-									Required:    true,
-									Description: SloAlertConfigDescTimeThresholdWarmUp,
-									Validators: []validator.Int64{
-										int64validator.AtLeast(1),
-									},
+						Attributes: map[string]schema.Attribute{
+							"warm_up": schema.Int64Attribute{
+								Required:    true,
+								Description: SloAlertConfigDescTimeThresholdWarmUp,
+								Validators: []validator.Int64{
+									int64validator.AtLeast(1),
 								},
-								"cool_down": schema.Int64Attribute{
-									Required:    true,
-									Description: SloAlertConfigDescTimeThresholdCoolDown,
-									Validators: []validator.Int64{
-										int64validator.AtLeast(1),
-									},
+							},
+							"cool_down": schema.Int64Attribute{
+								Required:    true,
+								Description: SloAlertConfigDescTimeThresholdCoolDown,
+								Validators: []validator.Int64{
+									int64validator.AtLeast(1),
 								},
 							},
 						},
 					},
-					"burn_rate_config": schema.ListNestedBlock{
+					"burn_rate_config": schema.ListNestedAttribute{
+						Optional:    true,
 						Description: SloAlertConfigDescBurnRateConfig,
-						NestedObject: schema.NestedBlockObject{
+						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								"alert_window_type": schema.StringAttribute{
 									Required:    true,
@@ -241,8 +240,8 @@ func NewSloAlertConfigResourceHandleFramework() resourcehandle.ResourceHandleFra
 							},
 						},
 					},
-					"custom_payload_fields": shared.GetCustomPayloadFieldsSchema(),
 				},
+				Blocks: map[string]schema.Block{},
 			},
 			SchemaVersion: 1,
 			CreateOnly:    false,
@@ -312,15 +311,13 @@ func (r *sloAlertConfigResourceFramework) UpdateState(ctx context.Context, state
 			return diags
 		}
 
-		model.Threshold = types.ListValueMust(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"type":     types.StringType,
-				"operator": types.StringType,
-				"value":    types.Float64Type,
-			},
-		}, []attr.Value{thresholdObj})
+		model.Threshold = thresholdObj
 	} else {
-		model.Threshold = types.ListNull(types.ObjectType{})
+		model.Threshold = types.ObjectNull(map[string]attr.Type{
+			"type":     types.StringType,
+			"operator": types.StringType,
+			"value":    types.Float64Type,
+		})
 	}
 
 	// Map time threshold
@@ -338,12 +335,7 @@ func (r *sloAlertConfigResourceFramework) UpdateState(ctx context.Context, state
 		return diags
 	}
 
-	model.TimeThreshold = types.ListValueMust(types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"warm_up":   types.Int64Type,
-			"cool_down": types.Int64Type,
-		},
-	}, []attr.Value{timeThresholdObj})
+	model.TimeThreshold = timeThresholdObj
 
 	// Map SLO IDs
 	sloIds := []attr.Value{}
@@ -481,42 +473,36 @@ func (r *sloAlertConfigResourceFramework) MapStateToDataObject(ctx context.Conte
 	// Map threshold
 	var threshold *restapi.SloAlertThreshold
 	if terraformAlertType != "burn_rate_v2" && !model.Threshold.IsNull() && !model.Threshold.IsUnknown() {
-		var thresholdModels []SloAlertThresholdModel
-		diags.Append(model.Threshold.ElementsAs(ctx, &thresholdModels, false)...)
+		var thresholdModel SloAlertThresholdModel
+		diags.Append(model.Threshold.As(ctx, &thresholdModel, basetypes.ObjectAsOptions{})...)
 		if diags.HasError() {
 			return nil, diags
 		}
 
-		if len(thresholdModels) > 0 {
-			thresholdModel := thresholdModels[0]
-			thresholdType := "staticThreshold"
-			if !thresholdModel.Type.IsNull() {
-				thresholdType = thresholdModel.Type.ValueString()
-			}
+		thresholdType := "staticThreshold"
+		if !thresholdModel.Type.IsNull() {
+			thresholdType = thresholdModel.Type.ValueString()
+		}
 
-			threshold = &restapi.SloAlertThreshold{
-				Type:     thresholdType,
-				Operator: thresholdModel.Operator.ValueString(),
-				Value:    thresholdModel.Value.ValueFloat64(),
-			}
+		threshold = &restapi.SloAlertThreshold{
+			Type:     thresholdType,
+			Operator: thresholdModel.Operator.ValueString(),
+			Value:    thresholdModel.Value.ValueFloat64(),
 		}
 	}
 
 	// Map time threshold
 	var timeThreshold restapi.SloAlertTimeThreshold
 	if !model.TimeThreshold.IsNull() && !model.TimeThreshold.IsUnknown() {
-		var timeThresholdModels []SloAlertTimeThresholdModel
-		diags.Append(model.TimeThreshold.ElementsAs(ctx, &timeThresholdModels, false)...)
+		var timeThresholdModel SloAlertTimeThresholdModel
+		diags.Append(model.TimeThreshold.As(ctx, &timeThresholdModel, basetypes.ObjectAsOptions{})...)
 		if diags.HasError() {
 			return nil, diags
 		}
 
-		if len(timeThresholdModels) > 0 {
-			timeThresholdModel := timeThresholdModels[0]
-			timeThreshold = restapi.SloAlertTimeThreshold{
-				TimeWindow: int(timeThresholdModel.WarmUp.ValueInt64()),
-				Expiry:     int(timeThresholdModel.CoolDown.ValueInt64()),
-			}
+		timeThreshold = restapi.SloAlertTimeThreshold{
+			TimeWindow: int(timeThresholdModel.WarmUp.ValueInt64()),
+			Expiry:     int(timeThresholdModel.CoolDown.ValueInt64()),
 		}
 	}
 

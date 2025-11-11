@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 // ResourceInstanaAutomationPolicyFramework the name of the terraform-provider-instana resource to manage automation policies
@@ -40,6 +41,16 @@ type TriggerModel struct {
 	Type        types.String `tfsdk:"type"`
 	Name        types.String `tfsdk:"name"`
 	Description types.String `tfsdk:"description"`
+	Scheduling  types.Object `tfsdk:"scheduling"`
+}
+
+// SchedulingModel represents the scheduling configuration for automation policy trigger
+type SchedulingModel struct {
+	StartTime     types.Int64  `tfsdk:"start_time"`
+	Duration      types.Int64  `tfsdk:"duration"`
+	DurationUnit  types.String `tfsdk:"duration_unit"`
+	RecurrentRule types.String `tfsdk:"recurrent_rule"`
+	Recurrent     types.Bool   `tfsdk:"recurrent"`
 }
 
 // TypeConfigurationModel represents a type configuration in the automation policy
@@ -111,6 +122,35 @@ func NewAutomationPolicyResourceHandleFramework() resourcehandle.ResourceHandleF
 							shared.AutomationPolicyFieldDescription: schema.StringAttribute{
 								Optional:    true,
 								Description: AutomationPolicyDescTriggerDescription,
+							},
+							"scheduling": schema.SingleNestedAttribute{
+								Optional:    true,
+								Description: AutomationPolicyDescTriggerScheduling,
+								Attributes: map[string]schema.Attribute{
+									"start_time": schema.Int64Attribute{
+										Optional:    true,
+										Description: AutomationPolicyDescTriggerSchedulingStartTime,
+									},
+									"duration": schema.Int64Attribute{
+										Optional:    true,
+										Description: AutomationPolicyDescTriggerSchedulingDuration,
+									},
+									"duration_unit": schema.StringAttribute{
+										Optional:    true,
+										Description: AutomationPolicyDescTriggerSchedulingDurationUnit,
+										Validators: []validator.String{
+											stringvalidator.OneOf("MINUTE", "HOUR", "DAY"),
+										},
+									},
+									"recurrent_rule": schema.StringAttribute{
+										Optional:    true,
+										Description: AutomationPolicyDescTriggerSchedulingRecurrentRule,
+									},
+									"recurrent": schema.BoolAttribute{
+										Optional:    true,
+										Description: AutomationPolicyDescTriggerSchedulingRecurrent,
+									},
+								},
 							},
 						},
 					},
@@ -260,12 +300,72 @@ func (r *automationPolicyResourceFramework) mapTriggerToState(trigger *restapi.T
 	}
 
 	if triggerModel.Description.IsNull() || triggerModel.Description.IsUnknown() {
-		triggerModel.Description = types.StringValue(trigger.Description)
+		if trigger.Description != "" {
+			triggerModel.Description = types.StringValue(trigger.Description)
+		} else {
+			triggerModel.Description = types.StringNull()
+		}
+
 	}
 	if triggerModel.Name.IsNull() || triggerModel.Name.IsUnknown() {
-		triggerModel.Name = types.StringValue(trigger.Name)
+		if trigger.Name != "" {
+			triggerModel.Name = types.StringValue(trigger.Name)
+		} else {
+			triggerModel.Name = types.StringNull()
+		}
+
 	}
-	// The existing value from plan is already preserved in UpdateState function
+
+	// Map scheduling from API response if not already set in the model
+	// The scheduling field is preserved from the plan in UpdateState function
+	if triggerModel.Scheduling.IsNull() || triggerModel.Scheduling.IsUnknown() {
+		if trigger.Scheduling.StartTime != 0 {
+			// Handle duration_unit - set to null if empty
+			var durationUnit attr.Value
+			if trigger.Scheduling.DurationUnit != "" {
+				durationUnit = types.StringValue(string(trigger.Scheduling.DurationUnit))
+			} else {
+				durationUnit = types.StringNull()
+			}
+
+			// Handle recurrent_rule - set to null if empty
+			var recurrentRule attr.Value
+			if trigger.Scheduling.RecurrentRule != "" {
+				recurrentRule = types.StringValue(trigger.Scheduling.RecurrentRule)
+			} else {
+				recurrentRule = types.StringNull()
+			}
+
+			schedulingObj := map[string]attr.Value{
+				"start_time":     types.Int64Value(trigger.Scheduling.StartTime),
+				"duration":       types.Int64Value(int64(trigger.Scheduling.Duration)),
+				"duration_unit":  durationUnit,
+				"recurrent_rule": recurrentRule,
+				"recurrent":      types.BoolValue(trigger.Scheduling.Recurrent),
+			}
+
+			schedulingType := map[string]attr.Type{
+				"start_time":     types.Int64Type,
+				"duration":       types.Int64Type,
+				"duration_unit":  types.StringType,
+				"recurrent_rule": types.StringType,
+				"recurrent":      types.BoolType,
+			}
+
+			schedulingValue, _ := types.ObjectValue(schedulingType, schedulingObj)
+			triggerModel.Scheduling = schedulingValue
+		} else {
+			// Set to null if no scheduling data from API
+			schedulingType := map[string]attr.Type{
+				"start_time":     types.Int64Type,
+				"duration":       types.Int64Type,
+				"duration_unit":  types.StringType,
+				"recurrent_rule": types.StringType,
+				"recurrent":      types.BoolType,
+			}
+			triggerModel.Scheduling = types.ObjectNull(schedulingType)
+		}
+	}
 
 	return triggerModel
 }
@@ -419,6 +519,29 @@ func (r *automationPolicyResourceFramework) mapTriggerFromState(ctx context.Cont
 
 	if !triggerModel.Description.IsNull() {
 		trigger.Description = triggerModel.Description.ValueString()
+	}
+
+	// Map scheduling if present
+	if !triggerModel.Scheduling.IsNull() && !triggerModel.Scheduling.IsUnknown() {
+		var schedulingModel SchedulingModel
+		diags.Append(triggerModel.Scheduling.As(ctx, &schedulingModel, basetypes.ObjectAsOptions{})...)
+		if diags.HasError() {
+			return trigger, diags
+		}
+
+		// Only set scheduling if at least start_time is provided
+		if !schedulingModel.StartTime.IsNull() && !schedulingModel.StartTime.IsUnknown() {
+			trigger.Scheduling = restapi.Scheduling{
+				StartTime:    schedulingModel.StartTime.ValueInt64(),
+				Duration:     int(schedulingModel.Duration.ValueInt64()),
+				DurationUnit: restapi.DurationUnit(schedulingModel.DurationUnit.ValueString()),
+				Recurrent:    schedulingModel.Recurrent.ValueBool(),
+			}
+
+			if !schedulingModel.RecurrentRule.IsNull() {
+				trigger.Scheduling.RecurrentRule = schedulingModel.RecurrentRule.ValueString()
+			}
+		}
 	}
 
 	return trigger, diags

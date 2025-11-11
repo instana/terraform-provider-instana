@@ -57,12 +57,13 @@ func GetCustomPayloadFieldType() types.ObjectType {
 	}
 }
 
-// GetCustomPayloadFieldsSchema returns the schema for custom payload fields as a list nested block
+// GetCustomPayloadFieldsSchema returns the schema for custom payload fields as a list nested attribute
 // This can be used by any resource that needs to define custom payload fields
-func GetCustomPayloadFieldsSchema() schema.ListNestedBlock {
-	return schema.ListNestedBlock{
+func GetCustomPayloadFieldsSchema() schema.ListNestedAttribute {
+	return schema.ListNestedAttribute{
 		Description: "Custom payload fields for the configuration.",
-		NestedObject: schema.NestedBlockObject{
+		Optional:    true,
+		NestedObject: schema.NestedAttributeObject{
 			Attributes: map[string]schema.Attribute{
 				CustomPayloadFieldsFieldKey: schema.StringAttribute{
 					Required:    true,
@@ -72,10 +73,9 @@ func GetCustomPayloadFieldsSchema() schema.ListNestedBlock {
 					Optional:    true,
 					Description: "The value of a static string custom payload field",
 				},
-			},
-			Blocks: map[string]schema.Block{
-				CustomPayloadFieldsFieldDynamicValue: schema.SingleNestedBlock{
+				CustomPayloadFieldsFieldDynamicValue: schema.SingleNestedAttribute{
 					Description: "The value of a dynamic custom payload field",
+					Optional:    true,
 					Attributes: map[string]schema.Attribute{
 						CustomPayloadFieldsFieldDynamicKey: schema.StringAttribute{
 							Optional:    true,
@@ -92,12 +92,13 @@ func GetCustomPayloadFieldsSchema() schema.ListNestedBlock {
 	}
 }
 
-// GetStaticOnlyCustomPayloadFieldsSchema returns the schema for custom payload fields as a list nested block
+// GetStaticOnlyCustomPayloadFieldsSchema returns the schema for custom payload fields as a list nested attribute
 // This version only supports static string values and does not include the dynamic_value block
-func GetStaticOnlyCustomPayloadFieldsSchema() schema.ListNestedBlock {
-	return schema.ListNestedBlock{
+func GetStaticOnlyCustomPayloadFieldsSchema() schema.ListNestedAttribute {
+	return schema.ListNestedAttribute{
 		Description: "Custom payload fields for the configuration.",
-		NestedObject: schema.NestedBlockObject{
+		Optional:    true,
+		NestedObject: schema.NestedAttributeObject{
 			Attributes: map[string]schema.Attribute{
 				CustomPayloadFieldsFieldKey: schema.StringAttribute{
 					Required:    true,

@@ -15,8 +15,8 @@ type SyntheticTestModel struct {
 	Locations        types.Set    `tfsdk:"locations"`
 	PlaybackMode     types.String `tfsdk:"playback_mode"`
 	TestFrequency    types.Int64  `tfsdk:"test_frequency"`
-	HttpAction       types.List   `tfsdk:"http_action"`
-	HttpScript       types.List   `tfsdk:"http_script"`
+	HttpAction       types.Object `tfsdk:"http_action"`
+	HttpScript       types.Object `tfsdk:"http_script"`
 }
 
 // HttpActionConfigModel represents the Terraform model for HTTP Action configuration
