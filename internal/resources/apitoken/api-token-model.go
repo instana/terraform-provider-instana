@@ -1,6 +1,8 @@
 package apitoken
 
+import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
+)
 
 // APITokenModel represents the data model for the API token resource
 type APITokenModel struct {
