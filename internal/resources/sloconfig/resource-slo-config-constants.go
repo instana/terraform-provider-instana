@@ -1,5 +1,11 @@
 package sloconfig
 
+// ResourceInstanaSloConfigFramework the name of the terraform-provider-instana resource to manage SLO configurations
+const ResourceInstanaSloConfigFramework = "slo_config"
+
+// SloConfigFieldRbacTags is the field name for RBAC tags
+const SloConfigFieldRbacTags = "rbac_tags"
+
 // Resource description constants
 const (
 	// SloConfigDescResource is the description for the SLO config resource

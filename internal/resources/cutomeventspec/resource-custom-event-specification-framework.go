@@ -21,144 +21,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// ResourceInstanaCustomEventSpecificationFramework the name of the terraform-provider-instana resource to manage custom event specifications
-const ResourceInstanaCustomEventSpecificationFramework = "custom_event_specification"
-
-const (
-	CustomEventSpecificationFieldName           = "name"
-	CustomEventSpecificationFieldEntityType     = "entity_type"
-	CustomEventSpecificationFieldQuery          = "query"
-	CustomEventSpecificationFieldTriggering     = "triggering"
-	CustomEventSpecificationFieldDescription    = "description"
-	CustomEventSpecificationFieldExpirationTime = "expiration_time"
-	CustomEventSpecificationFieldEnabled        = "enabled"
-
-	CustomEventSpecificationFieldRuleLogicalOperator         = "rule_logical_operator"
-	CustomEventSpecificationFieldRules                       = "rules"
-	CustomEventSpecificationFieldEntityCountRule             = "entity_count"
-	CustomEventSpecificationFieldEntityCountVerificationRule = "entity_count_verification"
-	CustomEventSpecificationFieldEntityVerificationRule      = "entity_verification"
-	CustomEventSpecificationFieldHostAvailabilityRule        = "host_availability"
-	CustomEventSpecificationFieldSystemRule                  = "system"
-	CustomEventSpecificationFieldThresholdRule               = "threshold"
-
-	CustomEventSpecificationRuleFieldSeverity                          = "severity"
-	CustomEventSpecificationRuleFieldMatchingEntityType                = "matching_entity_type"
-	CustomEventSpecificationRuleFieldMatchingOperator                  = "matching_operator"
-	CustomEventSpecificationRuleFieldMatchingEntityLabel               = "matching_entity_label"
-	CustomEventSpecificationRuleFieldOfflineDuration                   = "offline_duration"
-	CustomEventSpecificationSystemRuleFieldSystemRuleId                = "system_rule_id"
-	CustomEventSpecificationThresholdRuleFieldMetricName               = "metric_name"
-	CustomEventSpecificationThresholdRuleFieldRollup                   = "rollup"
-	CustomEventSpecificationThresholdRuleFieldWindow                   = "window"
-	CustomEventSpecificationThresholdRuleFieldAggregation              = "aggregation"
-	CustomEventSpecificationRuleFieldConditionOperator                 = "condition_operator"
-	CustomEventSpecificationRuleFieldConditionValue                    = "condition_value"
-	CustomEventSpecificationThresholdRuleFieldMetricPattern            = "metric_pattern"
-	CustomEventSpecificationThresholdRuleFieldMetricPatternPrefix      = "prefix"
-	CustomEventSpecificationThresholdRuleFieldMetricPatternPostfix     = "postfix"
-	CustomEventSpecificationThresholdRuleFieldMetricPatternPlaceholder = "placeholder"
-	CustomEventSpecificationThresholdRuleFieldMetricPatternOperator    = "operator"
-	CustomEventSpecificationHostAvailabilityRuleFieldMetricCloseAfter  = "close_after"
-	CustomEventSpecificationHostAvailabilityRuleFieldTagFilter         = "tag_filter"
-)
-
-// CustomEventSpecificationModel represents the data model for the custom event specification resource
-type CustomEventSpecificationModel struct {
-	ID                  types.String `tfsdk:"id"`
-	Name                types.String `tfsdk:"name"`
-	EntityType          types.String `tfsdk:"entity_type"`
-	Query               types.String `tfsdk:"query"`
-	Triggering          types.Bool   `tfsdk:"triggering"`
-	Description         types.String `tfsdk:"description"`
-	ExpirationTime      types.Int64  `tfsdk:"expiration_time"`
-	Enabled             types.Bool   `tfsdk:"enabled"`
-	RuleLogicalOperator types.String `tfsdk:"rule_logical_operator"`
-	Rules               types.Object `tfsdk:"rules"`
-}
-
-// RulesModel represents the rules container in the custom event specification
-type RulesModel struct {
-	EntityCount             types.List `tfsdk:"entity_count"`
-	EntityCountVerification types.List `tfsdk:"entity_count_verification"`
-	EntityVerification      types.List `tfsdk:"entity_verification"`
-	HostAvailability        types.List `tfsdk:"host_availability"`
-	System                  types.List `tfsdk:"system"`
-	Threshold               types.List `tfsdk:"threshold"`
-}
-
-// EntityCountRuleModel represents an entity count rule
-type EntityCountRuleModel struct {
-	Severity          types.String  `tfsdk:"severity"`
-	ConditionOperator types.String  `tfsdk:"condition_operator"`
-	ConditionValue    types.Float64 `tfsdk:"condition_value"`
-}
-
-// EntityCountVerificationRuleModel represents an entity count verification rule
-type EntityCountVerificationRuleModel struct {
-	Severity            types.String  `tfsdk:"severity"`
-	ConditionOperator   types.String  `tfsdk:"condition_operator"`
-	ConditionValue      types.Float64 `tfsdk:"condition_value"`
-	MatchingEntityType  types.String  `tfsdk:"matching_entity_type"`
-	MatchingOperator    types.String  `tfsdk:"matching_operator"`
-	MatchingEntityLabel types.String  `tfsdk:"matching_entity_label"`
-}
-
-// EntityVerificationRuleModel represents an entity verification rule
-type EntityVerificationRuleModel struct {
-	Severity            types.String `tfsdk:"severity"`
-	MatchingEntityType  types.String `tfsdk:"matching_entity_type"`
-	MatchingOperator    types.String `tfsdk:"matching_operator"`
-	MatchingEntityLabel types.String `tfsdk:"matching_entity_label"`
-	OfflineDuration     types.Int64  `tfsdk:"offline_duration"`
-}
-
-// HostAvailabilityRuleModel represents a host availability rule
-type HostAvailabilityRuleModel struct {
-	Severity        types.String `tfsdk:"severity"`
-	OfflineDuration types.Int64  `tfsdk:"offline_duration"`
-	CloseAfter      types.Int64  `tfsdk:"close_after"`
-	TagFilter       types.String `tfsdk:"tag_filter"`
-}
-
-// SystemRuleModel represents a system rule
-type SystemRuleModel struct {
-	Severity     types.String `tfsdk:"severity"`
-	SystemRuleID types.String `tfsdk:"system_rule_id"`
-}
-
-// ThresholdRuleModel represents a threshold rule
-type ThresholdRuleModel struct {
-	Severity          types.String  `tfsdk:"severity"`
-	MetricName        types.String  `tfsdk:"metric_name"`
-	MetricPattern     types.List    `tfsdk:"metric_pattern"`
-	Rollup            types.Int64   `tfsdk:"rollup"`
-	Window            types.Int64   `tfsdk:"window"`
-	Aggregation       types.String  `tfsdk:"aggregation"`
-	ConditionOperator types.String  `tfsdk:"condition_operator"`
-	ConditionValue    types.Float64 `tfsdk:"condition_value"`
-}
-
-// MetricPatternModel represents a metric pattern in a threshold rule
-type MetricPatternModel struct {
-	Prefix      types.String `tfsdk:"prefix"`
-	Postfix     types.String `tfsdk:"postfix"`
-	Placeholder types.String `tfsdk:"placeholder"`
-	Operator    types.String `tfsdk:"operator"`
-}
-
-// mapSeverityToInt maps the severity string to an integer value
-func mapSeverityToInt(severity string) int {
-	switch severity {
-	case "warning":
-		return 5
-	case "critical":
-		return 10
-	default:
-		return 5 // Default to warning
-	}
-}
-
 // NewCustomEventSpecificationResourceHandleFramework creates the resource handle for Custom Event Specification
 func NewCustomEventSpecificationResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.CustomEventSpecification] {
 	return &customEventSpecificationResourceFramework{
@@ -1136,4 +998,16 @@ func (r *customEventSpecificationResourceFramework) MapStateToDataObject(ctx con
 		RuleLogicalOperator: model.RuleLogicalOperator.ValueString(),
 		Rules:               rules,
 	}, diags
+}
+
+// mapSeverityToInt maps the severity string to an integer value
+func mapSeverityToInt(severity string) int {
+	switch severity {
+	case "warning":
+		return 5
+	case "critical":
+		return 10
+	default:
+		return 5 // Default to warning
+	}
 }

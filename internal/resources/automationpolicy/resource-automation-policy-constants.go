@@ -1,5 +1,11 @@
 package automationpolicy
 
+// ResourceInstanaAutomationPolicyFramework the name of the terraform-provider-instana resource to manage automation policies
+const ResourceInstanaAutomationPolicyFramework = "automation_policy"
+
+// runnable types
+const actionRunnable = "action"
+
 // Resource description
 const AutomationPolicyDescResource = "This resource manages automation policies in Instana."
 

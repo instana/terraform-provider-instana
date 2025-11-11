@@ -20,35 +20,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// ResourceInstanaApplicationConfigFramework the name of the terraform-provider-instana resource to manage application config
-const ResourceInstanaApplicationConfigFramework = "application_config"
-
-// ApplicationConfigFieldAccessRules field name for access rules
-const ApplicationConfigFieldAccessRules = "access_rules"
-
-const (
-	//ApplicationConfigFieldLabel const for the label field of the application config
-	ApplicationConfigFieldLabel = "label"
-	//ApplicationConfigFieldFullLabel const for the full label field of the application config. The field is computed and contains the label which is sent to instana. The computation depends on the configured default_name_prefix and default_name_suffix at provider level
-	ApplicationConfigFieldFullLabel = "full_label"
-	//ApplicationConfigFieldScope const for the scope field of the application config
-	ApplicationConfigFieldScope = "scope"
-	//ApplicationConfigFieldBoundaryScope const for the boundary_scope field of the application config
-	ApplicationConfigFieldBoundaryScope = "boundary_scope"
-	//ApplicationConfigFieldTagFilter const for the tag_filter field of the application config
-	ApplicationConfigFieldTagFilter = "tag_filter"
-)
-
-// ApplicationConfigModel represents the data model for the application configuration resource
-type ApplicationConfigModel struct {
-	ID            types.String `tfsdk:"id"`
-	Label         types.String `tfsdk:"label"`
-	Scope         types.String `tfsdk:"scope"`
-	BoundaryScope types.String `tfsdk:"boundary_scope"`
-	TagFilter     types.String `tfsdk:"tag_filter"`
-	AccessRules   types.List   `tfsdk:"access_rules"`
-}
-
 // NewApplicationConfigResourceHandleFramework creates the resource handle for Application Configuration
 func NewApplicationConfigResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.ApplicationConfig] {
 	return &applicationConfigResourceFramework{

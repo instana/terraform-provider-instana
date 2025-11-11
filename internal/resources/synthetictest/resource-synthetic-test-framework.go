@@ -24,9 +24,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
-// ResourceInstanaSyntheticTestFramework the name of the terraform-provider-instana resource to manage synthetic tests
-const ResourceInstanaSyntheticTestFramework = "synthetic_test"
-
 // NewSyntheticTestResourceHandleFramework creates the resource handle for Synthetic Tests
 func NewSyntheticTestResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.SyntheticTest] {
 	return &syntheticTestResourceFramework{
