@@ -1,4 +1,4 @@
-package tf_framework
+package synthetictest
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"

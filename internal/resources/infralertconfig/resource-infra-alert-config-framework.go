@@ -289,8 +289,8 @@ func (r *infraAlertConfigResourceFramework) UpdateState(ctx context.Context, sta
 
 		// Convert threshold rule model to object
 		thresholdRuleObj, thresholdDiags := types.ObjectValueFrom(ctx, map[string]attr.Type{
-			shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
-			shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
+			shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrObjectTypes(),
+			shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrObjectTypes(),
 		}, thresholdRuleModel)
 		diags.Append(thresholdDiags...)
 		if diags.HasError() {
@@ -311,8 +311,8 @@ func (r *infraAlertConfigResourceFramework) UpdateState(ctx context.Context, sta
 		// Create rules model and convert to object
 		thresholdObjType := types.ObjectType{
 			AttrTypes: map[string]attr.Type{
-				shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
-				shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
+				shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrObjectTypes(),
+				shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrObjectTypes(),
 			},
 		}
 
@@ -351,8 +351,8 @@ func (r *infraAlertConfigResourceFramework) UpdateState(ctx context.Context, sta
 					"threshold_operator":       types.StringType,
 					"threshold": types.ObjectType{
 						AttrTypes: map[string]attr.Type{
-							shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
-							shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
+							shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrObjectTypes(),
+							shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrObjectTypes(),
 						},
 					},
 				},
@@ -519,7 +519,7 @@ func (r *infraAlertConfigResourceFramework) MapStateToDataObject(ctx context.Con
 
 				// Map warning threshold
 				if !thresholdRuleModel.Warning.IsNull() && !thresholdRuleModel.Warning.IsUnknown() {
-					warningThresholds, warningDiags := shared.MapThresholdRuleFromState(ctx, thresholdRuleModel.Warning)
+					warningThresholds, warningDiags := shared.MapThresholdRuleFromStateObject(ctx, thresholdRuleModel.Warning)
 					diags.Append(warningDiags...)
 					if diags.HasError() {
 						return nil, diags
@@ -531,7 +531,7 @@ func (r *infraAlertConfigResourceFramework) MapStateToDataObject(ctx context.Con
 
 				// Map critical threshold
 				if !thresholdRuleModel.Critical.IsNull() && !thresholdRuleModel.Critical.IsUnknown() {
-					criticalThresholds, criticalDiags := shared.MapThresholdRuleFromState(ctx, thresholdRuleModel.Critical)
+					criticalThresholds, criticalDiags := shared.MapThresholdRuleFromStateObject(ctx, thresholdRuleModel.Critical)
 					diags.Append(criticalDiags...)
 					if diags.HasError() {
 						return nil, diags

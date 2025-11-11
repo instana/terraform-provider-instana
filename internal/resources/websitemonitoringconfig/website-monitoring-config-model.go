@@ -1,4 +1,4 @@
-package tf_framework
+package websitemonitoringconfig
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"

@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
-	"github.com/gessnerfl/terraform-provider-instana/instana/tf_framework"
 	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -62,7 +61,7 @@ func (r *websiteMonitoringConfigResourceFramework) SetComputedFields(_ context.C
 
 func (r *websiteMonitoringConfigResourceFramework) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.WebsiteMonitoringConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	var model tf_framework.WebsiteMonitoringConfigModel
+	var model WebsiteMonitoringConfigModel
 
 	// Get current state from plan or state
 	if plan != nil {
@@ -86,7 +85,7 @@ func (r *websiteMonitoringConfigResourceFramework) UpdateState(ctx context.Conte
 	var diags diag.Diagnostics
 
 	// Create a model and populate it with values from the API object
-	model := tf_framework.WebsiteMonitoringConfigModel{
+	model := WebsiteMonitoringConfigModel{
 		ID:      types.StringValue(apiObject.ID),
 		Name:    types.StringValue(apiObject.Name),
 		AppName: types.StringValue(apiObject.AppName),

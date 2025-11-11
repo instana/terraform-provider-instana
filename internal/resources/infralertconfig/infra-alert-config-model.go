@@ -57,8 +57,8 @@ type InfraGenericRuleModel struct {
 
 // InfraThresholdRuleModel represents the threshold rule model
 type InfraThresholdRuleModel struct {
-	Warning  types.List `tfsdk:"warning"`
-	Critical types.List `tfsdk:"critical"`
+	Warning  types.Object `tfsdk:"warning"`
+	Critical types.Object `tfsdk:"critical"`
 }
 
 // InfraStaticThresholdModel represents the static threshold model

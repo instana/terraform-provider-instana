@@ -6,7 +6,6 @@ import (
 	"regexp"
 
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
-	"github.com/gessnerfl/terraform-provider-instana/instana/tf_framework"
 	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
 	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -280,7 +279,7 @@ func (r *syntheticTestResourceFramework) SetComputedFields(_ context.Context, _ 
 
 func (r *syntheticTestResourceFramework) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.SyntheticTest, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	var model tf_framework.SyntheticTestModel
+	var model SyntheticTestModel
 
 	// Get current state from plan or state
 	if plan != nil {
@@ -347,7 +346,7 @@ func (r *syntheticTestResourceFramework) MapStateToDataObject(ctx context.Contex
 	}, diags
 }
 
-func (r *syntheticTestResourceFramework) mapConfigurationFromModel(ctx context.Context, model tf_framework.SyntheticTestModel) (restapi.SyntheticTestConfig, diag.Diagnostics) {
+func (r *syntheticTestResourceFramework) mapConfigurationFromModel(ctx context.Context, model SyntheticTestModel) (restapi.SyntheticTestConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Check if either http_action or http_script is set
@@ -364,7 +363,7 @@ func (r *syntheticTestResourceFramework) mapConfigurationFromModel(ctx context.C
 
 	// Map HTTP Action configuration
 	if !model.HttpAction.IsNull() && !model.HttpAction.IsUnknown() {
-		var httpActionModel tf_framework.HttpActionConfigModel
+		var httpActionModel HttpActionConfigModel
 		diags.Append(model.HttpAction.As(ctx, &httpActionModel, basetypes.ObjectAsOptions{})...)
 		if diags.HasError() {
 			return restapi.SyntheticTestConfig{}, diags
@@ -406,7 +405,7 @@ func (r *syntheticTestResourceFramework) mapConfigurationFromModel(ctx context.C
 
 	// Map HTTP Script configuration
 	if !model.HttpScript.IsNull() && !model.HttpScript.IsUnknown() {
-		var httpScriptModel tf_framework.HttpScriptConfigModel
+		var httpScriptModel HttpScriptConfigModel
 		diags.Append(model.HttpScript.As(ctx, &httpScriptModel, basetypes.ObjectAsOptions{})...)
 		if diags.HasError() {
 			return restapi.SyntheticTestConfig{}, diags
@@ -431,7 +430,7 @@ func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state 
 	var diags diag.Diagnostics
 
 	// Create a model and populate it with values from the API object
-	model := tf_framework.SyntheticTestModel{
+	model := SyntheticTestModel{
 		ID:           types.StringValue(apiObject.ID),
 		Label:        types.StringValue(apiObject.Label),
 		Active:       types.BoolValue(apiObject.Active),
@@ -475,7 +474,7 @@ func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state 
 
 	// Map configuration based on synthetic type
 	if apiObject.Configuration.SyntheticType == "HTTPAction" {
-		httpActionModel := tf_framework.HttpActionConfigModel{
+		httpActionModel := HttpActionConfigModel{
 			MarkSyntheticCall: types.BoolValue(apiObject.Configuration.MarkSyntheticCall),
 			Retries:           types.Int64Value(int64(apiObject.Configuration.Retries)),
 			RetryInterval:     types.Int64Value(int64(apiObject.Configuration.RetryInterval)),
@@ -536,7 +535,7 @@ func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state 
 			"script":              types.StringType,
 		})
 	} else if apiObject.Configuration.SyntheticType == "HTTPScript" {
-		httpScriptModel := tf_framework.HttpScriptConfigModel{
+		httpScriptModel := HttpScriptConfigModel{
 			MarkSyntheticCall: types.BoolValue(apiObject.Configuration.MarkSyntheticCall),
 			Retries:           types.Int64Value(int64(apiObject.Configuration.Retries)),
 			RetryInterval:     types.Int64Value(int64(apiObject.Configuration.RetryInterval)),
