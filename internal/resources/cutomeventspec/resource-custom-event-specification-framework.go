@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 // NewCustomEventSpecificationResourceHandleFramework creates the resource handle for Custom Event Specification
@@ -105,205 +106,191 @@ func createCustomEventSpecificationSchema() schema.Schema {
 				Description: CustomEventSpecificationResourceDescRules,
 				Optional:    true,
 				Attributes: map[string]schema.Attribute{
-					"entity_count": schema.ListNestedAttribute{
+					"entity_count": schema.SingleNestedAttribute{
 						Description: CustomEventSpecificationResourceDescEntityCountRules,
 						Optional:    true,
-						NestedObject: schema.NestedAttributeObject{
-							Attributes: map[string]schema.Attribute{
-								"severity": schema.StringAttribute{
-									Description: CustomEventSpecificationResourceDescSeverity,
-									Required:    true,
-									Validators: []validator.String{
-										stringvalidator.OneOf("warning", "critical"),
-									},
+						Attributes: map[string]schema.Attribute{
+							"severity": schema.StringAttribute{
+								Description: CustomEventSpecificationResourceDescSeverity,
+								Required:    true,
+								Validators: []validator.String{
+									stringvalidator.OneOf("warning", "critical"),
 								},
-								"condition_operator": schema.StringAttribute{
-									Description: CustomEventSpecificationResourceDescConditionOperator,
-									Required:    true,
-								},
-								"condition_value": schema.Float64Attribute{
-									Description: CustomEventSpecificationResourceDescConditionValue,
-									Required:    true,
-								},
+							},
+							"condition_operator": schema.StringAttribute{
+								Description: CustomEventSpecificationResourceDescConditionOperator,
+								Required:    true,
+							},
+							"condition_value": schema.Float64Attribute{
+								Description: CustomEventSpecificationResourceDescConditionValue,
+								Required:    true,
 							},
 						},
 					},
-					"entity_count_verification": schema.ListNestedAttribute{
+					"entity_count_verification": schema.SingleNestedAttribute{
 						Description: CustomEventSpecificationResourceDescEntityCountVerification,
 						Optional:    true,
-						NestedObject: schema.NestedAttributeObject{
-							Attributes: map[string]schema.Attribute{
-								"severity": schema.StringAttribute{
-									Description: CustomEventSpecificationResourceDescSeverity,
-									Required:    true,
-									Validators: []validator.String{
-										stringvalidator.OneOf("warning", "critical"),
-									},
+						Attributes: map[string]schema.Attribute{
+							"severity": schema.StringAttribute{
+								Description: CustomEventSpecificationResourceDescSeverity,
+								Required:    true,
+								Validators: []validator.String{
+									stringvalidator.OneOf("warning", "critical"),
 								},
-								"condition_operator": schema.StringAttribute{
-									Description: CustomEventSpecificationResourceDescConditionOperator,
-									Required:    true,
-								},
-								"condition_value": schema.Float64Attribute{
-									Description: CustomEventSpecificationResourceDescConditionValue,
-									Required:    true,
-								},
-								"matching_entity_type": schema.StringAttribute{
-									Description: CustomEventSpecificationResourceDescMatchingEntityType,
-									Required:    true,
-								},
-								"matching_operator": schema.StringAttribute{
-									Description: CustomEventSpecificationResourceDescMatchingOperator,
-									Required:    true,
-								},
-								"matching_entity_label": schema.StringAttribute{
-									Description: CustomEventSpecificationResourceDescMatchingEntityLabel,
-									Required:    true,
-								},
+							},
+							"condition_operator": schema.StringAttribute{
+								Description: CustomEventSpecificationResourceDescConditionOperator,
+								Required:    true,
+							},
+							"condition_value": schema.Float64Attribute{
+								Description: CustomEventSpecificationResourceDescConditionValue,
+								Required:    true,
+							},
+							"matching_entity_type": schema.StringAttribute{
+								Description: CustomEventSpecificationResourceDescMatchingEntityType,
+								Required:    true,
+							},
+							"matching_operator": schema.StringAttribute{
+								Description: CustomEventSpecificationResourceDescMatchingOperator,
+								Required:    true,
+							},
+							"matching_entity_label": schema.StringAttribute{
+								Description: CustomEventSpecificationResourceDescMatchingEntityLabel,
+								Required:    true,
 							},
 						},
 					},
-					"entity_verification": schema.ListNestedAttribute{
+					"entity_verification": schema.SingleNestedAttribute{
 						Description: CustomEventSpecificationResourceDescEntityVerification,
 						Optional:    true,
-						NestedObject: schema.NestedAttributeObject{
-							Attributes: map[string]schema.Attribute{
-								"severity": schema.StringAttribute{
-									Description: CustomEventSpecificationResourceDescSeverity,
-									Required:    true,
-									Validators: []validator.String{
-										stringvalidator.OneOf("warning", "critical"),
-									},
+						Attributes: map[string]schema.Attribute{
+							"severity": schema.StringAttribute{
+								Description: CustomEventSpecificationResourceDescSeverity,
+								Required:    true,
+								Validators: []validator.String{
+									stringvalidator.OneOf("warning", "critical"),
 								},
-								"matching_entity_type": schema.StringAttribute{
-									Description: CustomEventSpecificationResourceDescMatchingEntityType,
-									Required:    true,
-								},
-								"matching_operator": schema.StringAttribute{
-									Description: CustomEventSpecificationResourceDescMatchingOperator,
-									Required:    true,
-								},
-								"matching_entity_label": schema.StringAttribute{
-									Description: CustomEventSpecificationResourceDescMatchingEntityLabel,
-									Required:    true,
-								},
-								"offline_duration": schema.Int64Attribute{
-									Description: CustomEventSpecificationResourceDescOfflineDuration,
-									Required:    true,
-								},
+							},
+							"matching_entity_type": schema.StringAttribute{
+								Description: CustomEventSpecificationResourceDescMatchingEntityType,
+								Required:    true,
+							},
+							"matching_operator": schema.StringAttribute{
+								Description: CustomEventSpecificationResourceDescMatchingOperator,
+								Required:    true,
+							},
+							"matching_entity_label": schema.StringAttribute{
+								Description: CustomEventSpecificationResourceDescMatchingEntityLabel,
+								Required:    true,
+							},
+							"offline_duration": schema.Int64Attribute{
+								Description: CustomEventSpecificationResourceDescOfflineDuration,
+								Required:    true,
 							},
 						},
 					},
-					"host_availability": schema.ListNestedAttribute{
+					"host_availability": schema.SingleNestedAttribute{
 						Description: CustomEventSpecificationResourceDescHostAvailability,
 						Optional:    true,
-						NestedObject: schema.NestedAttributeObject{
-							Attributes: map[string]schema.Attribute{
-								"severity": schema.StringAttribute{
-									Description: CustomEventSpecificationResourceDescSeverity,
-									Required:    true,
-									Validators: []validator.String{
-										stringvalidator.OneOf("warning", "critical"),
-									},
+						Attributes: map[string]schema.Attribute{
+							"severity": schema.StringAttribute{
+								Description: CustomEventSpecificationResourceDescSeverity,
+								Required:    true,
+								Validators: []validator.String{
+									stringvalidator.OneOf("warning", "critical"),
 								},
-								"offline_duration": schema.Int64Attribute{
-									Description: CustomEventSpecificationResourceDescOfflineDuration,
-									Required:    true,
-								},
-								"close_after": schema.Int64Attribute{
-									Description: CustomEventSpecificationResourceDescCloseAfter,
-									Optional:    true,
-								},
-								"tag_filter": schema.StringAttribute{
-									Description: CustomEventSpecificationResourceDescTagFilter,
-									Optional:    true,
-								},
+							},
+							"offline_duration": schema.Int64Attribute{
+								Description: CustomEventSpecificationResourceDescOfflineDuration,
+								Required:    true,
+							},
+							"close_after": schema.Int64Attribute{
+								Description: CustomEventSpecificationResourceDescCloseAfter,
+								Optional:    true,
+							},
+							"tag_filter": schema.StringAttribute{
+								Description: CustomEventSpecificationResourceDescTagFilter,
+								Optional:    true,
 							},
 						},
 					},
-					"system": schema.ListNestedAttribute{
+					"system": schema.SingleNestedAttribute{
 						Description: CustomEventSpecificationResourceDescSystemRules,
 						Optional:    true,
-						NestedObject: schema.NestedAttributeObject{
-							Attributes: map[string]schema.Attribute{
-								"severity": schema.StringAttribute{
-									Description: CustomEventSpecificationResourceDescSeverity,
-									Required:    true,
-									Validators: []validator.String{
-										stringvalidator.OneOf("warning", "critical"),
-									},
+						Attributes: map[string]schema.Attribute{
+							"severity": schema.StringAttribute{
+								Description: CustomEventSpecificationResourceDescSeverity,
+								Required:    true,
+								Validators: []validator.String{
+									stringvalidator.OneOf("warning", "critical"),
 								},
-								"system_rule_id": schema.StringAttribute{
-									Description: CustomEventSpecificationResourceDescSystemRuleID,
-									Required:    true,
-								},
+							},
+							"system_rule_id": schema.StringAttribute{
+								Description: CustomEventSpecificationResourceDescSystemRuleID,
+								Required:    true,
 							},
 						},
 					},
-					"threshold": schema.ListNestedAttribute{
+					"threshold": schema.SingleNestedAttribute{
 						Description: CustomEventSpecificationResourceDescThresholdRules,
 						Optional:    true,
-						NestedObject: schema.NestedAttributeObject{
-							Attributes: map[string]schema.Attribute{
-								"severity": schema.StringAttribute{
-									Description: CustomEventSpecificationResourceDescSeverity,
-									Required:    true,
-									Validators: []validator.String{
-										stringvalidator.OneOf("warning", "critical"),
+						Attributes: map[string]schema.Attribute{
+							"severity": schema.StringAttribute{
+								Description: CustomEventSpecificationResourceDescSeverity,
+								Required:    true,
+								Validators: []validator.String{
+									stringvalidator.OneOf("warning", "critical"),
+								},
+							},
+							"metric_name": schema.StringAttribute{
+								Description: CustomEventSpecificationResourceDescMetricName,
+								Required:    true,
+							},
+							"rollup": schema.Int64Attribute{
+								Description: CustomEventSpecificationResourceDescRollup,
+								Required:    true,
+							},
+							"window": schema.Int64Attribute{
+								Description: CustomEventSpecificationResourceDescWindow,
+								Required:    true,
+							},
+							"aggregation": schema.StringAttribute{
+								Description: CustomEventSpecificationResourceDescAggregation,
+								Required:    true,
+							},
+							"condition_operator": schema.StringAttribute{
+								Description: CustomEventSpecificationResourceDescConditionOperator,
+								Required:    true,
+							},
+							"condition_value": schema.Float64Attribute{
+								Description: CustomEventSpecificationResourceDescConditionValue,
+								Required:    true,
+							},
+							"metric_pattern": schema.SingleNestedAttribute{
+								Description: CustomEventSpecificationResourceDescMetricPattern,
+								Optional:    true,
+								Attributes: map[string]schema.Attribute{
+									"prefix": schema.StringAttribute{
+										Description: CustomEventSpecificationResourceDescMetricPatternPrefix,
+										Required:    true,
 									},
-								},
-								"metric_name": schema.StringAttribute{
-									Description: CustomEventSpecificationResourceDescMetricName,
-									Required:    true,
-								},
-								"rollup": schema.Int64Attribute{
-									Description: CustomEventSpecificationResourceDescRollup,
-									Required:    true,
-								},
-								"window": schema.Int64Attribute{
-									Description: CustomEventSpecificationResourceDescWindow,
-									Required:    true,
-								},
-								"aggregation": schema.StringAttribute{
-									Description: CustomEventSpecificationResourceDescAggregation,
-									Required:    true,
-								},
-								"condition_operator": schema.StringAttribute{
-									Description: CustomEventSpecificationResourceDescConditionOperator,
-									Required:    true,
-								},
-								"condition_value": schema.Float64Attribute{
-									Description: CustomEventSpecificationResourceDescConditionValue,
-									Required:    true,
-								},
-								"metric_pattern": schema.ListNestedAttribute{
-									Description: CustomEventSpecificationResourceDescMetricPattern,
-									Optional:    true,
-									NestedObject: schema.NestedAttributeObject{
-										Attributes: map[string]schema.Attribute{
-											"prefix": schema.StringAttribute{
-												Description: CustomEventSpecificationResourceDescMetricPatternPrefix,
-												Required:    true,
-											},
-											"postfix": schema.StringAttribute{
-												Description: CustomEventSpecificationResourceDescMetricPatternPostfix,
-												Optional:    true,
-												Computed:    true,
-												Default:     stringdefault.StaticString(""),
-											},
-											"placeholder": schema.StringAttribute{
-												Description: CustomEventSpecificationResourceDescMetricPatternPlaceholder,
-												Optional:    true,
-												Computed:    true,
-												Default:     stringdefault.StaticString(""),
-											},
-											"operator": schema.StringAttribute{
-												Description: CustomEventSpecificationResourceDescMetricPatternOperator,
-												Optional:    true,
-												Computed:    true,
-												Default:     stringdefault.StaticString("EQUALS"),
-											},
-										},
+									"postfix": schema.StringAttribute{
+										Description: CustomEventSpecificationResourceDescMetricPatternPostfix,
+										Optional:    true,
+										Computed:    true,
+										Default:     stringdefault.StaticString(""),
+									},
+									"placeholder": schema.StringAttribute{
+										Description: CustomEventSpecificationResourceDescMetricPatternPlaceholder,
+										Optional:    true,
+										Computed:    true,
+										Default:     stringdefault.StaticString(""),
+									},
+									"operator": schema.StringAttribute{
+										Description: CustomEventSpecificationResourceDescMetricPatternOperator,
+										Optional:    true,
+										Computed:    true,
+										Default:     stringdefault.StaticString("EQUALS"),
 									},
 								},
 							},
@@ -345,60 +332,60 @@ func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Cont
 
 	// Process rules
 	if len(spec.Rules) > 0 {
-		// Create rule containers
-		var entityCountRules []EntityCountRuleModel
-		var entityCountVerificationRules []EntityCountVerificationRuleModel
-		var entityVerificationRules []EntityVerificationRuleModel
-		var hostAvailabilityRules []HostAvailabilityRuleModel
-		var systemRules []SystemRuleModel
-		var thresholdRules []ThresholdRuleModel
+		// Create rule objects (single instances, not lists)
+		var entityCountRule *EntityCountRuleModel
+		var entityCountVerificationRule *EntityCountVerificationRuleModel
+		var entityVerificationRule *EntityVerificationRuleModel
+		var hostAvailabilityRule *HostAvailabilityRuleModel
+		var systemRule *SystemRuleModel
+		var thresholdRule *ThresholdRuleModel
 
-		// Process each rule based on its type
+		// Process each rule based on its type (take first occurrence of each type)
 		for _, rule := range spec.Rules {
 			switch rule.DType {
 			case restapi.EntityCountRuleType:
-				if rule.ConditionOperator != nil && rule.ConditionValue != nil {
-					entityCountRules = append(entityCountRules, EntityCountRuleModel{
+				if entityCountRule == nil && rule.ConditionOperator != nil && rule.ConditionValue != nil {
+					entityCountRule = &EntityCountRuleModel{
 						Severity:          mapIntToSeverityString(rule.Severity),
 						ConditionOperator: util.SetStringPointerToState(rule.ConditionOperator),
 						ConditionValue:    util.SetFloat64PointerToState(rule.ConditionValue),
-					})
+					}
 				}
 			case restapi.EntityCountVerificationRuleType:
-				if rule.ConditionOperator != nil && rule.ConditionValue != nil &&
+				if entityCountVerificationRule == nil && rule.ConditionOperator != nil && rule.ConditionValue != nil &&
 					rule.MatchingEntityType != nil && rule.MatchingOperator != nil && rule.MatchingEntityLabel != nil {
-					entityCountVerificationRules = append(entityCountVerificationRules, EntityCountVerificationRuleModel{
+					entityCountVerificationRule = &EntityCountVerificationRuleModel{
 						Severity:            mapIntToSeverityString(rule.Severity),
 						ConditionOperator:   util.SetStringPointerToState(rule.ConditionOperator),
 						ConditionValue:      util.SetFloat64PointerToState(rule.ConditionValue),
 						MatchingEntityType:  util.SetStringPointerToState(rule.MatchingEntityType),
 						MatchingOperator:    util.SetStringPointerToState(rule.MatchingOperator),
 						MatchingEntityLabel: util.SetStringPointerToState(rule.MatchingEntityLabel),
-					})
+					}
 				}
 			case restapi.EntityVerificationRuleType:
-				if rule.MatchingEntityType != nil && rule.MatchingOperator != nil &&
+				if entityVerificationRule == nil && rule.MatchingEntityType != nil && rule.MatchingOperator != nil &&
 					rule.MatchingEntityLabel != nil && rule.OfflineDuration != nil {
-					entityVerificationRules = append(entityVerificationRules, EntityVerificationRuleModel{
+					entityVerificationRule = &EntityVerificationRuleModel{
 						Severity:            mapIntToSeverityString(rule.Severity),
 						MatchingEntityType:  util.SetStringPointerToState(rule.MatchingEntityType),
 						MatchingOperator:    util.SetStringPointerToState(rule.MatchingOperator),
 						MatchingEntityLabel: util.SetStringPointerToState(rule.MatchingEntityLabel),
 						OfflineDuration:     util.SetInt64PointerToState(rule.OfflineDuration),
-					})
+					}
 				}
 			case restapi.HostAvailabilityRuleType:
-				if rule.OfflineDuration != nil {
-					hostRule := HostAvailabilityRuleModel{
+				if hostAvailabilityRule == nil && rule.OfflineDuration != nil {
+					hr := HostAvailabilityRuleModel{
 						Severity:        mapIntToSeverityString(rule.Severity),
 						OfflineDuration: util.SetInt64PointerToState(rule.OfflineDuration),
 						TagFilter:       types.StringValue(""), // Default empty string
 					}
 
 					if rule.CloseAfter != nil {
-						hostRule.CloseAfter = util.SetInt64PointerToState(rule.CloseAfter)
+						hr.CloseAfter = util.SetInt64PointerToState(rule.CloseAfter)
 					} else {
-						hostRule.CloseAfter = types.Int64Null()
+						hr.CloseAfter = types.Int64Null()
 					}
 
 					// Handle tag filter conversion
@@ -406,23 +393,23 @@ func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Cont
 						// Convert tag filter to string representation
 						normalizedTagFilterString, err := tagfilter.MapTagFilterToNormalizedString(rule.TagFilter)
 						if err == nil && normalizedTagFilterString != nil {
-							hostRule.TagFilter = util.SetStringPointerToState(normalizedTagFilterString)
+							hr.TagFilter = util.SetStringPointerToState(normalizedTagFilterString)
 						}
 					}
 
-					hostAvailabilityRules = append(hostAvailabilityRules, hostRule)
+					hostAvailabilityRule = &hr
 				}
 			case restapi.SystemRuleType:
-				if rule.SystemRuleID != nil {
-					systemRules = append(systemRules, SystemRuleModel{
+				if systemRule == nil && rule.SystemRuleID != nil {
+					systemRule = &SystemRuleModel{
 						Severity:     mapIntToSeverityString(rule.Severity),
 						SystemRuleID: util.SetStringPointerToState(rule.SystemRuleID),
-					})
+					}
 				}
 			case restapi.ThresholdRuleType:
-				if rule.MetricName != nil && rule.Rollup != nil && rule.Window != nil &&
+				if thresholdRule == nil && rule.MetricName != nil && rule.Rollup != nil && rule.Window != nil &&
 					rule.Aggregation != nil && rule.ConditionOperator != nil && rule.ConditionValue != nil {
-					thresholdRule := ThresholdRuleModel{
+					tr := ThresholdRuleModel{
 						Severity:          mapIntToSeverityString(rule.Severity),
 						MetricName:        util.SetStringPointerToState(rule.MetricName),
 						Rollup:            util.SetInt64PointerToState(rule.Rollup),
@@ -443,148 +430,197 @@ func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Cont
 
 						metricPatternModel.Placeholder = util.SetStringPointerToState(rule.MetricPattern.Placeholder)
 
-						// Create a list of metric patterns with this single pattern
-						metricPatterns, diags := types.ListValueFrom(ctx, types.ObjectType{
-							AttrTypes: map[string]attr.Type{
-								"prefix":      types.StringType,
-								"postfix":     types.StringType,
-								"placeholder": types.StringType,
-								"operator":    types.StringType,
-							},
-						}, []MetricPatternModel{metricPatternModel})
+						// Create a single object for metric pattern
+						metricPatternObj, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
+							"prefix":      types.StringType,
+							"postfix":     types.StringType,
+							"placeholder": types.StringType,
+							"operator":    types.StringType,
+						}, metricPatternModel)
 
 						if diags.HasError() {
 							return diags
 						}
 
-						thresholdRule.MetricPattern = metricPatterns
+						tr.MetricPattern = metricPatternObj
 					} else {
-						// Empty list for metric pattern
-						emptyList, diags := types.ListValueFrom(ctx, types.ObjectType{
-							AttrTypes: map[string]attr.Type{
-								"prefix":      types.StringType,
-								"postfix":     types.StringType,
-								"placeholder": types.StringType,
-								"operator":    types.StringType,
-							},
-						}, []MetricPatternModel{})
-
-						if diags.HasError() {
-							return diags
-						}
-
-						thresholdRule.MetricPattern = emptyList
+						// Null object for metric pattern
+						tr.MetricPattern = types.ObjectNull(map[string]attr.Type{
+							"prefix":      types.StringType,
+							"postfix":     types.StringType,
+							"placeholder": types.StringType,
+							"operator":    types.StringType,
+						})
 					}
 
-					thresholdRules = append(thresholdRules, thresholdRule)
+					thresholdRule = &tr
 				}
 			}
 		}
 
-		// Create lists for each rule type
-		entityCountList, diags := types.ListValueFrom(ctx, types.ObjectType{
-			AttrTypes: map[string]attr.Type{
+		// Create objects for each rule type
+		var entityCountObj types.Object
+		if entityCountRule != nil {
+			entityCountObj, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 				"severity":           types.StringType,
 				"condition_operator": types.StringType,
 				"condition_value":    types.Float64Type,
-			},
-		}, entityCountRules)
-		if diags.HasError() {
-			return diags
+			}, entityCountRule)
+			if diags.HasError() {
+				return diags
+			}
+		} else {
+			entityCountObj = types.ObjectNull(map[string]attr.Type{
+				"severity":           types.StringType,
+				"condition_operator": types.StringType,
+				"condition_value":    types.Float64Type,
+			})
 		}
 
-		entityCountVerificationList, diags := types.ListValueFrom(ctx, types.ObjectType{
-			AttrTypes: map[string]attr.Type{
+		var entityCountVerificationObj types.Object
+		if entityCountVerificationRule != nil {
+			entityCountVerificationObj, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 				"severity":              types.StringType,
 				"condition_operator":    types.StringType,
 				"condition_value":       types.Float64Type,
 				"matching_entity_type":  types.StringType,
 				"matching_operator":     types.StringType,
 				"matching_entity_label": types.StringType,
-			},
-		}, entityCountVerificationRules)
-		if diags.HasError() {
-			return diags
+			}, entityCountVerificationRule)
+			if diags.HasError() {
+				return diags
+			}
+		} else {
+			entityCountVerificationObj = types.ObjectNull(map[string]attr.Type{
+				"severity":              types.StringType,
+				"condition_operator":    types.StringType,
+				"condition_value":       types.Float64Type,
+				"matching_entity_type":  types.StringType,
+				"matching_operator":     types.StringType,
+				"matching_entity_label": types.StringType,
+			})
 		}
 
-		entityVerificationList, diags := types.ListValueFrom(ctx, types.ObjectType{
-			AttrTypes: map[string]attr.Type{
+		var entityVerificationObj types.Object
+		if entityVerificationRule != nil {
+			entityVerificationObj, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 				"severity":              types.StringType,
 				"matching_entity_type":  types.StringType,
 				"matching_operator":     types.StringType,
 				"matching_entity_label": types.StringType,
 				"offline_duration":      types.Int64Type,
-			},
-		}, entityVerificationRules)
-		if diags.HasError() {
-			return diags
+			}, entityVerificationRule)
+			if diags.HasError() {
+				return diags
+			}
+		} else {
+			entityVerificationObj = types.ObjectNull(map[string]attr.Type{
+				"severity":              types.StringType,
+				"matching_entity_type":  types.StringType,
+				"matching_operator":     types.StringType,
+				"matching_entity_label": types.StringType,
+				"offline_duration":      types.Int64Type,
+			})
 		}
 
-		hostAvailabilityList, diags := types.ListValueFrom(ctx, types.ObjectType{
-			AttrTypes: map[string]attr.Type{
+		var hostAvailabilityObj types.Object
+		if hostAvailabilityRule != nil {
+			hostAvailabilityObj, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 				"severity":         types.StringType,
 				"offline_duration": types.Int64Type,
 				"close_after":      types.Int64Type,
 				"tag_filter":       types.StringType,
-			},
-		}, hostAvailabilityRules)
-		if diags.HasError() {
-			return diags
+			}, hostAvailabilityRule)
+			if diags.HasError() {
+				return diags
+			}
+		} else {
+			hostAvailabilityObj = types.ObjectNull(map[string]attr.Type{
+				"severity":         types.StringType,
+				"offline_duration": types.Int64Type,
+				"close_after":      types.Int64Type,
+				"tag_filter":       types.StringType,
+			})
 		}
 
-		systemList, diags := types.ListValueFrom(ctx, types.ObjectType{
-			AttrTypes: map[string]attr.Type{
+		var systemObj types.Object
+		if systemRule != nil {
+			systemObj, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 				"severity":       types.StringType,
 				"system_rule_id": types.StringType,
-			},
-		}, systemRules)
-		if diags.HasError() {
-			return diags
+			}, systemRule)
+			if diags.HasError() {
+				return diags
+			}
+		} else {
+			systemObj = types.ObjectNull(map[string]attr.Type{
+				"severity":       types.StringType,
+				"system_rule_id": types.StringType,
+			})
 		}
 
-		thresholdList, diags := types.ListValueFrom(ctx, types.ObjectType{
-			AttrTypes: map[string]attr.Type{
+		var thresholdObj types.Object
+		if thresholdRule != nil {
+			thresholdObj, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
 				"severity":    types.StringType,
 				"metric_name": types.StringType,
-				"metric_pattern": types.ListType{ElemType: types.ObjectType{
+				"metric_pattern": types.ObjectType{
 					AttrTypes: map[string]attr.Type{
 						"prefix":      types.StringType,
 						"postfix":     types.StringType,
 						"placeholder": types.StringType,
 						"operator":    types.StringType,
 					},
-				}},
+				},
 				"rollup":             types.Int64Type,
 				"window":             types.Int64Type,
 				"aggregation":        types.StringType,
 				"condition_operator": types.StringType,
 				"condition_value":    types.Float64Type,
-			},
-		}, thresholdRules)
-		if diags.HasError() {
-			return diags
+			}, thresholdRule)
+			if diags.HasError() {
+				return diags
+			}
+		} else {
+			thresholdObj = types.ObjectNull(map[string]attr.Type{
+				"severity":    types.StringType,
+				"metric_name": types.StringType,
+				"metric_pattern": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"prefix":      types.StringType,
+						"postfix":     types.StringType,
+						"placeholder": types.StringType,
+						"operator":    types.StringType,
+					},
+				},
+				"rollup":             types.Int64Type,
+				"window":             types.Int64Type,
+				"aggregation":        types.StringType,
+				"condition_operator": types.StringType,
+				"condition_value":    types.Float64Type,
+			})
 		}
 
 		// Create the rules model
 		rulesModel := RulesModel{
-			EntityCount:             entityCountList,
-			EntityCountVerification: entityCountVerificationList,
-			EntityVerification:      entityVerificationList,
-			HostAvailability:        hostAvailabilityList,
-			System:                  systemList,
-			Threshold:               thresholdList,
+			EntityCount:             entityCountObj,
+			EntityCountVerification: entityCountVerificationObj,
+			EntityVerification:      entityVerificationObj,
+			HostAvailability:        hostAvailabilityObj,
+			System:                  systemObj,
+			Threshold:               thresholdObj,
 		}
 
-		// Convert the rules model to a list
+		// Convert the rules model to an object
 		rulesObj, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
-			"entity_count": types.ListType{ElemType: types.ObjectType{
+			"entity_count": types.ObjectType{
 				AttrTypes: map[string]attr.Type{
 					"severity":           types.StringType,
 					"condition_operator": types.StringType,
 					"condition_value":    types.Float64Type,
 				},
-			}},
-			"entity_count_verification": types.ListType{ElemType: types.ObjectType{
+			},
+			"entity_count_verification": types.ObjectType{
 				AttrTypes: map[string]attr.Type{
 					"severity":              types.StringType,
 					"condition_operator":    types.StringType,
@@ -593,8 +629,8 @@ func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Cont
 					"matching_operator":     types.StringType,
 					"matching_entity_label": types.StringType,
 				},
-			}},
-			"entity_verification": types.ListType{ElemType: types.ObjectType{
+			},
+			"entity_verification": types.ObjectType{
 				AttrTypes: map[string]attr.Type{
 					"severity":              types.StringType,
 					"matching_entity_type":  types.StringType,
@@ -602,40 +638,40 @@ func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Cont
 					"matching_entity_label": types.StringType,
 					"offline_duration":      types.Int64Type,
 				},
-			}},
-			"host_availability": types.ListType{ElemType: types.ObjectType{
+			},
+			"host_availability": types.ObjectType{
 				AttrTypes: map[string]attr.Type{
 					"severity":         types.StringType,
 					"offline_duration": types.Int64Type,
 					"close_after":      types.Int64Type,
 					"tag_filter":       types.StringType,
 				},
-			}},
-			"system": types.ListType{ElemType: types.ObjectType{
+			},
+			"system": types.ObjectType{
 				AttrTypes: map[string]attr.Type{
 					"severity":       types.StringType,
 					"system_rule_id": types.StringType,
 				},
-			}},
-			"threshold": types.ListType{ElemType: types.ObjectType{
+			},
+			"threshold": types.ObjectType{
 				AttrTypes: map[string]attr.Type{
 					"severity":    types.StringType,
 					"metric_name": types.StringType,
-					"metric_pattern": types.ListType{ElemType: types.ObjectType{
+					"metric_pattern": types.ObjectType{
 						AttrTypes: map[string]attr.Type{
 							"prefix":      types.StringType,
 							"postfix":     types.StringType,
 							"placeholder": types.StringType,
 							"operator":    types.StringType,
 						},
-					}},
+					},
 					"rollup":             types.Int64Type,
 					"window":             types.Int64Type,
 					"aggregation":        types.StringType,
 					"condition_operator": types.StringType,
 					"condition_value":    types.Float64Type,
 				},
-			}},
+			},
 		}, rulesModel)
 		if diags.HasError() {
 			return diags
@@ -646,14 +682,14 @@ func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Cont
 	} else {
 		// No rules
 		model.Rules = types.ObjectNull(map[string]attr.Type{
-			"entity_count": types.ListType{ElemType: types.ObjectType{
+			"entity_count": types.ObjectType{
 				AttrTypes: map[string]attr.Type{
 					"severity":           types.StringType,
 					"condition_operator": types.StringType,
 					"condition_value":    types.Float64Type,
 				},
-			}},
-			"entity_count_verification": types.ListType{ElemType: types.ObjectType{
+			},
+			"entity_count_verification": types.ObjectType{
 				AttrTypes: map[string]attr.Type{
 					"severity":              types.StringType,
 					"condition_operator":    types.StringType,
@@ -662,8 +698,8 @@ func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Cont
 					"matching_operator":     types.StringType,
 					"matching_entity_label": types.StringType,
 				},
-			}},
-			"entity_verification": types.ListType{ElemType: types.ObjectType{
+			},
+			"entity_verification": types.ObjectType{
 				AttrTypes: map[string]attr.Type{
 					"severity":              types.StringType,
 					"matching_entity_type":  types.StringType,
@@ -671,40 +707,40 @@ func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Cont
 					"matching_entity_label": types.StringType,
 					"offline_duration":      types.Int64Type,
 				},
-			}},
-			"host_availability": types.ListType{ElemType: types.ObjectType{
+			},
+			"host_availability": types.ObjectType{
 				AttrTypes: map[string]attr.Type{
 					"severity":         types.StringType,
 					"offline_duration": types.Int64Type,
 					"close_after":      types.Int64Type,
 					"tag_filter":       types.StringType,
 				},
-			}},
-			"system": types.ListType{ElemType: types.ObjectType{
+			},
+			"system": types.ObjectType{
 				AttrTypes: map[string]attr.Type{
 					"severity":       types.StringType,
 					"system_rule_id": types.StringType,
 				},
-			}},
-			"threshold": types.ListType{ElemType: types.ObjectType{
+			},
+			"threshold": types.ObjectType{
 				AttrTypes: map[string]attr.Type{
 					"severity":    types.StringType,
 					"metric_name": types.StringType,
-					"metric_pattern": types.ListType{ElemType: types.ObjectType{
+					"metric_pattern": types.ObjectType{
 						AttrTypes: map[string]attr.Type{
 							"prefix":      types.StringType,
 							"postfix":     types.StringType,
 							"placeholder": types.StringType,
 							"operator":    types.StringType,
 						},
-					}},
+					},
 					"rollup":             types.Int64Type,
 					"window":             types.Int64Type,
 					"aggregation":        types.StringType,
 					"condition_operator": types.StringType,
 					"condition_value":    types.Float64Type,
 				},
-			}},
+			},
 		})
 	}
 
@@ -776,212 +812,197 @@ func (r *customEventSpecificationResourceFramework) MapStateToDataObject(ctx con
 			return nil, diags
 		}
 
-		// Process entity count rules
+		// Process entity count rule
 		if !rulesModel.EntityCount.IsNull() && !rulesModel.EntityCount.IsUnknown() {
-			var entityCountRules []EntityCountRuleModel
-			diags.Append(rulesModel.EntityCount.ElementsAs(ctx, &entityCountRules, false)...)
+			var entityCountRule EntityCountRuleModel
+			diags.Append(rulesModel.EntityCount.As(ctx, &entityCountRule, basetypes.ObjectAsOptions{})...)
 			if diags.HasError() {
 				return nil, diags
 			}
 
-			for _, rule := range entityCountRules {
-				severity := mapSeverityToInt(rule.Severity.ValueString())
-				conditionOperator := rule.ConditionOperator.ValueString()
-				conditionValue := rule.ConditionValue.ValueFloat64()
+			severity := mapSeverityToInt(entityCountRule.Severity.ValueString())
+			conditionOperator := entityCountRule.ConditionOperator.ValueString()
+			conditionValue := entityCountRule.ConditionValue.ValueFloat64()
 
-				rules = append(rules, restapi.RuleSpecification{
-					DType:             restapi.EntityCountRuleType,
-					Severity:          severity,
-					ConditionOperator: &conditionOperator,
-					ConditionValue:    &conditionValue,
-				})
-			}
+			rules = append(rules, restapi.RuleSpecification{
+				DType:             restapi.EntityCountRuleType,
+				Severity:          severity,
+				ConditionOperator: &conditionOperator,
+				ConditionValue:    &conditionValue,
+			})
 		}
 
-		// Process entity count verification rules
+		// Process entity count verification rule
 		if !rulesModel.EntityCountVerification.IsNull() && !rulesModel.EntityCountVerification.IsUnknown() {
-			var entityCountVerificationRules []EntityCountVerificationRuleModel
-			diags.Append(rulesModel.EntityCountVerification.ElementsAs(ctx, &entityCountVerificationRules, false)...)
+			var entityCountVerificationRule EntityCountVerificationRuleModel
+			diags.Append(rulesModel.EntityCountVerification.As(ctx, &entityCountVerificationRule, basetypes.ObjectAsOptions{})...)
 			if diags.HasError() {
 				return nil, diags
 			}
 
-			for _, rule := range entityCountVerificationRules {
-				severity := mapSeverityToInt(rule.Severity.ValueString())
-				conditionOperator := rule.ConditionOperator.ValueString()
-				conditionValue := rule.ConditionValue.ValueFloat64()
-				matchingEntityType := rule.MatchingEntityType.ValueString()
-				matchingOperator := rule.MatchingOperator.ValueString()
-				matchingEntityLabel := rule.MatchingEntityLabel.ValueString()
+			severity := mapSeverityToInt(entityCountVerificationRule.Severity.ValueString())
+			conditionOperator := entityCountVerificationRule.ConditionOperator.ValueString()
+			conditionValue := entityCountVerificationRule.ConditionValue.ValueFloat64()
+			matchingEntityType := entityCountVerificationRule.MatchingEntityType.ValueString()
+			matchingOperator := entityCountVerificationRule.MatchingOperator.ValueString()
+			matchingEntityLabel := entityCountVerificationRule.MatchingEntityLabel.ValueString()
 
-				rules = append(rules, restapi.RuleSpecification{
-					DType:               restapi.EntityCountVerificationRuleType,
-					Severity:            severity,
-					ConditionOperator:   &conditionOperator,
-					ConditionValue:      &conditionValue,
-					MatchingEntityType:  &matchingEntityType,
-					MatchingOperator:    &matchingOperator,
-					MatchingEntityLabel: &matchingEntityLabel,
-				})
-			}
+			rules = append(rules, restapi.RuleSpecification{
+				DType:               restapi.EntityCountVerificationRuleType,
+				Severity:            severity,
+				ConditionOperator:   &conditionOperator,
+				ConditionValue:      &conditionValue,
+				MatchingEntityType:  &matchingEntityType,
+				MatchingOperator:    &matchingOperator,
+				MatchingEntityLabel: &matchingEntityLabel,
+			})
 		}
 
-		// Process entity verification rules
+		// Process entity verification rule
 		if !rulesModel.EntityVerification.IsNull() && !rulesModel.EntityVerification.IsUnknown() {
-			var entityVerificationRules []EntityVerificationRuleModel
-			diags.Append(rulesModel.EntityVerification.ElementsAs(ctx, &entityVerificationRules, false)...)
+			var entityVerificationRule EntityVerificationRuleModel
+			diags.Append(rulesModel.EntityVerification.As(ctx, &entityVerificationRule, basetypes.ObjectAsOptions{})...)
 			if diags.HasError() {
 				return nil, diags
 			}
 
-			for _, rule := range entityVerificationRules {
-				severity := mapSeverityToInt(rule.Severity.ValueString())
-				matchingEntityType := rule.MatchingEntityType.ValueString()
-				matchingOperator := rule.MatchingOperator.ValueString()
-				matchingEntityLabel := rule.MatchingEntityLabel.ValueString()
-				offlineDuration := int(rule.OfflineDuration.ValueInt64())
+			severity := mapSeverityToInt(entityVerificationRule.Severity.ValueString())
+			matchingEntityType := entityVerificationRule.MatchingEntityType.ValueString()
+			matchingOperator := entityVerificationRule.MatchingOperator.ValueString()
+			matchingEntityLabel := entityVerificationRule.MatchingEntityLabel.ValueString()
+			offlineDuration := int(entityVerificationRule.OfflineDuration.ValueInt64())
 
-				rules = append(rules, restapi.RuleSpecification{
-					DType:               restapi.EntityVerificationRuleType,
-					Severity:            severity,
-					MatchingEntityType:  &matchingEntityType,
-					MatchingOperator:    &matchingOperator,
-					MatchingEntityLabel: &matchingEntityLabel,
-					OfflineDuration:     &offlineDuration,
-				})
-			}
+			rules = append(rules, restapi.RuleSpecification{
+				DType:               restapi.EntityVerificationRuleType,
+				Severity:            severity,
+				MatchingEntityType:  &matchingEntityType,
+				MatchingOperator:    &matchingOperator,
+				MatchingEntityLabel: &matchingEntityLabel,
+				OfflineDuration:     &offlineDuration,
+			})
 		}
 
-		// Process host availability rules
+		// Process host availability rule
 		if !rulesModel.HostAvailability.IsNull() && !rulesModel.HostAvailability.IsUnknown() {
-			var hostAvailabilityRules []HostAvailabilityRuleModel
-			diags.Append(rulesModel.HostAvailability.ElementsAs(ctx, &hostAvailabilityRules, false)...)
+			var hostAvailabilityRule HostAvailabilityRuleModel
+			diags.Append(rulesModel.HostAvailability.As(ctx, &hostAvailabilityRule, basetypes.ObjectAsOptions{})...)
 			if diags.HasError() {
 				return nil, diags
 			}
 
-			for _, rule := range hostAvailabilityRules {
-				severity := mapSeverityToInt(rule.Severity.ValueString())
-				offlineDuration := int(rule.OfflineDuration.ValueInt64())
+			severity := mapSeverityToInt(hostAvailabilityRule.Severity.ValueString())
+			offlineDuration := int(hostAvailabilityRule.OfflineDuration.ValueInt64())
 
-				var closeAfter *int
-				if !rule.CloseAfter.IsNull() {
-					ca := int(rule.CloseAfter.ValueInt64())
-					closeAfter = &ca
-				}
-
-				// Parse tag filter if provided
-				var tagFilter *restapi.TagFilter
-				if !rule.TagFilter.IsNull() && rule.TagFilter.ValueString() != "" {
-					tagFilterStr := rule.TagFilter.ValueString()
-					parser := tagfilter.NewParser()
-					expr, err := parser.Parse(tagFilterStr)
-					if err != nil {
-						diags.AddError(
-							CustomEventSpecificationResourceErrParseTagFilter,
-							fmt.Sprintf(CustomEventSpecificationResourceErrParseTagFilterMsg, err),
-						)
-						return nil, diags
-					}
-
-					mapper := tagfilter.NewMapper()
-					tagFilter = mapper.ToAPIModel(expr)
-				}
-
-				rules = append(rules, restapi.RuleSpecification{
-					DType:           restapi.HostAvailabilityRuleType,
-					Severity:        severity,
-					OfflineDuration: &offlineDuration,
-					CloseAfter:      closeAfter,
-					TagFilter:       tagFilter,
-				})
+			var closeAfter *int
+			if !hostAvailabilityRule.CloseAfter.IsNull() {
+				ca := int(hostAvailabilityRule.CloseAfter.ValueInt64())
+				closeAfter = &ca
 			}
+
+			// Parse tag filter if provided
+			var tagFilter *restapi.TagFilter
+			if !hostAvailabilityRule.TagFilter.IsNull() && hostAvailabilityRule.TagFilter.ValueString() != "" {
+				tagFilterStr := hostAvailabilityRule.TagFilter.ValueString()
+				parser := tagfilter.NewParser()
+				expr, err := parser.Parse(tagFilterStr)
+				if err != nil {
+					diags.AddError(
+						CustomEventSpecificationResourceErrParseTagFilter,
+						fmt.Sprintf(CustomEventSpecificationResourceErrParseTagFilterMsg, err),
+					)
+					return nil, diags
+				}
+
+				mapper := tagfilter.NewMapper()
+				tagFilter = mapper.ToAPIModel(expr)
+			}
+
+			rules = append(rules, restapi.RuleSpecification{
+				DType:           restapi.HostAvailabilityRuleType,
+				Severity:        severity,
+				OfflineDuration: &offlineDuration,
+				CloseAfter:      closeAfter,
+				TagFilter:       tagFilter,
+			})
 		}
 
-		// Process system rules
+		// Process system rule
 		if !rulesModel.System.IsNull() && !rulesModel.System.IsUnknown() {
-			var systemRules []SystemRuleModel
-			diags.Append(rulesModel.System.ElementsAs(ctx, &systemRules, false)...)
+			var systemRule SystemRuleModel
+			diags.Append(rulesModel.System.As(ctx, &systemRule, basetypes.ObjectAsOptions{})...)
 			if diags.HasError() {
 				return nil, diags
 			}
 
-			for _, rule := range systemRules {
-				severity := mapSeverityToInt(rule.Severity.ValueString())
-				systemRuleID := rule.SystemRuleID.ValueString()
+			severity := mapSeverityToInt(systemRule.Severity.ValueString())
+			systemRuleID := systemRule.SystemRuleID.ValueString()
 
-				rules = append(rules, restapi.RuleSpecification{
-					DType:        restapi.SystemRuleType,
-					Severity:     severity,
-					SystemRuleID: &systemRuleID,
-				})
-			}
+			rules = append(rules, restapi.RuleSpecification{
+				DType:        restapi.SystemRuleType,
+				Severity:     severity,
+				SystemRuleID: &systemRuleID,
+			})
 		}
 
-		// Process threshold rules
+		// Process threshold rule
 		if !rulesModel.Threshold.IsNull() && !rulesModel.Threshold.IsUnknown() {
-			var thresholdRules []ThresholdRuleModel
-			diags.Append(rulesModel.Threshold.ElementsAs(ctx, &thresholdRules, false)...)
+			var thresholdRule ThresholdRuleModel
+			diags.Append(rulesModel.Threshold.As(ctx, &thresholdRule, basetypes.ObjectAsOptions{})...)
 			if diags.HasError() {
 				return nil, diags
 			}
 
-			for _, rule := range thresholdRules {
-				severity := mapSeverityToInt(rule.Severity.ValueString())
-				metricName := rule.MetricName.ValueString()
-				rollup := int(rule.Rollup.ValueInt64())
-				window := int(rule.Window.ValueInt64())
-				aggregation := rule.Aggregation.ValueString()
-				conditionOperator := rule.ConditionOperator.ValueString()
-				conditionValue := rule.ConditionValue.ValueFloat64()
+			severity := mapSeverityToInt(thresholdRule.Severity.ValueString())
+			metricName := thresholdRule.MetricName.ValueString()
+			rollup := int(thresholdRule.Rollup.ValueInt64())
+			window := int(thresholdRule.Window.ValueInt64())
+			aggregation := thresholdRule.Aggregation.ValueString()
+			conditionOperator := thresholdRule.ConditionOperator.ValueString()
+			conditionValue := thresholdRule.ConditionValue.ValueFloat64()
 
-				var metricPattern *restapi.MetricPattern
-				if !rule.MetricPattern.IsNull() && !rule.MetricPattern.IsUnknown() {
-					var metricPatterns []MetricPatternModel
-					diags.Append(rule.MetricPattern.ElementsAs(ctx, &metricPatterns, false)...)
-					if diags.HasError() {
-						return nil, diags
-					}
-
-					if len(metricPatterns) > 0 {
-						mp := metricPatterns[0]
-						prefix := mp.Prefix.ValueString()
-
-						var postfix *string
-						if !mp.Postfix.IsNull() && mp.Postfix.ValueString() != "" {
-							p := mp.Postfix.ValueString()
-							postfix = &p
-						}
-
-						var placeholder *string
-						if !mp.Placeholder.IsNull() && mp.Placeholder.ValueString() != "" {
-							p := mp.Placeholder.ValueString()
-							placeholder = &p
-						}
-
-						operator := mp.Operator.ValueString()
-
-						metricPattern = &restapi.MetricPattern{
-							Prefix:      prefix,
-							Postfix:     postfix,
-							Placeholder: placeholder,
-							Operator:    operator,
-						}
-					}
+			var metricPattern *restapi.MetricPattern
+			if !thresholdRule.MetricPattern.IsNull() && !thresholdRule.MetricPattern.IsUnknown() {
+				var mp MetricPatternModel
+				diags.Append(thresholdRule.MetricPattern.As(ctx, &mp, basetypes.ObjectAsOptions{})...)
+				if diags.HasError() {
+					return nil, diags
 				}
 
-				rules = append(rules, restapi.RuleSpecification{
-					DType:             restapi.ThresholdRuleType,
-					Severity:          severity,
-					MetricName:        &metricName,
-					Rollup:            &rollup,
-					Window:            &window,
-					Aggregation:       &aggregation,
-					ConditionOperator: &conditionOperator,
-					ConditionValue:    &conditionValue,
-					MetricPattern:     metricPattern,
-				})
+				prefix := mp.Prefix.ValueString()
+
+				var postfix *string
+				if !mp.Postfix.IsNull() && mp.Postfix.ValueString() != "" {
+					p := mp.Postfix.ValueString()
+					postfix = &p
+				}
+
+				var placeholder *string
+				if !mp.Placeholder.IsNull() && mp.Placeholder.ValueString() != "" {
+					p := mp.Placeholder.ValueString()
+					placeholder = &p
+				}
+
+				operator := mp.Operator.ValueString()
+
+				metricPattern = &restapi.MetricPattern{
+					Prefix:      prefix,
+					Postfix:     postfix,
+					Placeholder: placeholder,
+					Operator:    operator,
+				}
 			}
+
+			rules = append(rules, restapi.RuleSpecification{
+				DType:             restapi.ThresholdRuleType,
+				Severity:          severity,
+				MetricName:        &metricName,
+				Rollup:            &rollup,
+				Window:            &window,
+				Aggregation:       &aggregation,
+				ConditionOperator: &conditionOperator,
+				ConditionValue:    &conditionValue,
+				MetricPattern:     metricPattern,
+			})
 		}
 	}
 

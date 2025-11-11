@@ -10,7 +10,6 @@ import (
 	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
 	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
 	"github.com/gessnerfl/terraform-provider-instana/internal/util"
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -122,174 +121,6 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 						Description: "Optional flag to indicate whether also an Incident is triggered or not. The default is false",
 					},
 					shared.DefaultCustomPayloadFieldsName: shared.GetCustomPayloadFieldsSchema(),
-					ApplicationAlertConfigFieldRule: schema.ListNestedAttribute{
-						Description: "Indicates the type of rule this alert configuration is about.",
-						Optional:    true,
-						NestedObject: schema.NestedAttributeObject{
-							Attributes: map[string]schema.Attribute{
-								ApplicationAlertConfigFieldRuleErrorRate: schema.ListNestedAttribute{
-									Description: "Rule based on the error rate of the configured alert configuration target",
-									Optional:    true,
-									NestedObject: schema.NestedAttributeObject{
-										Attributes: map[string]schema.Attribute{
-											ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
-												Optional:    true,
-												Computed:    true,
-												Description: "The metric name of the application alert rule",
-											},
-											ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
-												Optional:    true,
-												Computed:    true,
-												Description: "The aggregation function of the application alert rule",
-												Validators: []validator.String{
-													stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
-												},
-											},
-										},
-									},
-								},
-								ApplicationAlertConfigFieldRuleErrors: schema.ListNestedAttribute{
-									Description: "Rule based on the number of errors of the configured alert configuration target",
-									Optional:    true,
-									NestedObject: schema.NestedAttributeObject{
-										Attributes: map[string]schema.Attribute{
-											ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
-												Optional:    true,
-												Computed:    true,
-												Description: "The metric name of the application alert rule",
-											},
-											ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
-												Optional:    true,
-												Computed:    true,
-												Description: "The aggregation function of the application alert rule",
-												Validators: []validator.String{
-													stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
-												},
-											},
-										},
-									},
-								},
-								ApplicationAlertConfigFieldRuleLogs: schema.ListNestedAttribute{
-									Description: "Rule based on logs of the configured alert configuration target",
-									Optional:    true,
-									NestedObject: schema.NestedAttributeObject{
-										Attributes: map[string]schema.Attribute{
-											ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
-												Optional:    true,
-												Computed:    true,
-												Description: "The metric name of the application alert rule",
-											},
-											ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
-												Optional:    true,
-												Computed:    true,
-												Description: "The aggregation function of the application alert rule",
-												Validators: []validator.String{
-													stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
-												},
-											},
-											ApplicationAlertConfigFieldRuleLogsLevel: schema.StringAttribute{
-												Optional:    true,
-												Computed:    true,
-												Description: "The log level for which this rule applies to",
-												Validators: []validator.String{
-													stringvalidator.OneOf(restapi.SupportedLogLevels.ToStringSlice()...),
-												},
-											},
-											ApplicationAlertConfigFieldRuleLogsMessage: schema.StringAttribute{
-												Optional:    true,
-												Computed:    true,
-												Description: "The log message for which this rule applies to",
-											},
-											ApplicationAlertConfigFieldRuleLogsOperator: schema.StringAttribute{
-												Optional:    true,
-												Computed:    true,
-												Description: "The operator which will be applied to evaluate this rule",
-												Validators: []validator.String{
-													stringvalidator.OneOf(restapi.SupportedExpressionOperators.ToStringSlice()...),
-												},
-											},
-										},
-									},
-								},
-								ApplicationAlertConfigFieldRuleSlowness: schema.ListNestedAttribute{
-									Description: "Rule based on the slowness of the configured alert configuration target",
-									Optional:    true,
-									NestedObject: schema.NestedAttributeObject{
-										Attributes: map[string]schema.Attribute{
-											ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
-												Optional:    true,
-												Computed:    true,
-												Description: "The metric name of the application alert rule",
-											},
-											ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
-												Optional:    true,
-												Computed:    true,
-												Description: "The aggregation function of the application alert rule",
-												Validators: []validator.String{
-													stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
-												},
-											},
-										},
-									},
-								},
-								ApplicationAlertConfigFieldRuleStatusCode: schema.ListNestedAttribute{
-									Description: "Rule based on the HTTP status code of the configured alert configuration target",
-									Optional:    true,
-									NestedObject: schema.NestedAttributeObject{
-										Attributes: map[string]schema.Attribute{
-											ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
-												Optional:    true,
-												Computed:    true,
-												Description: "The metric name of the application alert rule",
-											},
-											ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
-												Optional:    true,
-												Computed:    true,
-												Description: "The aggregation function of the application alert rule",
-												Validators: []validator.String{
-													stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
-												},
-											},
-											ApplicationAlertConfigFieldRuleStatusCodeStart: schema.Int64Attribute{
-												Optional:    true,
-												Computed:    true,
-												Description: "minimal HTTP status code applied for this rule",
-											},
-											ApplicationAlertConfigFieldRuleStatusCodeEnd: schema.Int64Attribute{
-												Optional:    true,
-												Computed:    true,
-												Description: "maximum HTTP status code applied for this rule",
-											},
-										},
-									},
-								},
-								ApplicationAlertConfigFieldRuleThroughput: schema.ListNestedAttribute{
-									Description: "Rule based on the throughput of the configured alert configuration target",
-									Optional:    true,
-									NestedObject: schema.NestedAttributeObject{
-										Attributes: map[string]schema.Attribute{
-											ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
-												Optional:    true,
-												Computed:    true,
-												Description: "The metric name of the application alert rule",
-											},
-											ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
-												Optional:    true,
-												Computed:    true,
-												Description: "The aggregation function of the application alert rule",
-												Validators: []validator.String{
-													stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-						Validators: []validator.List{
-							listvalidator.SizeAtMost(1),
-						},
-					},
 					ApplicationAlertConfigFieldRules: schema.ListNestedAttribute{
 						Description: "A list of rules where each rule is associated with multiple thresholds and their corresponding severity levels.",
 						Optional:    true,
@@ -303,176 +134,159 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 										stringvalidator.OneOf(">", ">=", "<", "<="),
 									},
 								},
-								ApplicationAlertConfigFieldThreshold: schema.ListNestedAttribute{
+								ApplicationAlertConfigFieldThreshold: schema.SingleNestedAttribute{
 									Description: "Threshold configuration for different severity levels",
 									Optional:    true,
-									NestedObject: schema.NestedAttributeObject{
-										Attributes: map[string]schema.Attribute{
-											shared.LogAlertConfigFieldWarning:  shared.StaticAndAdaptiveThresholdBlockSchema(),
-											shared.LogAlertConfigFieldCritical: shared.StaticAndAdaptiveThresholdBlockSchema(),
-										},
-									},
-									Validators: []validator.List{
-										listvalidator.SizeAtMost(1),
+									Attributes: map[string]schema.Attribute{
+										shared.LogAlertConfigFieldWarning:  shared.StaticAndAdaptiveThresholdBlockSchema(),
+										shared.LogAlertConfigFieldCritical: shared.StaticAndAdaptiveThresholdBlockSchema(),
 									},
 								},
 								ApplicationAlertConfigFieldRule: schema.SingleNestedAttribute{
 									Description: "The rule configuration",
 									Optional:    true,
 									Attributes: map[string]schema.Attribute{
-										ApplicationAlertConfigFieldRuleErrorRate: schema.ListNestedAttribute{
+										ApplicationAlertConfigFieldRuleErrorRate: schema.SingleNestedAttribute{
 											Description: "Rule based on the error rate of the configured alert configuration target",
 											Optional:    true,
-											NestedObject: schema.NestedAttributeObject{
-												Attributes: map[string]schema.Attribute{
-													ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
-														Optional:    true,
-														Computed:    true,
-														Description: "The metric name of the application alert rule",
-													},
-													ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
-														Optional:    true,
-														Computed:    true,
-														Description: "The aggregation function of the application alert rule",
-														Validators: []validator.String{
-															stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
-														},
+											Attributes: map[string]schema.Attribute{
+												ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
+													Optional:    true,
+													Computed:    true,
+													Description: "The metric name of the application alert rule",
+												},
+												ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
+													Optional:    true,
+													Computed:    true,
+													Description: "The aggregation function of the application alert rule",
+													Validators: []validator.String{
+														stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
 													},
 												},
 											},
 										},
-										ApplicationAlertConfigFieldRuleErrors: schema.ListNestedAttribute{
+										ApplicationAlertConfigFieldRuleErrors: schema.SingleNestedAttribute{
 											Description: "Rule based on the number of errors of the configured alert configuration target",
 											Optional:    true,
-											NestedObject: schema.NestedAttributeObject{
-												Attributes: map[string]schema.Attribute{
-													ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
-														Optional:    true,
-														Computed:    true,
-														Description: "The metric name of the application alert rule",
-													},
-													ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
-														Optional:    true,
-														Computed:    true,
-														Description: "The aggregation function of the application alert rule",
-														Validators: []validator.String{
-															stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
-														},
+											Attributes: map[string]schema.Attribute{
+												ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
+													Optional:    true,
+													Computed:    true,
+													Description: "The metric name of the application alert rule",
+												},
+												ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
+													Optional:    true,
+													Computed:    true,
+													Description: "The aggregation function of the application alert rule",
+													Validators: []validator.String{
+														stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
 													},
 												},
 											},
 										},
-										ApplicationAlertConfigFieldRuleLogs: schema.ListNestedAttribute{
+										ApplicationAlertConfigFieldRuleLogs: schema.SingleNestedAttribute{
 											Description: "Rule based on logs of the configured alert configuration target",
 											Optional:    true,
-											NestedObject: schema.NestedAttributeObject{
-												Attributes: map[string]schema.Attribute{
-													ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
-														Optional:    true,
-														Computed:    true,
-														Description: "The metric name of the application alert rule",
+											Attributes: map[string]schema.Attribute{
+												ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
+													Optional:    true,
+													Computed:    true,
+													Description: "The metric name of the application alert rule",
+												},
+												ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
+													Optional:    true,
+													Computed:    true,
+													Description: "The aggregation function of the application alert rule",
+													Validators: []validator.String{
+														stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
 													},
-													ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
-														Optional:    true,
-														Computed:    true,
-														Description: "The aggregation function of the application alert rule",
-														Validators: []validator.String{
-															stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
-														},
+												},
+												ApplicationAlertConfigFieldRuleLogsLevel: schema.StringAttribute{
+													Optional:    true,
+													Computed:    true,
+													Description: "The log level for which this rule applies to",
+													Validators: []validator.String{
+														stringvalidator.OneOf(restapi.SupportedLogLevels.ToStringSlice()...),
 													},
-													ApplicationAlertConfigFieldRuleLogsLevel: schema.StringAttribute{
-														Optional:    true,
-														Computed:    true,
-														Description: "The log level for which this rule applies to",
-														Validators: []validator.String{
-															stringvalidator.OneOf(restapi.SupportedLogLevels.ToStringSlice()...),
-														},
-													},
-													ApplicationAlertConfigFieldRuleLogsMessage: schema.StringAttribute{
-														Optional:    true,
-														Computed:    true,
-														Description: "The log message for which this rule applies to",
-													},
-													ApplicationAlertConfigFieldRuleLogsOperator: schema.StringAttribute{
-														Optional:    true,
-														Computed:    true,
-														Description: "The operator which will be applied to evaluate this rule",
-														Validators: []validator.String{
-															stringvalidator.OneOf(restapi.SupportedExpressionOperators.ToStringSlice()...),
-														},
+												},
+												ApplicationAlertConfigFieldRuleLogsMessage: schema.StringAttribute{
+													Optional:    true,
+													Computed:    true,
+													Description: "The log message for which this rule applies to",
+												},
+												ApplicationAlertConfigFieldRuleLogsOperator: schema.StringAttribute{
+													Optional:    true,
+													Computed:    true,
+													Description: "The operator which will be applied to evaluate this rule",
+													Validators: []validator.String{
+														stringvalidator.OneOf(restapi.SupportedExpressionOperators.ToStringSlice()...),
 													},
 												},
 											},
 										},
-										ApplicationAlertConfigFieldRuleSlowness: schema.ListNestedAttribute{
+										ApplicationAlertConfigFieldRuleSlowness: schema.SingleNestedAttribute{
 											Description: "Rule based on the slowness of the configured alert configuration target",
 											Optional:    true,
-											NestedObject: schema.NestedAttributeObject{
-												Attributes: map[string]schema.Attribute{
-													ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
-														Optional:    true,
-														Computed:    true,
-														Description: "The metric name of the application alert rule",
-													},
-													ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
-														Optional:    true,
-														Computed:    true,
-														Description: "The aggregation function of the application alert rule",
-														Validators: []validator.String{
-															stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
-														},
+											Attributes: map[string]schema.Attribute{
+												ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
+													Optional:    true,
+													Computed:    true,
+													Description: "The metric name of the application alert rule",
+												},
+												ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
+													Optional:    true,
+													Computed:    true,
+													Description: "The aggregation function of the application alert rule",
+													Validators: []validator.String{
+														stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
 													},
 												},
 											},
 										},
-										ApplicationAlertConfigFieldRuleStatusCode: schema.ListNestedAttribute{
+										ApplicationAlertConfigFieldRuleStatusCode: schema.SingleNestedAttribute{
 											Description: "Rule based on the HTTP status code of the configured alert configuration target",
 											Optional:    true,
-											NestedObject: schema.NestedAttributeObject{
-												Attributes: map[string]schema.Attribute{
-													ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
-														Optional:    true,
-														Computed:    true,
-														Description: "The metric name of the application alert rule",
+											Attributes: map[string]schema.Attribute{
+												ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
+													Optional:    true,
+													Computed:    true,
+													Description: "The metric name of the application alert rule",
+												},
+												ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
+													Optional:    true,
+													Computed:    true,
+													Description: "The aggregation function of the application alert rule",
+													Validators: []validator.String{
+														stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
 													},
-													ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
-														Optional:    true,
-														Computed:    true,
-														Description: "The aggregation function of the application alert rule",
-														Validators: []validator.String{
-															stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
-														},
-													},
-													ApplicationAlertConfigFieldRuleStatusCodeStart: schema.Int64Attribute{
-														Optional:    true,
-														Computed:    true,
-														Description: "minimal HTTP status code applied for this rule",
-													},
-													ApplicationAlertConfigFieldRuleStatusCodeEnd: schema.Int64Attribute{
-														Optional:    true,
-														Computed:    true,
-														Description: "maximum HTTP status code applied for this rule",
-													},
+												},
+												ApplicationAlertConfigFieldRuleStatusCodeStart: schema.Int64Attribute{
+													Optional:    true,
+													Computed:    true,
+													Description: "minimal HTTP status code applied for this rule",
+												},
+												ApplicationAlertConfigFieldRuleStatusCodeEnd: schema.Int64Attribute{
+													Optional:    true,
+													Computed:    true,
+													Description: "maximum HTTP status code applied for this rule",
 												},
 											},
 										},
-										ApplicationAlertConfigFieldRuleThroughput: schema.ListNestedAttribute{
+										ApplicationAlertConfigFieldRuleThroughput: schema.SingleNestedAttribute{
 											Description: "Rule based on the throughput of the configured alert configuration target",
 											Optional:    true,
-											NestedObject: schema.NestedAttributeObject{
-												Attributes: map[string]schema.Attribute{
-													ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
-														Optional:    true,
-														Computed:    true,
-														Description: "The metric name of the application alert rule",
-													},
-													ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
-														Optional:    true,
-														Computed:    true,
-														Description: "The aggregation function of the application alert rule",
-														Validators: []validator.String{
-															stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
-														},
+											Attributes: map[string]schema.Attribute{
+												ApplicationAlertConfigFieldRuleMetricName: schema.StringAttribute{
+													Optional:    true,
+													Computed:    true,
+													Description: "The metric name of the application alert rule",
+												},
+												ApplicationAlertConfigFieldRuleAggregation: schema.StringAttribute{
+													Optional:    true,
+													Computed:    true,
+													Description: "The aggregation function of the application alert rule",
+													Validators: []validator.String{
+														stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
 													},
 												},
 											},
@@ -482,62 +296,51 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 							},
 						},
 					},
-					ApplicationAlertConfigFieldTimeThreshold: schema.ListNestedAttribute{
+					ApplicationAlertConfigFieldTimeThreshold: schema.SingleNestedAttribute{
 						Description: "Indicates the type of violation of the defined threshold.",
 						Optional:    true,
-						NestedObject: schema.NestedAttributeObject{
-							Attributes: map[string]schema.Attribute{
-								ApplicationAlertConfigFieldTimeThresholdRequestImpact: schema.ListNestedAttribute{
-									Description: "Time threshold base on request impact",
-									Optional:    true,
-									NestedObject: schema.NestedAttributeObject{
-										Attributes: map[string]schema.Attribute{
-											ApplicationAlertConfigFieldTimeThresholdTimeWindow: schema.Int64Attribute{
-												Required:    true,
-												Description: "The time window if the time threshold",
-											},
-											ApplicationAlertConfigFieldTimeThresholdRequestImpactRequests: schema.Int64Attribute{
-												Required:    true,
-												Description: "The number of requests in the given window",
-											},
-										},
+						Attributes: map[string]schema.Attribute{
+							ApplicationAlertConfigFieldTimeThresholdRequestImpact: schema.SingleNestedAttribute{
+								Description: "Time threshold base on request impact",
+								Optional:    true,
+								Attributes: map[string]schema.Attribute{
+									ApplicationAlertConfigFieldTimeThresholdTimeWindow: schema.Int64Attribute{
+										Required:    true,
+										Description: "The time window if the time threshold",
+									},
+									ApplicationAlertConfigFieldTimeThresholdRequestImpactRequests: schema.Int64Attribute{
+										Required:    true,
+										Description: "The number of requests in the given window",
 									},
 								},
-								ApplicationAlertConfigFieldTimeThresholdViolationsInPeriod: schema.ListNestedAttribute{
-									Description: "Time threshold base on violations in period",
-									Optional:    true,
-									NestedObject: schema.NestedAttributeObject{
-										Attributes: map[string]schema.Attribute{
-											ApplicationAlertConfigFieldTimeThresholdTimeWindow: schema.Int64Attribute{
-												Required:    true,
-												Description: "The time window if the time threshold",
-											},
-											ApplicationAlertConfigFieldTimeThresholdViolationsInPeriodViolations: schema.Int64Attribute{
-												Required:    true,
-												Description: "The violations appeared in the period",
-												Validators:  []validator.Int64{
-													// TODO: Add validator for range 1-12
-												},
-											},
-										},
+							},
+							ApplicationAlertConfigFieldTimeThresholdViolationsInPeriod: schema.SingleNestedAttribute{
+								Description: "Time threshold base on violations in period",
+								Optional:    true,
+								Attributes: map[string]schema.Attribute{
+									ApplicationAlertConfigFieldTimeThresholdTimeWindow: schema.Int64Attribute{
+										Required:    true,
+										Description: "The time window if the time threshold",
 									},
-								},
-								ApplicationAlertConfigFieldTimeThresholdViolationsInSequence: schema.ListNestedAttribute{
-									Description: "Time threshold base on violations in sequence",
-									Optional:    true,
-									NestedObject: schema.NestedAttributeObject{
-										Attributes: map[string]schema.Attribute{
-											ApplicationAlertConfigFieldTimeThresholdTimeWindow: schema.Int64Attribute{
-												Required:    true,
-												Description: "The time window if the time threshold",
-											},
+									ApplicationAlertConfigFieldTimeThresholdViolationsInPeriodViolations: schema.Int64Attribute{
+										Required:    true,
+										Description: "The violations appeared in the period",
+										Validators:  []validator.Int64{
+											// TODO: Add validator for range 1-12
 										},
 									},
 								},
 							},
-						},
-						Validators: []validator.List{
-							listvalidator.SizeAtMost(1),
+							ApplicationAlertConfigFieldTimeThresholdViolationsInSequence: schema.SingleNestedAttribute{
+								Description: "Time threshold base on violations in sequence",
+								Optional:    true,
+								Attributes: map[string]schema.Attribute{
+									ApplicationAlertConfigFieldTimeThresholdTimeWindow: schema.Int64Attribute{
+										Required:    true,
+										Description: "The time window if the time threshold",
+									},
+								},
+							},
 						},
 					},
 					ApplicationAlertConfigFieldApplications: schema.SetNestedAttribute{
@@ -592,54 +395,6 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 												},
 											},
 										},
-									},
-								},
-							},
-						},
-					},
-					ApplicationAlertConfigFieldThreshold: schema.SingleNestedAttribute{
-						Description: "Threshold configuration for different severity levels",
-						Optional:    true,
-						Attributes: map[string]schema.Attribute{
-							"static": schema.SingleNestedAttribute{
-								Description: "Static threshold definition.",
-								Optional:    true,
-								Attributes: map[string]schema.Attribute{
-									"operator": schema.StringAttribute{
-										Description: "Comparison operator for the static threshold.",
-										Optional:    true,
-										Validators: []validator.String{
-											stringvalidator.OneOf([]string{">=", ">", "<=", "<", "=="}...),
-										},
-									},
-									"value": schema.Int64Attribute{
-										Description: "The numeric value for the static threshold.",
-										Optional:    true,
-									},
-								},
-							},
-							"adaptive_baseline": schema.SingleNestedAttribute{
-								Description: "Adaptive baseline threshold definition.",
-								Optional:    true,
-								Attributes: map[string]schema.Attribute{
-									"operator": schema.StringAttribute{
-										Description: "Comparison operator for the adaptive baseline threshold.",
-										Optional:    true,
-										Validators: []validator.String{
-											stringvalidator.OneOf([]string{">=", ">", "<=", "<", "=="}...),
-										},
-									},
-									"deviation_factor": schema.Float32Attribute{
-										Description: "The numeric value for the deviation factor.",
-										Optional:    true,
-									},
-									"adaptability": schema.Float32Attribute{
-										Description: "The numeric value for the adaptability.",
-										Optional:    true,
-									},
-									"seasonality": schema.StringAttribute{
-										Description: "Value for the seasonality.",
-										Optional:    true,
 									},
 								},
 							},
@@ -911,281 +666,6 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 		result.CustomerPayloadFields = customerPayloadFields
 	}
 
-	// Handle threshold
-	if model.Threshold != nil {
-		// We need to convert from ThresholdRule to Threshold
-		// First, get the operator from the schema
-		//var thresholdElements []types.Object
-
-		threshold := &restapi.Threshold{}
-
-		if model.Threshold.Static != nil {
-			value := float64(model.Threshold.Static.Value.ValueInt64())
-			threshold.Value = &value
-			threshold.Type = "staticThreshold"
-
-			threshold.Operator = restapi.ThresholdOperator(model.Threshold.Static.Operator.ValueString())
-
-		}
-		if model.Threshold.AdaptiveBaseline != nil {
-			threshold.Type = "adaptiveBaseline"
-			threshold.Operator = restapi.ThresholdOperator(model.Threshold.AdaptiveBaseline.Operator.ValueString())
-			deviationFactor := model.Threshold.AdaptiveBaseline.DeviationFactor.ValueFloat32()
-			threshold.DeviationFactor = &deviationFactor
-			adaptability := model.Threshold.AdaptiveBaseline.Adaptability.ValueFloat32()
-			threshold.Adaptability = &adaptability
-			seasonality := restapi.ThresholdSeasonality(model.Threshold.AdaptiveBaseline.Seasonality.ValueString())
-			threshold.Seasonality = &seasonality
-
-		}
-		result.Threshold = threshold
-
-		// diags.Append(model.Threshold.ElementsAs(ctx, &thresholdElements, false)...)
-		// if diags.HasError() {
-		// 	return nil, diags
-		// }
-
-		// if len(thresholdElements) > 0 {
-		// 	// Create a new Threshold object
-		// 	threshold := &restapi.Threshold{}
-		// 	log.Printf("static threshold elements : %+v\n", thresholdElements)
-
-		// 	// Check for static threshold
-		// 	if staticVal, ok := thresholdElements[0].Attributes()[ThresholdFieldStatic]; ok && !staticVal.IsNull() && !staticVal.IsUnknown() {
-		// 		log.Printf("static threshold value type: %T\n", staticVal)
-
-		// 		// Extract the operator and value directly from the static object
-		// 		var staticObj struct {
-		// 			Operator types.String `tfsdk:"operator"`
-		// 			Value    types.Int64  `tfsdk:"value"`
-		// 		}
-
-		// 		staticObject, ok := staticVal.(types.Object)
-		// 		if ok && !staticObject.IsNull() && !staticObject.IsUnknown() {
-		// 			log.Printf("static threshold individual: %+v\n", staticObject)
-
-		// 			diags.Append(staticObject.As(ctx, &staticObj, basetypes.ObjectAsOptions{})...)
-		// 			if diags.HasError() {
-		// 				return nil, diags
-		// 			}
-
-		// 			// Set the threshold type and operator
-		// 			threshold.Type = "staticThreshold"
-		// 			threshold.Operator = restapi.ThresholdOperator(staticObj.Operator.ValueString())
-
-		// 			// Set the value
-		// 			if !staticObj.Value.IsNull() && !staticObj.Value.IsUnknown() {
-		// 				value := float64(staticObj.Value.ValueInt64())
-		// 				threshold.Value = &value
-		// 			}
-		// 			log.Printf("static threshold final: %+v\n", threshold)
-		// 		}
-		// 	}
-
-		// 	// Check for adaptive baseline threshold
-		// 	if adaptiveVal, ok := thresholdElements[0].Attributes()[ThresholdFieldAdaptiveBaseline]; ok && !adaptiveVal.IsNull() && !adaptiveVal.IsUnknown() {
-		// 		log.Printf("adaptive threshold value type: %T\n", adaptiveVal)
-
-		// 		// Extract the operator, deviation factor, adaptability, and seasonality directly
-		// 		var adaptiveObj struct {
-		// 			Operator        types.String  `tfsdk:"operator"`
-		// 			DeviationFactor types.Float64 `tfsdk:"deviation_factor"`
-		// 			Adaptability    types.Float64 `tfsdk:"adaptability"`
-		// 			Seasonality     types.String  `tfsdk:"seasonality"`
-		// 		}
-
-		// 		adaptiveObject, ok := adaptiveVal.(types.Object)
-		// 		if ok && !adaptiveObject.IsNull() && !adaptiveObject.IsUnknown() {
-		// 			log.Printf("adaptive threshold individual: %+v\n", adaptiveObject)
-
-		// 			diags.Append(adaptiveObject.As(ctx, &adaptiveObj, basetypes.ObjectAsOptions{})...)
-		// 			if diags.HasError() {
-		// 				return nil, diags
-		// 			}
-
-		// 			// Set the threshold type and operator
-		// 			threshold.Type = "adaptiveBaseline"
-		// 			threshold.Operator = restapi.ThresholdOperator(adaptiveObj.Operator.ValueString())
-
-		// 			// Set the deviation factor
-		// 			if !adaptiveObj.DeviationFactor.IsNull() && !adaptiveObj.DeviationFactor.IsUnknown() {
-		// 				deviationFactor := float32(adaptiveObj.DeviationFactor.ValueFloat64())
-		// 				threshold.DeviationFactor = &deviationFactor
-		// 			}
-
-		// 			// Set the seasonality
-		// 			if !adaptiveObj.Seasonality.IsNull() && !adaptiveObj.Seasonality.IsUnknown() {
-		// 				seasonality := restapi.ThresholdSeasonality(adaptiveObj.Seasonality.ValueString())
-		// 				threshold.Seasonality = &seasonality
-		// 			}
-
-		// 			log.Printf("adaptive threshold final: %+v\n", threshold)
-		// 		}
-		// 	}
-
-		// 	result.Threshold = threshold
-		// }
-	}
-
-	// Handle rule (deprecated but supported for backward compatibility)
-	if !model.Rule.IsNull() && !model.Rule.IsUnknown() {
-		var rules []RuleModel
-		diags = model.Rule.ElementsAs(ctx, &rules, false)
-		if diags.HasError() {
-			return nil, diags
-		}
-
-		if len(rules) > 0 {
-			rule := rules[0]
-			result.Rule = &restapi.ApplicationAlertRule{}
-
-			// Handle error rate rule
-			if !rule.ErrorRate.IsNull() && !rule.ErrorRate.IsUnknown() {
-				var errorRateRules []RuleConfigModel
-				diags = rule.ErrorRate.ElementsAs(ctx, &errorRateRules, false)
-				if diags.HasError() {
-					return nil, diags
-				}
-				if len(errorRateRules) > 0 {
-					if errorRateRules[0].MetricName.IsNull() || errorRateRules[0].MetricName.IsUnknown() {
-						diags.AddError(
-							"MetricName is required for Error rate rules",
-							"MetricName is required for Error rate rules",
-						)
-						return nil, diags
-					}
-					result.Rule.AlertType = ApplicationAlertConfigFieldRuleErrorRate
-					result.Rule.MetricName = errorRateRules[0].MetricName.ValueString()
-					result.Rule.Aggregation = restapi.Aggregation(errorRateRules[0].Aggregation.ValueString())
-				}
-			}
-
-			// Handle errors rule
-			if !rule.Errors.IsNull() && !rule.Errors.IsUnknown() {
-				var errorsRules []RuleConfigModel
-				diags = rule.Errors.ElementsAs(ctx, &errorsRules, false)
-				if diags.HasError() {
-					return nil, diags
-				}
-				if len(errorsRules) > 0 {
-					if errorsRules[0].MetricName.IsNull() || errorsRules[0].MetricName.IsUnknown() {
-						diags.AddError(
-							"MetricName is required for Error rules",
-							"MetricName is required for Error rules",
-						)
-						return nil, diags
-					}
-					result.Rule.AlertType = ApplicationAlertConfigFieldRuleErrors
-					result.Rule.MetricName = errorsRules[0].MetricName.ValueString()
-					result.Rule.Aggregation = restapi.Aggregation(errorsRules[0].Aggregation.ValueString())
-				}
-			}
-
-			// Handle logs rule
-			if !rule.Logs.IsNull() && !rule.Logs.IsUnknown() {
-				var logsRules []LogsRuleModel
-				diags = rule.Logs.ElementsAs(ctx, &logsRules, false)
-				if diags.HasError() {
-					return nil, diags
-				}
-				if len(logsRules) > 0 {
-					if logsRules[0].MetricName.IsNull() || logsRules[0].MetricName.IsUnknown() ||
-						logsRules[0].Level.IsNull() || logsRules[0].Level.IsUnknown() ||
-						logsRules[0].Operator.IsNull() || logsRules[0].Operator.IsUnknown() {
-						diags.AddError(
-							"MetricName,Log level, Log operators are required for log rules",
-							"MetricName,Log level, Log operators are required for log rules",
-						)
-						return nil, diags
-					}
-					result.Rule.AlertType = ApplicationAlertConfigFieldRuleLogs
-					result.Rule.MetricName = logsRules[0].MetricName.ValueString()
-					result.Rule.Aggregation = restapi.Aggregation(logsRules[0].Aggregation.ValueString())
-
-					// Set additional fields for logs
-					level := restapi.LogLevel(logsRules[0].Level.ValueString())
-					result.Rule.Level = &level
-
-					message := logsRules[0].Message.ValueString()
-					result.Rule.Message = &message
-
-					operator := restapi.ExpressionOperator(logsRules[0].Operator.ValueString())
-					result.Rule.Operator = &operator
-				}
-			}
-
-			// Handle slowness rule
-			if !rule.Slowness.IsNull() && !rule.Slowness.IsUnknown() {
-				var slownessRules []RuleConfigModel
-				diags = rule.Slowness.ElementsAs(ctx, &slownessRules, false)
-				if diags.HasError() {
-					return nil, diags
-				}
-				if len(slownessRules) > 0 {
-					if slownessRules[0].MetricName.IsNull() || slownessRules[0].MetricName.IsUnknown() {
-						diags.AddError(
-							"MetricName is required for slowness rules",
-							"MetricName is required for slowness rules",
-						)
-						return nil, diags
-					}
-					result.Rule.AlertType = ApplicationAlertConfigFieldRuleSlowness
-					result.Rule.MetricName = slownessRules[0].MetricName.ValueString()
-					result.Rule.Aggregation = restapi.Aggregation(slownessRules[0].Aggregation.ValueString())
-				}
-			}
-
-			// Handle status code rule
-			if !rule.StatusCode.IsNull() && !rule.StatusCode.IsUnknown() {
-				var statusCodeRules []StatusCodeRuleModel
-				diags = rule.StatusCode.ElementsAs(ctx, &statusCodeRules, false)
-				if diags.HasError() {
-					return nil, diags
-				}
-				if len(statusCodeRules) > 0 {
-					if statusCodeRules[0].MetricName.IsNull() || statusCodeRules[0].MetricName.IsUnknown() {
-						diags.AddError(
-							"MetricName is required for statuc code rules",
-							"MetricName is required for statuc code rules",
-						)
-						return nil, diags
-					}
-					result.Rule.AlertType = ApplicationAlertConfigFieldRuleStatusCode
-					result.Rule.MetricName = statusCodeRules[0].MetricName.ValueString()
-					result.Rule.Aggregation = restapi.Aggregation(statusCodeRules[0].Aggregation.ValueString())
-
-					// Set additional fields for status code
-					statusCodeStart := int32(statusCodeRules[0].StatusCodeStart.ValueInt64())
-					result.Rule.StatusCodeStart = &statusCodeStart
-
-					statusCodeEnd := int32(statusCodeRules[0].StatusCodeEnd.ValueInt64())
-					result.Rule.StatusCodeEnd = &statusCodeEnd
-				}
-			}
-
-			// Handle throughput rule
-			if !rule.Throughput.IsNull() && !rule.Throughput.IsUnknown() {
-				var throughputRules []RuleConfigModel
-				diags = rule.Throughput.ElementsAs(ctx, &throughputRules, false)
-				if diags.HasError() {
-					return nil, diags
-				}
-				if len(throughputRules) > 0 {
-					if throughputRules[0].MetricName.IsNull() || throughputRules[0].MetricName.IsUnknown() {
-						diags.AddError(
-							"MetricName is required for thoughput rule",
-							"MetricName is required for Error rate rule",
-						)
-						return nil, diags
-					}
-					result.Rule.AlertType = ApplicationAlertConfigFieldRuleThroughput
-					result.Rule.MetricName = throughputRules[0].MetricName.ValueString()
-					result.Rule.Aggregation = restapi.Aggregation(throughputRules[0].Aggregation.ValueString())
-				}
-			}
-		}
-	}
-
 	// Handle rules (new format with multiple thresholds and severity levels)
 	if !model.Rules.IsNull() && !model.Rules.IsUnknown() {
 		var ruleWithThresholds []RuleWithThresholdModel
@@ -1212,149 +692,137 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 
 				// Handle error rate rule
 				if !rule.ErrorRate.IsNull() && !rule.ErrorRate.IsUnknown() {
-					var errorRateRules []RuleConfigModel
-					diags = rule.ErrorRate.ElementsAs(ctx, &errorRateRules, false)
+					var errorRateRule RuleConfigModel
+					diags = rule.ErrorRate.As(ctx, &errorRateRule, basetypes.ObjectAsOptions{})
 					if diags.HasError() {
 						return nil, diags
 					}
-					if len(errorRateRules) > 0 {
-						if errorRateRules[0].MetricName.IsNull() || errorRateRules[0].MetricName.IsUnknown() {
-							diags.AddError(
-								"MetricName is required for Error rate rules",
-								"MetricName is required for Error rate rules",
-							)
-							return nil, diags
-						}
-						result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleErrorRate
-						result.Rules[i].Rule.MetricName = errorRateRules[0].MetricName.ValueString()
-						result.Rules[i].Rule.Aggregation = restapi.Aggregation(errorRateRules[0].Aggregation.ValueString())
+					if errorRateRule.MetricName.IsNull() || errorRateRule.MetricName.IsUnknown() {
+						diags.AddError(
+							"MetricName is required for Error rate rules",
+							"MetricName is required for Error rate rules",
+						)
+						return nil, diags
 					}
+					result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleErrorRate
+					result.Rules[i].Rule.MetricName = errorRateRule.MetricName.ValueString()
+					result.Rules[i].Rule.Aggregation = restapi.Aggregation(errorRateRule.Aggregation.ValueString())
 				}
 
 				// Handle errors rule
 				if !rule.Errors.IsNull() && !rule.Errors.IsUnknown() {
-					var errorsRules []RuleConfigModel
-					diags = rule.Errors.ElementsAs(ctx, &errorsRules, false)
+					var errorsRule RuleConfigModel
+					diags = rule.Errors.As(ctx, &errorsRule, basetypes.ObjectAsOptions{})
 					if diags.HasError() {
 						return nil, diags
 					}
-					if len(errorsRules) > 0 {
-						if errorsRules[0].MetricName.IsNull() || errorsRules[0].MetricName.IsUnknown() {
-							diags.AddError(
-								"MetricName is required for Error rules",
-								"MetricName is required for Error rules",
-							)
-							return nil, diags
-						}
-						result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleErrors
-						result.Rules[i].Rule.MetricName = errorsRules[0].MetricName.ValueString()
-						result.Rules[i].Rule.Aggregation = restapi.Aggregation(errorsRules[0].Aggregation.ValueString())
+					if errorsRule.MetricName.IsNull() || errorsRule.MetricName.IsUnknown() {
+						diags.AddError(
+							"MetricName is required for Error rules",
+							"MetricName is required for Error rules",
+						)
+						return nil, diags
 					}
+					result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleErrors
+					result.Rules[i].Rule.MetricName = errorsRule.MetricName.ValueString()
+					result.Rules[i].Rule.Aggregation = restapi.Aggregation(errorsRule.Aggregation.ValueString())
 				}
 
 				// Handle logs rule
 				if !rule.Logs.IsNull() && !rule.Logs.IsUnknown() {
-					var logsRules []LogsRuleModel
-					diags = rule.Logs.ElementsAs(ctx, &logsRules, false)
+					var logsRule LogsRuleModel
+					diags = rule.Logs.As(ctx, &logsRule, basetypes.ObjectAsOptions{})
 					if diags.HasError() {
 						return nil, diags
 					}
-					if len(logsRules) > 0 {
-						if logsRules[0].MetricName.IsNull() || logsRules[0].MetricName.IsUnknown() ||
-							logsRules[0].Level.IsNull() || logsRules[0].Level.IsUnknown() ||
-							logsRules[0].Operator.IsNull() || logsRules[0].Operator.IsUnknown() {
-							diags.AddError(
-								"MetricName,log level,log operator are required for log rules",
-								"MetricName,log level,log operator are required for log rules",
-							)
-							return nil, diags
-						}
-						result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleLogs
-						result.Rules[i].Rule.MetricName = logsRules[0].MetricName.ValueString()
-						result.Rules[i].Rule.Aggregation = restapi.Aggregation(logsRules[0].Aggregation.ValueString())
-
-						// Set additional fields for logs
-						level := restapi.LogLevel(logsRules[0].Level.ValueString())
-						result.Rules[i].Rule.Level = &level
-
-						message := logsRules[0].Message.ValueString()
-						result.Rules[i].Rule.Message = &message
-
-						operator := restapi.ExpressionOperator(logsRules[0].Operator.ValueString())
-						result.Rules[i].Rule.Operator = &operator
+					if logsRule.MetricName.IsNull() || logsRule.MetricName.IsUnknown() ||
+						logsRule.Level.IsNull() || logsRule.Level.IsUnknown() ||
+						logsRule.Operator.IsNull() || logsRule.Operator.IsUnknown() {
+						diags.AddError(
+							"MetricName,log level,log operator are required for log rules",
+							"MetricName,log level,log operator are required for log rules",
+						)
+						return nil, diags
 					}
+					result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleLogs
+					result.Rules[i].Rule.MetricName = logsRule.MetricName.ValueString()
+					result.Rules[i].Rule.Aggregation = restapi.Aggregation(logsRule.Aggregation.ValueString())
+
+					// Set additional fields for logs
+					level := restapi.LogLevel(logsRule.Level.ValueString())
+					result.Rules[i].Rule.Level = &level
+
+					message := logsRule.Message.ValueString()
+					result.Rules[i].Rule.Message = &message
+
+					operator := restapi.ExpressionOperator(logsRule.Operator.ValueString())
+					result.Rules[i].Rule.Operator = &operator
 				}
 
 				// Handle slowness rule
 				if !rule.Slowness.IsNull() && !rule.Slowness.IsUnknown() {
 					log.Printf("Slowness : %+v\n", rule.Slowness)
-					var slownessRules []RuleConfigModel
-					diags = rule.Slowness.ElementsAs(ctx, &slownessRules, false)
-					log.Printf("Slowness mapped : %+v\n", slownessRules)
+					var slownessRule RuleConfigModel
+					diags = rule.Slowness.As(ctx, &slownessRule, basetypes.ObjectAsOptions{})
+					log.Printf("Slowness mapped : %+v\n", slownessRule)
 					if diags.HasError() {
 						return nil, diags
 					}
-					if len(slownessRules) > 0 {
-						if slownessRules[0].MetricName.IsNull() || slownessRules[0].MetricName.IsUnknown() {
-							diags.AddError(
-								"MetricName is required for slowness",
-								"MetricName is required for slowness",
-							)
-							return nil, diags
-						}
-						result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleSlowness
-						result.Rules[i].Rule.MetricName = slownessRules[0].MetricName.ValueString()
-						result.Rules[i].Rule.Aggregation = restapi.Aggregation(slownessRules[0].Aggregation.ValueString())
+					if slownessRule.MetricName.IsNull() || slownessRule.MetricName.IsUnknown() {
+						diags.AddError(
+							"MetricName is required for slowness",
+							"MetricName is required for slowness",
+						)
+						return nil, diags
 					}
+					result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleSlowness
+					result.Rules[i].Rule.MetricName = slownessRule.MetricName.ValueString()
+					result.Rules[i].Rule.Aggregation = restapi.Aggregation(slownessRule.Aggregation.ValueString())
 				}
 
 				// Handle status code rule
 				if !rule.StatusCode.IsNull() && !rule.StatusCode.IsUnknown() {
-					var statusCodeRules []StatusCodeRuleModel
-					diags = rule.StatusCode.ElementsAs(ctx, &statusCodeRules, false)
+					var statusCodeRule StatusCodeRuleModel
+					diags = rule.StatusCode.As(ctx, &statusCodeRule, basetypes.ObjectAsOptions{})
 					if diags.HasError() {
 						return nil, diags
 					}
-					if len(statusCodeRules) > 0 {
-						if statusCodeRules[0].MetricName.IsNull() || statusCodeRules[0].MetricName.IsUnknown() {
-							diags.AddError(
-								"MetricName is required for status code",
-								"MetricName is required for statuc code",
-							)
-							return nil, diags
-						}
-						result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleStatusCode
-						result.Rules[i].Rule.MetricName = statusCodeRules[0].MetricName.ValueString()
-						result.Rules[i].Rule.Aggregation = restapi.Aggregation(statusCodeRules[0].Aggregation.ValueString())
-
-						// Set additional fields for status code
-						statusCodeStart := int32(statusCodeRules[0].StatusCodeStart.ValueInt64())
-						result.Rules[i].Rule.StatusCodeStart = &statusCodeStart
-
-						statusCodeEnd := int32(statusCodeRules[0].StatusCodeEnd.ValueInt64())
-						result.Rules[i].Rule.StatusCodeEnd = &statusCodeEnd
+					if statusCodeRule.MetricName.IsNull() || statusCodeRule.MetricName.IsUnknown() {
+						diags.AddError(
+							"MetricName is required for status code",
+							"MetricName is required for statuc code",
+						)
+						return nil, diags
 					}
+					result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleStatusCode
+					result.Rules[i].Rule.MetricName = statusCodeRule.MetricName.ValueString()
+					result.Rules[i].Rule.Aggregation = restapi.Aggregation(statusCodeRule.Aggregation.ValueString())
+
+					// Set additional fields for status code
+					statusCodeStart := int32(statusCodeRule.StatusCodeStart.ValueInt64())
+					result.Rules[i].Rule.StatusCodeStart = &statusCodeStart
+
+					statusCodeEnd := int32(statusCodeRule.StatusCodeEnd.ValueInt64())
+					result.Rules[i].Rule.StatusCodeEnd = &statusCodeEnd
 				}
 
 				// Handle throughput rule
 				if !rule.Throughput.IsNull() && !rule.Throughput.IsUnknown() {
-					var throughputRules []RuleConfigModel
-					diags = rule.Throughput.ElementsAs(ctx, &throughputRules, false)
+					var throughputRule RuleConfigModel
+					diags = rule.Throughput.As(ctx, &throughputRule, basetypes.ObjectAsOptions{})
 					if diags.HasError() {
 						return nil, diags
 					}
-					if len(throughputRules) > 0 {
-						if throughputRules[0].MetricName.IsNull() || throughputRules[0].MetricName.IsUnknown() {
-							diags.AddError(
-								"MetricName is required for througput",
-								"MetricName is required for throughput",
-							)
-							return nil, diags
-						}
-						result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleThroughput
-						result.Rules[i].Rule.MetricName = throughputRules[0].MetricName.ValueString()
-						result.Rules[i].Rule.Aggregation = restapi.Aggregation(throughputRules[0].Aggregation.ValueString())
+					if throughputRule.MetricName.IsNull() || throughputRule.MetricName.IsUnknown() {
+						diags.AddError(
+							"MetricName is required for througput",
+							"MetricName is required for throughput",
+						)
+						return nil, diags
 					}
+					result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleThroughput
+					result.Rules[i].Rule.MetricName = throughputRule.MetricName.ValueString()
+					result.Rules[i].Rule.Aggregation = restapi.Aggregation(throughputRule.Aggregation.ValueString())
 				}
 			}
 
@@ -1363,7 +831,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 			var thresholdDiags diag.Diagnostics
 
 			if !ruleWithThreshold.Thresholds.IsNull() && !ruleWithThreshold.Thresholds.IsUnknown() {
-				thresholdMap, thresholdDiags = shared.MapThresholdsFromState(ctx, ruleWithThreshold.Thresholds)
+				thresholdMap, thresholdDiags = shared.MapThresholdsFromStateObject(ctx, ruleWithThreshold.Thresholds)
 				diags.Append(thresholdDiags...)
 				if diags.HasError() {
 					return nil, diags
@@ -1391,57 +859,47 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 
 	// Handle time threshold
 	if !model.TimeThreshold.IsNull() && !model.TimeThreshold.IsUnknown() {
-		var timeThresholds []AppAlertTimeThresholdModel
-		diags = model.TimeThreshold.ElementsAs(ctx, &timeThresholds, false)
+		var timeThreshold AppAlertTimeThresholdModel
+		diags = model.TimeThreshold.As(ctx, &timeThreshold, basetypes.ObjectAsOptions{})
 		if diags.HasError() {
 			return nil, diags
 		}
 
-		if len(timeThresholds) > 0 {
-			timeThreshold := timeThresholds[0]
-			result.TimeThreshold = &restapi.ApplicationAlertTimeThreshold{}
+		result.TimeThreshold = &restapi.ApplicationAlertTimeThreshold{}
 
-			// Handle request impact
-			if !timeThreshold.RequestImpact.IsNull() && !timeThreshold.RequestImpact.IsUnknown() {
-				var requestImpacts []AppAlertRequestImpactModel
-				diags = timeThreshold.RequestImpact.ElementsAs(ctx, &requestImpacts, false)
-				if diags.HasError() {
-					return nil, diags
-				}
-				if len(requestImpacts) > 0 {
-					result.TimeThreshold.Type = "requestImpact"
-					result.TimeThreshold.TimeWindow = requestImpacts[0].TimeWindow.ValueInt64()
-					result.TimeThreshold.Requests = int(requestImpacts[0].Requests.ValueInt64())
-
-				}
+		// Handle request impact
+		if !timeThreshold.RequestImpact.IsNull() && !timeThreshold.RequestImpact.IsUnknown() {
+			var requestImpact AppAlertRequestImpactModel
+			diags = timeThreshold.RequestImpact.As(ctx, &requestImpact, basetypes.ObjectAsOptions{})
+			if diags.HasError() {
+				return nil, diags
 			}
+			result.TimeThreshold.Type = "requestImpact"
+			result.TimeThreshold.TimeWindow = requestImpact.TimeWindow.ValueInt64()
+			result.TimeThreshold.Requests = int(requestImpact.Requests.ValueInt64())
+		}
 
-			// Handle violations in period
-			if !timeThreshold.ViolationsInPeriod.IsNull() && !timeThreshold.ViolationsInPeriod.IsUnknown() {
-				var violationsInPeriods []AppAlertViolationsInPeriodModel
-				diags = timeThreshold.ViolationsInPeriod.ElementsAs(ctx, &violationsInPeriods, false)
-				if diags.HasError() {
-					return nil, diags
-				}
-				if len(violationsInPeriods) > 0 {
-					result.TimeThreshold.Type = "violationsInPeriod"
-					result.TimeThreshold.TimeWindow = violationsInPeriods[0].TimeWindow.ValueInt64()
-					result.TimeThreshold.Violations = int(violationsInPeriods[0].Violations.ValueInt64())
-				}
+		// Handle violations in period
+		if !timeThreshold.ViolationsInPeriod.IsNull() && !timeThreshold.ViolationsInPeriod.IsUnknown() {
+			var violationsInPeriod AppAlertViolationsInPeriodModel
+			diags = timeThreshold.ViolationsInPeriod.As(ctx, &violationsInPeriod, basetypes.ObjectAsOptions{})
+			if diags.HasError() {
+				return nil, diags
 			}
+			result.TimeThreshold.Type = "violationsInPeriod"
+			result.TimeThreshold.TimeWindow = violationsInPeriod.TimeWindow.ValueInt64()
+			result.TimeThreshold.Violations = int(violationsInPeriod.Violations.ValueInt64())
+		}
 
-			// Handle violations in sequence
-			if !timeThreshold.ViolationsInSequence.IsNull() && !timeThreshold.ViolationsInSequence.IsUnknown() {
-				var violationsInSequences []AppAlertViolationsInSequenceModel
-				diags = timeThreshold.ViolationsInSequence.ElementsAs(ctx, &violationsInSequences, false)
-				if diags.HasError() {
-					return nil, diags
-				}
-				if len(violationsInSequences) > 0 {
-					result.TimeThreshold.Type = "violationsInSequence"
-					result.TimeThreshold.TimeWindow = violationsInSequences[0].TimeWindow.ValueInt64()
-				}
+		// Handle violations in sequence
+		if !timeThreshold.ViolationsInSequence.IsNull() && !timeThreshold.ViolationsInSequence.IsUnknown() {
+			var violationsInSequence AppAlertViolationsInSequenceModel
+			diags = timeThreshold.ViolationsInSequence.As(ctx, &violationsInSequence, basetypes.ObjectAsOptions{})
+			if diags.HasError() {
+				return nil, diags
 			}
+			result.TimeThreshold.Type = "violationsInSequence"
+			result.TimeThreshold.TimeWindow = violationsInSequence.TimeWindow.ValueInt64()
 		}
 	}
 
@@ -1621,398 +1079,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 	if diags.HasError() {
 		return diags
 	}
-	log.Printf("Before Threshold stage")
-	// Handle threshold
-	if data.Threshold != nil {
 
-		applicationModel := ApplicationThresholdModel{
-			Static:           nil,
-			AdaptiveBaseline: nil,
-		}
-
-		if data.Threshold.Type == "staticThreshold" {
-			staticModel := shared.StaticTypeModel{
-				Operator: types.StringValue(string(data.Threshold.Operator)),
-				Value:    util.SetInt64PointerToState(data.Threshold.Value),
-			}
-			applicationModel.Static = &staticModel
-		}
-		if data.Threshold.Type == "adaptiveBaseline" {
-			adaptiveBaselineModel := shared.AdaptiveBaselineModel{
-				Operator:        types.StringValue(string(data.Threshold.Operator)),
-				DeviationFactor: util.SetFloat32PointerToState(data.Threshold.DeviationFactor),
-				Adaptability:    util.SetFloat32PointerToState(data.Threshold.Adaptability),
-				Seasonality:     types.StringValue(string(*data.Threshold.Seasonality)),
-			}
-			applicationModel.AdaptiveBaseline = &adaptiveBaselineModel
-		}
-
-		model.Threshold = &applicationModel
-
-		// // Map thresholds
-		// thresholdObj := map[string]attr.Value{}
-		// // Create threshold object value with the appropriate attribute types
-		// thresholdAttrTypes := map[string]attr.Type{}
-		// // Create threshold object based on the threshold type
-		// if data.Threshold != nil {
-		// 	// Map static threshold
-		// 	thresholdObj[ThresholdFieldStatic] = types.ListNull(types.ObjectType{
-		// 		AttrTypes: map[string]attr.Type{
-		// 			LogAlertConfigFieldValue: types.Int64Type,
-		// 			"operator":               types.StringType,
-		// 		},
-		// 	})
-		// 	thresholdObj[ThresholdFieldAdaptiveBaseline] = types.ListNull(types.ObjectType{
-		// 		AttrTypes: map[string]attr.Type{
-		// 			ThresholdFieldAdaptiveBaselineDeviation:    types.Float64Type,
-		// 			ThresholdFieldAdaptiveBaselineAdaptability: types.Float64Type,
-		// 			ThresholdFieldAdaptiveBaselineSeasonality:  types.StringType,
-		// 			"operator": types.StringType,
-		// 		},
-		// 	})
-		// 	thresholdAttrTypes[ThresholdFieldStatic] = types.ListType{
-		// 		ElemType: types.ObjectType{
-		// 			AttrTypes: map[string]attr.Type{
-		// 				"operator":               types.StringType,
-		// 				LogAlertConfigFieldValue: types.Int64Type,
-		// 			},
-		// 		},
-		// 	}
-		// 	thresholdAttrTypes[ThresholdFieldAdaptiveBaseline] = types.ListType{
-		// 		ElemType: types.ObjectType{
-		// 			AttrTypes: map[string]attr.Type{
-		// 				"operator":         types.StringType,
-		// 				"deviation_factor": types.Float64Type,
-		// 				"adaptability":     types.Float64Type,
-		// 				"seasonality":      types.StringType,
-		// 			},
-		// 		},
-		// 	}
-		// 	if data.Threshold.Type == "staticThreshold" {
-		// 		// Create static threshold object
-		// 		staticObj := map[string]attr.Value{}
-
-		// 		// Add operator
-		// 		staticObj["operator"] = types.StringValue(string(data.Threshold.Operator))
-
-		// 		// Add value
-		// 		if data.Threshold.Value != nil {
-		// 			staticObj["value"] = setInt64PointerToState(data.Threshold.Value))
-		// 		} else {
-		// 			staticObj["value"] = types.Int64Null()
-		// 		}
-
-		// 		// Create static object value
-		// 		staticObjVal, staticObjDiags := types.ObjectValue(
-		// 			map[string]attr.Type{
-		// 				"operator": types.StringType,
-		// 				"value":    types.Int64Type,
-		// 			},
-		// 			staticObj,
-		// 		)
-		// 		if staticObjDiags.HasError() {
-		// 			return staticObjDiags
-		// 		}
-
-		// 		// Create static list
-		// 		staticList, staticListDiags := types.ListValue(
-		// 			types.ObjectType{
-		// 				AttrTypes: map[string]attr.Type{
-		// 					"operator": types.StringType,
-		// 					"value":    types.Int64Type,
-		// 				},
-		// 			},
-		// 			[]attr.Value{staticObjVal},
-		// 		)
-		// 		if staticListDiags.HasError() {
-		// 			return staticListDiags
-		// 		}
-
-		// 		thresholdObj[ThresholdFieldStatic] = staticList
-		// 	} else if data.Threshold.Type == "adaptiveBaseline" {
-		// 		// Create adaptive baseline threshold object
-		// 		adaptiveObj := map[string]attr.Value{}
-
-		// 		// Add operator
-		// 		adaptiveObj["operator"] = types.StringValue(string(data.Threshold.Operator))
-
-		// 		// Add deviation factor
-		// 		if data.Threshold.DeviationFactor != nil {
-		// 			adaptiveObj["deviation_factor"] = types.Float64Value(float64(*data.Threshold.DeviationFactor))
-		// 		} else {
-		// 			adaptiveObj["deviation_factor"] = types.Float64Null()
-		// 		}
-
-		// 		// Add adaptability (assuming it's stored in Value for now)
-		// 		if data.Threshold.Value != nil {
-		// 			adaptiveObj["adaptability"] = setFloat64PointerToState(data.Threshold.Value)
-		// 		} else {
-		// 			adaptiveObj["adaptability"] = types.Float64Null()
-		// 		}
-
-		// 		// Add seasonality
-		// 		if data.Threshold.Seasonality != nil {
-		// 			adaptiveObj["seasonality"] = types.StringValue(string(*data.Threshold.Seasonality))
-		// 		} else {
-		// 			adaptiveObj["seasonality"] = types.StringNull()
-		// 		}
-
-		// 		// Create adaptive baseline object value
-		// 		adaptiveObjVal, adaptiveObjDiags := types.ObjectValue(
-		// 			map[string]attr.Type{
-		// 				"operator":         types.StringType,
-		// 				"deviation_factor": types.Float64Type,
-		// 				"adaptability":     types.Float64Type,
-		// 				"seasonality":      types.StringType,
-		// 			},
-		// 			adaptiveObj,
-		// 		)
-		// 		if adaptiveObjDiags.HasError() {
-		// 			return adaptiveObjDiags
-		// 		}
-
-		// 		// Create adaptive baseline list
-		// 		adaptiveList, adaptiveListDiags := types.ListValue(
-		// 			types.ObjectType{
-		// 				AttrTypes: map[string]attr.Type{
-		// 					"operator":         types.StringType,
-		// 					"deviation_factor": types.Float64Type,
-		// 					"adaptability":     types.Float64Type,
-		// 					"seasonality":      types.StringType,
-		// 				},
-		// 			},
-		// 			[]attr.Value{adaptiveObjVal},
-		// 		)
-		// 		if adaptiveListDiags.HasError() {
-		// 			return adaptiveListDiags
-		// 		}
-
-		// 		thresholdObj[ThresholdFieldAdaptiveBaseline] = adaptiveList
-		// 	}
-		// }
-
-		// // Create the object value
-		// thresholdObjVal, thresholdObjDiags := types.ObjectValue(
-		// 	thresholdAttrTypes,
-		// 	thresholdObj,
-		// )
-		// if thresholdObjDiags.HasError() {
-		// 	return thresholdObjDiags
-		// }
-
-		// // Create the list value
-		// thresholdList, thresholdListDiags := types.ListValue(
-		// 	types.ObjectType{
-		// 		AttrTypes: thresholdAttrTypes,
-		// 	},
-		// 	[]attr.Value{thresholdObjVal},
-		// )
-		// if thresholdListDiags.HasError() {
-		// 	return thresholdListDiags
-		// }
-
-		// model.Threshold = thresholdList
-	}
-
-	if diags.HasError() {
-		return diags
-	}
-	log.Printf("Before Rule stage")
-	// Handle rule (deprecated but supported for backward compatibility)
-	if data.Rule != nil {
-		ruleModel := RuleModel{}
-		errorRateElements := make([]attr.Value, 0)
-		errorsElements := make([]attr.Value, 0)
-		logsElements := make([]attr.Value, 0)
-		slownessElements := make([]attr.Value, 0)
-		statusCodeElements := make([]attr.Value, 0)
-		throughputElements := make([]attr.Value, 0)
-
-		// Set rule model fields based on the AlertType
-		if data.Rule != nil {
-			switch data.Rule.AlertType {
-			case ApplicationAlertConfigFieldRuleErrorRate:
-				errorRateElements = []attr.Value{
-					types.ObjectValueMust(map[string]attr.Type{
-						"metric_name": types.StringType,
-						"aggregation": types.StringType,
-					}, map[string]attr.Value{
-						"metric_name": types.StringValue(data.Rule.MetricName),
-						"aggregation": types.StringValue(string(data.Rule.Aggregation)),
-					}),
-				}
-
-			case ApplicationAlertConfigFieldRuleErrors:
-				errorsElements = []attr.Value{
-					types.ObjectValueMust(map[string]attr.Type{
-						"metric_name": types.StringType,
-						"aggregation": types.StringType,
-					}, map[string]attr.Value{
-						"metric_name": types.StringValue(data.Rule.MetricName),
-						"aggregation": types.StringValue(string(data.Rule.Aggregation)),
-					}),
-				}
-
-			case ApplicationAlertConfigFieldRuleLogs:
-				// For logs, we need to handle additional fields
-				level := ""
-				message := ""
-				operator := ""
-
-				if data.Rule.Level != nil {
-					level = string(*data.Rule.Level)
-				}
-				if data.Rule.Message != nil {
-					message = *data.Rule.Message
-				}
-				if data.Rule.Operator != nil {
-					operator = string(*data.Rule.Operator)
-				}
-
-				logsElements = []attr.Value{
-					types.ObjectValueMust(map[string]attr.Type{
-						"metric_name": types.StringType,
-						"aggregation": types.StringType,
-						"level":       types.StringType,
-						"message":     types.StringType,
-						"operator":    types.StringType,
-					}, map[string]attr.Value{
-						"metric_name": types.StringValue(data.Rule.MetricName),
-						"aggregation": types.StringValue(string(data.Rule.Aggregation)),
-						"level":       types.StringValue(level),
-						"message":     types.StringValue(message),
-						"operator":    types.StringValue(operator),
-					}),
-				}
-
-			case ApplicationAlertConfigFieldRuleSlowness:
-				slownessElements = []attr.Value{
-					types.ObjectValueMust(map[string]attr.Type{
-						"metric_name": types.StringType,
-						"aggregation": types.StringType,
-					}, map[string]attr.Value{
-						"metric_name": types.StringValue(data.Rule.MetricName),
-						"aggregation": types.StringValue(string(data.Rule.Aggregation)),
-					}),
-				}
-
-			case ApplicationAlertConfigFieldRuleStatusCode:
-				// For status code, we need to handle additional fields
-				statusCodeStart := int64(0)
-				statusCodeEnd := int64(0)
-
-				if data.Rule.StatusCodeStart != nil {
-					statusCodeStart = int64(*data.Rule.StatusCodeStart)
-				}
-				if data.Rule.StatusCodeEnd != nil {
-					statusCodeEnd = int64(*data.Rule.StatusCodeEnd)
-				}
-
-				statusCodeElements = []attr.Value{
-					types.ObjectValueMust(map[string]attr.Type{
-						"metric_name":       types.StringType,
-						"aggregation":       types.StringType,
-						"status_code_start": types.Int64Type,
-						"status_code_end":   types.Int64Type,
-					}, map[string]attr.Value{
-						"metric_name":       types.StringValue(data.Rule.MetricName),
-						"aggregation":       types.StringValue(string(data.Rule.Aggregation)),
-						"status_code_start": types.Int64Value(statusCodeStart),
-						"status_code_end":   types.Int64Value(statusCodeEnd),
-					}),
-				}
-
-			case ApplicationAlertConfigFieldRuleThroughput:
-				throughputElements = []attr.Value{
-					types.ObjectValueMust(map[string]attr.Type{
-						"metric_name": types.StringType,
-						"aggregation": types.StringType,
-					}, map[string]attr.Value{
-						"metric_name": types.StringValue(data.Rule.MetricName),
-						"aggregation": types.StringValue(string(data.Rule.Aggregation)),
-					}),
-				}
-
-			}
-		}
-
-		ruleModel.ErrorRate = types.ListValueMust(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"metric_name": types.StringType,
-				"aggregation": types.StringType,
-			},
-		}, errorRateElements)
-
-		ruleModel.Errors = types.ListValueMust(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"metric_name": types.StringType,
-				"aggregation": types.StringType,
-			},
-		}, errorsElements)
-
-		ruleModel.Logs = types.ListValueMust(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"metric_name": types.StringType,
-				"aggregation": types.StringType,
-				"level":       types.StringType,
-				"message":     types.StringType,
-				"operator":    types.StringType,
-			},
-		}, logsElements)
-
-		ruleModel.Slowness = types.ListValueMust(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"metric_name": types.StringType,
-				"aggregation": types.StringType,
-			},
-		}, slownessElements)
-
-		ruleModel.StatusCode = types.ListValueMust(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"metric_name":       types.StringType,
-				"aggregation":       types.StringType,
-				"status_code_start": types.Int64Type,
-				"status_code_end":   types.Int64Type,
-			},
-		}, statusCodeElements)
-
-		ruleModel.Throughput = types.ListValueMust(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"metric_name": types.StringType,
-				"aggregation": types.StringType,
-			},
-		}, throughputElements)
-
-		// Define rule attribute types
-		ruleAttrTypes := map[string]attr.Type{
-			"error_rate":  types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
-			"errors":      types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
-			"logs":        types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "level": types.StringType, "message": types.StringType, "operator": types.StringType}}},
-			"slowness":    types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
-			"status_code": types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "status_code_start": types.Int64Type, "status_code_end": types.Int64Type}}},
-			"throughput":  types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
-		}
-
-		ruleObj, diags := types.ObjectValueFrom(ctx, ruleAttrTypes, ruleModel)
-		if diags.HasError() {
-			return diags
-		}
-
-		model.Rule = types.ListValueMust(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"error_rate":  types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
-				"errors":      types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
-				"logs":        types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "level": types.StringType, "message": types.StringType, "operator": types.StringType}}},
-				"slowness":    types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
-				"status_code": types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "status_code_start": types.Int64Type, "status_code_end": types.Int64Type}}},
-				"throughput":  types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
-			},
-		}, []attr.Value{ruleObj})
-	}
-
-	if diags.HasError() {
-		return diags
-	}
 	log.Printf("Before Rules stage")
 	// Handle rules (new format with multiple thresholds and severity levels)
 	if len(data.Rules) > 0 {
@@ -2020,36 +1087,36 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 		for i, ruleWithThreshold := range data.Rules {
 			// Create rule model
 			ruleModel := RuleModel{}
-			errorRateElements := make([]attr.Value, 0)
-			errorsElements := make([]attr.Value, 0)
-			logsElements := make([]attr.Value, 0)
-			slownessElements := make([]attr.Value, 0)
-			statusCodeElements := make([]attr.Value, 0)
-			throughputElements := make([]attr.Value, 0)
 
 			// Set rule model fields based on the AlertType
 			switch ruleWithThreshold.Rule.AlertType {
 			case ApplicationAlertConfigFieldRuleErrorRate:
-				errorRateElements = []attr.Value{
-					types.ObjectValueMust(map[string]attr.Type{
-						"metric_name": types.StringType,
-						"aggregation": types.StringType,
-					}, map[string]attr.Value{
-						"metric_name": types.StringValue(ruleWithThreshold.Rule.MetricName),
-						"aggregation": types.StringValue(string(ruleWithThreshold.Rule.Aggregation)),
-					}),
-				}
+				ruleModel.ErrorRate = types.ObjectValueMust(map[string]attr.Type{
+					"metric_name": types.StringType,
+					"aggregation": types.StringType,
+				}, map[string]attr.Value{
+					"metric_name": types.StringValue(ruleWithThreshold.Rule.MetricName),
+					"aggregation": types.StringValue(string(ruleWithThreshold.Rule.Aggregation)),
+				})
+				ruleModel.Errors = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType})
+				ruleModel.Logs = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "level": types.StringType, "message": types.StringType, "operator": types.StringType})
+				ruleModel.Slowness = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType})
+				ruleModel.StatusCode = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "status_code_start": types.Int64Type, "status_code_end": types.Int64Type})
+				ruleModel.Throughput = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType})
 
 			case ApplicationAlertConfigFieldRuleErrors:
-				errorsElements = []attr.Value{
-					types.ObjectValueMust(map[string]attr.Type{
-						"metric_name": types.StringType,
-						"aggregation": types.StringType,
-					}, map[string]attr.Value{
-						"metric_name": types.StringValue(ruleWithThreshold.Rule.MetricName),
-						"aggregation": types.StringValue(string(ruleWithThreshold.Rule.Aggregation)),
-					}),
-				}
+				ruleModel.ErrorRate = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType})
+				ruleModel.Errors = types.ObjectValueMust(map[string]attr.Type{
+					"metric_name": types.StringType,
+					"aggregation": types.StringType,
+				}, map[string]attr.Value{
+					"metric_name": types.StringValue(ruleWithThreshold.Rule.MetricName),
+					"aggregation": types.StringValue(string(ruleWithThreshold.Rule.Aggregation)),
+				})
+				ruleModel.Logs = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "level": types.StringType, "message": types.StringType, "operator": types.StringType})
+				ruleModel.Slowness = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType})
+				ruleModel.StatusCode = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "status_code_start": types.Int64Type, "status_code_end": types.Int64Type})
+				ruleModel.Throughput = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType})
 
 			case ApplicationAlertConfigFieldRuleLogs:
 				// For logs, we need to handle additional fields
@@ -2067,32 +1134,38 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 					operator = string(*ruleWithThreshold.Rule.Operator)
 				}
 
-				logsElements = []attr.Value{
-					types.ObjectValueMust(map[string]attr.Type{
-						"metric_name": types.StringType,
-						"aggregation": types.StringType,
-						"level":       types.StringType,
-						"message":     types.StringType,
-						"operator":    types.StringType,
-					}, map[string]attr.Value{
-						"metric_name": types.StringValue(ruleWithThreshold.Rule.MetricName),
-						"aggregation": types.StringValue(string(ruleWithThreshold.Rule.Aggregation)),
-						"level":       types.StringValue(level),
-						"message":     types.StringValue(message),
-						"operator":    types.StringValue(operator),
-					}),
-				}
+				ruleModel.ErrorRate = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType})
+				ruleModel.Errors = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType})
+				ruleModel.Logs = types.ObjectValueMust(map[string]attr.Type{
+					"metric_name": types.StringType,
+					"aggregation": types.StringType,
+					"level":       types.StringType,
+					"message":     types.StringType,
+					"operator":    types.StringType,
+				}, map[string]attr.Value{
+					"metric_name": types.StringValue(ruleWithThreshold.Rule.MetricName),
+					"aggregation": types.StringValue(string(ruleWithThreshold.Rule.Aggregation)),
+					"level":       types.StringValue(level),
+					"message":     types.StringValue(message),
+					"operator":    types.StringValue(operator),
+				})
+				ruleModel.Slowness = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType})
+				ruleModel.StatusCode = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "status_code_start": types.Int64Type, "status_code_end": types.Int64Type})
+				ruleModel.Throughput = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType})
 
 			case ApplicationAlertConfigFieldRuleSlowness:
-				slownessElements = []attr.Value{
-					types.ObjectValueMust(map[string]attr.Type{
-						"metric_name": types.StringType,
-						"aggregation": types.StringType,
-					}, map[string]attr.Value{
-						"metric_name": types.StringValue(ruleWithThreshold.Rule.MetricName),
-						"aggregation": types.StringValue(string(ruleWithThreshold.Rule.Aggregation)),
-					}),
-				}
+				ruleModel.ErrorRate = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType})
+				ruleModel.Errors = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType})
+				ruleModel.Logs = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "level": types.StringType, "message": types.StringType, "operator": types.StringType})
+				ruleModel.Slowness = types.ObjectValueMust(map[string]attr.Type{
+					"metric_name": types.StringType,
+					"aggregation": types.StringType,
+				}, map[string]attr.Value{
+					"metric_name": types.StringValue(ruleWithThreshold.Rule.MetricName),
+					"aggregation": types.StringValue(string(ruleWithThreshold.Rule.Aggregation)),
+				})
+				ruleModel.StatusCode = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "status_code_start": types.Int64Type, "status_code_end": types.Int64Type})
+				ruleModel.Throughput = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType})
 
 			case ApplicationAlertConfigFieldRuleStatusCode:
 				// For status code, we need to handle additional fields
@@ -2106,88 +1179,46 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 					statusCodeEnd = int64(*ruleWithThreshold.Rule.StatusCodeEnd)
 				}
 
-				statusCodeElements = []attr.Value{
-					types.ObjectValueMust(map[string]attr.Type{
-						"metric_name":       types.StringType,
-						"aggregation":       types.StringType,
-						"status_code_start": types.Int64Type,
-						"status_code_end":   types.Int64Type,
-					}, map[string]attr.Value{
-						"metric_name":       types.StringValue(ruleWithThreshold.Rule.MetricName),
-						"aggregation":       types.StringValue(string(ruleWithThreshold.Rule.Aggregation)),
-						"status_code_start": types.Int64Value(statusCodeStart),
-						"status_code_end":   types.Int64Value(statusCodeEnd),
-					}),
-				}
-
-			case ApplicationAlertConfigFieldRuleThroughput:
-				throughputElements = []attr.Value{
-					types.ObjectValueMust(map[string]attr.Type{
-						"metric_name": types.StringType,
-						"aggregation": types.StringType,
-					}, map[string]attr.Value{
-						"metric_name": types.StringValue(ruleWithThreshold.Rule.MetricName),
-						"aggregation": types.StringValue(string(ruleWithThreshold.Rule.Aggregation)),
-					}),
-				}
-
-			}
-
-			ruleModel.ErrorRate = types.ListValueMust(types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"metric_name": types.StringType,
-					"aggregation": types.StringType,
-				},
-			}, errorRateElements)
-
-			ruleModel.Errors = types.ListValueMust(types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"metric_name": types.StringType,
-					"aggregation": types.StringType,
-				},
-			}, errorsElements)
-
-			ruleModel.Logs = types.ListValueMust(types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"metric_name": types.StringType,
-					"aggregation": types.StringType,
-					"level":       types.StringType,
-					"message":     types.StringType,
-					"operator":    types.StringType,
-				},
-			}, logsElements)
-
-			ruleModel.Slowness = types.ListValueMust(types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"metric_name": types.StringType,
-					"aggregation": types.StringType,
-				},
-			}, slownessElements)
-
-			ruleModel.StatusCode = types.ListValueMust(types.ObjectType{
-				AttrTypes: map[string]attr.Type{
+				ruleModel.ErrorRate = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType})
+				ruleModel.Errors = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType})
+				ruleModel.Logs = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "level": types.StringType, "message": types.StringType, "operator": types.StringType})
+				ruleModel.Slowness = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType})
+				ruleModel.StatusCode = types.ObjectValueMust(map[string]attr.Type{
 					"metric_name":       types.StringType,
 					"aggregation":       types.StringType,
 					"status_code_start": types.Int64Type,
 					"status_code_end":   types.Int64Type,
-				},
-			}, statusCodeElements)
+				}, map[string]attr.Value{
+					"metric_name":       types.StringValue(ruleWithThreshold.Rule.MetricName),
+					"aggregation":       types.StringValue(string(ruleWithThreshold.Rule.Aggregation)),
+					"status_code_start": types.Int64Value(statusCodeStart),
+					"status_code_end":   types.Int64Value(statusCodeEnd),
+				})
+				ruleModel.Throughput = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType})
 
-			ruleModel.Throughput = types.ListValueMust(types.ObjectType{
-				AttrTypes: map[string]attr.Type{
+			case ApplicationAlertConfigFieldRuleThroughput:
+				ruleModel.ErrorRate = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType})
+				ruleModel.Errors = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType})
+				ruleModel.Logs = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "level": types.StringType, "message": types.StringType, "operator": types.StringType})
+				ruleModel.Slowness = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType})
+				ruleModel.StatusCode = types.ObjectNull(map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "status_code_start": types.Int64Type, "status_code_end": types.Int64Type})
+				ruleModel.Throughput = types.ObjectValueMust(map[string]attr.Type{
 					"metric_name": types.StringType,
 					"aggregation": types.StringType,
-				},
-			}, throughputElements)
+				}, map[string]attr.Value{
+					"metric_name": types.StringValue(ruleWithThreshold.Rule.MetricName),
+					"aggregation": types.StringValue(string(ruleWithThreshold.Rule.Aggregation)),
+				})
+			}
 
 			// Define rule attribute types
 			ruleAttrTypes := map[string]attr.Type{
-				"error_rate":  types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
-				"errors":      types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
-				"logs":        types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "level": types.StringType, "message": types.StringType, "operator": types.StringType}}},
-				"slowness":    types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
-				"status_code": types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "status_code_start": types.Int64Type, "status_code_end": types.Int64Type}}},
-				"throughput":  types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
+				"error_rate":  types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}},
+				"errors":      types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}},
+				"logs":        types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "level": types.StringType, "message": types.StringType, "operator": types.StringType}},
+				"slowness":    types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}},
+				"status_code": types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "status_code_start": types.Int64Type, "status_code_end": types.Int64Type}},
+				"throughput":  types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}},
 			}
 
 			ruleObj, diags := types.ObjectValueFrom(ctx, ruleAttrTypes, ruleModel)
@@ -2221,8 +1252,8 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 			// Create threshold object value
 			thresholdObjVal, thresholdObjDiags := types.ObjectValue(
 				map[string]attr.Type{
-					shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
-					shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
+					shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrObjectTypes(),
+					shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrObjectTypes(),
 				},
 				thresholdObj,
 			)
@@ -2231,45 +1262,29 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 				return diags
 			}
 
-			// Add threshold to rule
-			thresholdList, thresholdListDiags := types.ListValue(
-				types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
-						shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
-					},
-				},
-				[]attr.Value{thresholdObjVal},
-			)
-			diags.Append(thresholdListDiags...)
-			if diags.HasError() {
-				return diags
-			}
 			log.Printf("before calling rules value initial")
 			ruleWithThresholdModel := RuleWithThresholdModel{}
 			ruleWithThresholdModel.Rule = ruleObj
 			ruleWithThresholdModel.ThresholdOperator = types.StringValue(ruleWithThreshold.ThresholdOperator)
-			ruleWithThresholdModel.Thresholds = thresholdList
+			ruleWithThresholdModel.Thresholds = thresholdObjVal
 
 			// Create rule with threshold object
 			ruleWithThresholdObj, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
 				"rule": types.ObjectType{
 					AttrTypes: map[string]attr.Type{
-						"error_rate":  types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
-						"errors":      types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
-						"logs":        types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "level": types.StringType, "message": types.StringType, "operator": types.StringType}}},
-						"slowness":    types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
-						"status_code": types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "status_code_start": types.Int64Type, "status_code_end": types.Int64Type}}},
-						"throughput":  types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
+						"error_rate":  types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}},
+						"errors":      types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}},
+						"logs":        types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "level": types.StringType, "message": types.StringType, "operator": types.StringType}},
+						"slowness":    types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}},
+						"status_code": types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "status_code_start": types.Int64Type, "status_code_end": types.Int64Type}},
+						"throughput":  types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}},
 					},
 				},
 				"threshold_operator": types.StringType,
-				"threshold": types.ListType{
-					ElemType: types.ObjectType{
-						AttrTypes: map[string]attr.Type{
-							shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
-							shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
-						},
+				"threshold": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrObjectTypes(),
+						shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrObjectTypes(),
 					},
 				},
 			}, ruleWithThresholdModel)
@@ -2283,21 +1298,19 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 			AttrTypes: map[string]attr.Type{
 				"rule": types.ObjectType{
 					AttrTypes: map[string]attr.Type{
-						"error_rate":  types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
-						"errors":      types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
-						"logs":        types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "level": types.StringType, "message": types.StringType, "operator": types.StringType}}},
-						"slowness":    types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
-						"status_code": types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "status_code_start": types.Int64Type, "status_code_end": types.Int64Type}}},
-						"throughput":  types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
+						"error_rate":  types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}},
+						"errors":      types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}},
+						"logs":        types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "level": types.StringType, "message": types.StringType, "operator": types.StringType}},
+						"slowness":    types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}},
+						"status_code": types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "status_code_start": types.Int64Type, "status_code_end": types.Int64Type}},
+						"throughput":  types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}},
 					},
 				},
 				"threshold_operator": types.StringType,
-				"thresholds": types.ListType{
-					ElemType: types.ObjectType{
-						AttrTypes: map[string]attr.Type{
-							shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
-							shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
-						},
+				"threshold": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrObjectTypes(),
+						shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrObjectTypes(),
 					},
 				},
 			},
@@ -2306,21 +1319,19 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 			AttrTypes: map[string]attr.Type{
 				"rule": types.ObjectType{
 					AttrTypes: map[string]attr.Type{
-						"error_rate":  types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
-						"errors":      types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
-						"logs":        types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "level": types.StringType, "message": types.StringType, "operator": types.StringType}}},
-						"slowness":    types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
-						"status_code": types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "status_code_start": types.Int64Type, "status_code_end": types.Int64Type}}},
-						"throughput":  types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}}},
+						"error_rate":  types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}},
+						"errors":      types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}},
+						"logs":        types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "level": types.StringType, "message": types.StringType, "operator": types.StringType}},
+						"slowness":    types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}},
+						"status_code": types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "status_code_start": types.Int64Type, "status_code_end": types.Int64Type}},
+						"throughput":  types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}},
 					},
 				},
 				"threshold_operator": types.StringType,
-				"threshold": types.ListType{
-					ElemType: types.ObjectType{
-						AttrTypes: map[string]attr.Type{
-							shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
-							shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
-						},
+				"threshold": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrObjectTypes(),
+						shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrObjectTypes(),
 					},
 				},
 			},
@@ -2334,67 +1345,64 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 	if data.TimeThreshold != nil {
 		timeThresholdModel := AppAlertTimeThresholdModel{}
 
-		violationsInSequenceElements := []attr.Value{}
-		requestImpactElements := []attr.Value{}
-		violationsInPeriodElements := []attr.Value{}
 		// Determine which time threshold to populate based on the Type field
 		switch data.TimeThreshold.Type {
 		case "requestImpact":
-			requestImpactElements = []attr.Value{
-				types.ObjectValueMust(map[string]attr.Type{
-					"time_window": types.Int64Type,
-					"requests":    types.Int64Type,
-				}, map[string]attr.Value{
-					"time_window": types.Int64Value(int64(data.TimeThreshold.TimeWindow)),
-					"requests":    types.Int64Value(int64(data.TimeThreshold.Requests)),
-				}),
-			}
-
-		case "violationsInPeriod":
-			violationsInPeriodElements = []attr.Value{
-				types.ObjectValueMust(map[string]attr.Type{
-					"time_window": types.Int64Type,
-					"violations":  types.Int64Type,
-				}, map[string]attr.Value{
-					"time_window": types.Int64Value(int64(data.TimeThreshold.TimeWindow)),
-					"violations":  types.Int64Value(int64(data.TimeThreshold.Violations)),
-				}),
-			}
-
-		case "violationsInSequence":
-			violationsInSequenceElements = []attr.Value{
-				types.ObjectValueMust(map[string]attr.Type{
-					"time_window": types.Int64Type,
-				}, map[string]attr.Value{
-					"time_window": types.Int64Value(int64(data.TimeThreshold.TimeWindow)),
-				}),
-			}
-
-		}
-		timeThresholdModel.RequestImpact = types.ListValueMust(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
+			requestImpactObj := types.ObjectValueMust(map[string]attr.Type{
 				"time_window": types.Int64Type,
 				"requests":    types.Int64Type,
-			},
-		}, requestImpactElements)
-
-		timeThresholdModel.ViolationsInPeriod = types.ListValueMust(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
+			}, map[string]attr.Value{
+				"time_window": types.Int64Value(int64(data.TimeThreshold.TimeWindow)),
+				"requests":    types.Int64Value(int64(data.TimeThreshold.Requests)),
+			})
+			timeThresholdModel.RequestImpact = requestImpactObj
+			timeThresholdModel.ViolationsInPeriod = types.ObjectNull(map[string]attr.Type{
 				"time_window": types.Int64Type,
 				"violations":  types.Int64Type,
-			},
-		}, violationsInPeriodElements)
-		timeThresholdModel.ViolationsInSequence = types.ListValueMust(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
+			})
+			timeThresholdModel.ViolationsInSequence = types.ObjectNull(map[string]attr.Type{
 				"time_window": types.Int64Type,
-			},
-		}, violationsInSequenceElements)
+			})
+
+		case "violationsInPeriod":
+			violationsInPeriodObj := types.ObjectValueMust(map[string]attr.Type{
+				"time_window": types.Int64Type,
+				"violations":  types.Int64Type,
+			}, map[string]attr.Value{
+				"time_window": types.Int64Value(int64(data.TimeThreshold.TimeWindow)),
+				"violations":  types.Int64Value(int64(data.TimeThreshold.Violations)),
+			})
+			timeThresholdModel.RequestImpact = types.ObjectNull(map[string]attr.Type{
+				"time_window": types.Int64Type,
+				"requests":    types.Int64Type,
+			})
+			timeThresholdModel.ViolationsInPeriod = violationsInPeriodObj
+			timeThresholdModel.ViolationsInSequence = types.ObjectNull(map[string]attr.Type{
+				"time_window": types.Int64Type,
+			})
+
+		case "violationsInSequence":
+			violationsInSequenceObj := types.ObjectValueMust(map[string]attr.Type{
+				"time_window": types.Int64Type,
+			}, map[string]attr.Value{
+				"time_window": types.Int64Value(int64(data.TimeThreshold.TimeWindow)),
+			})
+			timeThresholdModel.RequestImpact = types.ObjectNull(map[string]attr.Type{
+				"time_window": types.Int64Type,
+				"requests":    types.Int64Type,
+			})
+			timeThresholdModel.ViolationsInPeriod = types.ObjectNull(map[string]attr.Type{
+				"time_window": types.Int64Type,
+				"violations":  types.Int64Type,
+			})
+			timeThresholdModel.ViolationsInSequence = violationsInSequenceObj
+		}
 
 		// Define attribute types for time threshold
 		timeThresholdAttrTypes := map[string]attr.Type{
-			"request_impact":         types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"time_window": types.Int64Type, "requests": types.Int64Type}}},
-			"violations_in_period":   types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"time_window": types.Int64Type, "violations": types.Int64Type}}},
-			"violations_in_sequence": types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"time_window": types.Int64Type}}},
+			"request_impact":         types.ObjectType{AttrTypes: map[string]attr.Type{"time_window": types.Int64Type, "requests": types.Int64Type}},
+			"violations_in_period":   types.ObjectType{AttrTypes: map[string]attr.Type{"time_window": types.Int64Type, "violations": types.Int64Type}},
+			"violations_in_sequence": types.ObjectType{AttrTypes: map[string]attr.Type{"time_window": types.Int64Type}},
 		}
 
 		timeThresholdObj, diags := types.ObjectValueFrom(ctx, timeThresholdAttrTypes, timeThresholdModel)
@@ -2402,13 +1410,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 			return diags
 		}
 
-		model.TimeThreshold = types.ListValueMust(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"request_impact":         types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"time_window": types.Int64Type, "requests": types.Int64Type}}},
-				"violations_in_period":   types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"time_window": types.Int64Type, "violations": types.Int64Type}}},
-				"violations_in_sequence": types.ListType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"time_window": types.Int64Type}}},
-			},
-		}, []attr.Value{timeThresholdObj})
+		model.TimeThreshold = timeThresholdObj
 	}
 	if diags.HasError() {
 		return diags

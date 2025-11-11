@@ -18,12 +18,12 @@ type CustomEventSpecificationModel struct {
 
 // RulesModel represents the rules container in the custom event specification
 type RulesModel struct {
-	EntityCount             types.List `tfsdk:"entity_count"`
-	EntityCountVerification types.List `tfsdk:"entity_count_verification"`
-	EntityVerification      types.List `tfsdk:"entity_verification"`
-	HostAvailability        types.List `tfsdk:"host_availability"`
-	System                  types.List `tfsdk:"system"`
-	Threshold               types.List `tfsdk:"threshold"`
+	EntityCount             types.Object `tfsdk:"entity_count"`
+	EntityCountVerification types.Object `tfsdk:"entity_count_verification"`
+	EntityVerification      types.Object `tfsdk:"entity_verification"`
+	HostAvailability        types.Object `tfsdk:"host_availability"`
+	System                  types.Object `tfsdk:"system"`
+	Threshold               types.Object `tfsdk:"threshold"`
 }
 
 // EntityCountRuleModel represents an entity count rule
@@ -70,7 +70,7 @@ type SystemRuleModel struct {
 type ThresholdRuleModel struct {
 	Severity          types.String  `tfsdk:"severity"`
 	MetricName        types.String  `tfsdk:"metric_name"`
-	MetricPattern     types.List    `tfsdk:"metric_pattern"`
+	MetricPattern     types.Object  `tfsdk:"metric_pattern"`
 	Rollup            types.Int64   `tfsdk:"rollup"`
 	Window            types.Int64   `tfsdk:"window"`
 	Aggregation       types.String  `tfsdk:"aggregation"`
