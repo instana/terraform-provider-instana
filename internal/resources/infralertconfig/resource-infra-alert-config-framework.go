@@ -9,11 +9,13 @@ import (
 	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
 	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
 	"github.com/gessnerfl/terraform-provider-instana/internal/util"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -113,11 +115,17 @@ func NewInfraAlertConfigResourceHandleFramework() resourcehandle.ResourceHandleF
 								Optional:    true,
 								Description: InfraAlertConfigDescAlertChannelIDs,
 								ElementType: types.StringType,
+								Validators: []validator.List{
+									listvalidator.SizeAtLeast(1),
+								},
 							},
 							ResourceFieldThresholdRuleCriticalSeverity: schema.ListAttribute{
 								Optional:    true,
 								Description: InfraAlertConfigDescAlertChannelIDs,
 								ElementType: types.StringType,
+								Validators: []validator.List{
+									listvalidator.SizeAtLeast(1),
+								},
 							},
 						},
 					},

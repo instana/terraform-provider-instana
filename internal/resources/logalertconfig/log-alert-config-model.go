@@ -7,7 +7,7 @@ type LogAlertConfigModel struct {
 	ID                  types.String        `tfsdk:"id"`
 	Name                types.String        `tfsdk:"name"`
 	Description         types.String        `tfsdk:"description"`
-	AlertChannels       types.List          `tfsdk:"alert_channels"`
+	AlertChannels       types.Object        `tfsdk:"alert_channels"`
 	GracePeriod         types.Int64         `tfsdk:"grace_period"`
 	GroupBy             types.List          `tfsdk:"group_by"`
 	Granularity         types.Int64         `tfsdk:"granularity"`
