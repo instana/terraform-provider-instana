@@ -9,6 +9,7 @@ import (
 	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
 	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -66,20 +67,24 @@ func NewLogAlertConfigResourceHandleFramework() resourcehandle.ResourceHandleFra
 						Description: LogAlertConfigDescTagFilter,
 					},
 					shared.DefaultCustomPayloadFieldsName: shared.GetCustomPayloadFieldsSchema(),
-					LogAlertConfigFieldAlertChannels: schema.ListNestedAttribute{
+					LogAlertConfigFieldAlertChannels: schema.SingleNestedAttribute{
 						Description: LogAlertConfigDescAlertChannels,
 						Optional:    true,
-						NestedObject: schema.NestedAttributeObject{
-							Attributes: map[string]schema.Attribute{
-								shared.ThresholdFieldWarning: schema.ListAttribute{
-									Optional:    true,
-									Description: LogAlertConfigDescAlertChannelIDs,
-									ElementType: types.StringType,
+						Attributes: map[string]schema.Attribute{
+							shared.ThresholdFieldWarning: schema.ListAttribute{
+								Optional:    true,
+								Description: LogAlertConfigDescAlertChannelIDs,
+								ElementType: types.StringType,
+								Validators: []validator.List{
+									listvalidator.SizeAtLeast(1),
 								},
-								shared.ThresholdFieldCritical: schema.ListAttribute{
-									Optional:    true,
-									Description: LogAlertConfigDescAlertChannelIDs,
-									ElementType: types.StringType,
+							},
+							shared.ThresholdFieldCritical: schema.ListAttribute{
+								Optional:    true,
+								Description: LogAlertConfigDescAlertChannelIDs,
+								ElementType: types.StringType,
+								Validators: []validator.List{
+									listvalidator.SizeAtLeast(1),
 								},
 							},
 						},
