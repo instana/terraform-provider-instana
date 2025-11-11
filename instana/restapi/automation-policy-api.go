@@ -14,10 +14,11 @@ type AutomationPolicy struct {
 }
 
 type Trigger struct {
-	Id          string `json:"id"`
-	Type        string `json:"type"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	Id          string     `json:"id"`
+	Type        string     `json:"type"`
+	Name        string     `json:"name"`
+	Description string     `json:"description"`
+	Scheduling  Scheduling `json:"scheduling,omitempty"`
 }
 
 type TypeConfiguration struct {

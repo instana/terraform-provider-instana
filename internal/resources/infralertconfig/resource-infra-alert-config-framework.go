@@ -9,15 +9,14 @@ import (
 	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
 	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
 	"github.com/gessnerfl/terraform-provider-instana/internal/util"
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 // ResourceInstanaInfraAlertConfigFramework the name of the terraform-provider-instana resource to manage infrastructure alert configurations
@@ -57,11 +56,11 @@ type InfraAlertConfigModel struct {
 	Description        types.String             `tfsdk:"description"`
 	TagFilter          types.String             `tfsdk:"tag_filter"`
 	GroupBy            types.List               `tfsdk:"group_by"`
-	AlertChannels      types.List               `tfsdk:"alert_channels"`
+	AlertChannels      types.Object             `tfsdk:"alert_channels"`
 	Granularity        types.Int64              `tfsdk:"granularity"`
 	TimeThreshold      *InfraTimeThresholdModel `tfsdk:"time_threshold"`
 	CustomPayloadField types.List               `tfsdk:"custom_payload_field"`
-	Rules              types.List               `tfsdk:"rules"`
+	Rules              types.Object             `tfsdk:"rules"`
 	EvaluationType     types.String             `tfsdk:"evaluation_type"`
 }
 
@@ -100,7 +99,7 @@ type InfraGenericRuleModel struct {
 	CrossSeriesAggregation types.String `tfsdk:"cross_series_aggregation"`
 	Regex                  types.Bool   `tfsdk:"regex"`
 	ThresholdOperator      types.String `tfsdk:"threshold_operator"`
-	ThresholdRule          types.List   `tfsdk:"threshold"`
+	ThresholdRule          types.Object `tfsdk:"threshold"`
 }
 
 // InfraThresholdRuleModel represents the threshold rule model
@@ -162,61 +161,69 @@ func NewInfraAlertConfigResourceHandleFramework() resourcehandle.ResourceHandleF
 						Description: InfraAlertConfigDescEvaluationType,
 						Required:    true,
 					},
-				},
-				Blocks: map[string]schema.Block{
-					"rules": schema.ListNestedBlock{
+					"custom_payload_field": shared.GetCustomPayloadFieldsSchema(),
+					"rules": schema.SingleNestedAttribute{
 						Description: InfraAlertConfigDescRules,
-						//Optional:    true,
-						NestedObject: schema.NestedBlockObject{
-							Blocks: map[string]schema.Block{
-								"generic_rule": schema.SingleNestedBlock{
-									Description: InfraAlertConfigDescGenericRule,
-
-									Attributes: map[string]schema.Attribute{
-										"metric_name": schema.StringAttribute{
-											Description: InfraAlertConfigDescMetricName,
-											Required:    true,
-										},
-										"entity_type": schema.StringAttribute{
-											Description: InfraAlertConfigDescEntityType,
-											Required:    true,
-										},
-										"aggregation": schema.StringAttribute{
-											Description: InfraAlertConfigDescAggregation,
-											Required:    true,
-										},
-										"cross_series_aggregation": schema.StringAttribute{
-											Description: InfraAlertConfigDescCrossSeriesAggregation,
-											Required:    true,
-										},
-										"regex": schema.BoolAttribute{
-											Description: InfraAlertConfigDescRegex,
-											Required:    true,
-										},
-										"threshold_operator": schema.StringAttribute{
-											Description: InfraAlertConfigDescThresholdOperator,
-											Required:    true,
-										},
+						Optional:    true,
+						Attributes: map[string]schema.Attribute{
+							"generic_rule": schema.SingleNestedAttribute{
+								Description: InfraAlertConfigDescGenericRule,
+								Optional:    true,
+								Attributes: map[string]schema.Attribute{
+									"metric_name": schema.StringAttribute{
+										Description: InfraAlertConfigDescMetricName,
+										Required:    true,
 									},
-									Blocks: map[string]schema.Block{
-										"threshold": schema.ListNestedBlock{
-											Description: InfraAlertConfigDescThreshold,
-											NestedObject: schema.NestedBlockObject{
-												Blocks: map[string]schema.Block{
-													"warning":  shared.StaticAndAdaptiveThresholdBlockSchema(),
-													"critical": shared.StaticAndAdaptiveThresholdBlockSchema(),
-												},
-											},
-											Validators: []validator.List{
-												listvalidator.SizeAtMost(1),
-											},
+									"entity_type": schema.StringAttribute{
+										Description: InfraAlertConfigDescEntityType,
+										Required:    true,
+									},
+									"aggregation": schema.StringAttribute{
+										Description: InfraAlertConfigDescAggregation,
+										Required:    true,
+									},
+									"cross_series_aggregation": schema.StringAttribute{
+										Description: InfraAlertConfigDescCrossSeriesAggregation,
+										Required:    true,
+									},
+									"regex": schema.BoolAttribute{
+										Description: InfraAlertConfigDescRegex,
+										Required:    true,
+									},
+									"threshold_operator": schema.StringAttribute{
+										Description: InfraAlertConfigDescThresholdOperator,
+										Required:    true,
+									},
+									"threshold": schema.SingleNestedAttribute{
+										Description: InfraAlertConfigDescThreshold,
+										Optional:    true,
+										Attributes: map[string]schema.Attribute{
+											"warning":  shared.StaticAndAdaptiveThresholdAttributeSchema(),
+											"critical": shared.StaticAndAdaptiveThresholdAttributeSchema(),
 										},
 									},
 								},
 							},
 						},
 					},
-					"custom_payload_field": shared.GetCustomPayloadFieldsSchema(),
+					"alert_channels": schema.SingleNestedAttribute{
+						Description: InfraAlertConfigDescAlertChannels,
+						Optional:    true,
+						Attributes: map[string]schema.Attribute{
+							ResourceFieldThresholdRuleWarningSeverity: schema.ListAttribute{
+								Optional:    true,
+								Description: InfraAlertConfigDescAlertChannelIDs,
+								ElementType: types.StringType,
+							},
+							ResourceFieldThresholdRuleCriticalSeverity: schema.ListAttribute{
+								Optional:    true,
+								Description: InfraAlertConfigDescAlertChannelIDs,
+								ElementType: types.StringType,
+							},
+						},
+					},
+				},
+				Blocks: map[string]schema.Block{
 					"time_threshold": schema.SingleNestedBlock{
 						Description: InfraAlertConfigDescTimeThreshold,
 						Blocks: map[string]schema.Block{
@@ -227,23 +234,6 @@ func NewInfraAlertConfigResourceHandleFramework() resourcehandle.ResourceHandleF
 										Required:    true,
 										Description: InfraAlertConfigDescTimeWindow,
 									},
-								},
-							},
-						},
-					},
-					"alert_channels": schema.ListNestedBlock{
-						Description: InfraAlertConfigDescAlertChannels,
-						NestedObject: schema.NestedBlockObject{
-							Attributes: map[string]schema.Attribute{
-								ResourceFieldThresholdRuleWarningSeverity: schema.ListAttribute{
-									Optional:    true,
-									Description: InfraAlertConfigDescAlertChannelIDs,
-									ElementType: types.StringType,
-								},
-								ResourceFieldThresholdRuleCriticalSeverity: schema.ListAttribute{
-									Optional:    true,
-									Description: InfraAlertConfigDescAlertChannelIDs,
-									ElementType: types.StringType,
 								},
 							},
 						},
@@ -309,12 +299,51 @@ func (r *infraAlertConfigResourceFramework) UpdateState(ctx context.Context, sta
 	}
 
 	// Map alert channels if present
-	alertChannelsList, alertChannelsDiags := shared.MapAlertChannelsToState(ctx, resource.AlertChannels)
-	if alertChannelsDiags.HasError() {
-		diags.Append(alertChannelsDiags...)
-		return diags
+	if len(resource.AlertChannels) > 0 {
+		alertChannelsObj := map[string]attr.Value{}
+
+		// Map warning severity
+		if warningChannels, ok := resource.AlertChannels[restapi.WarningSeverity]; ok && len(warningChannels) > 0 {
+			warningList, warningDiags := types.ListValueFrom(ctx, types.StringType, warningChannels)
+			diags.Append(warningDiags...)
+			if diags.HasError() {
+				return diags
+			}
+			alertChannelsObj[ResourceFieldThresholdRuleWarningSeverity] = warningList
+		} else {
+			alertChannelsObj[ResourceFieldThresholdRuleWarningSeverity] = types.ListNull(types.StringType)
+		}
+
+		// Map critical severity
+		if criticalChannels, ok := resource.AlertChannels[restapi.CriticalSeverity]; ok && len(criticalChannels) > 0 {
+			criticalList, criticalDiags := types.ListValueFrom(ctx, types.StringType, criticalChannels)
+			diags.Append(criticalDiags...)
+			if diags.HasError() {
+				return diags
+			}
+			alertChannelsObj[ResourceFieldThresholdRuleCriticalSeverity] = criticalList
+		} else {
+			alertChannelsObj[ResourceFieldThresholdRuleCriticalSeverity] = types.ListNull(types.StringType)
+		}
+
+		objVal, objDiags := types.ObjectValue(
+			map[string]attr.Type{
+				ResourceFieldThresholdRuleWarningSeverity:  types.ListType{ElemType: types.StringType},
+				ResourceFieldThresholdRuleCriticalSeverity: types.ListType{ElemType: types.StringType},
+			},
+			alertChannelsObj,
+		)
+		diags.Append(objDiags...)
+		if diags.HasError() {
+			return diags
+		}
+		model.AlertChannels = objVal
+	} else {
+		model.AlertChannels = types.ObjectNull(map[string]attr.Type{
+			ResourceFieldThresholdRuleWarningSeverity:  types.ListType{ElemType: types.StringType},
+			ResourceFieldThresholdRuleCriticalSeverity: types.ListType{ElemType: types.StringType},
+		})
 	}
-	model.AlertChannels = alertChannelsList
 
 	// Map time threshold if present
 
@@ -330,16 +359,6 @@ func (r *infraAlertConfigResourceFramework) UpdateState(ctx context.Context, sta
 
 	// Map rules if present
 	if len(resource.Rules) > 0 {
-		// Create generic rule model
-		genericRuleModel := InfraGenericRuleModel{
-			MetricName:             types.StringValue(resource.Rules[0].Rule.MetricName),
-			EntityType:             types.StringValue(resource.Rules[0].Rule.EntityType),
-			Aggregation:            types.StringValue(string(resource.Rules[0].Rule.Aggregation)),
-			CrossSeriesAggregation: types.StringValue(string(resource.Rules[0].Rule.CrossSeriesAggregation)),
-			Regex:                  types.BoolValue(resource.Rules[0].Rule.Regex),
-			ThresholdOperator:      types.StringValue(string(resource.Rules[0].ThresholdOperator)),
-		}
-
 		// Create threshold rule model
 		thresholdRuleModel := InfraThresholdRuleModel{}
 
@@ -359,68 +378,42 @@ func (r *infraAlertConfigResourceFramework) UpdateState(ctx context.Context, sta
 		if diags.HasError() {
 			return diags
 		}
-
 		thresholdRuleModel.Critical = criticalThresholdList
 
 		// Convert threshold rule model to object
-		thresholdRuleObj, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
+		thresholdRuleObj, thresholdDiags := types.ObjectValueFrom(ctx, map[string]attr.Type{
 			shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
 			shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
 		}, thresholdRuleModel)
+		diags.Append(thresholdDiags...)
 		if diags.HasError() {
 			return diags
 		}
 
-		// Set threshold rule in generic rule model
-		genericRuleModel.ThresholdRule = types.ListValueMust(types.ObjectType{
+		// Create generic rule model
+		genericRuleModel := InfraGenericRuleModel{
+			MetricName:             types.StringValue(resource.Rules[0].Rule.MetricName),
+			EntityType:             types.StringValue(resource.Rules[0].Rule.EntityType),
+			Aggregation:            types.StringValue(string(resource.Rules[0].Rule.Aggregation)),
+			CrossSeriesAggregation: types.StringValue(string(resource.Rules[0].Rule.CrossSeriesAggregation)),
+			Regex:                  types.BoolValue(resource.Rules[0].Rule.Regex),
+			ThresholdOperator:      types.StringValue(string(resource.Rules[0].ThresholdOperator)),
+			ThresholdRule:          thresholdRuleObj,
+		}
+
+		// Create rules model and convert to object
+		thresholdObjType := types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 				shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
 				shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
 			},
-		}, []attr.Value{thresholdRuleObj})
-
-		// Convert generic rule model to object
-		thresholdListType := types.ListType{ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
-				shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
-			},
-		}}
-		// genericRuleObj, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
-		// 	"metric_name":              types.StringType,
-		// 	"entity_type":              types.StringType,
-		// 	"aggregation":              types.StringType,
-		// 	"cross_series_aggregation": types.StringType,
-		// 	"regex":                    types.BoolType,
-		// 	"threshold_operator":       types.StringType,
-		// 	"threshold":                thresholdListType,
-		// }, genericRuleModel)
-		// if diags.HasError() {
-		// 	return diags
-		// }
-
-		// Create rules model
+		}
 
 		rulesModel := InfraRulesModel{
 			GenericRule: &genericRuleModel,
 		}
 
-		// rulesModel := InfraRulesModel{
-		// 	GenericRule: types.ListValueMust(types.ObjectType{
-		// 		AttrTypes: map[string]attr.Type{
-		// 			"metric_name":              types.StringType,
-		// 			"entity_type":              types.StringType,
-		// 			"aggregation":              types.StringType,
-		// 			"cross_series_aggregation": types.StringType,
-		// 			"regex":                    types.BoolType,
-		// 			"threshold_operator":       types.StringType,
-		// 			"threshold":                thresholdListType,
-		// 		},
-		// 	}, []attr.Value{genericRuleObj}),
-		// }
-
-		// Convert rules model to object
-		rulesObj, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
+		rulesObj, rulesDiags := types.ObjectValueFrom(ctx, map[string]attr.Type{
 			"generic_rule": types.ObjectType{
 				AttrTypes: map[string]attr.Type{
 					"metric_name":              types.StringType,
@@ -429,34 +422,33 @@ func (r *infraAlertConfigResourceFramework) UpdateState(ctx context.Context, sta
 					"cross_series_aggregation": types.StringType,
 					"regex":                    types.BoolType,
 					"threshold_operator":       types.StringType,
-					"threshold":                thresholdListType,
+					"threshold":                thresholdObjType,
 				},
 			},
 		}, rulesModel)
+		diags.Append(rulesDiags...)
 		if diags.HasError() {
 			return diags
 		}
 
-		// Set rules in model
-		model.Rules = types.ListValueMust(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"generic_rule": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"metric_name":              types.StringType,
-						"entity_type":              types.StringType,
-						"aggregation":              types.StringType,
-						"cross_series_aggregation": types.StringType,
-						"regex":                    types.BoolType,
-						"threshold_operator":       types.StringType,
-						"threshold":                thresholdListType,
+		model.Rules = rulesObj
+	} else {
+		model.Rules = types.ObjectNull(map[string]attr.Type{
+			"generic_rule": types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"metric_name":              types.StringType,
+					"entity_type":              types.StringType,
+					"aggregation":              types.StringType,
+					"cross_series_aggregation": types.StringType,
+					"regex":                    types.BoolType,
+					"threshold_operator":       types.StringType,
+					"threshold": types.ObjectType{
+						AttrTypes: map[string]attr.Type{
+							shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
+							shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrListTypes(),
+						},
 					},
 				},
-			},
-		}, []attr.Value{rulesObj})
-	} else {
-		model.Rules = types.ListNull(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"generic_rule": types.ObjectType{},
 			},
 		})
 	}
@@ -516,12 +508,39 @@ func (r *infraAlertConfigResourceFramework) MapStateToDataObject(ctx context.Con
 
 	// Map alert channels if present
 	alertChannels := make(map[restapi.AlertSeverity][]string)
-	if !model.AlertChannels.IsNull() {
-		var alertChannelsDiags diag.Diagnostics
-		alertChannels, alertChannelsDiags = shared.MapAlertChannelsFromState(ctx, model.AlertChannels)
-		if alertChannelsDiags.HasError() {
-			diags.Append(alertChannelsDiags...)
+	if !model.AlertChannels.IsNull() && !model.AlertChannels.IsUnknown() {
+		var alertChannelsModel struct {
+			Warning  types.List `tfsdk:"warning"`
+			Critical types.List `tfsdk:"critical"`
+		}
+
+		diags.Append(model.AlertChannels.As(ctx, &alertChannelsModel, basetypes.ObjectAsOptions{})...)
+		if diags.HasError() {
 			return nil, diags
+		}
+
+		// Map warning severity
+		if !alertChannelsModel.Warning.IsNull() && !alertChannelsModel.Warning.IsUnknown() {
+			var warningChannels []string
+			diags.Append(alertChannelsModel.Warning.ElementsAs(ctx, &warningChannels, false)...)
+			if diags.HasError() {
+				return nil, diags
+			}
+			if len(warningChannels) > 0 {
+				alertChannels[restapi.WarningSeverity] = warningChannels
+			}
+		}
+
+		// Map critical severity
+		if !alertChannelsModel.Critical.IsNull() && !alertChannelsModel.Critical.IsUnknown() {
+			var criticalChannels []string
+			diags.Append(alertChannelsModel.Critical.ElementsAs(ctx, &criticalChannels, false)...)
+			if diags.HasError() {
+				return nil, diags
+			}
+			if len(criticalChannels) > 0 {
+				alertChannels[restapi.CriticalSeverity] = criticalChannels
+			}
 		}
 	}
 
@@ -559,49 +578,63 @@ func (r *infraAlertConfigResourceFramework) MapStateToDataObject(ctx context.Con
 	// Map rules if present
 	var rules []restapi.RuleWithThreshold[restapi.InfraAlertRule]
 	if !model.Rules.IsNull() && !model.Rules.IsUnknown() {
-		var rulesModels []InfraRulesModel
-		diags.Append(model.Rules.ElementsAs(ctx, &rulesModels, false)...)
+		var rulesModel InfraRulesModel
+		diags.Append(model.Rules.As(ctx, &rulesModel, basetypes.ObjectAsOptions{})...)
 		if diags.HasError() {
 			return nil, diags
 		}
 
-		if len(rulesModels) > 0 {
-			rulesModel := rulesModels[0]
+		// Map generic rule
+		if rulesModel.GenericRule != nil {
+			genericRuleModel := rulesModel.GenericRule
 
-			// Map generic rule
-			if rulesModel.GenericRule != nil {
+			// Create rule with threshold
+			ruleWithThreshold := restapi.RuleWithThreshold[restapi.InfraAlertRule]{
+				ThresholdOperator: restapi.ThresholdOperator(genericRuleModel.ThresholdOperator.ValueString()),
+				Rule: restapi.InfraAlertRule{
+					AlertType:              "genericRule",
+					MetricName:             genericRuleModel.MetricName.ValueString(),
+					EntityType:             genericRuleModel.EntityType.ValueString(),
+					Aggregation:            restapi.Aggregation(genericRuleModel.Aggregation.ValueString()),
+					CrossSeriesAggregation: restapi.Aggregation(genericRuleModel.CrossSeriesAggregation.ValueString()),
+					Regex:                  genericRuleModel.Regex.ValueBool(),
+				},
+				Thresholds: make(map[restapi.AlertSeverity]restapi.ThresholdRule),
+			}
 
-				genericRuleModel := rulesModel.GenericRule
-
-				//if len(genericRuleModels) > 0 {
-				//	genericRuleModel := genericRuleModels[0]
-
-				// Create rule with threshold
-				ruleWithThreshold := restapi.RuleWithThreshold[restapi.InfraAlertRule]{
-					ThresholdOperator: restapi.ThresholdOperator(genericRuleModel.ThresholdOperator.ValueString()),
-					Rule: restapi.InfraAlertRule{
-						AlertType:              "genericRule",
-						MetricName:             genericRuleModel.MetricName.ValueString(),
-						EntityType:             genericRuleModel.EntityType.ValueString(),
-						Aggregation:            restapi.Aggregation(genericRuleModel.Aggregation.ValueString()),
-						CrossSeriesAggregation: restapi.Aggregation(genericRuleModel.CrossSeriesAggregation.ValueString()),
-						Regex:                  genericRuleModel.Regex.ValueBool(),
-					},
-					Thresholds: make(map[restapi.AlertSeverity]restapi.ThresholdRule),
+			// Map thresholds
+			if !genericRuleModel.ThresholdRule.IsNull() && !genericRuleModel.ThresholdRule.IsUnknown() {
+				var thresholdRuleModel InfraThresholdRuleModel
+				diags.Append(genericRuleModel.ThresholdRule.As(ctx, &thresholdRuleModel, basetypes.ObjectAsOptions{})...)
+				if diags.HasError() {
+					return nil, diags
 				}
 
-				// Map thresholds
-				var thresholdDiags diag.Diagnostics
-				if !genericRuleModel.ThresholdRule.IsNull() && !genericRuleModel.ThresholdRule.IsUnknown() {
-					ruleWithThreshold.Thresholds, thresholdDiags = shared.MapThresholdsFromState(ctx, genericRuleModel.ThresholdRule)
-					diags.Append(thresholdDiags...)
+				// Map warning threshold
+				if !thresholdRuleModel.Warning.IsNull() && !thresholdRuleModel.Warning.IsUnknown() {
+					warningThresholds, warningDiags := shared.MapThresholdRuleFromState(ctx, thresholdRuleModel.Warning)
+					diags.Append(warningDiags...)
 					if diags.HasError() {
 						return nil, diags
 					}
+					if warningThresholds != nil {
+						ruleWithThreshold.Thresholds[restapi.WarningSeverity] = *warningThresholds
+					}
 				}
-				rules = append(rules, ruleWithThreshold)
-				//}
+
+				// Map critical threshold
+				if !thresholdRuleModel.Critical.IsNull() && !thresholdRuleModel.Critical.IsUnknown() {
+					criticalThresholds, criticalDiags := shared.MapThresholdRuleFromState(ctx, thresholdRuleModel.Critical)
+					diags.Append(criticalDiags...)
+					if diags.HasError() {
+						return nil, diags
+					}
+					if criticalThresholds != nil {
+						ruleWithThreshold.Thresholds[restapi.CriticalSeverity] = *criticalThresholds
+					}
+				}
 			}
+			rules = append(rules, ruleWithThreshold)
 		}
 	}
 

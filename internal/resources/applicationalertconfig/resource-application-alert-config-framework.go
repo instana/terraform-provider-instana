@@ -334,6 +334,7 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 						Default:     booldefault.StaticBool(false),
 						Description: "Optional flag to indicate whether also an Incident is triggered or not. The default is false",
 					},
+					shared.DefaultCustomPayloadFieldsName: shared.GetCustomPayloadFieldsSchema(),
 				},
 				Blocks: map[string]schema.Block{
 					ApplicationAlertConfigFieldApplications: schema.SetNestedBlock{
@@ -394,7 +395,6 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 							},
 						},
 					},
-					shared.DefaultCustomPayloadFieldsName: shared.GetCustomPayloadFieldsSchema(),
 					ApplicationAlertConfigFieldRule: schema.ListNestedBlock{
 						Description: "Indicates the type of rule this alert configuration is about.",
 						NestedObject: schema.NestedBlockObject{

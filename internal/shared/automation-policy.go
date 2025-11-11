@@ -16,6 +16,7 @@ var SupportedTriggerTypes = []string{
 	"syntheticsSmartAlert",
 	"logSmartAlert",
 	"sloSmartAlert",
+	"schedule",
 }
 
 var SupportedPolicyTypes = []string{

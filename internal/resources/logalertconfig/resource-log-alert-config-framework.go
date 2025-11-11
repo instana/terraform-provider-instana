@@ -9,7 +9,6 @@ import (
 	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
 	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -65,7 +64,7 @@ type LogAlertConfigModel struct {
 	GroupBy             types.List          `tfsdk:"group_by"`
 	Granularity         types.Int64         `tfsdk:"granularity"`
 	TagFilter           types.String        `tfsdk:"tag_filter"`
-	Rules               types.List          `tfsdk:"rules"`
+	Rules               types.Object        `tfsdk:"rules"`
 	TimeThreshold       *TimeThresholdModel `tfsdk:"time_threshold"`
 	CustomPayloadFields types.List          `tfsdk:"custom_payload_field"`
 }
@@ -96,7 +95,7 @@ type LogAlertRuleModel struct {
 	AlertType         types.String `tfsdk:"alert_type"`
 	Aggregation       types.String `tfsdk:"aggregation"`
 	ThresholdOperator types.String `tfsdk:"threshold_operator"`
-	Threshold         types.List   `tfsdk:"threshold"`
+	Threshold         types.Object `tfsdk:"threshold"`
 }
 
 // ThresholdModel represents a threshold in the Terraform model
@@ -149,11 +148,11 @@ func NewLogAlertConfigResourceHandleFramework() resourcehandle.ResourceHandleFra
 						Required:    true,
 						Description: LogAlertConfigDescTagFilter,
 					},
-				},
-				Blocks: map[string]schema.Block{
-					LogAlertConfigFieldAlertChannels: schema.ListNestedBlock{
+					shared.DefaultCustomPayloadFieldsName: shared.GetCustomPayloadFieldsSchema(),
+					LogAlertConfigFieldAlertChannels: schema.ListNestedAttribute{
 						Description: LogAlertConfigDescAlertChannels,
-						NestedObject: schema.NestedBlockObject{
+						Optional:    true,
+						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								shared.ThresholdFieldWarning: schema.ListAttribute{
 									Optional:    true,
@@ -168,9 +167,10 @@ func NewLogAlertConfigResourceHandleFramework() resourcehandle.ResourceHandleFra
 							},
 						},
 					},
-					LogAlertConfigFieldGroupBy: schema.ListNestedBlock{
+					LogAlertConfigFieldGroupBy: schema.ListNestedAttribute{
 						Description: LogAlertConfigDescGroupBy,
-						NestedObject: schema.NestedBlockObject{
+						Optional:    true,
+						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								LogAlertConfigFieldGroupByTagName: schema.StringAttribute{
 									Required:    true,
@@ -183,55 +183,47 @@ func NewLogAlertConfigResourceHandleFramework() resourcehandle.ResourceHandleFra
 							},
 						},
 					},
-					LogAlertConfigFieldRules: schema.ListNestedBlock{
+					LogAlertConfigFieldRules: schema.SingleNestedAttribute{
 						Description: LogAlertConfigDescRules,
-						NestedObject: schema.NestedBlockObject{
-							Attributes: map[string]schema.Attribute{
-								LogAlertConfigFieldMetricName: schema.StringAttribute{
-									Required:    true,
-									Description: LogAlertConfigDescMetricName,
-								},
-								LogAlertConfigFieldAlertType: schema.StringAttribute{
-									Optional:    true,
-									Description: LogAlertConfigDescAlertType,
-									Validators: []validator.String{
-										stringvalidator.OneOf(LogAlertTypeLogCount),
-									},
-								},
-								LogAlertConfigFieldAggregation: schema.StringAttribute{
-									Optional:    true,
-									Description: LogAlertConfigDescAggregation,
-									Validators: []validator.String{
-										stringvalidator.OneOf(string(restapi.SumAggregation)),
-									},
-								},
-								LogAlertConfigFieldThresholdOperator: schema.StringAttribute{
-									Required:    true,
-									Description: LogAlertConfigDescThresholdOperator,
-									Validators: []validator.String{
-										stringvalidator.OneOf(restapi.SupportedThresholdOperators.ToStringSlice()...),
-									},
+						Optional:    true,
+						Attributes: map[string]schema.Attribute{
+							LogAlertConfigFieldMetricName: schema.StringAttribute{
+								Required:    true,
+								Description: LogAlertConfigDescMetricName,
+							},
+							LogAlertConfigFieldAlertType: schema.StringAttribute{
+								Optional:    true,
+								Description: LogAlertConfigDescAlertType,
+								Validators: []validator.String{
+									stringvalidator.OneOf(LogAlertTypeLogCount),
 								},
 							},
-							Blocks: map[string]schema.Block{
-								LogAlertConfigFieldThreshold: schema.ListNestedBlock{
-									Description: LogAlertConfigDescThreshold,
-									NestedObject: schema.NestedBlockObject{
-										Blocks: map[string]schema.Block{
-											LogAlertConfigFieldWarning:  shared.StaticThresholdBlockSchema(),
-											LogAlertConfigFieldCritical: shared.StaticThresholdBlockSchema(),
-										},
-									},
-									Validators: []validator.List{
-										listvalidator.SizeAtMost(1),
-									},
+							LogAlertConfigFieldAggregation: schema.StringAttribute{
+								Optional:    true,
+								Description: LogAlertConfigDescAggregation,
+								Validators: []validator.String{
+									stringvalidator.OneOf(string(restapi.SumAggregation)),
 								},
 							},
-						},
-						Validators: []validator.List{
-							listvalidator.SizeAtMost(1),
+							LogAlertConfigFieldThresholdOperator: schema.StringAttribute{
+								Required:    true,
+								Description: LogAlertConfigDescThresholdOperator,
+								Validators: []validator.String{
+									stringvalidator.OneOf(restapi.SupportedThresholdOperators.ToStringSlice()...),
+								},
+							},
+							LogAlertConfigFieldThreshold: schema.SingleNestedAttribute{
+								Description: LogAlertConfigDescThreshold,
+								Optional:    true,
+								Attributes: map[string]schema.Attribute{
+									LogAlertConfigFieldWarning:  shared.StaticThresholdAttributeSchema(),
+									LogAlertConfigFieldCritical: shared.StaticThresholdAttributeSchema(),
+								},
+							},
 						},
 					},
+				},
+				Blocks: map[string]schema.Block{
 					LogAlertConfigFieldTimeThreshold: schema.SingleNestedBlock{
 						Description: LogAlertConfigDescTimeThreshold,
 						Blocks: map[string]schema.Block{
@@ -246,7 +238,6 @@ func NewLogAlertConfigResourceHandleFramework() resourcehandle.ResourceHandleFra
 							},
 						},
 					},
-					shared.DefaultCustomPayloadFieldsName: shared.GetCustomPayloadFieldsSchema(),
 				},
 			},
 			SchemaVersion: 1,
@@ -650,133 +641,125 @@ func (r *logAlertConfigResourceFramework) mapTimeThresholdToState1(ctx context.C
 	)
 }
 
-func (r *logAlertConfigResourceFramework) mapRulesToState(ctx context.Context, rules []restapi.RuleWithThreshold[restapi.LogAlertRule]) (types.List, diag.Diagnostics) {
+func (r *logAlertConfigResourceFramework) mapRulesToState(ctx context.Context, rules []restapi.RuleWithThreshold[restapi.LogAlertRule]) (types.Object, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
+	thresholdAttrTypes := map[string]attr.Type{
+		LogAlertConfigFieldWarning:  types.ObjectType{AttrTypes: shared.GetStaticThresholdAttrTypes()},
+		LogAlertConfigFieldCritical: types.ObjectType{AttrTypes: shared.GetStaticThresholdAttrTypes()},
+	}
+
+	ruleAttrTypes := map[string]attr.Type{
+		LogAlertConfigFieldMetricName:        types.StringType,
+		LogAlertConfigFieldAlertType:         types.StringType,
+		LogAlertConfigFieldAggregation:       types.StringType,
+		LogAlertConfigFieldThresholdOperator: types.StringType,
+		LogAlertConfigFieldThreshold:         types.ObjectType{AttrTypes: thresholdAttrTypes},
+	}
+
 	if len(rules) == 0 {
-		return types.ListNull(types.ObjectType{}), diags
+		return types.ObjectNull(ruleAttrTypes), diags
 	}
 
-	ruleElements := make([]attr.Value, len(rules))
+	// Since rules is now SingleNestedAttribute, we only handle the first rule
+	ruleWithThreshold := rules[0]
+	rule := ruleWithThreshold.Rule
 
-	for i, ruleWithThreshold := range rules {
-		rule := ruleWithThreshold.Rule
-
-		// Convert "logCount" to "log.count" for the schema
-		alertType := rule.AlertType
-		if alertType == "logCount" {
-			alertType = LogAlertTypeLogCount
-		}
-
-		// Create rule object
-		ruleObj := map[string]attr.Value{
-			LogAlertConfigFieldMetricName:        types.StringValue(rule.MetricName),
-			LogAlertConfigFieldAlertType:         types.StringValue(alertType),
-			LogAlertConfigFieldThresholdOperator: types.StringValue(string(ruleWithThreshold.ThresholdOperator)),
-		}
-
-		if rule.Aggregation != "" {
-			ruleObj[LogAlertConfigFieldAggregation] = types.StringValue(string(rule.Aggregation))
-		} else {
-			ruleObj[LogAlertConfigFieldAggregation] = types.StringValue(string(restapi.SumAggregation))
-		}
-
-		// Map thresholds
-		thresholdObj := map[string]attr.Value{}
-
-		// Map warning threshold
-		warningThreshold, isWarningThresholdPresent := ruleWithThreshold.Thresholds[restapi.WarningSeverity]
-		warningThresholdList, warningDiags := shared.MapThresholdToState(ctx, isWarningThresholdPresent, &warningThreshold, []string{"static"})
-		diags.Append(warningDiags...)
-		if diags.HasError() {
-			return types.ListNull(types.ObjectType{}), diags
-		}
-		thresholdObj[LogAlertConfigFieldWarning] = warningThresholdList
-
-		// Map critical threshold
-		criticalThreshold, isCriticalThresholdPresent := ruleWithThreshold.Thresholds[restapi.CriticalSeverity]
-		criticalThresholdList, criticalDiags := shared.MapThresholdToState(ctx, isCriticalThresholdPresent, &criticalThreshold, []string{"static"})
-		diags.Append(criticalDiags...)
-		if diags.HasError() {
-			return types.ListNull(types.ObjectType{}), diags
-		}
-		thresholdObj[LogAlertConfigFieldCritical] = criticalThresholdList
-
-		// Create threshold object value
-		thresholdObjVal, thresholdObjDiags := types.ObjectValue(
-			map[string]attr.Type{
-				LogAlertConfigFieldWarning:  shared.GetStaticThresholdAttrListTypes(),
-				LogAlertConfigFieldCritical: shared.GetStaticThresholdAttrListTypes(),
-			},
-			thresholdObj,
-		)
-		diags.Append(thresholdObjDiags...)
-		if diags.HasError() {
-			return types.ListNull(types.ObjectType{}), diags
-		}
-
-		// Add threshold to rule
-		thresholdList, thresholdListDiags := types.ListValue(
-			types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					LogAlertConfigFieldWarning:  shared.GetStaticThresholdAttrListTypes(),
-					LogAlertConfigFieldCritical: shared.GetStaticThresholdAttrListTypes(),
-				},
-			},
-			[]attr.Value{thresholdObjVal},
-		)
-		diags.Append(thresholdListDiags...)
-		if diags.HasError() {
-			return types.ListNull(types.ObjectType{}), diags
-		}
-
-		ruleObj[LogAlertConfigFieldThreshold] = thresholdList
-
-		// Create rule object value
-		ruleObjVal, ruleObjDiags := types.ObjectValue(
-			map[string]attr.Type{
-				LogAlertConfigFieldMetricName:        types.StringType,
-				LogAlertConfigFieldAlertType:         types.StringType,
-				LogAlertConfigFieldAggregation:       types.StringType,
-				LogAlertConfigFieldThresholdOperator: types.StringType,
-				LogAlertConfigFieldThreshold: types.ListType{
-					ElemType: types.ObjectType{
-						AttrTypes: map[string]attr.Type{
-							LogAlertConfigFieldWarning:  shared.GetStaticThresholdAttrListTypes(),
-							LogAlertConfigFieldCritical: shared.GetStaticThresholdAttrListTypes(),
-						},
-					},
-				},
-			},
-			ruleObj,
-		)
-		diags.Append(ruleObjDiags...)
-		if diags.HasError() {
-			return types.ListNull(types.ObjectType{}), diags
-		}
-
-		ruleElements[i] = ruleObjVal
+	// Convert "logCount" to "log.count" for the schema
+	alertType := rule.AlertType
+	if alertType == "logCount" {
+		alertType = LogAlertTypeLogCount
 	}
 
-	return types.ListValue(
-		types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				LogAlertConfigFieldMetricName:        types.StringType,
-				LogAlertConfigFieldAlertType:         types.StringType,
-				LogAlertConfigFieldAggregation:       types.StringType,
-				LogAlertConfigFieldThresholdOperator: types.StringType,
-				LogAlertConfigFieldThreshold: types.ListType{
-					ElemType: types.ObjectType{
-						AttrTypes: map[string]attr.Type{
-							LogAlertConfigFieldWarning:  shared.GetStaticThresholdAttrListTypes(),
-							LogAlertConfigFieldCritical: shared.GetStaticThresholdAttrListTypes(),
-						},
-					},
-				},
+	// Create rule object
+	ruleObj := map[string]attr.Value{
+		LogAlertConfigFieldMetricName:        types.StringValue(rule.MetricName),
+		LogAlertConfigFieldAlertType:         types.StringValue(alertType),
+		LogAlertConfigFieldThresholdOperator: types.StringValue(string(ruleWithThreshold.ThresholdOperator)),
+	}
+
+	if rule.Aggregation != "" {
+		ruleObj[LogAlertConfigFieldAggregation] = types.StringValue(string(rule.Aggregation))
+	} else {
+		ruleObj[LogAlertConfigFieldAggregation] = types.StringValue(string(restapi.SumAggregation))
+	}
+
+	// Map thresholds - create nested objects for warning and critical
+	thresholdObj := map[string]attr.Value{}
+
+	// Map warning threshold - convert to object
+	warningThreshold, isWarningThresholdPresent := ruleWithThreshold.Thresholds[restapi.WarningSeverity]
+	if isWarningThresholdPresent {
+		staticInnerObj, staticInnerDiags := types.ObjectValue(
+			map[string]attr.Type{
+				"operator": types.StringType,
+				"value":    types.Int64Type,
 			},
-		},
-		ruleElements,
-	)
+			map[string]attr.Value{
+				"operator": types.StringNull(),
+				"value":    types.Int64Value(int64(*warningThreshold.Value)),
+			},
+		)
+		diags.Append(staticInnerDiags...)
+		if diags.HasError() {
+			return types.ObjectNull(ruleAttrTypes), diags
+		}
+
+		warningStaticObj := map[string]attr.Value{
+			"static": staticInnerObj,
+		}
+		warningObj, warnDiags := types.ObjectValue(shared.GetStaticThresholdAttrTypes(), warningStaticObj)
+		diags.Append(warnDiags...)
+		if diags.HasError() {
+			return types.ObjectNull(ruleAttrTypes), diags
+		}
+		thresholdObj[LogAlertConfigFieldWarning] = warningObj
+	} else {
+		thresholdObj[LogAlertConfigFieldWarning] = types.ObjectNull(shared.GetStaticThresholdAttrTypes())
+	}
+
+	// Map critical threshold - convert to object
+	criticalThreshold, isCriticalThresholdPresent := ruleWithThreshold.Thresholds[restapi.CriticalSeverity]
+	if isCriticalThresholdPresent {
+		staticInnerObj, staticInnerDiags := types.ObjectValue(
+			map[string]attr.Type{
+				"operator": types.StringType,
+				"value":    types.Int64Type,
+			},
+			map[string]attr.Value{
+				"operator": types.StringNull(),
+				"value":    types.Int64Value(int64(*criticalThreshold.Value)),
+			},
+		)
+		diags.Append(staticInnerDiags...)
+		if diags.HasError() {
+			return types.ObjectNull(ruleAttrTypes), diags
+		}
+
+		criticalStaticObj := map[string]attr.Value{
+			"static": staticInnerObj,
+		}
+		criticalObj, critDiags := types.ObjectValue(shared.GetStaticThresholdAttrTypes(), criticalStaticObj)
+		diags.Append(critDiags...)
+		if diags.HasError() {
+			return types.ObjectNull(ruleAttrTypes), diags
+		}
+		thresholdObj[LogAlertConfigFieldCritical] = criticalObj
+	} else {
+		thresholdObj[LogAlertConfigFieldCritical] = types.ObjectNull(shared.GetStaticThresholdAttrTypes())
+	}
+
+	// Create threshold object value
+	thresholdObjVal, thresholdObjDiags := types.ObjectValue(thresholdAttrTypes, thresholdObj)
+	diags.Append(thresholdObjDiags...)
+	if diags.HasError() {
+		return types.ObjectNull(ruleAttrTypes), diags
+	}
+
+	ruleObj[LogAlertConfigFieldThreshold] = thresholdObjVal
+
+	// Create rule object value
+	return types.ObjectValue(ruleAttrTypes, ruleObj)
 }
 
 func (r *logAlertConfigResourceFramework) mapThresholdRuleToState(ctx context.Context, threshold *restapi.ThresholdRule) (types.List, diag.Diagnostics) {
@@ -842,81 +825,145 @@ func (r *logAlertConfigResourceFramework) mapThresholdRuleToState(ctx context.Co
 	)
 }
 
-func (r *logAlertConfigResourceFramework) mapRulesFromState(ctx context.Context, rulesList types.List) ([]restapi.RuleWithThreshold[restapi.LogAlertRule], diag.Diagnostics) {
+func (r *logAlertConfigResourceFramework) mapRulesFromState(ctx context.Context, rulesObj types.Object) ([]restapi.RuleWithThreshold[restapi.LogAlertRule], diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	if rulesList.IsNull() || rulesList.IsUnknown() {
+	if rulesObj.IsNull() || rulesObj.IsUnknown() {
 		return []restapi.RuleWithThreshold[restapi.LogAlertRule]{}, diags
 	}
 
-	var rulesElements []types.Object
-	diags.Append(rulesList.ElementsAs(ctx, &rulesElements, false)...)
+	var rule struct {
+		MetricName        types.String `tfsdk:"metric_name"`
+		AlertType         types.String `tfsdk:"alert_type"`
+		Aggregation       types.String `tfsdk:"aggregation"`
+		ThresholdOperator types.String `tfsdk:"threshold_operator"`
+		Threshold         types.Object `tfsdk:"threshold"`
+	}
+
+	diags.Append(rulesObj.As(ctx, &rule, basetypes.ObjectAsOptions{})...)
 	if diags.HasError() {
 		return nil, diags
 	}
 
-	if len(rulesElements) == 0 {
-		return []restapi.RuleWithThreshold[restapi.LogAlertRule]{}, diags
+	// Convert "log.count" to "logCount" for the API
+	alertType := rule.AlertType.ValueString()
+	if alertType == LogAlertTypeLogCount {
+		alertType = "logCount"
 	}
 
-	result := make([]restapi.RuleWithThreshold[restapi.LogAlertRule], len(rulesElements))
+	// Create log alert rule
+	logAlertRule := restapi.LogAlertRule{
+		MetricName: rule.MetricName.ValueString(),
+		AlertType:  alertType,
+	}
 
-	for i, ruleObj := range rulesElements {
-		var rule struct {
-			MetricName        types.String `tfsdk:"metric_name"`
-			AlertType         types.String `tfsdk:"alert_type"`
-			Aggregation       types.String `tfsdk:"aggregation"`
-			ThresholdOperator types.String `tfsdk:"threshold_operator"`
-			Threshold         types.List   `tfsdk:"threshold"`
-		}
+	if !rule.Aggregation.IsNull() {
+		logAlertRule.Aggregation = restapi.Aggregation(rule.Aggregation.ValueString())
+	}
 
-		diags.Append(ruleObj.As(ctx, &rule, basetypes.ObjectAsOptions{})...)
+	// Get threshold operator
+	thresholdOperator := restapi.ThresholdOperator(rule.ThresholdOperator.ValueString())
+
+	// Map thresholds from object
+	var thresholdMap map[restapi.AlertSeverity]restapi.ThresholdRule
+	var thresholdDiags diag.Diagnostics
+
+	if !rule.Threshold.IsNull() && !rule.Threshold.IsUnknown() {
+		thresholdMap, thresholdDiags = r.mapThresholdObjectFromState(ctx, rule.Threshold)
+		diags.Append(thresholdDiags...)
 		if diags.HasError() {
 			return nil, diags
 		}
+	} else {
+		thresholdMap = make(map[restapi.AlertSeverity]restapi.ThresholdRule)
+	}
 
-		// Convert "log.count" to "logCount" for the API
-		alertType := rule.AlertType.ValueString()
-		if alertType == LogAlertTypeLogCount {
-			alertType = "logCount"
-		}
-
-		// Create log alert rule
-		logAlertRule := restapi.LogAlertRule{
-			MetricName: rule.MetricName.ValueString(),
-			AlertType:  alertType,
-		}
-
-		if !rule.Aggregation.IsNull() {
-			logAlertRule.Aggregation = restapi.Aggregation(rule.Aggregation.ValueString())
-		}
-
-		// Get threshold operator
-		thresholdOperator := restapi.ThresholdOperator(rule.ThresholdOperator.ValueString())
-
-		// Map thresholds
-		var thresholdMap map[restapi.AlertSeverity]restapi.ThresholdRule
-		var thresholdDiags diag.Diagnostics
-
-		if !rule.Threshold.IsNull() && !rule.Threshold.IsUnknown() {
-			thresholdMap, thresholdDiags = shared.MapThresholdsFromState(ctx, rule.Threshold)
-			diags.Append(thresholdDiags...)
-			if diags.HasError() {
-				return nil, diags
-			}
-		} else {
-			thresholdMap = make(map[restapi.AlertSeverity]restapi.ThresholdRule)
-		}
-
-		// Create rule with threshold
-		result[i] = restapi.RuleWithThreshold[restapi.LogAlertRule]{
+	// Create rule with threshold - return as single-element array
+	result := []restapi.RuleWithThreshold[restapi.LogAlertRule]{
+		{
 			ThresholdOperator: thresholdOperator,
 			Rule:              logAlertRule,
 			Thresholds:        thresholdMap,
-		}
+		},
 	}
 
 	return result, diags
+}
+
+// mapThresholdObjectFromState maps threshold object (warning/critical) to API model
+func (r *logAlertConfigResourceFramework) mapThresholdObjectFromState(ctx context.Context, thresholdObj types.Object) (map[restapi.AlertSeverity]restapi.ThresholdRule, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	thresholdMap := make(map[restapi.AlertSeverity]restapi.ThresholdRule)
+
+	var thresholds struct {
+		Warning  types.Object `tfsdk:"warning"`
+		Critical types.Object `tfsdk:"critical"`
+	}
+
+	diags.Append(thresholdObj.As(ctx, &thresholds, basetypes.ObjectAsOptions{})...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	// Map warning threshold
+	if !thresholds.Warning.IsNull() && !thresholds.Warning.IsUnknown() {
+		warningThreshold, warnDiags := r.mapSingleThresholdFromState(ctx, thresholds.Warning)
+		diags.Append(warnDiags...)
+		if diags.HasError() {
+			return nil, diags
+		}
+		if warningThreshold != nil {
+			thresholdMap[restapi.WarningSeverity] = *warningThreshold
+		}
+	}
+
+	// Map critical threshold
+	if !thresholds.Critical.IsNull() && !thresholds.Critical.IsUnknown() {
+		criticalThreshold, critDiags := r.mapSingleThresholdFromState(ctx, thresholds.Critical)
+		diags.Append(critDiags...)
+		if diags.HasError() {
+			return nil, diags
+		}
+		if criticalThreshold != nil {
+			thresholdMap[restapi.CriticalSeverity] = *criticalThreshold
+		}
+	}
+
+	return thresholdMap, diags
+}
+
+// mapSingleThresholdFromState maps a single threshold (static) to API model
+func (r *logAlertConfigResourceFramework) mapSingleThresholdFromState(ctx context.Context, thresholdObj types.Object) (*restapi.ThresholdRule, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	var threshold struct {
+		Static types.Object `tfsdk:"static"`
+	}
+
+	diags.Append(thresholdObj.As(ctx, &threshold, basetypes.ObjectAsOptions{})...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	if threshold.Static.IsNull() || threshold.Static.IsUnknown() {
+		return nil, diags
+	}
+
+	var static struct {
+		Operator types.String `tfsdk:"operator"`
+		Value    types.Int64  `tfsdk:"value"`
+	}
+
+	diags.Append(threshold.Static.As(ctx, &static, basetypes.ObjectAsOptions{})...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	valueFloat := float64(static.Value.ValueInt64())
+	return &restapi.ThresholdRule{
+		Type:  "staticThreshold",
+		Value: &valueFloat,
+	}, diags
 }
 
 // mapThresholdRuleFromState and MapThresholdsFromState have been moved to threshold-mapping-framework.go

@@ -21,6 +21,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 // ResourceInstanaSyntheticTestFramework the name of the terraform-provider-instana resource to manage synthetic tests
@@ -96,142 +97,139 @@ func NewSyntheticTestResourceHandleFramework() resourcehandle.ResourceHandleFram
 							},
 						},
 					},
-				},
-				Blocks: map[string]schema.Block{
-					"http_action": schema.ListNestedBlock{
+					"http_action": schema.SingleNestedAttribute{
+						Optional:    true,
 						Description: SyntheticTestDescHttpAction,
-						NestedObject: schema.NestedBlockObject{
-							Attributes: map[string]schema.Attribute{
-								"mark_synthetic_call": schema.BoolAttribute{
-									Optional:    true,
-									Computed:    true,
-									Description: SyntheticTestDescMarkSyntheticCall,
-									Default:     booldefault.StaticBool(false),
-								},
-								"retries": schema.Int64Attribute{
-									Optional:    true,
-									Computed:    true,
-									Description: SyntheticTestDescRetries,
-									Default:     int64default.StaticInt64(0),
-									Validators: []validator.Int64{
-										int64Validator{
-											min: 0,
-											max: 2,
-										},
+						Attributes: map[string]schema.Attribute{
+							"mark_synthetic_call": schema.BoolAttribute{
+								Optional:    true,
+								Computed:    true,
+								Description: SyntheticTestDescMarkSyntheticCall,
+								Default:     booldefault.StaticBool(false),
+							},
+							"retries": schema.Int64Attribute{
+								Optional:    true,
+								Computed:    true,
+								Description: SyntheticTestDescRetries,
+								Default:     int64default.StaticInt64(0),
+								Validators: []validator.Int64{
+									int64Validator{
+										min: 0,
+										max: 2,
 									},
 								},
-								"retry_interval": schema.Int64Attribute{
-									Optional:    true,
-									Computed:    true,
-									Description: SyntheticTestDescRetryInterval,
-									Default:     int64default.StaticInt64(1),
-									Validators: []validator.Int64{
-										int64Validator{
-											min: 1,
-											max: 10,
-										},
+							},
+							"retry_interval": schema.Int64Attribute{
+								Optional:    true,
+								Computed:    true,
+								Description: SyntheticTestDescRetryInterval,
+								Default:     int64default.StaticInt64(1),
+								Validators: []validator.Int64{
+									int64Validator{
+										min: 1,
+										max: 10,
 									},
 								},
-								"timeout": schema.StringAttribute{
-									Optional:    true,
-									Description: SyntheticTestDescTimeout,
+							},
+							"timeout": schema.StringAttribute{
+								Optional:    true,
+								Description: SyntheticTestDescTimeout,
+							},
+							"url": schema.StringAttribute{
+								Optional:    true,
+								Description: SyntheticTestDescURL,
+								Validators: []validator.String{
+									stringvalidator.RegexMatches(regexp.MustCompile(`^https?://[^\s/$.?#].[^\s]*$`), SyntheticTestValidatorURLRegex),
 								},
-								"url": schema.StringAttribute{
-									Optional:    true,
-									Description: SyntheticTestDescURL,
-									Validators: []validator.String{
-										stringvalidator.RegexMatches(regexp.MustCompile(`^https?://[^\s/$.?#].[^\s]*$`), SyntheticTestValidatorURLRegex),
-									},
+							},
+							"operation": schema.StringAttribute{
+								Optional:    true,
+								Description: SyntheticTestDescOperation,
+								Validators: []validator.String{
+									stringvalidator.OneOf("GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT", "DELETE"),
 								},
-								"operation": schema.StringAttribute{
-									Optional:    true,
-									Description: SyntheticTestDescOperation,
-									Validators: []validator.String{
-										stringvalidator.OneOf("GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT", "DELETE"),
-									},
-								},
-								"headers": schema.MapAttribute{
-									Optional:    true,
-									Description: SyntheticTestDescHeaders,
-									ElementType: types.StringType,
-								},
-								"body": schema.StringAttribute{
-									Optional:    true,
-									Description: SyntheticTestDescBody,
-								},
-								"validation_string": schema.StringAttribute{
-									Optional:    true,
-									Description: SyntheticTestDescValidationString,
-								},
-								"follow_redirect": schema.BoolAttribute{
-									Optional:    true,
-									Computed:    true,
-									Description: SyntheticTestDescFollowRedirect,
-									Default:     booldefault.StaticBool(false),
-								},
-								"allow_insecure": schema.BoolAttribute{
-									Optional:    true,
-									Computed:    true,
-									Description: SyntheticTestDescAllowInsecure,
-									Default:     booldefault.StaticBool(false),
-								},
-								"expect_status": schema.Int64Attribute{
-									Optional:    true,
-									Description: SyntheticTestDescExpectStatus,
-								},
-								"expect_match": schema.StringAttribute{
-									Optional:    true,
-									Description: SyntheticTestDescExpectMatch,
-								},
+							},
+							"headers": schema.MapAttribute{
+								Optional:    true,
+								Description: SyntheticTestDescHeaders,
+								ElementType: types.StringType,
+							},
+							"body": schema.StringAttribute{
+								Optional:    true,
+								Description: SyntheticTestDescBody,
+							},
+							"validation_string": schema.StringAttribute{
+								Optional:    true,
+								Description: SyntheticTestDescValidationString,
+							},
+							"follow_redirect": schema.BoolAttribute{
+								Optional:    true,
+								Computed:    true,
+								Description: SyntheticTestDescFollowRedirect,
+								Default:     booldefault.StaticBool(false),
+							},
+							"allow_insecure": schema.BoolAttribute{
+								Optional:    true,
+								Computed:    true,
+								Description: SyntheticTestDescAllowInsecure,
+								Default:     booldefault.StaticBool(false),
+							},
+							"expect_status": schema.Int64Attribute{
+								Optional:    true,
+								Description: SyntheticTestDescExpectStatus,
+							},
+							"expect_match": schema.StringAttribute{
+								Optional:    true,
+								Description: SyntheticTestDescExpectMatch,
 							},
 						},
 					},
-					"http_script": schema.ListNestedBlock{
+					"http_script": schema.SingleNestedAttribute{
+						Optional:    true,
 						Description: SyntheticTestDescHttpScript,
-						NestedObject: schema.NestedBlockObject{
-							Attributes: map[string]schema.Attribute{
-								"mark_synthetic_call": schema.BoolAttribute{
-									Optional:    true,
-									Computed:    true,
-									Description: SyntheticTestDescMarkSyntheticCall,
-									Default:     booldefault.StaticBool(false),
-								},
-								"retries": schema.Int64Attribute{
-									Optional:    true,
-									Computed:    true,
-									Description: SyntheticTestDescRetries,
-									Default:     int64default.StaticInt64(0),
-									Validators: []validator.Int64{
-										int64Validator{
-											min: 0,
-											max: 2,
-										},
+						Attributes: map[string]schema.Attribute{
+							"mark_synthetic_call": schema.BoolAttribute{
+								Optional:    true,
+								Computed:    true,
+								Description: SyntheticTestDescMarkSyntheticCall,
+								Default:     booldefault.StaticBool(false),
+							},
+							"retries": schema.Int64Attribute{
+								Optional:    true,
+								Computed:    true,
+								Description: SyntheticTestDescRetries,
+								Default:     int64default.StaticInt64(0),
+								Validators: []validator.Int64{
+									int64Validator{
+										min: 0,
+										max: 2,
 									},
 								},
-								"retry_interval": schema.Int64Attribute{
-									Optional:    true,
-									Computed:    true,
-									Description: SyntheticTestDescRetryInterval,
-									Default:     int64default.StaticInt64(1),
-									Validators: []validator.Int64{
-										int64Validator{
-											min: 1,
-											max: 10,
-										},
+							},
+							"retry_interval": schema.Int64Attribute{
+								Optional:    true,
+								Computed:    true,
+								Description: SyntheticTestDescRetryInterval,
+								Default:     int64default.StaticInt64(1),
+								Validators: []validator.Int64{
+									int64Validator{
+										min: 1,
+										max: 10,
 									},
 								},
-								"timeout": schema.StringAttribute{
-									Optional:    true,
-									Description: SyntheticTestDescTimeout,
-								},
-								"script": schema.StringAttribute{
-									Required:    true,
-									Description: SyntheticTestDescScript,
-								},
+							},
+							"timeout": schema.StringAttribute{
+								Optional:    true,
+								Description: SyntheticTestDescTimeout,
+							},
+							"script": schema.StringAttribute{
+								Required:    true,
+								Description: SyntheticTestDescScript,
 							},
 						},
 					},
 				},
+				Blocks: map[string]schema.Block{},
 			},
 			SchemaVersion: 0,
 		},
@@ -370,18 +368,11 @@ func (r *syntheticTestResourceFramework) mapConfigurationFromModel(ctx context.C
 
 	// Map HTTP Action configuration
 	if !model.HttpAction.IsNull() && !model.HttpAction.IsUnknown() {
-		var httpActionModels []tf_framework.HttpActionConfigModel
-		diags.Append(model.HttpAction.ElementsAs(ctx, &httpActionModels, false)...)
+		var httpActionModel tf_framework.HttpActionConfigModel
+		diags.Append(model.HttpAction.As(ctx, &httpActionModel, basetypes.ObjectAsOptions{})...)
 		if diags.HasError() {
 			return restapi.SyntheticTestConfig{}, diags
 		}
-
-		if len(httpActionModels) != 1 {
-			diags.AddError(SyntheticTestErrInvalidHttpAction, SyntheticTestErrInvalidHttpActionMsg)
-			return restapi.SyntheticTestConfig{}, diags
-		}
-
-		httpActionModel := httpActionModels[0]
 
 		// Map headers
 		var headers map[string]interface{}
@@ -419,18 +410,11 @@ func (r *syntheticTestResourceFramework) mapConfigurationFromModel(ctx context.C
 
 	// Map HTTP Script configuration
 	if !model.HttpScript.IsNull() && !model.HttpScript.IsUnknown() {
-		var httpScriptModels []tf_framework.HttpScriptConfigModel
-		diags.Append(model.HttpScript.ElementsAs(ctx, &httpScriptModels, false)...)
+		var httpScriptModel tf_framework.HttpScriptConfigModel
+		diags.Append(model.HttpScript.As(ctx, &httpScriptModel, basetypes.ObjectAsOptions{})...)
 		if diags.HasError() {
 			return restapi.SyntheticTestConfig{}, diags
 		}
-
-		if len(httpScriptModels) != 1 {
-			diags.AddError(SyntheticTestErrInvalidHttpScript, SyntheticTestErrInvalidHttpScriptMsg)
-			return restapi.SyntheticTestConfig{}, diags
-		}
-
-		httpScriptModel := httpScriptModels[0]
 
 		return restapi.SyntheticTestConfig{
 			MarkSyntheticCall: httpScriptModel.MarkSyntheticCall.ValueBool(),
@@ -503,13 +487,9 @@ func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state 
 
 		// Map optional fields
 		httpActionModel.Timeout = util.SetStringPointerToState(apiObject.Configuration.Timeout)
-
 		httpActionModel.URL = util.SetStringPointerToState(apiObject.Configuration.URL)
-
 		httpActionModel.Operation = util.SetStringPointerToState(apiObject.Configuration.Operation)
-
 		httpActionModel.Body = util.SetStringPointerToState(apiObject.Configuration.Body)
-
 		httpActionModel.ValidationString = util.SetStringPointerToState(apiObject.Configuration.ValidationString)
 
 		if apiObject.Configuration.FollowRedirect != nil {
@@ -551,37 +531,14 @@ func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state 
 			"expect_match":        types.StringType,
 		}, httpActionModel)
 
-		model.HttpAction = types.ListValueMust(
-			types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"mark_synthetic_call": types.BoolType,
-					"retries":             types.Int64Type,
-					"retry_interval":      types.Int64Type,
-					"timeout":             types.StringType,
-					"url":                 types.StringType,
-					"operation":           types.StringType,
-					"headers":             types.MapType{ElemType: types.StringType},
-					"body":                types.StringType,
-					"validation_string":   types.StringType,
-					"follow_redirect":     types.BoolType,
-					"allow_insecure":      types.BoolType,
-					"expect_status":       types.Int64Type,
-					"expect_match":        types.StringType,
-				},
-			},
-			[]attr.Value{httpActionObj},
-		)
-		model.HttpScript = types.ListNull(
-			types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"mark_synthetic_call": types.BoolType,
-					"retries":             types.Int64Type,
-					"retry_interval":      types.Int64Type,
-					"timeout":             types.StringType,
-					"script":              types.StringType,
-				},
-			},
-		)
+		model.HttpAction = httpActionObj
+		model.HttpScript = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"script":              types.StringType,
+		})
 	} else if apiObject.Configuration.SyntheticType == "HTTPScript" {
 		httpScriptModel := tf_framework.HttpScriptConfigModel{
 			MarkSyntheticCall: types.BoolValue(apiObject.Configuration.MarkSyntheticCall),
@@ -591,7 +548,6 @@ func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state 
 
 		// Map optional fields
 		httpScriptModel.Timeout = util.SetStringPointerToState(apiObject.Configuration.Timeout)
-
 		httpScriptModel.Script = util.SetStringPointerToState(apiObject.Configuration.Script)
 
 		// Create object for http_script
@@ -603,37 +559,22 @@ func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state 
 			"script":              types.StringType,
 		}, httpScriptModel)
 
-		model.HttpScript = types.ListValueMust(
-			types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"mark_synthetic_call": types.BoolType,
-					"retries":             types.Int64Type,
-					"retry_interval":      types.Int64Type,
-					"timeout":             types.StringType,
-					"script":              types.StringType,
-				},
-			},
-			[]attr.Value{httpScriptObj},
-		)
-		model.HttpAction = types.ListNull(
-			types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"mark_synthetic_call": types.BoolType,
-					"retries":             types.Int64Type,
-					"retry_interval":      types.Int64Type,
-					"timeout":             types.StringType,
-					"url":                 types.StringType,
-					"operation":           types.StringType,
-					"headers":             types.MapType{ElemType: types.StringType},
-					"body":                types.StringType,
-					"validation_string":   types.StringType,
-					"follow_redirect":     types.BoolType,
-					"allow_insecure":      types.BoolType,
-					"expect_status":       types.Int64Type,
-					"expect_match":        types.StringType,
-				},
-			},
-		)
+		model.HttpScript = httpScriptObj
+		model.HttpAction = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"url":                 types.StringType,
+			"operation":           types.StringType,
+			"headers":             types.MapType{ElemType: types.StringType},
+			"body":                types.StringType,
+			"validation_string":   types.StringType,
+			"follow_redirect":     types.BoolType,
+			"allow_insecure":      types.BoolType,
+			"expect_status":       types.Int64Type,
+			"expect_match":        types.StringType,
+		})
 	}
 
 	// Set state

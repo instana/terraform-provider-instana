@@ -42,7 +42,7 @@ type SloCorrectionConfigModel struct {
 	Name        types.String `tfsdk:"name"`
 	Description types.String `tfsdk:"description"`
 	Active      types.Bool   `tfsdk:"active"`
-	Scheduling  types.List   `tfsdk:"scheduling"`
+	Scheduling  types.Object `tfsdk:"scheduling"`
 	SloIds      types.Set    `tfsdk:"slo_ids"`
 	Tags        types.Set    `tfsdk:"tags"`
 }
@@ -169,30 +169,22 @@ func (r *sloCorrectionConfigResourceFramework) MapStateToDataObject(ctx context.
 
 	// Map scheduling
 	var scheduling restapi.Scheduling
-	if !model.Scheduling.IsNull() {
-		var schedulingElements []types.Object
-		diags.Append(model.Scheduling.ElementsAs(ctx, &schedulingElements, false)...)
+	if !model.Scheduling.IsNull() && !model.Scheduling.IsUnknown() {
+		var schedulingModel SchedulingModel
+		diags.Append(model.Scheduling.As(ctx, &schedulingModel, basetypes.ObjectAsOptions{})...)
 		if diags.HasError() {
 			return nil, diags
 		}
 
-		if len(schedulingElements) > 0 {
-			var schedulingModel SchedulingModel
-			diags.Append(schedulingElements[0].As(ctx, &schedulingModel, basetypes.ObjectAsOptions{})...)
-			if diags.HasError() {
-				return nil, diags
-			}
+		scheduling = restapi.Scheduling{
+			StartTime:    schedulingModel.StartTime.ValueInt64(),
+			Duration:     int(schedulingModel.Duration.ValueInt64()),
+			DurationUnit: restapi.DurationUnit(strings.ToUpper(schedulingModel.DurationUnit.ValueString())),
+			Recurrent:    schedulingModel.Recurrent.ValueBool(),
+		}
 
-			scheduling = restapi.Scheduling{
-				StartTime:    schedulingModel.StartTime.ValueInt64(),
-				Duration:     int(schedulingModel.Duration.ValueInt64()),
-				DurationUnit: restapi.DurationUnit(strings.ToUpper(schedulingModel.DurationUnit.ValueString())),
-				Recurrent:    schedulingModel.Recurrent.ValueBool(),
-			}
-
-			if !schedulingModel.RecurrentRule.IsNull() {
-				scheduling.RecurrentRule = schedulingModel.RecurrentRule.ValueString()
-			}
+		if !schedulingModel.RecurrentRule.IsNull() {
+			scheduling.RecurrentRule = schedulingModel.RecurrentRule.ValueString()
 		}
 	}
 
@@ -262,16 +254,7 @@ func (r *sloCorrectionConfigResourceFramework) UpdateState(ctx context.Context, 
 		return diags
 	}
 
-	schedulingList, schedulingListDiags := types.ListValue(
-		types.ObjectType{AttrTypes: schedulingType},
-		[]attr.Value{schedulingValue},
-	)
-	diags.Append(schedulingListDiags...)
-	if diags.HasError() {
-		return diags
-	}
-
-	model.Scheduling = schedulingList
+	model.Scheduling = schedulingValue
 
 	// Map SLO IDs
 	sloIdsSet, sloIdsDiags := types.SetValueFrom(ctx, types.StringType, apiObject.SloIds)

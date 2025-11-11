@@ -110,8 +110,6 @@ func NewAlertingConfigResourceHandleFramework() resourcehandle.ResourceHandleFra
 							setplanmodifier.RequiresReplace(),
 						},
 					},
-				},
-				Blocks: map[string]schema.Block{
 					shared.DefaultCustomPayloadFieldsName: shared.GetCustomPayloadFieldsSchema(),
 				},
 			},

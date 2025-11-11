@@ -277,9 +277,9 @@ func NewWebsiteAlertConfigResourceHandleFramework() resourcehandle.ResourceHandl
 							},
 						},
 					},
+					"custom_payload_fields": shared.GetCustomPayloadFieldsSchema(),
 				},
 				Blocks: map[string]schema.Block{
-					"custom_payload_fields": shared.GetCustomPayloadFieldsSchema(),
 					"threshold": schema.SingleNestedBlock{
 						Description: WebsiteAlertConfigDescThreshold,
 						Blocks: map[string]schema.Block{
