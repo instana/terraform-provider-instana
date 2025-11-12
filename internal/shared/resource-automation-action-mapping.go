@@ -18,19 +18,19 @@ import (
 
 // AutomationActionModel represents the data model for an automation action
 type AutomationActionModel struct {
-	ID             types.String  `tfsdk:"id"`
-	Name           types.String  `tfsdk:"name"`
-	Description    types.String  `tfsdk:"description"`
-	Tags           types.List    `tfsdk:"tags"`
-	Script         *ScriptModel  `tfsdk:"script"`
-	Http           *HttpModel    `tfsdk:"http"`
-	Manual         *ManualModel  `tfsdk:"manual"`
-	Jira           *JiraModel    `tfsdk:"jira"`
-	GitHub         *GitHubModel  `tfsdk:"github"`
-	DocLink        *DocLinkModel `tfsdk:"doc_link"`
-	GitLab         *GitLabModel  `tfsdk:"gitlab"`
-	Ansible        *AnsibleModel `tfsdk:"ansible"`
-	InputParameter types.List    `tfsdk:"input_parameter"`
+	ID             types.String     `tfsdk:"id"`
+	Name           types.String     `tfsdk:"name"`
+	Description    types.String     `tfsdk:"description"`
+	Tags           types.List       `tfsdk:"tags"`
+	Script         *ScriptModel     `tfsdk:"script"`
+	Http           *HttpModel       `tfsdk:"http"`
+	Manual         *ManualModel     `tfsdk:"manual"`
+	Jira           *JiraModel       `tfsdk:"jira"`
+	GitHub         *GitHubModel     `tfsdk:"github"`
+	DocLink        *DocLinkModel    `tfsdk:"doc_link"`
+	GitLab         *GitLabModel     `tfsdk:"gitlab"`
+	Ansible        *AnsibleModel    `tfsdk:"ansible"`
+	InputParameter []ParameterModel `tfsdk:"input_parameter"`
 }
 
 type AnsibleModel struct {
@@ -200,84 +200,37 @@ func MapTagsFromState(ctx context.Context, tagsList types.List) (interface{}, di
 }
 
 // MapInputParametersToState maps input parameters from API to Terraform state
-func MapInputParametersToState(ctx context.Context, parameters []restapi.Parameter) (types.List, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	elements := make([]attr.Value, len(parameters))
-	for i, param := range parameters {
-		paramObj := map[string]attr.Value{
-			AutomationActionParameterFieldName:        types.StringValue(param.Name),
-			AutomationActionParameterFieldDescription: types.StringValue(param.Description),
-			AutomationActionParameterFieldLabel:       types.StringValue(param.Label),
-			AutomationActionParameterFieldRequired:    types.BoolValue(param.Required),
-			AutomationActionParameterFieldHidden:      types.BoolValue(param.Hidden),
-			AutomationActionParameterFieldType:        types.StringValue(param.Type),
-			AutomationActionParameterFieldValue:       types.StringValue(param.Value),
-		}
-
-		objValue, d := types.ObjectValue(
-			map[string]attr.Type{
-				AutomationActionParameterFieldName:        types.StringType,
-				AutomationActionParameterFieldDescription: types.StringType,
-				AutomationActionParameterFieldLabel:       types.StringType,
-				AutomationActionParameterFieldRequired:    types.BoolType,
-				AutomationActionParameterFieldHidden:      types.BoolType,
-				AutomationActionParameterFieldType:        types.StringType,
-				AutomationActionParameterFieldValue:       types.StringType,
-			},
-			paramObj,
-		)
-		diags.Append(d...)
-		if diags.HasError() {
-			return types.ListNull(types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					AutomationActionParameterFieldName:        types.StringType,
-					AutomationActionParameterFieldDescription: types.StringType,
-					AutomationActionParameterFieldLabel:       types.StringType,
-					AutomationActionParameterFieldRequired:    types.BoolType,
-					AutomationActionParameterFieldHidden:      types.BoolType,
-					AutomationActionParameterFieldType:        types.StringType,
-					AutomationActionParameterFieldValue:       types.StringType,
-				},
-			}), diags
-		}
-
-		elements[i] = objValue
+func MapInputParametersToState(ctx context.Context, parameters []restapi.Parameter) []ParameterModel {
+	if len(parameters) == 0 {
+		return nil
 	}
 
-	return types.ListValueMust(
-		types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				AutomationActionParameterFieldName:        types.StringType,
-				AutomationActionParameterFieldDescription: types.StringType,
-				AutomationActionParameterFieldLabel:       types.StringType,
-				AutomationActionParameterFieldRequired:    types.BoolType,
-				AutomationActionParameterFieldHidden:      types.BoolType,
-				AutomationActionParameterFieldType:        types.StringType,
-				AutomationActionParameterFieldValue:       types.StringType,
-			},
-		},
-		elements,
-	), diags
+	models := make([]ParameterModel, len(parameters))
+	for i, param := range parameters {
+		models[i] = ParameterModel{
+			Name:        types.StringValue(param.Name),
+			Description: types.StringValue(param.Description),
+			Label:       types.StringValue(param.Label),
+			Required:    types.BoolValue(param.Required),
+			Hidden:      types.BoolValue(param.Hidden),
+			Type:        types.StringValue(param.Type),
+			Value:       types.StringValue(param.Value),
+		}
+	}
+
+	return models
 }
 
 // MapInputParametersFromState maps input parameters from Terraform state to API
 func MapInputParametersFromState(ctx context.Context, model AutomationActionModel) ([]restapi.Parameter, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	var parameters []restapi.Parameter
 
-	if model.InputParameter.IsNull() {
-		return parameters, diags
-	}
-
-	var parameterModels []ParameterModel
-	diags.Append(model.InputParameter.ElementsAs(ctx, &parameterModels, false)...)
-	if diags.HasError() {
+	if len(model.InputParameter) == 0 {
 		return nil, diags
 	}
 
-	parameters = make([]restapi.Parameter, len(parameterModels))
-	for i, param := range parameterModels {
+	parameters := make([]restapi.Parameter, len(model.InputParameter))
+	for i, param := range model.InputParameter {
 		parameters[i] = restapi.Parameter{
 			Name:        param.Name.ValueString(),
 			Description: param.Description.ValueString(),

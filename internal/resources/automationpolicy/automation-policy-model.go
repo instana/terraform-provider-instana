@@ -17,11 +17,11 @@ type AutomationPolicyModel struct {
 
 // TriggerModel represents a trigger in the automation policy
 type TriggerModel struct {
-	ID          types.String `tfsdk:"id"`
-	Type        types.String `tfsdk:"type"`
-	Name        types.String `tfsdk:"name"`
-	Description types.String `tfsdk:"description"`
-	Scheduling  types.Object `tfsdk:"scheduling"`
+	ID          types.String     `tfsdk:"id"`
+	Type        types.String     `tfsdk:"type"`
+	Name        types.String     `tfsdk:"name"`
+	Description types.String     `tfsdk:"description"`
+	Scheduling  *SchedulingModel `tfsdk:"scheduling"`
 }
 
 // SchedulingModel represents the scheduling configuration for automation policy trigger

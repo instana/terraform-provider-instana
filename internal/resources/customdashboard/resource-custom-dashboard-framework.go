@@ -10,7 +10,6 @@ import (
 	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/gessnerfl/terraform-provider-instana/utils"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -125,11 +124,7 @@ func (r *customDashboardResourceFramework) UpdateState(ctx context.Context, stat
 		model.Widgets = types.StringValue(util.NormalizeJSONString(string(widgetsBytes)))
 
 		// Map access rules
-		accessRules, d := r.mapAccessRulesToState(ctx, dashboard.AccessRules)
-		diags.Append(d...)
-		if !diags.HasError() {
-			model.AccessRules = accessRules
-		}
+		model.AccessRules = r.mapAccessRulesToState(ctx, dashboard.AccessRules)
 	}
 
 	// Set the entire model to state
@@ -137,45 +132,21 @@ func (r *customDashboardResourceFramework) UpdateState(ctx context.Context, stat
 	return diags
 }
 
-func (r *customDashboardResourceFramework) mapAccessRulesToState(ctx context.Context, accessRules []restapi.AccessRule) (types.List, diag.Diagnostics) {
-	var diags diag.Diagnostics
-	elements := make([]attr.Value, len(accessRules))
-
-	for i, rule := range accessRules {
-		ruleObj := map[string]attr.Value{
-			CustomDashboardFieldAccessRuleAccessType:   types.StringValue(string(rule.AccessType)),
-			CustomDashboardFieldAccessRuleRelationType: types.StringValue(string(rule.RelationType)),
-		}
-
-		// Handle related ID
-		ruleObj[CustomDashboardFieldAccessRuleRelatedID] = util.SetStringPointerToState(rule.RelatedID)
-
-		objValue, d := types.ObjectValue(
-			map[string]attr.Type{
-				CustomDashboardFieldAccessRuleAccessType:   types.StringType,
-				CustomDashboardFieldAccessRuleRelatedID:    types.StringType,
-				CustomDashboardFieldAccessRuleRelationType: types.StringType,
-			},
-			ruleObj,
-		)
-		diags.Append(d...)
-		if diags.HasError() {
-			return types.ListNull(types.ObjectType{}), diags
-		}
-
-		elements[i] = objValue
+func (r *customDashboardResourceFramework) mapAccessRulesToState(ctx context.Context, accessRules []restapi.AccessRule) []AccessRuleModel {
+	if len(accessRules) == 0 {
+		return nil
 	}
 
-	return types.ListValueMust(
-		types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				CustomDashboardFieldAccessRuleAccessType:   types.StringType,
-				CustomDashboardFieldAccessRuleRelatedID:    types.StringType,
-				CustomDashboardFieldAccessRuleRelationType: types.StringType,
-			},
-		},
-		elements,
-	), diags
+	models := make([]AccessRuleModel, len(accessRules))
+	for i, rule := range accessRules {
+		models[i] = AccessRuleModel{
+			AccessType:   types.StringValue(string(rule.AccessType)),
+			RelationType: types.StringValue(string(rule.RelationType)),
+			RelatedID:    util.SetStringPointerToState(rule.RelatedID),
+		}
+	}
+
+	return models
 }
 
 func (r *customDashboardResourceFramework) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.CustomDashboard, diag.Diagnostics) {
@@ -200,11 +171,7 @@ func (r *customDashboardResourceFramework) MapStateToDataObject(ctx context.Cont
 	}
 
 	// Map access rules
-	accessRules, d := r.mapAccessRulesFromState(ctx, model.AccessRules)
-	diags.Append(d...)
-	if diags.HasError() {
-		return nil, diags
-	}
+	accessRules := r.mapAccessRulesFromState(ctx, model.AccessRules)
 
 	// Map widgets - normalize the JSON
 	var widgets json.RawMessage
@@ -221,21 +188,12 @@ func (r *customDashboardResourceFramework) MapStateToDataObject(ctx context.Cont
 	}, diags
 }
 
-func (r *customDashboardResourceFramework) mapAccessRulesFromState(ctx context.Context, accessRulesList types.List) ([]restapi.AccessRule, diag.Diagnostics) {
-	var diags diag.Diagnostics
-	var accessRules []restapi.AccessRule
-
-	if accessRulesList.IsNull() {
-		return accessRules, diags
+func (r *customDashboardResourceFramework) mapAccessRulesFromState(ctx context.Context, accessRuleModels []AccessRuleModel) []restapi.AccessRule {
+	if len(accessRuleModels) == 0 {
+		return nil
 	}
 
-	var accessRuleModels []AccessRuleModel
-	diags.Append(accessRulesList.ElementsAs(ctx, &accessRuleModels, false)...)
-	if diags.HasError() {
-		return accessRules, diags
-	}
-
-	accessRules = make([]restapi.AccessRule, len(accessRuleModels))
+	accessRules := make([]restapi.AccessRule, len(accessRuleModels))
 	for i, ruleModel := range accessRuleModels {
 		rule := restapi.AccessRule{
 			AccessType:   restapi.AccessType(ruleModel.AccessType.ValueString()),
@@ -251,5 +209,5 @@ func (r *customDashboardResourceFramework) mapAccessRulesFromState(ctx context.C
 		accessRules[i] = rule
 	}
 
-	return accessRules, diags
+	return accessRules
 }
