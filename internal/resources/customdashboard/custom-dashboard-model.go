@@ -4,10 +4,10 @@ import "github.com/hashicorp/terraform-plugin-framework/types"
 
 // CustomDashboardModel represents the data model for the custom dashboard resource
 type CustomDashboardModel struct {
-	ID          types.String `tfsdk:"id"`
-	Title       types.String `tfsdk:"title"`
-	AccessRules types.List   `tfsdk:"access_rule"`
-	Widgets     types.String `tfsdk:"widgets"`
+	ID          types.String      `tfsdk:"id"`
+	Title       types.String      `tfsdk:"title"`
+	AccessRules []AccessRuleModel `tfsdk:"access_rule"`
+	Widgets     types.String      `tfsdk:"widgets"`
 }
 
 // AccessRuleModel represents an access rule in the custom dashboard

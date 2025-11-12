@@ -16,7 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 // NewAutomationPolicyResourceHandleFramework creates the resource handle for Automation Policies
@@ -265,10 +264,10 @@ func (r *automationPolicyResourceFramework) mapTriggerToState(trigger *restapi.T
 
 	// Map scheduling from API response if not already set in the model
 	// The scheduling field is preserved from the plan in UpdateState function
-	if triggerModel.Scheduling.IsNull() || triggerModel.Scheduling.IsUnknown() {
+	if triggerModel.Scheduling == nil {
 		if trigger.Scheduling.StartTime != 0 {
 			// Handle duration_unit - set to null if empty
-			var durationUnit attr.Value
+			var durationUnit types.String
 			if trigger.Scheduling.DurationUnit != "" {
 				durationUnit = types.StringValue(string(trigger.Scheduling.DurationUnit))
 			} else {
@@ -276,42 +275,22 @@ func (r *automationPolicyResourceFramework) mapTriggerToState(trigger *restapi.T
 			}
 
 			// Handle recurrent_rule - set to null if empty
-			var recurrentRule attr.Value
+			var recurrentRule types.String
 			if trigger.Scheduling.RecurrentRule != "" {
 				recurrentRule = types.StringValue(trigger.Scheduling.RecurrentRule)
 			} else {
 				recurrentRule = types.StringNull()
 			}
 
-			schedulingObj := map[string]attr.Value{
-				"start_time":     types.Int64Value(trigger.Scheduling.StartTime),
-				"duration":       types.Int64Value(int64(trigger.Scheduling.Duration)),
-				"duration_unit":  durationUnit,
-				"recurrent_rule": recurrentRule,
-				"recurrent":      types.BoolValue(trigger.Scheduling.Recurrent),
+			triggerModel.Scheduling = &SchedulingModel{
+				StartTime:     types.Int64Value(trigger.Scheduling.StartTime),
+				Duration:      types.Int64Value(int64(trigger.Scheduling.Duration)),
+				DurationUnit:  durationUnit,
+				RecurrentRule: recurrentRule,
+				Recurrent:     types.BoolValue(trigger.Scheduling.Recurrent),
 			}
-
-			schedulingType := map[string]attr.Type{
-				"start_time":     types.Int64Type,
-				"duration":       types.Int64Type,
-				"duration_unit":  types.StringType,
-				"recurrent_rule": types.StringType,
-				"recurrent":      types.BoolType,
-			}
-
-			schedulingValue, _ := types.ObjectValue(schedulingType, schedulingObj)
-			triggerModel.Scheduling = schedulingValue
-		} else {
-			// Set to null if no scheduling data from API
-			schedulingType := map[string]attr.Type{
-				"start_time":     types.Int64Type,
-				"duration":       types.Int64Type,
-				"duration_unit":  types.StringType,
-				"recurrent_rule": types.StringType,
-				"recurrent":      types.BoolType,
-			}
-			triggerModel.Scheduling = types.ObjectNull(schedulingType)
 		}
+		// If no scheduling data from API, leave it as nil
 	}
 
 	return triggerModel
@@ -348,7 +327,7 @@ func (r *automationPolicyResourceFramework) mapActionsToState(ctx context.Contex
 	for i, actionPolicy := range runnable.RunConfiguration.Actions {
 		// Map the full automation action from the nested Action field
 		tags, _ := shared.MapTagsToState(ctx, actionPolicy.Action.Tags)
-		inputParams, _ := shared.MapInputParametersToState(ctx, actionPolicy.Action.InputParameters)
+		inputParams := shared.MapInputParametersToState(ctx, actionPolicy.Action.InputParameters)
 
 		actionModel := shared.AutomationActionModel{
 			ID:             types.StringValue(actionPolicy.Action.ID),
@@ -373,30 +352,6 @@ func (r *automationPolicyResourceFramework) mapActionsToState(ctx context.Contex
 	}
 
 	return result
-}
-
-func (r *automationPolicyResourceFramework) mapInputParametersToStateMap(ctx context.Context, inputParams []restapi.Parameter) types.Map {
-	if len(inputParams) == 0 {
-		return types.MapNull(types.StringType)
-	}
-
-	elements := make(map[string]attr.Value)
-	for _, param := range inputParams {
-		elements[param.Name] = types.StringValue(param.Value)
-	}
-
-	return types.MapValueMust(types.StringType, elements)
-}
-
-func (r *automationPolicyResourceFramework) mapInputParametersToState(ctx context.Context, inputParams []restapi.InputParameterValue) (types.Map, diag.Diagnostics) {
-	var diags diag.Diagnostics
-	elements := make(map[string]attr.Value)
-
-	for _, param := range inputParams {
-		elements[param.Name] = types.StringValue(param.Value)
-	}
-
-	return types.MapValueMust(types.StringType, elements), diags
 }
 
 func (r *automationPolicyResourceFramework) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.AutomationPolicy, diag.Diagnostics) {
@@ -469,12 +424,8 @@ func (r *automationPolicyResourceFramework) mapTriggerFromState(ctx context.Cont
 	}
 
 	// Map scheduling if present
-	if !triggerModel.Scheduling.IsNull() && !triggerModel.Scheduling.IsUnknown() {
-		var schedulingModel SchedulingModel
-		diags.Append(triggerModel.Scheduling.As(ctx, &schedulingModel, basetypes.ObjectAsOptions{})...)
-		if diags.HasError() {
-			return trigger, diags
-		}
+	if triggerModel.Scheduling != nil {
+		schedulingModel := triggerModel.Scheduling
 
 		// Only set scheduling if at least start_time is provided
 		if !schedulingModel.StartTime.IsNull() && !schedulingModel.StartTime.IsUnknown() {
@@ -607,31 +558,6 @@ func (r *automationPolicyResourceFramework) mapRunnableFromState(ctx context.Con
 
 	runnable.RunConfiguration.Actions = actions
 	return runnable, diags
-}
-
-func (r *automationPolicyResourceFramework) mapInputParametersFromState(ctx context.Context, inputParamsMap types.Map) ([]restapi.InputParameterValue, diag.Diagnostics) {
-	var diags diag.Diagnostics
-	var inputParams []restapi.InputParameterValue
-
-	if inputParamsMap.IsNull() {
-		return inputParams, diags
-	}
-
-	elements := make(map[string]string)
-	diags.Append(inputParamsMap.ElementsAs(ctx, &elements, false)...)
-	if diags.HasError() {
-		return inputParams, diags
-	}
-
-	inputParams = make([]restapi.InputParameterValue, 0, len(elements))
-	for name, value := range elements {
-		inputParams = append(inputParams, restapi.InputParameterValue{
-			Name:  name,
-			Value: value,
-		})
-	}
-
-	return inputParams, diags
 }
 
 func (r *automationPolicyResourceFramework) mapTagsFromState(ctx context.Context, tagsList types.List) (interface{}, diag.Diagnostics) {
