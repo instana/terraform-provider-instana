@@ -36,6 +36,12 @@ type ApplicationModel struct {
 
 // ApplicationThresholdModel represents a threshold in the application alert config
 type ApplicationThresholdModel struct {
+	Warning  *ThresholdLevelModel `tfsdk:"warning"`
+	Critical *ThresholdLevelModel `tfsdk:"critical"`
+}
+
+// ThresholdLevelModel represents a threshold level (warning or critical) configuration
+type ThresholdLevelModel struct {
 	Static           *shared.StaticTypeModel       `tfsdk:"static"`
 	AdaptiveBaseline *shared.AdaptiveBaselineModel `tfsdk:"adaptive_baseline"`
 }
