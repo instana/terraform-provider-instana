@@ -7,20 +7,20 @@ import (
 
 // WebsiteAlertConfigModel represents the data model for the Website Alert Config resource
 type WebsiteAlertConfigModel struct {
-	ID                  types.String               `tfsdk:"id"`
-	Name                types.String               `tfsdk:"name"`
-	Description         types.String               `tfsdk:"description"`
-	Severity            types.String               `tfsdk:"severity"`
-	Triggering          types.Bool                 `tfsdk:"triggering"`
-	WebsiteID           types.String               `tfsdk:"website_id"`
-	TagFilter           types.String               `tfsdk:"tag_filter"`
-	AlertChannelIDs     types.Set                  `tfsdk:"alert_channel_ids"`
-	Granularity         types.Int64                `tfsdk:"granularity"`
-	CustomPayloadFields types.List                 `tfsdk:"custom_payload_fields"`
-	Rule                *WebsiteAlertRuleModel     `tfsdk:"rule"`
-	Threshold           *WebsiteThresholdModel     `tfsdk:"threshold"`
-	TimeThreshold       *WebsiteTimeThresholdModel `tfsdk:"time_threshold"`
-	Rules               types.List                 `tfsdk:"rules"`
+	ID                  types.String                   `tfsdk:"id"`
+	Name                types.String                   `tfsdk:"name"`
+	Description         types.String                   `tfsdk:"description"`
+	Severity            types.String                   `tfsdk:"severity"`
+	Triggering          types.Bool                     `tfsdk:"triggering"`
+	WebsiteID           types.String                   `tfsdk:"website_id"`
+	TagFilter           types.String                   `tfsdk:"tag_filter"`
+	AlertChannelIDs     []string                       `tfsdk:"alert_channel_ids"`
+	Granularity         types.Int64                    `tfsdk:"granularity"`
+	CustomPayloadFields []CustomPayloadFieldModel      `tfsdk:"custom_payload_fields"`
+	Rule                *WebsiteAlertRuleModel         `tfsdk:"rule"`
+	Threshold           *WebsiteThresholdModel         `tfsdk:"threshold"`
+	TimeThreshold       *WebsiteTimeThresholdModel     `tfsdk:"time_threshold"`
+	Rules               []RuleWithThresholdPluginModel `tfsdk:"rules"`
 }
 
 type RuleWithThresholdPluginModel struct {
