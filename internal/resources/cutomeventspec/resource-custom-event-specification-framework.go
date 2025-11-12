@@ -9,7 +9,6 @@ import (
 	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
 	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
@@ -19,7 +18,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 // NewCustomEventSpecificationResourceHandleFramework creates the resource handle for Custom Event Specification
@@ -421,328 +419,31 @@ func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Cont
 
 					// Handle metric pattern if present
 					if rule.MetricPattern != nil {
-						metricPatternModel := MetricPatternModel{
-							Prefix:   types.StringValue(rule.MetricPattern.Prefix),
-							Operator: types.StringValue(rule.MetricPattern.Operator),
+						tr.MetricPattern = &MetricPatternModel{
+							Prefix:      types.StringValue(rule.MetricPattern.Prefix),
+							Operator:    types.StringValue(rule.MetricPattern.Operator),
+							Postfix:     util.SetStringPointerToState(rule.MetricPattern.Postfix),
+							Placeholder: util.SetStringPointerToState(rule.MetricPattern.Placeholder),
 						}
-
-						metricPatternModel.Postfix = util.SetStringPointerToState(rule.MetricPattern.Postfix)
-
-						metricPatternModel.Placeholder = util.SetStringPointerToState(rule.MetricPattern.Placeholder)
-
-						// Create a single object for metric pattern
-						metricPatternObj, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
-							"prefix":      types.StringType,
-							"postfix":     types.StringType,
-							"placeholder": types.StringType,
-							"operator":    types.StringType,
-						}, metricPatternModel)
-
-						if diags.HasError() {
-							return diags
-						}
-
-						tr.MetricPattern = metricPatternObj
-					} else {
-						// Null object for metric pattern
-						tr.MetricPattern = types.ObjectNull(map[string]attr.Type{
-							"prefix":      types.StringType,
-							"postfix":     types.StringType,
-							"placeholder": types.StringType,
-							"operator":    types.StringType,
-						})
 					}
+					// If nil, leave tr.MetricPattern as nil
 
 					thresholdRule = &tr
 				}
 			}
 		}
 
-		// Create objects for each rule type
-		var entityCountObj types.Object
-		if entityCountRule != nil {
-			entityCountObj, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-				"severity":           types.StringType,
-				"condition_operator": types.StringType,
-				"condition_value":    types.Float64Type,
-			}, entityCountRule)
-			if diags.HasError() {
-				return diags
-			}
-		} else {
-			entityCountObj = types.ObjectNull(map[string]attr.Type{
-				"severity":           types.StringType,
-				"condition_operator": types.StringType,
-				"condition_value":    types.Float64Type,
-			})
+		// Create the rules model with pointer fields
+		model.Rules = &RulesModel{
+			EntityCount:             entityCountRule,
+			EntityCountVerification: entityCountVerificationRule,
+			EntityVerification:      entityVerificationRule,
+			HostAvailability:        hostAvailabilityRule,
+			System:                  systemRule,
+			Threshold:               thresholdRule,
 		}
-
-		var entityCountVerificationObj types.Object
-		if entityCountVerificationRule != nil {
-			entityCountVerificationObj, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-				"severity":              types.StringType,
-				"condition_operator":    types.StringType,
-				"condition_value":       types.Float64Type,
-				"matching_entity_type":  types.StringType,
-				"matching_operator":     types.StringType,
-				"matching_entity_label": types.StringType,
-			}, entityCountVerificationRule)
-			if diags.HasError() {
-				return diags
-			}
-		} else {
-			entityCountVerificationObj = types.ObjectNull(map[string]attr.Type{
-				"severity":              types.StringType,
-				"condition_operator":    types.StringType,
-				"condition_value":       types.Float64Type,
-				"matching_entity_type":  types.StringType,
-				"matching_operator":     types.StringType,
-				"matching_entity_label": types.StringType,
-			})
-		}
-
-		var entityVerificationObj types.Object
-		if entityVerificationRule != nil {
-			entityVerificationObj, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-				"severity":              types.StringType,
-				"matching_entity_type":  types.StringType,
-				"matching_operator":     types.StringType,
-				"matching_entity_label": types.StringType,
-				"offline_duration":      types.Int64Type,
-			}, entityVerificationRule)
-			if diags.HasError() {
-				return diags
-			}
-		} else {
-			entityVerificationObj = types.ObjectNull(map[string]attr.Type{
-				"severity":              types.StringType,
-				"matching_entity_type":  types.StringType,
-				"matching_operator":     types.StringType,
-				"matching_entity_label": types.StringType,
-				"offline_duration":      types.Int64Type,
-			})
-		}
-
-		var hostAvailabilityObj types.Object
-		if hostAvailabilityRule != nil {
-			hostAvailabilityObj, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-				"severity":         types.StringType,
-				"offline_duration": types.Int64Type,
-				"close_after":      types.Int64Type,
-				"tag_filter":       types.StringType,
-			}, hostAvailabilityRule)
-			if diags.HasError() {
-				return diags
-			}
-		} else {
-			hostAvailabilityObj = types.ObjectNull(map[string]attr.Type{
-				"severity":         types.StringType,
-				"offline_duration": types.Int64Type,
-				"close_after":      types.Int64Type,
-				"tag_filter":       types.StringType,
-			})
-		}
-
-		var systemObj types.Object
-		if systemRule != nil {
-			systemObj, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-				"severity":       types.StringType,
-				"system_rule_id": types.StringType,
-			}, systemRule)
-			if diags.HasError() {
-				return diags
-			}
-		} else {
-			systemObj = types.ObjectNull(map[string]attr.Type{
-				"severity":       types.StringType,
-				"system_rule_id": types.StringType,
-			})
-		}
-
-		var thresholdObj types.Object
-		if thresholdRule != nil {
-			thresholdObj, diags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-				"severity":    types.StringType,
-				"metric_name": types.StringType,
-				"metric_pattern": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"prefix":      types.StringType,
-						"postfix":     types.StringType,
-						"placeholder": types.StringType,
-						"operator":    types.StringType,
-					},
-				},
-				"rollup":             types.Int64Type,
-				"window":             types.Int64Type,
-				"aggregation":        types.StringType,
-				"condition_operator": types.StringType,
-				"condition_value":    types.Float64Type,
-			}, thresholdRule)
-			if diags.HasError() {
-				return diags
-			}
-		} else {
-			thresholdObj = types.ObjectNull(map[string]attr.Type{
-				"severity":    types.StringType,
-				"metric_name": types.StringType,
-				"metric_pattern": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"prefix":      types.StringType,
-						"postfix":     types.StringType,
-						"placeholder": types.StringType,
-						"operator":    types.StringType,
-					},
-				},
-				"rollup":             types.Int64Type,
-				"window":             types.Int64Type,
-				"aggregation":        types.StringType,
-				"condition_operator": types.StringType,
-				"condition_value":    types.Float64Type,
-			})
-		}
-
-		// Create the rules model
-		rulesModel := RulesModel{
-			EntityCount:             entityCountObj,
-			EntityCountVerification: entityCountVerificationObj,
-			EntityVerification:      entityVerificationObj,
-			HostAvailability:        hostAvailabilityObj,
-			System:                  systemObj,
-			Threshold:               thresholdObj,
-		}
-
-		// Convert the rules model to an object
-		rulesObj, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
-			"entity_count": types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"severity":           types.StringType,
-					"condition_operator": types.StringType,
-					"condition_value":    types.Float64Type,
-				},
-			},
-			"entity_count_verification": types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"severity":              types.StringType,
-					"condition_operator":    types.StringType,
-					"condition_value":       types.Float64Type,
-					"matching_entity_type":  types.StringType,
-					"matching_operator":     types.StringType,
-					"matching_entity_label": types.StringType,
-				},
-			},
-			"entity_verification": types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"severity":              types.StringType,
-					"matching_entity_type":  types.StringType,
-					"matching_operator":     types.StringType,
-					"matching_entity_label": types.StringType,
-					"offline_duration":      types.Int64Type,
-				},
-			},
-			"host_availability": types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"severity":         types.StringType,
-					"offline_duration": types.Int64Type,
-					"close_after":      types.Int64Type,
-					"tag_filter":       types.StringType,
-				},
-			},
-			"system": types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"severity":       types.StringType,
-					"system_rule_id": types.StringType,
-				},
-			},
-			"threshold": types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"severity":    types.StringType,
-					"metric_name": types.StringType,
-					"metric_pattern": types.ObjectType{
-						AttrTypes: map[string]attr.Type{
-							"prefix":      types.StringType,
-							"postfix":     types.StringType,
-							"placeholder": types.StringType,
-							"operator":    types.StringType,
-						},
-					},
-					"rollup":             types.Int64Type,
-					"window":             types.Int64Type,
-					"aggregation":        types.StringType,
-					"condition_operator": types.StringType,
-					"condition_value":    types.Float64Type,
-				},
-			},
-		}, rulesModel)
-		if diags.HasError() {
-			return diags
-		}
-
-		// Set the rules in the model
-		model.Rules = rulesObj
-	} else {
-		// No rules
-		model.Rules = types.ObjectNull(map[string]attr.Type{
-			"entity_count": types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"severity":           types.StringType,
-					"condition_operator": types.StringType,
-					"condition_value":    types.Float64Type,
-				},
-			},
-			"entity_count_verification": types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"severity":              types.StringType,
-					"condition_operator":    types.StringType,
-					"condition_value":       types.Float64Type,
-					"matching_entity_type":  types.StringType,
-					"matching_operator":     types.StringType,
-					"matching_entity_label": types.StringType,
-				},
-			},
-			"entity_verification": types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"severity":              types.StringType,
-					"matching_entity_type":  types.StringType,
-					"matching_operator":     types.StringType,
-					"matching_entity_label": types.StringType,
-					"offline_duration":      types.Int64Type,
-				},
-			},
-			"host_availability": types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"severity":         types.StringType,
-					"offline_duration": types.Int64Type,
-					"close_after":      types.Int64Type,
-					"tag_filter":       types.StringType,
-				},
-			},
-			"system": types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"severity":       types.StringType,
-					"system_rule_id": types.StringType,
-				},
-			},
-			"threshold": types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"severity":    types.StringType,
-					"metric_name": types.StringType,
-					"metric_pattern": types.ObjectType{
-						AttrTypes: map[string]attr.Type{
-							"prefix":      types.StringType,
-							"postfix":     types.StringType,
-							"placeholder": types.StringType,
-							"operator":    types.StringType,
-						},
-					},
-					"rollup":             types.Int64Type,
-					"window":             types.Int64Type,
-					"aggregation":        types.StringType,
-					"condition_operator": types.StringType,
-					"condition_value":    types.Float64Type,
-				},
-			},
-		})
 	}
+	// If no rules, leave model.Rules as nil
 
 	// Set the entire model to state
 	diags = state.Set(ctx, model)
@@ -805,24 +506,12 @@ func (r *customEventSpecificationResourceFramework) MapStateToDataObject(ctx con
 	var rules []restapi.RuleSpecification
 
 	// Check if rules are defined
-	if !model.Rules.IsNull() && !model.Rules.IsUnknown() {
-		var rulesModel RulesModel
-		diags.Append(tfsdk.ValueAs(ctx, model.Rules, &rulesModel)...)
-		if diags.HasError() {
-			return nil, diags
-		}
-
+	if model.Rules != nil {
 		// Process entity count rule
-		if !rulesModel.EntityCount.IsNull() && !rulesModel.EntityCount.IsUnknown() {
-			var entityCountRule EntityCountRuleModel
-			diags.Append(rulesModel.EntityCount.As(ctx, &entityCountRule, basetypes.ObjectAsOptions{})...)
-			if diags.HasError() {
-				return nil, diags
-			}
-
-			severity := mapSeverityToInt(entityCountRule.Severity.ValueString())
-			conditionOperator := entityCountRule.ConditionOperator.ValueString()
-			conditionValue := entityCountRule.ConditionValue.ValueFloat64()
+		if model.Rules.EntityCount != nil {
+			severity := mapSeverityToInt(model.Rules.EntityCount.Severity.ValueString())
+			conditionOperator := model.Rules.EntityCount.ConditionOperator.ValueString()
+			conditionValue := model.Rules.EntityCount.ConditionValue.ValueFloat64()
 
 			rules = append(rules, restapi.RuleSpecification{
 				DType:             restapi.EntityCountRuleType,
@@ -833,19 +522,13 @@ func (r *customEventSpecificationResourceFramework) MapStateToDataObject(ctx con
 		}
 
 		// Process entity count verification rule
-		if !rulesModel.EntityCountVerification.IsNull() && !rulesModel.EntityCountVerification.IsUnknown() {
-			var entityCountVerificationRule EntityCountVerificationRuleModel
-			diags.Append(rulesModel.EntityCountVerification.As(ctx, &entityCountVerificationRule, basetypes.ObjectAsOptions{})...)
-			if diags.HasError() {
-				return nil, diags
-			}
-
-			severity := mapSeverityToInt(entityCountVerificationRule.Severity.ValueString())
-			conditionOperator := entityCountVerificationRule.ConditionOperator.ValueString()
-			conditionValue := entityCountVerificationRule.ConditionValue.ValueFloat64()
-			matchingEntityType := entityCountVerificationRule.MatchingEntityType.ValueString()
-			matchingOperator := entityCountVerificationRule.MatchingOperator.ValueString()
-			matchingEntityLabel := entityCountVerificationRule.MatchingEntityLabel.ValueString()
+		if model.Rules.EntityCountVerification != nil {
+			severity := mapSeverityToInt(model.Rules.EntityCountVerification.Severity.ValueString())
+			conditionOperator := model.Rules.EntityCountVerification.ConditionOperator.ValueString()
+			conditionValue := model.Rules.EntityCountVerification.ConditionValue.ValueFloat64()
+			matchingEntityType := model.Rules.EntityCountVerification.MatchingEntityType.ValueString()
+			matchingOperator := model.Rules.EntityCountVerification.MatchingOperator.ValueString()
+			matchingEntityLabel := model.Rules.EntityCountVerification.MatchingEntityLabel.ValueString()
 
 			rules = append(rules, restapi.RuleSpecification{
 				DType:               restapi.EntityCountVerificationRuleType,
@@ -859,18 +542,12 @@ func (r *customEventSpecificationResourceFramework) MapStateToDataObject(ctx con
 		}
 
 		// Process entity verification rule
-		if !rulesModel.EntityVerification.IsNull() && !rulesModel.EntityVerification.IsUnknown() {
-			var entityVerificationRule EntityVerificationRuleModel
-			diags.Append(rulesModel.EntityVerification.As(ctx, &entityVerificationRule, basetypes.ObjectAsOptions{})...)
-			if diags.HasError() {
-				return nil, diags
-			}
-
-			severity := mapSeverityToInt(entityVerificationRule.Severity.ValueString())
-			matchingEntityType := entityVerificationRule.MatchingEntityType.ValueString()
-			matchingOperator := entityVerificationRule.MatchingOperator.ValueString()
-			matchingEntityLabel := entityVerificationRule.MatchingEntityLabel.ValueString()
-			offlineDuration := int(entityVerificationRule.OfflineDuration.ValueInt64())
+		if model.Rules.EntityVerification != nil {
+			severity := mapSeverityToInt(model.Rules.EntityVerification.Severity.ValueString())
+			matchingEntityType := model.Rules.EntityVerification.MatchingEntityType.ValueString()
+			matchingOperator := model.Rules.EntityVerification.MatchingOperator.ValueString()
+			matchingEntityLabel := model.Rules.EntityVerification.MatchingEntityLabel.ValueString()
+			offlineDuration := int(model.Rules.EntityVerification.OfflineDuration.ValueInt64())
 
 			rules = append(rules, restapi.RuleSpecification{
 				DType:               restapi.EntityVerificationRuleType,
@@ -883,26 +560,20 @@ func (r *customEventSpecificationResourceFramework) MapStateToDataObject(ctx con
 		}
 
 		// Process host availability rule
-		if !rulesModel.HostAvailability.IsNull() && !rulesModel.HostAvailability.IsUnknown() {
-			var hostAvailabilityRule HostAvailabilityRuleModel
-			diags.Append(rulesModel.HostAvailability.As(ctx, &hostAvailabilityRule, basetypes.ObjectAsOptions{})...)
-			if diags.HasError() {
-				return nil, diags
-			}
-
-			severity := mapSeverityToInt(hostAvailabilityRule.Severity.ValueString())
-			offlineDuration := int(hostAvailabilityRule.OfflineDuration.ValueInt64())
+		if model.Rules.HostAvailability != nil {
+			severity := mapSeverityToInt(model.Rules.HostAvailability.Severity.ValueString())
+			offlineDuration := int(model.Rules.HostAvailability.OfflineDuration.ValueInt64())
 
 			var closeAfter *int
-			if !hostAvailabilityRule.CloseAfter.IsNull() {
-				ca := int(hostAvailabilityRule.CloseAfter.ValueInt64())
+			if !model.Rules.HostAvailability.CloseAfter.IsNull() {
+				ca := int(model.Rules.HostAvailability.CloseAfter.ValueInt64())
 				closeAfter = &ca
 			}
 
 			// Parse tag filter if provided
 			var tagFilter *restapi.TagFilter
-			if !hostAvailabilityRule.TagFilter.IsNull() && hostAvailabilityRule.TagFilter.ValueString() != "" {
-				tagFilterStr := hostAvailabilityRule.TagFilter.ValueString()
+			if !model.Rules.HostAvailability.TagFilter.IsNull() && model.Rules.HostAvailability.TagFilter.ValueString() != "" {
+				tagFilterStr := model.Rules.HostAvailability.TagFilter.ValueString()
 				parser := tagfilter.NewParser()
 				expr, err := parser.Parse(tagFilterStr)
 				if err != nil {
@@ -927,15 +598,9 @@ func (r *customEventSpecificationResourceFramework) MapStateToDataObject(ctx con
 		}
 
 		// Process system rule
-		if !rulesModel.System.IsNull() && !rulesModel.System.IsUnknown() {
-			var systemRule SystemRuleModel
-			diags.Append(rulesModel.System.As(ctx, &systemRule, basetypes.ObjectAsOptions{})...)
-			if diags.HasError() {
-				return nil, diags
-			}
-
-			severity := mapSeverityToInt(systemRule.Severity.ValueString())
-			systemRuleID := systemRule.SystemRuleID.ValueString()
+		if model.Rules.System != nil {
+			severity := mapSeverityToInt(model.Rules.System.Severity.ValueString())
+			systemRuleID := model.Rules.System.SystemRuleID.ValueString()
 
 			rules = append(rules, restapi.RuleSpecification{
 				DType:        restapi.SystemRuleType,
@@ -945,44 +610,32 @@ func (r *customEventSpecificationResourceFramework) MapStateToDataObject(ctx con
 		}
 
 		// Process threshold rule
-		if !rulesModel.Threshold.IsNull() && !rulesModel.Threshold.IsUnknown() {
-			var thresholdRule ThresholdRuleModel
-			diags.Append(rulesModel.Threshold.As(ctx, &thresholdRule, basetypes.ObjectAsOptions{})...)
-			if diags.HasError() {
-				return nil, diags
-			}
-
-			severity := mapSeverityToInt(thresholdRule.Severity.ValueString())
-			metricName := thresholdRule.MetricName.ValueString()
-			rollup := int(thresholdRule.Rollup.ValueInt64())
-			window := int(thresholdRule.Window.ValueInt64())
-			aggregation := thresholdRule.Aggregation.ValueString()
-			conditionOperator := thresholdRule.ConditionOperator.ValueString()
-			conditionValue := thresholdRule.ConditionValue.ValueFloat64()
+		if model.Rules.Threshold != nil {
+			severity := mapSeverityToInt(model.Rules.Threshold.Severity.ValueString())
+			metricName := model.Rules.Threshold.MetricName.ValueString()
+			rollup := int(model.Rules.Threshold.Rollup.ValueInt64())
+			window := int(model.Rules.Threshold.Window.ValueInt64())
+			aggregation := model.Rules.Threshold.Aggregation.ValueString()
+			conditionOperator := model.Rules.Threshold.ConditionOperator.ValueString()
+			conditionValue := model.Rules.Threshold.ConditionValue.ValueFloat64()
 
 			var metricPattern *restapi.MetricPattern
-			if !thresholdRule.MetricPattern.IsNull() && !thresholdRule.MetricPattern.IsUnknown() {
-				var mp MetricPatternModel
-				diags.Append(thresholdRule.MetricPattern.As(ctx, &mp, basetypes.ObjectAsOptions{})...)
-				if diags.HasError() {
-					return nil, diags
-				}
-
-				prefix := mp.Prefix.ValueString()
+			if model.Rules.Threshold.MetricPattern != nil {
+				prefix := model.Rules.Threshold.MetricPattern.Prefix.ValueString()
 
 				var postfix *string
-				if !mp.Postfix.IsNull() && mp.Postfix.ValueString() != "" {
-					p := mp.Postfix.ValueString()
+				if !model.Rules.Threshold.MetricPattern.Postfix.IsNull() && model.Rules.Threshold.MetricPattern.Postfix.ValueString() != "" {
+					p := model.Rules.Threshold.MetricPattern.Postfix.ValueString()
 					postfix = &p
 				}
 
 				var placeholder *string
-				if !mp.Placeholder.IsNull() && mp.Placeholder.ValueString() != "" {
-					p := mp.Placeholder.ValueString()
+				if !model.Rules.Threshold.MetricPattern.Placeholder.IsNull() && model.Rules.Threshold.MetricPattern.Placeholder.ValueString() != "" {
+					p := model.Rules.Threshold.MetricPattern.Placeholder.ValueString()
 					placeholder = &p
 				}
 
-				operator := mp.Operator.ValueString()
+				operator := model.Rules.Threshold.MetricPattern.Operator.ValueString()
 
 				metricPattern = &restapi.MetricPattern{
 					Prefix:      prefix,

@@ -13,17 +13,17 @@ type CustomEventSpecificationModel struct {
 	ExpirationTime      types.Int64  `tfsdk:"expiration_time"`
 	Enabled             types.Bool   `tfsdk:"enabled"`
 	RuleLogicalOperator types.String `tfsdk:"rule_logical_operator"`
-	Rules               types.Object `tfsdk:"rules"`
+	Rules               *RulesModel  `tfsdk:"rules"`
 }
 
 // RulesModel represents the rules container in the custom event specification
 type RulesModel struct {
-	EntityCount             types.Object `tfsdk:"entity_count"`
-	EntityCountVerification types.Object `tfsdk:"entity_count_verification"`
-	EntityVerification      types.Object `tfsdk:"entity_verification"`
-	HostAvailability        types.Object `tfsdk:"host_availability"`
-	System                  types.Object `tfsdk:"system"`
-	Threshold               types.Object `tfsdk:"threshold"`
+	EntityCount             *EntityCountRuleModel             `tfsdk:"entity_count"`
+	EntityCountVerification *EntityCountVerificationRuleModel `tfsdk:"entity_count_verification"`
+	EntityVerification      *EntityVerificationRuleModel      `tfsdk:"entity_verification"`
+	HostAvailability        *HostAvailabilityRuleModel        `tfsdk:"host_availability"`
+	System                  *SystemRuleModel                  `tfsdk:"system"`
+	Threshold               *ThresholdRuleModel               `tfsdk:"threshold"`
 }
 
 // EntityCountRuleModel represents an entity count rule
@@ -68,14 +68,14 @@ type SystemRuleModel struct {
 
 // ThresholdRuleModel represents a threshold rule
 type ThresholdRuleModel struct {
-	Severity          types.String  `tfsdk:"severity"`
-	MetricName        types.String  `tfsdk:"metric_name"`
-	MetricPattern     types.Object  `tfsdk:"metric_pattern"`
-	Rollup            types.Int64   `tfsdk:"rollup"`
-	Window            types.Int64   `tfsdk:"window"`
-	Aggregation       types.String  `tfsdk:"aggregation"`
-	ConditionOperator types.String  `tfsdk:"condition_operator"`
-	ConditionValue    types.Float64 `tfsdk:"condition_value"`
+	Severity          types.String        `tfsdk:"severity"`
+	MetricName        types.String        `tfsdk:"metric_name"`
+	MetricPattern     *MetricPatternModel `tfsdk:"metric_pattern"`
+	Rollup            types.Int64         `tfsdk:"rollup"`
+	Window            types.Int64         `tfsdk:"window"`
+	Aggregation       types.String        `tfsdk:"aggregation"`
+	ConditionOperator types.String        `tfsdk:"condition_operator"`
+	ConditionValue    types.Float64       `tfsdk:"condition_value"`
 }
 
 // MetricPatternModel represents a metric pattern in a threshold rule
