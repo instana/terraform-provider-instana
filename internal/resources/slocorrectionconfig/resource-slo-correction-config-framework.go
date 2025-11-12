@@ -7,6 +7,7 @@ import (
 	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -14,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 // NewSloCorrectionConfigResourceHandleFramework creates the resource handle for SLO Correction Config
@@ -126,24 +128,42 @@ func (r *sloCorrectionConfigResourceFramework) MapStateToDataObject(ctx context.
 
 	// Map scheduling
 	var scheduling restapi.Scheduling
-	if model.Scheduling != nil {
-		scheduling = restapi.Scheduling{
-			StartTime:    model.Scheduling.StartTime.ValueInt64(),
-			Duration:     int(model.Scheduling.Duration.ValueInt64()),
-			DurationUnit: restapi.DurationUnit(strings.ToUpper(model.Scheduling.DurationUnit.ValueString())),
-			Recurrent:    model.Scheduling.Recurrent.ValueBool(),
+	if !model.Scheduling.IsNull() && !model.Scheduling.IsUnknown() {
+		var schedulingModel SchedulingModel
+		diags.Append(model.Scheduling.As(ctx, &schedulingModel, basetypes.ObjectAsOptions{})...)
+		if diags.HasError() {
+			return nil, diags
 		}
 
-		if !model.Scheduling.RecurrentRule.IsNull() {
-			scheduling.RecurrentRule = model.Scheduling.RecurrentRule.ValueString()
+		scheduling = restapi.Scheduling{
+			StartTime:    schedulingModel.StartTime.ValueInt64(),
+			Duration:     int(schedulingModel.Duration.ValueInt64()),
+			DurationUnit: restapi.DurationUnit(strings.ToUpper(schedulingModel.DurationUnit.ValueString())),
+			Recurrent:    schedulingModel.Recurrent.ValueBool(),
+		}
+
+		if !schedulingModel.RecurrentRule.IsNull() {
+			scheduling.RecurrentRule = schedulingModel.RecurrentRule.ValueString()
 		}
 	}
 
 	// Map SLO IDs
-	sloIds := model.SloIds
+	var sloIds []string
+	if !model.SloIds.IsNull() {
+		diags.Append(model.SloIds.ElementsAs(ctx, &sloIds, false)...)
+		if diags.HasError() {
+			return nil, diags
+		}
+	}
 
 	// Map tags
-	tags := model.Tags
+	var tags []string
+	if !model.Tags.IsNull() {
+		diags.Append(model.Tags.ElementsAs(ctx, &tags, false)...)
+		if diags.HasError() {
+			return nil, diags
+		}
+	}
 
 	// Create API object
 	sloCorrectionConfig := &restapi.SloCorrectionConfig{
@@ -175,23 +195,48 @@ func (r *sloCorrectionConfigResourceFramework) UpdateState(ctx context.Context, 
 	if apiObject.Scheduling.RecurrentRule != "" {
 		recurrentRuleValue = types.StringValue(apiObject.Scheduling.RecurrentRule)
 	}
-
-	model.Scheduling = &SchedulingModel{
-		StartTime:     types.Int64Value(apiObject.Scheduling.StartTime),
-		Duration:      types.Int64Value(int64(apiObject.Scheduling.Duration)),
-		DurationUnit:  types.StringValue(string(apiObject.Scheduling.DurationUnit)),
-		RecurrentRule: recurrentRuleValue,
-		Recurrent:     types.BoolValue(apiObject.Scheduling.Recurrent),
+	schedulingObj := map[string]attr.Value{
+		"start_time":     types.Int64Value(apiObject.Scheduling.StartTime),
+		"duration":       types.Int64Value(int64(apiObject.Scheduling.Duration)),
+		"duration_unit":  types.StringValue(string(apiObject.Scheduling.DurationUnit)),
+		"recurrent_rule": recurrentRuleValue,
+		"recurrent":      types.BoolValue(apiObject.Scheduling.Recurrent),
 	}
 
+	schedulingType := map[string]attr.Type{
+		"start_time":     types.Int64Type,
+		"duration":       types.Int64Type,
+		"duration_unit":  types.StringType,
+		"recurrent_rule": types.StringType,
+		"recurrent":      types.BoolType,
+	}
+
+	schedulingValue, schedulingDiags := types.ObjectValue(schedulingType, schedulingObj)
+	diags.Append(schedulingDiags...)
+	if diags.HasError() {
+		return diags
+	}
+
+	model.Scheduling = schedulingValue
+
 	// Map SLO IDs
-	model.SloIds = apiObject.SloIds
+	sloIdsSet, sloIdsDiags := types.SetValueFrom(ctx, types.StringType, apiObject.SloIds)
+	diags.Append(sloIdsDiags...)
+	if diags.HasError() {
+		return diags
+	}
+	model.SloIds = sloIdsSet
 
 	// Map tags
 	if len(apiObject.Tags) > 0 {
-		model.Tags = apiObject.Tags
+		tagsSet, tagsDiags := types.SetValueFrom(ctx, types.StringType, apiObject.Tags)
+		diags.Append(tagsDiags...)
+		if diags.HasError() {
+			return diags
+		}
+		model.Tags = tagsSet
 	} else {
-		model.Tags = []string{}
+		model.Tags = types.SetNull(types.StringType)
 	}
 
 	// Set the entire model to state

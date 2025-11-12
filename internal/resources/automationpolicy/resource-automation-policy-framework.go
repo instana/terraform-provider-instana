@@ -8,6 +8,7 @@ import (
 	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
 	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -184,13 +185,13 @@ func (r *automationPolicyResourceFramework) UpdateState(ctx context.Context, sta
 	model.Description = types.StringValue(policy.Description)
 	// Handle tags
 	if policy.Tags != nil {
-		tags, d := r.mapTagsToState(ctx, policy.Tags)
+		tagsList, d := r.mapTagsToState(ctx, policy.Tags)
 		diags.Append(d...)
 		if !diags.HasError() {
-			model.Tags = tags
+			model.Tags = tagsList
 		}
 	} else {
-		model.Tags = []string{}
+		model.Tags = types.ListNull(types.StringType)
 	}
 
 	// Map trigger
@@ -204,35 +205,35 @@ func (r *automationPolicyResourceFramework) UpdateState(ctx context.Context, sta
 	return diags
 }
 
-func (r *automationPolicyResourceFramework) mapTagsToState(ctx context.Context, tags interface{}) ([]string, diag.Diagnostics) {
+func (r *automationPolicyResourceFramework) mapTagsToState(ctx context.Context, tags interface{}) (types.List, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if tags == nil {
-		return []string{}, diags
+		return types.ListNull(types.StringType), diags
 	}
 
 	// Handle tags based on their type
 	switch v := tags.(type) {
 	case []interface{}:
-		result := make([]string, len(v))
+		elements := make([]attr.Value, len(v))
 		for i, tag := range v {
 			if strTag, ok := tag.(string); ok {
-				result[i] = strTag
+				elements[i] = types.StringValue(strTag)
 			} else {
 				diags.AddError(
 					AutomationPolicyErrMappingTags,
 					fmt.Sprintf(AutomationPolicyErrTagNotString, i),
 				)
-				return []string{}, diags
+				return types.ListNull(types.StringType), diags
 			}
 		}
-		return result, diags
+		return types.ListValueMust(types.StringType, elements), diags
 	default:
 		diags.AddError(
 			AutomationPolicyErrMappingTags,
 			AutomationPolicyErrTagsFormat,
 		)
-		return []string{}, diags
+		return types.ListNull(types.StringType), diags
 	}
 }
 
@@ -559,10 +560,16 @@ func (r *automationPolicyResourceFramework) mapRunnableFromState(ctx context.Con
 	return runnable, diags
 }
 
-func (r *automationPolicyResourceFramework) mapTagsFromState(ctx context.Context, tags []string) (interface{}, diag.Diagnostics) {
+func (r *automationPolicyResourceFramework) mapTagsFromState(ctx context.Context, tagsList types.List) (interface{}, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	if tags == nil || len(tags) == 0 {
+	if tagsList.IsNull() {
+		return nil, diags
+	}
+
+	var tags []string
+	diags.Append(tagsList.ElementsAs(ctx, &tags, false)...)
+	if diags.HasError() {
 		return nil, diags
 	}
 

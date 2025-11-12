@@ -6,10 +6,10 @@ import "github.com/hashicorp/terraform-plugin-framework/types"
 type AlertingConfigModel struct {
 	ID                    types.String `tfsdk:"id"`
 	AlertName             types.String `tfsdk:"alert_name"`
-	IntegrationIDs        []string     `tfsdk:"integration_ids"`
+	IntegrationIDs        types.Set    `tfsdk:"integration_ids"`
 	EventFilterQuery      types.String `tfsdk:"event_filter_query"`
-	EventFilterEventTypes []string     `tfsdk:"event_filter_event_types"`
-	EventFilterRuleIDs    []string     `tfsdk:"event_filter_rule_ids"`
+	EventFilterEventTypes types.Set    `tfsdk:"event_filter_event_types"`
+	EventFilterRuleIDs    types.Set    `tfsdk:"event_filter_rule_ids"`
 	CustomPayloadFields   types.List   `tfsdk:"custom_payload_field"`
 }
 

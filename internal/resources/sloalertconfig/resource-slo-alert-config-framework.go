@@ -10,6 +10,7 @@ import (
 	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -17,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 // NewSloAlertConfigResourceHandleFramework creates the resource handle for SLO Alert configuration
@@ -204,42 +206,107 @@ func (r *sloAlertConfigResourceFramework) UpdateState(ctx context.Context, state
 			thresholdType = "staticThreshold"
 		}
 
-		model.Threshold = &SloAlertThresholdModel{
+		thresholdModel := SloAlertThresholdModel{
 			Type:     types.StringValue(thresholdType),
 			Operator: types.StringValue(sloAlertConfig.Threshold.Operator),
 			Value:    types.Float64Value(sloAlertConfig.Threshold.Value),
 		}
+
+		thresholdObj, objDiags := types.ObjectValueFrom(ctx, map[string]attr.Type{
+			"type":     types.StringType,
+			"operator": types.StringType,
+			"value":    types.Float64Type,
+		}, thresholdModel)
+		if objDiags.HasError() {
+			diags.Append(objDiags...)
+			return diags
+		}
+
+		model.Threshold = thresholdObj
 	} else {
-		model.Threshold = nil
+		model.Threshold = types.ObjectNull(map[string]attr.Type{
+			"type":     types.StringType,
+			"operator": types.StringType,
+			"value":    types.Float64Type,
+		})
 	}
 
 	// Map time threshold
-	model.TimeThreshold = &SloAlertTimeThresholdModel{
+	timeThresholdModel := SloAlertTimeThresholdModel{
 		WarmUp:   types.Int64Value(int64(sloAlertConfig.TimeThreshold.TimeWindow)),
 		CoolDown: types.Int64Value(int64(sloAlertConfig.TimeThreshold.Expiry)),
 	}
 
+	timeThresholdObj, objDiags := types.ObjectValueFrom(ctx, map[string]attr.Type{
+		"warm_up":   types.Int64Type,
+		"cool_down": types.Int64Type,
+	}, timeThresholdModel)
+	if objDiags.HasError() {
+		diags.Append(objDiags...)
+		return diags
+	}
+
+	model.TimeThreshold = timeThresholdObj
+
 	// Map SLO IDs
-	model.SloIds = sloAlertConfig.SloIds
+	sloIds := []attr.Value{}
+	for _, id := range sloAlertConfig.SloIds {
+		sloIds = append(sloIds, types.StringValue(id))
+	}
+	model.SloIds = types.SetValueMust(types.StringType, sloIds)
 
 	// Map Alert Channel IDs
-	model.AlertChannelIds = sloAlertConfig.AlertChannelIds
+	alertChannelIds := []attr.Value{}
+	for _, id := range sloAlertConfig.AlertChannelIds {
+		alertChannelIds = append(alertChannelIds, types.StringValue(id))
+	}
+	model.AlertChannelIds = types.SetValueMust(types.StringType, alertChannelIds)
 
 	// Map burn rate configs
 	if sloAlertConfig.BurnRateConfigs != nil && len(*sloAlertConfig.BurnRateConfigs) > 0 {
-		burnRateConfigs := []SloAlertBurnRateConfigModel{}
+		burnRateConfigs := []attr.Value{}
 		for _, cfg := range *sloAlertConfig.BurnRateConfigs {
-			burnRateConfigs = append(burnRateConfigs, SloAlertBurnRateConfigModel{
+			burnRateConfigModel := SloAlertBurnRateConfigModel{
 				AlertWindowType:   types.StringValue(cfg.AlertWindowType),
 				Duration:          types.StringValue(fmt.Sprintf("%d", cfg.Duration)),
 				DurationUnitType:  types.StringValue(cfg.DurationUnitType),
 				ThresholdOperator: types.StringValue(cfg.Threshold.Operator),
 				ThresholdValue:    types.StringValue(fmt.Sprintf("%.2f", cfg.Threshold.Value)),
-			})
+			}
+
+			burnRateConfigObj, objDiags := types.ObjectValueFrom(ctx, map[string]attr.Type{
+				"alert_window_type":  types.StringType,
+				"duration":           types.StringType,
+				"duration_unit_type": types.StringType,
+				"threshold_operator": types.StringType,
+				"threshold_value":    types.StringType,
+			}, burnRateConfigModel)
+			if objDiags.HasError() {
+				diags.Append(objDiags...)
+				return diags
+			}
+			burnRateConfigs = append(burnRateConfigs, burnRateConfigObj)
 		}
-		model.BurnRateConfig = burnRateConfigs
+
+		model.BurnRateConfig = types.ListValueMust(types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"alert_window_type":  types.StringType,
+				"duration":           types.StringType,
+				"duration_unit_type": types.StringType,
+				"threshold_operator": types.StringType,
+				"threshold_value":    types.StringType,
+			},
+		}, burnRateConfigs)
 	} else {
-		model.BurnRateConfig = []SloAlertBurnRateConfigModel{}
+		model.BurnRateConfig = types.ListNull(types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"alert_window_type":  types.StringType,
+				"duration":           types.StringType,
+				"duration_unit_type": types.StringType,
+				"threshold_operator": types.StringType,
+				"threshold_value":    types.StringType,
+			},
+		})
 	}
 
 	// Map custom payload fields using the reusable function
@@ -248,18 +315,7 @@ func (r *sloAlertConfigResourceFramework) UpdateState(ctx context.Context, state
 		diags.Append(payloadDiags...)
 		return diags
 	}
-
-	// Convert types.List to slice model
-	if !customPayloadFieldsList.IsNull() && !customPayloadFieldsList.IsUnknown() {
-		var customPayloadModels []SloAlertCustomPayloadFieldModel
-		diags.Append(customPayloadFieldsList.ElementsAs(ctx, &customPayloadModels, false)...)
-		if diags.HasError() {
-			return diags
-		}
-		model.CustomPayload = customPayloadModels
-	} else {
-		model.CustomPayload = []SloAlertCustomPayloadFieldModel{}
-	}
+	model.CustomPayload = customPayloadFieldsList
 
 	// Set the state
 	diags.Append(state.Set(ctx, model)...)
@@ -327,38 +383,72 @@ func (r *sloAlertConfigResourceFramework) MapStateToDataObject(ctx context.Conte
 
 	// Map threshold
 	var threshold *restapi.SloAlertThreshold
-	if terraformAlertType != "burn_rate_v2" && model.Threshold != nil {
+	if terraformAlertType != "burn_rate_v2" && !model.Threshold.IsNull() && !model.Threshold.IsUnknown() {
+		var thresholdModel SloAlertThresholdModel
+		diags.Append(model.Threshold.As(ctx, &thresholdModel, basetypes.ObjectAsOptions{})...)
+		if diags.HasError() {
+			return nil, diags
+		}
+
 		thresholdType := "staticThreshold"
-		if !model.Threshold.Type.IsNull() {
-			thresholdType = model.Threshold.Type.ValueString()
+		if !thresholdModel.Type.IsNull() {
+			thresholdType = thresholdModel.Type.ValueString()
 		}
 
 		threshold = &restapi.SloAlertThreshold{
 			Type:     thresholdType,
-			Operator: model.Threshold.Operator.ValueString(),
-			Value:    model.Threshold.Value.ValueFloat64(),
+			Operator: thresholdModel.Operator.ValueString(),
+			Value:    thresholdModel.Value.ValueFloat64(),
 		}
 	}
 
 	// Map time threshold
 	var timeThreshold restapi.SloAlertTimeThreshold
-	if model.TimeThreshold != nil {
+	if !model.TimeThreshold.IsNull() && !model.TimeThreshold.IsUnknown() {
+		var timeThresholdModel SloAlertTimeThresholdModel
+		diags.Append(model.TimeThreshold.As(ctx, &timeThresholdModel, basetypes.ObjectAsOptions{})...)
+		if diags.HasError() {
+			return nil, diags
+		}
+
 		timeThreshold = restapi.SloAlertTimeThreshold{
-			TimeWindow: int(model.TimeThreshold.WarmUp.ValueInt64()),
-			Expiry:     int(model.TimeThreshold.CoolDown.ValueInt64()),
+			TimeWindow: int(timeThresholdModel.WarmUp.ValueInt64()),
+			Expiry:     int(timeThresholdModel.CoolDown.ValueInt64()),
 		}
 	}
 
 	// Map SLO IDs
-	sloIds := model.SloIds
+	var sloIds []string
+	if !model.SloIds.IsNull() && !model.SloIds.IsUnknown() {
+		var sloIdValues []string
+		diags.Append(model.SloIds.ElementsAs(ctx, &sloIdValues, false)...)
+		if diags.HasError() {
+			return nil, diags
+		}
+		sloIds = sloIdValues
+	}
 
 	// Map Alert Channel IDs
-	alertChannelIds := model.AlertChannelIds
+	var alertChannelIds []string
+	if !model.AlertChannelIds.IsNull() && !model.AlertChannelIds.IsUnknown() {
+		var alertChannelIdValues []string
+		diags.Append(model.AlertChannelIds.ElementsAs(ctx, &alertChannelIdValues, false)...)
+		if diags.HasError() {
+			return nil, diags
+		}
+		alertChannelIds = alertChannelIdValues
+	}
 
 	// Map burn rate configs
 	var burnRateConfigs []restapi.BurnRateConfig
-	if terraformAlertType == "burn_rate_v2" && len(model.BurnRateConfig) > 0 {
-		for _, burnRateConfigModel := range model.BurnRateConfig {
+	if terraformAlertType == "burn_rate_v2" && !model.BurnRateConfig.IsNull() && !model.BurnRateConfig.IsUnknown() {
+		var burnRateConfigModels []SloAlertBurnRateConfigModel
+		diags.Append(model.BurnRateConfig.ElementsAs(ctx, &burnRateConfigModels, false)...)
+		if diags.HasError() {
+			return nil, diags
+		}
+
+		for _, burnRateConfigModel := range burnRateConfigModels {
 			duration, err := strconv.Atoi(burnRateConfigModel.Duration.ValueString())
 			if err != nil {
 				diags.AddError(
@@ -391,16 +481,9 @@ func (r *sloAlertConfigResourceFramework) MapStateToDataObject(ctx context.Conte
 
 	// Map custom payload fields using the reusable function
 	var customPayloadFields []restapi.CustomPayloadField[any]
-	if len(model.CustomPayload) > 0 {
-		// Convert slice model back to types.List for the shared function
-		customPayloadList, listDiags := types.ListValueFrom(ctx, shared.GetCustomPayloadFieldType(), model.CustomPayload)
-		if listDiags.HasError() {
-			diags.Append(listDiags...)
-			return nil, diags
-		}
-
+	if !model.CustomPayload.IsNull() && !model.CustomPayload.IsUnknown() {
 		var payloadDiags diag.Diagnostics
-		customPayloadFields, payloadDiags = shared.MapCustomPayloadFieldsToAPIObject(ctx, customPayloadList)
+		customPayloadFields, payloadDiags = shared.MapCustomPayloadFieldsToAPIObject(ctx, model.CustomPayload)
 		if payloadDiags.HasError() {
 			diags.Append(payloadDiags...)
 			return nil, diags
