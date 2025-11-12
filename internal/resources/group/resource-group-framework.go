@@ -3,12 +3,11 @@ package group
 import (
 	"context"
 
-	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
+	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -16,7 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 // NewGroupResourceHandleFramework creates the resource handle for RBAC Groups
@@ -131,55 +129,25 @@ func (r *groupResourceFramework) UpdateState(ctx context.Context, state *tfsdk.S
 
 	// Map members if present
 	if len(group.Members) > 0 {
-		memberElements := make([]attr.Value, len(group.Members))
+		model.Members = make([]GroupMemberModel, len(group.Members))
 		for i, member := range group.Members {
-			memberModel := GroupMemberModel{
+			model.Members[i] = GroupMemberModel{
 				UserID: types.StringValue(member.UserID),
+				Email:  util.SetStringPointerToState(member.Email),
 			}
-
-			memberModel.Email = util.SetStringPointerToState(member.Email)
-
-			memberObj, memberDiags := types.ObjectValueFrom(ctx, map[string]attr.Type{
-				"user_id": types.StringType,
-				"email":   types.StringType,
-			}, memberModel)
-
-			if memberDiags.HasError() {
-				diags.Append(memberDiags...)
-				return diags
-			}
-
-			memberElements[i] = memberObj
 		}
-
-		model.Members = types.SetValueMust(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"user_id": types.StringType,
-				"email":   types.StringType,
-			},
-		}, memberElements)
-	} else {
-		model.Members = types.SetNull(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"user_id": types.StringType,
-				"email":   types.StringType,
-			},
-		})
 	}
 
 	// Map permission set if not empty
 	if !group.PermissionSet.IsEmpty() {
-		permissionSetModel := GroupPermissionSetModel{}
+		permissionSetModel := &GroupPermissionSetModel{}
 
 		// Map application IDs
 		if len(group.PermissionSet.ApplicationIDs) > 0 {
-			appIDElements := make([]attr.Value, len(group.PermissionSet.ApplicationIDs))
+			permissionSetModel.ApplicationIDs = make([]string, len(group.PermissionSet.ApplicationIDs))
 			for i, appID := range group.PermissionSet.ApplicationIDs {
-				appIDElements[i] = types.StringValue(appID.ScopeID)
+				permissionSetModel.ApplicationIDs[i] = appID.ScopeID
 			}
-			permissionSetModel.ApplicationIDs = types.SetValueMust(types.StringType, appIDElements)
-		} else {
-			permissionSetModel.ApplicationIDs = types.SetNull(types.StringType)
 		}
 
 		// Map infra DFQ filter
@@ -191,85 +159,45 @@ func (r *groupResourceFramework) UpdateState(ctx context.Context, state *tfsdk.S
 
 		// Map Kubernetes cluster UUIDs
 		if len(group.PermissionSet.KubernetesClusterUUIDs) > 0 {
-			kubeClusterElements := make([]attr.Value, len(group.PermissionSet.KubernetesClusterUUIDs))
+			permissionSetModel.KubernetesClusterUUIDs = make([]string, len(group.PermissionSet.KubernetesClusterUUIDs))
 			for i, kubeCluster := range group.PermissionSet.KubernetesClusterUUIDs {
-				kubeClusterElements[i] = types.StringValue(kubeCluster.ScopeID)
+				permissionSetModel.KubernetesClusterUUIDs[i] = kubeCluster.ScopeID
 			}
-			permissionSetModel.KubernetesClusterUUIDs = types.SetValueMust(types.StringType, kubeClusterElements)
-		} else {
-			permissionSetModel.KubernetesClusterUUIDs = types.SetNull(types.StringType)
 		}
 
 		// Map Kubernetes namespace UIDs
 		if len(group.PermissionSet.KubernetesNamespaceUIDs) > 0 {
-			kubeNsElements := make([]attr.Value, len(group.PermissionSet.KubernetesNamespaceUIDs))
+			permissionSetModel.KubernetesNamespaceUIDs = make([]string, len(group.PermissionSet.KubernetesNamespaceUIDs))
 			for i, kubeNs := range group.PermissionSet.KubernetesNamespaceUIDs {
-				kubeNsElements[i] = types.StringValue(kubeNs.ScopeID)
+				permissionSetModel.KubernetesNamespaceUIDs[i] = kubeNs.ScopeID
 			}
-			permissionSetModel.KubernetesNamespaceUIDs = types.SetValueMust(types.StringType, kubeNsElements)
-		} else {
-			permissionSetModel.KubernetesNamespaceUIDs = types.SetNull(types.StringType)
 		}
 
 		// Map mobile app IDs
 		if len(group.PermissionSet.MobileAppIDs) > 0 {
-			mobileAppElements := make([]attr.Value, len(group.PermissionSet.MobileAppIDs))
+			permissionSetModel.MobileAppIDs = make([]string, len(group.PermissionSet.MobileAppIDs))
 			for i, mobileApp := range group.PermissionSet.MobileAppIDs {
-				mobileAppElements[i] = types.StringValue(mobileApp.ScopeID)
+				permissionSetModel.MobileAppIDs[i] = mobileApp.ScopeID
 			}
-			permissionSetModel.MobileAppIDs = types.SetValueMust(types.StringType, mobileAppElements)
-		} else {
-			permissionSetModel.MobileAppIDs = types.SetNull(types.StringType)
 		}
 
 		// Map website IDs
 		if len(group.PermissionSet.WebsiteIDs) > 0 {
-			websiteElements := make([]attr.Value, len(group.PermissionSet.WebsiteIDs))
+			permissionSetModel.WebsiteIDs = make([]string, len(group.PermissionSet.WebsiteIDs))
 			for i, website := range group.PermissionSet.WebsiteIDs {
-				websiteElements[i] = types.StringValue(website.ScopeID)
+				permissionSetModel.WebsiteIDs[i] = website.ScopeID
 			}
-			permissionSetModel.WebsiteIDs = types.SetValueMust(types.StringType, websiteElements)
-		} else {
-			permissionSetModel.WebsiteIDs = types.SetNull(types.StringType)
 		}
 
 		// Map permissions
 		if len(group.PermissionSet.Permissions) > 0 {
-			permissionElements := make([]attr.Value, len(group.PermissionSet.Permissions))
+			permissionSetModel.Permissions = make([]string, len(group.PermissionSet.Permissions))
 			for i, permission := range group.PermissionSet.Permissions {
-				permissionElements[i] = types.StringValue(string(permission))
+				permissionSetModel.Permissions[i] = string(permission)
 			}
-			permissionSetModel.Permissions = types.SetValueMust(types.StringType, permissionElements)
-		} else {
-			permissionSetModel.Permissions = types.SetNull(types.StringType)
 		}
 
-		// Convert permission set model to object
-		var permDiags diag.Diagnostics
-		model.PermissionSet, permDiags = types.ObjectValueFrom(ctx, map[string]attr.Type{
-			"application_ids":             types.SetType{ElemType: types.StringType},
-			"infra_dfq_filter":            types.StringType,
-			"kubernetes_cluster_uuids":    types.SetType{ElemType: types.StringType},
-			"kubernetes_namespaces_uuids": types.SetType{ElemType: types.StringType},
-			"mobile_app_ids":              types.SetType{ElemType: types.StringType},
-			"website_ids":                 types.SetType{ElemType: types.StringType},
-			"permissions":                 types.SetType{ElemType: types.StringType},
-		}, permissionSetModel)
-
-		if permDiags.HasError() {
-			diags.Append(permDiags...)
-			return diags
-		}
-	} else {
-		model.PermissionSet = types.ObjectNull(map[string]attr.Type{
-			"application_ids":             types.SetType{ElemType: types.StringType},
-			"infra_dfq_filter":            types.StringType,
-			"kubernetes_cluster_uuids":    types.SetType{ElemType: types.StringType},
-			"kubernetes_namespaces_uuids": types.SetType{ElemType: types.StringType},
-			"mobile_app_ids":              types.SetType{ElemType: types.StringType},
-			"website_ids":                 types.SetType{ElemType: types.StringType},
-			"permissions":                 types.SetType{ElemType: types.StringType},
-		})
+		model.PermissionSet = permissionSetModel
 	}
 
 	// Set the state
@@ -299,17 +227,9 @@ func (r *groupResourceFramework) MapStateToDataObject(ctx context.Context, plan 
 	}
 
 	// Map members
-	//var members []restapi.APIMember
 	members := make([]restapi.APIMember, 0)
-	if !model.Members.IsNull() && !model.Members.IsUnknown() {
-		var memberModels []GroupMemberModel
-		diags.Append(model.Members.ElementsAs(ctx, &memberModels, false)...)
-		if diags.HasError() {
-			return nil, diags
-		}
-
-		//members = make([]restapi.APIMember, len(memberModels))
-		for _, memberModel := range memberModels {
+	if len(model.Members) > 0 {
+		for _, memberModel := range model.Members {
 			member := restapi.APIMember{
 				UserID: memberModel.UserID.ValueString(),
 			}
@@ -333,32 +253,20 @@ func (r *groupResourceFramework) MapStateToDataObject(ctx context.Context, plan 
 	permissionSet.MobileAppIDs = emptyScopeBinding
 	permissionSet.Permissions = make([]restapi.InstanaPermission, 0)
 
-	if !model.PermissionSet.IsNull() && !model.PermissionSet.IsUnknown() {
-		var permissionSetModel GroupPermissionSetModel
-		diags.Append(model.PermissionSet.As(ctx, &permissionSetModel, basetypes.ObjectAsOptions{})...)
-		if diags.HasError() {
-			return nil, diags
-		}
-
+	if model.PermissionSet != nil {
 		// Map application IDs
-		if !permissionSetModel.ApplicationIDs.IsNull() && !permissionSetModel.ApplicationIDs.IsUnknown() {
-			var appIDs []string
-			diags.Append(permissionSetModel.ApplicationIDs.ElementsAs(ctx, &appIDs, false)...)
-			if diags.HasError() {
-				return nil, diags
-			}
-
-			scopeBindings := make([]restapi.ScopeBinding, len(appIDs))
-			for i, appID := range appIDs {
+		if len(model.PermissionSet.ApplicationIDs) > 0 {
+			scopeBindings := make([]restapi.ScopeBinding, len(model.PermissionSet.ApplicationIDs))
+			for i, appID := range model.PermissionSet.ApplicationIDs {
 				scopeBindings[i] = restapi.ScopeBinding{ScopeID: appID}
 			}
 			permissionSet.ApplicationIDs = scopeBindings
 		}
 
 		// Map infra DFQ filter
-		if !permissionSetModel.InfraDFQFilter.IsNull() && !permissionSetModel.InfraDFQFilter.IsUnknown() {
+		if !model.PermissionSet.InfraDFQFilter.IsNull() && !model.PermissionSet.InfraDFQFilter.IsUnknown() {
 			permissionSet.InfraDFQFilter = &restapi.ScopeBinding{
-				ScopeID: permissionSetModel.InfraDFQFilter.ValueString(),
+				ScopeID: model.PermissionSet.InfraDFQFilter.ValueString(),
 			}
 		} else {
 			roleId := "-1"
@@ -369,75 +277,45 @@ func (r *groupResourceFramework) MapStateToDataObject(ctx context.Context, plan 
 		}
 
 		// Map Kubernetes cluster UUIDs
-		if !permissionSetModel.KubernetesClusterUUIDs.IsNull() && !permissionSetModel.KubernetesClusterUUIDs.IsUnknown() {
-			var kubeClusterUUIDs []string
-			diags.Append(permissionSetModel.KubernetesClusterUUIDs.ElementsAs(ctx, &kubeClusterUUIDs, false)...)
-			if diags.HasError() {
-				return nil, diags
-			}
-
-			scopeBindings := make([]restapi.ScopeBinding, len(kubeClusterUUIDs))
-			for i, kubeClusterUUID := range kubeClusterUUIDs {
+		if len(model.PermissionSet.KubernetesClusterUUIDs) > 0 {
+			scopeBindings := make([]restapi.ScopeBinding, len(model.PermissionSet.KubernetesClusterUUIDs))
+			for i, kubeClusterUUID := range model.PermissionSet.KubernetesClusterUUIDs {
 				scopeBindings[i] = restapi.ScopeBinding{ScopeID: kubeClusterUUID}
 			}
 			permissionSet.KubernetesClusterUUIDs = scopeBindings
 		}
 
 		// Map Kubernetes namespace UIDs
-		if !permissionSetModel.KubernetesNamespaceUIDs.IsNull() && !permissionSetModel.KubernetesNamespaceUIDs.IsUnknown() {
-			var kubeNamespaceUIDs []string
-			diags.Append(permissionSetModel.KubernetesNamespaceUIDs.ElementsAs(ctx, &kubeNamespaceUIDs, false)...)
-			if diags.HasError() {
-				return nil, diags
-			}
-
-			scopeBindings := make([]restapi.ScopeBinding, len(kubeNamespaceUIDs))
-			for i, kubeNamespaceUID := range kubeNamespaceUIDs {
+		if len(model.PermissionSet.KubernetesNamespaceUIDs) > 0 {
+			scopeBindings := make([]restapi.ScopeBinding, len(model.PermissionSet.KubernetesNamespaceUIDs))
+			for i, kubeNamespaceUID := range model.PermissionSet.KubernetesNamespaceUIDs {
 				scopeBindings[i] = restapi.ScopeBinding{ScopeID: kubeNamespaceUID}
 			}
 			permissionSet.KubernetesNamespaceUIDs = scopeBindings
 		}
 
 		// Map mobile app IDs
-		if !permissionSetModel.MobileAppIDs.IsNull() && !permissionSetModel.MobileAppIDs.IsUnknown() {
-			var mobileAppIDs []string
-			diags.Append(permissionSetModel.MobileAppIDs.ElementsAs(ctx, &mobileAppIDs, false)...)
-			if diags.HasError() {
-				return nil, diags
-			}
-
-			scopeBindings := make([]restapi.ScopeBinding, len(mobileAppIDs))
-			for i, mobileAppID := range mobileAppIDs {
+		if len(model.PermissionSet.MobileAppIDs) > 0 {
+			scopeBindings := make([]restapi.ScopeBinding, len(model.PermissionSet.MobileAppIDs))
+			for i, mobileAppID := range model.PermissionSet.MobileAppIDs {
 				scopeBindings[i] = restapi.ScopeBinding{ScopeID: mobileAppID}
 			}
 			permissionSet.MobileAppIDs = scopeBindings
 		}
 
 		// Map website IDs
-		if !permissionSetModel.WebsiteIDs.IsNull() && !permissionSetModel.WebsiteIDs.IsUnknown() {
-			var websiteIDs []string
-			diags.Append(permissionSetModel.WebsiteIDs.ElementsAs(ctx, &websiteIDs, false)...)
-			if diags.HasError() {
-				return nil, diags
-			}
-
-			scopeBindings := make([]restapi.ScopeBinding, len(websiteIDs))
-			for i, websiteID := range websiteIDs {
+		if len(model.PermissionSet.WebsiteIDs) > 0 {
+			scopeBindings := make([]restapi.ScopeBinding, len(model.PermissionSet.WebsiteIDs))
+			for i, websiteID := range model.PermissionSet.WebsiteIDs {
 				scopeBindings[i] = restapi.ScopeBinding{ScopeID: websiteID}
 			}
 			permissionSet.WebsiteIDs = scopeBindings
 		}
 
 		// Map permissions
-		if !permissionSetModel.Permissions.IsNull() && !permissionSetModel.Permissions.IsUnknown() {
-			var permissionStrings []string
-			diags.Append(permissionSetModel.Permissions.ElementsAs(ctx, &permissionStrings, false)...)
-			if diags.HasError() {
-				return nil, diags
-			}
-
-			permissions := make([]restapi.InstanaPermission, len(permissionStrings))
-			for i, permissionString := range permissionStrings {
+		if len(model.PermissionSet.Permissions) > 0 {
+			permissions := make([]restapi.InstanaPermission, len(model.PermissionSet.Permissions))
+			for i, permissionString := range model.PermissionSet.Permissions {
 				permissions[i] = restapi.InstanaPermission(permissionString)
 			}
 			permissionSet.Permissions = permissions

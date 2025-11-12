@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
+	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -199,8 +199,9 @@ func MapThresholdRulePluginFromState(ctx context.Context, thresholdObj *Threshol
 		staticVal := thresholdObj.Static
 		valueFloat := float64(staticVal.Value.ValueInt64())
 		return &restapi.ThresholdRule{
-			Type:  "staticThreshold",
-			Value: &valueFloat,
+			Type:     "staticThreshold",
+			Value:    &valueFloat,
+			Operator: staticVal.Operator.ValueStringPointer(),
 		}, diags
 	}
 

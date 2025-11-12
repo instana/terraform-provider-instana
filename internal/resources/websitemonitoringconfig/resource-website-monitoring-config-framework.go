@@ -3,8 +3,8 @@ package websitemonitoringconfig
 import (
 	"context"
 
-	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
+	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
