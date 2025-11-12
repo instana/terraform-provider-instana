@@ -18,7 +18,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 // NewInfraAlertConfigResourceHandleFramework creates a new instance of the infrastructure alert configuration resource
@@ -207,7 +206,7 @@ func (r *infraAlertConfigResourceFramework) UpdateState(ctx context.Context, sta
 
 	// Map alert channels if present
 	if len(resource.AlertChannels) > 0 {
-		alertChannelsObj := map[string]attr.Value{}
+		alertChannelsModel := &InfraAlertChannelsModel{}
 
 		// Map warning severity
 		if warningChannels, ok := resource.AlertChannels[restapi.WarningSeverity]; ok && len(warningChannels) > 0 {
@@ -216,9 +215,9 @@ func (r *infraAlertConfigResourceFramework) UpdateState(ctx context.Context, sta
 			if diags.HasError() {
 				return diags
 			}
-			alertChannelsObj[ResourceFieldThresholdRuleWarningSeverity] = warningList
+			alertChannelsModel.Warning = warningList
 		} else {
-			alertChannelsObj[ResourceFieldThresholdRuleWarningSeverity] = types.ListNull(types.StringType)
+			alertChannelsModel.Warning = types.ListNull(types.StringType)
 		}
 
 		// Map critical severity
@@ -228,28 +227,14 @@ func (r *infraAlertConfigResourceFramework) UpdateState(ctx context.Context, sta
 			if diags.HasError() {
 				return diags
 			}
-			alertChannelsObj[ResourceFieldThresholdRuleCriticalSeverity] = criticalList
+			alertChannelsModel.Critical = criticalList
 		} else {
-			alertChannelsObj[ResourceFieldThresholdRuleCriticalSeverity] = types.ListNull(types.StringType)
+			alertChannelsModel.Critical = types.ListNull(types.StringType)
 		}
 
-		objVal, objDiags := types.ObjectValue(
-			map[string]attr.Type{
-				ResourceFieldThresholdRuleWarningSeverity:  types.ListType{ElemType: types.StringType},
-				ResourceFieldThresholdRuleCriticalSeverity: types.ListType{ElemType: types.StringType},
-			},
-			alertChannelsObj,
-		)
-		diags.Append(objDiags...)
-		if diags.HasError() {
-			return diags
-		}
-		model.AlertChannels = objVal
+		model.AlertChannels = alertChannelsModel
 	} else {
-		model.AlertChannels = types.ObjectNull(map[string]attr.Type{
-			ResourceFieldThresholdRuleWarningSeverity:  types.ListType{ElemType: types.StringType},
-			ResourceFieldThresholdRuleCriticalSeverity: types.ListType{ElemType: types.StringType},
-		})
+		model.AlertChannels = nil
 	}
 
 	// Map time threshold if present
@@ -266,98 +251,40 @@ func (r *infraAlertConfigResourceFramework) UpdateState(ctx context.Context, sta
 
 	// Map rules if present
 	if len(resource.Rules) > 0 {
-		// Create threshold rule model
-		thresholdRuleModel := InfraThresholdRuleModel{}
+		// Create threshold rule model using ThresholdPluginModel
+		thresholdRuleModel := &shared.ThresholdPluginModel{}
 
 		// Map warning threshold
 		warningThreshold, isWarningThresholdPresent := resource.Rules[0].Thresholds[restapi.WarningSeverity]
-		warningThresholdList, warningDiags := shared.MapThresholdToState(ctx, isWarningThresholdPresent, &warningThreshold, []string{"static", "adaptiveBaseline"})
-		diags.Append(warningDiags...)
-		if diags.HasError() {
-			return diags
+		if isWarningThresholdPresent {
+			thresholdRuleModel.Warning = shared.MapThresholdPluginToState(ctx, &warningThreshold, isWarningThresholdPresent)
 		}
-		thresholdRuleModel.Warning = warningThresholdList
 
 		// Map critical threshold
 		criticalThreshold, isCriticalThresholdPresent := resource.Rules[0].Thresholds[restapi.CriticalSeverity]
-		criticalThresholdList, criticalDiags := shared.MapThresholdToState(ctx, isCriticalThresholdPresent, &criticalThreshold, []string{"static", "adaptiveBaseline"})
-		diags.Append(criticalDiags...)
-		if diags.HasError() {
-			return diags
-		}
-		thresholdRuleModel.Critical = criticalThresholdList
-
-		// Convert threshold rule model to object
-		thresholdRuleObj, thresholdDiags := types.ObjectValueFrom(ctx, map[string]attr.Type{
-			shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrObjectTypes(),
-			shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrObjectTypes(),
-		}, thresholdRuleModel)
-		diags.Append(thresholdDiags...)
-		if diags.HasError() {
-			return diags
+		if isCriticalThresholdPresent {
+			thresholdRuleModel.Critical = shared.MapThresholdPluginToState(ctx, &criticalThreshold, isCriticalThresholdPresent)
 		}
 
 		// Create generic rule model
-		genericRuleModel := InfraGenericRuleModel{
+		genericRuleModel := &InfraGenericRuleModel{
 			MetricName:             types.StringValue(resource.Rules[0].Rule.MetricName),
 			EntityType:             types.StringValue(resource.Rules[0].Rule.EntityType),
 			Aggregation:            types.StringValue(string(resource.Rules[0].Rule.Aggregation)),
 			CrossSeriesAggregation: types.StringValue(string(resource.Rules[0].Rule.CrossSeriesAggregation)),
 			Regex:                  types.BoolValue(resource.Rules[0].Rule.Regex),
 			ThresholdOperator:      types.StringValue(string(resource.Rules[0].ThresholdOperator)),
-			ThresholdRule:          thresholdRuleObj,
+			ThresholdRule:          thresholdRuleModel,
 		}
 
-		// Create rules model and convert to object
-		thresholdObjType := types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrObjectTypes(),
-				shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrObjectTypes(),
-			},
+		// Create rules model
+		rulesModel := &InfraRulesModel{
+			GenericRule: genericRuleModel,
 		}
 
-		rulesModel := InfraRulesModel{
-			GenericRule: &genericRuleModel,
-		}
-
-		rulesObj, rulesDiags := types.ObjectValueFrom(ctx, map[string]attr.Type{
-			"generic_rule": types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"metric_name":              types.StringType,
-					"entity_type":              types.StringType,
-					"aggregation":              types.StringType,
-					"cross_series_aggregation": types.StringType,
-					"regex":                    types.BoolType,
-					"threshold_operator":       types.StringType,
-					"threshold":                thresholdObjType,
-				},
-			},
-		}, rulesModel)
-		diags.Append(rulesDiags...)
-		if diags.HasError() {
-			return diags
-		}
-
-		model.Rules = rulesObj
+		model.Rules = rulesModel
 	} else {
-		model.Rules = types.ObjectNull(map[string]attr.Type{
-			"generic_rule": types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"metric_name":              types.StringType,
-					"entity_type":              types.StringType,
-					"aggregation":              types.StringType,
-					"cross_series_aggregation": types.StringType,
-					"regex":                    types.BoolType,
-					"threshold_operator":       types.StringType,
-					"threshold": types.ObjectType{
-						AttrTypes: map[string]attr.Type{
-							shared.LogAlertConfigFieldWarning:  shared.GetStaticAndAdaptiveThresholdAttrObjectTypes(),
-							shared.LogAlertConfigFieldCritical: shared.GetStaticAndAdaptiveThresholdAttrObjectTypes(),
-						},
-					},
-				},
-			},
-		})
+		model.Rules = nil
 	}
 
 	// Set the state
@@ -415,21 +342,11 @@ func (r *infraAlertConfigResourceFramework) MapStateToDataObject(ctx context.Con
 
 	// Map alert channels if present
 	alertChannels := make(map[restapi.AlertSeverity][]string)
-	if !model.AlertChannels.IsNull() && !model.AlertChannels.IsUnknown() {
-		var alertChannelsModel struct {
-			Warning  types.List `tfsdk:"warning"`
-			Critical types.List `tfsdk:"critical"`
-		}
-
-		diags.Append(model.AlertChannels.As(ctx, &alertChannelsModel, basetypes.ObjectAsOptions{})...)
-		if diags.HasError() {
-			return nil, diags
-		}
-
+	if model.AlertChannels != nil {
 		// Map warning severity
-		if !alertChannelsModel.Warning.IsNull() && !alertChannelsModel.Warning.IsUnknown() {
+		if !model.AlertChannels.Warning.IsNull() && !model.AlertChannels.Warning.IsUnknown() {
 			var warningChannels []string
-			diags.Append(alertChannelsModel.Warning.ElementsAs(ctx, &warningChannels, false)...)
+			diags.Append(model.AlertChannels.Warning.ElementsAs(ctx, &warningChannels, false)...)
 			if diags.HasError() {
 				return nil, diags
 			}
@@ -439,9 +356,9 @@ func (r *infraAlertConfigResourceFramework) MapStateToDataObject(ctx context.Con
 		}
 
 		// Map critical severity
-		if !alertChannelsModel.Critical.IsNull() && !alertChannelsModel.Critical.IsUnknown() {
+		if !model.AlertChannels.Critical.IsNull() && !model.AlertChannels.Critical.IsUnknown() {
 			var criticalChannels []string
-			diags.Append(alertChannelsModel.Critical.ElementsAs(ctx, &criticalChannels, false)...)
+			diags.Append(model.AlertChannels.Critical.ElementsAs(ctx, &criticalChannels, false)...)
 			if diags.HasError() {
 				return nil, diags
 			}
@@ -484,65 +401,50 @@ func (r *infraAlertConfigResourceFramework) MapStateToDataObject(ctx context.Con
 
 	// Map rules if present
 	var rules []restapi.RuleWithThreshold[restapi.InfraAlertRule]
-	if !model.Rules.IsNull() && !model.Rules.IsUnknown() {
-		var rulesModel InfraRulesModel
-		diags.Append(model.Rules.As(ctx, &rulesModel, basetypes.ObjectAsOptions{})...)
-		if diags.HasError() {
-			return nil, diags
+	if model.Rules != nil && model.Rules.GenericRule != nil {
+		genericRuleModel := model.Rules.GenericRule
+
+		// Create rule with threshold
+		ruleWithThreshold := restapi.RuleWithThreshold[restapi.InfraAlertRule]{
+			ThresholdOperator: restapi.ThresholdOperator(genericRuleModel.ThresholdOperator.ValueString()),
+			Rule: restapi.InfraAlertRule{
+				AlertType:              "genericRule",
+				MetricName:             genericRuleModel.MetricName.ValueString(),
+				EntityType:             genericRuleModel.EntityType.ValueString(),
+				Aggregation:            restapi.Aggregation(genericRuleModel.Aggregation.ValueString()),
+				CrossSeriesAggregation: restapi.Aggregation(genericRuleModel.CrossSeriesAggregation.ValueString()),
+				Regex:                  genericRuleModel.Regex.ValueBool(),
+			},
+			Thresholds: make(map[restapi.AlertSeverity]restapi.ThresholdRule),
 		}
 
-		// Map generic rule
-		if rulesModel.GenericRule != nil {
-			genericRuleModel := rulesModel.GenericRule
-
-			// Create rule with threshold
-			ruleWithThreshold := restapi.RuleWithThreshold[restapi.InfraAlertRule]{
-				ThresholdOperator: restapi.ThresholdOperator(genericRuleModel.ThresholdOperator.ValueString()),
-				Rule: restapi.InfraAlertRule{
-					AlertType:              "genericRule",
-					MetricName:             genericRuleModel.MetricName.ValueString(),
-					EntityType:             genericRuleModel.EntityType.ValueString(),
-					Aggregation:            restapi.Aggregation(genericRuleModel.Aggregation.ValueString()),
-					CrossSeriesAggregation: restapi.Aggregation(genericRuleModel.CrossSeriesAggregation.ValueString()),
-					Regex:                  genericRuleModel.Regex.ValueBool(),
-				},
-				Thresholds: make(map[restapi.AlertSeverity]restapi.ThresholdRule),
-			}
-
-			// Map thresholds
-			if !genericRuleModel.ThresholdRule.IsNull() && !genericRuleModel.ThresholdRule.IsUnknown() {
-				var thresholdRuleModel InfraThresholdRuleModel
-				diags.Append(genericRuleModel.ThresholdRule.As(ctx, &thresholdRuleModel, basetypes.ObjectAsOptions{})...)
+		// Map thresholds using ThresholdPluginModel
+		if genericRuleModel.ThresholdRule != nil {
+			// Map warning threshold
+			if genericRuleModel.ThresholdRule.Warning != nil {
+				warningThresholds, warningDiags := shared.MapThresholdRulePluginFromState(ctx, genericRuleModel.ThresholdRule.Warning)
+				diags.Append(warningDiags...)
 				if diags.HasError() {
 					return nil, diags
 				}
-
-				// Map warning threshold
-				if !thresholdRuleModel.Warning.IsNull() && !thresholdRuleModel.Warning.IsUnknown() {
-					warningThresholds, warningDiags := shared.MapThresholdRuleFromStateObject(ctx, thresholdRuleModel.Warning)
-					diags.Append(warningDiags...)
-					if diags.HasError() {
-						return nil, diags
-					}
-					if warningThresholds != nil {
-						ruleWithThreshold.Thresholds[restapi.WarningSeverity] = *warningThresholds
-					}
-				}
-
-				// Map critical threshold
-				if !thresholdRuleModel.Critical.IsNull() && !thresholdRuleModel.Critical.IsUnknown() {
-					criticalThresholds, criticalDiags := shared.MapThresholdRuleFromStateObject(ctx, thresholdRuleModel.Critical)
-					diags.Append(criticalDiags...)
-					if diags.HasError() {
-						return nil, diags
-					}
-					if criticalThresholds != nil {
-						ruleWithThreshold.Thresholds[restapi.CriticalSeverity] = *criticalThresholds
-					}
+				if warningThresholds != nil {
+					ruleWithThreshold.Thresholds[restapi.WarningSeverity] = *warningThresholds
 				}
 			}
-			rules = append(rules, ruleWithThreshold)
+
+			// Map critical threshold
+			if genericRuleModel.ThresholdRule.Critical != nil {
+				criticalThresholds, criticalDiags := shared.MapThresholdRulePluginFromState(ctx, genericRuleModel.ThresholdRule.Critical)
+				diags.Append(criticalDiags...)
+				if diags.HasError() {
+					return nil, diags
+				}
+				if criticalThresholds != nil {
+					ruleWithThreshold.Thresholds[restapi.CriticalSeverity] = *criticalThresholds
+				}
+			}
 		}
+		rules = append(rules, ruleWithThreshold)
 	}
 
 	// Create the API object

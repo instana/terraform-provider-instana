@@ -199,8 +199,9 @@ func MapThresholdRulePluginFromState(ctx context.Context, thresholdObj *Threshol
 		staticVal := thresholdObj.Static
 		valueFloat := float64(staticVal.Value.ValueInt64())
 		return &restapi.ThresholdRule{
-			Type:  "staticThreshold",
-			Value: &valueFloat,
+			Type:     "staticThreshold",
+			Value:    &valueFloat,
+			Operator: staticVal.Operator.ValueStringPointer(),
 		}, diags
 	}
 
