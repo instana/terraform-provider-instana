@@ -51,6 +51,11 @@ func StaticBlockSchema() schema.SingleNestedAttribute {
 				Computed:    true,
 				Description: "The value of the threshold",
 			},
+			"operator": schema.StringAttribute{
+				Optional:    true,
+				Computed:    true,
+				Description: "The operator for the static threshold",
+			},
 		},
 	}
 }
