@@ -4,23 +4,23 @@ import "github.com/hashicorp/terraform-plugin-framework/types"
 
 // InfraAlertConfigModel represents the data model for infrastructure alert configuration
 type InfraAlertConfigModel struct {
-	ID                 types.String             `tfsdk:"id"`
-	Name               types.String             `tfsdk:"name"`
-	Description        types.String             `tfsdk:"description"`
-	TagFilter          types.String             `tfsdk:"tag_filter"`
-	GroupBy            types.List               `tfsdk:"group_by"`
-	AlertChannels      types.Object             `tfsdk:"alert_channels"`
-	Granularity        types.Int64              `tfsdk:"granularity"`
-	TimeThreshold      *InfraTimeThresholdModel `tfsdk:"time_threshold"`
-	CustomPayloadField types.List               `tfsdk:"custom_payload_field"`
-	Rules              types.Object             `tfsdk:"rules"`
-	EvaluationType     types.String             `tfsdk:"evaluation_type"`
+	ID                 types.String                   `tfsdk:"id"`
+	Name               types.String                   `tfsdk:"name"`
+	Description        types.String                   `tfsdk:"description"`
+	TagFilter          types.String                   `tfsdk:"tag_filter"`
+	GroupBy            []string                       `tfsdk:"group_by"`
+	AlertChannels      *InfraAlertChannelsModel       `tfsdk:"alert_channels"`
+	Granularity        types.Int64                    `tfsdk:"granularity"`
+	TimeThreshold      *InfraTimeThresholdModel       `tfsdk:"time_threshold"`
+	CustomPayloadField []InfraCustomPayloadFieldModel `tfsdk:"custom_payload_field"`
+	Rules              *InfraRulesModel               `tfsdk:"rules"`
+	EvaluationType     types.String                   `tfsdk:"evaluation_type"`
 }
 
 // InfraAlertChannelsModel represents the alert channels model
 type InfraAlertChannelsModel struct {
-	Warning  types.List `tfsdk:"warning"`
-	Critical types.List `tfsdk:"critical"`
+	Warning  []string `tfsdk:"warning"`
+	Critical []string `tfsdk:"critical"`
 }
 
 // InfraTimeThresholdModel represents the time threshold model
@@ -46,13 +46,13 @@ type InfraRulesModel struct {
 
 // InfraGenericRuleModel represents the generic rule model
 type InfraGenericRuleModel struct {
-	MetricName             types.String `tfsdk:"metric_name"`
-	EntityType             types.String `tfsdk:"entity_type"`
-	Aggregation            types.String `tfsdk:"aggregation"`
-	CrossSeriesAggregation types.String `tfsdk:"cross_series_aggregation"`
-	Regex                  types.Bool   `tfsdk:"regex"`
-	ThresholdOperator      types.String `tfsdk:"threshold_operator"`
-	ThresholdRule          types.Object `tfsdk:"threshold"`
+	MetricName             types.String             `tfsdk:"metric_name"`
+	EntityType             types.String             `tfsdk:"entity_type"`
+	Aggregation            types.String             `tfsdk:"aggregation"`
+	CrossSeriesAggregation types.String             `tfsdk:"cross_series_aggregation"`
+	Regex                  types.Bool               `tfsdk:"regex"`
+	ThresholdOperator      types.String             `tfsdk:"threshold_operator"`
+	ThresholdRule          *InfraThresholdRuleModel `tfsdk:"threshold"`
 }
 
 // InfraThresholdRuleModel represents the threshold rule model
@@ -70,5 +70,5 @@ type InfraStaticThresholdModel struct {
 type InfraHistoricBaselineThresholdModel struct {
 	DeviationFactor types.Float64 `tfsdk:"deviation_factor"`
 	Seasonality     types.String  `tfsdk:"seasonality"`
-	Baseline        types.List    `tfsdk:"baseline"`
+	Baseline        []float64     `tfsdk:"baseline"`
 }
