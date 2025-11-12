@@ -770,35 +770,65 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 				thresholdMap := make(map[restapi.AlertSeverity]restapi.ThresholdRule)
 
 				// Map warning threshold
-				if ruleWithThreshold.Thresholds.Static != nil {
-					warningThreshold := &restapi.ThresholdRule{
-						Type: "staticThreshold",
+				if ruleWithThreshold.Thresholds.Warning != nil {
+					if ruleWithThreshold.Thresholds.Warning.Static != nil {
+						warningThreshold := &restapi.ThresholdRule{
+							Type: "staticThreshold",
+						}
+						if !ruleWithThreshold.Thresholds.Warning.Static.Value.IsNull() && !ruleWithThreshold.Thresholds.Warning.Static.Value.IsUnknown() {
+							value := float64(ruleWithThreshold.Thresholds.Warning.Static.Value.ValueInt64())
+							warningThreshold.Value = &value
+						}
+						thresholdMap[restapi.WarningSeverity] = *warningThreshold
+					} else if ruleWithThreshold.Thresholds.Warning.AdaptiveBaseline != nil {
+						warningThreshold := &restapi.ThresholdRule{
+							Type: "adaptiveBaseline",
+						}
+						if !ruleWithThreshold.Thresholds.Warning.AdaptiveBaseline.DeviationFactor.IsNull() && !ruleWithThreshold.Thresholds.Warning.AdaptiveBaseline.DeviationFactor.IsUnknown() {
+							deviation := ruleWithThreshold.Thresholds.Warning.AdaptiveBaseline.DeviationFactor.ValueFloat32()
+							warningThreshold.DeviationFactor = &deviation
+						}
+						if !ruleWithThreshold.Thresholds.Warning.AdaptiveBaseline.Adaptability.IsNull() && !ruleWithThreshold.Thresholds.Warning.AdaptiveBaseline.Adaptability.IsUnknown() {
+							adaptability := ruleWithThreshold.Thresholds.Warning.AdaptiveBaseline.Adaptability.ValueFloat32()
+							warningThreshold.Adaptability = &adaptability
+						}
+						if !ruleWithThreshold.Thresholds.Warning.AdaptiveBaseline.Seasonality.IsNull() && !ruleWithThreshold.Thresholds.Warning.AdaptiveBaseline.Seasonality.IsUnknown() {
+							seasonality := restapi.ThresholdSeasonality(ruleWithThreshold.Thresholds.Warning.AdaptiveBaseline.Seasonality.ValueString())
+							warningThreshold.Seasonality = &seasonality
+						}
+						thresholdMap[restapi.WarningSeverity] = *warningThreshold
 					}
-					if !ruleWithThreshold.Thresholds.Static.Value.IsNull() && !ruleWithThreshold.Thresholds.Static.Value.IsUnknown() {
-						value := float64(ruleWithThreshold.Thresholds.Static.Value.ValueInt64())
-						warningThreshold.Value = &value
-					}
-					thresholdMap[restapi.WarningSeverity] = *warningThreshold
 				}
 
-				// Map adaptive baseline threshold
-				if ruleWithThreshold.Thresholds.AdaptiveBaseline != nil {
-					adaptiveThreshold := &restapi.ThresholdRule{
-						Type: "adaptiveBaseline",
+				// Map critical threshold
+				if ruleWithThreshold.Thresholds.Critical != nil {
+					if ruleWithThreshold.Thresholds.Critical.Static != nil {
+						criticalThreshold := &restapi.ThresholdRule{
+							Type: "staticThreshold",
+						}
+						if !ruleWithThreshold.Thresholds.Critical.Static.Value.IsNull() && !ruleWithThreshold.Thresholds.Critical.Static.Value.IsUnknown() {
+							value := float64(ruleWithThreshold.Thresholds.Critical.Static.Value.ValueInt64())
+							criticalThreshold.Value = &value
+						}
+						thresholdMap[restapi.CriticalSeverity] = *criticalThreshold
+					} else if ruleWithThreshold.Thresholds.Critical.AdaptiveBaseline != nil {
+						criticalThreshold := &restapi.ThresholdRule{
+							Type: "adaptiveBaseline",
+						}
+						if !ruleWithThreshold.Thresholds.Critical.AdaptiveBaseline.DeviationFactor.IsNull() && !ruleWithThreshold.Thresholds.Critical.AdaptiveBaseline.DeviationFactor.IsUnknown() {
+							deviation := ruleWithThreshold.Thresholds.Critical.AdaptiveBaseline.DeviationFactor.ValueFloat32()
+							criticalThreshold.DeviationFactor = &deviation
+						}
+						if !ruleWithThreshold.Thresholds.Critical.AdaptiveBaseline.Adaptability.IsNull() && !ruleWithThreshold.Thresholds.Critical.AdaptiveBaseline.Adaptability.IsUnknown() {
+							adaptability := ruleWithThreshold.Thresholds.Critical.AdaptiveBaseline.Adaptability.ValueFloat32()
+							criticalThreshold.Adaptability = &adaptability
+						}
+						if !ruleWithThreshold.Thresholds.Critical.AdaptiveBaseline.Seasonality.IsNull() && !ruleWithThreshold.Thresholds.Critical.AdaptiveBaseline.Seasonality.IsUnknown() {
+							seasonality := restapi.ThresholdSeasonality(ruleWithThreshold.Thresholds.Critical.AdaptiveBaseline.Seasonality.ValueString())
+							criticalThreshold.Seasonality = &seasonality
+						}
+						thresholdMap[restapi.CriticalSeverity] = *criticalThreshold
 					}
-					if !ruleWithThreshold.Thresholds.AdaptiveBaseline.DeviationFactor.IsNull() && !ruleWithThreshold.Thresholds.AdaptiveBaseline.DeviationFactor.IsUnknown() {
-						deviation := ruleWithThreshold.Thresholds.AdaptiveBaseline.DeviationFactor.ValueFloat32()
-						adaptiveThreshold.DeviationFactor = &deviation
-					}
-					if !ruleWithThreshold.Thresholds.AdaptiveBaseline.Adaptability.IsNull() && !ruleWithThreshold.Thresholds.AdaptiveBaseline.Adaptability.IsUnknown() {
-						adaptability := ruleWithThreshold.Thresholds.AdaptiveBaseline.Adaptability.ValueFloat32()
-						adaptiveThreshold.Adaptability = &adaptability
-					}
-					if !ruleWithThreshold.Thresholds.AdaptiveBaseline.Seasonality.IsNull() && !ruleWithThreshold.Thresholds.AdaptiveBaseline.Seasonality.IsUnknown() {
-						seasonality := restapi.ThresholdSeasonality(ruleWithThreshold.Thresholds.AdaptiveBaseline.Seasonality.ValueString())
-						adaptiveThreshold.Seasonality = &seasonality
-					}
-					thresholdMap[restapi.CriticalSeverity] = *adaptiveThreshold
 				}
 
 				result.Rules[i].Thresholds = thresholdMap
@@ -1083,18 +1113,45 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 			if len(ruleWithThreshold.Thresholds) > 0 {
 				thresholdModel := &ApplicationThresholdModel{}
 
-				// Check for warning threshold (static)
+				// Check for warning threshold
 				if warningThreshold, ok := ruleWithThreshold.Thresholds[restapi.WarningSeverity]; ok {
+					warningModel := &ThresholdLevelModel{}
 					if warningThreshold.Type == "staticThreshold" && warningThreshold.Value != nil {
-						thresholdModel.Static = &shared.StaticTypeModel{
-							Value: types.Int64Value(int64(*warningThreshold.Value)),
+						warningModel.Static = &shared.StaticTypeModel{
+							Value:    types.Int64Value(int64(*warningThreshold.Value)),
+							Operator: util.SetStringPointerToState(warningThreshold.Operator),
 						}
+					} else if warningThreshold.Type == "adaptiveBaseline" {
+						adaptiveModel := &shared.AdaptiveBaselineModel{}
+						if warningThreshold.DeviationFactor != nil {
+							adaptiveModel.DeviationFactor = types.Float32Value(*warningThreshold.DeviationFactor)
+						} else {
+							adaptiveModel.DeviationFactor = types.Float32Null()
+						}
+						if warningThreshold.Adaptability != nil {
+							adaptiveModel.Adaptability = types.Float32Value(*warningThreshold.Adaptability)
+						} else {
+							adaptiveModel.Adaptability = types.Float32Null()
+						}
+						if warningThreshold.Seasonality != nil {
+							adaptiveModel.Seasonality = types.StringValue(string(*warningThreshold.Seasonality))
+						} else {
+							adaptiveModel.Seasonality = types.StringNull()
+						}
+						warningModel.AdaptiveBaseline = adaptiveModel
 					}
+					thresholdModel.Warning = warningModel
 				}
 
-				// Check for critical threshold (adaptive baseline)
+				// Check for critical threshold
 				if criticalThreshold, ok := ruleWithThreshold.Thresholds[restapi.CriticalSeverity]; ok {
-					if criticalThreshold.Type == "adaptiveBaseline" {
+					criticalModel := &ThresholdLevelModel{}
+					if criticalThreshold.Type == "staticThreshold" && criticalThreshold.Value != nil {
+						criticalModel.Static = &shared.StaticTypeModel{
+							Value:    types.Int64Value(int64(*criticalThreshold.Value)),
+							Operator: util.SetStringPointerToState(criticalThreshold.Operator),
+						}
+					} else if criticalThreshold.Type == "adaptiveBaseline" {
 						adaptiveModel := &shared.AdaptiveBaselineModel{}
 						if criticalThreshold.DeviationFactor != nil {
 							adaptiveModel.DeviationFactor = types.Float32Value(*criticalThreshold.DeviationFactor)
@@ -1111,8 +1168,9 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 						} else {
 							adaptiveModel.Seasonality = types.StringNull()
 						}
-						thresholdModel.AdaptiveBaseline = adaptiveModel
+						criticalModel.AdaptiveBaseline = adaptiveModel
 					}
+					thresholdModel.Critical = criticalModel
 				}
 
 				ruleWithThresholdModel.Thresholds = thresholdModel
