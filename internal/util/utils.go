@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"

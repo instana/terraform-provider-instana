@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/instana/terraform-provider-instana/utils"
+	"github.com/gessnerfl/terraform-provider-instana/utils"
 
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
 	"github.com/stretchr/testify/require"
 
-	. "github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
+	. "github.com/gessnerfl/terraform-provider-instana/internal/shared/tagfilter"
 )
 
 const (

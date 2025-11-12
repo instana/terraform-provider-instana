@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	. "github.com/instana/terraform-provider-instana/internal/restapi"
+	. "github.com/gessnerfl/terraform-provider-instana/internal/restapi"
 )
 
 const (

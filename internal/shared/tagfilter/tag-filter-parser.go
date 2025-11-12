@@ -7,7 +7,7 @@ import (
 
 	"github.com/alecthomas/participle"
 	"github.com/alecthomas/participle/lexer"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
 )
 
 // ExpressionRenderer interface definition to render an expression in its normalized form

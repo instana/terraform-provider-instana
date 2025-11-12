@@ -8,8 +8,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/instana/terraform-provider-instana/internal/restapi"
-	. "github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
+	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
+	. "github.com/gessnerfl/terraform-provider-instana/internal/shared/tagfilter"
 )
 
 const (

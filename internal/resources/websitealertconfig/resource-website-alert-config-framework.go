@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
-	"github.com/gessnerfl/terraform-provider-instana/instana/tagfilter"
 	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
+	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
+	"github.com/gessnerfl/terraform-provider-instana/internal/shared/tagfilter"
 	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -567,15 +567,9 @@ func (r *websiteAlertConfigResourceFramework) MapStateToDataObject(ctx context.C
 	log.Printf("reached rules section")
 	//Map rules
 	rules := make([]restapi.WebsiteAlertRuleWithThresholds, 0)
-	if !model.Rules.IsNull() && !model.Rules.IsUnknown() {
-		var rulesList []RuleWithThresholdPluginModel
-		diags.Append(model.Rules.ElementsAs(ctx, &rulesList, false)...)
-		if diags.HasError() {
-			return nil, diags
-		}
-
+	if model.Rules != nil && len(model.Rules) > 0 {
 		// Process each rule
-		for _, i := range rulesList {
+		for _, i := range model.Rules {
 			var websiteAlertRule *restapi.WebsiteAlertRule
 			if i.Rule != nil {
 				log.Printf("reached rule section")
@@ -895,105 +889,7 @@ func (r *websiteAlertConfigResourceFramework) UpdateState(ctx context.Context, s
 	model.Rule = r.mapRuleToState(ctx, apiObject.Rule)
 
 	//map rules
-	rulesModel := r.mapRulesToState(ctx, apiObject)
-	// Define the proper attribute types for RuleWithThresholdPluginModel
-	ruleAttrTypes := map[string]attr.Type{
-		"rule": types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"slowness": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"metric_name": types.StringType,
-						"aggregation": types.StringType,
-					},
-				},
-				"specific_js_error": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"metric_name": types.StringType,
-						"aggregation": types.StringType,
-						"operator":    types.StringType,
-						"value":       types.StringType,
-					},
-				},
-				"status_code": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"metric_name": types.StringType,
-						"aggregation": types.StringType,
-						"operator":    types.StringType,
-						"value":       types.StringType,
-					},
-				},
-				"throughput": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"metric_name": types.StringType,
-						"aggregation": types.StringType,
-					},
-				},
-			},
-		},
-		"operator": types.StringType,
-		"threshold": types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"warning": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"static": types.ObjectType{
-							AttrTypes: map[string]attr.Type{
-								"operator": types.StringType,
-								"value":    types.Int64Type,
-							},
-						},
-						"adaptive_baseline": types.ObjectType{
-							AttrTypes: map[string]attr.Type{
-								"deviation_factor": types.Float32Type,
-								"adaptability":     types.Float32Type,
-								"seasonality":      types.StringType,
-								"operator":         types.StringType,
-							},
-						},
-						"historic_baseline": types.ObjectType{
-							AttrTypes: map[string]attr.Type{
-								"baseline":         types.ListType{ElemType: types.ListType{ElemType: types.Float64Type}},
-								"deviation_factor": types.Float32Type,
-								"seasonality":      types.StringType,
-							},
-						},
-					},
-				},
-				"critical": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"static": types.ObjectType{
-							AttrTypes: map[string]attr.Type{
-								"operator": types.StringType,
-								"value":    types.Int64Type,
-							},
-						},
-						"adaptive_baseline": types.ObjectType{
-							AttrTypes: map[string]attr.Type{
-								"deviation_factor": types.Float32Type,
-								"adaptability":     types.Float32Type,
-								"seasonality":      types.StringType,
-								"operator":         types.StringType,
-							},
-						},
-						"historic_baseline": types.ObjectType{
-							AttrTypes: map[string]attr.Type{
-								"baseline":         types.ListType{ElemType: types.ListType{ElemType: types.Float64Type}},
-								"deviation_factor": types.Float32Type,
-								"seasonality":      types.StringType,
-							},
-						},
-					},
-				},
-			},
-		},
-	}
-
-	// Use ListValueFrom to automatically infer types from the slice of structs
-	rulesListValue, rulesDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ruleAttrTypes}, rulesModel)
-	diags.Append(rulesDiags...)
-	if diags.HasError() {
-		return diags
-	}
-	model.Rules = rulesListValue
+	model.Rules = r.mapRulesToState(ctx, apiObject)
 
 	//map custom paylaod
 	customPayloadFieldsList, payloadDiags := shared.CustomPayloadFieldsToTerraform(ctx, apiObject.CustomerPayloadFields)

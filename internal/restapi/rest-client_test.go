@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"testing"
 
-	. "github.com/instana/terraform-provider-instana/internal/restapi"
-	"github.com/instana/terraform-provider-instana/testutils"
+	. "github.com/gessnerfl/terraform-provider-instana/internal/restapi"
+	"github.com/gessnerfl/terraform-provider-instana/testutils"
 	"github.com/stretchr/testify/require"
 )
 
