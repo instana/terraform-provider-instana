@@ -10,7 +10,7 @@ type AutomationPolicyModel struct {
 	ID                types.String             `tfsdk:"id"`
 	Name              types.String             `tfsdk:"name"`
 	Description       types.String             `tfsdk:"description"`
-	Tags              []string                 `tfsdk:"tags"`
+	Tags              types.List               `tfsdk:"tags"`
 	Trigger           TriggerModel             `tfsdk:"trigger"`
 	TypeConfiguration []TypeConfigurationModel `tfsdk:"type_configuration"`
 }
