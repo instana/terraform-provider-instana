@@ -7,19 +7,19 @@ import (
 
 // SloAlertConfigModel represents the data model for SLO Alert configuration
 type SloAlertConfigModel struct {
-	ID              types.String `tfsdk:"id"`
-	Name            types.String `tfsdk:"name"`
-	Description     types.String `tfsdk:"description"`
-	Severity        types.Int64  `tfsdk:"severity"`
-	Triggering      types.Bool   `tfsdk:"triggering"`
-	Enabled         types.Bool   `tfsdk:"enabled"`
-	AlertType       types.String `tfsdk:"alert_type"`
-	Threshold       types.Object `tfsdk:"threshold"`
-	SloIds          types.Set    `tfsdk:"slo_ids"`
-	AlertChannelIds types.Set    `tfsdk:"alert_channel_ids"`
-	TimeThreshold   types.Object `tfsdk:"time_threshold"`
-	BurnRateConfig  types.List   `tfsdk:"burn_rate_config"`
-	CustomPayload   types.List   `tfsdk:"custom_payload_fields"`
+	ID              types.String                      `tfsdk:"id"`
+	Name            types.String                      `tfsdk:"name"`
+	Description     types.String                      `tfsdk:"description"`
+	Severity        types.Int64                       `tfsdk:"severity"`
+	Triggering      types.Bool                        `tfsdk:"triggering"`
+	Enabled         types.Bool                        `tfsdk:"enabled"`
+	AlertType       types.String                      `tfsdk:"alert_type"`
+	Threshold       *SloAlertThresholdModel           `tfsdk:"threshold"`
+	SloIds          []string                          `tfsdk:"slo_ids"`
+	AlertChannelIds []string                          `tfsdk:"alert_channel_ids"`
+	TimeThreshold   *SloAlertTimeThresholdModel       `tfsdk:"time_threshold"`
+	BurnRateConfig  []SloAlertBurnRateConfigModel     `tfsdk:"burn_rate_config"`
+	CustomPayload   []SloAlertCustomPayloadFieldModel `tfsdk:"custom_payload_fields"`
 }
 
 // SloAlertThresholdModel represents the threshold configuration for SLO Alert

@@ -10,7 +10,6 @@ import (
 	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -18,7 +17,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 // NewSyntheticAlertConfigResourceHandleFramework creates the resource handle for Synthetic Alert Configuration
@@ -163,55 +161,31 @@ func (r *syntheticAlertConfigResourceFramework) MapStateToDataObject(ctx context
 
 	// Map rule
 	var rule restapi.SyntheticAlertRule
-	if !model.Rule.IsNull() && !model.Rule.IsUnknown() {
-		var ruleModel SyntheticAlertRuleModel
-		diags.Append(model.Rule.As(ctx, &ruleModel, basetypes.ObjectAsOptions{})...)
-		if diags.HasError() {
-			return nil, diags
-		}
-
+	if model.Rule != nil {
 		rule = restapi.SyntheticAlertRule{
-			AlertType:  ruleModel.AlertType.ValueString(),
-			MetricName: ruleModel.MetricName.ValueString(),
+			AlertType:  model.Rule.AlertType.ValueString(),
+			MetricName: model.Rule.MetricName.ValueString(),
 		}
 
-		if !ruleModel.Aggregation.IsNull() {
-			rule.Aggregation = ruleModel.Aggregation.ValueString()
+		if !model.Rule.Aggregation.IsNull() {
+			rule.Aggregation = model.Rule.Aggregation.ValueString()
 		}
 	}
 
 	// Map time threshold
 	var timeThreshold restapi.SyntheticAlertTimeThreshold
-	if !model.TimeThreshold.IsNull() && !model.TimeThreshold.IsUnknown() {
-		var timeThresholdModel SyntheticAlertTimeThresholdModel
-		diags.Append(model.TimeThreshold.As(ctx, &timeThresholdModel, basetypes.ObjectAsOptions{})...)
-		if diags.HasError() {
-			return nil, diags
-		}
-
+	if model.TimeThreshold != nil {
 		timeThreshold = restapi.SyntheticAlertTimeThreshold{
-			Type:            timeThresholdModel.Type.ValueString(),
-			ViolationsCount: int(timeThresholdModel.ViolationsCount.ValueInt64()),
+			Type:            model.TimeThreshold.Type.ValueString(),
+			ViolationsCount: int(model.TimeThreshold.ViolationsCount.ValueInt64()),
 		}
 	}
 
 	// Map synthetic test IDs
-	var syntheticTestIds []string
-	if !model.SyntheticTestIds.IsNull() {
-		diags.Append(model.SyntheticTestIds.ElementsAs(ctx, &syntheticTestIds, false)...)
-		if diags.HasError() {
-			return nil, diags
-		}
-	}
+	syntheticTestIds := model.SyntheticTestIds
 
 	// Map alert channel IDs
-	var alertChannelIds []string
-	if !model.AlertChannelIds.IsNull() {
-		diags.Append(model.AlertChannelIds.ElementsAs(ctx, &alertChannelIds, false)...)
-		if diags.HasError() {
-			return nil, diags
-		}
-	}
+	alertChannelIds := model.AlertChannelIds
 
 	// Map tag filter
 	var tagFilter *restapi.TagFilter
@@ -235,9 +209,16 @@ func (r *syntheticAlertConfigResourceFramework) MapStateToDataObject(ctx context
 	}
 	// Map custom payload fields
 	var customerPayloadFields []restapi.CustomPayloadField[any]
-	if !model.CustomPayloadFields.IsNull() {
+	if len(model.CustomPayloadFields) > 0 {
+		// Convert slice model back to types.List for the shared function
+		customPayloadList, listDiags := types.ListValueFrom(ctx, shared.GetCustomPayloadFieldType(), model.CustomPayloadFields)
+		if listDiags.HasError() {
+			diags.Append(listDiags...)
+			return nil, diags
+		}
+
 		var payloadDiags diag.Diagnostics
-		customerPayloadFields, payloadDiags = shared.MapCustomPayloadFieldsToAPIObject(ctx, model.CustomPayloadFields)
+		customerPayloadFields, payloadDiags = shared.MapCustomPayloadFieldsToAPIObject(ctx, customPayloadList)
 		if payloadDiags.HasError() {
 			diags.Append(payloadDiags...)
 			return nil, diags
@@ -309,65 +290,28 @@ func (r *syntheticAlertConfigResourceFramework) UpdateState(ctx context.Context,
 	}
 
 	// Map rule
-	ruleObj := map[string]attr.Value{
-		SyntheticAlertRuleFieldAlertType:  types.StringValue(apiObject.Rule.AlertType),
-		SyntheticAlertRuleFieldMetricName: types.StringValue(apiObject.Rule.MetricName),
-	}
-
+	aggregationValue := types.StringNull()
 	if apiObject.Rule.Aggregation != "" {
-		ruleObj[SyntheticAlertRuleFieldAggregation] = types.StringValue(apiObject.Rule.Aggregation)
-	} else {
-		ruleObj[SyntheticAlertRuleFieldAggregation] = types.StringNull()
+		aggregationValue = types.StringValue(apiObject.Rule.Aggregation)
 	}
 
-	ruleType := map[string]attr.Type{
-		SyntheticAlertRuleFieldAlertType:   types.StringType,
-		SyntheticAlertRuleFieldMetricName:  types.StringType,
-		SyntheticAlertRuleFieldAggregation: types.StringType,
+	model.Rule = &SyntheticAlertRuleModel{
+		AlertType:   types.StringValue(apiObject.Rule.AlertType),
+		MetricName:  types.StringValue(apiObject.Rule.MetricName),
+		Aggregation: aggregationValue,
 	}
-
-	ruleValue, ruleDiags := types.ObjectValue(ruleType, ruleObj)
-	diags.Append(ruleDiags...)
-	if diags.HasError() {
-		return diags
-	}
-
-	model.Rule = ruleValue
 
 	// Map time threshold
-	timeThresholdObj := map[string]attr.Value{
-		SyntheticAlertTimeThresholdFieldType:            types.StringValue(apiObject.TimeThreshold.Type),
-		SyntheticAlertTimeThresholdFieldViolationsCount: types.Int64Value(int64(apiObject.TimeThreshold.ViolationsCount)),
+	model.TimeThreshold = &SyntheticAlertTimeThresholdModel{
+		Type:            types.StringValue(apiObject.TimeThreshold.Type),
+		ViolationsCount: types.Int64Value(int64(apiObject.TimeThreshold.ViolationsCount)),
 	}
-
-	timeThresholdType := map[string]attr.Type{
-		SyntheticAlertTimeThresholdFieldType:            types.StringType,
-		SyntheticAlertTimeThresholdFieldViolationsCount: types.Int64Type,
-	}
-
-	timeThresholdValue, timeThresholdDiags := types.ObjectValue(timeThresholdType, timeThresholdObj)
-	diags.Append(timeThresholdDiags...)
-	if diags.HasError() {
-		return diags
-	}
-
-	model.TimeThreshold = timeThresholdValue
 
 	// Map synthetic test IDs
-	syntheticTestIdsSet, syntheticTestIdsDiags := types.SetValueFrom(ctx, types.StringType, apiObject.SyntheticTestIds)
-	diags.Append(syntheticTestIdsDiags...)
-	if diags.HasError() {
-		return diags
-	}
-	model.SyntheticTestIds = syntheticTestIdsSet
+	model.SyntheticTestIds = apiObject.SyntheticTestIds
 
 	// Map alert channel IDs
-	alertChannelIdsSet, alertChannelIdsDiags := types.SetValueFrom(ctx, types.StringType, apiObject.AlertChannelIds)
-	diags.Append(alertChannelIdsDiags...)
-	if diags.HasError() {
-		return diags
-	}
-	model.AlertChannelIds = alertChannelIdsSet
+	model.AlertChannelIds = apiObject.AlertChannelIds
 
 	// Map custom payload fields
 	customPayloadFieldsList, payloadDiags := shared.CustomPayloadFieldsToTerraform(ctx, apiObject.CustomerPayloadFields)
@@ -375,7 +319,18 @@ func (r *syntheticAlertConfigResourceFramework) UpdateState(ctx context.Context,
 		diags.Append(payloadDiags...)
 		return diags
 	}
-	model.CustomPayloadFields = customPayloadFieldsList
+
+	// Convert types.List to slice model
+	if !customPayloadFieldsList.IsNull() && !customPayloadFieldsList.IsUnknown() {
+		var customPayloadModels []SyntheticAlertCustomPayloadFieldModel
+		diags.Append(customPayloadFieldsList.ElementsAs(ctx, &customPayloadModels, false)...)
+		if diags.HasError() {
+			return diags
+		}
+		model.CustomPayloadFields = customPayloadModels
+	} else {
+		model.CustomPayloadFields = []SyntheticAlertCustomPayloadFieldModel{}
+	}
 
 	// Set the entire model to state
 	diags.Append(state.Set(ctx, model)...)

@@ -11,7 +11,6 @@ import (
 	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
 	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
@@ -520,13 +519,7 @@ func (r *websiteAlertConfigResourceFramework) MapStateToDataObject(ctx context.C
 	}
 
 	// Map alert channel IDs
-	var alertChannelIDs []string
-	if !model.AlertChannelIDs.IsNull() && !model.AlertChannelIDs.IsUnknown() {
-		diags.Append(model.AlertChannelIDs.ElementsAs(ctx, &alertChannelIDs, false)...)
-		if diags.HasError() {
-			return nil, diags
-		}
-	}
+	alertChannelIDs := model.AlertChannelIDs
 
 	// Map custom payload fields
 	customPayloadFields := make([]restapi.CustomPayloadField[any], 0)
@@ -534,12 +527,12 @@ func (r *websiteAlertConfigResourceFramework) MapStateToDataObject(ctx context.C
 	// 	// Skip custom payload fields for now
 	// 	customPayloadFields = []restapi.CustomPayloadField[any]{}
 	// }
-	if !model.CustomPayloadFields.IsNull() && !model.CustomPayloadFields.IsUnknown() {
-		var payloadDiags diag.Diagnostics
-		customPayloadFields, payloadDiags = shared.MapCustomPayloadFieldsToAPIObject(ctx, model.CustomPayloadFields)
-		if payloadDiags.HasError() {
-			diags.Append(payloadDiags...)
-			return nil, diags
+	if model.CustomPayloadFields != nil && len(model.CustomPayloadFields) > 0 {
+		for _, field := range model.CustomPayloadFields {
+			customPayloadFields = append(customPayloadFields, restapi.CustomPayloadField[any]{
+				Key:   field.Key.ValueString(),
+				Value: field.Value.ValueString(),
+			})
 		}
 	}
 
@@ -567,15 +560,9 @@ func (r *websiteAlertConfigResourceFramework) MapStateToDataObject(ctx context.C
 	log.Printf("reached rules section")
 	//Map rules
 	rules := make([]restapi.WebsiteAlertRuleWithThresholds, 0)
-	if !model.Rules.IsNull() && !model.Rules.IsUnknown() {
-		var rulesList []RuleWithThresholdPluginModel
-		diags.Append(model.Rules.ElementsAs(ctx, &rulesList, false)...)
-		if diags.HasError() {
-			return nil, diags
-		}
-
+	if model.Rules != nil && len(model.Rules) > 0 {
 		// Process each rule
-		for _, i := range rulesList {
+		for _, i := range model.Rules {
 			var websiteAlertRule *restapi.WebsiteAlertRule
 			if i.Rule != nil {
 				log.Printf("reached rule section")
@@ -882,126 +869,30 @@ func (r *websiteAlertConfigResourceFramework) UpdateState(ctx context.Context, s
 
 	// Map alert channel IDs
 	if apiObject.AlertChannelIDs != nil && len(apiObject.AlertChannelIDs) > 0 {
-		alertChannelIDs := make([]attr.Value, len(apiObject.AlertChannelIDs))
-		for i, id := range apiObject.AlertChannelIDs {
-			alertChannelIDs[i] = types.StringValue(id)
-		}
-		model.AlertChannelIDs = types.SetValueMust(types.StringType, alertChannelIDs)
+		model.AlertChannelIDs = apiObject.AlertChannelIDs
 	} else {
-		model.AlertChannelIDs = types.SetNull(types.StringType)
+		model.AlertChannelIDs = nil
 	}
 
 	//map rule
 	model.Rule = r.mapRuleToState(ctx, apiObject.Rule)
 
 	//map rules
-	rulesModel := r.mapRulesToState(ctx, apiObject)
-	// Define the proper attribute types for RuleWithThresholdPluginModel
-	ruleAttrTypes := map[string]attr.Type{
-		"rule": types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"slowness": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"metric_name": types.StringType,
-						"aggregation": types.StringType,
-					},
-				},
-				"specific_js_error": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"metric_name": types.StringType,
-						"aggregation": types.StringType,
-						"operator":    types.StringType,
-						"value":       types.StringType,
-					},
-				},
-				"status_code": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"metric_name": types.StringType,
-						"aggregation": types.StringType,
-						"operator":    types.StringType,
-						"value":       types.StringType,
-					},
-				},
-				"throughput": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"metric_name": types.StringType,
-						"aggregation": types.StringType,
-					},
-				},
-			},
-		},
-		"operator": types.StringType,
-		"threshold": types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"warning": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"static": types.ObjectType{
-							AttrTypes: map[string]attr.Type{
-								"operator": types.StringType,
-								"value":    types.Int64Type,
-							},
-						},
-						"adaptive_baseline": types.ObjectType{
-							AttrTypes: map[string]attr.Type{
-								"deviation_factor": types.Float32Type,
-								"adaptability":     types.Float32Type,
-								"seasonality":      types.StringType,
-								"operator":         types.StringType,
-							},
-						},
-						"historic_baseline": types.ObjectType{
-							AttrTypes: map[string]attr.Type{
-								"baseline":         types.ListType{ElemType: types.ListType{ElemType: types.Float64Type}},
-								"deviation_factor": types.Float32Type,
-								"seasonality":      types.StringType,
-							},
-						},
-					},
-				},
-				"critical": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"static": types.ObjectType{
-							AttrTypes: map[string]attr.Type{
-								"operator": types.StringType,
-								"value":    types.Int64Type,
-							},
-						},
-						"adaptive_baseline": types.ObjectType{
-							AttrTypes: map[string]attr.Type{
-								"deviation_factor": types.Float32Type,
-								"adaptability":     types.Float32Type,
-								"seasonality":      types.StringType,
-								"operator":         types.StringType,
-							},
-						},
-						"historic_baseline": types.ObjectType{
-							AttrTypes: map[string]attr.Type{
-								"baseline":         types.ListType{ElemType: types.ListType{ElemType: types.Float64Type}},
-								"deviation_factor": types.Float32Type,
-								"seasonality":      types.StringType,
-							},
-						},
-					},
-				},
-			},
-		},
-	}
+	model.Rules = r.mapRulesToState(ctx, apiObject)
 
-	// Use ListValueFrom to automatically infer types from the slice of structs
-	rulesListValue, rulesDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ruleAttrTypes}, rulesModel)
-	diags.Append(rulesDiags...)
-	if diags.HasError() {
-		return diags
+	//map custom payload
+	if apiObject.CustomerPayloadFields != nil && len(apiObject.CustomerPayloadFields) > 0 {
+		customPayloadFields := make([]CustomPayloadFieldModel, len(apiObject.CustomerPayloadFields))
+		for i, field := range apiObject.CustomerPayloadFields {
+			customPayloadFields[i] = CustomPayloadFieldModel{
+				Key:   types.StringValue(field.Key),
+				Value: types.StringValue(fmt.Sprintf("%v", field.Value)),
+			}
+		}
+		model.CustomPayloadFields = customPayloadFields
+	} else {
+		model.CustomPayloadFields = nil
 	}
-	model.Rules = rulesListValue
-
-	//map custom paylaod
-	customPayloadFieldsList, payloadDiags := shared.CustomPayloadFieldsToTerraform(ctx, apiObject.CustomerPayloadFields)
-	if payloadDiags.HasError() {
-		diags.Append(payloadDiags...)
-		return diags
-	}
-	model.CustomPayloadFields = customPayloadFieldsList
 
 	//map threshold
 	model.Threshold = r.mapThresholdToState(ctx, apiObject.Threshold)

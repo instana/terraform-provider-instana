@@ -115,37 +115,17 @@ func (r *alertingConfigResourceFramework) UpdateState(ctx context.Context, state
 	}
 
 	// Set integration IDs
-	integrationIDs, diags := types.SetValueFrom(ctx, types.StringType, config.IntegrationIDs)
-	if diags.HasError() {
-		return diags
-	}
-	model.IntegrationIDs = integrationIDs
+	model.IntegrationIDs = config.IntegrationIDs
 
 	// Set event filter query
 	model.EventFilterQuery = util.SetStringPointerToState(config.EventFilteringConfiguration.Query)
 
 	// Set event filter event types
 	eventTypes := r.convertEventTypesToHarmonizedStringRepresentation(config.EventFilteringConfiguration.EventTypes)
-	if len(eventTypes) > 0 {
-		eventTypesSet, diags := types.SetValueFrom(ctx, types.StringType, eventTypes)
-		if diags.HasError() {
-			return diags
-		}
-		model.EventFilterEventTypes = eventTypesSet
-	} else {
-		model.EventFilterEventTypes = types.SetNull(types.StringType)
-	}
+	model.EventFilterEventTypes = eventTypes
 
 	// Set event filter rule IDs
-	if len(config.EventFilteringConfiguration.RuleIDs) > 0 {
-		ruleIDsSet, diags := types.SetValueFrom(ctx, types.StringType, config.EventFilteringConfiguration.RuleIDs)
-		if diags.HasError() {
-			return diags
-		}
-		model.EventFilterRuleIDs = ruleIDsSet
-	} else {
-		model.EventFilterRuleIDs = types.SetNull(types.StringType)
-	}
+	model.EventFilterRuleIDs = config.EventFilteringConfiguration.RuleIDs
 
 	// Convert custom payload fields to the appropriate Terraform types
 	// Using the utility function from tfutils package for better maintainability and reusability
@@ -190,13 +170,7 @@ func (r *alertingConfigResourceFramework) MapStateToDataObject(ctx context.Conte
 	alertName := model.AlertName.ValueString()
 
 	// Map integration IDs
-	var integrationIDs []string
-	if !model.IntegrationIDs.IsNull() {
-		diags.Append(model.IntegrationIDs.ElementsAs(ctx, &integrationIDs, false)...)
-		if diags.HasError() {
-			return nil, diags
-		}
-	}
+	integrationIDs := model.IntegrationIDs
 
 	// Map event filter query
 	var query *string
@@ -206,23 +180,10 @@ func (r *alertingConfigResourceFramework) MapStateToDataObject(ctx context.Conte
 	}
 
 	// Map event filter event types
-	var eventTypeStrs []string
-	if !model.EventFilterEventTypes.IsNull() {
-		diags.Append(model.EventFilterEventTypes.ElementsAs(ctx, &eventTypeStrs, false)...)
-		if diags.HasError() {
-			return nil, diags
-		}
-	}
-	eventTypes := r.readEventTypesFromStrings(eventTypeStrs)
+	eventTypes := r.readEventTypesFromStrings(model.EventFilterEventTypes)
 
 	// Map event filter rule IDs
-	var ruleIDs []string
-	if !model.EventFilterRuleIDs.IsNull() {
-		diags.Append(model.EventFilterRuleIDs.ElementsAs(ctx, &ruleIDs, false)...)
-		if diags.HasError() {
-			return nil, diags
-		}
-	}
+	ruleIDs := model.EventFilterRuleIDs
 
 	// Map custom payload fields
 	var customerPayloadFields []restapi.CustomPayloadField[any]

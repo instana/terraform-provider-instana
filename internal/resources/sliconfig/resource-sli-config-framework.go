@@ -11,7 +11,6 @@ import (
 	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/float64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -19,7 +18,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 // NewSliConfigResourceHandleFramework creates the resource handle for SLI configuration
@@ -223,48 +221,26 @@ func (r *sliConfigResourceFramework) UpdateState(ctx context.Context, state *tfs
 
 	// Map metric configuration if present
 	if sliConfig.MetricConfiguration != nil {
-		metricConfigModel := MetricConfigurationModel{
+		model.MetricConfiguration = &MetricConfigurationModel{
 			MetricName:  types.StringValue(sliConfig.MetricConfiguration.Name),
 			Aggregation: types.StringValue(sliConfig.MetricConfiguration.Aggregation),
 			Threshold:   types.Float64Value(sliConfig.MetricConfiguration.Threshold),
 		}
-
-		metricConfigObj, diags := types.ObjectValueFrom(ctx, map[string]attr.Type{
-			"metric_name": types.StringType,
-			"aggregation": types.StringType,
-			"threshold":   types.Float64Type,
-		}, metricConfigModel)
-		if diags.HasError() {
-			return diags
-		}
-
-		model.MetricConfiguration = metricConfigObj
-	} else {
-		model.MetricConfiguration = types.ObjectNull(map[string]attr.Type{
-			"metric_name": types.StringType,
-			"aggregation": types.StringType,
-			"threshold":   types.Float64Type,
-		})
 	}
 
 	// Map SLI entity
-	sliEntityModel := SliEntityModel{}
+	sliEntityModel := &SliEntityModel{}
 	var entityDiags diag.Diagnostics
-
-	sliEntityModel.ApplicationTimeBased = types.ObjectNull(applicationTimeBasedObjectType.AttrTypes)
-	sliEntityModel.ApplicationEventBased = types.ObjectNull(applicationEventBasedObjectType.AttrTypes)
-	sliEntityModel.WebsiteEventBased = types.ObjectNull(websiteEventBasedObjectType.AttrTypes)
-	sliEntityModel.WebsiteTimeBased = types.ObjectNull(websiteTimeBasedObjectType.AttrTypes)
 
 	switch sliConfig.SliEntity.Type {
 	case "application":
-		sliEntityModel.ApplicationTimeBased, entityDiags = r.mapApplicationTimeBasedToStateObject(ctx, sliConfig.SliEntity)
+		sliEntityModel.ApplicationTimeBased, entityDiags = r.mapApplicationTimeBasedToState(ctx, sliConfig.SliEntity)
 	case "availability":
-		sliEntityModel.ApplicationEventBased, entityDiags = r.mapApplicationEventBasedToStateObject(ctx, sliConfig.SliEntity)
+		sliEntityModel.ApplicationEventBased, entityDiags = r.mapApplicationEventBasedToState(ctx, sliConfig.SliEntity)
 	case "websiteEventBased":
-		sliEntityModel.WebsiteEventBased, entityDiags = r.mapWebsiteEventBasedToStateObject(ctx, sliConfig.SliEntity)
+		sliEntityModel.WebsiteEventBased, entityDiags = r.mapWebsiteEventBasedToState(ctx, sliConfig.SliEntity)
 	case "websiteTimeBased":
-		sliEntityModel.WebsiteTimeBased, entityDiags = r.mapWebsiteTimeBasedToStateObject(ctx, sliConfig.SliEntity)
+		sliEntityModel.WebsiteTimeBased, entityDiags = r.mapWebsiteTimeBasedToState(ctx, sliConfig.SliEntity)
 	default:
 		diags.AddError(
 			SliConfigErrUnsupportedEntityType,
@@ -278,52 +254,28 @@ func (r *sliConfigResourceFramework) UpdateState(ctx context.Context, state *tfs
 		return diags
 	}
 
-	// Create SLI entity object
-	model.SliEntity = types.ObjectValueMust(
-		map[string]attr.Type{
-			"application_time_based":  types.ObjectType{AttrTypes: applicationTimeBasedObjectType.AttrTypes},
-			"application_event_based": types.ObjectType{AttrTypes: applicationEventBasedObjectType.AttrTypes},
-			"website_event_based":     types.ObjectType{AttrTypes: websiteEventBasedObjectType.AttrTypes},
-			"website_time_based":      types.ObjectType{AttrTypes: websiteTimeBasedObjectType.AttrTypes},
-		},
-		map[string]attr.Value{
-			"application_time_based":  sliEntityModel.ApplicationTimeBased,
-			"application_event_based": sliEntityModel.ApplicationEventBased,
-			"website_event_based":     sliEntityModel.WebsiteEventBased,
-			"website_time_based":      sliEntityModel.WebsiteTimeBased,
-		},
-	)
+	model.SliEntity = sliEntityModel
 
 	// Set the state
 	diags.Append(state.Set(ctx, model)...)
 	return diags
 }
 
-func (r *sliConfigResourceFramework) mapApplicationTimeBasedToStateObject(ctx context.Context, sliEntity restapi.SliEntity) (types.Object, diag.Diagnostics) {
+func (r *sliConfigResourceFramework) mapApplicationTimeBasedToState(ctx context.Context, sliEntity restapi.SliEntity) (*ApplicationTimeBasedModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	appTimeBasedModel := ApplicationTimeBasedModel{
+	return &ApplicationTimeBasedModel{
 		ApplicationID: util.SetStringPointerToState(sliEntity.ApplicationID),
 		BoundaryScope: util.SetStringPointerToState(sliEntity.BoundaryScope),
-	}
-
-	appTimeBasedModel.ServiceID = util.SetStringPointerToState(sliEntity.ServiceID)
-
-	appTimeBasedModel.EndpointID = util.SetStringPointerToState(sliEntity.EndpointID)
-
-	appTimeBasedObj, objDiags := types.ObjectValueFrom(ctx, applicationTimeBasedObjectType.AttrTypes, appTimeBasedModel)
-	if objDiags.HasError() {
-		diags.Append(objDiags...)
-		return types.ObjectNull(applicationTimeBasedObjectType.AttrTypes), diags
-	}
-
-	return appTimeBasedObj, diags
+		ServiceID:     util.SetStringPointerToState(sliEntity.ServiceID),
+		EndpointID:    util.SetStringPointerToState(sliEntity.EndpointID),
+	}, diags
 }
 
-func (r *sliConfigResourceFramework) mapApplicationEventBasedToStateObject(ctx context.Context, sliEntity restapi.SliEntity) (types.Object, diag.Diagnostics) {
+func (r *sliConfigResourceFramework) mapApplicationEventBasedToState(ctx context.Context, sliEntity restapi.SliEntity) (*ApplicationEventBasedModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	appEventBasedModel := ApplicationEventBasedModel{
+	appEventBasedModel := &ApplicationEventBasedModel{
 		ApplicationID: util.SetStringPointerToState(sliEntity.ApplicationID),
 		BoundaryScope: util.SetStringPointerToState(sliEntity.BoundaryScope),
 		EndpointID:    util.SetStringPointerToState(sliEntity.EndpointID),
@@ -338,7 +290,7 @@ func (r *sliConfigResourceFramework) mapApplicationEventBasedToStateObject(ctx c
 				SliConfigErrMappingGoodEventFilter,
 				fmt.Sprintf(SliConfigErrMappingGoodEventFilterMsg, err),
 			)
-			return types.ObjectNull(applicationEventBasedObjectType.AttrTypes), diags
+			return nil, diags
 		}
 		appEventBasedModel.GoodEventFilterExpression = util.SetStringPointerToState(goodEventFilterStr)
 	} else {
@@ -353,7 +305,7 @@ func (r *sliConfigResourceFramework) mapApplicationEventBasedToStateObject(ctx c
 				SliConfigErrMappingBadEventFilter,
 				fmt.Sprintf(SliConfigErrMappingBadEventFilterMsg, err),
 			)
-			return types.ObjectNull(applicationEventBasedObjectType.AttrTypes), diags
+			return nil, diags
 		}
 		appEventBasedModel.BadEventFilterExpression = util.SetStringPointerToState(badEventFilterStr)
 	} else {
@@ -373,19 +325,13 @@ func (r *sliConfigResourceFramework) mapApplicationEventBasedToStateObject(ctx c
 		appEventBasedModel.IncludeSynthetic = types.BoolValue(false)
 	}
 
-	appEventBasedObj, objDiags := types.ObjectValueFrom(ctx, applicationEventBasedObjectType.AttrTypes, appEventBasedModel)
-	if objDiags.HasError() {
-		diags.Append(objDiags...)
-		return types.ObjectNull(applicationEventBasedObjectType.AttrTypes), diags
-	}
-
-	return appEventBasedObj, diags
+	return appEventBasedModel, diags
 }
 
-func (r *sliConfigResourceFramework) mapWebsiteEventBasedToStateObject(ctx context.Context, sliEntity restapi.SliEntity) (types.Object, diag.Diagnostics) {
+func (r *sliConfigResourceFramework) mapWebsiteEventBasedToState(ctx context.Context, sliEntity restapi.SliEntity) (*WebsiteEventBasedModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	websiteEventBasedModel := WebsiteEventBasedModel{
+	websiteEventBasedModel := &WebsiteEventBasedModel{
 		WebsiteID:  util.SetStringPointerToState(sliEntity.WebsiteId),
 		BeaconType: util.SetStringPointerToState(sliEntity.BeaconType),
 	}
@@ -398,7 +344,7 @@ func (r *sliConfigResourceFramework) mapWebsiteEventBasedToStateObject(ctx conte
 				SliConfigErrMappingGoodEventFilter,
 				fmt.Sprintf(SliConfigErrMappingGoodEventFilterMsg, err),
 			)
-			return types.ObjectNull(websiteEventBasedObjectType.AttrTypes), diags
+			return nil, diags
 		}
 		websiteEventBasedModel.GoodEventFilterExpression = util.SetStringPointerToState(goodEventFilterStr)
 	} else {
@@ -413,26 +359,20 @@ func (r *sliConfigResourceFramework) mapWebsiteEventBasedToStateObject(ctx conte
 				SliConfigErrMappingBadEventFilter,
 				fmt.Sprintf(SliConfigErrMappingBadEventFilterMsg, err),
 			)
-			return types.ObjectNull(websiteEventBasedObjectType.AttrTypes), diags
+			return nil, diags
 		}
 		websiteEventBasedModel.BadEventFilterExpression = util.SetStringPointerToState(badEventFilterStr)
 	} else {
 		websiteEventBasedModel.BadEventFilterExpression = types.StringNull()
 	}
 
-	websiteEventBasedObj, objDiags := types.ObjectValueFrom(ctx, websiteEventBasedObjectType.AttrTypes, websiteEventBasedModel)
-	if objDiags.HasError() {
-		diags.Append(objDiags...)
-		return types.ObjectNull(websiteEventBasedObjectType.AttrTypes), diags
-	}
-
-	return websiteEventBasedObj, diags
+	return websiteEventBasedModel, diags
 }
 
-func (r *sliConfigResourceFramework) mapWebsiteTimeBasedToStateObject(ctx context.Context, sliEntity restapi.SliEntity) (types.Object, diag.Diagnostics) {
+func (r *sliConfigResourceFramework) mapWebsiteTimeBasedToState(ctx context.Context, sliEntity restapi.SliEntity) (*WebsiteTimeBasedModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	websiteTimeBasedModel := WebsiteTimeBasedModel{
+	websiteTimeBasedModel := &WebsiteTimeBasedModel{
 		WebsiteID:  util.SetStringPointerToState(sliEntity.WebsiteId),
 		BeaconType: util.SetStringPointerToState(sliEntity.BeaconType),
 	}
@@ -445,20 +385,14 @@ func (r *sliConfigResourceFramework) mapWebsiteTimeBasedToStateObject(ctx contex
 				SliConfigErrMappingFilterExpression,
 				fmt.Sprintf(SliConfigErrMappingFilterExpressionMsg, err),
 			)
-			return types.ObjectNull(websiteTimeBasedObjectType.AttrTypes), diags
+			return nil, diags
 		}
 		websiteTimeBasedModel.FilterExpression = util.SetStringPointerToState(filterExprStr)
 	} else {
 		websiteTimeBasedModel.FilterExpression = types.StringNull()
 	}
 
-	websiteTimeBasedObj, objDiags := types.ObjectValueFrom(ctx, websiteTimeBasedObjectType.AttrTypes, websiteTimeBasedModel)
-	if objDiags.HasError() {
-		diags.Append(objDiags...)
-		return types.ObjectNull(websiteTimeBasedObjectType.AttrTypes), diags
-	}
-
-	return websiteTimeBasedObj, diags
+	return websiteTimeBasedModel, diags
 }
 
 func (r *sliConfigResourceFramework) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.SliConfig, diag.Diagnostics) {
@@ -493,17 +427,11 @@ func (r *sliConfigResourceFramework) MapStateToDataObject(ctx context.Context, p
 
 	// Map metric configuration
 	var metricConfiguration *restapi.MetricConfiguration
-	if !model.MetricConfiguration.IsNull() && !model.MetricConfiguration.IsUnknown() {
-		var metricConfigModel MetricConfigurationModel
-		diags.Append(model.MetricConfiguration.As(ctx, &metricConfigModel, basetypes.ObjectAsOptions{})...)
-		if diags.HasError() {
-			return nil, diags
-		}
-
+	if model.MetricConfiguration != nil {
 		metricConfiguration = &restapi.MetricConfiguration{
-			Name:        metricConfigModel.MetricName.ValueString(),
-			Aggregation: metricConfigModel.Aggregation.ValueString(),
-			Threshold:   metricConfigModel.Threshold.ValueFloat64(),
+			Name:        model.MetricConfiguration.MetricName.ValueString(),
+			Aggregation: model.MetricConfiguration.Aggregation.ValueString(),
+			Threshold:   model.MetricConfiguration.Threshold.ValueFloat64(),
 		}
 	}
 
@@ -511,22 +439,16 @@ func (r *sliConfigResourceFramework) MapStateToDataObject(ctx context.Context, p
 	var sliEntity restapi.SliEntity
 	var entityErr error
 
-	if !model.SliEntity.IsNull() && !model.SliEntity.IsUnknown() {
-		var sliEntityModel SliEntityModel
-		diags.Append(model.SliEntity.As(ctx, &sliEntityModel, basetypes.ObjectAsOptions{})...)
-		if diags.HasError() {
-			return nil, diags
-		}
-
+	if model.SliEntity != nil {
 		// Check which entity type is set
-		if !sliEntityModel.ApplicationTimeBased.IsNull() && !sliEntityModel.ApplicationTimeBased.IsUnknown() {
-			sliEntity, entityErr = r.mapApplicationTimeBasedFromStateObject(ctx, sliEntityModel.ApplicationTimeBased)
-		} else if !sliEntityModel.ApplicationEventBased.IsNull() && !sliEntityModel.ApplicationEventBased.IsUnknown() {
-			sliEntity, entityErr = r.mapApplicationEventBasedFromStateObject(ctx, sliEntityModel.ApplicationEventBased)
-		} else if !sliEntityModel.WebsiteEventBased.IsNull() && !sliEntityModel.WebsiteEventBased.IsUnknown() {
-			sliEntity, entityErr = r.mapWebsiteEventBasedFromStateObject(ctx, sliEntityModel.WebsiteEventBased)
-		} else if !sliEntityModel.WebsiteTimeBased.IsNull() && !sliEntityModel.WebsiteTimeBased.IsUnknown() {
-			sliEntity, entityErr = r.mapWebsiteTimeBasedFromStateObject(ctx, sliEntityModel.WebsiteTimeBased)
+		if model.SliEntity.ApplicationTimeBased != nil {
+			sliEntity, entityErr = r.mapApplicationTimeBasedFromState(model.SliEntity.ApplicationTimeBased)
+		} else if model.SliEntity.ApplicationEventBased != nil {
+			sliEntity, entityErr = r.mapApplicationEventBasedFromState(model.SliEntity.ApplicationEventBased)
+		} else if model.SliEntity.WebsiteEventBased != nil {
+			sliEntity, entityErr = r.mapWebsiteEventBasedFromState(model.SliEntity.WebsiteEventBased)
+		} else if model.SliEntity.WebsiteTimeBased != nil {
+			sliEntity, entityErr = r.mapWebsiteTimeBasedFromState(model.SliEntity.WebsiteTimeBased)
 		}
 
 		if entityErr != nil {
@@ -548,16 +470,11 @@ func (r *sliConfigResourceFramework) MapStateToDataObject(ctx context.Context, p
 	}, diags
 }
 
-func (r *sliConfigResourceFramework) mapApplicationTimeBasedFromStateObject(ctx context.Context, appTimeBasedObj types.Object) (restapi.SliEntity, error) {
-	if appTimeBasedObj.IsNull() || appTimeBasedObj.IsUnknown() {
-		return restapi.SliEntity{}, errors.New("application time based entity is null or unknown")
+func (r *sliConfigResourceFramework) mapApplicationTimeBasedFromState(appTimeBasedModel *ApplicationTimeBasedModel) (restapi.SliEntity, error) {
+	if appTimeBasedModel == nil {
+		return restapi.SliEntity{}, errors.New("application time based entity is null")
 	}
 
-	var appTimeBasedModel ApplicationTimeBasedModel
-	diags := appTimeBasedObj.As(ctx, &appTimeBasedModel, basetypes.ObjectAsOptions{})
-	if diags.HasError() {
-		return restapi.SliEntity{}, fmt.Errorf("failed to parse application time based entity: %v", diags)
-	}
 	applicationID := appTimeBasedModel.ApplicationID.ValueString()
 	boundaryScope := appTimeBasedModel.BoundaryScope.ValueString()
 
@@ -591,16 +508,11 @@ func (r *sliConfigResourceFramework) mapTagFilterStringToAPIModel(input string) 
 	return mapper.ToAPIModel(expr), nil
 }
 
-func (r *sliConfigResourceFramework) mapApplicationEventBasedFromStateObject(ctx context.Context, appEventBasedObj types.Object) (restapi.SliEntity, error) {
-	if appEventBasedObj.IsNull() || appEventBasedObj.IsUnknown() {
-		return restapi.SliEntity{}, errors.New("application event based entity is null or unknown")
+func (r *sliConfigResourceFramework) mapApplicationEventBasedFromState(appEventBasedModel *ApplicationEventBasedModel) (restapi.SliEntity, error) {
+	if appEventBasedModel == nil {
+		return restapi.SliEntity{}, errors.New("application event based entity is null")
 	}
 
-	var appEventBasedModel ApplicationEventBasedModel
-	diags := appEventBasedObj.As(ctx, &appEventBasedModel, basetypes.ObjectAsOptions{})
-	if diags.HasError() {
-		return restapi.SliEntity{}, fmt.Errorf("failed to parse application event based entity: %v", diags)
-	}
 	applicationID := appEventBasedModel.ApplicationID.ValueString()
 	boundaryScope := appEventBasedModel.BoundaryScope.ValueString()
 
@@ -639,16 +551,11 @@ func (r *sliConfigResourceFramework) mapApplicationEventBasedFromStateObject(ctx
 	return entity, nil
 }
 
-func (r *sliConfigResourceFramework) mapWebsiteEventBasedFromStateObject(ctx context.Context, websiteEventBasedObj types.Object) (restapi.SliEntity, error) {
-	if websiteEventBasedObj.IsNull() || websiteEventBasedObj.IsUnknown() {
-		return restapi.SliEntity{}, errors.New("website event based entity is null or unknown")
+func (r *sliConfigResourceFramework) mapWebsiteEventBasedFromState(websiteEventBasedModel *WebsiteEventBasedModel) (restapi.SliEntity, error) {
+	if websiteEventBasedModel == nil {
+		return restapi.SliEntity{}, errors.New("website event based entity is null")
 	}
 
-	var websiteEventBasedModel WebsiteEventBasedModel
-	diags := websiteEventBasedObj.As(ctx, &websiteEventBasedModel, basetypes.ObjectAsOptions{})
-	if diags.HasError() {
-		return restapi.SliEntity{}, fmt.Errorf("failed to parse website event based entity: %v", diags)
-	}
 	websiteID := websiteEventBasedModel.WebsiteID.ValueString()
 	beaconType := websiteEventBasedModel.BeaconType.ValueString()
 
@@ -677,16 +584,11 @@ func (r *sliConfigResourceFramework) mapWebsiteEventBasedFromStateObject(ctx con
 	return entity, nil
 }
 
-func (r *sliConfigResourceFramework) mapWebsiteTimeBasedFromStateObject(ctx context.Context, websiteTimeBasedObj types.Object) (restapi.SliEntity, error) {
-	if websiteTimeBasedObj.IsNull() || websiteTimeBasedObj.IsUnknown() {
-		return restapi.SliEntity{}, errors.New("website time based entity is null or unknown")
+func (r *sliConfigResourceFramework) mapWebsiteTimeBasedFromState(websiteTimeBasedModel *WebsiteTimeBasedModel) (restapi.SliEntity, error) {
+	if websiteTimeBasedModel == nil {
+		return restapi.SliEntity{}, errors.New("website time based entity is null")
 	}
 
-	var websiteTimeBasedModel WebsiteTimeBasedModel
-	diags := websiteTimeBasedObj.As(ctx, &websiteTimeBasedModel, basetypes.ObjectAsOptions{})
-	if diags.HasError() {
-		return restapi.SliEntity{}, fmt.Errorf("failed to parse website time based entity: %v", diags)
-	}
 	websiteID := websiteTimeBasedModel.WebsiteID.ValueString()
 	beaconType := websiteTimeBasedModel.BeaconType.ValueString()
 
