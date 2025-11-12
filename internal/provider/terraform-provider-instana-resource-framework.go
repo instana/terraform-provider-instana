@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
-	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"

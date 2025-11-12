@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/internal/datasources"
 	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
 	"github.com/gessnerfl/terraform-provider-instana/internal/resources/alertingchannel"
@@ -26,7 +27,6 @@ import (
 	"github.com/gessnerfl/terraform-provider-instana/internal/resources/synthetictest"
 	"github.com/gessnerfl/terraform-provider-instana/internal/resources/websitealertconfig"
 	"github.com/gessnerfl/terraform-provider-instana/internal/resources/websitemonitoringconfig"
-	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
