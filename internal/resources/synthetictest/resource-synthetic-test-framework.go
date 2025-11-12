@@ -62,6 +62,21 @@ func NewSyntheticTestResourceHandleFramework() resourcehandle.ResourceHandleFram
 						Optional:    true,
 						Description: SyntheticTestDescApplicationID,
 					},
+					"applications": schema.SetAttribute{
+						Optional:    true,
+						Description: "Array of application IDs",
+						ElementType: types.StringType,
+					},
+					"mobile_apps": schema.SetAttribute{
+						Optional:    true,
+						Description: "Array of mobile app IDs",
+						ElementType: types.StringType,
+					},
+					"websites": schema.SetAttribute{
+						Optional:    true,
+						Description: "Array of website IDs",
+						ElementType: types.StringType,
+					},
 					"custom_properties": schema.MapAttribute{
 						Optional:    true,
 						Description: SyntheticTestDescCustomProperties,
@@ -71,6 +86,22 @@ func NewSyntheticTestResourceHandleFramework() resourcehandle.ResourceHandleFram
 						Required:    true,
 						Description: SyntheticTestDescLocations,
 						ElementType: types.StringType,
+					},
+					"rbac_tags": schema.SetNestedAttribute{
+						Optional:    true,
+						Description: "RBAC tags for access control",
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"name": schema.StringAttribute{
+									Required:    true,
+									Description: "Tag name",
+								},
+								"value": schema.StringAttribute{
+									Required:    true,
+									Description: "Tag value",
+								},
+							},
+						},
 					},
 					"playback_mode": schema.StringAttribute{
 						Optional:    true,
@@ -178,6 +209,21 @@ func NewSyntheticTestResourceHandleFramework() resourcehandle.ResourceHandleFram
 								Optional:    true,
 								Description: SyntheticTestDescExpectMatch,
 							},
+							"expect_exists": schema.SetAttribute{
+								Optional:    true,
+								Description: "JSON paths that must exist in the response",
+								ElementType: types.StringType,
+							},
+							"expect_not_empty": schema.SetAttribute{
+								Optional:    true,
+								Description: "JSON paths that must not be empty in the response",
+								ElementType: types.StringType,
+							},
+							"expect_json": schema.MapAttribute{
+								Optional:    true,
+								Description: "Expected JSON structure in the response",
+								ElementType: types.StringType,
+							},
 						},
 					},
 					"http_script": schema.SingleNestedAttribute{
@@ -219,8 +265,453 @@ func NewSyntheticTestResourceHandleFramework() resourcehandle.ResourceHandleFram
 								Description: SyntheticTestDescTimeout,
 							},
 							"script": schema.StringAttribute{
+								Optional:    true,
+								Description: SyntheticTestDescScript,
+							},
+							"script_type": schema.StringAttribute{
+								Optional:    true,
+								Description: "Script type (Basic or Jest)",
+								Validators: []validator.String{
+									stringvalidator.OneOf("Basic", "Jest"),
+								},
+							},
+							"file_name": schema.StringAttribute{
+								Optional:    true,
+								Description: "Script file name",
+							},
+							"scripts": schema.SingleNestedAttribute{
+								Optional:    true,
+								Description: "Multiple scripts configuration for Jest",
+								Attributes: map[string]schema.Attribute{
+									"bundle": schema.StringAttribute{
+										Optional:    true,
+										Description: "Bundle content",
+									},
+									"script_file": schema.StringAttribute{
+										Optional:    true,
+										Description: "Script file content",
+									},
+								},
+							},
+						},
+					},
+					"browser_script": schema.SingleNestedAttribute{
+						Optional:    true,
+						Description: "Browser script configuration",
+						Attributes: map[string]schema.Attribute{
+							"mark_synthetic_call": schema.BoolAttribute{
+								Optional:    true,
+								Computed:    true,
+								Description: SyntheticTestDescMarkSyntheticCall,
+								Default:     booldefault.StaticBool(false),
+							},
+							"retries": schema.Int64Attribute{
+								Optional:    true,
+								Computed:    true,
+								Description: SyntheticTestDescRetries,
+								Default:     int64default.StaticInt64(0),
+								Validators: []validator.Int64{
+									int64Validator{
+										min: 0,
+										max: 2,
+									},
+								},
+							},
+							"retry_interval": schema.Int64Attribute{
+								Optional:    true,
+								Computed:    true,
+								Description: SyntheticTestDescRetryInterval,
+								Default:     int64default.StaticInt64(1),
+								Validators: []validator.Int64{
+									int64Validator{
+										min: 1,
+										max: 10,
+									},
+								},
+							},
+							"timeout": schema.StringAttribute{
+								Optional:    true,
+								Description: SyntheticTestDescTimeout,
+							},
+							"script": schema.StringAttribute{
+								Optional:    true,
+								Description: SyntheticTestDescScript,
+							},
+							"script_type": schema.StringAttribute{
+								Optional:    true,
+								Description: "Script type (Basic or Jest)",
+								Validators: []validator.String{
+									stringvalidator.OneOf("Basic", "Jest"),
+								},
+							},
+							"file_name": schema.StringAttribute{
+								Optional:    true,
+								Description: "Script file name",
+							},
+							"scripts": schema.SingleNestedAttribute{
+								Optional:    true,
+								Description: "Multiple scripts configuration for Jest",
+								Attributes: map[string]schema.Attribute{
+									"bundle": schema.StringAttribute{
+										Optional:    true,
+										Description: "Bundle content",
+									},
+									"script_file": schema.StringAttribute{
+										Optional:    true,
+										Description: "Script file content",
+									},
+								},
+							},
+							"browser": schema.StringAttribute{
+								Optional:    true,
+								Description: "Browser type (chrome or firefox)",
+								Validators: []validator.String{
+									stringvalidator.OneOf("chrome", "firefox"),
+								},
+							},
+							"record_video": schema.BoolAttribute{
+								Optional:    true,
+								Computed:    true,
+								Description: "Record video of the test execution",
+								Default:     booldefault.StaticBool(false),
+							},
+						},
+					},
+					"dns": schema.SingleNestedAttribute{
+						Optional:    true,
+						Description: "DNS test configuration",
+						Attributes: map[string]schema.Attribute{
+							"mark_synthetic_call": schema.BoolAttribute{
+								Optional:    true,
+								Computed:    true,
+								Description: SyntheticTestDescMarkSyntheticCall,
+								Default:     booldefault.StaticBool(false),
+							},
+							"retries": schema.Int64Attribute{
+								Optional:    true,
+								Computed:    true,
+								Description: SyntheticTestDescRetries,
+								Default:     int64default.StaticInt64(0),
+								Validators: []validator.Int64{
+									int64Validator{
+										min: 0,
+										max: 2,
+									},
+								},
+							},
+							"retry_interval": schema.Int64Attribute{
+								Optional:    true,
+								Computed:    true,
+								Description: SyntheticTestDescRetryInterval,
+								Default:     int64default.StaticInt64(1),
+								Validators: []validator.Int64{
+									int64Validator{
+										min: 1,
+										max: 10,
+									},
+								},
+							},
+							"timeout": schema.StringAttribute{
+								Optional:    true,
+								Description: SyntheticTestDescTimeout,
+							},
+							"lookup": schema.StringAttribute{
+								Required:    true,
+								Description: "Domain name to lookup",
+							},
+							"server": schema.StringAttribute{
+								Required:    true,
+								Description: "DNS server to query",
+							},
+							"query_type": schema.StringAttribute{
+								Optional:    true,
+								Description: "DNS query type",
+								Validators: []validator.String{
+									stringvalidator.OneOf("ALL", "ALL_CONDITIONS", "ANY", "A", "AAAA", "CNAME", "NS"),
+								},
+							},
+							"port": schema.Int64Attribute{
+								Optional:    true,
+								Description: "DNS server port",
+							},
+							"transport": schema.StringAttribute{
+								Optional:    true,
+								Description: "Transport protocol (TCP or UDP)",
+								Validators: []validator.String{
+									stringvalidator.OneOf("TCP", "UDP"),
+								},
+							},
+							"accept_cname": schema.BoolAttribute{
+								Optional:    true,
+								Description: "Accept CNAME records",
+							},
+							"lookup_server_name": schema.BoolAttribute{
+								Optional:    true,
+								Description: "Lookup server name",
+							},
+							"recursive_lookups": schema.BoolAttribute{
+								Optional:    true,
+								Description: "Enable recursive lookups",
+							},
+							"server_retries": schema.Int64Attribute{
+								Optional:    true,
+								Description: "Number of server retries",
+							},
+							"query_time": schema.SingleNestedAttribute{
+								Optional:    true,
+								Description: "Query time filter",
+								Attributes: map[string]schema.Attribute{
+									"key": schema.StringAttribute{
+										Required:    true,
+										Description: "Filter key",
+									},
+									"operator": schema.StringAttribute{
+										Required:    true,
+										Description: "Filter operator",
+										Validators: []validator.String{
+											stringvalidator.OneOf("CONTAINS", "EQUALS", "GREATER_THAN", "IS", "LESS_THAN", "MATCHES", "NOT_MATCHES"),
+										},
+									},
+									"value": schema.Int64Attribute{
+										Required:    true,
+										Description: "Filter value",
+									},
+								},
+							},
+							"target_values": schema.SetNestedAttribute{
+								Optional:    true,
+								Description: "Target value filters",
+								NestedObject: schema.NestedAttributeObject{
+									Attributes: map[string]schema.Attribute{
+										"key": schema.StringAttribute{
+											Required:    true,
+											Description: "Filter key",
+											Validators: []validator.String{
+												stringvalidator.OneOf("ALL", "ALL_CONDITIONS", "ANY", "A", "AAAA", "CNAME", "NS"),
+											},
+										},
+										"operator": schema.StringAttribute{
+											Required:    true,
+											Description: "Filter operator",
+											Validators: []validator.String{
+												stringvalidator.OneOf("CONTAINS", "EQUALS", "GREATER_THAN", "IS", "LESS_THAN", "MATCHES", "NOT_MATCHES"),
+											},
+										},
+										"value": schema.StringAttribute{
+											Required:    true,
+											Description: "Filter value",
+										},
+									},
+								},
+							},
+						},
+					},
+					"ssl_certificate": schema.SingleNestedAttribute{
+						Optional:    true,
+						Description: "SSL certificate test configuration",
+						Attributes: map[string]schema.Attribute{
+							"mark_synthetic_call": schema.BoolAttribute{
+								Optional:    true,
+								Computed:    true,
+								Description: SyntheticTestDescMarkSyntheticCall,
+								Default:     booldefault.StaticBool(false),
+							},
+							"retries": schema.Int64Attribute{
+								Optional:    true,
+								Computed:    true,
+								Description: SyntheticTestDescRetries,
+								Default:     int64default.StaticInt64(0),
+								Validators: []validator.Int64{
+									int64Validator{
+										min: 0,
+										max: 2,
+									},
+								},
+							},
+							"retry_interval": schema.Int64Attribute{
+								Optional:    true,
+								Computed:    true,
+								Description: SyntheticTestDescRetryInterval,
+								Default:     int64default.StaticInt64(1),
+								Validators: []validator.Int64{
+									int64Validator{
+										min: 1,
+										max: 10,
+									},
+								},
+							},
+							"timeout": schema.StringAttribute{
+								Optional:    true,
+								Description: SyntheticTestDescTimeout,
+							},
+							"hostname": schema.StringAttribute{
+								Required:    true,
+								Description: "Hostname to check SSL certificate",
+								Validators: []validator.String{
+									stringvalidator.LengthBetween(0, 2047),
+								},
+							},
+							"days_remaining_check": schema.Int64Attribute{
+								Required:    true,
+								Description: "Minimum days remaining before certificate expiration",
+								Validators: []validator.Int64{
+									int64Validator{
+										min: 1,
+										max: 365,
+									},
+								},
+							},
+							"accept_self_signed_certificate": schema.BoolAttribute{
+								Optional:    true,
+								Description: "Accept self-signed certificates",
+							},
+							"port": schema.Int64Attribute{
+								Optional:    true,
+								Description: "Port number",
+							},
+							"validation_rules": schema.SetNestedAttribute{
+								Optional:    true,
+								Description: "SSL certificate validation rules",
+								NestedObject: schema.NestedAttributeObject{
+									Attributes: map[string]schema.Attribute{
+										"key": schema.StringAttribute{
+											Required:    true,
+											Description: "Validation key",
+										},
+										"operator": schema.StringAttribute{
+											Required:    true,
+											Description: "Validation operator",
+											Validators: []validator.String{
+												stringvalidator.OneOf("CONTAINS", "EQUALS", "GREATER_THAN", "IS", "LESS_THAN", "MATCHES", "NOT_MATCHES"),
+											},
+										},
+										"value": schema.StringAttribute{
+											Required:    true,
+											Description: "Validation value",
+										},
+									},
+								},
+							},
+						},
+					},
+					"webpage_action": schema.SingleNestedAttribute{
+						Optional:    true,
+						Description: "Webpage action test configuration",
+						Attributes: map[string]schema.Attribute{
+							"mark_synthetic_call": schema.BoolAttribute{
+								Optional:    true,
+								Computed:    true,
+								Description: SyntheticTestDescMarkSyntheticCall,
+								Default:     booldefault.StaticBool(false),
+							},
+							"retries": schema.Int64Attribute{
+								Optional:    true,
+								Computed:    true,
+								Description: SyntheticTestDescRetries,
+								Default:     int64default.StaticInt64(0),
+								Validators: []validator.Int64{
+									int64Validator{
+										min: 0,
+										max: 2,
+									},
+								},
+							},
+							"retry_interval": schema.Int64Attribute{
+								Optional:    true,
+								Computed:    true,
+								Description: SyntheticTestDescRetryInterval,
+								Default:     int64default.StaticInt64(1),
+								Validators: []validator.Int64{
+									int64Validator{
+										min: 1,
+										max: 10,
+									},
+								},
+							},
+							"timeout": schema.StringAttribute{
+								Optional:    true,
+								Description: SyntheticTestDescTimeout,
+							},
+							"url": schema.StringAttribute{
+								Required:    true,
+								Description: SyntheticTestDescURL,
+								Validators: []validator.String{
+									stringvalidator.RegexMatches(regexp.MustCompile(`^https?://[^\s/$.?#].[^\s]*$`), SyntheticTestValidatorURLRegex),
+								},
+							},
+							"browser": schema.StringAttribute{
+								Optional:    true,
+								Description: "Browser type (chrome or firefox)",
+								Validators: []validator.String{
+									stringvalidator.OneOf("chrome", "firefox"),
+								},
+							},
+							"record_video": schema.BoolAttribute{
+								Optional:    true,
+								Computed:    true,
+								Description: "Record video of the test execution",
+								Default:     booldefault.StaticBool(false),
+							},
+						},
+					},
+					"webpage_script": schema.SingleNestedAttribute{
+						Optional:    true,
+						Description: "Webpage script test configuration",
+						Attributes: map[string]schema.Attribute{
+							"mark_synthetic_call": schema.BoolAttribute{
+								Optional:    true,
+								Computed:    true,
+								Description: SyntheticTestDescMarkSyntheticCall,
+								Default:     booldefault.StaticBool(false),
+							},
+							"retries": schema.Int64Attribute{
+								Optional:    true,
+								Computed:    true,
+								Description: SyntheticTestDescRetries,
+								Default:     int64default.StaticInt64(0),
+								Validators: []validator.Int64{
+									int64Validator{
+										min: 0,
+										max: 2,
+									},
+								},
+							},
+							"retry_interval": schema.Int64Attribute{
+								Optional:    true,
+								Computed:    true,
+								Description: SyntheticTestDescRetryInterval,
+								Default:     int64default.StaticInt64(1),
+								Validators: []validator.Int64{
+									int64Validator{
+										min: 1,
+										max: 10,
+									},
+								},
+							},
+							"timeout": schema.StringAttribute{
+								Optional:    true,
+								Description: SyntheticTestDescTimeout,
+							},
+							"script": schema.StringAttribute{
 								Required:    true,
 								Description: SyntheticTestDescScript,
+							},
+							"file_name": schema.StringAttribute{
+								Optional:    true,
+								Description: "Script file name",
+							},
+							"browser": schema.StringAttribute{
+								Optional:    true,
+								Description: "Browser type (chrome or firefox)",
+								Validators: []validator.String{
+									stringvalidator.OneOf("chrome", "firefox"),
+								},
+							},
+							"record_video": schema.BoolAttribute{
+								Optional:    true,
+								Computed:    true,
+								Description: "Record video of the test execution",
+								Default:     booldefault.StaticBool(false),
 							},
 						},
 					},
@@ -299,6 +790,33 @@ func (r *syntheticTestResourceFramework) MapStateToDataObject(ctx context.Contex
 		applicationID = &appID
 	}
 
+	// Map applications
+	var applications []string
+	if !model.Applications.IsNull() && !model.Applications.IsUnknown() {
+		diags.Append(model.Applications.ElementsAs(ctx, &applications, false)...)
+		if diags.HasError() {
+			return nil, diags
+		}
+	}
+
+	// Map mobile apps
+	var mobileApps []string
+	if !model.MobileApps.IsNull() && !model.MobileApps.IsUnknown() {
+		diags.Append(model.MobileApps.ElementsAs(ctx, &mobileApps, false)...)
+		if diags.HasError() {
+			return nil, diags
+		}
+	}
+
+	// Map websites
+	var websites []string
+	if !model.Websites.IsNull() && !model.Websites.IsUnknown() {
+		diags.Append(model.Websites.ElementsAs(ctx, &websites, false)...)
+		if diags.HasError() {
+			return nil, diags
+		}
+	}
+
 	// Map custom properties
 	customProperties := make(map[string]interface{})
 	if !model.CustomProperties.IsNull() && !model.CustomProperties.IsUnknown() {
@@ -314,6 +832,22 @@ func (r *syntheticTestResourceFramework) MapStateToDataObject(ctx context.Contex
 		diags.Append(model.Locations.ElementsAs(ctx, &locations, false)...)
 		if diags.HasError() {
 			return nil, diags
+		}
+	}
+
+	// Map RBAC tags
+	var rbacTags []restapi.ApiTag
+	if !model.RbacTags.IsNull() && !model.RbacTags.IsUnknown() {
+		var rbacTagModels []RbacTagModel
+		diags.Append(model.RbacTags.ElementsAs(ctx, &rbacTagModels, false)...)
+		if diags.HasError() {
+			return nil, diags
+		}
+		for _, tagModel := range rbacTagModels {
+			rbacTags = append(rbacTags, restapi.ApiTag{
+				Name:  tagModel.Name.ValueString(),
+				Value: tagModel.Value.ValueString(),
+			})
 		}
 	}
 
@@ -338,26 +872,52 @@ func (r *syntheticTestResourceFramework) MapStateToDataObject(ctx context.Contex
 		Description:      getStringPointerFromFrameworkType(model.Description),
 		Active:           model.Active.ValueBool(),
 		ApplicationID:    applicationID,
+		Applications:     applications,
+		MobileApps:       mobileApps,
+		Websites:         websites,
 		Configuration:    configuration,
 		CustomProperties: customProperties,
 		Locations:        locations,
 		PlaybackMode:     model.PlaybackMode.ValueString(),
 		TestFrequency:    testFrequency,
+		RbacTags:         rbacTags,
 	}, diags
 }
 
 func (r *syntheticTestResourceFramework) mapConfigurationFromModel(ctx context.Context, model SyntheticTestModel) (restapi.SyntheticTestConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	// Check if either http_action or http_script is set
-	if (model.HttpAction.IsNull() || model.HttpAction.IsUnknown()) && (model.HttpScript.IsNull() || model.HttpScript.IsUnknown()) {
-		diags.AddError(SyntheticTestErrConfigRequired, SyntheticTestErrConfigRequiredMsg)
-		return restapi.SyntheticTestConfig{}, diags
+	// Count how many configuration types are set
+	configCount := 0
+	if !model.HttpAction.IsNull() && !model.HttpAction.IsUnknown() {
+		configCount++
+	}
+	if !model.HttpScript.IsNull() && !model.HttpScript.IsUnknown() {
+		configCount++
+	}
+	if !model.BrowserScript.IsNull() && !model.BrowserScript.IsUnknown() {
+		configCount++
+	}
+	if !model.DNS.IsNull() && !model.DNS.IsUnknown() {
+		configCount++
+	}
+	if !model.SSLCertificate.IsNull() && !model.SSLCertificate.IsUnknown() {
+		configCount++
+	}
+	if !model.WebpageAction.IsNull() && !model.WebpageAction.IsUnknown() {
+		configCount++
+	}
+	if !model.WebpageScript.IsNull() && !model.WebpageScript.IsUnknown() {
+		configCount++
 	}
 
-	// Check if both http_action and http_script are set
-	if (!model.HttpAction.IsNull() && !model.HttpAction.IsUnknown()) && (!model.HttpScript.IsNull() && !model.HttpScript.IsUnknown()) {
-		diags.AddError(SyntheticTestErrInvalidConfig, SyntheticTestErrInvalidConfigMsg)
+	// Validate exactly one configuration type is set
+	if configCount == 0 {
+		diags.AddError(SyntheticTestErrConfigRequired, "Exactly one synthetic test configuration type must be specified")
+		return restapi.SyntheticTestConfig{}, diags
+	}
+	if configCount > 1 {
+		diags.AddError(SyntheticTestErrInvalidConfig, "Only one synthetic test configuration type can be specified")
 		return restapi.SyntheticTestConfig{}, diags
 	}
 
@@ -385,6 +945,33 @@ func (r *syntheticTestResourceFramework) mapConfigurationFromModel(ctx context.C
 			expectStatus = &status
 		}
 
+		// Map expect exists
+		var expectExists []string
+		if !httpActionModel.ExpectExists.IsNull() && !httpActionModel.ExpectExists.IsUnknown() {
+			diags.Append(httpActionModel.ExpectExists.ElementsAs(ctx, &expectExists, false)...)
+			if diags.HasError() {
+				return restapi.SyntheticTestConfig{}, diags
+			}
+		}
+
+		// Map expect not empty
+		var expectNotEmpty []string
+		if !httpActionModel.ExpectNotEmpty.IsNull() && !httpActionModel.ExpectNotEmpty.IsUnknown() {
+			diags.Append(httpActionModel.ExpectNotEmpty.ElementsAs(ctx, &expectNotEmpty, false)...)
+			if diags.HasError() {
+				return restapi.SyntheticTestConfig{}, diags
+			}
+		}
+
+		// Map expect json
+		var expectJson map[string]interface{}
+		if !httpActionModel.ExpectJson.IsNull() && !httpActionModel.ExpectJson.IsUnknown() {
+			diags.Append(httpActionModel.ExpectJson.ElementsAs(ctx, &expectJson, false)...)
+			if diags.HasError() {
+				return restapi.SyntheticTestConfig{}, diags
+			}
+		}
+
 		return restapi.SyntheticTestConfig{
 			MarkSyntheticCall: httpActionModel.MarkSyntheticCall.ValueBool(),
 			Retries:           int32(httpActionModel.Retries.ValueInt64()),
@@ -400,6 +987,9 @@ func (r *syntheticTestResourceFramework) mapConfigurationFromModel(ctx context.C
 			AllowInsecure:     getBoolPointerFromFrameworkType(httpActionModel.AllowInsecure),
 			ExpectStatus:      expectStatus,
 			ExpectMatch:       getStringPointerFromFrameworkType(httpActionModel.ExpectMatch),
+			ExpectExists:      expectExists,
+			ExpectNotEmpty:    expectNotEmpty,
+			ExpectJson:        expectJson,
 		}, diags
 	}
 
@@ -411,18 +1001,225 @@ func (r *syntheticTestResourceFramework) mapConfigurationFromModel(ctx context.C
 			return restapi.SyntheticTestConfig{}, diags
 		}
 
-		return restapi.SyntheticTestConfig{
+		config := restapi.SyntheticTestConfig{
 			MarkSyntheticCall: httpScriptModel.MarkSyntheticCall.ValueBool(),
 			Retries:           int32(httpScriptModel.Retries.ValueInt64()),
 			RetryInterval:     int32(httpScriptModel.RetryInterval.ValueInt64()),
 			SyntheticType:     "HTTPScript",
 			Timeout:           getStringPointerFromFrameworkType(httpScriptModel.Timeout),
 			Script:            getStringPointerFromFrameworkType(httpScriptModel.Script),
+			ScriptType:        getStringPointerFromFrameworkType(httpScriptModel.ScriptType),
+			FileName:          getStringPointerFromFrameworkType(httpScriptModel.FileName),
+		}
+
+		// Map scripts if present
+		if !httpScriptModel.Scripts.IsNull() && !httpScriptModel.Scripts.IsUnknown() {
+			var scriptsModel MultipleScriptsModel
+			diags.Append(httpScriptModel.Scripts.As(ctx, &scriptsModel, basetypes.ObjectAsOptions{})...)
+			if !diags.HasError() {
+				config.Scripts = &restapi.MultipleScriptsConfiguration{
+					Bundle:     getStringPointerFromFrameworkType(scriptsModel.Bundle),
+					ScriptFile: getStringPointerFromFrameworkType(scriptsModel.ScriptFile),
+				}
+			}
+		}
+
+		return config, diags
+	}
+
+	// Map Browser Script configuration
+	if !model.BrowserScript.IsNull() && !model.BrowserScript.IsUnknown() {
+		var browserScriptModel BrowserScriptConfigModel
+		diags.Append(model.BrowserScript.As(ctx, &browserScriptModel, basetypes.ObjectAsOptions{})...)
+		if diags.HasError() {
+			return restapi.SyntheticTestConfig{}, diags
+		}
+
+		config := restapi.SyntheticTestConfig{
+			MarkSyntheticCall: browserScriptModel.MarkSyntheticCall.ValueBool(),
+			Retries:           int32(browserScriptModel.Retries.ValueInt64()),
+			RetryInterval:     int32(browserScriptModel.RetryInterval.ValueInt64()),
+			SyntheticType:     "BrowserScript",
+			Timeout:           getStringPointerFromFrameworkType(browserScriptModel.Timeout),
+			Script:            getStringPointerFromFrameworkType(browserScriptModel.Script),
+			ScriptType:        getStringPointerFromFrameworkType(browserScriptModel.ScriptType),
+			FileName:          getStringPointerFromFrameworkType(browserScriptModel.FileName),
+			Browser:           getStringPointerFromFrameworkType(browserScriptModel.Browser),
+			RecordVideo:       getBoolPointerFromFrameworkType(browserScriptModel.RecordVideo),
+		}
+
+		// Map scripts if present
+		if !browserScriptModel.Scripts.IsNull() && !browserScriptModel.Scripts.IsUnknown() {
+			var scriptsModel MultipleScriptsModel
+			diags.Append(browserScriptModel.Scripts.As(ctx, &scriptsModel, basetypes.ObjectAsOptions{})...)
+			if !diags.HasError() {
+				config.Scripts = &restapi.MultipleScriptsConfiguration{
+					Bundle:     getStringPointerFromFrameworkType(scriptsModel.Bundle),
+					ScriptFile: getStringPointerFromFrameworkType(scriptsModel.ScriptFile),
+				}
+			}
+		}
+
+		return config, diags
+	}
+
+	// Map DNS configuration
+	if !model.DNS.IsNull() && !model.DNS.IsUnknown() {
+		var dnsModel DNSConfigModel
+		diags.Append(model.DNS.As(ctx, &dnsModel, basetypes.ObjectAsOptions{})...)
+		if diags.HasError() {
+			return restapi.SyntheticTestConfig{}, diags
+		}
+
+		config := restapi.SyntheticTestConfig{
+			MarkSyntheticCall: dnsModel.MarkSyntheticCall.ValueBool(),
+			Retries:           int32(dnsModel.Retries.ValueInt64()),
+			RetryInterval:     int32(dnsModel.RetryInterval.ValueInt64()),
+			SyntheticType:     "DNS",
+			Timeout:           getStringPointerFromFrameworkType(dnsModel.Timeout),
+			Lookup:            getStringPointerFromFrameworkType(dnsModel.Lookup),
+			Server:            getStringPointerFromFrameworkType(dnsModel.Server),
+			QueryType:         getStringPointerFromFrameworkType(dnsModel.QueryType),
+			Transport:         getStringPointerFromFrameworkType(dnsModel.Transport),
+			AcceptCNAME:       getBoolPointerFromFrameworkType(dnsModel.AcceptCNAME),
+			LookupServerName:  getBoolPointerFromFrameworkType(dnsModel.LookupServerName),
+			RecursiveLookups:  getBoolPointerFromFrameworkType(dnsModel.RecursiveLookups),
+		}
+
+		// Map port
+		if !dnsModel.Port.IsNull() && !dnsModel.Port.IsUnknown() {
+			port := int32(dnsModel.Port.ValueInt64())
+			config.Port = &port
+		}
+
+		// Map server retries
+		if !dnsModel.ServerRetries.IsNull() && !dnsModel.ServerRetries.IsUnknown() {
+			retries := int32(dnsModel.ServerRetries.ValueInt64())
+			config.ServerRetries = &retries
+		}
+
+		// Map query time
+		if !dnsModel.QueryTime.IsNull() && !dnsModel.QueryTime.IsUnknown() {
+			var queryTimeModel DNSFilterQueryTimeModel
+			diags.Append(dnsModel.QueryTime.As(ctx, &queryTimeModel, basetypes.ObjectAsOptions{})...)
+			if !diags.HasError() {
+				config.QueryTime = &restapi.DNSFilterQueryTime{
+					Key:      queryTimeModel.Key.ValueString(),
+					Operator: queryTimeModel.Operator.ValueString(),
+					Value:    queryTimeModel.Value.ValueInt64(),
+				}
+			}
+		}
+
+		// Map target values
+		if !dnsModel.TargetValues.IsNull() && !dnsModel.TargetValues.IsUnknown() {
+			var targetValueModels []DNSFilterTargetValueModel
+			diags.Append(dnsModel.TargetValues.ElementsAs(ctx, &targetValueModels, false)...)
+			if !diags.HasError() {
+				for _, tvModel := range targetValueModels {
+					config.TargetValues = append(config.TargetValues, restapi.DNSFilterTargetValue{
+						Key:      tvModel.Key.ValueString(),
+						Operator: tvModel.Operator.ValueString(),
+						Value:    tvModel.Value.ValueString(),
+					})
+				}
+			}
+		}
+
+		return config, diags
+	}
+
+	// Map SSL Certificate configuration
+	if !model.SSLCertificate.IsNull() && !model.SSLCertificate.IsUnknown() {
+		var sslModel SSLCertificateConfigModel
+		diags.Append(model.SSLCertificate.As(ctx, &sslModel, basetypes.ObjectAsOptions{})...)
+		if diags.HasError() {
+			return restapi.SyntheticTestConfig{}, diags
+		}
+
+		config := restapi.SyntheticTestConfig{
+			MarkSyntheticCall:    sslModel.MarkSyntheticCall.ValueBool(),
+			Retries:              int32(sslModel.Retries.ValueInt64()),
+			RetryInterval:        int32(sslModel.RetryInterval.ValueInt64()),
+			SyntheticType:        "SSLCertificate",
+			Timeout:              getStringPointerFromFrameworkType(sslModel.Timeout),
+			Hostname:             getStringPointerFromFrameworkType(sslModel.Hostname),
+			AcceptSelfSignedCert: getBoolPointerFromFrameworkType(sslModel.AcceptSelfSignedCert),
+		}
+
+		// Map days remaining check
+		if !sslModel.DaysRemainingCheck.IsNull() && !sslModel.DaysRemainingCheck.IsUnknown() {
+			days := int32(sslModel.DaysRemainingCheck.ValueInt64())
+			config.DaysRemainingCheck = &days
+		}
+
+		// Map port
+		if !sslModel.Port.IsNull() && !sslModel.Port.IsUnknown() {
+			port := int32(sslModel.Port.ValueInt64())
+			config.SSLPort = &port
+		}
+
+		// Map validation rules
+		if !sslModel.ValidationRules.IsNull() && !sslModel.ValidationRules.IsUnknown() {
+			var validationRuleModels []SSLCertificateValidationModel
+			diags.Append(sslModel.ValidationRules.ElementsAs(ctx, &validationRuleModels, false)...)
+			if !diags.HasError() {
+				for _, vrModel := range validationRuleModels {
+					config.ValidationRules = append(config.ValidationRules, restapi.SSLCertificateValidation{
+						Key:      vrModel.Key.ValueString(),
+						Operator: vrModel.Operator.ValueString(),
+						Value:    vrModel.Value.ValueString(),
+					})
+				}
+			}
+		}
+
+		return config, diags
+	}
+
+	// Map Webpage Action configuration
+	if !model.WebpageAction.IsNull() && !model.WebpageAction.IsUnknown() {
+		var webpageActionModel WebpageActionConfigModel
+		diags.Append(model.WebpageAction.As(ctx, &webpageActionModel, basetypes.ObjectAsOptions{})...)
+		if diags.HasError() {
+			return restapi.SyntheticTestConfig{}, diags
+		}
+
+		return restapi.SyntheticTestConfig{
+			MarkSyntheticCall: webpageActionModel.MarkSyntheticCall.ValueBool(),
+			Retries:           int32(webpageActionModel.Retries.ValueInt64()),
+			RetryInterval:     int32(webpageActionModel.RetryInterval.ValueInt64()),
+			SyntheticType:     "WebpageAction",
+			Timeout:           getStringPointerFromFrameworkType(webpageActionModel.Timeout),
+			URL:               getStringPointerFromFrameworkType(webpageActionModel.URL),
+			Browser:           getStringPointerFromFrameworkType(webpageActionModel.Browser),
+			RecordVideo:       getBoolPointerFromFrameworkType(webpageActionModel.RecordVideo),
+		}, diags
+	}
+
+	// Map Webpage Script configuration
+	if !model.WebpageScript.IsNull() && !model.WebpageScript.IsUnknown() {
+		var webpageScriptModel WebpageScriptConfigModel
+		diags.Append(model.WebpageScript.As(ctx, &webpageScriptModel, basetypes.ObjectAsOptions{})...)
+		if diags.HasError() {
+			return restapi.SyntheticTestConfig{}, diags
+		}
+
+		return restapi.SyntheticTestConfig{
+			MarkSyntheticCall: webpageScriptModel.MarkSyntheticCall.ValueBool(),
+			Retries:           int32(webpageScriptModel.Retries.ValueInt64()),
+			RetryInterval:     int32(webpageScriptModel.RetryInterval.ValueInt64()),
+			SyntheticType:     "WebpageScript",
+			Timeout:           getStringPointerFromFrameworkType(webpageScriptModel.Timeout),
+			Script:            getStringPointerFromFrameworkType(webpageScriptModel.Script),
+			FileName:          getStringPointerFromFrameworkType(webpageScriptModel.FileName),
+			Browser:           getStringPointerFromFrameworkType(webpageScriptModel.Browser),
+			RecordVideo:       getBoolPointerFromFrameworkType(webpageScriptModel.RecordVideo),
 		}, diags
 	}
 
 	// This should never happen due to the checks above
-	diags.AddError(SyntheticTestErrNoValidConfig, SyntheticTestErrNoValidConfigMsg)
+	diags.AddError(SyntheticTestErrNoValidConfig, "No valid synthetic test configuration found")
 	return restapi.SyntheticTestConfig{}, diags
 }
 
@@ -442,6 +1239,39 @@ func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state 
 
 	// Map application ID
 	model.ApplicationID = util.SetStringPointerToState(apiObject.ApplicationID)
+
+	// Map applications
+	if apiObject.Applications != nil && len(apiObject.Applications) > 0 {
+		appValues := make([]attr.Value, len(apiObject.Applications))
+		for i, app := range apiObject.Applications {
+			appValues[i] = types.StringValue(app)
+		}
+		model.Applications = types.SetValueMust(types.StringType, appValues)
+	} else {
+		model.Applications = types.SetNull(types.StringType)
+	}
+
+	// Map mobile apps
+	if apiObject.MobileApps != nil && len(apiObject.MobileApps) > 0 {
+		mobileAppValues := make([]attr.Value, len(apiObject.MobileApps))
+		for i, app := range apiObject.MobileApps {
+			mobileAppValues[i] = types.StringValue(app)
+		}
+		model.MobileApps = types.SetValueMust(types.StringType, mobileAppValues)
+	} else {
+		model.MobileApps = types.SetNull(types.StringType)
+	}
+
+	// Map websites
+	if apiObject.Websites != nil && len(apiObject.Websites) > 0 {
+		websiteValues := make([]attr.Value, len(apiObject.Websites))
+		for i, website := range apiObject.Websites {
+			websiteValues[i] = types.StringValue(website)
+		}
+		model.Websites = types.SetValueMust(types.StringType, websiteValues)
+	} else {
+		model.Websites = types.SetNull(types.StringType)
+	}
 
 	// Map test frequency
 	if apiObject.TestFrequency != nil {
@@ -470,6 +1300,36 @@ func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state 
 		model.Locations = types.SetValueMust(types.StringType, locationValues)
 	} else {
 		model.Locations = types.SetNull(types.StringType)
+	}
+
+	// Map RBAC tags
+	if apiObject.RbacTags != nil && len(apiObject.RbacTags) > 0 {
+		rbacTagValues := make([]attr.Value, len(apiObject.RbacTags))
+		for i, tag := range apiObject.RbacTags {
+			tagObj, _ := types.ObjectValue(
+				map[string]attr.Type{
+					"name":  types.StringType,
+					"value": types.StringType,
+				},
+				map[string]attr.Value{
+					"name":  types.StringValue(tag.Name),
+					"value": types.StringValue(tag.Value),
+				},
+			)
+			rbacTagValues[i] = tagObj
+		}
+		model.RbacTags = types.SetValueMust(
+			types.ObjectType{AttrTypes: map[string]attr.Type{
+				"name":  types.StringType,
+				"value": types.StringType,
+			}},
+			rbacTagValues,
+		)
+	} else {
+		model.RbacTags = types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
+			"name":  types.StringType,
+			"value": types.StringType,
+		}})
 	}
 
 	// Map configuration based on synthetic type
@@ -509,6 +1369,39 @@ func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state 
 			httpActionModel.Headers = types.MapNull(types.StringType)
 		}
 
+		// Map expect exists
+		if apiObject.Configuration.ExpectExists != nil && len(apiObject.Configuration.ExpectExists) > 0 {
+			expectExistsValues := make([]attr.Value, len(apiObject.Configuration.ExpectExists))
+			for i, val := range apiObject.Configuration.ExpectExists {
+				expectExistsValues[i] = types.StringValue(val)
+			}
+			httpActionModel.ExpectExists = types.SetValueMust(types.StringType, expectExistsValues)
+		} else {
+			httpActionModel.ExpectExists = types.SetNull(types.StringType)
+		}
+
+		// Map expect not empty
+		if apiObject.Configuration.ExpectNotEmpty != nil && len(apiObject.Configuration.ExpectNotEmpty) > 0 {
+			expectNotEmptyValues := make([]attr.Value, len(apiObject.Configuration.ExpectNotEmpty))
+			for i, val := range apiObject.Configuration.ExpectNotEmpty {
+				expectNotEmptyValues[i] = types.StringValue(val)
+			}
+			httpActionModel.ExpectNotEmpty = types.SetValueMust(types.StringType, expectNotEmptyValues)
+		} else {
+			httpActionModel.ExpectNotEmpty = types.SetNull(types.StringType)
+		}
+
+		// Map expect json
+		if apiObject.Configuration.ExpectJson != nil && len(apiObject.Configuration.ExpectJson) > 0 {
+			expectJsonMap := make(map[string]attr.Value)
+			for k, v := range apiObject.Configuration.ExpectJson {
+				expectJsonMap[k] = types.StringValue(fmt.Sprintf("%v", v))
+			}
+			httpActionModel.ExpectJson = types.MapValueMust(types.StringType, expectJsonMap)
+		} else {
+			httpActionModel.ExpectJson = types.MapNull(types.StringType)
+		}
+
 		// Create object for http_action
 		httpActionObj, _ := types.ObjectValueFrom(ctx, map[string]attr.Type{
 			"mark_synthetic_call": types.BoolType,
@@ -524,15 +1417,81 @@ func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state 
 			"allow_insecure":      types.BoolType,
 			"expect_status":       types.Int64Type,
 			"expect_match":        types.StringType,
+			"expect_exists":       types.SetType{ElemType: types.StringType},
+			"expect_not_empty":    types.SetType{ElemType: types.StringType},
+			"expect_json":         types.MapType{ElemType: types.StringType},
 		}, httpActionModel)
 
 		model.HttpAction = httpActionObj
+		// Set all other config types to null with proper attribute types
 		model.HttpScript = types.ObjectNull(map[string]attr.Type{
 			"mark_synthetic_call": types.BoolType,
 			"retries":             types.Int64Type,
 			"retry_interval":      types.Int64Type,
 			"timeout":             types.StringType,
 			"script":              types.StringType,
+			"script_type":         types.StringType,
+			"file_name":           types.StringType,
+			"scripts":             types.ObjectType{AttrTypes: map[string]attr.Type{"bundle": types.StringType, "script_file": types.StringType}},
+		})
+		model.BrowserScript = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"script":              types.StringType,
+			"script_type":         types.StringType,
+			"file_name":           types.StringType,
+			"scripts":             types.ObjectType{AttrTypes: map[string]attr.Type{"bundle": types.StringType, "script_file": types.StringType}},
+			"browser":             types.StringType,
+			"record_video":        types.BoolType,
+		})
+		model.DNS = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"lookup":              types.StringType,
+			"server":              types.StringType,
+			"query_type":          types.StringType,
+			"port":                types.Int64Type,
+			"transport":           types.StringType,
+			"accept_cname":        types.BoolType,
+			"lookup_server_name":  types.BoolType,
+			"recursive_lookups":   types.BoolType,
+			"server_retries":      types.Int64Type,
+			"query_time":          types.ObjectType{AttrTypes: map[string]attr.Type{"key": types.StringType, "operator": types.StringType, "value": types.Int64Type}},
+			"target_values":       types.SetType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"key": types.StringType, "operator": types.StringType, "value": types.StringType}}},
+		})
+		model.SSLCertificate = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call":            types.BoolType,
+			"retries":                        types.Int64Type,
+			"retry_interval":                 types.Int64Type,
+			"timeout":                        types.StringType,
+			"hostname":                       types.StringType,
+			"days_remaining_check":           types.Int64Type,
+			"accept_self_signed_certificate": types.BoolType,
+			"port":                           types.Int64Type,
+			"validation_rules":               types.SetType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"key": types.StringType, "operator": types.StringType, "value": types.StringType}}},
+		})
+		model.WebpageAction = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"url":                 types.StringType,
+			"browser":             types.StringType,
+			"record_video":        types.BoolType,
+		})
+		model.WebpageScript = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"script":              types.StringType,
+			"file_name":           types.StringType,
+			"browser":             types.StringType,
+			"record_video":        types.BoolType,
 		})
 	} else if apiObject.Configuration.SyntheticType == "HTTPScript" {
 		httpScriptModel := HttpScriptConfigModel{
@@ -544,6 +1503,32 @@ func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state 
 		// Map optional fields
 		httpScriptModel.Timeout = util.SetStringPointerToState(apiObject.Configuration.Timeout)
 		httpScriptModel.Script = util.SetStringPointerToState(apiObject.Configuration.Script)
+		httpScriptModel.ScriptType = util.SetStringPointerToState(apiObject.Configuration.ScriptType)
+		if apiObject.Configuration.FileName != nil && *apiObject.Configuration.FileName != "" {
+			httpScriptModel.FileName = types.StringValue(*apiObject.Configuration.FileName)
+		} else {
+			httpScriptModel.FileName = types.StringNull()
+		}
+
+		// Map scripts if present
+		if apiObject.Configuration.Scripts != nil {
+			scriptsObj, _ := types.ObjectValue(
+				map[string]attr.Type{
+					"bundle":      types.StringType,
+					"script_file": types.StringType,
+				},
+				map[string]attr.Value{
+					"bundle":      util.SetStringPointerToState(apiObject.Configuration.Scripts.Bundle),
+					"script_file": util.SetStringPointerToState(apiObject.Configuration.Scripts.ScriptFile),
+				},
+			)
+			httpScriptModel.Scripts = scriptsObj
+		} else {
+			httpScriptModel.Scripts = types.ObjectNull(map[string]attr.Type{
+				"bundle":      types.StringType,
+				"script_file": types.StringType,
+			})
+		}
 
 		// Create object for http_script
 		httpScriptObj, _ := types.ObjectValueFrom(ctx, map[string]attr.Type{
@@ -552,6 +1537,9 @@ func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state 
 			"retry_interval":      types.Int64Type,
 			"timeout":             types.StringType,
 			"script":              types.StringType,
+			"script_type":         types.StringType,
+			"file_name":           types.StringType,
+			"scripts":             types.ObjectType{AttrTypes: map[string]attr.Type{"bundle": types.StringType, "script_file": types.StringType}},
 		}, httpScriptModel)
 
 		model.HttpScript = httpScriptObj
@@ -569,6 +1557,733 @@ func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state 
 			"allow_insecure":      types.BoolType,
 			"expect_status":       types.Int64Type,
 			"expect_match":        types.StringType,
+			"expect_exists":       types.SetType{ElemType: types.StringType},
+			"expect_not_empty":    types.SetType{ElemType: types.StringType},
+			"expect_json":         types.MapType{ElemType: types.StringType},
+		})
+		model.BrowserScript = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"script":              types.StringType,
+			"script_type":         types.StringType,
+			"file_name":           types.StringType,
+			"scripts":             types.ObjectType{AttrTypes: map[string]attr.Type{"bundle": types.StringType, "script_file": types.StringType}},
+			"browser":             types.StringType,
+			"record_video":        types.BoolType,
+		})
+		model.DNS = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"lookup":              types.StringType,
+			"server":              types.StringType,
+			"query_type":          types.StringType,
+			"port":                types.Int64Type,
+			"transport":           types.StringType,
+			"accept_cname":        types.BoolType,
+			"lookup_server_name":  types.BoolType,
+			"recursive_lookups":   types.BoolType,
+			"server_retries":      types.Int64Type,
+			"query_time":          types.ObjectType{AttrTypes: map[string]attr.Type{"key": types.StringType, "operator": types.StringType, "value": types.Int64Type}},
+			"target_values":       types.SetType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"key": types.StringType, "operator": types.StringType, "value": types.StringType}}},
+		})
+		model.SSLCertificate = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call":            types.BoolType,
+			"retries":                        types.Int64Type,
+			"retry_interval":                 types.Int64Type,
+			"timeout":                        types.StringType,
+			"hostname":                       types.StringType,
+			"days_remaining_check":           types.Int64Type,
+			"accept_self_signed_certificate": types.BoolType,
+			"port":                           types.Int64Type,
+			"validation_rules":               types.SetType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"key": types.StringType, "operator": types.StringType, "value": types.StringType}}},
+		})
+		model.WebpageAction = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"url":                 types.StringType,
+			"browser":             types.StringType,
+			"record_video":        types.BoolType,
+		})
+		model.WebpageScript = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"script":              types.StringType,
+			"file_name":           types.StringType,
+			"browser":             types.StringType,
+			"record_video":        types.BoolType,
+		})
+
+	} else if apiObject.Configuration.SyntheticType == "BrowserScript" {
+		browserScriptModel := BrowserScriptConfigModel{
+			MarkSyntheticCall: types.BoolValue(apiObject.Configuration.MarkSyntheticCall),
+			Retries:           types.Int64Value(int64(apiObject.Configuration.Retries)),
+			RetryInterval:     types.Int64Value(int64(apiObject.Configuration.RetryInterval)),
+		}
+
+		browserScriptModel.Timeout = util.SetStringPointerToState(apiObject.Configuration.Timeout)
+		browserScriptModel.Script = util.SetStringPointerToState(apiObject.Configuration.Script)
+		browserScriptModel.ScriptType = util.SetStringPointerToState(apiObject.Configuration.ScriptType)
+		if apiObject.Configuration.FileName != nil && *apiObject.Configuration.FileName != "" {
+			browserScriptModel.FileName = types.StringValue(*apiObject.Configuration.FileName)
+		} else {
+			browserScriptModel.FileName = types.StringNull()
+		}
+		browserScriptModel.Browser = util.SetStringPointerToState(apiObject.Configuration.Browser)
+
+		if apiObject.Configuration.RecordVideo != nil {
+			browserScriptModel.RecordVideo = types.BoolValue(*apiObject.Configuration.RecordVideo)
+		}
+
+		if apiObject.Configuration.Scripts != nil {
+			scriptsObj, _ := types.ObjectValue(
+				map[string]attr.Type{
+					"bundle":      types.StringType,
+					"script_file": types.StringType,
+				},
+				map[string]attr.Value{
+					"bundle":      util.SetStringPointerToState(apiObject.Configuration.Scripts.Bundle),
+					"script_file": util.SetStringPointerToState(apiObject.Configuration.Scripts.ScriptFile),
+				},
+			)
+			browserScriptModel.Scripts = scriptsObj
+		} else {
+			browserScriptModel.Scripts = types.ObjectNull(map[string]attr.Type{
+				"bundle":      types.StringType,
+				"script_file": types.StringType,
+			})
+		}
+
+		browserScriptObj, _ := types.ObjectValueFrom(ctx, map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"script":              types.StringType,
+			"script_type":         types.StringType,
+			"file_name":           types.StringType,
+			"scripts":             types.ObjectType{AttrTypes: map[string]attr.Type{"bundle": types.StringType, "script_file": types.StringType}},
+			"browser":             types.StringType,
+			"record_video":        types.BoolType,
+		}, browserScriptModel)
+
+		model.BrowserScript = browserScriptObj
+		model.HttpAction = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"url":                 types.StringType,
+			"operation":           types.StringType,
+			"headers":             types.MapType{ElemType: types.StringType},
+			"body":                types.StringType,
+			"validation_string":   types.StringType,
+			"follow_redirect":     types.BoolType,
+			"allow_insecure":      types.BoolType,
+			"expect_status":       types.Int64Type,
+			"expect_match":        types.StringType,
+			"expect_exists":       types.SetType{ElemType: types.StringType},
+			"expect_not_empty":    types.SetType{ElemType: types.StringType},
+			"expect_json":         types.MapType{ElemType: types.StringType},
+		})
+		model.HttpScript = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"script":              types.StringType,
+			"script_type":         types.StringType,
+			"file_name":           types.StringType,
+			"scripts":             types.ObjectType{AttrTypes: map[string]attr.Type{"bundle": types.StringType, "script_file": types.StringType}},
+		})
+		model.DNS = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"lookup":              types.StringType,
+			"server":              types.StringType,
+			"query_type":          types.StringType,
+			"port":                types.Int64Type,
+			"transport":           types.StringType,
+			"accept_cname":        types.BoolType,
+			"lookup_server_name":  types.BoolType,
+			"recursive_lookups":   types.BoolType,
+			"server_retries":      types.Int64Type,
+			"query_time":          types.ObjectType{AttrTypes: map[string]attr.Type{"key": types.StringType, "operator": types.StringType, "value": types.Int64Type}},
+			"target_values":       types.SetType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"key": types.StringType, "operator": types.StringType, "value": types.StringType}}},
+		})
+		model.SSLCertificate = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call":            types.BoolType,
+			"retries":                        types.Int64Type,
+			"retry_interval":                 types.Int64Type,
+			"timeout":                        types.StringType,
+			"hostname":                       types.StringType,
+			"days_remaining_check":           types.Int64Type,
+			"accept_self_signed_certificate": types.BoolType,
+			"port":                           types.Int64Type,
+			"validation_rules":               types.SetType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"key": types.StringType, "operator": types.StringType, "value": types.StringType}}},
+		})
+		model.WebpageAction = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"url":                 types.StringType,
+			"browser":             types.StringType,
+			"record_video":        types.BoolType,
+		})
+		model.WebpageScript = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"script":              types.StringType,
+			"file_name":           types.StringType,
+			"browser":             types.StringType,
+			"record_video":        types.BoolType,
+		})
+
+	} else if apiObject.Configuration.SyntheticType == "DNS" {
+		dnsModel := DNSConfigModel{
+			MarkSyntheticCall: types.BoolValue(apiObject.Configuration.MarkSyntheticCall),
+			Retries:           types.Int64Value(int64(apiObject.Configuration.Retries)),
+			RetryInterval:     types.Int64Value(int64(apiObject.Configuration.RetryInterval)),
+		}
+
+		dnsModel.Timeout = util.SetStringPointerToState(apiObject.Configuration.Timeout)
+		dnsModel.Lookup = util.SetStringPointerToState(apiObject.Configuration.Lookup)
+		dnsModel.Server = util.SetStringPointerToState(apiObject.Configuration.Server)
+		dnsModel.QueryType = util.SetStringPointerToState(apiObject.Configuration.QueryType)
+		dnsModel.Transport = util.SetStringPointerToState(apiObject.Configuration.Transport)
+
+		if apiObject.Configuration.Port != nil {
+			dnsModel.Port = util.SetInt64PointerToState(apiObject.Configuration.Port)
+		}
+		if apiObject.Configuration.ServerRetries != nil {
+			dnsModel.ServerRetries = util.SetInt64PointerToState(apiObject.Configuration.ServerRetries)
+		}
+		if apiObject.Configuration.AcceptCNAME != nil {
+			dnsModel.AcceptCNAME = types.BoolValue(*apiObject.Configuration.AcceptCNAME)
+		}
+		if apiObject.Configuration.LookupServerName != nil {
+			dnsModel.LookupServerName = types.BoolValue(*apiObject.Configuration.LookupServerName)
+		}
+		if apiObject.Configuration.RecursiveLookups != nil {
+			dnsModel.RecursiveLookups = types.BoolValue(*apiObject.Configuration.RecursiveLookups)
+		}
+
+		// Map query time
+		if apiObject.Configuration.QueryTime != nil {
+			queryTimeObj, _ := types.ObjectValue(
+				map[string]attr.Type{
+					"key":      types.StringType,
+					"operator": types.StringType,
+					"value":    types.Int64Type,
+				},
+				map[string]attr.Value{
+					"key":      types.StringValue(apiObject.Configuration.QueryTime.Key),
+					"operator": types.StringValue(apiObject.Configuration.QueryTime.Operator),
+					"value":    types.Int64Value(apiObject.Configuration.QueryTime.Value),
+				},
+			)
+			dnsModel.QueryTime = queryTimeObj
+		} else {
+			dnsModel.QueryTime = types.ObjectNull(map[string]attr.Type{
+				"key":      types.StringType,
+				"operator": types.StringType,
+				"value":    types.Int64Type,
+			})
+		}
+
+		// Map target values
+		if apiObject.Configuration.TargetValues != nil && len(apiObject.Configuration.TargetValues) > 0 {
+			targetValueObjs := make([]attr.Value, len(apiObject.Configuration.TargetValues))
+			for i, tv := range apiObject.Configuration.TargetValues {
+				tvObj, _ := types.ObjectValue(
+					map[string]attr.Type{
+						"key":      types.StringType,
+						"operator": types.StringType,
+						"value":    types.StringType,
+					},
+					map[string]attr.Value{
+						"key":      types.StringValue(tv.Key),
+						"operator": types.StringValue(tv.Operator),
+						"value":    types.StringValue(tv.Value),
+					},
+				)
+				targetValueObjs[i] = tvObj
+			}
+			dnsModel.TargetValues = types.SetValueMust(
+				types.ObjectType{AttrTypes: map[string]attr.Type{
+					"key":      types.StringType,
+					"operator": types.StringType,
+					"value":    types.StringType,
+				}},
+				targetValueObjs,
+			)
+		} else {
+			dnsModel.TargetValues = types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
+				"key":      types.StringType,
+				"operator": types.StringType,
+				"value":    types.StringType,
+			}})
+		}
+
+		dnsObj, _ := types.ObjectValueFrom(ctx, map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"lookup":              types.StringType,
+			"server":              types.StringType,
+			"query_type":          types.StringType,
+			"port":                types.Int64Type,
+			"transport":           types.StringType,
+			"accept_cname":        types.BoolType,
+			"lookup_server_name":  types.BoolType,
+			"recursive_lookups":   types.BoolType,
+			"server_retries":      types.Int64Type,
+			"query_time":          types.ObjectType{AttrTypes: map[string]attr.Type{"key": types.StringType, "operator": types.StringType, "value": types.Int64Type}},
+			"target_values":       types.SetType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"key": types.StringType, "operator": types.StringType, "value": types.StringType}}},
+		}, dnsModel)
+
+		model.DNS = dnsObj
+		model.HttpAction = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"url":                 types.StringType,
+			"operation":           types.StringType,
+			"headers":             types.MapType{ElemType: types.StringType},
+			"body":                types.StringType,
+			"validation_string":   types.StringType,
+			"follow_redirect":     types.BoolType,
+			"allow_insecure":      types.BoolType,
+			"expect_status":       types.Int64Type,
+			"expect_match":        types.StringType,
+			"expect_exists":       types.SetType{ElemType: types.StringType},
+			"expect_not_empty":    types.SetType{ElemType: types.StringType},
+			"expect_json":         types.MapType{ElemType: types.StringType},
+		})
+		model.HttpScript = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"script":              types.StringType,
+			"script_type":         types.StringType,
+			"file_name":           types.StringType,
+			"scripts":             types.ObjectType{AttrTypes: map[string]attr.Type{"bundle": types.StringType, "script_file": types.StringType}},
+		})
+		model.BrowserScript = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"script":              types.StringType,
+			"script_type":         types.StringType,
+			"file_name":           types.StringType,
+			"scripts":             types.ObjectType{AttrTypes: map[string]attr.Type{"bundle": types.StringType, "script_file": types.StringType}},
+			"browser":             types.StringType,
+			"record_video":        types.BoolType,
+		})
+		model.SSLCertificate = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call":            types.BoolType,
+			"retries":                        types.Int64Type,
+			"retry_interval":                 types.Int64Type,
+			"timeout":                        types.StringType,
+			"hostname":                       types.StringType,
+			"days_remaining_check":           types.Int64Type,
+			"accept_self_signed_certificate": types.BoolType,
+			"port":                           types.Int64Type,
+			"validation_rules":               types.SetType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"key": types.StringType, "operator": types.StringType, "value": types.StringType}}},
+		})
+		model.WebpageAction = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"url":                 types.StringType,
+			"browser":             types.StringType,
+			"record_video":        types.BoolType,
+		})
+		model.WebpageScript = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"script":              types.StringType,
+			"file_name":           types.StringType,
+			"browser":             types.StringType,
+			"record_video":        types.BoolType,
+		})
+
+	} else if apiObject.Configuration.SyntheticType == "SSLCertificate" {
+		sslModel := SSLCertificateConfigModel{
+			MarkSyntheticCall: types.BoolValue(apiObject.Configuration.MarkSyntheticCall),
+			Retries:           types.Int64Value(int64(apiObject.Configuration.Retries)),
+			RetryInterval:     types.Int64Value(int64(apiObject.Configuration.RetryInterval)),
+		}
+
+		sslModel.Timeout = util.SetStringPointerToState(apiObject.Configuration.Timeout)
+		sslModel.Hostname = util.SetStringPointerToState(apiObject.Configuration.Hostname)
+
+		if apiObject.Configuration.DaysRemainingCheck != nil {
+			sslModel.DaysRemainingCheck = util.SetInt64PointerToState(apiObject.Configuration.DaysRemainingCheck)
+		}
+		if apiObject.Configuration.SSLPort != nil {
+			sslModel.Port = util.SetInt64PointerToState(apiObject.Configuration.SSLPort)
+		}
+		if apiObject.Configuration.AcceptSelfSignedCert != nil {
+			sslModel.AcceptSelfSignedCert = types.BoolValue(*apiObject.Configuration.AcceptSelfSignedCert)
+		}
+
+		// Map validation rules
+		if apiObject.Configuration.ValidationRules != nil && len(apiObject.Configuration.ValidationRules) > 0 {
+			validationRuleObjs := make([]attr.Value, len(apiObject.Configuration.ValidationRules))
+			for i, vr := range apiObject.Configuration.ValidationRules {
+				vrObj, _ := types.ObjectValue(
+					map[string]attr.Type{
+						"key":      types.StringType,
+						"operator": types.StringType,
+						"value":    types.StringType,
+					},
+					map[string]attr.Value{
+						"key":      types.StringValue(vr.Key),
+						"operator": types.StringValue(vr.Operator),
+						"value":    types.StringValue(fmt.Sprintf("%v", vr.Value)),
+					},
+				)
+				validationRuleObjs[i] = vrObj
+			}
+			sslModel.ValidationRules = types.SetValueMust(
+				types.ObjectType{AttrTypes: map[string]attr.Type{
+					"key":      types.StringType,
+					"operator": types.StringType,
+					"value":    types.StringType,
+				}},
+				validationRuleObjs,
+			)
+		} else {
+			sslModel.ValidationRules = types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
+				"key":      types.StringType,
+				"operator": types.StringType,
+				"value":    types.StringType,
+			}})
+		}
+
+		sslObj, _ := types.ObjectValueFrom(ctx, map[string]attr.Type{
+			"mark_synthetic_call":            types.BoolType,
+			"retries":                        types.Int64Type,
+			"retry_interval":                 types.Int64Type,
+			"timeout":                        types.StringType,
+			"hostname":                       types.StringType,
+			"days_remaining_check":           types.Int64Type,
+			"accept_self_signed_certificate": types.BoolType,
+			"port":                           types.Int64Type,
+			"validation_rules":               types.SetType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"key": types.StringType, "operator": types.StringType, "value": types.StringType}}},
+		}, sslModel)
+
+		model.SSLCertificate = sslObj
+		model.HttpAction = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"url":                 types.StringType,
+			"operation":           types.StringType,
+			"headers":             types.MapType{ElemType: types.StringType},
+			"body":                types.StringType,
+			"validation_string":   types.StringType,
+			"follow_redirect":     types.BoolType,
+			"allow_insecure":      types.BoolType,
+			"expect_status":       types.Int64Type,
+			"expect_match":        types.StringType,
+			"expect_exists":       types.SetType{ElemType: types.StringType},
+			"expect_not_empty":    types.SetType{ElemType: types.StringType},
+			"expect_json":         types.MapType{ElemType: types.StringType},
+		})
+		model.HttpScript = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"script":              types.StringType,
+			"script_type":         types.StringType,
+			"file_name":           types.StringType,
+			"scripts":             types.ObjectType{AttrTypes: map[string]attr.Type{"bundle": types.StringType, "script_file": types.StringType}},
+		})
+		model.BrowserScript = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"script":              types.StringType,
+			"script_type":         types.StringType,
+			"file_name":           types.StringType,
+			"scripts":             types.ObjectType{AttrTypes: map[string]attr.Type{"bundle": types.StringType, "script_file": types.StringType}},
+			"browser":             types.StringType,
+			"record_video":        types.BoolType,
+		})
+		model.DNS = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"lookup":              types.StringType,
+			"server":              types.StringType,
+			"query_type":          types.StringType,
+			"port":                types.Int64Type,
+			"transport":           types.StringType,
+			"accept_cname":        types.BoolType,
+			"lookup_server_name":  types.BoolType,
+			"recursive_lookups":   types.BoolType,
+			"server_retries":      types.Int64Type,
+			"query_time":          types.ObjectType{AttrTypes: map[string]attr.Type{"key": types.StringType, "operator": types.StringType, "value": types.Int64Type}},
+			"target_values":       types.SetType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"key": types.StringType, "operator": types.StringType, "value": types.StringType}}},
+		})
+		model.WebpageAction = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"url":                 types.StringType,
+			"browser":             types.StringType,
+			"record_video":        types.BoolType,
+		})
+		model.WebpageScript = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"script":              types.StringType,
+			"file_name":           types.StringType,
+			"browser":             types.StringType,
+			"record_video":        types.BoolType,
+		})
+
+	} else if apiObject.Configuration.SyntheticType == "WebpageAction" {
+		webpageActionModel := WebpageActionConfigModel{
+			MarkSyntheticCall: types.BoolValue(apiObject.Configuration.MarkSyntheticCall),
+			Retries:           types.Int64Value(int64(apiObject.Configuration.Retries)),
+			RetryInterval:     types.Int64Value(int64(apiObject.Configuration.RetryInterval)),
+		}
+
+		webpageActionModel.Timeout = util.SetStringPointerToState(apiObject.Configuration.Timeout)
+		webpageActionModel.URL = util.SetStringPointerToState(apiObject.Configuration.URL)
+		webpageActionModel.Browser = util.SetStringPointerToState(apiObject.Configuration.Browser)
+
+		if apiObject.Configuration.RecordVideo != nil {
+			webpageActionModel.RecordVideo = types.BoolValue(*apiObject.Configuration.RecordVideo)
+		}
+
+		webpageActionObj, _ := types.ObjectValueFrom(ctx, map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"url":                 types.StringType,
+			"browser":             types.StringType,
+			"record_video":        types.BoolType,
+		}, webpageActionModel)
+
+		model.WebpageAction = webpageActionObj
+		model.HttpAction = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"url":                 types.StringType,
+			"operation":           types.StringType,
+			"headers":             types.MapType{ElemType: types.StringType},
+			"body":                types.StringType,
+			"validation_string":   types.StringType,
+			"follow_redirect":     types.BoolType,
+			"allow_insecure":      types.BoolType,
+			"expect_status":       types.Int64Type,
+			"expect_match":        types.StringType,
+			"expect_exists":       types.SetType{ElemType: types.StringType},
+			"expect_not_empty":    types.SetType{ElemType: types.StringType},
+			"expect_json":         types.MapType{ElemType: types.StringType},
+		})
+		model.HttpScript = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"script":              types.StringType,
+			"script_type":         types.StringType,
+			"file_name":           types.StringType,
+			"scripts":             types.ObjectType{AttrTypes: map[string]attr.Type{"bundle": types.StringType, "script_file": types.StringType}},
+		})
+		model.BrowserScript = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"script":              types.StringType,
+			"script_type":         types.StringType,
+			"file_name":           types.StringType,
+			"scripts":             types.ObjectType{AttrTypes: map[string]attr.Type{"bundle": types.StringType, "script_file": types.StringType}},
+			"browser":             types.StringType,
+			"record_video":        types.BoolType,
+		})
+		model.DNS = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"lookup":              types.StringType,
+			"server":              types.StringType,
+			"query_type":          types.StringType,
+			"port":                types.Int64Type,
+			"transport":           types.StringType,
+			"accept_cname":        types.BoolType,
+			"lookup_server_name":  types.BoolType,
+			"recursive_lookups":   types.BoolType,
+			"server_retries":      types.Int64Type,
+			"query_time":          types.ObjectType{AttrTypes: map[string]attr.Type{"key": types.StringType, "operator": types.StringType, "value": types.Int64Type}},
+			"target_values":       types.SetType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"key": types.StringType, "operator": types.StringType, "value": types.StringType}}},
+		})
+		model.SSLCertificate = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call":            types.BoolType,
+			"retries":                        types.Int64Type,
+			"retry_interval":                 types.Int64Type,
+			"timeout":                        types.StringType,
+			"hostname":                       types.StringType,
+			"days_remaining_check":           types.Int64Type,
+			"accept_self_signed_certificate": types.BoolType,
+			"port":                           types.Int64Type,
+			"validation_rules":               types.SetType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"key": types.StringType, "operator": types.StringType, "value": types.StringType}}},
+		})
+		model.WebpageScript = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"script":              types.StringType,
+			"file_name":           types.StringType,
+			"browser":             types.StringType,
+			"record_video":        types.BoolType,
+		})
+
+	} else if apiObject.Configuration.SyntheticType == "WebpageScript" {
+		webpageScriptModel := WebpageScriptConfigModel{
+			MarkSyntheticCall: types.BoolValue(apiObject.Configuration.MarkSyntheticCall),
+			Retries:           types.Int64Value(int64(apiObject.Configuration.Retries)),
+			RetryInterval:     types.Int64Value(int64(apiObject.Configuration.RetryInterval)),
+		}
+
+		webpageScriptModel.Timeout = util.SetStringPointerToState(apiObject.Configuration.Timeout)
+		webpageScriptModel.Script = util.SetStringPointerToState(apiObject.Configuration.Script)
+		if apiObject.Configuration.FileName != nil && *apiObject.Configuration.FileName != "" {
+			webpageScriptModel.FileName = types.StringValue(*apiObject.Configuration.FileName)
+		} else {
+			webpageScriptModel.FileName = types.StringNull()
+		}
+		webpageScriptModel.Browser = util.SetStringPointerToState(apiObject.Configuration.Browser)
+
+		if apiObject.Configuration.RecordVideo != nil {
+			webpageScriptModel.RecordVideo = types.BoolValue(*apiObject.Configuration.RecordVideo)
+		}
+
+		webpageScriptObj, _ := types.ObjectValueFrom(ctx, map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"script":              types.StringType,
+			"file_name":           types.StringType,
+			"browser":             types.StringType,
+			"record_video":        types.BoolType,
+		}, webpageScriptModel)
+
+		model.WebpageScript = webpageScriptObj
+		model.HttpAction = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"url":                 types.StringType,
+			"operation":           types.StringType,
+			"headers":             types.MapType{ElemType: types.StringType},
+			"body":                types.StringType,
+			"validation_string":   types.StringType,
+			"follow_redirect":     types.BoolType,
+			"allow_insecure":      types.BoolType,
+			"expect_status":       types.Int64Type,
+			"expect_match":        types.StringType,
+			"expect_exists":       types.SetType{ElemType: types.StringType},
+			"expect_not_empty":    types.SetType{ElemType: types.StringType},
+			"expect_json":         types.MapType{ElemType: types.StringType},
+		})
+		model.HttpScript = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"script":              types.StringType,
+			"script_type":         types.StringType,
+			"file_name":           types.StringType,
+			"scripts":             types.ObjectType{AttrTypes: map[string]attr.Type{"bundle": types.StringType, "script_file": types.StringType}},
+		})
+		model.BrowserScript = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"script":              types.StringType,
+			"script_type":         types.StringType,
+			"file_name":           types.StringType,
+			"scripts":             types.ObjectType{AttrTypes: map[string]attr.Type{"bundle": types.StringType, "script_file": types.StringType}},
+			"browser":             types.StringType,
+			"record_video":        types.BoolType,
+		})
+		model.DNS = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"lookup":              types.StringType,
+			"server":              types.StringType,
+			"query_type":          types.StringType,
+			"port":                types.Int64Type,
+			"transport":           types.StringType,
+			"accept_cname":        types.BoolType,
+			"lookup_server_name":  types.BoolType,
+			"recursive_lookups":   types.BoolType,
+			"server_retries":      types.Int64Type,
+			"query_time":          types.ObjectType{AttrTypes: map[string]attr.Type{"key": types.StringType, "operator": types.StringType, "value": types.Int64Type}},
+			"target_values":       types.SetType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"key": types.StringType, "operator": types.StringType, "value": types.StringType}}},
+		})
+		model.SSLCertificate = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call":            types.BoolType,
+			"retries":                        types.Int64Type,
+			"retry_interval":                 types.Int64Type,
+			"timeout":                        types.StringType,
+			"hostname":                       types.StringType,
+			"days_remaining_check":           types.Int64Type,
+			"accept_self_signed_certificate": types.BoolType,
+			"port":                           types.Int64Type,
+			"validation_rules":               types.SetType{ElemType: types.ObjectType{AttrTypes: map[string]attr.Type{"key": types.StringType, "operator": types.StringType, "value": types.StringType}}},
+		})
+		model.WebpageAction = types.ObjectNull(map[string]attr.Type{
+			"mark_synthetic_call": types.BoolType,
+			"retries":             types.Int64Type,
+			"retry_interval":      types.Int64Type,
+			"timeout":             types.StringType,
+			"url":                 types.StringType,
+			"browser":             types.StringType,
+			"record_video":        types.BoolType,
 		})
 	}
 
