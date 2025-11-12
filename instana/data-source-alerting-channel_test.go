@@ -3,15 +3,16 @@ package instana_test
 import (
 	"errors"
 	"fmt"
+	"testing"
+
 	. "github.com/gessnerfl/terraform-provider-instana/instana"
-	"github.com/gessnerfl/terraform-provider-instana/instana/restapi"
+	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/mocks"
 	"github.com/gessnerfl/terraform-provider-instana/testutils"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/require"
 	gomock "go.uber.org/mock/gomock"
-	"testing"
 )
 
 func TestAlertingChannelDataSource(t *testing.T) {
