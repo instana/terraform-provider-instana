@@ -8,11 +8,11 @@ import (
 
 // SliConfigModel represents the data model for SLI configuration
 type SliConfigModel struct {
-	ID                         types.String `tfsdk:"id"`
-	Name                       types.String `tfsdk:"name"`
-	InitialEvaluationTimestamp types.Int64  `tfsdk:"initial_evaluation_timestamp"`
-	MetricConfiguration        types.Object `tfsdk:"metric_configuration"`
-	SliEntity                  types.Object `tfsdk:"sli_entity"`
+	ID                         types.String              `tfsdk:"id"`
+	Name                       types.String              `tfsdk:"name"`
+	InitialEvaluationTimestamp types.Int64               `tfsdk:"initial_evaluation_timestamp"`
+	MetricConfiguration        *MetricConfigurationModel `tfsdk:"metric_configuration"`
+	SliEntity                  *SliEntityModel           `tfsdk:"sli_entity"`
 }
 
 // MetricConfigurationModel represents the metric configuration for SLI
@@ -24,10 +24,10 @@ type MetricConfigurationModel struct {
 
 // SliEntityModel represents the SLI entity configuration
 type SliEntityModel struct {
-	ApplicationTimeBased  types.Object `tfsdk:"application_time_based"`
-	ApplicationEventBased types.Object `tfsdk:"application_event_based"`
-	WebsiteEventBased     types.Object `tfsdk:"website_event_based"`
-	WebsiteTimeBased      types.Object `tfsdk:"website_time_based"`
+	ApplicationTimeBased  *ApplicationTimeBasedModel  `tfsdk:"application_time_based"`
+	ApplicationEventBased *ApplicationEventBasedModel `tfsdk:"application_event_based"`
+	WebsiteEventBased     *WebsiteEventBasedModel     `tfsdk:"website_event_based"`
+	WebsiteTimeBased      *WebsiteTimeBasedModel      `tfsdk:"website_time_based"`
 }
 
 // ApplicationTimeBasedModel represents the application time based SLI entity
