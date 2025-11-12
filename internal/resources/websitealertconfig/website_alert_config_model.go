@@ -29,14 +29,6 @@ type RuleWithThresholdPluginModel struct {
 	Thresholds        *shared.ThresholdAllPluginModel `tfsdk:"threshold"`
 }
 
-// // WebsiteAlertRuleModel represents the rule configuration for Website Alert Config
-// type WebsiteAlertRuleModel struct {
-// 	Slowness        types.List `tfsdk:"slowness"`
-// 	SpecificJsError types.List `tfsdk:"specific_js_error"`
-// 	StatusCode      types.List `tfsdk:"status_code"`
-// 	Throughput      types.List `tfsdk:"throughput"`
-// }
-
 // WebsiteAlertRuleModel represents the rule configuration for Website Alert Config
 type WebsiteAlertRuleModel struct {
 	Slowness        *WebsiteAlertRuleConfigModel         `tfsdk:"slowness"`

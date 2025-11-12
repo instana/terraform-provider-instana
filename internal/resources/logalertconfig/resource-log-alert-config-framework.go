@@ -526,43 +526,6 @@ func (r *logAlertConfigResourceFramework) mapTimeThresholdToState(ctx context.Co
 	}
 }
 
-func (r *logAlertConfigResourceFramework) mapTimeThresholdToState1(ctx context.Context, timeThreshold *restapi.LogTimeThreshold) (types.List, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	if timeThreshold == nil {
-		return types.ListNull(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				LogAlertConfigFieldTimeThresholdTimeWindow: types.Int64Type,
-			},
-		}), diags
-	}
-
-	// Create time threshold object
-	timeThresholdObj := map[string]attr.Value{
-		LogAlertConfigFieldTimeThresholdTimeWindow: types.Int64Value(timeThreshold.TimeWindow),
-	}
-
-	timeThresholdObjVal, timeThresholdObjDiags := types.ObjectValue(
-		map[string]attr.Type{
-			LogAlertConfigFieldTimeThresholdTimeWindow: types.Int64Type,
-		},
-		timeThresholdObj,
-	)
-	diags.Append(timeThresholdObjDiags...)
-	if diags.HasError() {
-		return types.ListNull(types.ObjectType{}), diags
-	}
-
-	return types.ListValue(
-		types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				LogAlertConfigFieldTimeThresholdTimeWindow: types.Int64Type,
-			},
-		},
-		[]attr.Value{timeThresholdObjVal},
-	)
-}
-
 func (r *logAlertConfigResourceFramework) mapRulesToState(ctx context.Context, rules []restapi.RuleWithThreshold[restapi.LogAlertRule]) (types.Object, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
@@ -692,69 +655,6 @@ func (r *logAlertConfigResourceFramework) mapRulesToState(ctx context.Context, r
 
 	// Create rule object value
 	return types.ObjectValue(ruleAttrTypes, ruleObj)
-}
-
-func (r *logAlertConfigResourceFramework) mapThresholdRuleToState(ctx context.Context, threshold *restapi.ThresholdRule) (types.List, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	// Get the threshold value
-	var thresholdValue int64
-	if threshold.Value != nil {
-		thresholdValue = int64(*threshold.Value)
-	} else {
-		thresholdValue = 0
-	}
-
-	// Create static threshold object
-	staticObj := map[string]attr.Value{
-		LogAlertConfigFieldValue: types.Int64Value(thresholdValue),
-	}
-
-	staticObjVal, staticObjDiags := types.ObjectValue(
-		map[string]attr.Type{
-			LogAlertConfigFieldValue: types.Int64Type,
-		},
-		staticObj,
-	)
-	diags.Append(staticObjDiags...)
-	if diags.HasError() {
-		return types.ListNull(types.ObjectType{}), diags
-	}
-
-	// Create static list
-	staticList, staticListDiags := types.ListValue(
-		types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				LogAlertConfigFieldValue: types.Int64Type,
-			},
-		},
-		[]attr.Value{staticObjVal},
-	)
-	diags.Append(staticListDiags...)
-	if diags.HasError() {
-		return types.ListNull(types.ObjectType{}), diags
-	}
-
-	// Create threshold object with static block
-	thresholdObj := map[string]attr.Value{
-		"static": staticList,
-	}
-
-	thresholdObjVal, thresholdObjDiags := types.ObjectValue(
-		shared.GetStaticThresholdAttrTypes(),
-		thresholdObj,
-	)
-	diags.Append(thresholdObjDiags...)
-	if diags.HasError() {
-		return types.ListNull(types.ObjectType{}), diags
-	}
-
-	return types.ListValue(
-		types.ObjectType{
-			AttrTypes: shared.GetStaticThresholdAttrTypes(),
-		},
-		[]attr.Value{thresholdObjVal},
-	)
 }
 
 func (r *logAlertConfigResourceFramework) mapRulesFromState(ctx context.Context, rulesObj types.Object) ([]restapi.RuleWithThreshold[restapi.LogAlertRule], diag.Diagnostics) {
