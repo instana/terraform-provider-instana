@@ -8,9 +8,9 @@ import (
 // ApplicationAlertConfigModel represents the data model for the application alert configuration resource
 type ApplicationAlertConfigModel struct {
 	ID                  types.String                `tfsdk:"id"`
-	AlertChannelIDs     types.Set                   `tfsdk:"alert_channel_ids"`
+	AlertChannelIDs     []types.String              `tfsdk:"alert_channel_ids"`
 	AlertChannels       types.Map                   `tfsdk:"alert_channels"`
-	Applications        types.Set                   `tfsdk:"application"`
+	Applications        []ApplicationModel          `tfsdk:"application"`
 	BoundaryScope       types.String                `tfsdk:"boundary_scope"`
 	CustomPayloadFields types.List                  `tfsdk:"custom_payload_field"`
 	Description         types.String                `tfsdk:"description"`
@@ -20,7 +20,7 @@ type ApplicationAlertConfigModel struct {
 	IncludeInternal     types.Bool                  `tfsdk:"include_internal"`
 	IncludeSynthetic    types.Bool                  `tfsdk:"include_synthetic"`
 	Name                types.String                `tfsdk:"name"`
-	Rules               types.List                  `tfsdk:"rules"`
+	Rules               []RuleWithThresholdModel    `tfsdk:"rules"`
 	Severity            types.String                `tfsdk:"severity"`
 	TagFilter           types.String                `tfsdk:"tag_filter"`
 	TimeThreshold       *AppAlertTimeThresholdModel `tfsdk:"time_threshold"`
@@ -29,9 +29,9 @@ type ApplicationAlertConfigModel struct {
 
 // ApplicationModel represents an application in the application alert config
 type ApplicationModel struct {
-	ApplicationID types.String `tfsdk:"application_id"`
-	Inclusive     types.Bool   `tfsdk:"inclusive"`
-	Services      types.Set    `tfsdk:"service"`
+	ApplicationID types.String   `tfsdk:"application_id"`
+	Inclusive     types.Bool     `tfsdk:"inclusive"`
+	Services      []ServiceModel `tfsdk:"service"`
 }
 
 // ApplicationThresholdModel represents a threshold in the application alert config
@@ -42,9 +42,9 @@ type ApplicationThresholdModel struct {
 
 // ServiceModel represents a service in the application alert config
 type ServiceModel struct {
-	ServiceID types.String `tfsdk:"service_id"`
-	Inclusive types.Bool   `tfsdk:"inclusive"`
-	Endpoints types.Set    `tfsdk:"endpoint"`
+	ServiceID types.String    `tfsdk:"service_id"`
+	Inclusive types.Bool      `tfsdk:"inclusive"`
+	Endpoints []EndpointModel `tfsdk:"endpoint"`
 }
 
 // EndpointModel represents an endpoint in the application alert config

@@ -574,11 +574,10 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 	}
 
 	// Handle alert channel IDs (deprecated but supported for backward compatibility)
-	if !model.AlertChannelIDs.IsNull() && !model.AlertChannelIDs.IsUnknown() {
-		var alertChannelIDs []string
-		diags = model.AlertChannelIDs.ElementsAs(ctx, &alertChannelIDs, false)
-		if diags.HasError() {
-			return nil, diags
+	if len(model.AlertChannelIDs) > 0 {
+		alertChannelIDs := make([]string, len(model.AlertChannelIDs))
+		for i, id := range model.AlertChannelIDs {
+			alertChannelIDs[i] = id.ValueString()
 		}
 		result.AlertChannelIDs = alertChannelIDs
 	}
@@ -598,37 +597,19 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 	}
 
 	// Handle applications
-	if !model.Applications.IsNull() && !model.Applications.IsUnknown() {
-		var applications []ApplicationModel
-		diags = model.Applications.ElementsAs(ctx, &applications, false)
-		if diags.HasError() {
-			return nil, diags
-		}
-
+	if len(model.Applications) > 0 {
 		result.Applications = make(map[string]restapi.IncludedApplication)
-		for _, app := range applications {
+		for _, app := range model.Applications {
 			appID := app.ApplicationID.ValueString()
 			services := make(map[string]restapi.IncludedService)
 
-			if !app.Services.IsNull() && !app.Services.IsUnknown() {
-				var serviceModels []ServiceModel
-				diags = app.Services.ElementsAs(ctx, &serviceModels, false)
-				if diags.HasError() {
-					return nil, diags
-				}
-
-				for _, svc := range serviceModels {
+			if len(app.Services) > 0 {
+				for _, svc := range app.Services {
 					svcID := svc.ServiceID.ValueString()
 					endpoints := make(map[string]restapi.IncludedEndpoint)
 
-					if !svc.Endpoints.IsNull() && !svc.Endpoints.IsUnknown() {
-						var endpointModels []EndpointModel
-						diags = svc.Endpoints.ElementsAs(ctx, &endpointModels, false)
-						if diags.HasError() {
-							return nil, diags
-						}
-
-						for _, ep := range endpointModels {
+					if len(svc.Endpoints) > 0 {
+						for _, ep := range svc.Endpoints {
 							epID := ep.EndpointID.ValueString()
 							endpoints[epID] = restapi.IncludedEndpoint{
 								EndpointID: epID,
@@ -666,15 +647,9 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 	}
 
 	// Handle rules (new format with multiple thresholds and severity levels)
-	if !model.Rules.IsNull() && !model.Rules.IsUnknown() {
-		var ruleWithThresholds []RuleWithThresholdModel
-		diags = model.Rules.ElementsAs(ctx, &ruleWithThresholds, false)
-		if diags.HasError() {
-			return nil, diags
-		}
-
-		result.Rules = make([]restapi.ApplicationAlertRuleWithThresholds, len(ruleWithThresholds))
-		for i, ruleWithThreshold := range ruleWithThresholds {
+	if len(model.Rules) > 0 {
+		result.Rules = make([]restapi.ApplicationAlertRuleWithThresholds, len(model.Rules))
+		for i, ruleWithThreshold := range model.Rules {
 			result.Rules[i] = restapi.ApplicationAlertRuleWithThresholds{
 				ThresholdOperator: ruleWithThreshold.ThresholdOperator.ValueString(),
 			}
@@ -917,13 +892,12 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 	log.Printf("Before allertchannel id stage")
 	// Handle alert channel IDs (deprecated but supported for backward compatibility)
 	if len(data.AlertChannelIDs) > 0 {
-		elements := make([]attr.Value, len(data.AlertChannelIDs))
+		model.AlertChannelIDs = make([]types.String, len(data.AlertChannelIDs))
 		for i, id := range data.AlertChannelIDs {
-			elements[i] = types.StringValue(id)
+			model.AlertChannelIDs[i] = types.StringValue(id)
 		}
-		model.AlertChannelIDs = types.SetValueMust(types.StringType, elements)
 	} else {
-		model.AlertChannelIDs = types.SetNull(types.StringType)
+		model.AlertChannelIDs = []types.String{}
 	}
 
 	log.Printf("Before alert channel stage")
@@ -948,74 +922,45 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 	}
 	log.Printf("Before applicaion stage")
 	// Handle applications
-	// Predefine attribute/type maps once
-	endpointAttrTypes := map[string]attr.Type{
-		"endpoint_id": types.StringType,
-		"inclusive":   types.BoolType,
-	}
-	endpointObjectType := types.ObjectType{AttrTypes: endpointAttrTypes}
-	endpointSetType := types.SetType{ElemType: endpointObjectType}
-
-	serviceAttrTypes := map[string]attr.Type{
-		"service_id": types.StringType,
-		"inclusive":  types.BoolType,
-		"endpoint":   endpointSetType, // key must match tfsdk tag on ServiceModel
-	}
-	serviceObjectType := types.ObjectType{AttrTypes: serviceAttrTypes}
-	serviceSetType := types.SetType{ElemType: serviceObjectType}
-
-	applicationAttrTypes := map[string]attr.Type{
-		"application_id": types.StringType,
-		"inclusive":      types.BoolType,
-		"service":        serviceSetType, // key must match tfsdk tag on ApplicationModel
-	}
-	applicationObjectType := types.ObjectType{AttrTypes: applicationAttrTypes}
-
 	if len(data.Applications) > 0 {
-		appElements := make([]attr.Value, 0, len(data.Applications))
+		model.Applications = make([]ApplicationModel, 0, len(data.Applications))
 		for _, app := range data.Applications {
 			appModel := ApplicationModel{
 				ApplicationID: types.StringValue(app.ApplicationID),
 				Inclusive:     types.BoolValue(app.Inclusive),
 			}
 
-			svcElements := make([]attr.Value, 0, len(app.Services))
-			for _, svc := range app.Services {
-				svcModel := ServiceModel{
-					ServiceID: types.StringValue(svc.ServiceID),
-					Inclusive: types.BoolValue(svc.Inclusive),
-				}
-
-				epElements := make([]attr.Value, 0, len(svc.Endpoints))
-				for _, ep := range svc.Endpoints {
-					epModel := EndpointModel{
-						EndpointID: types.StringValue(ep.EndpointID),
-						Inclusive:  types.BoolValue(ep.Inclusive),
+			if len(app.Services) > 0 {
+				appModel.Services = make([]ServiceModel, 0, len(app.Services))
+				for _, svc := range app.Services {
+					svcModel := ServiceModel{
+						ServiceID: types.StringValue(svc.ServiceID),
+						Inclusive: types.BoolValue(svc.Inclusive),
 					}
-					epObj, diags := types.ObjectValueFrom(ctx, endpointAttrTypes, epModel)
-					if diags.HasError() {
-						return diags
+
+					if len(svc.Endpoints) > 0 {
+						svcModel.Endpoints = make([]EndpointModel, 0, len(svc.Endpoints))
+						for _, ep := range svc.Endpoints {
+							epModel := EndpointModel{
+								EndpointID: types.StringValue(ep.EndpointID),
+								Inclusive:  types.BoolValue(ep.Inclusive),
+							}
+							svcModel.Endpoints = append(svcModel.Endpoints, epModel)
+						}
+					} else {
+						svcModel.Endpoints = []EndpointModel{}
 					}
-					epElements = append(epElements, epObj)
-				}
-				svcModel.Endpoints = types.SetValueMust(endpointObjectType, epElements)
-				svcObj, diags := types.ObjectValueFrom(ctx, serviceAttrTypes, svcModel)
-				if diags.HasError() {
-					return diags
-				}
-				svcElements = append(svcElements, svcObj)
 
+					appModel.Services = append(appModel.Services, svcModel)
+				}
+			} else {
+				appModel.Services = []ServiceModel{}
 			}
-			appModel.Services = types.SetValueMust(serviceObjectType, svcElements)
 
-			appObj, diags := types.ObjectValueFrom(ctx, applicationAttrTypes, appModel)
-			if diags.HasError() {
-				return diags
-			}
-			appElements = append(appElements, appObj)
+			model.Applications = append(model.Applications, appModel)
 		}
-
-		model.Applications = types.SetValueMust(applicationObjectType, appElements)
+	} else {
+		model.Applications = []ApplicationModel{}
 	}
 	if diags.HasError() {
 		return diags
@@ -1177,54 +1122,10 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 		}
 
 		log.Printf("before calling rules value final")
-		// Convert the slice of models to a types.List
-		rulesListValue, diags := types.ListValueFrom(ctx, types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"rule": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"error_rate":  types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}},
-						"errors":      types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}},
-						"logs":        types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "level": types.StringType, "message": types.StringType, "operator": types.StringType}},
-						"slowness":    types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}},
-						"status_code": types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "status_code_start": types.Int64Type, "status_code_end": types.Int64Type}},
-						"throughput":  types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}},
-					},
-				},
-				"threshold_operator": types.StringType,
-				"threshold": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						shared.ThresholdFieldStatic:           types.ObjectType{AttrTypes: map[string]attr.Type{"operator": types.StringType, "value": types.Int64Type}},
-						shared.ThresholdFieldAdaptiveBaseline: types.ObjectType{AttrTypes: map[string]attr.Type{"operator": types.StringType, "deviation_factor": types.Float32Type, "adaptability": types.Float32Type, "seasonality": types.StringType}},
-					},
-				},
-			},
-		}, ruleModels)
-		if diags.HasError() {
-			return diags
-		}
-		model.Rules = rulesListValue
+		// Directly assign the slice of models
+		model.Rules = ruleModels
 	} else {
-		model.Rules = types.ListNull(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"rule": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"error_rate":  types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}},
-						"errors":      types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}},
-						"logs":        types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "level": types.StringType, "message": types.StringType, "operator": types.StringType}},
-						"slowness":    types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}},
-						"status_code": types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType, "status_code_start": types.Int64Type, "status_code_end": types.Int64Type}},
-						"throughput":  types.ObjectType{AttrTypes: map[string]attr.Type{"metric_name": types.StringType, "aggregation": types.StringType}},
-					},
-				},
-				"threshold_operator": types.StringType,
-				"threshold": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						shared.ThresholdFieldStatic:           types.ObjectType{AttrTypes: map[string]attr.Type{"operator": types.StringType, "value": types.Int64Type}},
-						shared.ThresholdFieldAdaptiveBaseline: types.ObjectType{AttrTypes: map[string]attr.Type{"operator": types.StringType, "deviation_factor": types.Float32Type, "adaptability": types.Float32Type, "seasonality": types.StringType}},
-					},
-				},
-			},
-		})
+		model.Rules = []RuleWithThresholdModel{}
 	}
 	if diags.HasError() {
 		return diags
