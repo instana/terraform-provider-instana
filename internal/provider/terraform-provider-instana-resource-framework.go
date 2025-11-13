@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // NewTerraformResourceFramework creates a new terraform resource for the given handle
@@ -61,6 +62,13 @@ func (r *terraformResourceImplFramework[T]) Configure(_ context.Context, req res
 	}
 
 	r.providerMeta = providerMeta
+}
+
+func (r *terraformResourceImplFramework[T]) getResourceID(d *schema.ResourceData) string {
+	if r.resourceHandle.MetaData().ResourceIDField != nil {
+		return d.Get(*r.resourceHandle.MetaData().ResourceIDField).(string)
+	}
+	return d.Id()
 }
 
 // Create defines the create operation for the terraform resource

@@ -305,3 +305,11 @@ func SetStringPointerFromState(s types.String) *string {
 	v := s.ValueString()
 	return &v
 }
+
+// SetInt32PointerToInt64State converts an int32 pointer to types.Int64
+func SetInt32PointerToInt64State(i *int32) types.Int64 {
+	if i == nil {
+		return types.Int64Null()
+	}
+	return types.Int64Value(int64(*i))
+}

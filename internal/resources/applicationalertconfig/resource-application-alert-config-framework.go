@@ -3,7 +3,6 @@ package applicationalertconfig
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
 	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
@@ -514,16 +513,28 @@ func (r *applicationAlertConfigResourceFrameworkImpl) SetID(data *restapi.Applic
 // MapStateToDataObject converts Terraform state to API data object
 func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx context.Context, state tfsdk.State) (*restapi.ApplicationAlertConfig, diag.Diagnostics) {
 	var model ApplicationAlertConfigModel
-	var diags diag.Diagnostics
-
 	// Extract model from state
-	diags = state.Get(ctx, &model)
+	diags := state.Get(ctx, &model)
 	if diags.HasError() {
 		return nil, diags
 	}
 
 	// Initialize result with basic fields
-	result := r.mapBasicFields(&model)
+	result := &restapi.ApplicationAlertConfig{
+		ID:               model.ID.ValueString(),
+		Name:             model.Name.ValueString(),
+		Description:      model.Description.ValueString(),
+		BoundaryScope:    restapi.BoundaryScope(model.BoundaryScope.ValueString()),
+		EvaluationType:   restapi.ApplicationAlertEvaluationType(model.EvaluationType.ValueString()),
+		IncludeInternal:  model.IncludeInternal.ValueBool(),
+		IncludeSynthetic: model.IncludeSynthetic.ValueBool(),
+		Triggering:       model.Triggering.ValueBool(),
+		GracePeriod:      extractGracePeriod(model.GracePeriod),
+	}
+	// Map granularity if present
+	if !model.Granularity.IsNull() && !model.Granularity.IsUnknown() {
+		result.Granularity = restapi.Granularity(model.Granularity.ValueInt64())
+	}
 
 	// Map optional and complex fields
 	if err := r.mapTagFilter(&model, result, &diags); err != nil {
@@ -548,28 +559,6 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 	r.mapTimeThreshold(&model, result)
 
 	return result, diags
-}
-
-// mapBasicFields extracts and maps basic configuration fields
-func (r *applicationAlertConfigResourceFrameworkImpl) mapBasicFields(model *ApplicationAlertConfigModel) *restapi.ApplicationAlertConfig {
-	result := &restapi.ApplicationAlertConfig{
-		ID:               model.ID.ValueString(),
-		Name:             model.Name.ValueString(),
-		Description:      model.Description.ValueString(),
-		BoundaryScope:    restapi.BoundaryScope(model.BoundaryScope.ValueString()),
-		EvaluationType:   restapi.ApplicationAlertEvaluationType(model.EvaluationType.ValueString()),
-		IncludeInternal:  model.IncludeInternal.ValueBool(),
-		IncludeSynthetic: model.IncludeSynthetic.ValueBool(),
-		Triggering:       model.Triggering.ValueBool(),
-		GracePeriod:      extractGracePeriod(model.GracePeriod),
-	}
-
-	// Map granularity if present
-	if !model.Granularity.IsNull() && !model.Granularity.IsUnknown() {
-		result.Granularity = restapi.Granularity(model.Granularity.ValueInt64())
-	}
-
-	return result
 }
 
 // mapTagFilter parses and maps tag filter expression
@@ -928,10 +917,56 @@ func extractGracePeriod(v types.Int64) *int64 {
 	return &val
 }
 
+// UpdateState converts API data object to Terraform state
 func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	model := ApplicationAlertConfigModel{
+	// Build base model with simple fields
+	model := r.buildBaseModel(data)
+
+	// Map complex fields with error handling
+	if err := r.updateGracePeriod(&model, data); err != nil {
+		diags.Append(err...)
+		return diags
+	}
+
+	if err := r.updateTagFilter(&model, data); err != nil {
+		diags.Append(err...)
+		return diags
+	}
+
+	if err := r.updateAlertChannels(ctx, &model, data); err != nil {
+		diags.Append(err...)
+		return diags
+	}
+
+	if err := r.updateApplications(&model, data); err != nil {
+		diags.Append(err...)
+		return diags
+	}
+
+	if err := r.updateCustomPayloadFields(ctx, &model, data); err != nil {
+		diags.Append(err...)
+		return diags
+	}
+
+	if err := r.updateRules(&model, data); err != nil {
+		diags.Append(err...)
+		return diags
+	}
+
+	if err := r.updateTimeThreshold(&model, data); err != nil {
+		diags.Append(err...)
+		return diags
+	}
+
+	// Set final state
+	return state.Set(ctx, model)
+}
+
+// buildBaseModel creates the base model with simple field mappings
+func (r *applicationAlertConfigResourceFrameworkImpl) buildBaseModel(data *restapi.ApplicationAlertConfig) ApplicationAlertConfigModel {
+	return ApplicationAlertConfigModel{
 		ID:               types.StringValue(data.ID),
 		Name:             types.StringValue(data.Name),
 		Description:      types.StringValue(data.Description),
@@ -942,327 +977,299 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 		IncludeSynthetic: types.BoolValue(data.IncludeSynthetic),
 		Triggering:       types.BoolValue(data.Triggering),
 	}
+}
 
-	// Handle grace period
+// updateGracePeriod handles grace period field mapping
+func (r *applicationAlertConfigResourceFrameworkImpl) updateGracePeriod(model *ApplicationAlertConfigModel, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
 	if data.GracePeriod != nil {
 		model.GracePeriod = util.SetInt64PointerToState(data.GracePeriod)
+	} else {
+		model.GracePeriod = types.Int64Null()
 	}
+	return nil
+}
 
-	// Handle tag filter
+// updateTagFilter handles tag filter normalization and mapping
+func (r *applicationAlertConfigResourceFrameworkImpl) updateTagFilter(model *ApplicationAlertConfigModel, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
+	var diags diag.Diagnostics
+
 	if data.TagFilterExpression != nil {
 		normalizedTagFilterString, err := tagfilter.MapTagFilterToNormalizedString(data.TagFilterExpression)
 		if err != nil {
 			diags.AddError(
-				"Error normalizing tag filter",
-				"Could not normalize tag filter: "+err.Error(),
+				"Tag Filter Normalization Error",
+				fmt.Sprintf("Failed to normalize tag filter expression: %s", err.Error()),
 			)
 			return diags
 		}
-
 		model.TagFilter = util.SetStringPointerToState(normalizedTagFilterString)
-
 	} else {
 		model.TagFilter = types.StringNull()
 	}
 
-	if diags.HasError() {
-		return diags
-	}
+	return diags
+}
 
-	// Handle alert channels
-	if len(data.AlertChannels) > 0 {
-		elements := make(map[string]attr.Value)
-		for severity, channelIDs := range data.AlertChannels {
-			channelElements := make([]attr.Value, len(channelIDs))
-			for i, id := range channelIDs {
-				channelElements[i] = types.StringValue(id)
-			}
-			elements[severity] = types.SetValueMust(types.StringType, channelElements)
-		}
-		model.AlertChannels = types.MapValueMust(types.SetType{ElemType: types.StringType}, elements)
-		log.Printf("static threshold elements : %+v\n", model.AlertChannels)
+// updateAlertChannels handles alert channels mapping
+func (r *applicationAlertConfigResourceFrameworkImpl) updateAlertChannels(ctx context.Context, model *ApplicationAlertConfigModel, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
+	var diags diag.Diagnostics
 
-	} else {
+	if len(data.AlertChannels) == 0 {
 		model.AlertChannels = types.MapNull(types.SetType{ElemType: types.StringType})
-	}
-	if diags.HasError() {
 		return diags
 	}
-	log.Printf("Before applicaion stage")
-	// Handle applications
-	if len(data.Applications) > 0 {
-		model.Applications = make([]ApplicationModel, 0, len(data.Applications))
-		for _, app := range data.Applications {
-			appModel := ApplicationModel{
-				ApplicationID: types.StringValue(app.ApplicationID),
-				Inclusive:     types.BoolValue(app.Inclusive),
-			}
 
-			if len(app.Services) > 0 {
-				appModel.Services = make([]ServiceModel, 0, len(app.Services))
-				for _, svc := range app.Services {
-					svcModel := ServiceModel{
-						ServiceID: types.StringValue(svc.ServiceID),
-						Inclusive: types.BoolValue(svc.Inclusive),
-					}
-
-					if len(svc.Endpoints) > 0 {
-						svcModel.Endpoints = make([]EndpointModel, 0, len(svc.Endpoints))
-						for _, ep := range svc.Endpoints {
-							epModel := EndpointModel{
-								EndpointID: types.StringValue(ep.EndpointID),
-								Inclusive:  types.BoolValue(ep.Inclusive),
-							}
-							svcModel.Endpoints = append(svcModel.Endpoints, epModel)
-						}
-					} else {
-						svcModel.Endpoints = []EndpointModel{}
-					}
-
-					appModel.Services = append(appModel.Services, svcModel)
-				}
-			} else {
-				appModel.Services = []ServiceModel{}
-			}
-
-			model.Applications = append(model.Applications, appModel)
+	elements := make(map[string]attr.Value, len(data.AlertChannels))
+	for severity, channelIDs := range data.AlertChannels {
+		channelElements := make([]attr.Value, len(channelIDs))
+		for i, id := range channelIDs {
+			channelElements[i] = types.StringValue(id)
 		}
-	} else {
-		model.Applications = []ApplicationModel{}
+
+		channelSet, setDiags := types.SetValue(types.StringType, channelElements)
+		if setDiags.HasError() {
+			diags.Append(setDiags...)
+			return diags
+		}
+		elements[severity] = channelSet
 	}
-	if diags.HasError() {
+
+	alertChannelsMap, mapDiags := types.MapValue(types.SetType{ElemType: types.StringType}, elements)
+	if mapDiags.HasError() {
+		diags.Append(mapDiags...)
 		return diags
 	}
 
-	log.Printf("Before custom payload stage")
-	// Handle custom payload fields
+	model.AlertChannels = alertChannelsMap
+	return diags
+}
+
+// updateApplications handles application scope mapping
+func (r *applicationAlertConfigResourceFrameworkImpl) updateApplications(model *ApplicationAlertConfigModel, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
+	if len(data.Applications) == 0 {
+		model.Applications = []ApplicationModel{}
+		return nil
+	}
+
+	model.Applications = make([]ApplicationModel, 0, len(data.Applications))
+	for _, app := range data.Applications {
+		appModel := ApplicationModel{
+			ApplicationID: types.StringValue(app.ApplicationID),
+			Inclusive:     types.BoolValue(app.Inclusive),
+			Services:      r.mapServicesToModel(app.Services),
+		}
+		model.Applications = append(model.Applications, appModel)
+	}
+
+	return nil
+}
+
+// mapServicesToModel converts services from API to model format
+func (r *applicationAlertConfigResourceFrameworkImpl) mapServicesToModel(services map[string]restapi.IncludedService) []ServiceModel {
+	if len(services) == 0 {
+		return []ServiceModel{}
+	}
+
+	serviceModels := make([]ServiceModel, 0, len(services))
+	for _, svc := range services {
+		svcModel := ServiceModel{
+			ServiceID: types.StringValue(svc.ServiceID),
+			Inclusive: types.BoolValue(svc.Inclusive),
+			Endpoints: r.mapEndpointsToModel(svc.Endpoints),
+		}
+		serviceModels = append(serviceModels, svcModel)
+	}
+
+	return serviceModels
+}
+
+// mapEndpointsToModel converts endpoints from API to model format
+func (r *applicationAlertConfigResourceFrameworkImpl) mapEndpointsToModel(endpoints map[string]restapi.IncludedEndpoint) []EndpointModel {
+	if len(endpoints) == 0 {
+		return []EndpointModel{}
+	}
+
+	endpointModels := make([]EndpointModel, 0, len(endpoints))
+	for _, ep := range endpoints {
+		epModel := EndpointModel{
+			EndpointID: types.StringValue(ep.EndpointID),
+			Inclusive:  types.BoolValue(ep.Inclusive),
+		}
+		endpointModels = append(endpointModels, epModel)
+	}
+
+	return endpointModels
+}
+
+// updateCustomPayloadFields handles custom payload fields mapping
+func (r *applicationAlertConfigResourceFrameworkImpl) updateCustomPayloadFields(ctx context.Context, model *ApplicationAlertConfigModel, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
 	customPayloadFieldsList, payloadDiags := shared.CustomPayloadFieldsToTerraform(ctx, data.CustomerPayloadFields)
 	if payloadDiags.HasError() {
 		return payloadDiags
 	}
 	model.CustomPayloadFields = customPayloadFieldsList
+	return nil
+}
 
-	if diags.HasError() {
-		return diags
-	}
+// updateRules handles rules mapping with thresholds
+func (r *applicationAlertConfigResourceFrameworkImpl) updateRules(model *ApplicationAlertConfigModel, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
+	var diags diag.Diagnostics
 
-	log.Printf("Before Rules stage")
-	// Handle rules (new format with multiple thresholds and severity levels)
-	if len(data.Rules) > 0 {
-		ruleModels := make([]RuleWithThresholdModel, len(data.Rules))
-		for i, ruleWithThreshold := range data.Rules {
-			// Create rule model
-			ruleModel := RuleModel{}
-			// initialize all with nil
-			ruleModel.Errors = nil
-			ruleModel.Logs = nil
-			ruleModel.Slowness = nil
-			ruleModel.StatusCode = nil
-			ruleModel.Throughput = nil
-			ruleModel.ErrorRate = nil
-
-			// Set rule model fields based on the AlertType
-			switch ruleWithThreshold.Rule.AlertType {
-			case ApplicationAlertConfigFieldRuleErrorRate:
-				ruleModel.ErrorRate = &RuleConfigModel{
-					MetricName:  types.StringValue(ruleWithThreshold.Rule.MetricName),
-					Aggregation: types.StringValue(string(ruleWithThreshold.Rule.Aggregation)),
-				}
-
-			case ApplicationAlertConfigFieldRuleErrors:
-				ruleModel.ErrorRate = nil
-				ruleModel.Errors = &RuleConfigModel{
-					MetricName:  types.StringValue(ruleWithThreshold.Rule.MetricName),
-					Aggregation: types.StringValue(string(ruleWithThreshold.Rule.Aggregation)),
-				}
-
-			case ApplicationAlertConfigFieldRuleLogs:
-				// For logs, we need to handle additional fields
-				var level types.String
-				var message types.String
-				var operator types.String
-
-				if ruleWithThreshold.Rule.Level != nil {
-					level = types.StringValue(string(*ruleWithThreshold.Rule.Level))
-				} else {
-					level = types.StringNull()
-				}
-				if ruleWithThreshold.Rule.Message != nil {
-					message = types.StringValue(*ruleWithThreshold.Rule.Message)
-				} else {
-					message = types.StringNull()
-				}
-				if ruleWithThreshold.Rule.Operator != nil {
-					operator = types.StringValue(string(*ruleWithThreshold.Rule.Operator))
-				} else {
-					operator = types.StringNull()
-				}
-
-				ruleModel.Logs = &LogsRuleModel{
-					MetricName:  types.StringValue(ruleWithThreshold.Rule.MetricName),
-					Aggregation: types.StringValue(string(ruleWithThreshold.Rule.Aggregation)),
-					Level:       level,
-					Message:     message,
-					Operator:    operator,
-				}
-
-			case ApplicationAlertConfigFieldRuleSlowness:
-
-				ruleModel.Slowness = &RuleConfigModel{
-					MetricName:  types.StringValue(ruleWithThreshold.Rule.MetricName),
-					Aggregation: types.StringValue(string(ruleWithThreshold.Rule.Aggregation)),
-				}
-
-			case ApplicationAlertConfigFieldRuleStatusCode:
-				// For status code, we need to handle additional fields
-				var statusCodeStart types.Int64
-				var statusCodeEnd types.Int64
-
-				if ruleWithThreshold.Rule.StatusCodeStart != nil {
-					statusCodeStart = types.Int64Value(int64(*ruleWithThreshold.Rule.StatusCodeStart))
-				} else {
-					statusCodeStart = types.Int64Null()
-				}
-				if ruleWithThreshold.Rule.StatusCodeEnd != nil {
-					statusCodeEnd = types.Int64Value(int64(*ruleWithThreshold.Rule.StatusCodeEnd))
-				} else {
-					statusCodeEnd = types.Int64Null()
-				}
-
-				ruleModel.StatusCode = &StatusCodeRuleModel{
-					MetricName:      types.StringValue(ruleWithThreshold.Rule.MetricName),
-					Aggregation:     types.StringValue(string(ruleWithThreshold.Rule.Aggregation)),
-					StatusCodeStart: statusCodeStart,
-					StatusCodeEnd:   statusCodeEnd,
-				}
-			case ApplicationAlertConfigFieldRuleThroughput:
-				ruleModel.Throughput = &RuleConfigModel{
-					MetricName:  types.StringValue(ruleWithThreshold.Rule.MetricName),
-					Aggregation: types.StringValue(string(ruleWithThreshold.Rule.Aggregation)),
-				}
-			}
-
-			log.Printf("before calling rules value initial")
-			ruleWithThresholdModel := RuleWithThresholdModel{}
-			ruleWithThresholdModel.Rule = &ruleModel
-			ruleWithThresholdModel.ThresholdOperator = types.StringValue(ruleWithThreshold.ThresholdOperator)
-
-			// Map thresholds to ApplicationThresholdModel
-			if len(ruleWithThreshold.Thresholds) > 0 {
-				thresholdModel := &ApplicationThresholdModel{}
-
-				// Check for warning threshold
-				if warningThreshold, ok := ruleWithThreshold.Thresholds[restapi.WarningSeverity]; ok {
-					warningModel := &ThresholdLevelModel{}
-					if warningThreshold.Type == "staticThreshold" && warningThreshold.Value != nil {
-						warningModel.Static = &shared.StaticTypeModel{
-							Value:    types.Int64Value(int64(*warningThreshold.Value)),
-							Operator: util.SetStringPointerToState(warningThreshold.Operator),
-						}
-					} else if warningThreshold.Type == "adaptiveBaseline" {
-						adaptiveModel := &shared.AdaptiveBaselineModel{}
-						if warningThreshold.DeviationFactor != nil {
-							adaptiveModel.DeviationFactor = types.Float32Value(*warningThreshold.DeviationFactor)
-						} else {
-							adaptiveModel.DeviationFactor = types.Float32Null()
-						}
-						if warningThreshold.Adaptability != nil {
-							adaptiveModel.Adaptability = types.Float32Value(*warningThreshold.Adaptability)
-						} else {
-							adaptiveModel.Adaptability = types.Float32Null()
-						}
-						if warningThreshold.Seasonality != nil {
-							adaptiveModel.Seasonality = types.StringValue(string(*warningThreshold.Seasonality))
-						} else {
-							adaptiveModel.Seasonality = types.StringNull()
-						}
-						warningModel.AdaptiveBaseline = adaptiveModel
-					}
-					thresholdModel.Warning = warningModel
-				}
-
-				// Check for critical threshold
-				if criticalThreshold, ok := ruleWithThreshold.Thresholds[restapi.CriticalSeverity]; ok {
-					criticalModel := &ThresholdLevelModel{}
-					if criticalThreshold.Type == "staticThreshold" && criticalThreshold.Value != nil {
-						criticalModel.Static = &shared.StaticTypeModel{
-							Value:    types.Int64Value(int64(*criticalThreshold.Value)),
-							Operator: util.SetStringPointerToState(criticalThreshold.Operator),
-						}
-					} else if criticalThreshold.Type == "adaptiveBaseline" {
-						adaptiveModel := &shared.AdaptiveBaselineModel{}
-						if criticalThreshold.DeviationFactor != nil {
-							adaptiveModel.DeviationFactor = types.Float32Value(*criticalThreshold.DeviationFactor)
-						} else {
-							adaptiveModel.DeviationFactor = types.Float32Null()
-						}
-						if criticalThreshold.Adaptability != nil {
-							adaptiveModel.Adaptability = types.Float32Value(*criticalThreshold.Adaptability)
-						} else {
-							adaptiveModel.Adaptability = types.Float32Null()
-						}
-						if criticalThreshold.Seasonality != nil {
-							adaptiveModel.Seasonality = types.StringValue(string(*criticalThreshold.Seasonality))
-						} else {
-							adaptiveModel.Seasonality = types.StringNull()
-						}
-						criticalModel.AdaptiveBaseline = adaptiveModel
-					}
-					thresholdModel.Critical = criticalModel
-				}
-
-				ruleWithThresholdModel.Thresholds = thresholdModel
-			}
-
-			ruleModels[i] = ruleWithThresholdModel
-		}
-
-		log.Printf("before calling rules value final")
-		// Directly assign the slice of models
-		model.Rules = ruleModels
-	} else {
+	if len(data.Rules) == 0 {
 		model.Rules = []RuleWithThresholdModel{}
-	}
-	if diags.HasError() {
 		return diags
 	}
-	log.Printf("Before TimeThreshold stage")
-	// Handle time threshold
-	if data.TimeThreshold != nil {
-		timeThresholdModel := &AppAlertTimeThresholdModel{}
 
-		// Determine which time threshold to populate based on the Type field
-		switch data.TimeThreshold.Type {
-		case "requestImpact":
-			timeThresholdModel.RequestImpact = &AppAlertRequestImpactModel{
-				TimeWindow: types.Int64Value(int64(data.TimeThreshold.TimeWindow)),
-				Requests:   types.Int64Value(int64(data.TimeThreshold.Requests)),
-			}
-			timeThresholdModel.ViolationsInPeriod = nil
-			timeThresholdModel.ViolationsInSequence = nil
+	ruleModels := make([]RuleWithThresholdModel, len(data.Rules))
+	for i, ruleWithThreshold := range data.Rules {
+		ruleModel, err := r.mapRuleToModel(&ruleWithThreshold)
+		if err != nil {
+			diags.Append(err...)
+			return diags
+		}
+		ruleModels[i] = ruleModel
+	}
 
-		case "violationsInPeriod":
-			timeThresholdModel.RequestImpact = nil
-			timeThresholdModel.ViolationsInPeriod = &AppAlertViolationsInPeriodModel{
-				TimeWindow: types.Int64Value(int64(data.TimeThreshold.TimeWindow)),
-				Violations: types.Int64Value(int64(data.TimeThreshold.Violations)),
-			}
-			timeThresholdModel.ViolationsInSequence = nil
+	model.Rules = ruleModels
+	return diags
+}
 
-		case "violationsInSequence":
-			timeThresholdModel.RequestImpact = nil
-			timeThresholdModel.ViolationsInPeriod = nil
-			timeThresholdModel.ViolationsInSequence = &AppAlertViolationsInSequenceModel{
-				TimeWindow: types.Int64Value(int64(data.TimeThreshold.TimeWindow)),
+// mapRuleToModel converts a single rule with thresholds to model format
+func (r *applicationAlertConfigResourceFrameworkImpl) mapRuleToModel(ruleWithThreshold *restapi.ApplicationAlertRuleWithThresholds) (RuleWithThresholdModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	ruleModel := r.createRuleModelByType(ruleWithThreshold.Rule)
+
+	ruleWithThresholdModel := RuleWithThresholdModel{
+		Rule:              &ruleModel,
+		ThresholdOperator: types.StringValue(ruleWithThreshold.ThresholdOperator),
+		Thresholds:        r.mapThresholdsToModel(ruleWithThreshold.Thresholds),
+	}
+
+	return ruleWithThresholdModel, diags
+}
+
+// createRuleModelByType creates appropriate rule model based on alert type
+func (r *applicationAlertConfigResourceFrameworkImpl) createRuleModelByType(rule *restapi.ApplicationAlertRule) RuleModel {
+	ruleModel := RuleModel{}
+
+	switch rule.AlertType {
+	case ApplicationAlertConfigFieldRuleErrorRate:
+		ruleModel.ErrorRate = &RuleConfigModel{
+			MetricName:  types.StringValue(rule.MetricName),
+			Aggregation: types.StringValue(string(rule.Aggregation)),
+		}
+
+	case ApplicationAlertConfigFieldRuleErrors:
+		ruleModel.Errors = &RuleConfigModel{
+			MetricName:  types.StringValue(rule.MetricName),
+			Aggregation: types.StringValue(string(rule.Aggregation)),
+		}
+
+	case ApplicationAlertConfigFieldRuleLogs:
+		ruleModel.Logs = &LogsRuleModel{
+			MetricName:  types.StringValue(rule.MetricName),
+			Aggregation: types.StringValue(string(rule.Aggregation)),
+			Level:       util.SetStringPointerToState((*string)(rule.Level)),
+			Message:     util.SetStringPointerToState(rule.Message),
+			Operator:    util.SetStringPointerToState((*string)(rule.Operator)),
+		}
+
+	case ApplicationAlertConfigFieldRuleSlowness:
+		ruleModel.Slowness = &RuleConfigModel{
+			MetricName:  types.StringValue(rule.MetricName),
+			Aggregation: types.StringValue(string(rule.Aggregation)),
+		}
+
+	case ApplicationAlertConfigFieldRuleStatusCode:
+		ruleModel.StatusCode = &StatusCodeRuleModel{
+			MetricName:      types.StringValue(rule.MetricName),
+			Aggregation:     types.StringValue(string(rule.Aggregation)),
+			StatusCodeStart: util.SetInt32PointerToInt64State(rule.StatusCodeStart),
+			StatusCodeEnd:   util.SetInt32PointerToInt64State(rule.StatusCodeEnd),
+		}
+
+	case ApplicationAlertConfigFieldRuleThroughput:
+		ruleModel.Throughput = &RuleConfigModel{
+			MetricName:  types.StringValue(rule.MetricName),
+			Aggregation: types.StringValue(string(rule.Aggregation)),
+		}
+	}
+
+	return ruleModel
+}
+
+// mapThresholdsToModel converts threshold map to model format
+func (r *applicationAlertConfigResourceFrameworkImpl) mapThresholdsToModel(thresholds map[restapi.AlertSeverity]restapi.ThresholdRule) *ApplicationThresholdModel {
+	if len(thresholds) == 0 {
+		return nil
+	}
+
+	thresholdModel := &ApplicationThresholdModel{}
+
+	if warningThreshold, ok := thresholds[restapi.WarningSeverity]; ok {
+		thresholdModel.Warning = r.mapThresholdLevelToModel(&warningThreshold)
+	}
+
+	if criticalThreshold, ok := thresholds[restapi.CriticalSeverity]; ok {
+		thresholdModel.Critical = r.mapThresholdLevelToModel(&criticalThreshold)
+	}
+
+	return thresholdModel
+}
+
+// mapThresholdLevelToModel converts a threshold rule to threshold level model
+func (r *applicationAlertConfigResourceFrameworkImpl) mapThresholdLevelToModel(threshold *restapi.ThresholdRule) *ThresholdLevelModel {
+	levelModel := &ThresholdLevelModel{}
+
+	switch threshold.Type {
+	case "staticThreshold":
+		if threshold.Value != nil {
+			levelModel.Static = &shared.StaticTypeModel{
+				Value:    types.Int64Value(int64(*threshold.Value)),
+				Operator: util.SetStringPointerToState(threshold.Operator),
 			}
 		}
 
-		model.TimeThreshold = timeThresholdModel
+	case "adaptiveBaseline":
+		levelModel.AdaptiveBaseline = &shared.AdaptiveBaselineModel{
+			DeviationFactor: util.SetFloat32PointerToState(threshold.DeviationFactor),
+			Adaptability:    util.SetFloat32PointerToState(threshold.Adaptability),
+			Seasonality:     util.SetStringPointerToState((*string)(threshold.Seasonality)),
+		}
 	}
-	if diags.HasError() {
-		return diags
+
+	return levelModel
+}
+
+// updateTimeThreshold handles time threshold mapping
+func (r *applicationAlertConfigResourceFrameworkImpl) updateTimeThreshold(model *ApplicationAlertConfigModel, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
+	if data.TimeThreshold == nil {
+		model.TimeThreshold = nil
+		return nil
 	}
-	log.Printf("Reached final stage")
-	log.Printf("static threshold elements : %+v\n", model)
-	return state.Set(ctx, model)
+
+	timeThresholdModel := &AppAlertTimeThresholdModel{}
+
+	switch data.TimeThreshold.Type {
+	case "requestImpact":
+		timeThresholdModel.RequestImpact = &AppAlertRequestImpactModel{
+			TimeWindow: types.Int64Value(data.TimeThreshold.TimeWindow),
+			Requests:   types.Int64Value(int64(data.TimeThreshold.Requests)),
+		}
+
+	case "violationsInPeriod":
+		timeThresholdModel.ViolationsInPeriod = &AppAlertViolationsInPeriodModel{
+			TimeWindow: types.Int64Value(data.TimeThreshold.TimeWindow),
+			Violations: types.Int64Value(int64(data.TimeThreshold.Violations)),
+		}
+
+	case "violationsInSequence":
+		timeThresholdModel.ViolationsInSequence = &AppAlertViolationsInSequenceModel{
+			TimeWindow: types.Int64Value(data.TimeThreshold.TimeWindow),
+		}
+	}
+
+	model.TimeThreshold = timeThresholdModel
+	return nil
 }
