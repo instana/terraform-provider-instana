@@ -32,13 +32,8 @@ const (
 	//GroupFieldPermissionSetPermissions constant value for the schema field permissions
 	GroupFieldPermissionSetPermissions = "permissions"
 
-	groupMaxNumberOfSetElements = 1024
+	// Resource description constants
 
-	msgStateCannotBeRead = "WARN: %s state cannot be read\n"
-)
-
-// Resource description constants
-const (
 	GroupDescResource                             = "This resource manages RBAC groups in Instana."
 	GroupDescID                                   = "The ID of the group."
 	GroupDescName                                 = "The name of the Group"

@@ -16,9 +16,7 @@ const (
 	SloCorrectionConfigFieldSchedulingDuration      = "duration"
 	SloCorrectionConfigFieldSchedulingDurationUnit  = "duration_unit"
 	SloCorrectionConfigFieldSchedulingRecurrentRule = "recurrent_rule"
-)
 
-const (
 	// Resource description constants
 	SloCorrectionConfigDescResource      = "This resource manages SLO Correction Configurations in Instana."
 	SloCorrectionConfigDescID            = "The ID of the SLO Correction Config."

@@ -456,28 +456,6 @@ func (r *automationActionResourceFramework) mapTagsToState(ctx context.Context, 
 	}
 }
 
-func (r *automationActionResourceFramework) getFieldValue(action *restapi.AutomationAction, fieldName string) string {
-	for _, v := range action.Fields {
-		if v.Name == fieldName {
-			return v.Value
-		}
-	}
-	return ""
-}
-
-func (r *automationActionResourceFramework) getBoolFieldValueOrDefault(action *restapi.AutomationAction, fieldName string, defaultValue bool) bool {
-	for _, v := range action.Fields {
-		if v.Name == fieldName {
-			boolValue, err := strconv.ParseBool(v.Value)
-			if err != nil {
-				return defaultValue
-			}
-			return boolValue
-		}
-	}
-	return defaultValue
-}
-
 func (r *automationActionResourceFramework) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.AutomationAction, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var model shared.AutomationActionModel

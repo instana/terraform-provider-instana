@@ -1,5 +1,8 @@
 package applicationconfig
 
+// ResourceInstanaApplicationConfigFramework the name of the terraform-provider-instana resource to manage application config
+const ResourceInstanaApplicationConfigFramework = "application_config"
+
 // Description constants for Application Config resource
 const (
 	ApplicationConfigDescResource      = "This resource manages application configurations in Instana."
@@ -18,15 +21,10 @@ const (
 	ApplicationConfigErrParsingTagFilter     = "Error parsing tag filter"
 	ApplicationConfigErrInvalidAttributeType = "Invalid attribute type"
 	ApplicationConfigErrMissingAttribute     = "Missing attribute"
-)
 
-// ResourceInstanaApplicationConfigFramework the name of the terraform-provider-instana resource to manage application config
-const ResourceInstanaApplicationConfigFramework = "application_config"
+	// ApplicationConfigFieldAccessRules field name for access rules
+	ApplicationConfigFieldAccessRules = "access_rules"
 
-// ApplicationConfigFieldAccessRules field name for access rules
-const ApplicationConfigFieldAccessRules = "access_rules"
-
-const (
 	//ApplicationConfigFieldLabel const for the label field of the application config
 	ApplicationConfigFieldLabel = "label"
 	//ApplicationConfigFieldFullLabel const for the full label field of the application config. The field is computed and contains the label which is sent to instana. The computation depends on the configured default_name_prefix and default_name_suffix at provider level

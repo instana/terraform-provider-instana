@@ -18,7 +18,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 // NewLogAlertConfigResourceHandleFramework creates the resource handle for Log Alert Configuration
@@ -670,81 +669,3 @@ func (r *logAlertConfigResourceFramework) mapRulesFromState(ctx context.Context,
 
 	return result, diags
 }
-
-// mapThresholdObjectFromState maps threshold object (warning/critical) to API model
-func (r *logAlertConfigResourceFramework) mapThresholdObjectFromState(ctx context.Context, thresholdObj types.Object) (map[restapi.AlertSeverity]restapi.ThresholdRule, diag.Diagnostics) {
-	var diags diag.Diagnostics
-	thresholdMap := make(map[restapi.AlertSeverity]restapi.ThresholdRule)
-
-	var thresholds struct {
-		Warning  types.Object `tfsdk:"warning"`
-		Critical types.Object `tfsdk:"critical"`
-	}
-
-	diags.Append(thresholdObj.As(ctx, &thresholds, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil, diags
-	}
-
-	// Map warning threshold
-	if !thresholds.Warning.IsNull() && !thresholds.Warning.IsUnknown() {
-		warningThreshold, warnDiags := r.mapSingleThresholdFromState(ctx, thresholds.Warning)
-		diags.Append(warnDiags...)
-		if diags.HasError() {
-			return nil, diags
-		}
-		if warningThreshold != nil {
-			thresholdMap[restapi.WarningSeverity] = *warningThreshold
-		}
-	}
-
-	// Map critical threshold
-	if !thresholds.Critical.IsNull() && !thresholds.Critical.IsUnknown() {
-		criticalThreshold, critDiags := r.mapSingleThresholdFromState(ctx, thresholds.Critical)
-		diags.Append(critDiags...)
-		if diags.HasError() {
-			return nil, diags
-		}
-		if criticalThreshold != nil {
-			thresholdMap[restapi.CriticalSeverity] = *criticalThreshold
-		}
-	}
-
-	return thresholdMap, diags
-}
-
-// mapSingleThresholdFromState maps a single threshold (static) to API model
-func (r *logAlertConfigResourceFramework) mapSingleThresholdFromState(ctx context.Context, thresholdObj types.Object) (*restapi.ThresholdRule, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	var threshold struct {
-		Static types.Object `tfsdk:"static"`
-	}
-
-	diags.Append(thresholdObj.As(ctx, &threshold, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil, diags
-	}
-
-	if threshold.Static.IsNull() || threshold.Static.IsUnknown() {
-		return nil, diags
-	}
-
-	var static struct {
-		Operator types.String `tfsdk:"operator"`
-		Value    types.Int64  `tfsdk:"value"`
-	}
-
-	diags.Append(threshold.Static.As(ctx, &static, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil, diags
-	}
-
-	valueFloat := float64(static.Value.ValueInt64())
-	return &restapi.ThresholdRule{
-		Type:  "staticThreshold",
-		Value: &valueFloat,
-	}, diags
-}
-
-// mapThresholdRuleFromState and MapThresholdsFromState have been moved to threshold-mapping-framework.go

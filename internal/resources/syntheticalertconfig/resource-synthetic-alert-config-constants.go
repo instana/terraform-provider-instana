@@ -4,10 +4,9 @@ package syntheticalertconfig
 const (
 	// ResourceInstanaSyntheticAlertConfigFramework the name of the terraform-provider-instana resource to manage synthetic alert configurations
 	ResourceInstanaSyntheticAlertConfigFramework = "synthetic_alert_config"
-)
 
-// Field name constants for synthetic alert config
-const (
+	// Field name constants for synthetic alert config
+
 	// SyntheticAlertConfigFieldName constant value for the schema field name
 	SyntheticAlertConfigFieldName = "name"
 	// SyntheticAlertConfigFieldFullName constant value for the schema field full name
@@ -32,28 +31,25 @@ const (
 	SyntheticAlertConfigFieldID = "id"
 	// SyntheticAlertConfigFieldCustomPayloadField constant value for the schema field custom_payload_field
 	SyntheticAlertConfigFieldCustomPayloadField = "custom_payload_field"
-)
 
-// Rule field constants
-const (
+	// Rule field constants
+
 	// SyntheticAlertRuleFieldAlertType constant value for the rule field alert_type
 	SyntheticAlertRuleFieldAlertType = "alert_type"
 	// SyntheticAlertRuleFieldMetricName constant value for the rule field metric_name
 	SyntheticAlertRuleFieldMetricName = "metric_name"
 	// SyntheticAlertRuleFieldAggregation constant value for the rule field aggregation
 	SyntheticAlertRuleFieldAggregation = "aggregation"
-)
 
-// TimeThreshold field constants
-const (
+	// TimeThreshold field constants
+
 	// SyntheticAlertTimeThresholdFieldType constant value for the time threshold field type
 	SyntheticAlertTimeThresholdFieldType = "type"
 	// SyntheticAlertTimeThresholdFieldViolationsCount constant value for the time threshold field violations_count
 	SyntheticAlertTimeThresholdFieldViolationsCount = "violations_count"
-)
 
-// Description constants
-const (
+	// Description constants
+
 	// SyntheticAlertConfigDescResource description for the resource
 	SyntheticAlertConfigDescResource = "This resource manages Synthetic Alert Configurations in Instana."
 	// SyntheticAlertConfigDescID description for the ID field
@@ -86,10 +82,9 @@ const (
 	SyntheticAlertConfigDescTimeThresholdType = "The type of the time threshold (only violationsInSequence is supported)."
 	// SyntheticAlertConfigDescTimeThresholdViolationsCount description for the time threshold violations_count field
 	SyntheticAlertConfigDescTimeThresholdViolationsCount = "The number of violations required to trigger the alert (value between 1 and 12)."
-)
 
-// Error message constants
-const (
+	// Error message constants
+
 	// SyntheticAlertConfigErrParsingTagFilter error message for parsing tag filter
 	SyntheticAlertConfigErrParsingTagFilter = "Error parsing tag filter"
 	// SyntheticAlertConfigErrParsingTagFilterDetail error message detail for parsing tag filter
@@ -98,18 +93,16 @@ const (
 	SyntheticAlertConfigErrNormalizingTagFilter = "Error normalizing tag filter"
 	// SyntheticAlertConfigErrNormalizingTagFilterDetail error message detail for normalizing tag filter
 	SyntheticAlertConfigErrNormalizingTagFilterDetail = "Could not normalize tag filter: "
-)
 
-// Validation constants
-const (
+	// Validation constants
+
 	// SyntheticAlertConfigValidAlertType valid alert type value
 	SyntheticAlertConfigValidAlertType = "failure"
 	// SyntheticAlertConfigValidTimeThresholdType valid time threshold type value
 	SyntheticAlertConfigValidTimeThresholdType = "violationsInSequence"
-)
 
-// Aggregation type constants
-const (
+	// Aggregation type constants
+
 	AggregationTypeSum           = "SUM"
 	AggregationTypeMean          = "MEAN"
 	AggregationTypeMax           = "MAX"
@@ -127,10 +120,9 @@ const (
 	AggregationTypeSumPositive   = "SUM_POSITIVE"
 	AggregationTypePerSecond     = "PER_SECOND"
 	AggregationTypeIncrease      = "INCREASE"
-)
 
-// Tag filter constants
-const (
+	// Tag filter constants
+
 	// TagFilterTypeExpression tag filter type value
 	TagFilterTypeExpression = "EXPRESSION"
 	// TagFilterLogicalOperatorAnd logical operator value

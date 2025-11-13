@@ -92,10 +92,9 @@ const (
 	SloConfigDescTimezone = "The timezone for the SLO configuration"
 	// SloConfigDescStartTimestamp is the description for the start_timestamp field
 	SloConfigDescStartTimestamp = "Time window start time"
-)
 
-// Error message constants
-const (
+	// Error message constants
+
 	// SloConfigErrMappingState is the error title for mapping state to data object
 	SloConfigErrMappingState = "Error mapping state to data object"
 	// SloConfigErrBothPlanStateNil is the error message when both plan and state are nil
@@ -160,4 +159,81 @@ const (
 	SloConfigErrMappingTimeWindowToState = "Error mapping time window to state"
 	// SloConfigErrUnsupportedTimeWindowType is the error message for unsupported time window type
 	SloConfigErrUnsupportedTimeWindowType = "Unsupported time window type: %s"
+
+	// ResourceInstanaSloConfig the name of the terraform-provider-instana resource to manage SLI configurations
+	ResourceInstanaSloConfig       = "instana_slo_config"
+	SloConfigFromTerraformIdPrefix = "SLOTF"
+
+	//SloConfigField names for terraform
+	SloConfigFieldName                      = "name"
+	SloConfigFieldFullName                  = "full_name"
+	SloConfigFieldTarget                    = "target"
+	SloConfigFieldTags                      = "tags"
+	SloConfigFieldLastUpdated               = "last_updated"
+	SloConfigFieldCreatedDate               = "created_date"
+	SloConfigFieldSloEntity                 = "entity"
+	SloConfigFieldSloIndicator              = "indicator"
+	SloConfigFieldSloTimeWindow             = "time_window"
+	SloConfigFieldApplicationID             = "application_id"
+	SloConfigFieldWebsiteID                 = "website_id"
+	SloConfigFieldSyntheticTestIDs          = "synthetic_test_ids"
+	SloConfigFieldFilterExpression          = "filter_expression"
+	SloConfigFieldServiceID                 = "service_id"
+	SloConfigFieldEndpointID                = "endpoint_id"
+	SloConfigFieldIncludeInternal           = "include_internal"
+	SloConfigFieldIncludeSynthetic          = "include_synthetic"
+	SloConfigFieldBeaconType                = "beacon_type"
+	SloConfigFieldBoundaryScope             = "boundary_scope"
+	SloConfigFieldThreshold                 = "threshold"
+	SloConfigFieldAggregation               = "aggregation"
+	SloConfigFieldBadEventFilterExpression  = "bad_event_filter_expression"
+	SloConfigFieldGoodEventFilterExpression = "good_event_filter_expression"
+	SloConfigFieldTrafficType               = "traffic_type"
+	SloConfigFieldDuration                  = "duration"
+	SloConfigFieldDurationUnit              = "duration_unit"
+	SloConfigFieldTimezone                  = "timezone"
+	SloConfigFieldStartTimestamp            = "start_timestamp"
+
+	// Slo entity types for terraform
+	SloConfigApplicationEntity = "application"
+	SloConfigWebsiteEntity     = "website"
+	SloConfigSyntheticEntity   = "synthetic"
+
+	// Slo time windows types
+	SloConfigRollingTimeWindow = "rolling"
+	SloConfigFixedTimeWindow   = "fixed"
+
+	// Slo indicator types for terraform
+	SloConfigTimeBasedLatencyIndicator       = "time_based_latency"
+	SloConfigEventBasedLatencyIndicator      = "event_based_latency"
+	SloConfigTimeBasedAvailabilityIndicator  = "time_based_availability"
+	SloConfigEventBasedAvailabilityIndicator = "event_based_availability"
+	SloConfigTrafficIndicator                = "traffic"
+	SloConfigCustomIndicator                 = "custom"
+
+	// SloConfigFieldNames and values for API
+	SloConfigAPIFieldThreshold       = "threshold"
+	SloConfigAPIFieldAggregation     = "aggregation"
+	SloConfigAPIFieldDuration        = "duration"
+	SloConfigAPIFieldDurationUnit    = "durationUnit"
+	SloConfigAPIFieldTimezone        = "timezone"
+	SloConfigAPIFieldStartTimestamp  = "startTimestamp"
+	SloConfigAPIFieldTrafficType     = "trafficType"
+	SloConfigAPIFieldGoodEventFilter = "goodEventFilterExpression"
+	SloConfigAPIFieldBadEventFilter  = "badEventFilterExpression"
+
+	SloConfigAPIFieldFilter = "tagFilterExpression"
+
+	SloConfigAPIIndicatorBlueprintLatency      = "latency"
+	SloConfigAPIIndicatorBlueprintAvailability = "availability"
+	SloConfigAPIIndicatorBlueprintTraffic      = "traffic"
+	SloConfigAPIIndicatorBlueprintCustom       = "custom"
+
+	SloConfigAPIFieldBlueprint = "blueprint"
+	SloConfigAPIFieldType      = "type"
+
+	SloConfigAPIIndicatorMeasurementTypeTimeBased  = "timeBased"
+	SloConfigAPIIndicatorMeasurementTypeEventBased = "eventBased"
+	SloConfigAPITrafficIndicatorTypeAll            = "all"
+	SloConfigAPITrafficIndicatorTypeErroneous      = "erroneous"
 )
