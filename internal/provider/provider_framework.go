@@ -14,7 +14,7 @@ import (
 	"github.com/gessnerfl/terraform-provider-instana/internal/resources/automationaction"
 	"github.com/gessnerfl/terraform-provider-instana/internal/resources/automationpolicy"
 	"github.com/gessnerfl/terraform-provider-instana/internal/resources/customdashboard"
-	"github.com/gessnerfl/terraform-provider-instana/internal/resources/cutomeventspec"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resources/customeventspec"
 	"github.com/gessnerfl/terraform-provider-instana/internal/resources/group"
 	"github.com/gessnerfl/terraform-provider-instana/internal/resources/infralertconfig"
 	"github.com/gessnerfl/terraform-provider-instana/internal/resources/logalertconfig"
@@ -181,7 +181,7 @@ func (p *InstanaProvider) Resources(_ context.Context) []func() resource.Resourc
 		addResouceHandle(automationaction.NewAutomationActionResourceHandleFramework),
 		addResouceHandle(automationpolicy.NewAutomationPolicyResourceHandleFramework),
 		addResouceHandle(customdashboard.NewCustomDashboardResourceHandleFramework),
-		addResouceHandle(cutomeventspec.NewCustomEventSpecificationResourceHandleFramework),
+		addResouceHandle(customeventspec.NewCustomEventSpecificationResourceHandleFramework),
 		addResouceHandle(infralertconfig.NewInfraAlertConfigResourceHandleFramework),
 		addResouceHandle(group.NewGroupResourceHandleFramework),
 		addResouceHandle(sliconfig.NewSliConfigResourceHandleFramework),

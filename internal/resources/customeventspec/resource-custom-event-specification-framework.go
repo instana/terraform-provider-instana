@@ -1,4 +1,4 @@
-package cutomeventspec
+package customeventspec
 
 import (
 	"context"
