@@ -21,51 +21,51 @@ import (
 
 // NewAlertingChannelResourceHandleFramework creates the resource handle for Alerting Channels
 func NewAlertingChannelResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.AlertingChannel] {
-	supportedOpsGenieRegions := []string{"EU", "US"}
+	supportedOpsGenieRegions := []string{OpsGenieRegionEU, OpsGenieRegionUS}
 	return &alertingChannelResourceFramework{
 		metaData: resourcehandle.ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaAlertingChannelFramework,
 			Schema: schema.Schema{
-				Description: "This resource manages alerting channels in Instana.",
+				Description: AlertingChannelDescResource,
 				Attributes: map[string]schema.Attribute{
-					"id": schema.StringAttribute{
+					AlertingChannelFieldID: schema.StringAttribute{
 						Computed:    true,
-						Description: "The ID of the alerting channel.",
+						Description: AlertingChannelDescID,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
 					AlertingChannelFieldName: schema.StringAttribute{
 						Required:    true,
-						Description: "Configures the name of the alerting channel",
+						Description: AlertingChannelDescName,
 					},
 					AlertingChannelFieldChannelEmail: schema.SingleNestedAttribute{
 						Optional:    true,
-						Description: "The configuration of the Email channel",
+						Description: AlertingChannelDescEmail,
 						Attributes: map[string]schema.Attribute{
 							AlertingChannelEmailFieldEmails: schema.SetAttribute{
 								Required:    true,
-								Description: "The list of emails of the Email alerting channel",
+								Description: AlertingChannelDescEmailEmails,
 								ElementType: types.StringType,
 							},
 						},
 					},
 					AlertingChannelFieldChannelOpsGenie: schema.SingleNestedAttribute{
 						Optional:    true,
-						Description: "The configuration of the Ops Genie channel",
+						Description: AlertingChannelDescOpsGenie,
 						Attributes: map[string]schema.Attribute{
 							AlertingChannelOpsGenieFieldAPIKey: schema.StringAttribute{
 								Required:    true,
-								Description: "The OpsGenie API Key of the OpsGenie alerting channel",
+								Description: AlertingChannelDescOpsGenieAPIKey,
 							},
 							AlertingChannelOpsGenieFieldTags: schema.ListAttribute{
 								Required:    true,
-								Description: "The OpsGenie tags of the OpsGenie alerting channel",
+								Description: AlertingChannelDescOpsGenieTags,
 								ElementType: types.StringType,
 							},
 							AlertingChannelOpsGenieFieldRegion: schema.StringAttribute{
 								Required:    true,
-								Description: fmt.Sprintf("The OpsGenie region (%s) of the OpsGenie alerting channel", strings.Join(supportedOpsGenieRegions, ", ")),
+								Description: fmt.Sprintf(AlertingChannelDescOpsGenieRegion, strings.Join(supportedOpsGenieRegions, ", ")),
 								Validators: []validator.String{
 									stringvalidator.OneOf(supportedOpsGenieRegions...),
 								},
@@ -74,111 +74,111 @@ func NewAlertingChannelResourceHandleFramework() resourcehandle.ResourceHandleFr
 					},
 					AlertingChannelFieldChannelPageDuty: schema.SingleNestedAttribute{
 						Optional:    true,
-						Description: "The configuration of the Pager Duty channel",
+						Description: AlertingChannelDescPagerDuty,
 						Attributes: map[string]schema.Attribute{
 							AlertingChannelPagerDutyFieldServiceIntegrationKey: schema.StringAttribute{
 								Required:    true,
-								Description: "The Service Integration Key of the PagerDuty alerting channel",
+								Description: AlertingChannelDescPagerDutyServiceKey,
 							},
 						},
 					},
 					AlertingChannelFieldChannelSlack: schema.SingleNestedAttribute{
 						Optional:    true,
-						Description: "The configuration of the Slack channel",
+						Description: AlertingChannelDescSlack,
 						Attributes: map[string]schema.Attribute{
 							AlertingChannelSlackFieldWebhookURL: schema.StringAttribute{
 								Required:    true,
-								Description: "The webhook URL of the Slack alerting channel",
+								Description: AlertingChannelDescSlackWebhookURL,
 							},
 							AlertingChannelSlackFieldIconURL: schema.StringAttribute{
 								Optional:    true,
-								Description: "The icon URL of the Slack alerting channel",
+								Description: AlertingChannelDescSlackIconURL,
 							},
 							AlertingChannelSlackFieldChannel: schema.StringAttribute{
 								Optional:    true,
-								Description: "The Slack channel of the Slack alerting channel",
+								Description: AlertingChannelDescSlackChannel,
 							},
 						},
 					},
 					AlertingChannelFieldChannelSplunk: schema.SingleNestedAttribute{
 						Optional:    true,
-						Description: "The configuration of the Splunk channel",
+						Description: AlertingChannelDescSplunk,
 						Attributes: map[string]schema.Attribute{
 							AlertingChannelSplunkFieldURL: schema.StringAttribute{
 								Required:    true,
-								Description: "The URL of the Splunk alerting channel",
+								Description: AlertingChannelDescSplunkURL,
 							},
 							AlertingChannelSplunkFieldToken: schema.StringAttribute{
 								Required:    true,
-								Description: "The token of the Splunk alerting channel",
+								Description: AlertingChannelDescSplunkToken,
 							},
 						},
 					},
 					AlertingChannelFieldChannelVictorOps: schema.SingleNestedAttribute{
 						Optional:    true,
-						Description: "The configuration of the VictorOps channel",
+						Description: AlertingChannelDescVictorOps,
 						Attributes: map[string]schema.Attribute{
 							AlertingChannelVictorOpsFieldAPIKey: schema.StringAttribute{
 								Required:    true,
-								Description: "The API Key of the VictorOps alerting channel",
+								Description: AlertingChannelDescVictorOpsAPIKey,
 							},
 							AlertingChannelVictorOpsFieldRoutingKey: schema.StringAttribute{
 								Required:    true,
-								Description: "The Routing Key of the VictorOps alerting channel",
+								Description: AlertingChannelDescVictorOpsRoutingKey,
 							},
 						},
 					},
 					AlertingChannelFieldChannelWebhook: schema.SingleNestedAttribute{
 						Optional:    true,
-						Description: "The configuration of the Webhook channel",
+						Description: AlertingChannelDescWebhook,
 						Attributes: map[string]schema.Attribute{
 							AlertingChannelWebhookFieldWebhookURLs: schema.SetAttribute{
 								Required:    true,
-								Description: "The list of webhook urls of the Webhook alerting channel",
+								Description: AlertingChannelDescWebhookWebhookURLs,
 								ElementType: types.StringType,
 							},
 							AlertingChannelWebhookFieldHTTPHeaders: schema.MapAttribute{
 								Optional:    true,
-								Description: "The optional map of HTTP headers of the Webhook alerting channel",
+								Description: AlertingChannelDescWebhookHTTPHeaders,
 								ElementType: types.StringType,
 							},
 						},
 					},
 					AlertingChannelFieldChannelOffice365: schema.SingleNestedAttribute{
 						Optional:    true,
-						Description: "The configuration of the Office 365 channel",
+						Description: AlertingChannelDescOffice365,
 						Attributes: map[string]schema.Attribute{
 							AlertingChannelWebhookBasedFieldWebhookURL: schema.StringAttribute{
 								Required:    true,
-								Description: "The webhook URL of the Office 365 alerting channel",
+								Description: AlertingChannelDescOffice365WebhookURL,
 							},
 						},
 					},
 					AlertingChannelFieldChannelGoogleChat: schema.SingleNestedAttribute{
 						Optional:    true,
-						Description: "The configuration of the Google Chat channel",
+						Description: AlertingChannelDescGoogleChat,
 						Attributes: map[string]schema.Attribute{
 							AlertingChannelWebhookBasedFieldWebhookURL: schema.StringAttribute{
 								Required:    true,
-								Description: "The webhook URL of the Google Chat alerting channel",
+								Description: AlertingChannelDescGoogleChatWebhookURL,
 							},
 						},
 					},
 					AlertingChannelFieldChannelServiceNow: schema.SingleNestedAttribute{
 						Optional:    true,
-						Description: "The configuration of the ServiceNow channel",
+						Description: AlertingChannelDescServiceNow,
 						Attributes: map[string]schema.Attribute{
 							AlertingChannelServiceNowFieldServiceNowURL: schema.StringAttribute{
 								Required:    true,
-								Description: "The ServiceNow URL of the ServiceNow alerting channel",
+								Description: AlertingChannelDescServiceNowURL,
 							},
 							AlertingChannelServiceNowFieldUsername: schema.StringAttribute{
 								Required:    true,
-								Description: "The username of the ServiceNow alerting channel",
+								Description: AlertingChannelDescServiceNowUsername,
 							},
 							AlertingChannelServiceNowFieldPassword: schema.StringAttribute{
 								Optional:    true,
-								Description: "The password of the ServiceNow alerting channel",
+								Description: AlertingChannelDescServiceNowPassword,
 								PlanModifiers: []planmodifier.String{
 									// When the plan does not include the password, keep the value from state.
 									stringplanmodifier.UseStateForUnknown(),
@@ -186,25 +186,25 @@ func NewAlertingChannelResourceHandleFramework() resourcehandle.ResourceHandleFr
 							},
 							AlertingChannelServiceNowFieldAutoCloseIncidents: schema.BoolAttribute{
 								Optional:    true,
-								Description: "Whether to automatically close incidents in ServiceNow",
+								Description: AlertingChannelDescServiceNowAutoClose,
 							},
 						},
 					},
 					AlertingChannelFieldChannelServiceNowApplication: schema.SingleNestedAttribute{
 						Optional:    true,
-						Description: "The configuration of the ServiceNow Enhanced (ITSM) channel",
+						Description: AlertingChannelDescServiceNowApplication,
 						Attributes: map[string]schema.Attribute{
 							AlertingChannelServiceNowFieldServiceNowURL: schema.StringAttribute{
 								Required:    true,
-								Description: "The ServiceNow URL of the ServiceNow Enhanced alerting channel",
+								Description: AlertingChannelDescServiceNowAppURL,
 							},
 							AlertingChannelServiceNowFieldUsername: schema.StringAttribute{
 								Required:    true,
-								Description: "The username of the ServiceNow Enhanced alerting channel",
+								Description: AlertingChannelDescServiceNowAppUsername,
 							},
 							AlertingChannelServiceNowFieldPassword: schema.StringAttribute{
 								Optional:    true,
-								Description: "The password of the ServiceNow Enhanced alerting channel",
+								Description: AlertingChannelDescServiceNowAppPassword,
 								PlanModifiers: []planmodifier.String{
 									// When the plan does not include the password, keep the value from state.
 									stringplanmodifier.UseStateForUnknown(),
@@ -212,81 +212,81 @@ func NewAlertingChannelResourceHandleFramework() resourcehandle.ResourceHandleFr
 							},
 							AlertingChannelServiceNowApplicationFieldTenant: schema.StringAttribute{
 								Required:    true,
-								Description: "The tenant of the ServiceNow Enhanced alerting channel",
+								Description: AlertingChannelDescServiceNowAppTenant,
 							},
 							AlertingChannelServiceNowApplicationFieldUnit: schema.StringAttribute{
 								Required:    true,
-								Description: "The unit of the ServiceNow Enhanced alerting channel",
+								Description: AlertingChannelDescServiceNowAppUnit,
 							},
 							AlertingChannelServiceNowFieldAutoCloseIncidents: schema.BoolAttribute{
 								Optional:    true,
-								Description: "Whether to automatically close incidents in ServiceNow",
+								Description: AlertingChannelDescServiceNowAutoClose,
 							},
 							AlertingChannelServiceNowApplicationFieldInstanaURL: schema.StringAttribute{
 								Optional:    true,
-								Description: "The Instana URL for the ServiceNow Enhanced alerting channel",
+								Description: AlertingChannelDescServiceNowAppInstanaURL,
 							},
 							AlertingChannelServiceNowApplicationFieldEnableSendInstanaNotes: schema.BoolAttribute{
 								Optional:    true,
-								Description: "Whether to send Instana notes to ServiceNow",
+								Description: AlertingChannelDescServiceNowAppSendNotes,
 							},
 							AlertingChannelServiceNowApplicationFieldEnableSendServiceNowActivities: schema.BoolAttribute{
 								Optional:    true,
-								Description: "Whether to send ServiceNow activities",
+								Description: AlertingChannelDescServiceNowAppSendActivities,
 							},
 							AlertingChannelServiceNowApplicationFieldEnableSendServiceNowWorkNotes: schema.BoolAttribute{
 								Optional:    true,
-								Description: "Whether to send ServiceNow work notes",
+								Description: AlertingChannelDescServiceNowAppSendWorkNotes,
 							},
 							AlertingChannelServiceNowApplicationFieldManuallyClosedIncidents: schema.BoolAttribute{
 								Optional:    true,
-								Description: "Whether incidents are manually closed",
+								Description: AlertingChannelDescServiceNowAppManualClose,
 							},
 							AlertingChannelServiceNowApplicationFieldResolutionOfIncident: schema.BoolAttribute{
 								Optional:    true,
-								Description: "Whether to resolve incidents",
+								Description: AlertingChannelDescServiceNowAppResolution,
 							},
 							AlertingChannelServiceNowApplicationFieldSnowStatusOnCloseEvent: schema.Int64Attribute{
 								Optional:    true,
-								Description: "The ServiceNow status code when closing events",
+								Description: AlertingChannelDescServiceNowAppCloseStatus,
 							},
 						},
 					},
 					AlertingChannelFieldChannelPrometheusWebhook: schema.SingleNestedAttribute{
 						Optional:    true,
-						Description: "The configuration of the Prometheus Webhook channel",
+						Description: AlertingChannelDescPrometheusWebhook,
 						Attributes: map[string]schema.Attribute{
 							AlertingChannelWebhookBasedFieldWebhookURL: schema.StringAttribute{
 								Required:    true,
-								Description: "The webhook URL of the Prometheus Webhook alerting channel",
+								Description: AlertingChannelDescPrometheusWebhookURL,
 							},
 							AlertingChannelPrometheusWebhookFieldReceiver: schema.StringAttribute{
 								Optional:    true,
-								Description: "The receiver of the Prometheus Webhook alerting channel",
+								Description: AlertingChannelDescPrometheusWebhookReceiver,
 							},
 						},
 					},
 					AlertingChannelFieldChannelWebexTeamsWebhook: schema.SingleNestedAttribute{
 						Optional:    true,
-						Description: "The configuration of the Webex Teams Webhook channel",
+						Description: AlertingChannelDescWebexTeamsWebhook,
 						Attributes: map[string]schema.Attribute{
 							AlertingChannelWebhookBasedFieldWebhookURL: schema.StringAttribute{
 								Required:    true,
-								Description: "The webhook URL of the Webex Teams Webhook alerting channel",
+								Description: AlertingChannelDescWebexTeamsWebhookURL,
 							},
 						},
 					},
 					AlertingChannelFieldChannelWatsonAIOpsWebhook: schema.SingleNestedAttribute{
 						Optional:    true,
-						Description: "The configuration of the Watson AIOps Webhook channel",
+						Description: AlertingChannelDescWatsonAIOpsWebhook,
 						Attributes: map[string]schema.Attribute{
 							AlertingChannelWebhookBasedFieldWebhookURL: schema.StringAttribute{
 								Required:    true,
-								Description: "The webhook URL of the Watson AIOps Webhook alerting channel",
+								Description: AlertingChannelDescWatsonAIOpsWebhookURL,
 							},
 							AlertingChannelWebhookFieldHTTPHeaders: schema.ListAttribute{
 								Optional:    true,
-								Description: "The list of HTTP headers for the Watson AIOps Webhook alerting channel",
+								Description: AlertingChannelDescWatsonAIOpsHTTPHeaders,
 								ElementType: types.StringType,
 							},
 						},
@@ -302,145 +302,32 @@ type alertingChannelResourceFramework struct {
 	metaData resourcehandle.ResourceMetaDataFramework
 }
 
+// MetaData returns the resource metadata
 func (r *alertingChannelResourceFramework) MetaData() *resourcehandle.ResourceMetaDataFramework {
 	return &r.metaData
 }
 
+// GetRestResource returns the REST resource for alerting channels
 func (r *alertingChannelResourceFramework) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.AlertingChannel] {
 	return api.AlertingChannels()
 }
 
+// SetComputedFields sets computed fields in the plan
 func (r *alertingChannelResourceFramework) SetComputedFields(_ context.Context, _ *tfsdk.Plan) diag.Diagnostics {
 	return nil
 }
 
+// UpdateState updates the Terraform state with the alerting channel data from the API
 func (r *alertingChannelResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, alertingChannel *restapi.AlertingChannel) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	// Get the plan model to preserve optional values in the response
-	var planModel AlertingChannelModel
-	if plan != nil {
-		diags.Append(plan.Get(ctx, &planModel)...)
-		if diags.HasError() {
-			return diags
-		}
-	}
+	// Create base model with common fields
+	model := r.createBaseModel(alertingChannel)
 
-	// Create a model and populate it with values from the alerting channel
-	model := AlertingChannelModel{
-		ID:   types.StringValue(alertingChannel.ID),
-		Name: types.StringValue(alertingChannel.Name),
-	}
-
-	// Initialize all channel types as nil (they are pointer models)
-	// Only the matching channel type will be populated
-
-	// Set the appropriate channel type based on the alerting channel kind
-	switch alertingChannel.Kind {
-	case restapi.EmailChannelType:
-		emailChannel, emailDiags := shared.MapEmailChannelToState(ctx, alertingChannel)
-		if emailDiags.HasError() {
-			diags.Append(emailDiags...)
-			return diags
-		}
-		model.Email = emailChannel
-	case restapi.OpsGenieChannelType:
-		opsGenieChannel, opsGenieDiags := shared.MapOpsGenieChannelToState(ctx, alertingChannel)
-		if opsGenieDiags.HasError() {
-			diags.Append(opsGenieDiags...)
-			return diags
-		}
-		model.OpsGenie = opsGenieChannel
-	case restapi.PagerDutyChannelType:
-		pagerDutyChannel, pagerDutyDiags := shared.MapPagerDutyChannelToState(ctx, alertingChannel)
-		if pagerDutyDiags.HasError() {
-			diags.Append(pagerDutyDiags...)
-			return diags
-		}
-		model.PagerDuty = pagerDutyChannel
-	case restapi.SlackChannelType:
-		slackChannel, slackDiags := shared.MapSlackChannelToState(ctx, alertingChannel)
-		if slackDiags.HasError() {
-			diags.Append(slackDiags...)
-			return diags
-		}
-		model.Slack = slackChannel
-	case restapi.SplunkChannelType:
-		splunkChannel, splunkDiags := shared.MapSplunkChannelToState(ctx, alertingChannel)
-		if splunkDiags.HasError() {
-			diags.Append(splunkDiags...)
-			return diags
-		}
-		model.Splunk = splunkChannel
-	case restapi.VictorOpsChannelType:
-		victorOpsChannel, victorOpsDiags := shared.MapVictorOpsChannelToState(ctx, alertingChannel)
-		if victorOpsDiags.HasError() {
-			diags.Append(victorOpsDiags...)
-			return diags
-		}
-		model.VictorOps = victorOpsChannel
-	case restapi.WebhookChannelType:
-		webhookChannel, webhookDiags := shared.MapWebhookChannelToState(ctx, alertingChannel)
-		if webhookDiags.HasError() {
-			diags.Append(webhookDiags...)
-			return diags
-		}
-		model.Webhook = webhookChannel
-	case restapi.Office365ChannelType:
-		office365Channel, office365Diags := shared.MapWebhookBasedChannelToState(ctx, alertingChannel)
-		if office365Diags.HasError() {
-			diags.Append(office365Diags...)
-			return diags
-		}
-		model.Office365 = office365Channel
-	case restapi.GoogleChatChannelType:
-		googleChatChannel, googleChatDiags := shared.MapWebhookBasedChannelToState(ctx, alertingChannel)
-		if googleChatDiags.HasError() {
-			diags.Append(googleChatDiags...)
-			return diags
-		}
-		model.GoogleChat = googleChatChannel
-	case restapi.ServiceNowChannelType:
-		serviceNowChannel, serviceNowDiags := shared.MapServiceNowChannelToState(ctx, alertingChannel)
-		if serviceNowDiags.HasError() {
-			diags.Append(serviceNowDiags...)
-			return diags
-		}
-		model.ServiceNow = serviceNowChannel
-	case restapi.ServiceNowApplicationChannelType:
-		serviceNowEnhancedChannel, serviceNowEnhancedDiags := shared.MapServiceNowApplicationChannelToState(ctx, alertingChannel)
-		if serviceNowEnhancedDiags.HasError() {
-			diags.Append(serviceNowEnhancedDiags...)
-			return diags
-		}
-		model.ServiceNowApplication = serviceNowEnhancedChannel
-	case restapi.PrometheusWebhookChannelType:
-		prometheusWebhookChannel, prometheusWebhookDiags := shared.MapPrometheusWebhookChannelToState(ctx, alertingChannel)
-		if prometheusWebhookDiags.HasError() {
-			diags.Append(prometheusWebhookDiags...)
-			return diags
-		}
-		model.PrometheusWebhook = prometheusWebhookChannel
-	case restapi.WebexTeamsWebhookChannelType:
-		webexTeamsWebhookChannel, webexTeamsWebhookDiags := shared.MapWebhookBasedChannelToState(ctx, alertingChannel)
-		if webexTeamsWebhookDiags.HasError() {
-			diags.Append(webexTeamsWebhookDiags...)
-			return diags
-		}
-		model.WebexTeamsWebhook = webexTeamsWebhookChannel
-	case restapi.WatsonAIOpsWebhookChannelType:
-		watsonAIOpsWebhookChannel, watsonAIOpsWebhookDiags := shared.MapWatsonAIOpsWebhookChannelToState(ctx, alertingChannel)
-		if watsonAIOpsWebhookDiags.HasError() {
-			diags.Append(watsonAIOpsWebhookDiags...)
-			return diags
-		}
-		model.WatsonAIOpsWebhook = watsonAIOpsWebhookChannel
-	default:
-		diags.AddError(
-			"Unsupported alerting channel type",
-			fmt.Sprintf("Received unsupported alerting channel of type %s", alertingChannel.Kind),
-		)
-		return diags
+	// Map channel-specific data based on channel type
+	channelDiags := r.mapChannelTypeToModel(ctx, alertingChannel, &model)
+	if channelDiags.HasError() {
+		return channelDiags
 	}
 
 	// Set the entire model to state
@@ -448,6 +335,175 @@ func (r *alertingChannelResourceFramework) UpdateState(ctx context.Context, stat
 	return diags
 }
 
+// createBaseModel creates the base model with common fields (ID and Name)
+func (r *alertingChannelResourceFramework) createBaseModel(alertingChannel *restapi.AlertingChannel) AlertingChannelModel {
+	return AlertingChannelModel{
+		ID:   types.StringValue(alertingChannel.ID),
+		Name: types.StringValue(alertingChannel.Name),
+	}
+}
+
+// mapChannelTypeToModel maps the API channel data to the appropriate model field based on channel type
+func (r *alertingChannelResourceFramework) mapChannelTypeToModel(ctx context.Context, alertingChannel *restapi.AlertingChannel, model *AlertingChannelModel) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	switch alertingChannel.Kind {
+	case restapi.EmailChannelType:
+		return r.mapEmailToModel(ctx, alertingChannel, model)
+	case restapi.OpsGenieChannelType:
+		return r.mapOpsGenieToModel(ctx, alertingChannel, model)
+	case restapi.PagerDutyChannelType:
+		return r.mapPagerDutyToModel(ctx, alertingChannel, model)
+	case restapi.SlackChannelType:
+		return r.mapSlackToModel(ctx, alertingChannel, model)
+	case restapi.SplunkChannelType:
+		return r.mapSplunkToModel(ctx, alertingChannel, model)
+	case restapi.VictorOpsChannelType:
+		return r.mapVictorOpsToModel(ctx, alertingChannel, model)
+	case restapi.WebhookChannelType:
+		return r.mapWebhookToModel(ctx, alertingChannel, model)
+	case restapi.Office365ChannelType:
+		return r.mapOffice365ToModel(ctx, alertingChannel, model)
+	case restapi.GoogleChatChannelType:
+		return r.mapGoogleChatToModel(ctx, alertingChannel, model)
+	case restapi.ServiceNowChannelType:
+		return r.mapServiceNowToModel(ctx, alertingChannel, model)
+	case restapi.ServiceNowApplicationChannelType:
+		return r.mapServiceNowApplicationToModel(ctx, alertingChannel, model)
+	case restapi.PrometheusWebhookChannelType:
+		return r.mapPrometheusWebhookToModel(ctx, alertingChannel, model)
+	case restapi.WebexTeamsWebhookChannelType:
+		return r.mapWebexTeamsWebhookToModel(ctx, alertingChannel, model)
+	case restapi.WatsonAIOpsWebhookChannelType:
+		return r.mapWatsonAIOpsWebhookToModel(ctx, alertingChannel, model)
+	default:
+		diags.AddError(
+			AlertingChannelErrUnsupportedType,
+			fmt.Sprintf(AlertingChannelErrUnsupportedTypeMsg, alertingChannel.Kind),
+		)
+		return diags
+	}
+}
+
+// Individual channel type mapping methods
+func (r *alertingChannelResourceFramework) mapEmailToModel(ctx context.Context, channel *restapi.AlertingChannel, model *AlertingChannelModel) diag.Diagnostics {
+	emailChannel, diags := shared.MapEmailChannelToState(ctx, channel)
+	if !diags.HasError() {
+		model.Email = emailChannel
+	}
+	return diags
+}
+
+func (r *alertingChannelResourceFramework) mapOpsGenieToModel(ctx context.Context, channel *restapi.AlertingChannel, model *AlertingChannelModel) diag.Diagnostics {
+	opsGenieChannel, diags := shared.MapOpsGenieChannelToState(ctx, channel)
+	if !diags.HasError() {
+		model.OpsGenie = opsGenieChannel
+	}
+	return diags
+}
+
+func (r *alertingChannelResourceFramework) mapPagerDutyToModel(ctx context.Context, channel *restapi.AlertingChannel, model *AlertingChannelModel) diag.Diagnostics {
+	pagerDutyChannel, diags := shared.MapPagerDutyChannelToState(ctx, channel)
+	if !diags.HasError() {
+		model.PagerDuty = pagerDutyChannel
+	}
+	return diags
+}
+
+func (r *alertingChannelResourceFramework) mapSlackToModel(ctx context.Context, channel *restapi.AlertingChannel, model *AlertingChannelModel) diag.Diagnostics {
+	slackChannel, diags := shared.MapSlackChannelToState(ctx, channel)
+	if !diags.HasError() {
+		model.Slack = slackChannel
+	}
+	return diags
+}
+
+func (r *alertingChannelResourceFramework) mapSplunkToModel(ctx context.Context, channel *restapi.AlertingChannel, model *AlertingChannelModel) diag.Diagnostics {
+	splunkChannel, diags := shared.MapSplunkChannelToState(ctx, channel)
+	if !diags.HasError() {
+		model.Splunk = splunkChannel
+	}
+	return diags
+}
+
+func (r *alertingChannelResourceFramework) mapVictorOpsToModel(ctx context.Context, channel *restapi.AlertingChannel, model *AlertingChannelModel) diag.Diagnostics {
+	victorOpsChannel, diags := shared.MapVictorOpsChannelToState(ctx, channel)
+	if !diags.HasError() {
+		model.VictorOps = victorOpsChannel
+	}
+	return diags
+}
+
+func (r *alertingChannelResourceFramework) mapWebhookToModel(ctx context.Context, channel *restapi.AlertingChannel, model *AlertingChannelModel) diag.Diagnostics {
+	webhookChannel, diags := shared.MapWebhookChannelToState(ctx, channel)
+	if !diags.HasError() {
+		model.Webhook = webhookChannel
+	}
+	return diags
+}
+
+func (r *alertingChannelResourceFramework) mapOffice365ToModel(ctx context.Context, channel *restapi.AlertingChannel, model *AlertingChannelModel) diag.Diagnostics {
+	office365Channel, diags := shared.MapWebhookBasedChannelToState(ctx, channel)
+	if !diags.HasError() {
+		model.Office365 = office365Channel
+	}
+	return diags
+}
+
+func (r *alertingChannelResourceFramework) mapGoogleChatToModel(ctx context.Context, channel *restapi.AlertingChannel, model *AlertingChannelModel) diag.Diagnostics {
+	googleChatChannel, diags := shared.MapWebhookBasedChannelToState(ctx, channel)
+	if !diags.HasError() {
+		model.GoogleChat = googleChatChannel
+	}
+	return diags
+}
+
+func (r *alertingChannelResourceFramework) mapServiceNowToModel(ctx context.Context, channel *restapi.AlertingChannel, model *AlertingChannelModel) diag.Diagnostics {
+	serviceNowChannel, diags := shared.MapServiceNowChannelToState(ctx, channel)
+	if !diags.HasError() {
+		model.ServiceNow = serviceNowChannel
+	}
+	return diags
+}
+
+func (r *alertingChannelResourceFramework) mapServiceNowApplicationToModel(ctx context.Context, channel *restapi.AlertingChannel, model *AlertingChannelModel) diag.Diagnostics {
+	serviceNowAppChannel, diags := shared.MapServiceNowApplicationChannelToState(ctx, channel)
+	if !diags.HasError() {
+		model.ServiceNowApplication = serviceNowAppChannel
+	}
+	return diags
+}
+
+func (r *alertingChannelResourceFramework) mapPrometheusWebhookToModel(ctx context.Context, channel *restapi.AlertingChannel, model *AlertingChannelModel) diag.Diagnostics {
+	prometheusChannel, diags := shared.MapPrometheusWebhookChannelToState(ctx, channel)
+	if !diags.HasError() {
+		model.PrometheusWebhook = prometheusChannel
+	}
+	return diags
+}
+
+func (r *alertingChannelResourceFramework) mapWebexTeamsWebhookToModel(ctx context.Context, channel *restapi.AlertingChannel, model *AlertingChannelModel) diag.Diagnostics {
+	webexChannel, diags := shared.MapWebhookBasedChannelToState(ctx, channel)
+	if !diags.HasError() {
+		model.WebexTeamsWebhook = webexChannel
+	}
+	return diags
+}
+
+func (r *alertingChannelResourceFramework) mapWatsonAIOpsWebhookToModel(ctx context.Context, channel *restapi.AlertingChannel, model *AlertingChannelModel) diag.Diagnostics {
+	watsonChannel, diags := shared.MapWatsonAIOpsWebhookChannelToState(ctx, channel)
+	if !diags.HasError() {
+		model.WatsonAIOpsWebhook = watsonChannel
+	}
+	return diags
+}
+
+// ============================================================================
+// Channel Mapping Methods: State to API
+// These methods convert Terraform state models to API objects
+// ============================================================================
+
+// mapEmailChannelFromState converts Email channel state to API object
 func (r *alertingChannelResourceFramework) mapEmailChannelFromState(ctx context.Context, id string, name string, email *shared.EmailModel) (*restapi.AlertingChannel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
@@ -467,6 +523,7 @@ func (r *alertingChannelResourceFramework) mapEmailChannelFromState(ctx context.
 	}, nil
 }
 
+// mapOpsGenieChannelFromState converts OpsGenie channel state to API object
 func (r *alertingChannelResourceFramework) mapOpsGenieChannelFromState(ctx context.Context, id string, name string, opsGenie *shared.OpsGenieModel) (*restapi.AlertingChannel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
@@ -478,7 +535,7 @@ func (r *alertingChannelResourceFramework) mapOpsGenieChannelFromState(ctx conte
 	}
 
 	// Join tags into comma-separated string
-	tagsString := strings.Join(tags, ",")
+	tagsString := strings.Join(tags, TagSeparator)
 
 	// Create alerting channel
 	apiKeyValue := opsGenie.APIKey.ValueString()
@@ -494,6 +551,7 @@ func (r *alertingChannelResourceFramework) mapOpsGenieChannelFromState(ctx conte
 	}, nil
 }
 
+// mapPagerDutyChannelFromState converts PagerDuty channel state to API object
 func (r *alertingChannelResourceFramework) mapPagerDutyChannelFromState(ctx context.Context, id string, name string, pagerDuty *shared.PagerDutyModel) (*restapi.AlertingChannel, diag.Diagnostics) {
 	// Create alerting channel
 	serviceIntegrationKeyValue := pagerDuty.ServiceIntegrationKey.ValueString()
@@ -506,6 +564,7 @@ func (r *alertingChannelResourceFramework) mapPagerDutyChannelFromState(ctx cont
 	}, nil
 }
 
+// mapSlackChannelFromState converts Slack channel state to API object
 func (r *alertingChannelResourceFramework) mapSlackChannelFromState(ctx context.Context, id string, name string, slack *shared.SlackModel) (*restapi.AlertingChannel, diag.Diagnostics) {
 	// Create alerting channel
 	webhookURLValue := slack.WebhookURL.ValueString()
@@ -531,6 +590,7 @@ func (r *alertingChannelResourceFramework) mapSlackChannelFromState(ctx context.
 	return result, nil
 }
 
+// mapSplunkChannelFromState converts Splunk channel state to API object
 func (r *alertingChannelResourceFramework) mapSplunkChannelFromState(ctx context.Context, id string, name string, splunk *shared.SplunkModel) (*restapi.AlertingChannel, diag.Diagnostics) {
 	// Create alerting channel
 	urlValue := splunk.URL.ValueString()
@@ -545,6 +605,7 @@ func (r *alertingChannelResourceFramework) mapSplunkChannelFromState(ctx context
 	}, nil
 }
 
+// mapVictorOpsChannelFromState converts VictorOps channel state to API object
 func (r *alertingChannelResourceFramework) mapVictorOpsChannelFromState(ctx context.Context, id string, name string, victorOps *shared.VictorOpsModel) (*restapi.AlertingChannel, diag.Diagnostics) {
 	// Create alerting channel
 	apiKeyValue := victorOps.APIKey.ValueString()
@@ -559,6 +620,7 @@ func (r *alertingChannelResourceFramework) mapVictorOpsChannelFromState(ctx cont
 	}, nil
 }
 
+// mapWebhookChannelFromState converts Webhook channel state to API object
 func (r *alertingChannelResourceFramework) mapWebhookChannelFromState(ctx context.Context, id string, name string, webhook *shared.WebhookModel) (*restapi.AlertingChannel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
@@ -588,7 +650,7 @@ func (r *alertingChannelResourceFramework) mapWebhookChannelFromState(ctx contex
 		// Convert map to header list
 		headers := make([]string, 0, len(httpHeaders))
 		for key, value := range httpHeaders {
-			headers = append(headers, fmt.Sprintf("%s: %s", key, value))
+			headers = append(headers, fmt.Sprintf("%s%s%s", key, HeaderSeparator, value))
 		}
 
 		result.Headers = headers
@@ -597,6 +659,8 @@ func (r *alertingChannelResourceFramework) mapWebhookChannelFromState(ctx contex
 	return result, nil
 }
 
+// mapWebhookBasedChannelFromState converts webhook-based channel state to API object
+// Used for Office365, GoogleChat, and WebexTeams channels
 func (r *alertingChannelResourceFramework) mapWebhookBasedChannelFromState(ctx context.Context, id string, name string, webhookBased *shared.WebhookBasedModel, channelType restapi.AlertingChannelType) (*restapi.AlertingChannel, diag.Diagnostics) {
 	// Create alerting channel
 	webhookURLValue := webhookBased.WebhookURL.ValueString()
@@ -609,14 +673,15 @@ func (r *alertingChannelResourceFramework) mapWebhookBasedChannelFromState(ctx c
 	}, nil
 }
 
+// mapServiceNowChannelFromState converts ServiceNow channel state to API object
 func (r *alertingChannelResourceFramework) mapServiceNowChannelFromState(ctx context.Context, id string, name string, serviceNow *shared.ServiceNowModel) (*restapi.AlertingChannel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if serviceNow.Password.IsNull() || serviceNow.Password.IsUnknown() {
-		diags.AddError("Missing Password", "password must be specified when creating the resource")
+		diags.AddError(AlertingChannelErrMissingPassword, AlertingChannelErrMissingPasswordMsg)
 		return nil, diags
 	}
-	log.Printf("passwordValue: %s", serviceNow.Password.ValueString())
+	log.Printf(AlertingChannelLogPasswordValue, serviceNow.Password.ValueString())
 
 	serviceNowURLValue := serviceNow.ServiceNowURL.ValueString()
 	usernameValue := serviceNow.Username.ValueString()
@@ -639,15 +704,16 @@ func (r *alertingChannelResourceFramework) mapServiceNowChannelFromState(ctx con
 	return result, nil
 }
 
+// mapServiceNowApplicationChannelFromState converts ServiceNow Enhanced (ITSM) channel state to API object
 func (r *alertingChannelResourceFramework) mapServiceNowApplicationChannelFromState(ctx context.Context, id string, name string, serviceNowApp *shared.ServiceNowApplicationModel) (*restapi.AlertingChannel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if serviceNowApp.Password.IsNull() || serviceNowApp.Password.IsUnknown() {
-		diags.AddError("Missing Password", "password must be specified when creating the resource")
+		diags.AddError(AlertingChannelErrMissingPassword, AlertingChannelErrMissingPasswordMsg)
 		return nil, diags
 	}
 
-	log.Printf("passwordValue: %s", serviceNowApp.Password.ValueString())
+	log.Printf(AlertingChannelLogPasswordValue, serviceNowApp.Password.ValueString())
 
 	serviceNowURLValue := serviceNowApp.ServiceNowURL.ValueString()
 	usernameValue := serviceNowApp.Username.ValueString()
@@ -672,14 +738,14 @@ func (r *alertingChannelResourceFramework) mapServiceNowApplicationChannelFromSt
 		result.AutoCloseIncidents = &autoCloseValue
 	}
 
-	log.Printf("Inatna url : user %v", serviceNowApp.InstanaURL.ValueString())
+	log.Printf(AlertingChannelLogInstanaURL, serviceNowApp.InstanaURL.ValueString())
 	if !serviceNowApp.InstanaURL.IsNull() && !serviceNowApp.InstanaURL.IsUnknown() {
 		instanaURLValue := serviceNowApp.InstanaURL.ValueString()
 		result.InstanaURL = &instanaURLValue
 	} else {
 		diags.AddError(
-			"InstanaURL is required",
-			"InstanaURL is required when creating the resource",
+			AlertingChannelErrInstanaURLRequired,
+			AlertingChannelErrInstanaURLRequiredMsg,
 		)
 		return result, diags
 	}
@@ -714,11 +780,12 @@ func (r *alertingChannelResourceFramework) mapServiceNowApplicationChannelFromSt
 		result.SnowStatusOnCloseEvent = &snowStatusValue
 	}
 
-	log.Printf("[DEBUG] mapServiceNowApplicationChannelFromState: %v", result)
-	log.Printf("[DEBUG] intana url: %v", *result.InstanaURL)
+	log.Printf(AlertingChannelLogMapServiceNowApp, result)
+	log.Printf(AlertingChannelLogInstanaURLDebug, *result.InstanaURL)
 	return result, nil
 }
 
+// mapPrometheusWebhookChannelFromState converts Prometheus Webhook channel state to API object
 func (r *alertingChannelResourceFramework) mapPrometheusWebhookChannelFromState(ctx context.Context, id string, name string, prometheusWebhook *shared.PrometheusWebhookModel) (*restapi.AlertingChannel, diag.Diagnostics) {
 	webhookURLValue := prometheusWebhook.WebhookURL.ValueString()
 
@@ -737,6 +804,7 @@ func (r *alertingChannelResourceFramework) mapPrometheusWebhookChannelFromState(
 	return result, nil
 }
 
+// mapWatsonAIOpsWebhookChannelFromState converts Watson AIOps Webhook channel state to API object
 func (r *alertingChannelResourceFramework) mapWatsonAIOpsWebhookChannelFromState(ctx context.Context, id string, name string, watsonAIOpsWebhook *shared.WatsonAIOpsWebhookModel) (*restapi.AlertingChannel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
@@ -762,92 +830,104 @@ func (r *alertingChannelResourceFramework) mapWatsonAIOpsWebhookChannelFromState
 	return result, nil
 }
 
+// ============================================================================
+// Main Mapping Method
+// ============================================================================
+
+// MapStateToDataObject converts Terraform state to API object
+// This method determines which channel type is configured and delegates to the appropriate mapper
 func (r *alertingChannelResourceFramework) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.AlertingChannel, diag.Diagnostics) {
-	var diags diag.Diagnostics
-	var model AlertingChannelModel
-
-	// Get current state from plan or state
-	if plan != nil {
-		log.Printf("Model from plan")
-		diags.Append(plan.Get(ctx, &model)...)
-	} else {
-		log.Printf("Model from state")
-		diags.Append(state.Get(ctx, &model)...)
-	}
-
+	// Get model from plan or state
+	model, diags := r.getModelFromPlanOrState(ctx, plan, state)
 	if diags.HasError() {
 		return nil, diags
 	}
 
-	// Map ID
+	// Extract common fields
+	id, name := r.extractCommonFields(model)
+
+	// Map the configured channel type to API object
+	return r.mapConfiguredChannelType(ctx, model, id, name)
+}
+
+// getModelFromPlanOrState retrieves the model from either plan or state
+func (r *alertingChannelResourceFramework) getModelFromPlanOrState(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (AlertingChannelModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	var model AlertingChannelModel
+
+	if plan != nil {
+		log.Printf(AlertingChannelLogModelFromPlan)
+		diags.Append(plan.Get(ctx, &model)...)
+	} else {
+		log.Printf(AlertingChannelLogModelFromState)
+		diags.Append(state.Get(ctx, &model)...)
+	}
+
+	return model, diags
+}
+
+// extractCommonFields extracts ID and name from the model
+func (r *alertingChannelResourceFramework) extractCommonFields(model AlertingChannelModel) (string, string) {
 	id := ""
 	if !model.ID.IsNull() {
 		id = model.ID.ValueString()
 	}
-
-	// Map name
 	name := model.Name.ValueString()
+	return id, name
+}
 
-	// Determine which channel type is configured and map accordingly
+// mapConfiguredChannelType determines which channel type is configured and maps it to API object
+func (r *alertingChannelResourceFramework) mapConfiguredChannelType(ctx context.Context, model AlertingChannelModel, id, name string) (*restapi.AlertingChannel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Check each channel type and map accordingly
 	if model.Email != nil {
 		return r.mapEmailChannelFromState(ctx, id, name, model.Email)
 	}
-
 	if model.OpsGenie != nil {
 		return r.mapOpsGenieChannelFromState(ctx, id, name, model.OpsGenie)
 	}
-
 	if model.PagerDuty != nil {
 		return r.mapPagerDutyChannelFromState(ctx, id, name, model.PagerDuty)
 	}
-
 	if model.Slack != nil {
 		return r.mapSlackChannelFromState(ctx, id, name, model.Slack)
 	}
-
 	if model.Splunk != nil {
 		return r.mapSplunkChannelFromState(ctx, id, name, model.Splunk)
 	}
-
 	if model.VictorOps != nil {
 		return r.mapVictorOpsChannelFromState(ctx, id, name, model.VictorOps)
 	}
-
 	if model.Webhook != nil {
 		return r.mapWebhookChannelFromState(ctx, id, name, model.Webhook)
 	}
-
 	if model.Office365 != nil {
 		return r.mapWebhookBasedChannelFromState(ctx, id, name, model.Office365, restapi.Office365ChannelType)
 	}
-
 	if model.GoogleChat != nil {
 		return r.mapWebhookBasedChannelFromState(ctx, id, name, model.GoogleChat, restapi.GoogleChatChannelType)
 	}
-
 	if model.ServiceNow != nil {
 		return r.mapServiceNowChannelFromState(ctx, id, name, model.ServiceNow)
 	}
-
 	if model.ServiceNowApplication != nil {
 		return r.mapServiceNowApplicationChannelFromState(ctx, id, name, model.ServiceNowApplication)
 	}
-
 	if model.PrometheusWebhook != nil {
 		return r.mapPrometheusWebhookChannelFromState(ctx, id, name, model.PrometheusWebhook)
 	}
-
 	if model.WebexTeamsWebhook != nil {
 		return r.mapWebhookBasedChannelFromState(ctx, id, name, model.WebexTeamsWebhook, restapi.WebexTeamsWebhookChannelType)
 	}
-
 	if model.WatsonAIOpsWebhook != nil {
 		return r.mapWatsonAIOpsWebhookChannelFromState(ctx, id, name, model.WatsonAIOpsWebhook)
 	}
 
+	// No valid channel type configured
 	diags.AddError(
-		"Invalid Alerting Channel Configuration",
-		"No valid alerting channel configuration found. Please configure exactly one channel type.",
+		AlertingChannelErrInvalidConfig,
+		AlertingChannelErrInvalidConfigMsg,
 	)
 	return nil, diags
 }
