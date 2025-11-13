@@ -970,7 +970,7 @@ func (r *websiteAlertConfigResourceFramework) mapThresholdToState(ctx context.Co
 		thresholdRules := restapi.ThresholdRule{
 			Baseline: thresholdVal.Baseline,
 		}
-		historicBaselineModel.Baseline, _ = shared.MapBaseline(&thresholdRules)
+		historicBaselineModel.Baseline, _ = shared.MapBaselineToState(&thresholdRules)
 		websiteThresholdModel.HistoricBaseline = &historicBaselineModel
 	}
 

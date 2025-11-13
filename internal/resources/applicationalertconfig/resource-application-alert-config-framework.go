@@ -137,8 +137,8 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 									Description: "Threshold configuration for different severity levels",
 									Optional:    true,
 									Attributes: map[string]schema.Attribute{
-										shared.LogAlertConfigFieldWarning:  shared.StaticAndAdaptiveThresholdBlockSchema(),
-										shared.LogAlertConfigFieldCritical: shared.StaticAndAdaptiveThresholdBlockSchema(),
+										shared.LogAlertConfigFieldWarning:  shared.StaticAndAdaptiveThresholdAttributeSchema(),
+										shared.LogAlertConfigFieldCritical: shared.StaticAndAdaptiveThresholdAttributeSchema(),
 									},
 								},
 								ApplicationAlertConfigFieldRule: schema.SingleNestedAttribute{
