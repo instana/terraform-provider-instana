@@ -4,10 +4,9 @@ package alertingconfig
 const (
 	// ResourceInstanaAlertingConfigFramework the name of the terraform-provider-instana resource to manage alerting configurations
 	ResourceInstanaAlertingConfigFramework = "alerting_config"
-)
 
-// Field name constants for alerting config
-const (
+	// Field name constants for alerting config
+
 	// AlertingConfigFieldAlertName constant value for the schema field alert_name
 	AlertingConfigFieldAlertName = "alert_name"
 	// AlertingConfigFieldFullAlertName constant value for the schema field full_alert_name
@@ -22,10 +21,9 @@ const (
 	AlertingConfigFieldEventFilterRuleIDs = "event_filter_rule_ids"
 	// AlertingConfigFieldID constant value for the schema field id
 	AlertingConfigFieldID = "id"
-)
 
-// Description constants
-const (
+	// Description constants
+
 	// AlertingConfigDescResource description for the resource
 	AlertingConfigDescResource = "This resource manages alerting configurations in Instana."
 	// AlertingConfigDescID description for the ID field

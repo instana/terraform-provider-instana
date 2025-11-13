@@ -92,10 +92,9 @@ const (
 	SloConfigDescTimezone = "The timezone for the SLO configuration"
 	// SloConfigDescStartTimestamp is the description for the start_timestamp field
 	SloConfigDescStartTimestamp = "Time window start time"
-)
 
-// Error message constants
-const (
+	// Error message constants
+
 	// SloConfigErrMappingState is the error title for mapping state to data object
 	SloConfigErrMappingState = "Error mapping state to data object"
 	// SloConfigErrBothPlanStateNil is the error message when both plan and state are nil
@@ -160,13 +159,11 @@ const (
 	SloConfigErrMappingTimeWindowToState = "Error mapping time window to state"
 	// SloConfigErrUnsupportedTimeWindowType is the error message for unsupported time window type
 	SloConfigErrUnsupportedTimeWindowType = "Unsupported time window type: %s"
-)
 
-// ResourceInstanaSloConfig the name of the terraform-provider-instana resource to manage SLI configurations
-const ResourceInstanaSloConfig = "instana_slo_config"
-const SloConfigFromTerraformIdPrefix = "SLOTF"
+	// ResourceInstanaSloConfig the name of the terraform-provider-instana resource to manage SLI configurations
+	ResourceInstanaSloConfig       = "instana_slo_config"
+	SloConfigFromTerraformIdPrefix = "SLOTF"
 
-const (
 	//SloConfigField names for terraform
 	SloConfigFieldName                      = "name"
 	SloConfigFieldFullName                  = "full_name"
@@ -213,9 +210,7 @@ const (
 	SloConfigEventBasedAvailabilityIndicator = "event_based_availability"
 	SloConfigTrafficIndicator                = "traffic"
 	SloConfigCustomIndicator                 = "custom"
-)
 
-const (
 	// SloConfigFieldNames and values for API
 	SloConfigAPIFieldThreshold       = "threshold"
 	SloConfigAPIFieldAggregation     = "aggregation"

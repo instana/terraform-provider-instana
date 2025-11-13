@@ -69,10 +69,9 @@ const (
 	ApplicationAlertConfigFieldTimeThresholdViolationsInSequence = "violations_in_sequence"
 	//ApplicationAlertConfigFieldTriggering constant value for field triggering of resource instana_application_alert_config
 	ApplicationAlertConfigFieldTriggering = "triggering"
-)
 
-// Additional application alert config field names
-const (
+	// Additional application alert config field names
+
 	ApplicationAlertConfigFieldRules             = "rules"
 	ApplicationAlertConfigFieldThreshold         = "threshold"
 	ApplicationAlertConfigFieldThresholdOperator = "threshold_operator"

@@ -10,8 +10,7 @@ const (
 	WebsiteMonitoringConfigFieldFullName = "full_name"
 	//WebsiteMonitoringConfigFieldAppName constant value for the schema field app_name
 	WebsiteMonitoringConfigFieldAppName = "app_name"
-)
-const (
+
 	// Resource description constants
 	WebsiteMonitoringConfigDescResource = "This resource manages Website Monitoring Configurations in Instana."
 	WebsiteMonitoringConfigDescID       = "The ID of the Website Monitoring Configuration."

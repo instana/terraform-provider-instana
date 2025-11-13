@@ -32,10 +32,9 @@ const (
 	SloAlertConfigStatus      = "status"
 	SloAlertConfigErrorBudget = "error_budget"
 	SloAlertConfigBurnRateV2  = "burn_rate_v2"
-)
 
-// Resource description constants
-const (
+	// Resource description constants
+
 	// SloAlertConfigDescResource is the description for the SLO Alert config resource
 	SloAlertConfigDescResource = "This resource manages SLO Alert configurations in Instana."
 	// SloAlertConfigDescID is the description for the ID field
@@ -82,10 +81,9 @@ const (
 	SloAlertConfigDescBurnRateThresholdOperator = "The threshold operator for the burn rate config."
 	// SloAlertConfigDescBurnRateThresholdValue is the description for the threshold_value field
 	SloAlertConfigDescBurnRateThresholdValue = "The threshold value for the burn rate config."
-)
 
-// Error message constants
-const (
+	// Error message constants
+
 	// SloAlertConfigErrMappingAlertType is the error title for mapping alert type
 	SloAlertConfigErrMappingAlertType = "Error mapping alert type"
 	// SloAlertConfigErrInvalidAlertType is the error message for invalid alert type
