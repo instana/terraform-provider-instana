@@ -63,8 +63,7 @@ const (
 	WebsiteAlertConfigFieldTriggering = "triggering"
 	WebsiteAlertConfigFieldRules      = "rules"
 	WebsiteAlertConfigFieldThreshold  = "threshold"
-)
-const (
+
 	// Resource description constants
 	WebsiteAlertConfigDescResource        = "This resource manages Website Alert Configurations in Instana."
 	WebsiteAlertConfigDescID              = "The ID of the Website Alert Configuration."

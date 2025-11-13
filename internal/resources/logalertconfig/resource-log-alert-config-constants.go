@@ -31,10 +31,9 @@ const (
 	LogAlertConfigFieldTimeThreshold                     = "time_threshold"
 	LogAlertConfigFieldTimeThresholdTimeWindow           = "time_window"
 	LogAlertConfigFieldTimeThresholdViolationsInSequence = "violations_in_sequence"
-)
 
-// Resource description constants
-const (
+	// Resource description constants
+
 	LogAlertConfigDescResource             = "This resource manages log alert configurations in Instana."
 	LogAlertConfigDescID                   = "The ID of the log alert configuration."
 	LogAlertConfigDescName                 = "Name for the Log alert configuration"
@@ -56,10 +55,9 @@ const (
 	LogAlertConfigDescTimeThreshold        = "Indicates the type of violation of the defined threshold."
 	LogAlertConfigDescViolationsInSequence = "Time threshold base on violations in sequence"
 	LogAlertConfigDescTimeWindow           = "Time window in milliseconds."
-)
 
-// Error message constants
-const (
+	// Error message constants
+
 	LogAlertConfigErrNormalizingTagFilter    = "Error normalizing tag filter"
 	LogAlertConfigErrNormalizingTagFilterMsg = "Could not normalize tag filter: %s"
 	LogAlertConfigErrParsingTagFilter        = "Error parsing tag filter"
