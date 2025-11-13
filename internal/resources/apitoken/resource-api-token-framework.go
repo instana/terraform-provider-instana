@@ -18,6 +18,7 @@ import (
 
 // NewAPITokenResourceHandleFramework creates the resource handle for API Tokens
 func NewAPITokenResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.APIToken] {
+	internalIDFieldName := APITokenFieldInternalID
 	return &apiTokenResourceFramework{
 		metaData: resourcehandle.ResourceMetaDataFramework{
 			ResourceName: ResourceInstanaAPITokenFramework,
@@ -559,7 +560,9 @@ func NewAPITokenResourceHandleFramework() resourcehandle.ResourceHandleFramework
 					},
 				},
 			},
-			SchemaVersion: 2,
+			SkipIDGeneration: true,
+			SchemaVersion:    2,
+			ResourceIDField:  &internalIDFieldName,
 		},
 	}
 }
