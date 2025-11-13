@@ -6,15 +6,57 @@ import (
 
 	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/internal/util"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 const (
 	LogAlertConfigFieldValue = "value"
 )
 
+// Constants for threshold field names related to historic baseline
+const (
+	ThresholdFieldHistoricBaseline            = "historic_baseline"
+	ThresholdFieldHistoricBaselineBaseline    = "baseline"
+	ThresholdFieldHistoricBaselineDeviation   = "deviation_factor"
+	ThresholdFieldHistoricBaselineSeasonality = "seasonality"
+)
+
+// Constants for threshold field names related to adaptive baseline
+const (
+	ThresholdFieldAdaptiveBaseline             = "adaptive_baseline"
+	ThresholdFieldAdaptiveBaselineDeviation    = "deviation_factor"
+	ThresholdFieldAdaptiveBaselineAdaptability = "adaptability"
+	ThresholdFieldAdaptiveBaselineSeasonality  = "seasonality"
+)
+
+// Constants for threshold field names
+const (
+	ThresholdFieldWarning  = "warning"
+	ThresholdFieldCritical = "critical"
+	ThresholdFieldStatic   = "static"
+)
+
+type AdaptiveBaselineModel struct {
+	Operator        types.String  `tfsdk:"operator"`
+	DeviationFactor types.Float32 `tfsdk:"deviation_factor"`
+	Adaptability    types.Float32 `tfsdk:"adaptability"`
+	Seasonality     types.String  `tfsdk:"seasonality"`
+}
+
+type HistoricBaselineModel struct {
+	Baseline    types.List    `tfsdk:"baseline"`
+	Deviation   types.Float32 `tfsdk:"deviation_factor"`
+	Seasonality types.String  `tfsdk:"seasonality"`
+}
+
+type StaticTypeModel struct {
+	Operator types.String `tfsdk:"operator"`
+	Value    types.Int64  `tfsdk:"value"`
+}
 type ThresholdPluginModel struct {
 	Warning  *ThresholdTypeModel `tfsdk:"warning"`
 	Critical *ThresholdTypeModel `tfsdk:"critical"`
@@ -316,6 +358,35 @@ func MapThresholdRuleAllPluginFromState(ctx context.Context, thresholdObj *Thres
 	return nil, diags
 }
 
+func MapBaselineToState(threshold *restapi.ThresholdRule) (basetypes.ListValue, diag.Diagnostics) {
+	var baselineDiags diag.Diagnostics
+	baselineListValues := []attr.Value{}
+	for _, baselineArray := range *threshold.Baseline {
+		innerListValues := []attr.Value{}
+		for _, value := range baselineArray {
+			innerListValues = append(innerListValues, types.Float64Value(value))
+		}
+
+		innerSet, innerSetDiags := types.ListValue(types.Float64Type, innerListValues)
+		baselineDiags.Append(innerSetDiags...)
+		if baselineDiags.HasError() {
+			return basetypes.ListValue{}, baselineDiags
+		}
+
+		baselineListValues = append(baselineListValues, innerSet)
+	}
+
+	baselineSet, baselineSetDiags := types.ListValue(
+		types.ListType{ElemType: types.Float64Type},
+		baselineListValues,
+	)
+	baselineDiags.Append(baselineSetDiags...)
+	if baselineDiags.HasError() {
+		return basetypes.ListValue{}, baselineDiags
+	}
+	return baselineSet, baselineDiags
+}
+
 // mapBaselineFromState converts a Terraform List of List (baseline data) to API format
 func MapBaselineFromState(ctx context.Context, baselineList types.List) (*[][]float64, diag.Diagnostics) {
 	var diags diag.Diagnostics
@@ -390,7 +461,7 @@ func MapAllThresholdPluginToState(ctx context.Context, threshold *restapi.Thresh
 			Deviation:   util.SetFloat32PointerToState(threshold.DeviationFactor),
 			Seasonality: types.StringValue(string(*threshold.Seasonality)),
 		}
-		historicBaselineModel.Baseline, _ = MapBaseline(threshold)
+		historicBaselineModel.Baseline, _ = MapBaselineToState(threshold)
 		thresholdTypeModel.HistoricBaseline = &historicBaselineModel
 	default:
 		// Default to static threshold for all other types
