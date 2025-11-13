@@ -18,7 +18,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 // NewLogAlertConfigResourceHandleFramework creates the resource handle for Log Alert Configuration
@@ -670,39 +669,3 @@ func (r *logAlertConfigResourceFramework) mapRulesFromState(ctx context.Context,
 
 	return result, diags
 }
-
-// mapSingleThresholdFromState maps a single threshold (static) to API model
-func (r *logAlertConfigResourceFramework) mapSingleThresholdFromState(ctx context.Context, thresholdObj types.Object) (*restapi.ThresholdRule, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	var threshold struct {
-		Static types.Object `tfsdk:"static"`
-	}
-
-	diags.Append(thresholdObj.As(ctx, &threshold, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil, diags
-	}
-
-	if threshold.Static.IsNull() || threshold.Static.IsUnknown() {
-		return nil, diags
-	}
-
-	var static struct {
-		Operator types.String `tfsdk:"operator"`
-		Value    types.Int64  `tfsdk:"value"`
-	}
-
-	diags.Append(threshold.Static.As(ctx, &static, basetypes.ObjectAsOptions{})...)
-	if diags.HasError() {
-		return nil, diags
-	}
-
-	valueFloat := float64(static.Value.ValueInt64())
-	return &restapi.ThresholdRule{
-		Type:  "staticThreshold",
-		Value: &valueFloat,
-	}, diags
-}
-
-// mapThresholdRuleFromState and MapThresholdsFromState have been moved to threshold-mapping-framework.go
