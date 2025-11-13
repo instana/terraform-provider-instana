@@ -89,3 +89,30 @@ const (
 	ApplicationAlertConfigFieldApplicationsServicesEndpoints           = "endpoint"
 	ApplicationAlertConfigFieldApplicationsServicesEndpointsEndpointID = "endpoint_id"
 )
+
+// Error messages
+const (
+	ErrorMessageFailedToParseTagFilter      = "Failed to parse tag filter expression"
+	ErrorMessageInvalidTagFilter            = "Invalid tag filter expression: %s"
+	ErrorMessageFailedToMapCustomPayload    = "failed to map custom payload fields"
+	ErrorMessageMetricNameRequired          = "MetricName is required for %s rules"
+	ErrorMessageMissingMetricName           = "missing metric name"
+	ErrorMessageLogsFieldsRequired          = "MetricName, log level, and log operator are required for log rules"
+	ErrorMessageMissingRequiredFields       = "missing required fields"
+	ErrorMessageTagFilterNormalizationError = "Tag Filter Normalization Error"
+	ErrorMessageFailedToNormalizeTagFilter  = "Failed to normalize tag filter expression: %s"
+	ErrorMessageValidationError             = "Validation Error"
+)
+
+// Threshold type constants
+const (
+	ThresholdTypeStatic           = "staticThreshold"
+	ThresholdTypeAdaptiveBaseline = "adaptiveBaseline"
+)
+
+// Time threshold type constants
+const (
+	TimeThresholdTypeRequestImpact        = "requestImpact"
+	TimeThresholdTypeViolationsInPeriod   = "violationsInPeriod"
+	TimeThresholdTypeViolationsInSequence = "violationsInSequence"
+)

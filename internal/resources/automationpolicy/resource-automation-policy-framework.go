@@ -18,6 +18,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
+// ============================================================================
+// Resource Factory
+// ============================================================================
+
 // NewAutomationPolicyResourceHandleFramework creates the resource handle for Automation Policies
 func NewAutomationPolicyResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.AutomationPolicy] {
 	return &automationPolicyResourceFramework{
@@ -69,30 +73,30 @@ func NewAutomationPolicyResourceHandleFramework() resourcehandle.ResourceHandleF
 								Optional:    true,
 								Description: AutomationPolicyDescTriggerDescription,
 							},
-							"scheduling": schema.SingleNestedAttribute{
+							AutomationPolicyFieldScheduling: schema.SingleNestedAttribute{
 								Optional:    true,
 								Description: AutomationPolicyDescTriggerScheduling,
 								Attributes: map[string]schema.Attribute{
-									"start_time": schema.Int64Attribute{
+									AutomationPolicyFieldStartTime: schema.Int64Attribute{
 										Optional:    true,
 										Description: AutomationPolicyDescTriggerSchedulingStartTime,
 									},
-									"duration": schema.Int64Attribute{
+									AutomationPolicyFieldDuration: schema.Int64Attribute{
 										Optional:    true,
 										Description: AutomationPolicyDescTriggerSchedulingDuration,
 									},
-									"duration_unit": schema.StringAttribute{
+									AutomationPolicyFieldDurationUnit: schema.StringAttribute{
 										Optional:    true,
 										Description: AutomationPolicyDescTriggerSchedulingDurationUnit,
 										Validators: []validator.String{
-											stringvalidator.OneOf("MINUTE", "HOUR", "DAY"),
+											stringvalidator.OneOf(DurationUnitMinute, DurationUnitHour, DurationUnitDay),
 										},
 									},
-									"recurrent_rule": schema.StringAttribute{
+									AutomationPolicyFieldRecurrentRule: schema.StringAttribute{
 										Optional:    true,
 										Description: AutomationPolicyDescTriggerSchedulingRecurrentRule,
 									},
-									"recurrent": schema.BoolAttribute{
+									AutomationPolicyFieldRecurrent: schema.BoolAttribute{
 										Optional:    true,
 										Description: AutomationPolicyDescTriggerSchedulingRecurrent,
 									},
@@ -127,7 +131,7 @@ func NewAutomationPolicyResourceHandleFramework() resourcehandle.ResourceHandleF
 									Description: AutomationPolicyDescAction,
 									NestedObject: schema.NestedAttributeObject{
 										Attributes: map[string]schema.Attribute{
-											"action": schema.SingleNestedAttribute{
+											AutomationPolicyFieldAction: schema.SingleNestedAttribute{
 												Required:    true,
 												Description: AutomationPolicyDescActionAction,
 												Attributes:  shared.GetAutomationActionSchemaAttributes(),
@@ -149,22 +153,34 @@ func NewAutomationPolicyResourceHandleFramework() resourcehandle.ResourceHandleF
 	}
 }
 
+// ============================================================================
+// Resource Implementation
+// ============================================================================
+
 type automationPolicyResourceFramework struct {
 	metaData resourcehandle.ResourceMetaDataFramework
 }
 
+// MetaData returns the resource metadata
 func (r *automationPolicyResourceFramework) MetaData() *resourcehandle.ResourceMetaDataFramework {
 	return &r.metaData
 }
 
+// GetRestResource returns the REST resource for automation policies
 func (r *automationPolicyResourceFramework) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.AutomationPolicy] {
 	return api.AutomationPolicies()
 }
 
+// SetComputedFields sets computed fields in the plan (none for this resource)
 func (r *automationPolicyResourceFramework) SetComputedFields(_ context.Context, _ *tfsdk.Plan) diag.Diagnostics {
 	return nil
 }
 
+// ============================================================================
+// API to State Mapping
+// ============================================================================
+
+// UpdateState converts API data object to Terraform state
 func (r *automationPolicyResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, policy *restapi.AutomationPolicy) diag.Diagnostics {
 	var diags diag.Diagnostics
 
@@ -205,6 +221,7 @@ func (r *automationPolicyResourceFramework) UpdateState(ctx context.Context, sta
 	return diags
 }
 
+// mapTagsToState converts tags from API format to Terraform state format
 func (r *automationPolicyResourceFramework) mapTagsToState(ctx context.Context, tags interface{}) (types.List, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
@@ -237,6 +254,7 @@ func (r *automationPolicyResourceFramework) mapTagsToState(ctx context.Context, 
 	}
 }
 
+// mapTriggerToState maps trigger data from API to state model
 func (r *automationPolicyResourceFramework) mapTriggerToState(trigger *restapi.Trigger, triggerModel TriggerModel) TriggerModel {
 	if triggerModel.ID.IsNull() || triggerModel.ID.IsUnknown() {
 		triggerModel.ID = types.StringValue(trigger.Id)
@@ -296,6 +314,7 @@ func (r *automationPolicyResourceFramework) mapTriggerToState(trigger *restapi.T
 	return triggerModel
 }
 
+// mapTypeConfigurationsToState maps type configurations from API to state models
 func (r *automationPolicyResourceFramework) mapTypeConfigurationsToState(ctx context.Context, typeConfigs []restapi.TypeConfiguration) []TypeConfigurationModel {
 	result := make([]TypeConfigurationModel, len(typeConfigs))
 
@@ -321,6 +340,7 @@ func (r *automationPolicyResourceFramework) mapTypeConfigurationsToState(ctx con
 	return result
 }
 
+// mapActionsToState maps automation actions from API runnable to state models
 func (r *automationPolicyResourceFramework) mapActionsToState(ctx context.Context, runnable *restapi.Runnable) []PolicyActionModel {
 	result := make([]PolicyActionModel, len(runnable.RunConfiguration.Actions))
 
@@ -354,6 +374,11 @@ func (r *automationPolicyResourceFramework) mapActionsToState(ctx context.Contex
 	return result
 }
 
+// ============================================================================
+// State to API Mapping
+// ============================================================================
+
+// MapStateToDataObject converts Terraform state to API data object
 func (r *automationPolicyResourceFramework) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.AutomationPolicy, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var model AutomationPolicyModel
@@ -406,6 +431,7 @@ func (r *automationPolicyResourceFramework) MapStateToDataObject(ctx context.Con
 	}, diags
 }
 
+// mapTriggerFromState converts trigger from state model to API format
 func (r *automationPolicyResourceFramework) mapTriggerFromState(ctx context.Context, triggerModel TriggerModel) (restapi.Trigger, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
@@ -445,6 +471,7 @@ func (r *automationPolicyResourceFramework) mapTriggerFromState(ctx context.Cont
 	return trigger, diags
 }
 
+// mapTypeConfigurationsFromState converts type configurations from state to API format
 func (r *automationPolicyResourceFramework) mapTypeConfigurationsFromState(ctx context.Context, typeConfigModels []TypeConfigurationModel) ([]restapi.TypeConfiguration, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
@@ -474,6 +501,7 @@ func (r *automationPolicyResourceFramework) mapTypeConfigurationsFromState(ctx c
 	return typeConfigurations, diags
 }
 
+// mapConditionFromState converts condition from state model to API format
 func (r *automationPolicyResourceFramework) mapConditionFromState(ctx context.Context, conditionModel *ConditionModel) (*restapi.Condition, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
@@ -488,6 +516,7 @@ func (r *automationPolicyResourceFramework) mapConditionFromState(ctx context.Co
 	return condition, diags
 }
 
+// mapRunnableFromState converts policy actions from state to API runnable format
 func (r *automationPolicyResourceFramework) mapRunnableFromState(ctx context.Context, actionModels []PolicyActionModel) (restapi.Runnable, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	runnable := restapi.Runnable{
@@ -560,6 +589,11 @@ func (r *automationPolicyResourceFramework) mapRunnableFromState(ctx context.Con
 	return runnable, diags
 }
 
+// ============================================================================
+// Helper Methods
+// ============================================================================
+
+// mapTagsFromState converts tags from state to API format
 func (r *automationPolicyResourceFramework) mapTagsFromState(ctx context.Context, tagsList types.List) (interface{}, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
