@@ -567,239 +567,295 @@ func NewAPITokenResourceHandleFramework() resourcehandle.ResourceHandleFramework
 	}
 }
 
+// ============================================================================
+// Resource Implementation
+// ============================================================================
+
 type apiTokenResourceFramework struct {
 	metaData resourcehandle.ResourceMetaDataFramework
 }
 
+// MetaData returns the resource metadata
 func (r *apiTokenResourceFramework) MetaData() *resourcehandle.ResourceMetaDataFramework {
 	return &r.metaData
 }
 
+// GetRestResource returns the REST resource for API tokens
 func (r *apiTokenResourceFramework) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.APIToken] {
 	return api.APITokens()
 }
 
+// SetComputedFields sets computed fields (internal_id and access_granting_token) in the plan
 func (r *apiTokenResourceFramework) SetComputedFields(ctx context.Context, plan *tfsdk.Plan) diag.Diagnostics {
 	var diags diag.Diagnostics
-	diags.Append(plan.SetAttribute(ctx, path.Root("internal_id"), types.StringValue(util.RandomID()))...)
-	diags.Append(plan.SetAttribute(ctx, path.Root("access_granting_token"), types.StringValue(util.RandomID()))...)
+	diags.Append(plan.SetAttribute(ctx, path.Root(APITokenFieldInternalID), types.StringValue(util.RandomID()))...)
+	diags.Append(plan.SetAttribute(ctx, path.Root(APITokenFieldAccessGrantingToken), types.StringValue(util.RandomID()))...)
 	return diags
 }
 
+// ============================================================================
+// State Management
+// ============================================================================
+
+// UpdateState updates the Terraform state with the API token data from the API
 func (r *apiTokenResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiToken *restapi.APIToken) diag.Diagnostics {
-	var diags diag.Diagnostics
-
-	// Create a model and populate it with values from the API token
+	// Create base model with core fields
 	model := APITokenModel{
-		ID:                                       types.StringValue(apiToken.ID),
-		AccessGrantingToken:                      types.StringValue(apiToken.AccessGrantingToken),
-		InternalID:                               types.StringValue(apiToken.InternalID),
-		Name:                                     types.StringValue(apiToken.Name),
-		CanConfigureServiceMapping:               types.BoolValue(apiToken.CanConfigureServiceMapping),
-		CanConfigureEumApplications:              types.BoolValue(apiToken.CanConfigureEumApplications),
-		CanConfigureMobileAppMonitoring:          types.BoolValue(apiToken.CanConfigureMobileAppMonitoring),
-		CanConfigureUsers:                        types.BoolValue(apiToken.CanConfigureUsers),
-		CanInstallNewAgents:                      types.BoolValue(apiToken.CanInstallNewAgents),
-		CanConfigureIntegrations:                 types.BoolValue(apiToken.CanConfigureIntegrations),
-		CanConfigureEventsAndAlerts:              types.BoolValue(apiToken.CanConfigureEventsAndAlerts),
-		CanConfigureMaintenanceWindows:           types.BoolValue(apiToken.CanConfigureMaintenanceWindows),
-		CanConfigureApplicationSmartAlerts:       types.BoolValue(apiToken.CanConfigureApplicationSmartAlerts),
-		CanConfigureWebsiteSmartAlerts:           types.BoolValue(apiToken.CanConfigureWebsiteSmartAlerts),
-		CanConfigureMobileAppSmartAlerts:         types.BoolValue(apiToken.CanConfigureMobileAppSmartAlerts),
-		CanConfigureAPITokens:                    types.BoolValue(apiToken.CanConfigureAPITokens),
-		CanConfigureAgentRunMode:                 types.BoolValue(apiToken.CanConfigureAgentRunMode),
-		CanViewAuditLog:                          types.BoolValue(apiToken.CanViewAuditLog),
-		CanConfigureAgents:                       types.BoolValue(apiToken.CanConfigureAgents),
-		CanConfigureAuthenticationMethods:        types.BoolValue(apiToken.CanConfigureAuthenticationMethods),
-		CanConfigureApplications:                 types.BoolValue(apiToken.CanConfigureApplications),
-		CanConfigureTeams:                        types.BoolValue(apiToken.CanConfigureTeams),
-		CanConfigureReleases:                     types.BoolValue(apiToken.CanConfigureReleases),
-		CanConfigureLogManagement:                types.BoolValue(apiToken.CanConfigureLogManagement),
-		CanCreatePublicCustomDashboards:          types.BoolValue(apiToken.CanCreatePublicCustomDashboards),
-		CanViewLogs:                              types.BoolValue(apiToken.CanViewLogs),
-		CanViewTraceDetails:                      types.BoolValue(apiToken.CanViewTraceDetails),
-		CanConfigureSessionSettings:              types.BoolValue(apiToken.CanConfigureSessionSettings),
-		CanConfigureGlobalAlertPayload:           types.BoolValue(apiToken.CanConfigureGlobalAlertPayload),
-		CanConfigureGlobalApplicationSmartAlerts: types.BoolValue(apiToken.CanConfigureGlobalApplicationSmartAlerts),
-		CanConfigureGlobalSyntheticSmartAlerts:   types.BoolValue(apiToken.CanConfigureGlobalSyntheticSmartAlerts),
-		CanConfigureGlobalInfraSmartAlerts:       types.BoolValue(apiToken.CanConfigureGlobalInfraSmartAlerts),
-		CanConfigureGlobalLogSmartAlerts:         types.BoolValue(apiToken.CanConfigureGlobalLogSmartAlerts),
-		CanViewAccountAndBillingInformation:      types.BoolValue(apiToken.CanViewAccountAndBillingInformation),
-		CanEditAllAccessibleCustomDashboards:     types.BoolValue(apiToken.CanEditAllAccessibleCustomDashboards),
-
-		// Scope limitations
-		LimitedApplicationsScope:       types.BoolValue(apiToken.LimitedApplicationsScope),
-		LimitedBizOpsScope:             types.BoolValue(apiToken.LimitedBizOpsScope),
-		LimitedWebsitesScope:           types.BoolValue(apiToken.LimitedWebsitesScope),
-		LimitedKubernetesScope:         types.BoolValue(apiToken.LimitedKubernetesScope),
-		LimitedMobileAppsScope:         types.BoolValue(apiToken.LimitedMobileAppsScope),
-		LimitedInfrastructureScope:     types.BoolValue(apiToken.LimitedInfrastructureScope),
-		LimitedSyntheticsScope:         types.BoolValue(apiToken.LimitedSyntheticsScope),
-		LimitedVsphereScope:            types.BoolValue(apiToken.LimitedVsphereScope),
-		LimitedPhmcScope:               types.BoolValue(apiToken.LimitedPhmcScope),
-		LimitedPvcScope:                types.BoolValue(apiToken.LimitedPvcScope),
-		LimitedZhmcScope:               types.BoolValue(apiToken.LimitedZhmcScope),
-		LimitedPcfScope:                types.BoolValue(apiToken.LimitedPcfScope),
-		LimitedOpenstackScope:          types.BoolValue(apiToken.LimitedOpenstackScope),
-		LimitedAutomationScope:         types.BoolValue(apiToken.LimitedAutomationScope),
-		LimitedLogsScope:               types.BoolValue(apiToken.LimitedLogsScope),
-		LimitedNutanixScope:            types.BoolValue(apiToken.LimitedNutanixScope),
-		LimitedXenServerScope:          types.BoolValue(apiToken.LimitedXenServerScope),
-		LimitedWindowsHypervisorScope:  types.BoolValue(apiToken.LimitedWindowsHypervisorScope),
-		LimitedAlertChannelsScope:      types.BoolValue(apiToken.LimitedAlertChannelsScope),
-		LimitedLinuxKvmHypervisorScope: types.BoolValue(apiToken.LimitedLinuxKvmHypervisorScope),
-		LimitedServiceLevelScope:       types.BoolValue(apiToken.LimitedServiceLevelScope),
-		LimitedAiGatewayScope:          types.BoolValue(apiToken.LimitedAiGatewayScope),
-
-		// Additional permissions
-		CanConfigurePersonalAPITokens:             types.BoolValue(apiToken.CanConfigurePersonalAPITokens),
-		CanConfigureDatabaseManagement:            types.BoolValue(apiToken.CanConfigureDatabaseManagement),
-		CanConfigureAutomationActions:             types.BoolValue(apiToken.CanConfigureAutomationActions),
-		CanConfigureAutomationPolicies:            types.BoolValue(apiToken.CanConfigureAutomationPolicies),
-		CanRunAutomationActions:                   types.BoolValue(apiToken.CanRunAutomationActions),
-		CanDeleteAutomationActionHistory:          types.BoolValue(apiToken.CanDeleteAutomationActionHistory),
-		CanConfigureSyntheticTests:                types.BoolValue(apiToken.CanConfigureSyntheticTests),
-		CanConfigureSyntheticLocations:            types.BoolValue(apiToken.CanConfigureSyntheticLocations),
-		CanConfigureSyntheticCredentials:          types.BoolValue(apiToken.CanConfigureSyntheticCredentials),
-		CanViewSyntheticTests:                     types.BoolValue(apiToken.CanViewSyntheticTests),
-		CanViewSyntheticLocations:                 types.BoolValue(apiToken.CanViewSyntheticLocations),
-		CanViewSyntheticTestResults:               types.BoolValue(apiToken.CanViewSyntheticTestResults),
-		CanUseSyntheticCredentials:                types.BoolValue(apiToken.CanUseSyntheticCredentials),
-		CanConfigureBizops:                        types.BoolValue(apiToken.CanConfigureBizops),
-		CanViewBusinessProcesses:                  types.BoolValue(apiToken.CanViewBusinessProcesses),
-		CanViewBusinessProcessDetails:             types.BoolValue(apiToken.CanViewBusinessProcessDetails),
-		CanViewBusinessActivities:                 types.BoolValue(apiToken.CanViewBusinessActivities),
-		CanViewBizAlerts:                          types.BoolValue(apiToken.CanViewBizAlerts),
-		CanDeleteLogs:                             types.BoolValue(apiToken.CanDeleteLogs),
-		CanCreateHeapDump:                         types.BoolValue(apiToken.CanCreateHeapDump),
-		CanCreateThreadDump:                       types.BoolValue(apiToken.CanCreateThreadDump),
-		CanManuallyCloseIssue:                     types.BoolValue(apiToken.CanManuallyCloseIssue),
-		CanViewLogVolume:                          types.BoolValue(apiToken.CanViewLogVolume),
-		CanConfigureLogRetentionPeriod:            types.BoolValue(apiToken.CanConfigureLogRetentionPeriod),
-		CanConfigureSubtraces:                     types.BoolValue(apiToken.CanConfigureSubtraces),
-		CanInvokeAlertChannel:                     types.BoolValue(apiToken.CanInvokeAlertChannel),
-		CanConfigureLlm:                           types.BoolValue(apiToken.CanConfigureLlm),
-		CanConfigureAiAgents:                      types.BoolValue(apiToken.CanConfigureAiAgents),
-		CanConfigureApdex:                         types.BoolValue(apiToken.CanConfigureApdex),
-		CanConfigureServiceLevelCorrectionWindows: types.BoolValue(apiToken.CanConfigureServiceLevelCorrectionWindows),
-		CanConfigureServiceLevelSmartAlerts:       types.BoolValue(apiToken.CanConfigureServiceLevelSmartAlerts),
-		CanConfigureServiceLevels:                 types.BoolValue(apiToken.CanConfigureServiceLevels),
+		ID:                  types.StringValue(apiToken.ID),
+		AccessGrantingToken: types.StringValue(apiToken.AccessGrantingToken),
+		InternalID:          types.StringValue(apiToken.InternalID),
+		Name:                types.StringValue(apiToken.Name),
 	}
+
+	// Map permissions
+	r.mapPermissionsToModel(apiToken, &model)
+
+	// Map scope limitations
+	r.mapScopeLimitationsToModel(apiToken, &model)
+
+	// Map additional permissions
+	r.mapAdditionalPermissionsToModel(apiToken, &model)
+
 	// Set the state with our populated model
-	diags = state.Set(ctx, &model)
-	return diags
+	return state.Set(ctx, &model)
 }
 
+// mapPermissionsToModel maps basic permissions from API to model
+func (r *apiTokenResourceFramework) mapPermissionsToModel(apiToken *restapi.APIToken, model *APITokenModel) {
+	model.CanConfigureServiceMapping = types.BoolValue(apiToken.CanConfigureServiceMapping)
+	model.CanConfigureEumApplications = types.BoolValue(apiToken.CanConfigureEumApplications)
+	model.CanConfigureMobileAppMonitoring = types.BoolValue(apiToken.CanConfigureMobileAppMonitoring)
+	model.CanConfigureUsers = types.BoolValue(apiToken.CanConfigureUsers)
+	model.CanInstallNewAgents = types.BoolValue(apiToken.CanInstallNewAgents)
+	model.CanConfigureIntegrations = types.BoolValue(apiToken.CanConfigureIntegrations)
+	model.CanConfigureEventsAndAlerts = types.BoolValue(apiToken.CanConfigureEventsAndAlerts)
+	model.CanConfigureMaintenanceWindows = types.BoolValue(apiToken.CanConfigureMaintenanceWindows)
+	model.CanConfigureApplicationSmartAlerts = types.BoolValue(apiToken.CanConfigureApplicationSmartAlerts)
+	model.CanConfigureWebsiteSmartAlerts = types.BoolValue(apiToken.CanConfigureWebsiteSmartAlerts)
+	model.CanConfigureMobileAppSmartAlerts = types.BoolValue(apiToken.CanConfigureMobileAppSmartAlerts)
+	model.CanConfigureAPITokens = types.BoolValue(apiToken.CanConfigureAPITokens)
+	model.CanConfigureAgentRunMode = types.BoolValue(apiToken.CanConfigureAgentRunMode)
+	model.CanViewAuditLog = types.BoolValue(apiToken.CanViewAuditLog)
+	model.CanConfigureAgents = types.BoolValue(apiToken.CanConfigureAgents)
+	model.CanConfigureAuthenticationMethods = types.BoolValue(apiToken.CanConfigureAuthenticationMethods)
+	model.CanConfigureApplications = types.BoolValue(apiToken.CanConfigureApplications)
+	model.CanConfigureTeams = types.BoolValue(apiToken.CanConfigureTeams)
+	model.CanConfigureReleases = types.BoolValue(apiToken.CanConfigureReleases)
+	model.CanConfigureLogManagement = types.BoolValue(apiToken.CanConfigureLogManagement)
+	model.CanCreatePublicCustomDashboards = types.BoolValue(apiToken.CanCreatePublicCustomDashboards)
+	model.CanViewLogs = types.BoolValue(apiToken.CanViewLogs)
+	model.CanViewTraceDetails = types.BoolValue(apiToken.CanViewTraceDetails)
+	model.CanConfigureSessionSettings = types.BoolValue(apiToken.CanConfigureSessionSettings)
+	model.CanConfigureGlobalAlertPayload = types.BoolValue(apiToken.CanConfigureGlobalAlertPayload)
+	model.CanConfigureGlobalApplicationSmartAlerts = types.BoolValue(apiToken.CanConfigureGlobalApplicationSmartAlerts)
+	model.CanConfigureGlobalSyntheticSmartAlerts = types.BoolValue(apiToken.CanConfigureGlobalSyntheticSmartAlerts)
+	model.CanConfigureGlobalInfraSmartAlerts = types.BoolValue(apiToken.CanConfigureGlobalInfraSmartAlerts)
+	model.CanConfigureGlobalLogSmartAlerts = types.BoolValue(apiToken.CanConfigureGlobalLogSmartAlerts)
+	model.CanViewAccountAndBillingInformation = types.BoolValue(apiToken.CanViewAccountAndBillingInformation)
+	model.CanEditAllAccessibleCustomDashboards = types.BoolValue(apiToken.CanEditAllAccessibleCustomDashboards)
+}
+
+// mapScopeLimitationsToModel maps scope limitations from API to model
+func (r *apiTokenResourceFramework) mapScopeLimitationsToModel(apiToken *restapi.APIToken, model *APITokenModel) {
+	model.LimitedApplicationsScope = types.BoolValue(apiToken.LimitedApplicationsScope)
+	model.LimitedBizOpsScope = types.BoolValue(apiToken.LimitedBizOpsScope)
+	model.LimitedWebsitesScope = types.BoolValue(apiToken.LimitedWebsitesScope)
+	model.LimitedKubernetesScope = types.BoolValue(apiToken.LimitedKubernetesScope)
+	model.LimitedMobileAppsScope = types.BoolValue(apiToken.LimitedMobileAppsScope)
+	model.LimitedInfrastructureScope = types.BoolValue(apiToken.LimitedInfrastructureScope)
+	model.LimitedSyntheticsScope = types.BoolValue(apiToken.LimitedSyntheticsScope)
+	model.LimitedVsphereScope = types.BoolValue(apiToken.LimitedVsphereScope)
+	model.LimitedPhmcScope = types.BoolValue(apiToken.LimitedPhmcScope)
+	model.LimitedPvcScope = types.BoolValue(apiToken.LimitedPvcScope)
+	model.LimitedZhmcScope = types.BoolValue(apiToken.LimitedZhmcScope)
+	model.LimitedPcfScope = types.BoolValue(apiToken.LimitedPcfScope)
+	model.LimitedOpenstackScope = types.BoolValue(apiToken.LimitedOpenstackScope)
+	model.LimitedAutomationScope = types.BoolValue(apiToken.LimitedAutomationScope)
+	model.LimitedLogsScope = types.BoolValue(apiToken.LimitedLogsScope)
+	model.LimitedNutanixScope = types.BoolValue(apiToken.LimitedNutanixScope)
+	model.LimitedXenServerScope = types.BoolValue(apiToken.LimitedXenServerScope)
+	model.LimitedWindowsHypervisorScope = types.BoolValue(apiToken.LimitedWindowsHypervisorScope)
+	model.LimitedAlertChannelsScope = types.BoolValue(apiToken.LimitedAlertChannelsScope)
+	model.LimitedLinuxKvmHypervisorScope = types.BoolValue(apiToken.LimitedLinuxKvmHypervisorScope)
+	model.LimitedServiceLevelScope = types.BoolValue(apiToken.LimitedServiceLevelScope)
+	model.LimitedAiGatewayScope = types.BoolValue(apiToken.LimitedAiGatewayScope)
+}
+
+// mapAdditionalPermissionsToModel maps additional permissions from API to model
+func (r *apiTokenResourceFramework) mapAdditionalPermissionsToModel(apiToken *restapi.APIToken, model *APITokenModel) {
+	model.CanConfigurePersonalAPITokens = types.BoolValue(apiToken.CanConfigurePersonalAPITokens)
+	model.CanConfigureDatabaseManagement = types.BoolValue(apiToken.CanConfigureDatabaseManagement)
+	model.CanConfigureAutomationActions = types.BoolValue(apiToken.CanConfigureAutomationActions)
+	model.CanConfigureAutomationPolicies = types.BoolValue(apiToken.CanConfigureAutomationPolicies)
+	model.CanRunAutomationActions = types.BoolValue(apiToken.CanRunAutomationActions)
+	model.CanDeleteAutomationActionHistory = types.BoolValue(apiToken.CanDeleteAutomationActionHistory)
+	model.CanConfigureSyntheticTests = types.BoolValue(apiToken.CanConfigureSyntheticTests)
+	model.CanConfigureSyntheticLocations = types.BoolValue(apiToken.CanConfigureSyntheticLocations)
+	model.CanConfigureSyntheticCredentials = types.BoolValue(apiToken.CanConfigureSyntheticCredentials)
+	model.CanViewSyntheticTests = types.BoolValue(apiToken.CanViewSyntheticTests)
+	model.CanViewSyntheticLocations = types.BoolValue(apiToken.CanViewSyntheticLocations)
+	model.CanViewSyntheticTestResults = types.BoolValue(apiToken.CanViewSyntheticTestResults)
+	model.CanUseSyntheticCredentials = types.BoolValue(apiToken.CanUseSyntheticCredentials)
+	model.CanConfigureBizops = types.BoolValue(apiToken.CanConfigureBizops)
+	model.CanViewBusinessProcesses = types.BoolValue(apiToken.CanViewBusinessProcesses)
+	model.CanViewBusinessProcessDetails = types.BoolValue(apiToken.CanViewBusinessProcessDetails)
+	model.CanViewBusinessActivities = types.BoolValue(apiToken.CanViewBusinessActivities)
+	model.CanViewBizAlerts = types.BoolValue(apiToken.CanViewBizAlerts)
+	model.CanDeleteLogs = types.BoolValue(apiToken.CanDeleteLogs)
+	model.CanCreateHeapDump = types.BoolValue(apiToken.CanCreateHeapDump)
+	model.CanCreateThreadDump = types.BoolValue(apiToken.CanCreateThreadDump)
+	model.CanManuallyCloseIssue = types.BoolValue(apiToken.CanManuallyCloseIssue)
+	model.CanViewLogVolume = types.BoolValue(apiToken.CanViewLogVolume)
+	model.CanConfigureLogRetentionPeriod = types.BoolValue(apiToken.CanConfigureLogRetentionPeriod)
+	model.CanConfigureSubtraces = types.BoolValue(apiToken.CanConfigureSubtraces)
+	model.CanInvokeAlertChannel = types.BoolValue(apiToken.CanInvokeAlertChannel)
+	model.CanConfigureLlm = types.BoolValue(apiToken.CanConfigureLlm)
+	model.CanConfigureAiAgents = types.BoolValue(apiToken.CanConfigureAiAgents)
+	model.CanConfigureApdex = types.BoolValue(apiToken.CanConfigureApdex)
+	model.CanConfigureServiceLevelCorrectionWindows = types.BoolValue(apiToken.CanConfigureServiceLevelCorrectionWindows)
+	model.CanConfigureServiceLevelSmartAlerts = types.BoolValue(apiToken.CanConfigureServiceLevelSmartAlerts)
+	model.CanConfigureServiceLevels = types.BoolValue(apiToken.CanConfigureServiceLevels)
+}
+
+// ============================================================================
+// State to API Mapping
+// ============================================================================
+
+// MapStateToDataObject converts Terraform state to API object
 func (r *apiTokenResourceFramework) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.APIToken, diag.Diagnostics) {
+	// Get model from plan or state
+	model, diags := r.getAPITokenModelFromPlanOrState(ctx, plan, state)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	// Create base API token with core fields
+	apiToken := &restapi.APIToken{
+		ID:                  model.ID.ValueString(),
+		AccessGrantingToken: model.AccessGrantingToken.ValueString(),
+		InternalID:          model.InternalID.ValueString(),
+		Name:                model.Name.ValueString(),
+	}
+
+	// Map permissions
+	r.mapPermissionsFromModel(model, apiToken)
+
+	// Map scope limitations
+	r.mapScopeLimitationsFromModel(model, apiToken)
+
+	// Map additional permissions
+	r.mapAdditionalPermissionsFromModel(model, apiToken)
+
+	return apiToken, diags
+}
+
+// getAPITokenModelFromPlanOrState retrieves the model from either plan or state
+func (r *apiTokenResourceFramework) getAPITokenModelFromPlanOrState(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (APITokenModel, diag.Diagnostics) {
 	var model APITokenModel
 	var diags diag.Diagnostics
 
-	// Get current state from plan or state
 	if plan != nil {
 		diags.Append(plan.Get(ctx, &model)...)
 	} else if state != nil {
 		diags.Append(state.Get(ctx, &model)...)
 	}
-	if diags.HasError() {
-		return nil, diags
-	}
 
-	// Create API token object and populate it from the model
-	apiToken := &restapi.APIToken{
-		ID:                                       model.ID.ValueString(),
-		AccessGrantingToken:                      model.AccessGrantingToken.ValueString(),
-		InternalID:                               model.InternalID.ValueString(),
-		Name:                                     model.Name.ValueString(),
-		CanConfigureServiceMapping:               model.CanConfigureServiceMapping.ValueBool(),
-		CanConfigureEumApplications:              model.CanConfigureEumApplications.ValueBool(),
-		CanConfigureMobileAppMonitoring:          model.CanConfigureMobileAppMonitoring.ValueBool(),
-		CanConfigureUsers:                        model.CanConfigureUsers.ValueBool(),
-		CanInstallNewAgents:                      model.CanInstallNewAgents.ValueBool(),
-		CanConfigureIntegrations:                 model.CanConfigureIntegrations.ValueBool(),
-		CanConfigureEventsAndAlerts:              model.CanConfigureEventsAndAlerts.ValueBool(),
-		CanConfigureMaintenanceWindows:           model.CanConfigureMaintenanceWindows.ValueBool(),
-		CanConfigureApplicationSmartAlerts:       model.CanConfigureApplicationSmartAlerts.ValueBool(),
-		CanConfigureWebsiteSmartAlerts:           model.CanConfigureWebsiteSmartAlerts.ValueBool(),
-		CanConfigureMobileAppSmartAlerts:         model.CanConfigureMobileAppSmartAlerts.ValueBool(),
-		CanConfigureAPITokens:                    model.CanConfigureAPITokens.ValueBool(),
-		CanConfigureAgentRunMode:                 model.CanConfigureAgentRunMode.ValueBool(),
-		CanViewAuditLog:                          model.CanViewAuditLog.ValueBool(),
-		CanConfigureAgents:                       model.CanConfigureAgents.ValueBool(),
-		CanConfigureAuthenticationMethods:        model.CanConfigureAuthenticationMethods.ValueBool(),
-		CanConfigureApplications:                 model.CanConfigureApplications.ValueBool(),
-		CanConfigureTeams:                        model.CanConfigureTeams.ValueBool(),
-		CanConfigureReleases:                     model.CanConfigureReleases.ValueBool(),
-		CanConfigureLogManagement:                model.CanConfigureLogManagement.ValueBool(),
-		CanCreatePublicCustomDashboards:          model.CanCreatePublicCustomDashboards.ValueBool(),
-		CanViewLogs:                              model.CanViewLogs.ValueBool(),
-		CanViewTraceDetails:                      model.CanViewTraceDetails.ValueBool(),
-		CanConfigureSessionSettings:              model.CanConfigureSessionSettings.ValueBool(),
-		CanConfigureGlobalAlertPayload:           model.CanConfigureGlobalAlertPayload.ValueBool(),
-		CanConfigureGlobalApplicationSmartAlerts: model.CanConfigureGlobalApplicationSmartAlerts.ValueBool(),
-		CanConfigureGlobalSyntheticSmartAlerts:   model.CanConfigureGlobalSyntheticSmartAlerts.ValueBool(),
-		CanConfigureGlobalInfraSmartAlerts:       model.CanConfigureGlobalInfraSmartAlerts.ValueBool(),
-		CanConfigureGlobalLogSmartAlerts:         model.CanConfigureGlobalLogSmartAlerts.ValueBool(),
-		CanViewAccountAndBillingInformation:      model.CanViewAccountAndBillingInformation.ValueBool(),
-		CanEditAllAccessibleCustomDashboards:     model.CanEditAllAccessibleCustomDashboards.ValueBool(),
+	return model, diags
+}
 
-		// Scope limitations
-		LimitedApplicationsScope:       model.LimitedApplicationsScope.ValueBool(),
-		LimitedBizOpsScope:             model.LimitedBizOpsScope.ValueBool(),
-		LimitedWebsitesScope:           model.LimitedWebsitesScope.ValueBool(),
-		LimitedKubernetesScope:         model.LimitedKubernetesScope.ValueBool(),
-		LimitedMobileAppsScope:         model.LimitedMobileAppsScope.ValueBool(),
-		LimitedInfrastructureScope:     model.LimitedInfrastructureScope.ValueBool(),
-		LimitedSyntheticsScope:         model.LimitedSyntheticsScope.ValueBool(),
-		LimitedVsphereScope:            model.LimitedVsphereScope.ValueBool(),
-		LimitedPhmcScope:               model.LimitedPhmcScope.ValueBool(),
-		LimitedPvcScope:                model.LimitedPvcScope.ValueBool(),
-		LimitedZhmcScope:               model.LimitedZhmcScope.ValueBool(),
-		LimitedPcfScope:                model.LimitedPcfScope.ValueBool(),
-		LimitedOpenstackScope:          model.LimitedOpenstackScope.ValueBool(),
-		LimitedAutomationScope:         model.LimitedAutomationScope.ValueBool(),
-		LimitedLogsScope:               model.LimitedLogsScope.ValueBool(),
-		LimitedNutanixScope:            model.LimitedNutanixScope.ValueBool(),
-		LimitedXenServerScope:          model.LimitedXenServerScope.ValueBool(),
-		LimitedWindowsHypervisorScope:  model.LimitedWindowsHypervisorScope.ValueBool(),
-		LimitedAlertChannelsScope:      model.LimitedAlertChannelsScope.ValueBool(),
-		LimitedLinuxKvmHypervisorScope: model.LimitedLinuxKvmHypervisorScope.ValueBool(),
-		LimitedServiceLevelScope:       model.LimitedServiceLevelScope.ValueBool(),
-		LimitedAiGatewayScope:          model.LimitedAiGatewayScope.ValueBool(),
+// mapPermissionsFromModel maps basic permissions from model to API object
+func (r *apiTokenResourceFramework) mapPermissionsFromModel(model APITokenModel, apiToken *restapi.APIToken) {
+	apiToken.CanConfigureServiceMapping = model.CanConfigureServiceMapping.ValueBool()
+	apiToken.CanConfigureEumApplications = model.CanConfigureEumApplications.ValueBool()
+	apiToken.CanConfigureMobileAppMonitoring = model.CanConfigureMobileAppMonitoring.ValueBool()
+	apiToken.CanConfigureUsers = model.CanConfigureUsers.ValueBool()
+	apiToken.CanInstallNewAgents = model.CanInstallNewAgents.ValueBool()
+	apiToken.CanConfigureIntegrations = model.CanConfigureIntegrations.ValueBool()
+	apiToken.CanConfigureEventsAndAlerts = model.CanConfigureEventsAndAlerts.ValueBool()
+	apiToken.CanConfigureMaintenanceWindows = model.CanConfigureMaintenanceWindows.ValueBool()
+	apiToken.CanConfigureApplicationSmartAlerts = model.CanConfigureApplicationSmartAlerts.ValueBool()
+	apiToken.CanConfigureWebsiteSmartAlerts = model.CanConfigureWebsiteSmartAlerts.ValueBool()
+	apiToken.CanConfigureMobileAppSmartAlerts = model.CanConfigureMobileAppSmartAlerts.ValueBool()
+	apiToken.CanConfigureAPITokens = model.CanConfigureAPITokens.ValueBool()
+	apiToken.CanConfigureAgentRunMode = model.CanConfigureAgentRunMode.ValueBool()
+	apiToken.CanViewAuditLog = model.CanViewAuditLog.ValueBool()
+	apiToken.CanConfigureAgents = model.CanConfigureAgents.ValueBool()
+	apiToken.CanConfigureAuthenticationMethods = model.CanConfigureAuthenticationMethods.ValueBool()
+	apiToken.CanConfigureApplications = model.CanConfigureApplications.ValueBool()
+	apiToken.CanConfigureTeams = model.CanConfigureTeams.ValueBool()
+	apiToken.CanConfigureReleases = model.CanConfigureReleases.ValueBool()
+	apiToken.CanConfigureLogManagement = model.CanConfigureLogManagement.ValueBool()
+	apiToken.CanCreatePublicCustomDashboards = model.CanCreatePublicCustomDashboards.ValueBool()
+	apiToken.CanViewLogs = model.CanViewLogs.ValueBool()
+	apiToken.CanViewTraceDetails = model.CanViewTraceDetails.ValueBool()
+	apiToken.CanConfigureSessionSettings = model.CanConfigureSessionSettings.ValueBool()
+	apiToken.CanConfigureGlobalAlertPayload = model.CanConfigureGlobalAlertPayload.ValueBool()
+	apiToken.CanConfigureGlobalApplicationSmartAlerts = model.CanConfigureGlobalApplicationSmartAlerts.ValueBool()
+	apiToken.CanConfigureGlobalSyntheticSmartAlerts = model.CanConfigureGlobalSyntheticSmartAlerts.ValueBool()
+	apiToken.CanConfigureGlobalInfraSmartAlerts = model.CanConfigureGlobalInfraSmartAlerts.ValueBool()
+	apiToken.CanConfigureGlobalLogSmartAlerts = model.CanConfigureGlobalLogSmartAlerts.ValueBool()
+	apiToken.CanViewAccountAndBillingInformation = model.CanViewAccountAndBillingInformation.ValueBool()
+	apiToken.CanEditAllAccessibleCustomDashboards = model.CanEditAllAccessibleCustomDashboards.ValueBool()
+}
 
-		// Additional permissions
-		CanConfigurePersonalAPITokens:             model.CanConfigurePersonalAPITokens.ValueBool(),
-		CanConfigureDatabaseManagement:            model.CanConfigureDatabaseManagement.ValueBool(),
-		CanConfigureAutomationActions:             model.CanConfigureAutomationActions.ValueBool(),
-		CanConfigureAutomationPolicies:            model.CanConfigureAutomationPolicies.ValueBool(),
-		CanRunAutomationActions:                   model.CanRunAutomationActions.ValueBool(),
-		CanDeleteAutomationActionHistory:          model.CanDeleteAutomationActionHistory.ValueBool(),
-		CanConfigureSyntheticTests:                model.CanConfigureSyntheticTests.ValueBool(),
-		CanConfigureSyntheticLocations:            model.CanConfigureSyntheticLocations.ValueBool(),
-		CanConfigureSyntheticCredentials:          model.CanConfigureSyntheticCredentials.ValueBool(),
-		CanViewSyntheticTests:                     model.CanViewSyntheticTests.ValueBool(),
-		CanViewSyntheticLocations:                 model.CanViewSyntheticLocations.ValueBool(),
-		CanViewSyntheticTestResults:               model.CanViewSyntheticTestResults.ValueBool(),
-		CanUseSyntheticCredentials:                model.CanUseSyntheticCredentials.ValueBool(),
-		CanConfigureBizops:                        model.CanConfigureBizops.ValueBool(),
-		CanViewBusinessProcesses:                  model.CanViewBusinessProcesses.ValueBool(),
-		CanViewBusinessProcessDetails:             model.CanViewBusinessProcessDetails.ValueBool(),
-		CanViewBusinessActivities:                 model.CanViewBusinessActivities.ValueBool(),
-		CanViewBizAlerts:                          model.CanViewBizAlerts.ValueBool(),
-		CanDeleteLogs:                             model.CanDeleteLogs.ValueBool(),
-		CanCreateHeapDump:                         model.CanCreateHeapDump.ValueBool(),
-		CanCreateThreadDump:                       model.CanCreateThreadDump.ValueBool(),
-		CanManuallyCloseIssue:                     model.CanManuallyCloseIssue.ValueBool(),
-		CanViewLogVolume:                          model.CanViewLogVolume.ValueBool(),
-		CanConfigureLogRetentionPeriod:            model.CanConfigureLogRetentionPeriod.ValueBool(),
-		CanConfigureSubtraces:                     model.CanConfigureSubtraces.ValueBool(),
-		CanInvokeAlertChannel:                     model.CanInvokeAlertChannel.ValueBool(),
-		CanConfigureLlm:                           model.CanConfigureLlm.ValueBool(),
-		CanConfigureAiAgents:                      model.CanConfigureAiAgents.ValueBool(),
-		CanConfigureApdex:                         model.CanConfigureApdex.ValueBool(),
-		CanConfigureServiceLevelCorrectionWindows: model.CanConfigureServiceLevelCorrectionWindows.ValueBool(),
-		CanConfigureServiceLevelSmartAlerts:       model.CanConfigureServiceLevelSmartAlerts.ValueBool(),
-		CanConfigureServiceLevels:                 model.CanConfigureServiceLevels.ValueBool(),
-	}
+// mapScopeLimitationsFromModel maps scope limitations from model to API object
+func (r *apiTokenResourceFramework) mapScopeLimitationsFromModel(model APITokenModel, apiToken *restapi.APIToken) {
+	apiToken.LimitedApplicationsScope = model.LimitedApplicationsScope.ValueBool()
+	apiToken.LimitedBizOpsScope = model.LimitedBizOpsScope.ValueBool()
+	apiToken.LimitedWebsitesScope = model.LimitedWebsitesScope.ValueBool()
+	apiToken.LimitedKubernetesScope = model.LimitedKubernetesScope.ValueBool()
+	apiToken.LimitedMobileAppsScope = model.LimitedMobileAppsScope.ValueBool()
+	apiToken.LimitedInfrastructureScope = model.LimitedInfrastructureScope.ValueBool()
+	apiToken.LimitedSyntheticsScope = model.LimitedSyntheticsScope.ValueBool()
+	apiToken.LimitedVsphereScope = model.LimitedVsphereScope.ValueBool()
+	apiToken.LimitedPhmcScope = model.LimitedPhmcScope.ValueBool()
+	apiToken.LimitedPvcScope = model.LimitedPvcScope.ValueBool()
+	apiToken.LimitedZhmcScope = model.LimitedZhmcScope.ValueBool()
+	apiToken.LimitedPcfScope = model.LimitedPcfScope.ValueBool()
+	apiToken.LimitedOpenstackScope = model.LimitedOpenstackScope.ValueBool()
+	apiToken.LimitedAutomationScope = model.LimitedAutomationScope.ValueBool()
+	apiToken.LimitedLogsScope = model.LimitedLogsScope.ValueBool()
+	apiToken.LimitedNutanixScope = model.LimitedNutanixScope.ValueBool()
+	apiToken.LimitedXenServerScope = model.LimitedXenServerScope.ValueBool()
+	apiToken.LimitedWindowsHypervisorScope = model.LimitedWindowsHypervisorScope.ValueBool()
+	apiToken.LimitedAlertChannelsScope = model.LimitedAlertChannelsScope.ValueBool()
+	apiToken.LimitedLinuxKvmHypervisorScope = model.LimitedLinuxKvmHypervisorScope.ValueBool()
+	apiToken.LimitedServiceLevelScope = model.LimitedServiceLevelScope.ValueBool()
+	apiToken.LimitedAiGatewayScope = model.LimitedAiGatewayScope.ValueBool()
+}
 
-	return apiToken, diags
+// mapAdditionalPermissionsFromModel maps additional permissions from model to API object
+func (r *apiTokenResourceFramework) mapAdditionalPermissionsFromModel(model APITokenModel, apiToken *restapi.APIToken) {
+	apiToken.CanConfigurePersonalAPITokens = model.CanConfigurePersonalAPITokens.ValueBool()
+	apiToken.CanConfigureDatabaseManagement = model.CanConfigureDatabaseManagement.ValueBool()
+	apiToken.CanConfigureAutomationActions = model.CanConfigureAutomationActions.ValueBool()
+	apiToken.CanConfigureAutomationPolicies = model.CanConfigureAutomationPolicies.ValueBool()
+	apiToken.CanRunAutomationActions = model.CanRunAutomationActions.ValueBool()
+	apiToken.CanDeleteAutomationActionHistory = model.CanDeleteAutomationActionHistory.ValueBool()
+	apiToken.CanConfigureSyntheticTests = model.CanConfigureSyntheticTests.ValueBool()
+	apiToken.CanConfigureSyntheticLocations = model.CanConfigureSyntheticLocations.ValueBool()
+	apiToken.CanConfigureSyntheticCredentials = model.CanConfigureSyntheticCredentials.ValueBool()
+	apiToken.CanViewSyntheticTests = model.CanViewSyntheticTests.ValueBool()
+	apiToken.CanViewSyntheticLocations = model.CanViewSyntheticLocations.ValueBool()
+	apiToken.CanViewSyntheticTestResults = model.CanViewSyntheticTestResults.ValueBool()
+	apiToken.CanUseSyntheticCredentials = model.CanUseSyntheticCredentials.ValueBool()
+	apiToken.CanConfigureBizops = model.CanConfigureBizops.ValueBool()
+	apiToken.CanViewBusinessProcesses = model.CanViewBusinessProcesses.ValueBool()
+	apiToken.CanViewBusinessProcessDetails = model.CanViewBusinessProcessDetails.ValueBool()
+	apiToken.CanViewBusinessActivities = model.CanViewBusinessActivities.ValueBool()
+	apiToken.CanViewBizAlerts = model.CanViewBizAlerts.ValueBool()
+	apiToken.CanDeleteLogs = model.CanDeleteLogs.ValueBool()
+	apiToken.CanCreateHeapDump = model.CanCreateHeapDump.ValueBool()
+	apiToken.CanCreateThreadDump = model.CanCreateThreadDump.ValueBool()
+	apiToken.CanManuallyCloseIssue = model.CanManuallyCloseIssue.ValueBool()
+	apiToken.CanViewLogVolume = model.CanViewLogVolume.ValueBool()
+	apiToken.CanConfigureLogRetentionPeriod = model.CanConfigureLogRetentionPeriod.ValueBool()
+	apiToken.CanConfigureSubtraces = model.CanConfigureSubtraces.ValueBool()
+	apiToken.CanInvokeAlertChannel = model.CanInvokeAlertChannel.ValueBool()
+	apiToken.CanConfigureLlm = model.CanConfigureLlm.ValueBool()
+	apiToken.CanConfigureAiAgents = model.CanConfigureAiAgents.ValueBool()
+	apiToken.CanConfigureApdex = model.CanConfigureApdex.ValueBool()
+	apiToken.CanConfigureServiceLevelCorrectionWindows = model.CanConfigureServiceLevelCorrectionWindows.ValueBool()
+	apiToken.CanConfigureServiceLevelSmartAlerts = model.CanConfigureServiceLevelSmartAlerts.ValueBool()
+	apiToken.CanConfigureServiceLevels = model.CanConfigureServiceLevels.ValueBool()
 }

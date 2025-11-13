@@ -41,6 +41,24 @@ const AutomationPolicyDescAction = "The configuration for the automation action.
 const AutomationPolicyDescActionAction = "The automation action configuration."
 const AutomationPolicyDescActionAgentID = "The identifier of the agent host."
 
+// Field names
+const (
+	AutomationPolicyFieldScheduling    = "scheduling"
+	AutomationPolicyFieldStartTime     = "start_time"
+	AutomationPolicyFieldDuration      = "duration"
+	AutomationPolicyFieldDurationUnit  = "duration_unit"
+	AutomationPolicyFieldRecurrentRule = "recurrent_rule"
+	AutomationPolicyFieldRecurrent     = "recurrent"
+	AutomationPolicyFieldAction        = "action"
+)
+
+// Duration unit values
+const (
+	DurationUnitMinute = "MINUTE"
+	DurationUnitHour   = "HOUR"
+	DurationUnitDay    = "DAY"
+)
+
 // Error messages
 const AutomationPolicyErrMappingTags = "Error mapping tags"
 const AutomationPolicyErrTagNotString = "Tag at index %d is not a string"

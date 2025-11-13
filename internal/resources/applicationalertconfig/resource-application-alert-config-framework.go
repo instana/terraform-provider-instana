@@ -2,6 +2,7 @@ package applicationalertconfig
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
@@ -406,15 +407,21 @@ func NewGlobalApplicationAlertConfigResourceHandleFramework() resourcehandle.Res
 	}
 }
 
+// ============================================================================
+// Resource Framework Implementation
+// ============================================================================
+
 type applicationAlertConfigResourceFramework struct {
 	metaData resourcehandle.ResourceMetaDataFramework
 	isGlobal bool
 }
 
+// MetaData returns the resource metadata
 func (r *applicationAlertConfigResourceFramework) MetaData() *resourcehandle.ResourceMetaDataFramework {
 	return &r.metaData
 }
 
+// GetRestResource returns the appropriate REST resource based on whether this is a global config
 func (r *applicationAlertConfigResourceFramework) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.ApplicationAlertConfig] {
 	if r.isGlobal {
 		return api.GlobalApplicationAlertConfigs()
@@ -422,6 +429,7 @@ func (r *applicationAlertConfigResourceFramework) GetRestResource(api restapi.In
 	return api.ApplicationAlertConfigs()
 }
 
+// MapStateToDataObject converts Terraform state to API data object by delegating to the implementation
 func (r *applicationAlertConfigResourceFramework) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.ApplicationAlertConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var model ApplicationAlertConfigModel
@@ -462,6 +470,7 @@ func (r *applicationAlertConfigResourceFramework) MapStateToDataObject(ctx conte
 	return resource.MapStateToDataObject(ctx, tempState)
 }
 
+// UpdateState updates Terraform state with API data by delegating to the implementation
 func (r *applicationAlertConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, obj *restapi.ApplicationAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
@@ -476,10 +485,14 @@ func (r *applicationAlertConfigResourceFramework) UpdateState(ctx context.Contex
 	return resource.UpdateState(ctx, state, nil, obj)
 }
 
+// SetComputedFields sets computed fields in the plan (none for this resource)
 func (r *applicationAlertConfigResourceFramework) SetComputedFields(ctx context.Context, plan *tfsdk.Plan) diag.Diagnostics {
-	// No computed fields to set
 	return nil
 }
+
+// ============================================================================
+// Resource Framework Interface
+// ============================================================================
 
 // ResourceFramework interface for application alert config resources
 type ResourceFramework[T restapi.InstanaDataObject] interface {
@@ -489,6 +502,7 @@ type ResourceFramework[T restapi.InstanaDataObject] interface {
 	UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, obj T) diag.Diagnostics
 }
 
+// NewResource creates a new resource implementation instance
 func (r *applicationAlertConfigResourceFramework) NewResource(ctx context.Context, api restapi.InstanaAPI) (ResourceFramework[*restapi.ApplicationAlertConfig], diag.Diagnostics) {
 	return &applicationAlertConfigResourceFrameworkImpl{
 		api:      api,
@@ -496,19 +510,29 @@ func (r *applicationAlertConfigResourceFramework) NewResource(ctx context.Contex
 	}, nil
 }
 
-// applicationAlertConfigResource implements the ResourceFramework interface for ApplicationAlertConfig
+// ============================================================================
+// Resource Implementation
+// ============================================================================
+
+// applicationAlertConfigResourceFrameworkImpl implements the ResourceFramework interface for ApplicationAlertConfig
 type applicationAlertConfigResourceFrameworkImpl struct {
 	api      restapi.InstanaAPI
 	isGlobal bool
 }
 
+// GetID returns the ID from the API data object
 func (r *applicationAlertConfigResourceFrameworkImpl) GetID(data *restapi.ApplicationAlertConfig) string {
 	return data.ID
 }
 
+// SetID sets the ID in the API data object
 func (r *applicationAlertConfigResourceFrameworkImpl) SetID(data *restapi.ApplicationAlertConfig, id string) {
 	data.ID = id
 }
+
+// ============================================================================
+// State to API Mapping
+// ============================================================================
 
 // MapStateToDataObject converts Terraform state to API data object
 func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx context.Context, state tfsdk.State) (*restapi.ApplicationAlertConfig, diag.Diagnostics) {
@@ -575,8 +599,8 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapTagFilter(model *Applic
 	parsedExpression, err := tagfilter.ParseExpression(tagFilterExpression)
 	if err != nil {
 		diags.AddError(
-			"Failed to parse tag filter expression",
-			fmt.Sprintf("Invalid tag filter expression: %s", err.Error()),
+			ErrorMessageFailedToParseTagFilter,
+			fmt.Sprintf(ErrorMessageInvalidTagFilter, err.Error()),
 		)
 		return err
 	}
@@ -584,7 +608,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapTagFilter(model *Applic
 	return nil
 }
 
-// mapAlertChannels converts alert channels from state to API format
+// mapAlertChannels converts alert channels map from state to API format
 func (r *applicationAlertConfigResourceFrameworkImpl) mapAlertChannels(ctx context.Context, model *ApplicationAlertConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) {
 	if model.AlertChannels.IsNull() || model.AlertChannels.IsUnknown() {
 		return
@@ -654,7 +678,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapEndpoints(endpoints []E
 	return result
 }
 
-// mapCustomPayloadFields converts custom payload fields
+// mapCustomPayloadFields converts custom payload fields from state to API format
 func (r *applicationAlertConfigResourceFrameworkImpl) mapCustomPayloadFields(ctx context.Context, model *ApplicationAlertConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
 	if model.CustomPayloadFields.IsNull() || model.CustomPayloadFields.IsUnknown() {
 		return nil
@@ -663,13 +687,13 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapCustomPayloadFields(ctx
 	customerPayloadFields, payloadDiags := shared.MapCustomPayloadFieldsToAPIObject(ctx, model.CustomPayloadFields)
 	if payloadDiags.HasError() {
 		diags.Append(payloadDiags...)
-		return fmt.Errorf("failed to map custom payload fields")
+		return errors.New(ErrorMessageFailedToMapCustomPayload)
 	}
 	result.CustomerPayloadFields = customerPayloadFields
 	return nil
 }
 
-// mapRules converts alert rules with thresholds
+// mapRules converts alert rules with thresholds from state to API format
 func (r *applicationAlertConfigResourceFrameworkImpl) mapRules(model *ApplicationAlertConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
 	if len(model.Rules) == 0 {
 		return nil
@@ -730,11 +754,11 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapRuleConfiguration(index
 	return nil
 }
 
-// mapErrorRateRule maps error rate rule configuration
+// mapErrorRateRule maps error rate rule configuration to API format
 func (r *applicationAlertConfigResourceFrameworkImpl) mapErrorRateRule(index int, errorRate *RuleConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
 	if errorRate.MetricName.IsNull() || errorRate.MetricName.IsUnknown() {
-		diags.AddError("Validation Error", "MetricName is required for error rate rules")
-		return fmt.Errorf("missing metric name")
+		diags.AddError(ErrorMessageValidationError, fmt.Sprintf(ErrorMessageMetricNameRequired, "error rate"))
+		return errors.New(ErrorMessageMissingMetricName)
 	}
 	result.Rules[index].Rule.AlertType = ApplicationAlertConfigFieldRuleErrorRate
 	result.Rules[index].Rule.MetricName = errorRate.MetricName.ValueString()
@@ -742,25 +766,25 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapErrorRateRule(index int
 	return nil
 }
 
-// mapErrorsRule maps errors rule configuration
-func (r *applicationAlertConfigResourceFrameworkImpl) mapErrorsRule(index int, errors *RuleConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
-	if errors.MetricName.IsNull() || errors.MetricName.IsUnknown() {
-		diags.AddError("Validation Error", "MetricName is required for error rules")
-		return fmt.Errorf("missing metric name")
+// mapErrorsRule maps errors rule configuration to API format
+func (r *applicationAlertConfigResourceFrameworkImpl) mapErrorsRule(index int, errorsRule *RuleConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
+	if errorsRule.MetricName.IsNull() || errorsRule.MetricName.IsUnknown() {
+		diags.AddError(ErrorMessageValidationError, fmt.Sprintf(ErrorMessageMetricNameRequired, "error"))
+		return errors.New(ErrorMessageMissingMetricName)
 	}
 	result.Rules[index].Rule.AlertType = ApplicationAlertConfigFieldRuleErrors
-	result.Rules[index].Rule.MetricName = errors.MetricName.ValueString()
-	result.Rules[index].Rule.Aggregation = restapi.Aggregation(errors.Aggregation.ValueString())
+	result.Rules[index].Rule.MetricName = errorsRule.MetricName.ValueString()
+	result.Rules[index].Rule.Aggregation = restapi.Aggregation(errorsRule.Aggregation.ValueString())
 	return nil
 }
 
-// mapLogsRule maps logs rule configuration with additional fields
+// mapLogsRule maps logs rule configuration with additional fields to API format
 func (r *applicationAlertConfigResourceFrameworkImpl) mapLogsRule(index int, logs *LogsRuleModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
 	if logs.MetricName.IsNull() || logs.MetricName.IsUnknown() ||
 		logs.Level.IsNull() || logs.Level.IsUnknown() ||
 		logs.Operator.IsNull() || logs.Operator.IsUnknown() {
-		diags.AddError("Validation Error", "MetricName, log level, and log operator are required for log rules")
-		return fmt.Errorf("missing required fields")
+		diags.AddError(ErrorMessageValidationError, ErrorMessageLogsFieldsRequired)
+		return errors.New(ErrorMessageMissingRequiredFields)
 	}
 
 	result.Rules[index].Rule.AlertType = ApplicationAlertConfigFieldRuleLogs
@@ -779,11 +803,11 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapLogsRule(index int, log
 	return nil
 }
 
-// mapSlownessRule maps slowness rule configuration
+// mapSlownessRule maps slowness rule configuration to API format
 func (r *applicationAlertConfigResourceFrameworkImpl) mapSlownessRule(index int, slowness *RuleConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
 	if slowness.MetricName.IsNull() || slowness.MetricName.IsUnknown() {
-		diags.AddError("Validation Error", "MetricName is required for slowness rules")
-		return fmt.Errorf("missing metric name")
+		diags.AddError(ErrorMessageValidationError, fmt.Sprintf(ErrorMessageMetricNameRequired, "slowness"))
+		return errors.New(ErrorMessageMissingMetricName)
 	}
 	result.Rules[index].Rule.AlertType = ApplicationAlertConfigFieldRuleSlowness
 	result.Rules[index].Rule.MetricName = slowness.MetricName.ValueString()
@@ -791,11 +815,11 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapSlownessRule(index int,
 	return nil
 }
 
-// mapStatusCodeRule maps status code rule configuration with range
+// mapStatusCodeRule maps status code rule configuration with range to API format
 func (r *applicationAlertConfigResourceFrameworkImpl) mapStatusCodeRule(index int, statusCode *StatusCodeRuleModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
 	if statusCode.MetricName.IsNull() || statusCode.MetricName.IsUnknown() {
-		diags.AddError("Validation Error", "MetricName is required for status code rules")
-		return fmt.Errorf("missing metric name")
+		diags.AddError(ErrorMessageValidationError, fmt.Sprintf(ErrorMessageMetricNameRequired, "status code"))
+		return errors.New(ErrorMessageMissingMetricName)
 	}
 
 	result.Rules[index].Rule.AlertType = ApplicationAlertConfigFieldRuleStatusCode
@@ -811,11 +835,11 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapStatusCodeRule(index in
 	return nil
 }
 
-// mapThroughputRule maps throughput rule configuration
+// mapThroughputRule maps throughput rule configuration to API format
 func (r *applicationAlertConfigResourceFrameworkImpl) mapThroughputRule(index int, throughput *RuleConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
 	if throughput.MetricName.IsNull() || throughput.MetricName.IsUnknown() {
-		diags.AddError("Validation Error", "MetricName is required for throughput rules")
-		return fmt.Errorf("missing metric name")
+		diags.AddError(ErrorMessageValidationError, fmt.Sprintf(ErrorMessageMetricNameRequired, "throughput"))
+		return errors.New(ErrorMessageMissingMetricName)
 	}
 	result.Rules[index].Rule.AlertType = ApplicationAlertConfigFieldRuleThroughput
 	result.Rules[index].Rule.MetricName = throughput.MetricName.ValueString()
@@ -823,7 +847,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapThroughputRule(index in
 	return nil
 }
 
-// mapThresholds converts threshold configurations for warning and critical levels
+// mapThresholds converts threshold configurations for warning and critical severity levels
 func (r *applicationAlertConfigResourceFrameworkImpl) mapThresholds(index int, thresholds *ApplicationThresholdModel, result *restapi.ApplicationAlertConfig) {
 	thresholdMap := make(map[restapi.AlertSeverity]restapi.ThresholdRule)
 
@@ -853,9 +877,9 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapThresholdLevel(level *T
 	return nil
 }
 
-// mapStaticThreshold converts static threshold configuration
+// mapStaticThreshold converts static threshold configuration to API format
 func (r *applicationAlertConfigResourceFrameworkImpl) mapStaticThreshold(static *shared.StaticTypeModel) *restapi.ThresholdRule {
-	threshold := &restapi.ThresholdRule{Type: "staticThreshold"}
+	threshold := &restapi.ThresholdRule{Type: ThresholdTypeStatic}
 
 	if !static.Value.IsNull() && !static.Value.IsUnknown() {
 		value := float64(static.Value.ValueInt64())
@@ -865,9 +889,9 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapStaticThreshold(static 
 	return threshold
 }
 
-// mapAdaptiveThreshold converts adaptive baseline threshold configuration
+// mapAdaptiveThreshold converts adaptive baseline threshold configuration to API format
 func (r *applicationAlertConfigResourceFrameworkImpl) mapAdaptiveThreshold(adaptive *shared.AdaptiveBaselineModel) *restapi.ThresholdRule {
-	threshold := &restapi.ThresholdRule{Type: "adaptiveBaseline"}
+	threshold := &restapi.ThresholdRule{Type: ThresholdTypeAdaptiveBaseline}
 
 	if !adaptive.DeviationFactor.IsNull() && !adaptive.DeviationFactor.IsUnknown() {
 		deviation := adaptive.DeviationFactor.ValueFloat32()
@@ -896,19 +920,20 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapTimeThreshold(model *Ap
 	result.TimeThreshold = &restapi.ApplicationAlertTimeThreshold{}
 
 	if model.TimeThreshold.RequestImpact != nil {
-		result.TimeThreshold.Type = "requestImpact"
+		result.TimeThreshold.Type = TimeThresholdTypeRequestImpact
 		result.TimeThreshold.TimeWindow = model.TimeThreshold.RequestImpact.TimeWindow.ValueInt64()
 		result.TimeThreshold.Requests = int(model.TimeThreshold.RequestImpact.Requests.ValueInt64())
 	} else if model.TimeThreshold.ViolationsInPeriod != nil {
-		result.TimeThreshold.Type = "violationsInPeriod"
+		result.TimeThreshold.Type = TimeThresholdTypeViolationsInPeriod
 		result.TimeThreshold.TimeWindow = model.TimeThreshold.ViolationsInPeriod.TimeWindow.ValueInt64()
 		result.TimeThreshold.Violations = int(model.TimeThreshold.ViolationsInPeriod.Violations.ValueInt64())
 	} else if model.TimeThreshold.ViolationsInSequence != nil {
-		result.TimeThreshold.Type = "violationsInSequence"
+		result.TimeThreshold.Type = TimeThresholdTypeViolationsInSequence
 		result.TimeThreshold.TimeWindow = model.TimeThreshold.ViolationsInSequence.TimeWindow.ValueInt64()
 	}
 }
 
+// extractGracePeriod converts types.Int64 to *int64 for API, handling null/unknown values
 func extractGracePeriod(v types.Int64) *int64 {
 	if v.IsNull() || v.IsUnknown() {
 		return nil // send as null (omitted in JSON)
@@ -916,6 +941,10 @@ func extractGracePeriod(v types.Int64) *int64 {
 	val := v.ValueInt64()
 	return &val
 }
+
+// ============================================================================
+// API to State Mapping
+// ============================================================================
 
 // UpdateState converts API data object to Terraform state
 func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
@@ -997,8 +1026,8 @@ func (r *applicationAlertConfigResourceFrameworkImpl) updateTagFilter(model *App
 		normalizedTagFilterString, err := tagfilter.MapTagFilterToNormalizedString(data.TagFilterExpression)
 		if err != nil {
 			diags.AddError(
-				"Tag Filter Normalization Error",
-				fmt.Sprintf("Failed to normalize tag filter expression: %s", err.Error()),
+				ErrorMessageTagFilterNormalizationError,
+				fmt.Sprintf(ErrorMessageFailedToNormalizeTagFilter, err.Error()),
 			)
 			return diags
 		}
@@ -1010,7 +1039,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) updateTagFilter(model *App
 	return diags
 }
 
-// updateAlertChannels handles alert channels mapping
+// updateAlertChannels handles alert channels mapping from API to state
 func (r *applicationAlertConfigResourceFrameworkImpl) updateAlertChannels(ctx context.Context, model *ApplicationAlertConfigModel, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
@@ -1044,7 +1073,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) updateAlertChannels(ctx co
 	return diags
 }
 
-// updateApplications handles application scope mapping
+// updateApplications handles application scope mapping from API to state
 func (r *applicationAlertConfigResourceFrameworkImpl) updateApplications(model *ApplicationAlertConfigModel, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
 	if len(data.Applications) == 0 {
 		model.Applications = []ApplicationModel{}
@@ -1101,7 +1130,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapEndpointsToModel(endpoi
 	return endpointModels
 }
 
-// updateCustomPayloadFields handles custom payload fields mapping
+// updateCustomPayloadFields handles custom payload fields mapping from API to state
 func (r *applicationAlertConfigResourceFrameworkImpl) updateCustomPayloadFields(ctx context.Context, model *ApplicationAlertConfigModel, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
 	customPayloadFieldsList, payloadDiags := shared.CustomPayloadFieldsToTerraform(ctx, data.CustomerPayloadFields)
 	if payloadDiags.HasError() {
@@ -1111,7 +1140,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) updateCustomPayloadFields(
 	return nil
 }
 
-// updateRules handles rules mapping with thresholds
+// updateRules handles rules mapping with thresholds from API to state
 func (r *applicationAlertConfigResourceFrameworkImpl) updateRules(model *ApplicationAlertConfigModel, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
@@ -1218,12 +1247,12 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapThresholdsToModel(thres
 	return thresholdModel
 }
 
-// mapThresholdLevelToModel converts a threshold rule to threshold level model
+// mapThresholdLevelToModel converts a threshold rule from API to threshold level model
 func (r *applicationAlertConfigResourceFrameworkImpl) mapThresholdLevelToModel(threshold *restapi.ThresholdRule) *ThresholdLevelModel {
 	levelModel := &ThresholdLevelModel{}
 
 	switch threshold.Type {
-	case "staticThreshold":
+	case ThresholdTypeStatic:
 		if threshold.Value != nil {
 			levelModel.Static = &shared.StaticTypeModel{
 				Value:    types.Int64Value(int64(*threshold.Value)),
@@ -1231,7 +1260,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapThresholdLevelToModel(t
 			}
 		}
 
-	case "adaptiveBaseline":
+	case ThresholdTypeAdaptiveBaseline:
 		levelModel.AdaptiveBaseline = &shared.AdaptiveBaselineModel{
 			DeviationFactor: util.SetFloat32PointerToState(threshold.DeviationFactor),
 			Adaptability:    util.SetFloat32PointerToState(threshold.Adaptability),
@@ -1242,7 +1271,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapThresholdLevelToModel(t
 	return levelModel
 }
 
-// updateTimeThreshold handles time threshold mapping
+// updateTimeThreshold handles time threshold mapping from API to state
 func (r *applicationAlertConfigResourceFrameworkImpl) updateTimeThreshold(model *ApplicationAlertConfigModel, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
 	if data.TimeThreshold == nil {
 		model.TimeThreshold = nil
@@ -1252,19 +1281,19 @@ func (r *applicationAlertConfigResourceFrameworkImpl) updateTimeThreshold(model 
 	timeThresholdModel := &AppAlertTimeThresholdModel{}
 
 	switch data.TimeThreshold.Type {
-	case "requestImpact":
+	case TimeThresholdTypeRequestImpact:
 		timeThresholdModel.RequestImpact = &AppAlertRequestImpactModel{
 			TimeWindow: types.Int64Value(data.TimeThreshold.TimeWindow),
 			Requests:   types.Int64Value(int64(data.TimeThreshold.Requests)),
 		}
 
-	case "violationsInPeriod":
+	case TimeThresholdTypeViolationsInPeriod:
 		timeThresholdModel.ViolationsInPeriod = &AppAlertViolationsInPeriodModel{
 			TimeWindow: types.Int64Value(data.TimeThreshold.TimeWindow),
 			Violations: types.Int64Value(int64(data.TimeThreshold.Violations)),
 		}
 
-	case "violationsInSequence":
+	case TimeThresholdTypeViolationsInSequence:
 		timeThresholdModel.ViolationsInSequence = &AppAlertViolationsInSequenceModel{
 			TimeWindow: types.Int64Value(data.TimeThreshold.TimeWindow),
 		}
