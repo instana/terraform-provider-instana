@@ -15,11 +15,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Helper function to create pointer
-func ptr[T any](v T) *T {
-	return &v
-}
-
 func TestNewLogAlertConfigResourceHandleFramework(t *testing.T) {
 	resource := NewLogAlertConfigResourceHandleFramework()
 	require.NotNil(t, resource)
@@ -1018,16 +1013,14 @@ func TestMapStateToDataObject_WithNullID(t *testing.T) {
 	assert.Equal(t, "", result.ID)
 }
 
-func TestMapTimeThresholdToState_NilInput(t *testing.T) {
-	ctx := context.Background()
+func TestMapTimeThresholdToModel_NilInput(t *testing.T) {
 	resource := &logAlertConfigResourceFramework{}
 
-	result := resource.mapTimeThresholdToState(ctx, nil)
+	result := resource.mapTimeThresholdToModel(nil)
 	assert.Nil(t, result)
 }
 
-func TestMapTimeThresholdToState_UnsupportedType(t *testing.T) {
-	ctx := context.Background()
+func TestMapTimeThresholdToModel_UnsupportedType(t *testing.T) {
 	resource := &logAlertConfigResourceFramework{}
 
 	timeThreshold := &restapi.LogTimeThreshold{
@@ -1035,12 +1028,11 @@ func TestMapTimeThresholdToState_UnsupportedType(t *testing.T) {
 		TimeWindow: 300000,
 	}
 
-	result := resource.mapTimeThresholdToState(ctx, timeThreshold)
+	result := resource.mapTimeThresholdToModel(timeThreshold)
 	assert.Nil(t, result)
 }
 
-func TestMapTimeThresholdToState_ViolationsInSequence(t *testing.T) {
-	ctx := context.Background()
+func TestMapTimeThresholdToModel_ViolationsInSequence(t *testing.T) {
 	resource := &logAlertConfigResourceFramework{}
 
 	timeThreshold := &restapi.LogTimeThreshold{
@@ -1048,22 +1040,20 @@ func TestMapTimeThresholdToState_ViolationsInSequence(t *testing.T) {
 		TimeWindow: 300000,
 	}
 
-	result := resource.mapTimeThresholdToState(ctx, timeThreshold)
+	result := resource.mapTimeThresholdToModel(timeThreshold)
 	require.NotNil(t, result)
 	require.NotNil(t, result.ViolationsInSequence)
 	assert.Equal(t, int64(300000), result.ViolationsInSequence.TimeWindow.ValueInt64())
 }
 
-func TestMapTimeThresholdFromState_NilInput(t *testing.T) {
-	ctx := context.Background()
+func TestMapModelTimeThresholdToAPI_NilInput(t *testing.T) {
 	resource := &logAlertConfigResourceFramework{}
 
-	result := resource.mapTimeThresholdFromState(ctx, nil)
+	result := resource.mapModelTimeThresholdToAPI(nil)
 	assert.Nil(t, result)
 }
 
-func TestMapTimeThresholdFromState_NullTimeWindow(t *testing.T) {
-	ctx := context.Background()
+func TestMapModelTimeThresholdToAPI_NullTimeWindow(t *testing.T) {
 	resource := &logAlertConfigResourceFramework{}
 
 	timeThreshold := &TimeThresholdModel{
@@ -1072,7 +1062,7 @@ func TestMapTimeThresholdFromState_NullTimeWindow(t *testing.T) {
 		},
 	}
 
-	result := resource.mapTimeThresholdFromState(ctx, timeThreshold)
+	result := resource.mapModelTimeThresholdToAPI(timeThreshold)
 	assert.Nil(t, result)
 }
 
