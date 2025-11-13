@@ -19,6 +19,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
+// ============================================================================
+// Resource Factory
+// ============================================================================
+
 // NewApplicationConfigResourceHandleFramework creates the resource handle for Application Configuration
 func NewApplicationConfigResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.ApplicationConfig] {
 	return &applicationConfigResourceFramework{
@@ -69,21 +73,21 @@ func NewApplicationConfigResourceHandleFramework() resourcehandle.ResourceHandle
 						Description: ApplicationConfigDescAccessRules,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
-								"access_type": schema.StringAttribute{
+								ApplicationConfigFieldAccessType: schema.StringAttribute{
 									Required:    true,
 									Description: ApplicationConfigDescAccessType,
 									Validators: []validator.String{
 										stringvalidator.OneOf(restapi.SupportedAccessTypes.ToStringSlice()...),
 									},
 								},
-								"related_id": schema.StringAttribute{
+								ApplicationConfigFieldRelatedID: schema.StringAttribute{
 									Optional:    true,
 									Description: ApplicationConfigDescRelatedID,
 									Validators: []validator.String{
 										stringvalidator.LengthBetween(0, 64),
 									},
 								},
-								"relation_type": schema.StringAttribute{
+								ApplicationConfigFieldRelationType: schema.StringAttribute{
 									Required:    true,
 									Description: ApplicationConfigDescRelationType,
 									Validators: []validator.String{
@@ -100,22 +104,34 @@ func NewApplicationConfigResourceHandleFramework() resourcehandle.ResourceHandle
 	}
 }
 
+// ============================================================================
+// Resource Implementation
+// ============================================================================
+
 type applicationConfigResourceFramework struct {
 	metaData resourcehandle.ResourceMetaDataFramework
 }
 
+// MetaData returns the resource metadata
 func (r *applicationConfigResourceFramework) MetaData() *resourcehandle.ResourceMetaDataFramework {
 	return &r.metaData
 }
 
+// GetRestResource returns the REST resource for application configs
 func (r *applicationConfigResourceFramework) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.ApplicationConfig] {
 	return api.ApplicationConfigs()
 }
 
+// SetComputedFields sets computed fields in the plan (none for this resource)
 func (r *applicationConfigResourceFramework) SetComputedFields(_ context.Context, _ *tfsdk.Plan) diag.Diagnostics {
 	return nil
 }
 
+// ============================================================================
+// API to State Mapping
+// ============================================================================
+
+// UpdateState converts API data object to Terraform state
 func (r *applicationConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, config *restapi.ApplicationConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
@@ -127,21 +143,9 @@ func (r *applicationConfigResourceFramework) UpdateState(ctx context.Context, st
 		BoundaryScope: types.StringValue(string(config.BoundaryScope)),
 	}
 
-	// Set tag filter
-	if config.TagFilterExpression != nil {
-		normalizedTagFilterString, err := tagfilter.MapTagFilterToNormalizedString(config.TagFilterExpression)
-		if err != nil {
-			return diag.Diagnostics{
-				diag.NewErrorDiagnostic(
-					ApplicationConfigErrConvertingTagFilter,
-					fmt.Sprintf("Failed to convert tag filter: %s", err),
-				),
-			}
-		}
-		model.TagFilter = util.SetStringPointerToState(normalizedTagFilterString)
-
-	} else {
-		model.TagFilter = types.StringNull()
+	// Map tag filter with error handling
+	if err := r.mapTagFilterToState(config, &model); err != nil {
+		return err
 	}
 
 	// Map access rules
@@ -152,6 +156,26 @@ func (r *applicationConfigResourceFramework) UpdateState(ctx context.Context, st
 	return diags
 }
 
+// mapTagFilterToState handles tag filter normalization and mapping to state
+func (r *applicationConfigResourceFramework) mapTagFilterToState(config *restapi.ApplicationConfig, model *ApplicationConfigModel) diag.Diagnostics {
+	if config.TagFilterExpression != nil {
+		normalizedTagFilterString, err := tagfilter.MapTagFilterToNormalizedString(config.TagFilterExpression)
+		if err != nil {
+			return diag.Diagnostics{
+				diag.NewErrorDiagnostic(
+					ApplicationConfigErrConvertingTagFilter,
+					fmt.Sprintf(ApplicationConfigErrFailedToConvert, err),
+				),
+			}
+		}
+		model.TagFilter = util.SetStringPointerToState(normalizedTagFilterString)
+	} else {
+		model.TagFilter = types.StringNull()
+	}
+	return nil
+}
+
+// mapAccessRulesToState converts access rules from API to state format
 func (r *applicationConfigResourceFramework) mapAccessRulesToState(accessRules []restapi.AccessRule) []AccessRuleModel {
 	// If there are no access rules, return an empty slice
 	if len(accessRules) == 0 {
@@ -171,6 +195,11 @@ func (r *applicationConfigResourceFramework) mapAccessRulesToState(accessRules [
 	return models
 }
 
+// ============================================================================
+// State to API Mapping
+// ============================================================================
+
+// MapStateToDataObject converts Terraform state to API data object
 func (r *applicationConfigResourceFramework) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.ApplicationConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var model ApplicationConfigModel
@@ -186,28 +215,14 @@ func (r *applicationConfigResourceFramework) MapStateToDataObject(ctx context.Co
 		return nil, diags
 	}
 
-	// Map ID
-	id := ""
-	if !model.ID.IsNull() {
-		id = model.ID.ValueString()
-	}
+	// Extract ID
+	id := r.extractID(&model)
 
-	// Map tag filter
-	var tagFilter *restapi.TagFilter
-	if !model.TagFilter.IsNull() {
-		tagFilterStr := model.TagFilter.ValueString()
-		parser := tagfilter.NewParser()
-		expr, err := parser.Parse(tagFilterStr)
-		if err != nil {
-			diags.AddError(
-				ApplicationConfigErrParsingTagFilter,
-				fmt.Sprintf("Failed to parse tag filter: %s", err),
-			)
-			return nil, diags
-		}
-
-		mapper := tagfilter.NewMapper()
-		tagFilter = mapper.ToAPIModel(expr)
+	// Parse and map tag filter
+	tagFilter, tagDiags := r.mapTagFilterFromState(&model)
+	if tagDiags.HasError() {
+		diags.Append(tagDiags...)
+		return nil, diags
 	}
 
 	// Map access rules
@@ -223,6 +238,38 @@ func (r *applicationConfigResourceFramework) MapStateToDataObject(ctx context.Co
 	}, diags
 }
 
+// extractID extracts the ID from the model, returning empty string if null
+func (r *applicationConfigResourceFramework) extractID(model *ApplicationConfigModel) string {
+	if !model.ID.IsNull() {
+		return model.ID.ValueString()
+	}
+	return ""
+}
+
+// mapTagFilterFromState parses and converts tag filter from state to API format
+func (r *applicationConfigResourceFramework) mapTagFilterFromState(model *ApplicationConfigModel) (*restapi.TagFilter, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if model.TagFilter.IsNull() {
+		return nil, diags
+	}
+
+	tagFilterStr := model.TagFilter.ValueString()
+	parser := tagfilter.NewParser()
+	expr, err := parser.Parse(tagFilterStr)
+	if err != nil {
+		diags.AddError(
+			ApplicationConfigErrParsingTagFilter,
+			fmt.Sprintf(ApplicationConfigErrFailedToParse, err),
+		)
+		return nil, diags
+	}
+
+	mapper := tagfilter.NewMapper()
+	return mapper.ToAPIModel(expr), diags
+}
+
+// mapAccessRulesFromState converts access rules from state to API format
 func (r *applicationConfigResourceFramework) mapAccessRulesFromState(accessRulesModels []AccessRuleModel) []restapi.AccessRule {
 	// If there are no access rules, return an empty slice
 	if len(accessRulesModels) == 0 {
