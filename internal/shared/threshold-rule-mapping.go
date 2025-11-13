@@ -37,21 +37,18 @@ const (
 	LogAlertConfigFieldCritical       = "critical"
 
 	// Constants for threshold field names related to historic baseline
-
 	ThresholdFieldHistoricBaseline            = "historic_baseline"
 	ThresholdFieldHistoricBaselineBaseline    = "baseline"
 	ThresholdFieldHistoricBaselineDeviation   = "deviation_factor"
 	ThresholdFieldHistoricBaselineSeasonality = "seasonality"
 
 	// Constants for threshold field names related to adaptive baseline
-
 	ThresholdFieldAdaptiveBaseline             = "adaptive_baseline"
 	ThresholdFieldAdaptiveBaselineDeviation    = "deviation_factor"
 	ThresholdFieldAdaptiveBaselineAdaptability = "adaptability"
 	ThresholdFieldAdaptiveBaselineSeasonality  = "seasonality"
 
 	// Constants for threshold field names
-
 	ThresholdFieldWarning  = "warning"
 	ThresholdFieldCritical = "critical"
 	ThresholdFieldStatic   = "static"
@@ -212,6 +209,7 @@ func AllThresholdAttributeSchema() schema.SingleNestedAttribute {
 	}
 }
 
+// used for static and adaptive types
 func MapThresholdsPluginFromState(ctx context.Context, thresholdStruct *ThresholdPluginModel) (map[restapi.AlertSeverity]restapi.ThresholdRule, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	thresholdMap := make(map[restapi.AlertSeverity]restapi.ThresholdRule)
@@ -319,6 +317,7 @@ func MapThresholdsAllPluginFromState(ctx context.Context, thresholdStruct *Thres
 	return thresholdMap, diags
 }
 
+// used for static, adaptive and historic baseline types
 // MapThresholdRulePluginFromState maps a threshold rule from Terraform state to API model - used for new plugin model using nestedAttribute
 func MapThresholdRuleAllPluginFromState(ctx context.Context, thresholdObj *ThresholdAllTypeModel) (*restapi.ThresholdRule, diag.Diagnostics) {
 	var diags diag.Diagnostics

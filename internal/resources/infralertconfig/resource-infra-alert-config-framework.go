@@ -24,129 +24,153 @@ import (
 func NewInfraAlertConfigResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.InfraAlertConfig] {
 	return &infraAlertConfigResourceFramework{
 		metaData: resourcehandle.ResourceMetaDataFramework{
-			ResourceName: ResourceInstanaInfraAlertConfigFramework,
-			Schema: schema.Schema{
-				Description: InfraAlertConfigDescResource,
-				Attributes: map[string]schema.Attribute{
-					"id": schema.StringAttribute{
-						Description: InfraAlertConfigDescID,
-						Computed:    true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
-					},
-					"name": schema.StringAttribute{
-						Description: InfraAlertConfigDescName,
-						Required:    true,
-					},
-					"description": schema.StringAttribute{
-						Description: InfraAlertConfigDescDescription,
-						Optional:    true,
-					},
-					"tag_filter": schema.StringAttribute{
-						Description: InfraAlertConfigDescTagFilter,
-						Optional:    true,
-					},
-					"group_by": schema.ListAttribute{
-						Description: InfraAlertConfigDescGroupBy,
-						Optional:    true,
-						ElementType: types.StringType,
-					},
-					"granularity": schema.Int64Attribute{
-						Description: InfraAlertConfigDescGranularity,
-						Required:    true,
-					},
+			ResourceName:  ResourceInstanaInfraAlertConfigFramework,
+			Schema:        buildInfraAlertConfigSchema(),
+			SchemaVersion: 0,
+		},
+	}
+}
 
-					"evaluation_type": schema.StringAttribute{
-						Description: InfraAlertConfigDescEvaluationType,
+// buildInfraAlertConfigSchema constructs the Terraform schema for the infrastructure alert config resource
+func buildInfraAlertConfigSchema() schema.Schema {
+	return schema.Schema{
+		Description: InfraAlertConfigDescResource,
+		Attributes: map[string]schema.Attribute{
+			InfraAlertConfigFieldID: schema.StringAttribute{
+				Description: InfraAlertConfigDescID,
+				Computed:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			InfraAlertConfigFieldName: schema.StringAttribute{
+				Description: InfraAlertConfigDescName,
+				Required:    true,
+			},
+			InfraAlertConfigFieldDescription: schema.StringAttribute{
+				Description: InfraAlertConfigDescDescription,
+				Optional:    true,
+			},
+			InfraAlertConfigFieldTagFilter: schema.StringAttribute{
+				Description: InfraAlertConfigDescTagFilter,
+				Optional:    true,
+			},
+			InfraAlertConfigFieldGroupBy: schema.ListAttribute{
+				Description: InfraAlertConfigDescGroupBy,
+				Optional:    true,
+				ElementType: types.StringType,
+			},
+			InfraAlertConfigFieldGranularity: schema.Int64Attribute{
+				Description: InfraAlertConfigDescGranularity,
+				Required:    true,
+			},
+			InfraAlertConfigFieldEvaluationType: schema.StringAttribute{
+				Description: InfraAlertConfigDescEvaluationType,
+				Required:    true,
+			},
+			InfraAlertConfigFieldCustomPayloadField: shared.GetCustomPayloadFieldsSchema(),
+			InfraAlertConfigFieldRules:              buildRulesSchema(),
+			InfraAlertConfigFieldAlertChannels:      buildAlertChannelsSchema(),
+			InfraAlertConfigFieldTimeThreshold:      buildTimeThresholdSchema(),
+		},
+	}
+}
+
+// buildRulesSchema constructs the schema for rules configuration
+func buildRulesSchema() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Description: InfraAlertConfigDescRules,
+		Optional:    true,
+		Attributes: map[string]schema.Attribute{
+			InfraAlertConfigFieldGenericRule: buildGenericRuleSchema(),
+		},
+	}
+}
+
+// buildGenericRuleSchema constructs the schema for generic rule configuration
+func buildGenericRuleSchema() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Description: InfraAlertConfigDescGenericRule,
+		Optional:    true,
+		Attributes: map[string]schema.Attribute{
+			InfraAlertConfigFieldMetricName: schema.StringAttribute{
+				Description: InfraAlertConfigDescMetricName,
+				Required:    true,
+			},
+			InfraAlertConfigFieldEntityType: schema.StringAttribute{
+				Description: InfraAlertConfigDescEntityType,
+				Required:    true,
+			},
+			InfraAlertConfigFieldAggregation: schema.StringAttribute{
+				Description: InfraAlertConfigDescAggregation,
+				Required:    true,
+			},
+			InfraAlertConfigFieldCrossSeriesAggregation: schema.StringAttribute{
+				Description: InfraAlertConfigDescCrossSeriesAggregation,
+				Required:    true,
+			},
+			InfraAlertConfigFieldRegex: schema.BoolAttribute{
+				Description: InfraAlertConfigDescRegex,
+				Required:    true,
+			},
+			InfraAlertConfigFieldThresholdOperator: schema.StringAttribute{
+				Description: InfraAlertConfigDescThresholdOperator,
+				Required:    true,
+			},
+			InfraAlertConfigFieldThreshold: schema.SingleNestedAttribute{
+				Description: InfraAlertConfigDescThreshold,
+				Optional:    true,
+				Attributes: map[string]schema.Attribute{
+					ResourceFieldThresholdRuleWarningSeverity:  shared.StaticAndAdaptiveThresholdAttributeSchema(),
+					ResourceFieldThresholdRuleCriticalSeverity: shared.StaticAndAdaptiveThresholdAttributeSchema(),
+				},
+			},
+		},
+	}
+}
+
+// buildAlertChannelsSchema constructs the schema for alert channels configuration
+func buildAlertChannelsSchema() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Description: InfraAlertConfigDescAlertChannels,
+		Optional:    true,
+		Attributes: map[string]schema.Attribute{
+			ResourceFieldThresholdRuleWarningSeverity: schema.ListAttribute{
+				Optional:    true,
+				Description: InfraAlertConfigDescAlertChannelIDs,
+				ElementType: types.StringType,
+				Validators: []validator.List{
+					listvalidator.SizeAtLeast(1),
+				},
+			},
+			ResourceFieldThresholdRuleCriticalSeverity: schema.ListAttribute{
+				Optional:    true,
+				Description: InfraAlertConfigDescAlertChannelIDs,
+				ElementType: types.StringType,
+				Validators: []validator.List{
+					listvalidator.SizeAtLeast(1),
+				},
+			},
+		},
+	}
+}
+
+// buildTimeThresholdSchema constructs the schema for time threshold configuration
+func buildTimeThresholdSchema() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Description: InfraAlertConfigDescTimeThreshold,
+		Optional:    true,
+		Attributes: map[string]schema.Attribute{
+			InfraAlertConfigFieldTimeThresholdViolationsInSequence: schema.SingleNestedAttribute{
+				Description: InfraAlertConfigDescViolationsInSequence,
+				Optional:    true,
+				Attributes: map[string]schema.Attribute{
+					InfraAlertConfigFieldTimeThresholdTimeWindow: schema.Int64Attribute{
 						Required:    true,
-					},
-					"custom_payload_field": shared.GetCustomPayloadFieldsSchema(),
-					"rules": schema.SingleNestedAttribute{
-						Description: InfraAlertConfigDescRules,
-						Optional:    true,
-						Attributes: map[string]schema.Attribute{
-							"generic_rule": schema.SingleNestedAttribute{
-								Description: InfraAlertConfigDescGenericRule,
-								Optional:    true,
-								Attributes: map[string]schema.Attribute{
-									"metric_name": schema.StringAttribute{
-										Description: InfraAlertConfigDescMetricName,
-										Required:    true,
-									},
-									"entity_type": schema.StringAttribute{
-										Description: InfraAlertConfigDescEntityType,
-										Required:    true,
-									},
-									"aggregation": schema.StringAttribute{
-										Description: InfraAlertConfigDescAggregation,
-										Required:    true,
-									},
-									"cross_series_aggregation": schema.StringAttribute{
-										Description: InfraAlertConfigDescCrossSeriesAggregation,
-										Required:    true,
-									},
-									"regex": schema.BoolAttribute{
-										Description: InfraAlertConfigDescRegex,
-										Required:    true,
-									},
-									"threshold_operator": schema.StringAttribute{
-										Description: InfraAlertConfigDescThresholdOperator,
-										Required:    true,
-									},
-									"threshold": schema.SingleNestedAttribute{
-										Description: InfraAlertConfigDescThreshold,
-										Optional:    true,
-										Attributes: map[string]schema.Attribute{
-											"warning":  shared.StaticAndAdaptiveThresholdAttributeSchema(),
-											"critical": shared.StaticAndAdaptiveThresholdAttributeSchema(),
-										},
-									},
-								},
-							},
-						},
-					},
-					"alert_channels": schema.SingleNestedAttribute{
-						Description: InfraAlertConfigDescAlertChannels,
-						Optional:    true,
-						Attributes: map[string]schema.Attribute{
-							ResourceFieldThresholdRuleWarningSeverity: schema.ListAttribute{
-								Optional:    true,
-								Description: InfraAlertConfigDescAlertChannelIDs,
-								ElementType: types.StringType,
-								Validators: []validator.List{
-									listvalidator.SizeAtLeast(1),
-								},
-							},
-							ResourceFieldThresholdRuleCriticalSeverity: schema.ListAttribute{
-								Optional:    true,
-								Description: InfraAlertConfigDescAlertChannelIDs,
-								ElementType: types.StringType,
-								Validators: []validator.List{
-									listvalidator.SizeAtLeast(1),
-								},
-							},
-						},
-					},
-					"time_threshold": schema.SingleNestedAttribute{
-						Description: InfraAlertConfigDescTimeThreshold,
-						Optional:    true,
-						Attributes: map[string]schema.Attribute{
-							"violations_in_sequence": schema.SingleNestedAttribute{
-								Description: InfraAlertConfigDescViolationsInSequence,
-								Optional:    true,
-								Attributes: map[string]schema.Attribute{
-									"time_window": schema.Int64Attribute{
-										Required:    true,
-										Description: InfraAlertConfigDescTimeWindow,
-									},
-								},
-							},
-						},
+						Description: InfraAlertConfigDescTimeWindow,
 					},
 				},
 			},
-			SchemaVersion: 0,
 		},
 	}
 }
@@ -163,12 +187,28 @@ func (r *infraAlertConfigResourceFramework) GetRestResource(api restapi.InstanaA
 	return api.InfraAlertConfig()
 }
 
-func (r *infraAlertConfigResourceFramework) SetComputedFields(ctx context.Context, plan *tfsdk.Plan) diag.Diagnostics {
+func (r *infraAlertConfigResourceFramework) SetComputedFields(_ context.Context, _ *tfsdk.Plan) diag.Diagnostics {
 	return nil
 }
 
-func (r *infraAlertConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, resource *restapi.InfraAlertConfig) diag.Diagnostics {
+// UpdateState updates the Terraform state with data from the API response
+func (r *infraAlertConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, _ *tfsdk.Plan, resource *restapi.InfraAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
+
+	model, modelDiags := r.buildInfraAlertConfigModelFromAPIResponse(ctx, resource)
+	diags.Append(modelDiags...)
+	if diags.HasError() {
+		return diags
+	}
+
+	diags.Append(state.Set(ctx, model)...)
+	return diags
+}
+
+// buildInfraAlertConfigModelFromAPIResponse constructs an InfraAlertConfigModel from the API response
+func (r *infraAlertConfigResourceFramework) buildInfraAlertConfigModelFromAPIResponse(ctx context.Context, resource *restapi.InfraAlertConfig) (InfraAlertConfigModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
 	model := InfraAlertConfigModel{
 		ID:             types.StringValue(resource.ID),
 		Name:           types.StringValue(resource.Name),
@@ -177,305 +217,391 @@ func (r *infraAlertConfigResourceFramework) UpdateState(ctx context.Context, sta
 		EvaluationType: types.StringValue(string(resource.EvaluationType)),
 	}
 
-	// Map tag filter expression if present
-	if resource.TagFilterExpression != nil {
-		tagFilterString, err := tagfilter.MapTagFilterToNormalizedString(resource.TagFilterExpression)
-		if err != nil {
-			diags.AddError(
-				InfraAlertConfigErrMappingTagFilter,
-				fmt.Sprintf(InfraAlertConfigErrMappingTagFilterMsg, err),
-			)
-			return diags
-		}
-		model.TagFilter = util.SetStringPointerToState(tagFilterString)
+	tagFilter, tagFilterDiags := r.mapTagFilterToModel(resource.TagFilterExpression)
+	diags.Append(tagFilterDiags...)
+	model.TagFilter = tagFilter
 
-	} else {
-		model.TagFilter = types.StringNull()
-	}
+	model.GroupBy = r.mapGroupByToModel(resource.GroupBy)
 
-	// Map group by if present
-	if len(resource.GroupBy) > 0 {
-		groupByElements := make([]attr.Value, len(resource.GroupBy))
-		for i, groupBy := range resource.GroupBy {
-			groupByElements[i] = types.StringValue(groupBy)
-		}
-		model.GroupBy = types.ListValueMust(types.StringType, groupByElements)
-	} else {
-		model.GroupBy = types.ListNull(types.StringType)
-	}
+	alertChannels, alertChannelsDiags := r.mapAlertChannelsToModel(ctx, resource.AlertChannels)
+	diags.Append(alertChannelsDiags...)
+	model.AlertChannels = alertChannels
 
-	// Map alert channels if present
-	if len(resource.AlertChannels) > 0 {
-		alertChannelsModel := &InfraAlertChannelsModel{}
+	model.TimeThreshold = r.mapTimeThresholdToModel(resource.TimeThreshold)
 
-		// Map warning severity
-		if warningChannels, ok := resource.AlertChannels[restapi.WarningSeverity]; ok && len(warningChannels) > 0 {
-			warningList, warningDiags := types.ListValueFrom(ctx, types.StringType, warningChannels)
-			diags.Append(warningDiags...)
-			if diags.HasError() {
-				return diags
-			}
-			alertChannelsModel.Warning = warningList
-		} else {
-			alertChannelsModel.Warning = types.ListNull(types.StringType)
-		}
+	customPayloadFields, payloadDiags := shared.CustomPayloadFieldsToTerraform(ctx, resource.CustomerPayloadFields)
+	diags.Append(payloadDiags...)
+	model.CustomPayloadField = customPayloadFields
 
-		// Map critical severity
-		if criticalChannels, ok := resource.AlertChannels[restapi.CriticalSeverity]; ok && len(criticalChannels) > 0 {
-			criticalList, criticalDiags := types.ListValueFrom(ctx, types.StringType, criticalChannels)
-			diags.Append(criticalDiags...)
-			if diags.HasError() {
-				return diags
-			}
-			alertChannelsModel.Critical = criticalList
-		} else {
-			alertChannelsModel.Critical = types.ListNull(types.StringType)
-		}
+	rules, rulesDiags := r.mapRulesToModel(ctx, resource.Rules)
+	diags.Append(rulesDiags...)
+	model.Rules = rules
 
-		model.AlertChannels = alertChannelsModel
-	} else {
-		model.AlertChannels = nil
-	}
-
-	// Map time threshold if present
-
-	model.TimeThreshold = r.mapTimeThresholdToState(ctx, resource.TimeThreshold)
-
-	// Map custom payload fields if present
-	customPayloadFieldsList, payloadDiags := shared.CustomPayloadFieldsToTerraform(ctx, resource.CustomerPayloadFields)
-	if payloadDiags.HasError() {
-		diags.Append(payloadDiags...)
-		return diags
-	}
-	model.CustomPayloadField = customPayloadFieldsList
-
-	// Map rules if present
-	if len(resource.Rules) > 0 {
-		// Create threshold rule model using ThresholdPluginModel
-		thresholdRuleModel := &shared.ThresholdPluginModel{}
-
-		// Map warning threshold
-		warningThreshold, isWarningThresholdPresent := resource.Rules[0].Thresholds[restapi.WarningSeverity]
-		if isWarningThresholdPresent {
-			thresholdRuleModel.Warning = shared.MapThresholdPluginToState(ctx, &warningThreshold, isWarningThresholdPresent)
-		}
-
-		// Map critical threshold
-		criticalThreshold, isCriticalThresholdPresent := resource.Rules[0].Thresholds[restapi.CriticalSeverity]
-		if isCriticalThresholdPresent {
-			thresholdRuleModel.Critical = shared.MapThresholdPluginToState(ctx, &criticalThreshold, isCriticalThresholdPresent)
-		}
-
-		// Create generic rule model
-		genericRuleModel := &InfraGenericRuleModel{
-			MetricName:             types.StringValue(resource.Rules[0].Rule.MetricName),
-			EntityType:             types.StringValue(resource.Rules[0].Rule.EntityType),
-			Aggregation:            types.StringValue(string(resource.Rules[0].Rule.Aggregation)),
-			CrossSeriesAggregation: types.StringValue(string(resource.Rules[0].Rule.CrossSeriesAggregation)),
-			Regex:                  types.BoolValue(resource.Rules[0].Rule.Regex),
-			ThresholdOperator:      types.StringValue(string(resource.Rules[0].ThresholdOperator)),
-			ThresholdRule:          thresholdRuleModel,
-		}
-
-		// Create rules model
-		rulesModel := &InfraRulesModel{
-			GenericRule: genericRuleModel,
-		}
-
-		model.Rules = rulesModel
-	} else {
-		model.Rules = nil
-	}
-
-	// Set the state
-	diags.Append(state.Set(ctx, model)...)
-	return diags
+	return model, diags
 }
 
+// mapTagFilterToModel converts API tag filter to model representation
+func (r *infraAlertConfigResourceFramework) mapTagFilterToModel(tagFilterExpression *restapi.TagFilter) (types.String, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if tagFilterExpression == nil {
+		return types.StringNull(), diags
+	}
+
+	tagFilterString, err := tagfilter.MapTagFilterToNormalizedString(tagFilterExpression)
+	if err != nil {
+		diags.AddError(
+			InfraAlertConfigErrMappingTagFilter,
+			fmt.Sprintf(InfraAlertConfigErrMappingTagFilterMsg, err),
+		)
+		return types.StringNull(), diags
+	}
+
+	return util.SetStringPointerToState(tagFilterString), diags
+}
+
+// mapGroupByToModel converts API group by slice to model representation
+func (r *infraAlertConfigResourceFramework) mapGroupByToModel(groupBy []string) types.List {
+	if len(groupBy) == 0 {
+		return types.ListNull(types.StringType)
+	}
+
+	groupByElements := make([]attr.Value, len(groupBy))
+	for i, groupByValue := range groupBy {
+		groupByElements[i] = types.StringValue(groupByValue)
+	}
+	return types.ListValueMust(types.StringType, groupByElements)
+}
+
+// mapAlertChannelsToModel converts API alert channels to model representation
+func (r *infraAlertConfigResourceFramework) mapAlertChannelsToModel(ctx context.Context, alertChannels map[restapi.AlertSeverity][]string) (*InfraAlertChannelsModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if len(alertChannels) == 0 {
+		return nil, diags
+	}
+
+	alertChannelsModel := &InfraAlertChannelsModel{}
+
+	warningChannels, warningDiags := r.mapSeverityChannelsToModel(ctx, alertChannels, restapi.WarningSeverity)
+	diags.Append(warningDiags...)
+	alertChannelsModel.Warning = warningChannels
+
+	criticalChannels, criticalDiags := r.mapSeverityChannelsToModel(ctx, alertChannels, restapi.CriticalSeverity)
+	diags.Append(criticalDiags...)
+	alertChannelsModel.Critical = criticalChannels
+
+	return alertChannelsModel, diags
+}
+
+// mapSeverityChannelsToModel converts alert channels for a specific severity to model representation
+func (r *infraAlertConfigResourceFramework) mapSeverityChannelsToModel(ctx context.Context, alertChannels map[restapi.AlertSeverity][]string, severity restapi.AlertSeverity) (types.List, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	channels, exists := alertChannels[severity]
+	if !exists || len(channels) == 0 {
+		return types.ListNull(types.StringType), diags
+	}
+
+	channelList, listDiags := types.ListValueFrom(ctx, types.StringType, channels)
+	diags.Append(listDiags...)
+	return channelList, diags
+}
+
+// mapTimeThresholdToModel converts API time threshold to model representation
+func (r *infraAlertConfigResourceFramework) mapTimeThresholdToModel(apiTimeThreshold *restapi.InfraTimeThreshold) *InfraTimeThresholdModel {
+	if apiTimeThreshold == nil {
+		return nil
+	}
+
+	if apiTimeThreshold.Type != TimeThresholdTypeViolationsInSequence {
+		return nil
+	}
+
+	return &InfraTimeThresholdModel{
+		ViolationsInSequence: &InfraViolationsInSequenceModel{
+			TimeWindow: types.Int64Value(apiTimeThreshold.TimeWindow),
+		},
+	}
+}
+
+// mapRulesToModel converts API rules to model representation
+func (r *infraAlertConfigResourceFramework) mapRulesToModel(ctx context.Context, rules []restapi.RuleWithThreshold[restapi.InfraAlertRule]) (*InfraRulesModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if len(rules) == 0 {
+		return nil, diags
+	}
+
+	firstRule := rules[0]
+	thresholdRuleModel := r.mapThresholdsToModel(ctx, firstRule.Thresholds)
+
+	genericRuleModel := &InfraGenericRuleModel{
+		MetricName:             types.StringValue(firstRule.Rule.MetricName),
+		EntityType:             types.StringValue(firstRule.Rule.EntityType),
+		Aggregation:            types.StringValue(string(firstRule.Rule.Aggregation)),
+		CrossSeriesAggregation: types.StringValue(string(firstRule.Rule.CrossSeriesAggregation)),
+		Regex:                  types.BoolValue(firstRule.Rule.Regex),
+		ThresholdOperator:      types.StringValue(string(firstRule.ThresholdOperator)),
+		ThresholdRule:          thresholdRuleModel,
+	}
+
+	return &InfraRulesModel{
+		GenericRule: genericRuleModel,
+	}, diags
+}
+
+// mapThresholdsToModel converts API thresholds to model representation
+func (r *infraAlertConfigResourceFramework) mapThresholdsToModel(ctx context.Context, thresholds map[restapi.AlertSeverity]restapi.ThresholdRule) *shared.ThresholdPluginModel {
+	thresholdRuleModel := &shared.ThresholdPluginModel{}
+
+	if warningThreshold, hasWarning := thresholds[restapi.WarningSeverity]; hasWarning {
+		thresholdRuleModel.Warning = shared.MapThresholdPluginToState(ctx, &warningThreshold, true)
+	}
+
+	if criticalThreshold, hasCritical := thresholds[restapi.CriticalSeverity]; hasCritical {
+		thresholdRuleModel.Critical = shared.MapThresholdPluginToState(ctx, &criticalThreshold, true)
+	}
+
+	return thresholdRuleModel
+}
+
+// MapStateToDataObject maps Terraform state/plan to API InfraAlertConfig object
 func (r *infraAlertConfigResourceFramework) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.InfraAlertConfig, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	model, modelDiags := r.extractModelFromPlanOrState(ctx, plan, state)
+	diags.Append(modelDiags...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	infraAlertConfig := &restapi.InfraAlertConfig{
+		ID:             r.extractConfigID(model),
+		Name:           model.Name.ValueString(),
+		Description:    model.Description.ValueString(),
+		Granularity:    restapi.Granularity(model.Granularity.ValueInt64()),
+		EvaluationType: restapi.InfraAlertEvaluationType(model.EvaluationType.ValueString()),
+	}
+
+	tagFilter, tagFilterDiags := r.mapModelTagFilterToAPI(model.TagFilter)
+	diags.Append(tagFilterDiags...)
+	infraAlertConfig.TagFilterExpression = tagFilter
+
+	groupBy, groupByDiags := r.mapModelGroupByToAPI(ctx, model.GroupBy)
+	diags.Append(groupByDiags...)
+	infraAlertConfig.GroupBy = groupBy
+
+	alertChannels, alertChannelsDiags := r.mapModelAlertChannelsToAPI(ctx, model.AlertChannels)
+	diags.Append(alertChannelsDiags...)
+	infraAlertConfig.AlertChannels = alertChannels
+
+	infraAlertConfig.TimeThreshold = r.mapModelTimeThresholdToAPI(model.TimeThreshold)
+
+	customPayloadFields, payloadDiags := r.mapModelCustomPayloadFieldsToAPI(ctx, model.CustomPayloadField)
+	diags.Append(payloadDiags...)
+	infraAlertConfig.CustomerPayloadFields = customPayloadFields
+
+	rules, rulesDiags := r.mapModelRulesToAPI(ctx, model.Rules)
+	diags.Append(rulesDiags...)
+	infraAlertConfig.Rules = rules
+
+	return infraAlertConfig, diags
+}
+
+// extractModelFromPlanOrState retrieves the InfraAlertConfigModel from plan or state
+func (r *infraAlertConfigResourceFramework) extractModelFromPlanOrState(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (InfraAlertConfigModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var model InfraAlertConfigModel
 
-	// Get current state from plan or state
 	if plan != nil {
 		diags.Append(plan.Get(ctx, &model)...)
 	} else if state != nil {
 		diags.Append(state.Get(ctx, &model)...)
 	}
 
+	return model, diags
+}
+
+// extractConfigID extracts the configuration ID from the model
+func (r *infraAlertConfigResourceFramework) extractConfigID(model InfraAlertConfigModel) string {
+	if model.ID.IsNull() {
+		return EmptyString
+	}
+	return model.ID.ValueString()
+}
+
+// mapModelTagFilterToAPI converts model tag filter to API representation
+func (r *infraAlertConfigResourceFramework) mapModelTagFilterToAPI(tagFilter types.String) (*restapi.TagFilter, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if tagFilter.IsNull() || tagFilter.ValueString() == EmptyString {
+		return nil, diags
+	}
+
+	tagFilterStr := tagFilter.ValueString()
+	parser := tagfilter.NewParser()
+	expr, err := parser.Parse(tagFilterStr)
+	if err != nil {
+		diags.AddError(
+			InfraAlertConfigErrParsingTagFilter,
+			fmt.Sprintf(InfraAlertConfigErrParsingTagFilterMsg, err),
+		)
+		return nil, diags
+	}
+
+	mapper := tagfilter.NewMapper()
+	return mapper.ToAPIModel(expr), diags
+}
+
+// mapModelGroupByToAPI converts model group by to API representation
+func (r *infraAlertConfigResourceFramework) mapModelGroupByToAPI(ctx context.Context, groupBy types.List) ([]string, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if groupBy.IsNull() || groupBy.IsUnknown() {
+		return nil, diags
+	}
+
+	var groupBySlice []string
+	diags.Append(groupBy.ElementsAs(ctx, &groupBySlice, false)...)
+	return groupBySlice, diags
+}
+
+// mapModelAlertChannelsToAPI converts model alert channels to API representation
+func (r *infraAlertConfigResourceFramework) mapModelAlertChannelsToAPI(ctx context.Context, alertChannelsModel *InfraAlertChannelsModel) (map[restapi.AlertSeverity][]string, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	alertChannels := make(map[restapi.AlertSeverity][]string)
+
+	if alertChannelsModel == nil {
+		return alertChannels, diags
+	}
+
+	warningChannels, warningDiags := r.extractChannelsForSeverity(ctx, alertChannelsModel.Warning)
+	diags.Append(warningDiags...)
+	if len(warningChannels) > 0 {
+		alertChannels[restapi.WarningSeverity] = warningChannels
+	}
+
+	criticalChannels, criticalDiags := r.extractChannelsForSeverity(ctx, alertChannelsModel.Critical)
+	diags.Append(criticalDiags...)
+	if len(criticalChannels) > 0 {
+		alertChannels[restapi.CriticalSeverity] = criticalChannels
+	}
+
+	return alertChannels, diags
+}
+
+// extractChannelsForSeverity extracts channel IDs from a list for a specific severity
+func (r *infraAlertConfigResourceFramework) extractChannelsForSeverity(ctx context.Context, channelList types.List) ([]string, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if channelList.IsNull() || channelList.IsUnknown() {
+		return nil, diags
+	}
+
+	var channels []string
+	diags.Append(channelList.ElementsAs(ctx, &channels, false)...)
+	return channels, diags
+}
+
+// mapModelTimeThresholdToAPI converts model time threshold to API representation
+func (r *infraAlertConfigResourceFramework) mapModelTimeThresholdToAPI(timeThresholdModel *InfraTimeThresholdModel) *restapi.InfraTimeThreshold {
+	if timeThresholdModel == nil || timeThresholdModel.ViolationsInSequence == nil {
+		return nil
+	}
+
+	violationsModel := timeThresholdModel.ViolationsInSequence
+	if violationsModel.TimeWindow.IsNull() || violationsModel.TimeWindow.IsUnknown() {
+		return nil
+	}
+
+	return &restapi.InfraTimeThreshold{
+		Type:       TimeThresholdTypeViolationsInSequence,
+		TimeWindow: violationsModel.TimeWindow.ValueInt64(),
+	}
+}
+
+// mapModelCustomPayloadFieldsToAPI converts model custom payload fields to API representation
+func (r *infraAlertConfigResourceFramework) mapModelCustomPayloadFieldsToAPI(ctx context.Context, customPayloadField types.List) ([]restapi.CustomPayloadField[any], diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if customPayloadField.IsNull() || customPayloadField.IsUnknown() {
+		return nil, diags
+	}
+
+	var customPayloadFieldModels []InfraCustomPayloadFieldModel
+	diags.Append(customPayloadField.ElementsAs(ctx, &customPayloadFieldModels, false)...)
 	if diags.HasError() {
 		return nil, diags
 	}
 
-	// Map ID
-	id := ""
-	if !model.ID.IsNull() {
-		id = model.ID.ValueString()
+	customerPayloadFields := make([]restapi.CustomPayloadField[any], 0, len(customPayloadFieldModels))
+	for _, field := range customPayloadFieldModels {
+		customerPayloadFields = append(customerPayloadFields, restapi.CustomPayloadField[any]{
+			Key:   field.Key.ValueString(),
+			Value: field.Value.ValueString(),
+		})
 	}
 
-	// Map tag filter if present
-	var tagFilter *restapi.TagFilter
-	if !model.TagFilter.IsNull() && model.TagFilter.ValueString() != "" {
-		tagFilterStr := model.TagFilter.ValueString()
-		parser := tagfilter.NewParser()
-		expr, err := parser.Parse(tagFilterStr)
-		if err != nil {
-			diags.AddError(
-				InfraAlertConfigErrParsingTagFilter,
-				fmt.Sprintf(InfraAlertConfigErrParsingTagFilterMsg, err),
-			)
-			return nil, diags
-		}
-
-		mapper := tagfilter.NewMapper()
-		tagFilter = mapper.ToAPIModel(expr)
-	}
-
-	// Map group by if present
-	var groupBy []string
-	if !model.GroupBy.IsNull() && !model.GroupBy.IsUnknown() {
-		diags.Append(model.GroupBy.ElementsAs(ctx, &groupBy, false)...)
-		if diags.HasError() {
-			return nil, diags
-		}
-	}
-
-	// Map alert channels if present
-	alertChannels := make(map[restapi.AlertSeverity][]string)
-	if model.AlertChannels != nil {
-		// Map warning severity
-		if !model.AlertChannels.Warning.IsNull() && !model.AlertChannels.Warning.IsUnknown() {
-			var warningChannels []string
-			diags.Append(model.AlertChannels.Warning.ElementsAs(ctx, &warningChannels, false)...)
-			if diags.HasError() {
-				return nil, diags
-			}
-			if len(warningChannels) > 0 {
-				alertChannels[restapi.WarningSeverity] = warningChannels
-			}
-		}
-
-		// Map critical severity
-		if !model.AlertChannels.Critical.IsNull() && !model.AlertChannels.Critical.IsUnknown() {
-			var criticalChannels []string
-			diags.Append(model.AlertChannels.Critical.ElementsAs(ctx, &criticalChannels, false)...)
-			if diags.HasError() {
-				return nil, diags
-			}
-			if len(criticalChannels) > 0 {
-				alertChannels[restapi.CriticalSeverity] = criticalChannels
-			}
-		}
-	}
-
-	// Map time threshold
-	var timeThreshold *restapi.InfraTimeThreshold
-	if model.TimeThreshold != nil && model.TimeThreshold.ViolationsInSequence != nil {
-
-		v := model.TimeThreshold.ViolationsInSequence
-		if !v.TimeWindow.IsNull() && !v.TimeWindow.IsUnknown() {
-			timeThreshold = &restapi.InfraTimeThreshold{
-				Type:       "violationsInSequence",
-				TimeWindow: v.TimeWindow.ValueInt64(),
-			}
-		}
-
-	}
-
-	// Map custom payload fields if present
-	var customerPayloadFields []restapi.CustomPayloadField[any]
-	if !model.CustomPayloadField.IsNull() && !model.CustomPayloadField.IsUnknown() {
-		var customPayloadFieldModels []InfraCustomPayloadFieldModel
-		diags.Append(model.CustomPayloadField.ElementsAs(ctx, &customPayloadFieldModels, false)...)
-		if diags.HasError() {
-			return nil, diags
-		}
-
-		for _, field := range customPayloadFieldModels {
-			customerPayloadFields = append(customerPayloadFields, restapi.CustomPayloadField[any]{
-				Key:   field.Key.ValueString(),
-				Value: field.Value.ValueString(),
-			})
-		}
-	}
-
-	// Map rules if present
-	var rules []restapi.RuleWithThreshold[restapi.InfraAlertRule]
-	if model.Rules != nil && model.Rules.GenericRule != nil {
-		genericRuleModel := model.Rules.GenericRule
-
-		// Create rule with threshold
-		ruleWithThreshold := restapi.RuleWithThreshold[restapi.InfraAlertRule]{
-			ThresholdOperator: restapi.ThresholdOperator(genericRuleModel.ThresholdOperator.ValueString()),
-			Rule: restapi.InfraAlertRule{
-				AlertType:              "genericRule",
-				MetricName:             genericRuleModel.MetricName.ValueString(),
-				EntityType:             genericRuleModel.EntityType.ValueString(),
-				Aggregation:            restapi.Aggregation(genericRuleModel.Aggregation.ValueString()),
-				CrossSeriesAggregation: restapi.Aggregation(genericRuleModel.CrossSeriesAggregation.ValueString()),
-				Regex:                  genericRuleModel.Regex.ValueBool(),
-			},
-			Thresholds: make(map[restapi.AlertSeverity]restapi.ThresholdRule),
-		}
-
-		// Map thresholds using ThresholdPluginModel
-		if genericRuleModel.ThresholdRule != nil {
-			// Map warning threshold
-			if genericRuleModel.ThresholdRule.Warning != nil {
-				warningThresholds, warningDiags := shared.MapThresholdRulePluginFromState(ctx, genericRuleModel.ThresholdRule.Warning)
-				diags.Append(warningDiags...)
-				if diags.HasError() {
-					return nil, diags
-				}
-				if warningThresholds != nil {
-					ruleWithThreshold.Thresholds[restapi.WarningSeverity] = *warningThresholds
-				}
-			}
-
-			// Map critical threshold
-			if genericRuleModel.ThresholdRule.Critical != nil {
-				criticalThresholds, criticalDiags := shared.MapThresholdRulePluginFromState(ctx, genericRuleModel.ThresholdRule.Critical)
-				diags.Append(criticalDiags...)
-				if diags.HasError() {
-					return nil, diags
-				}
-				if criticalThresholds != nil {
-					ruleWithThreshold.Thresholds[restapi.CriticalSeverity] = *criticalThresholds
-				}
-			}
-		}
-		rules = append(rules, ruleWithThreshold)
-	}
-
-	// Create the API object
-	return &restapi.InfraAlertConfig{
-		ID:                    id,
-		Name:                  model.Name.ValueString(),
-		Description:           model.Description.ValueString(),
-		TagFilterExpression:   tagFilter,
-		GroupBy:               groupBy,
-		AlertChannels:         alertChannels,
-		Granularity:           restapi.Granularity(model.Granularity.ValueInt64()),
-		TimeThreshold:         timeThreshold,
-		CustomerPayloadFields: customerPayloadFields,
-		Rules:                 rules,
-		EvaluationType:        restapi.InfraAlertEvaluationType(model.EvaluationType.ValueString()),
-	}, diags
+	return customerPayloadFields, diags
 }
 
-func (r *infraAlertConfigResourceFramework) mapTimeThresholdToState(ctx context.Context, api *restapi.InfraTimeThreshold) *InfraTimeThresholdModel {
-	if api == nil {
-		return nil
+// mapModelRulesToAPI converts model rules to API representation
+func (r *infraAlertConfigResourceFramework) mapModelRulesToAPI(ctx context.Context, rulesModel *InfraRulesModel) ([]restapi.RuleWithThreshold[restapi.InfraAlertRule], diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if rulesModel == nil || rulesModel.GenericRule == nil {
+		return nil, diags
 	}
 
-	if api.Type != "violationsInSequence" {
-		// unsupported type — ignore or handle others
-		return nil
-	}
+	genericRuleModel := rulesModel.GenericRule
 
-	return &InfraTimeThresholdModel{
-		ViolationsInSequence: &InfraViolationsInSequenceModel{
-			TimeWindow: types.Int64Value(api.TimeWindow),
+	ruleWithThreshold := restapi.RuleWithThreshold[restapi.InfraAlertRule]{
+		ThresholdOperator: restapi.ThresholdOperator(genericRuleModel.ThresholdOperator.ValueString()),
+		Rule: restapi.InfraAlertRule{
+			AlertType:              GenericRuleAlertType,
+			MetricName:             genericRuleModel.MetricName.ValueString(),
+			EntityType:             genericRuleModel.EntityType.ValueString(),
+			Aggregation:            restapi.Aggregation(genericRuleModel.Aggregation.ValueString()),
+			CrossSeriesAggregation: restapi.Aggregation(genericRuleModel.CrossSeriesAggregation.ValueString()),
+			Regex:                  genericRuleModel.Regex.ValueBool(),
 		},
+		Thresholds: make(map[restapi.AlertSeverity]restapi.ThresholdRule),
 	}
+
+	thresholds, thresholdDiags := r.mapModelThresholdsToAPI(ctx, genericRuleModel.ThresholdRule)
+	diags.Append(thresholdDiags...)
+	ruleWithThreshold.Thresholds = thresholds
+
+	return []restapi.RuleWithThreshold[restapi.InfraAlertRule]{ruleWithThreshold}, diags
 }
+
+// mapModelThresholdsToAPI converts model thresholds to API representation
+func (r *infraAlertConfigResourceFramework) mapModelThresholdsToAPI(ctx context.Context, thresholdRuleModel *shared.ThresholdPluginModel) (map[restapi.AlertSeverity]restapi.ThresholdRule, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	thresholds := make(map[restapi.AlertSeverity]restapi.ThresholdRule)
+
+	if thresholdRuleModel == nil {
+		return thresholds, diags
+	}
+
+	if thresholdRuleModel.Warning != nil {
+		warningThreshold, warningDiags := shared.MapThresholdRulePluginFromState(ctx, thresholdRuleModel.Warning)
+		diags.Append(warningDiags...)
+		if warningThreshold != nil {
+			thresholds[restapi.WarningSeverity] = *warningThreshold
+		}
+	}
+
+	if thresholdRuleModel.Critical != nil {
+		criticalThreshold, criticalDiags := shared.MapThresholdRulePluginFromState(ctx, thresholdRuleModel.Critical)
+		diags.Append(criticalDiags...)
+		if criticalThreshold != nil {
+			thresholds[restapi.CriticalSeverity] = *criticalThreshold
+		}
+	}
+
+	return thresholds, diags
+}
+
+// Made with Bob
