@@ -20,7 +20,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// NewCustomEventSpecificationResourceHandleFramework creates the resource handle for Custom Event Specification
+// ============================================================================
+// Resource Factory
+// ============================================================================
+
+// NewCustomEventSpecificationResourceHandleFramework creates the resource handle for Custom Event Specifications
 func NewCustomEventSpecificationResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.CustomEventSpecification] {
 	return &customEventSpecificationResourceFramework{
 		metaData: resourcehandle.ResourceMetaDataFramework{
@@ -31,264 +35,274 @@ func NewCustomEventSpecificationResourceHandleFramework() resourcehandle.Resourc
 	}
 }
 
+// ============================================================================
+// Resource Implementation
+// ============================================================================
+
 type customEventSpecificationResourceFramework struct {
 	metaData resourcehandle.ResourceMetaDataFramework
 }
 
+// MetaData returns the resource metadata
 func (r *customEventSpecificationResourceFramework) MetaData() *resourcehandle.ResourceMetaDataFramework {
 	return &r.metaData
 }
 
+// GetRestResource returns the REST resource for custom event specifications
 func (r *customEventSpecificationResourceFramework) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.CustomEventSpecification] {
 	return api.CustomEventSpecifications()
 }
+
+// ============================================================================
+// Schema Definition
+// ============================================================================
 
 // createCustomEventSpecificationSchema creates the schema for the custom event specification resource
 func createCustomEventSpecificationSchema() schema.Schema {
 	return schema.Schema{
 		Description: CustomEventSpecificationResourceDescResource,
 		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
+			CustomEventSpecificationFieldID: schema.StringAttribute{
 				Description: CustomEventSpecificationResourceDescID,
 				Computed:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"name": schema.StringAttribute{
+			CustomEventSpecificationFieldName: schema.StringAttribute{
 				Description: CustomEventSpecificationResourceDescName,
 				Required:    true,
 			},
-			"entity_type": schema.StringAttribute{
+			CustomEventSpecificationFieldEntityType: schema.StringAttribute{
 				Description: CustomEventSpecificationResourceDescEntityType,
 				Required:    true,
 			},
-			"query": schema.StringAttribute{
+			CustomEventSpecificationFieldQuery: schema.StringAttribute{
 				Description: CustomEventSpecificationResourceDescQuery,
 				Optional:    true,
 				Computed:    true,
-				Default:     stringdefault.StaticString(""),
+				Default:     stringdefault.StaticString(CustomEventSpecificationDefaultEmptyString),
 			},
-			"triggering": schema.BoolAttribute{
+			CustomEventSpecificationFieldTriggering: schema.BoolAttribute{
 				Description: CustomEventSpecificationResourceDescTriggering,
 				Optional:    true,
 				Computed:    true,
 				Default:     booldefault.StaticBool(false),
 			},
-			"description": schema.StringAttribute{
+			CustomEventSpecificationFieldDescription: schema.StringAttribute{
 				Description: CustomEventSpecificationResourceDescDescription,
 				Optional:    true,
 				Computed:    true,
-				Default:     stringdefault.StaticString(""),
+				Default:     stringdefault.StaticString(CustomEventSpecificationDefaultEmptyString),
 			},
-			"expiration_time": schema.Int64Attribute{
+			CustomEventSpecificationFieldExpirationTime: schema.Int64Attribute{
 				Description: CustomEventSpecificationResourceDescExpirationTime,
 				Optional:    true,
 			},
-			"enabled": schema.BoolAttribute{
+			CustomEventSpecificationFieldEnabled: schema.BoolAttribute{
 				Description: CustomEventSpecificationResourceDescEnabled,
 				Optional:    true,
 				Computed:    true,
 				Default:     booldefault.StaticBool(true),
 			},
-			"rule_logical_operator": schema.StringAttribute{
+			CustomEventSpecificationFieldRuleLogicalOperator: schema.StringAttribute{
 				Description: CustomEventSpecificationResourceDescRuleLogicalOperator,
 				Optional:    true,
 				Computed:    true,
-				Default:     stringdefault.StaticString("AND"),
+				Default:     stringdefault.StaticString(CustomEventSpecificationLogicalOperatorAnd),
 				Validators: []validator.String{
-					stringvalidator.OneOf("AND", "OR"),
+					stringvalidator.OneOf(CustomEventSpecificationLogicalOperatorAnd, CustomEventSpecificationLogicalOperatorOr),
 				},
 			},
-			"rules": schema.SingleNestedAttribute{
+			CustomEventSpecificationFieldRules: schema.SingleNestedAttribute{
 				Description: CustomEventSpecificationResourceDescRules,
 				Optional:    true,
 				Attributes: map[string]schema.Attribute{
-					"entity_count": schema.SingleNestedAttribute{
+					CustomEventSpecificationFieldEntityCountRule: schema.SingleNestedAttribute{
 						Description: CustomEventSpecificationResourceDescEntityCountRules,
 						Optional:    true,
 						Attributes: map[string]schema.Attribute{
-							"severity": schema.StringAttribute{
+							CustomEventSpecificationRuleFieldSeverity: schema.StringAttribute{
 								Description: CustomEventSpecificationResourceDescSeverity,
 								Required:    true,
 								Validators: []validator.String{
-									stringvalidator.OneOf("warning", "critical"),
+									stringvalidator.OneOf(CustomEventSpecificationSeverityWarning, CustomEventSpecificationSeverityCritical),
 								},
 							},
-							"condition_operator": schema.StringAttribute{
+							CustomEventSpecificationRuleFieldConditionOperator: schema.StringAttribute{
 								Description: CustomEventSpecificationResourceDescConditionOperator,
 								Required:    true,
 							},
-							"condition_value": schema.Float64Attribute{
+							CustomEventSpecificationRuleFieldConditionValue: schema.Float64Attribute{
 								Description: CustomEventSpecificationResourceDescConditionValue,
 								Required:    true,
 							},
 						},
 					},
-					"entity_count_verification": schema.SingleNestedAttribute{
+					CustomEventSpecificationFieldEntityCountVerificationRule: schema.SingleNestedAttribute{
 						Description: CustomEventSpecificationResourceDescEntityCountVerification,
 						Optional:    true,
 						Attributes: map[string]schema.Attribute{
-							"severity": schema.StringAttribute{
+							CustomEventSpecificationRuleFieldSeverity: schema.StringAttribute{
 								Description: CustomEventSpecificationResourceDescSeverity,
 								Required:    true,
 								Validators: []validator.String{
-									stringvalidator.OneOf("warning", "critical"),
+									stringvalidator.OneOf(CustomEventSpecificationSeverityWarning, CustomEventSpecificationSeverityCritical),
 								},
 							},
-							"condition_operator": schema.StringAttribute{
+							CustomEventSpecificationRuleFieldConditionOperator: schema.StringAttribute{
 								Description: CustomEventSpecificationResourceDescConditionOperator,
 								Required:    true,
 							},
-							"condition_value": schema.Float64Attribute{
+							CustomEventSpecificationRuleFieldConditionValue: schema.Float64Attribute{
 								Description: CustomEventSpecificationResourceDescConditionValue,
 								Required:    true,
 							},
-							"matching_entity_type": schema.StringAttribute{
+							CustomEventSpecificationRuleFieldMatchingEntityType: schema.StringAttribute{
 								Description: CustomEventSpecificationResourceDescMatchingEntityType,
 								Required:    true,
 							},
-							"matching_operator": schema.StringAttribute{
+							CustomEventSpecificationRuleFieldMatchingOperator: schema.StringAttribute{
 								Description: CustomEventSpecificationResourceDescMatchingOperator,
 								Required:    true,
 							},
-							"matching_entity_label": schema.StringAttribute{
+							CustomEventSpecificationRuleFieldMatchingEntityLabel: schema.StringAttribute{
 								Description: CustomEventSpecificationResourceDescMatchingEntityLabel,
 								Required:    true,
 							},
 						},
 					},
-					"entity_verification": schema.SingleNestedAttribute{
+					CustomEventSpecificationFieldEntityVerificationRule: schema.SingleNestedAttribute{
 						Description: CustomEventSpecificationResourceDescEntityVerification,
 						Optional:    true,
 						Attributes: map[string]schema.Attribute{
-							"severity": schema.StringAttribute{
+							CustomEventSpecificationRuleFieldSeverity: schema.StringAttribute{
 								Description: CustomEventSpecificationResourceDescSeverity,
 								Required:    true,
 								Validators: []validator.String{
-									stringvalidator.OneOf("warning", "critical"),
+									stringvalidator.OneOf(CustomEventSpecificationSeverityWarning, CustomEventSpecificationSeverityCritical),
 								},
 							},
-							"matching_entity_type": schema.StringAttribute{
+							CustomEventSpecificationRuleFieldMatchingEntityType: schema.StringAttribute{
 								Description: CustomEventSpecificationResourceDescMatchingEntityType,
 								Required:    true,
 							},
-							"matching_operator": schema.StringAttribute{
+							CustomEventSpecificationRuleFieldMatchingOperator: schema.StringAttribute{
 								Description: CustomEventSpecificationResourceDescMatchingOperator,
 								Required:    true,
 							},
-							"matching_entity_label": schema.StringAttribute{
+							CustomEventSpecificationRuleFieldMatchingEntityLabel: schema.StringAttribute{
 								Description: CustomEventSpecificationResourceDescMatchingEntityLabel,
 								Required:    true,
 							},
-							"offline_duration": schema.Int64Attribute{
+							CustomEventSpecificationRuleFieldOfflineDuration: schema.Int64Attribute{
 								Description: CustomEventSpecificationResourceDescOfflineDuration,
 								Required:    true,
 							},
 						},
 					},
-					"host_availability": schema.SingleNestedAttribute{
+					CustomEventSpecificationFieldHostAvailabilityRule: schema.SingleNestedAttribute{
 						Description: CustomEventSpecificationResourceDescHostAvailability,
 						Optional:    true,
 						Attributes: map[string]schema.Attribute{
-							"severity": schema.StringAttribute{
+							CustomEventSpecificationRuleFieldSeverity: schema.StringAttribute{
 								Description: CustomEventSpecificationResourceDescSeverity,
 								Required:    true,
 								Validators: []validator.String{
-									stringvalidator.OneOf("warning", "critical"),
+									stringvalidator.OneOf(CustomEventSpecificationSeverityWarning, CustomEventSpecificationSeverityCritical),
 								},
 							},
-							"offline_duration": schema.Int64Attribute{
+							CustomEventSpecificationRuleFieldOfflineDuration: schema.Int64Attribute{
 								Description: CustomEventSpecificationResourceDescOfflineDuration,
 								Required:    true,
 							},
-							"close_after": schema.Int64Attribute{
+							CustomEventSpecificationHostAvailabilityRuleFieldMetricCloseAfter: schema.Int64Attribute{
 								Description: CustomEventSpecificationResourceDescCloseAfter,
 								Optional:    true,
 							},
-							"tag_filter": schema.StringAttribute{
+							CustomEventSpecificationHostAvailabilityRuleFieldTagFilter: schema.StringAttribute{
 								Description: CustomEventSpecificationResourceDescTagFilter,
 								Optional:    true,
 							},
 						},
 					},
-					"system": schema.SingleNestedAttribute{
+					CustomEventSpecificationFieldSystemRule: schema.SingleNestedAttribute{
 						Description: CustomEventSpecificationResourceDescSystemRules,
 						Optional:    true,
 						Attributes: map[string]schema.Attribute{
-							"severity": schema.StringAttribute{
+							CustomEventSpecificationRuleFieldSeverity: schema.StringAttribute{
 								Description: CustomEventSpecificationResourceDescSeverity,
 								Required:    true,
 								Validators: []validator.String{
-									stringvalidator.OneOf("warning", "critical"),
+									stringvalidator.OneOf(CustomEventSpecificationSeverityWarning, CustomEventSpecificationSeverityCritical),
 								},
 							},
-							"system_rule_id": schema.StringAttribute{
+							CustomEventSpecificationSystemRuleFieldSystemRuleId: schema.StringAttribute{
 								Description: CustomEventSpecificationResourceDescSystemRuleID,
 								Required:    true,
 							},
 						},
 					},
-					"threshold": schema.SingleNestedAttribute{
+					CustomEventSpecificationFieldThresholdRule: schema.SingleNestedAttribute{
 						Description: CustomEventSpecificationResourceDescThresholdRules,
 						Optional:    true,
 						Attributes: map[string]schema.Attribute{
-							"severity": schema.StringAttribute{
+							CustomEventSpecificationRuleFieldSeverity: schema.StringAttribute{
 								Description: CustomEventSpecificationResourceDescSeverity,
 								Required:    true,
 								Validators: []validator.String{
-									stringvalidator.OneOf("warning", "critical"),
+									stringvalidator.OneOf(CustomEventSpecificationSeverityWarning, CustomEventSpecificationSeverityCritical),
 								},
 							},
-							"metric_name": schema.StringAttribute{
+							CustomEventSpecificationThresholdRuleFieldMetricName: schema.StringAttribute{
 								Description: CustomEventSpecificationResourceDescMetricName,
 								Required:    true,
 							},
-							"rollup": schema.Int64Attribute{
+							CustomEventSpecificationThresholdRuleFieldRollup: schema.Int64Attribute{
 								Description: CustomEventSpecificationResourceDescRollup,
 								Required:    true,
 							},
-							"window": schema.Int64Attribute{
+							CustomEventSpecificationThresholdRuleFieldWindow: schema.Int64Attribute{
 								Description: CustomEventSpecificationResourceDescWindow,
 								Required:    true,
 							},
-							"aggregation": schema.StringAttribute{
+							CustomEventSpecificationThresholdRuleFieldAggregation: schema.StringAttribute{
 								Description: CustomEventSpecificationResourceDescAggregation,
 								Required:    true,
 							},
-							"condition_operator": schema.StringAttribute{
+							CustomEventSpecificationRuleFieldConditionOperator: schema.StringAttribute{
 								Description: CustomEventSpecificationResourceDescConditionOperator,
 								Required:    true,
 							},
-							"condition_value": schema.Float64Attribute{
+							CustomEventSpecificationRuleFieldConditionValue: schema.Float64Attribute{
 								Description: CustomEventSpecificationResourceDescConditionValue,
 								Required:    true,
 							},
-							"metric_pattern": schema.SingleNestedAttribute{
+							CustomEventSpecificationThresholdRuleFieldMetricPattern: schema.SingleNestedAttribute{
 								Description: CustomEventSpecificationResourceDescMetricPattern,
 								Optional:    true,
 								Attributes: map[string]schema.Attribute{
-									"prefix": schema.StringAttribute{
+									CustomEventSpecificationThresholdRuleFieldMetricPatternPrefix: schema.StringAttribute{
 										Description: CustomEventSpecificationResourceDescMetricPatternPrefix,
 										Required:    true,
 									},
-									"postfix": schema.StringAttribute{
+									CustomEventSpecificationThresholdRuleFieldMetricPatternPostfix: schema.StringAttribute{
 										Description: CustomEventSpecificationResourceDescMetricPatternPostfix,
 										Optional:    true,
 										Computed:    true,
-										Default:     stringdefault.StaticString(""),
+										Default:     stringdefault.StaticString(CustomEventSpecificationDefaultEmptyString),
 									},
-									"placeholder": schema.StringAttribute{
+									CustomEventSpecificationThresholdRuleFieldMetricPatternPlaceholder: schema.StringAttribute{
 										Description: CustomEventSpecificationResourceDescMetricPatternPlaceholder,
 										Optional:    true,
 										Computed:    true,
-										Default:     stringdefault.StaticString(""),
+										Default:     stringdefault.StaticString(CustomEventSpecificationDefaultEmptyString),
 									},
-									"operator": schema.StringAttribute{
+									CustomEventSpecificationThresholdRuleFieldMetricPatternOperator: schema.StringAttribute{
 										Description: CustomEventSpecificationResourceDescMetricPatternOperator,
 										Optional:    true,
 										Computed:    true,
-										Default:     stringdefault.StaticString("EQUALS"),
+										Default:     stringdefault.StaticString(CustomEventSpecificationMetricPatternOperatorEquals),
 									},
 								},
 							},
@@ -299,15 +313,39 @@ func createCustomEventSpecificationSchema() schema.Schema {
 		},
 	}
 }
-func (r *customEventSpecificationResourceFramework) SetComputedFields(_ context.Context, plan *tfsdk.Plan) diag.Diagnostics {
-	// No computed fields to set
+
+// ============================================================================
+// API to State Mapping
+// ============================================================================
+
+// SetComputedFields sets computed fields in the plan (none for this resource)
+func (r *customEventSpecificationResourceFramework) SetComputedFields(_ context.Context, _ *tfsdk.Plan) diag.Diagnostics {
 	return nil
 }
 
-func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, spec *restapi.CustomEventSpecification) diag.Diagnostics {
+// UpdateState converts API data object to Terraform state
+func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, _ *tfsdk.Plan, spec *restapi.CustomEventSpecification) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	// Create a model and populate it with values from the spec
+	// Validate input
+	if spec == nil {
+		diags.AddError("Invalid Input", "CustomEventSpecification cannot be nil")
+		return diags
+	}
+
+	// Build model from spec
+	model := r.buildModelFromSpec(spec, &diags)
+	if diags.HasError() {
+		return diags
+	}
+
+	// Set the model to state
+	diags.Append(state.Set(ctx, model)...)
+	return diags
+}
+
+// buildModelFromSpec constructs the model from API specification
+func (r *customEventSpecificationResourceFramework) buildModelFromSpec(spec *restapi.CustomEventSpecification, diags *diag.Diagnostics) CustomEventSpecificationModel {
 	model := CustomEventSpecificationModel{
 		ID:                  types.StringValue(spec.ID),
 		Name:                types.StringValue(spec.Name),
@@ -315,161 +353,242 @@ func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Cont
 		Triggering:          types.BoolValue(spec.Triggering),
 		Enabled:             types.BoolValue(spec.Enabled),
 		RuleLogicalOperator: types.StringValue(spec.RuleLogicalOperator),
+		Query:               util.SetStringPointerToState(spec.Query),
+		Description:         util.SetStringPointerToState(spec.Description),
+		ExpirationTime:      util.SetInt64PointerToState(spec.ExpirationTime),
 	}
 
-	// Set optional fields
-	model.Query = util.SetStringPointerToState(spec.Query)
-
-	model.Description = util.SetStringPointerToState(spec.Description)
-
-	if spec.ExpirationTime != nil {
-		model.ExpirationTime = util.SetInt64PointerToState(spec.ExpirationTime)
-	} else {
-		model.ExpirationTime = types.Int64Null()
-	}
-
-	// Process rules
+	// Process rules if present
 	if len(spec.Rules) > 0 {
-		// Create rule objects (single instances, not lists)
-		var entityCountRule *EntityCountRuleModel
-		var entityCountVerificationRule *EntityCountVerificationRuleModel
-		var entityVerificationRule *EntityVerificationRuleModel
-		var hostAvailabilityRule *HostAvailabilityRuleModel
-		var systemRule *SystemRuleModel
-		var thresholdRule *ThresholdRuleModel
+		model.Rules = r.buildRulesModel(spec.Rules, diags)
+	}
 
-		// Process each rule based on its type (take first occurrence of each type)
-		for _, rule := range spec.Rules {
-			switch rule.DType {
-			case restapi.EntityCountRuleType:
-				if entityCountRule == nil && rule.ConditionOperator != nil && rule.ConditionValue != nil {
-					entityCountRule = &EntityCountRuleModel{
-						Severity:          mapIntToSeverityString(rule.Severity),
-						ConditionOperator: util.SetStringPointerToState(rule.ConditionOperator),
-						ConditionValue:    util.SetFloat64PointerToState(rule.ConditionValue),
-					}
-				}
-			case restapi.EntityCountVerificationRuleType:
-				if entityCountVerificationRule == nil && rule.ConditionOperator != nil && rule.ConditionValue != nil &&
-					rule.MatchingEntityType != nil && rule.MatchingOperator != nil && rule.MatchingEntityLabel != nil {
-					entityCountVerificationRule = &EntityCountVerificationRuleModel{
-						Severity:            mapIntToSeverityString(rule.Severity),
-						ConditionOperator:   util.SetStringPointerToState(rule.ConditionOperator),
-						ConditionValue:      util.SetFloat64PointerToState(rule.ConditionValue),
-						MatchingEntityType:  util.SetStringPointerToState(rule.MatchingEntityType),
-						MatchingOperator:    util.SetStringPointerToState(rule.MatchingOperator),
-						MatchingEntityLabel: util.SetStringPointerToState(rule.MatchingEntityLabel),
-					}
-				}
-			case restapi.EntityVerificationRuleType:
-				if entityVerificationRule == nil && rule.MatchingEntityType != nil && rule.MatchingOperator != nil &&
-					rule.MatchingEntityLabel != nil && rule.OfflineDuration != nil {
-					entityVerificationRule = &EntityVerificationRuleModel{
-						Severity:            mapIntToSeverityString(rule.Severity),
-						MatchingEntityType:  util.SetStringPointerToState(rule.MatchingEntityType),
-						MatchingOperator:    util.SetStringPointerToState(rule.MatchingOperator),
-						MatchingEntityLabel: util.SetStringPointerToState(rule.MatchingEntityLabel),
-						OfflineDuration:     util.SetInt64PointerToState(rule.OfflineDuration),
-					}
-				}
-			case restapi.HostAvailabilityRuleType:
-				if hostAvailabilityRule == nil && rule.OfflineDuration != nil {
-					hr := HostAvailabilityRuleModel{
-						Severity:        mapIntToSeverityString(rule.Severity),
-						OfflineDuration: util.SetInt64PointerToState(rule.OfflineDuration),
-						TagFilter:       types.StringValue(""), // Default empty string
-					}
+	return model
+}
 
-					if rule.CloseAfter != nil {
-						hr.CloseAfter = util.SetInt64PointerToState(rule.CloseAfter)
-					} else {
-						hr.CloseAfter = types.Int64Null()
-					}
+// buildRulesModel processes all rules and returns a RulesModel
+func (r *customEventSpecificationResourceFramework) buildRulesModel(rules []restapi.RuleSpecification, diags *diag.Diagnostics) *RulesModel {
+	rulesModel := &RulesModel{}
 
-					// Handle tag filter conversion
-					if rule.TagFilter != nil {
-						// Convert tag filter to string representation
-						normalizedTagFilterString, err := tagfilter.MapTagFilterToNormalizedString(rule.TagFilter)
-						if err == nil && normalizedTagFilterString != nil {
-							hr.TagFilter = util.SetStringPointerToState(normalizedTagFilterString)
-						}
-					}
+	// Use a map for O(1) lookup to process only the first occurrence of each rule type
+	processedTypes := make(map[string]bool, 6)
 
-					hostAvailabilityRule = &hr
-				}
-			case restapi.SystemRuleType:
-				if systemRule == nil && rule.SystemRuleID != nil {
-					systemRule = &SystemRuleModel{
-						Severity:     mapIntToSeverityString(rule.Severity),
-						SystemRuleID: util.SetStringPointerToState(rule.SystemRuleID),
-					}
-				}
-			case restapi.ThresholdRuleType:
-				if thresholdRule == nil && rule.MetricName != nil && rule.Rollup != nil && rule.Window != nil &&
-					rule.Aggregation != nil && rule.ConditionOperator != nil && rule.ConditionValue != nil {
-					tr := ThresholdRuleModel{
-						Severity:          mapIntToSeverityString(rule.Severity),
-						MetricName:        util.SetStringPointerToState(rule.MetricName),
-						Rollup:            util.SetInt64PointerToState(rule.Rollup),
-						Window:            util.SetInt64PointerToState(rule.Window),
-						Aggregation:       util.SetStringPointerToState(rule.Aggregation),
-						ConditionOperator: util.SetStringPointerToState(rule.ConditionOperator),
-						ConditionValue:    util.SetFloat64PointerToState(rule.ConditionValue),
-					}
+	for i := range rules {
+		rule := &rules[i]
 
-					// Handle metric pattern if present
-					if rule.MetricPattern != nil {
-						tr.MetricPattern = &MetricPatternModel{
-							Prefix:      types.StringValue(rule.MetricPattern.Prefix),
-							Operator:    types.StringValue(rule.MetricPattern.Operator),
-							Postfix:     util.SetStringPointerToState(rule.MetricPattern.Postfix),
-							Placeholder: util.SetStringPointerToState(rule.MetricPattern.Placeholder),
-						}
-					}
-					// If nil, leave tr.MetricPattern as nil
+		// Skip if this rule type was already processed
+		if processedTypes[rule.DType] {
+			continue
+		}
 
-					thresholdRule = &tr
-				}
+		switch rule.DType {
+		case restapi.EntityCountRuleType:
+			if r.isValidEntityCountRule(rule) {
+				rulesModel.EntityCount = r.buildEntityCountRule(rule)
+				processedTypes[rule.DType] = true
+			}
+		case restapi.EntityCountVerificationRuleType:
+			if r.isValidEntityCountVerificationRule(rule) {
+				rulesModel.EntityCountVerification = r.buildEntityCountVerificationRule(rule)
+				processedTypes[rule.DType] = true
+			}
+		case restapi.EntityVerificationRuleType:
+			if r.isValidEntityVerificationRule(rule) {
+				rulesModel.EntityVerification = r.buildEntityVerificationRule(rule)
+				processedTypes[rule.DType] = true
+			}
+		case restapi.HostAvailabilityRuleType:
+			if r.isValidHostAvailabilityRule(rule) {
+				rulesModel.HostAvailability = r.buildHostAvailabilityRule(rule, diags)
+				processedTypes[rule.DType] = true
+			}
+		case restapi.SystemRuleType:
+			if r.isValidSystemRule(rule) {
+				rulesModel.System = r.buildSystemRule(rule)
+				processedTypes[rule.DType] = true
+			}
+		case restapi.ThresholdRuleType:
+			if r.isValidThresholdRule(rule) {
+				rulesModel.Threshold = r.buildThresholdRule(rule)
+				processedTypes[rule.DType] = true
 			}
 		}
+	}
 
-		// Create the rules model with pointer fields
-		model.Rules = &RulesModel{
-			EntityCount:             entityCountRule,
-			EntityCountVerification: entityCountVerificationRule,
-			EntityVerification:      entityVerificationRule,
-			HostAvailability:        hostAvailabilityRule,
-			System:                  systemRule,
-			Threshold:               thresholdRule,
+	return rulesModel
+}
+
+// Validation methods for each rule type
+func (r *customEventSpecificationResourceFramework) isValidEntityCountRule(rule *restapi.RuleSpecification) bool {
+	return rule.ConditionOperator != nil && rule.ConditionValue != nil
+}
+
+func (r *customEventSpecificationResourceFramework) isValidEntityCountVerificationRule(rule *restapi.RuleSpecification) bool {
+	return rule.ConditionOperator != nil && rule.ConditionValue != nil &&
+		rule.MatchingEntityType != nil && rule.MatchingOperator != nil && rule.MatchingEntityLabel != nil
+}
+
+func (r *customEventSpecificationResourceFramework) isValidEntityVerificationRule(rule *restapi.RuleSpecification) bool {
+	return rule.MatchingEntityType != nil && rule.MatchingOperator != nil &&
+		rule.MatchingEntityLabel != nil && rule.OfflineDuration != nil
+}
+
+func (r *customEventSpecificationResourceFramework) isValidHostAvailabilityRule(rule *restapi.RuleSpecification) bool {
+	return rule.OfflineDuration != nil
+}
+
+func (r *customEventSpecificationResourceFramework) isValidSystemRule(rule *restapi.RuleSpecification) bool {
+	return rule.SystemRuleID != nil
+}
+
+func (r *customEventSpecificationResourceFramework) isValidThresholdRule(rule *restapi.RuleSpecification) bool {
+	return rule.MetricName != nil && rule.Rollup != nil && rule.Window != nil &&
+		rule.Aggregation != nil && rule.ConditionOperator != nil && rule.ConditionValue != nil
+}
+
+// Builder methods for each rule type
+func (r *customEventSpecificationResourceFramework) buildEntityCountRule(rule *restapi.RuleSpecification) *EntityCountRuleModel {
+	return &EntityCountRuleModel{
+		Severity:          mapIntToSeverityString(rule.Severity),
+		ConditionOperator: util.SetStringPointerToState(rule.ConditionOperator),
+		ConditionValue:    util.SetFloat64PointerToState(rule.ConditionValue),
+	}
+}
+
+func (r *customEventSpecificationResourceFramework) buildEntityCountVerificationRule(rule *restapi.RuleSpecification) *EntityCountVerificationRuleModel {
+	return &EntityCountVerificationRuleModel{
+		Severity:            mapIntToSeverityString(rule.Severity),
+		ConditionOperator:   util.SetStringPointerToState(rule.ConditionOperator),
+		ConditionValue:      util.SetFloat64PointerToState(rule.ConditionValue),
+		MatchingEntityType:  util.SetStringPointerToState(rule.MatchingEntityType),
+		MatchingOperator:    util.SetStringPointerToState(rule.MatchingOperator),
+		MatchingEntityLabel: util.SetStringPointerToState(rule.MatchingEntityLabel),
+	}
+}
+
+func (r *customEventSpecificationResourceFramework) buildEntityVerificationRule(rule *restapi.RuleSpecification) *EntityVerificationRuleModel {
+	return &EntityVerificationRuleModel{
+		Severity:            mapIntToSeverityString(rule.Severity),
+		MatchingEntityType:  util.SetStringPointerToState(rule.MatchingEntityType),
+		MatchingOperator:    util.SetStringPointerToState(rule.MatchingOperator),
+		MatchingEntityLabel: util.SetStringPointerToState(rule.MatchingEntityLabel),
+		OfflineDuration:     util.SetInt64PointerToState(rule.OfflineDuration),
+	}
+}
+
+func (r *customEventSpecificationResourceFramework) buildHostAvailabilityRule(rule *restapi.RuleSpecification, diags *diag.Diagnostics) *HostAvailabilityRuleModel {
+	model := &HostAvailabilityRuleModel{
+		Severity:        mapIntToSeverityString(rule.Severity),
+		OfflineDuration: util.SetInt64PointerToState(rule.OfflineDuration),
+		CloseAfter:      util.SetInt64PointerToState(rule.CloseAfter),
+		TagFilter:       types.StringValue(CustomEventSpecificationDefaultEmptyString),
+	}
+
+	// Handle tag filter conversion with proper error handling
+	if rule.TagFilter != nil {
+		normalizedTagFilterString, err := tagfilter.MapTagFilterToNormalizedString(rule.TagFilter)
+		if err != nil {
+			diags.AddWarning(
+				"Tag Filter Conversion Warning",
+				fmt.Sprintf("Failed to convert tag filter to string: %v. Using empty string.", err),
+			)
+		} else if normalizedTagFilterString != nil {
+			model.TagFilter = util.SetStringPointerToState(normalizedTagFilterString)
 		}
 	}
-	// If no rules, leave model.Rules as nil
 
-	// Set the entire model to state
-	diags = state.Set(ctx, model)
-	return diags
+	return model
 }
+
+func (r *customEventSpecificationResourceFramework) buildSystemRule(rule *restapi.RuleSpecification) *SystemRuleModel {
+	return &SystemRuleModel{
+		Severity:     mapIntToSeverityString(rule.Severity),
+		SystemRuleID: util.SetStringPointerToState(rule.SystemRuleID),
+	}
+}
+
+func (r *customEventSpecificationResourceFramework) buildThresholdRule(rule *restapi.RuleSpecification) *ThresholdRuleModel {
+	model := &ThresholdRuleModel{
+		Severity:          mapIntToSeverityString(rule.Severity),
+		MetricName:        util.SetStringPointerToState(rule.MetricName),
+		Rollup:            util.SetInt64PointerToState(rule.Rollup),
+		Window:            util.SetInt64PointerToState(rule.Window),
+		Aggregation:       util.SetStringPointerToState(rule.Aggregation),
+		ConditionOperator: util.SetStringPointerToState(rule.ConditionOperator),
+		ConditionValue:    util.SetFloat64PointerToState(rule.ConditionValue),
+	}
+
+	// Handle metric pattern if present
+	if rule.MetricPattern != nil {
+		model.MetricPattern = &MetricPatternModel{
+			Prefix:      types.StringValue(rule.MetricPattern.Prefix),
+			Operator:    types.StringValue(rule.MetricPattern.Operator),
+			Postfix:     util.SetStringPointerToState(rule.MetricPattern.Postfix),
+			Placeholder: util.SetStringPointerToState(rule.MetricPattern.Placeholder),
+		}
+	}
+
+	return model
+}
+
+// ============================================================================
+// Helper Methods
+// ============================================================================
 
 // mapIntToSeverityString maps the severity integer to a string value
 func mapIntToSeverityString(severity int) types.String {
 	switch severity {
 	case 5:
-		return types.StringValue("warning")
+		return types.StringValue(CustomEventSpecificationSeverityWarning)
 	case 10:
-		return types.StringValue("critical")
+		return types.StringValue(CustomEventSpecificationSeverityCritical)
 	default:
-		return types.StringValue("warning") // Default to warning
+		return types.StringValue(CustomEventSpecificationSeverityWarning) // Default to warning
 	}
 }
 
+// ============================================================================
+// State to API Mapping
+// ============================================================================
+
+// MapStateToDataObject converts Terraform state to API data object
 func (r *customEventSpecificationResourceFramework) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.CustomEventSpecification, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Extract model from plan or state
+	model, extractDiags := r.extractModel(ctx, plan, state)
+	diags.Append(extractDiags...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	// Build API specification from model
+	spec := r.buildAPISpecification(model, &diags)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return spec, diags
+}
+
+// extractModel retrieves the model from plan or state with proper validation
+func (r *customEventSpecificationResourceFramework) extractModel(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*CustomEventSpecificationModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var model CustomEventSpecificationModel
 
-	// Get current state from plan or state
+	// Validate input - at least one source must be provided
+	if plan == nil && state == nil {
+		diags.AddError(
+			"Invalid Input",
+			"Both plan and state are nil. At least one must be provided.",
+		)
+		return nil, diags
+	}
+
+	// Get model from plan (preferred) or state
 	if plan != nil {
 		diags.Append(plan.Get(ctx, &model)...)
-	} else if state != nil {
+	} else {
 		diags.Append(state.Get(ctx, &model)...)
 	}
 
@@ -477,209 +596,232 @@ func (r *customEventSpecificationResourceFramework) MapStateToDataObject(ctx con
 		return nil, diags
 	}
 
-	// Map ID
-	id := ""
-	if !model.ID.IsNull() {
-		id = model.ID.ValueString()
-	}
+	return &model, diags
+}
 
-	// Map optional fields
-	var query *string
-	if !model.Query.IsNull() && model.Query.ValueString() != "" {
-		queryStr := model.Query.ValueString()
-		query = &queryStr
-	}
-
-	var description *string
-	if !model.Description.IsNull() && model.Description.ValueString() != "" {
-		descStr := model.Description.ValueString()
-		description = &descStr
-	}
-
-	var expirationTime *int
-	if !model.ExpirationTime.IsNull() {
-		expTime := int(model.ExpirationTime.ValueInt64())
-		expirationTime = &expTime
-	}
-
-	// Map rules
-	var rules []restapi.RuleSpecification
-
-	// Check if rules are defined
-	if model.Rules != nil {
-		// Process entity count rule
-		if model.Rules.EntityCount != nil {
-			severity := mapSeverityToInt(model.Rules.EntityCount.Severity.ValueString())
-			conditionOperator := model.Rules.EntityCount.ConditionOperator.ValueString()
-			conditionValue := model.Rules.EntityCount.ConditionValue.ValueFloat64()
-
-			rules = append(rules, restapi.RuleSpecification{
-				DType:             restapi.EntityCountRuleType,
-				Severity:          severity,
-				ConditionOperator: &conditionOperator,
-				ConditionValue:    &conditionValue,
-			})
-		}
-
-		// Process entity count verification rule
-		if model.Rules.EntityCountVerification != nil {
-			severity := mapSeverityToInt(model.Rules.EntityCountVerification.Severity.ValueString())
-			conditionOperator := model.Rules.EntityCountVerification.ConditionOperator.ValueString()
-			conditionValue := model.Rules.EntityCountVerification.ConditionValue.ValueFloat64()
-			matchingEntityType := model.Rules.EntityCountVerification.MatchingEntityType.ValueString()
-			matchingOperator := model.Rules.EntityCountVerification.MatchingOperator.ValueString()
-			matchingEntityLabel := model.Rules.EntityCountVerification.MatchingEntityLabel.ValueString()
-
-			rules = append(rules, restapi.RuleSpecification{
-				DType:               restapi.EntityCountVerificationRuleType,
-				Severity:            severity,
-				ConditionOperator:   &conditionOperator,
-				ConditionValue:      &conditionValue,
-				MatchingEntityType:  &matchingEntityType,
-				MatchingOperator:    &matchingOperator,
-				MatchingEntityLabel: &matchingEntityLabel,
-			})
-		}
-
-		// Process entity verification rule
-		if model.Rules.EntityVerification != nil {
-			severity := mapSeverityToInt(model.Rules.EntityVerification.Severity.ValueString())
-			matchingEntityType := model.Rules.EntityVerification.MatchingEntityType.ValueString()
-			matchingOperator := model.Rules.EntityVerification.MatchingOperator.ValueString()
-			matchingEntityLabel := model.Rules.EntityVerification.MatchingEntityLabel.ValueString()
-			offlineDuration := int(model.Rules.EntityVerification.OfflineDuration.ValueInt64())
-
-			rules = append(rules, restapi.RuleSpecification{
-				DType:               restapi.EntityVerificationRuleType,
-				Severity:            severity,
-				MatchingEntityType:  &matchingEntityType,
-				MatchingOperator:    &matchingOperator,
-				MatchingEntityLabel: &matchingEntityLabel,
-				OfflineDuration:     &offlineDuration,
-			})
-		}
-
-		// Process host availability rule
-		if model.Rules.HostAvailability != nil {
-			severity := mapSeverityToInt(model.Rules.HostAvailability.Severity.ValueString())
-			offlineDuration := int(model.Rules.HostAvailability.OfflineDuration.ValueInt64())
-
-			var closeAfter *int
-			if !model.Rules.HostAvailability.CloseAfter.IsNull() {
-				ca := int(model.Rules.HostAvailability.CloseAfter.ValueInt64())
-				closeAfter = &ca
-			}
-
-			// Parse tag filter if provided
-			var tagFilter *restapi.TagFilter
-			if !model.Rules.HostAvailability.TagFilter.IsNull() && model.Rules.HostAvailability.TagFilter.ValueString() != "" {
-				tagFilterStr := model.Rules.HostAvailability.TagFilter.ValueString()
-				parser := tagfilter.NewParser()
-				expr, err := parser.Parse(tagFilterStr)
-				if err != nil {
-					diags.AddError(
-						CustomEventSpecificationResourceErrParseTagFilter,
-						fmt.Sprintf(CustomEventSpecificationResourceErrParseTagFilterMsg, err),
-					)
-					return nil, diags
-				}
-
-				mapper := tagfilter.NewMapper()
-				tagFilter = mapper.ToAPIModel(expr)
-			}
-
-			rules = append(rules, restapi.RuleSpecification{
-				DType:           restapi.HostAvailabilityRuleType,
-				Severity:        severity,
-				OfflineDuration: &offlineDuration,
-				CloseAfter:      closeAfter,
-				TagFilter:       tagFilter,
-			})
-		}
-
-		// Process system rule
-		if model.Rules.System != nil {
-			severity := mapSeverityToInt(model.Rules.System.Severity.ValueString())
-			systemRuleID := model.Rules.System.SystemRuleID.ValueString()
-
-			rules = append(rules, restapi.RuleSpecification{
-				DType:        restapi.SystemRuleType,
-				Severity:     severity,
-				SystemRuleID: &systemRuleID,
-			})
-		}
-
-		// Process threshold rule
-		if model.Rules.Threshold != nil {
-			severity := mapSeverityToInt(model.Rules.Threshold.Severity.ValueString())
-			metricName := model.Rules.Threshold.MetricName.ValueString()
-			rollup := int(model.Rules.Threshold.Rollup.ValueInt64())
-			window := int(model.Rules.Threshold.Window.ValueInt64())
-			aggregation := model.Rules.Threshold.Aggregation.ValueString()
-			conditionOperator := model.Rules.Threshold.ConditionOperator.ValueString()
-			conditionValue := model.Rules.Threshold.ConditionValue.ValueFloat64()
-
-			var metricPattern *restapi.MetricPattern
-			if model.Rules.Threshold.MetricPattern != nil {
-				prefix := model.Rules.Threshold.MetricPattern.Prefix.ValueString()
-
-				var postfix *string
-				if !model.Rules.Threshold.MetricPattern.Postfix.IsNull() && model.Rules.Threshold.MetricPattern.Postfix.ValueString() != "" {
-					p := model.Rules.Threshold.MetricPattern.Postfix.ValueString()
-					postfix = &p
-				}
-
-				var placeholder *string
-				if !model.Rules.Threshold.MetricPattern.Placeholder.IsNull() && model.Rules.Threshold.MetricPattern.Placeholder.ValueString() != "" {
-					p := model.Rules.Threshold.MetricPattern.Placeholder.ValueString()
-					placeholder = &p
-				}
-
-				operator := model.Rules.Threshold.MetricPattern.Operator.ValueString()
-
-				metricPattern = &restapi.MetricPattern{
-					Prefix:      prefix,
-					Postfix:     postfix,
-					Placeholder: placeholder,
-					Operator:    operator,
-				}
-			}
-
-			rules = append(rules, restapi.RuleSpecification{
-				DType:             restapi.ThresholdRuleType,
-				Severity:          severity,
-				MetricName:        &metricName,
-				Rollup:            &rollup,
-				Window:            &window,
-				Aggregation:       &aggregation,
-				ConditionOperator: &conditionOperator,
-				ConditionValue:    &conditionValue,
-				MetricPattern:     metricPattern,
-			})
-		}
-	}
-
-	// Create the API object
+// buildAPISpecification constructs the API specification from the model
+func (r *customEventSpecificationResourceFramework) buildAPISpecification(model *CustomEventSpecificationModel, diags *diag.Diagnostics) *restapi.CustomEventSpecification {
 	return &restapi.CustomEventSpecification{
-		ID:                  id,
+		ID:                  r.extractID(model),
 		Name:                model.Name.ValueString(),
 		EntityType:          model.EntityType.ValueString(),
-		Query:               query,
+		Query:               r.extractOptionalString(model.Query),
 		Triggering:          model.Triggering.ValueBool(),
-		Description:         description,
-		ExpirationTime:      expirationTime,
+		Description:         r.extractOptionalString(model.Description),
+		ExpirationTime:      r.extractOptionalInt(model.ExpirationTime),
 		Enabled:             model.Enabled.ValueBool(),
 		RuleLogicalOperator: model.RuleLogicalOperator.ValueString(),
-		Rules:               rules,
-	}, diags
+		Rules:               r.buildRulesFromModel(model.Rules, diags),
+	}
+}
+
+// extractID extracts the ID from the model, defaulting to empty string
+func (r *customEventSpecificationResourceFramework) extractID(model *CustomEventSpecificationModel) string {
+	if model.ID.IsNull() {
+		return CustomEventSpecificationDefaultEmptyString
+	}
+	return model.ID.ValueString()
+}
+
+// extractOptionalString converts a types.String to *string, handling null and empty values
+func (r *customEventSpecificationResourceFramework) extractOptionalString(value types.String) *string {
+	if value.IsNull() || value.ValueString() == CustomEventSpecificationDefaultEmptyString {
+		return nil
+	}
+	str := value.ValueString()
+	return &str
+}
+
+// extractOptionalInt converts a types.Int64 to *int, handling null values
+func (r *customEventSpecificationResourceFramework) extractOptionalInt(value types.Int64) *int {
+	if value.IsNull() {
+		return nil
+	}
+	intVal := int(value.ValueInt64())
+	return &intVal
+}
+
+// buildRulesFromModel converts model rules to API rule specifications
+func (r *customEventSpecificationResourceFramework) buildRulesFromModel(rulesModel *RulesModel, diags *diag.Diagnostics) []restapi.RuleSpecification {
+	if rulesModel == nil {
+		return nil
+	}
+
+	// Pre-allocate slice with estimated capacity to reduce allocations
+	rules := make([]restapi.RuleSpecification, 0, 6)
+
+	// Process each rule type using dedicated builder methods
+	if rulesModel.EntityCount != nil {
+		rules = append(rules, r.buildEntityCountRuleSpec(rulesModel.EntityCount))
+	}
+
+	if rulesModel.EntityCountVerification != nil {
+		rules = append(rules, r.buildEntityCountVerificationRuleSpec(rulesModel.EntityCountVerification))
+	}
+
+	if rulesModel.EntityVerification != nil {
+		rules = append(rules, r.buildEntityVerificationRuleSpec(rulesModel.EntityVerification))
+	}
+
+	if rulesModel.HostAvailability != nil {
+		if spec, ok := r.buildHostAvailabilityRuleSpec(rulesModel.HostAvailability, diags); ok {
+			rules = append(rules, spec)
+		}
+	}
+
+	if rulesModel.System != nil {
+		rules = append(rules, r.buildSystemRuleSpec(rulesModel.System))
+	}
+
+	if rulesModel.Threshold != nil {
+		rules = append(rules, r.buildThresholdRuleSpec(rulesModel.Threshold))
+	}
+
+	return rules
+}
+
+// buildEntityCountRuleSpec creates an entity count rule specification
+func (r *customEventSpecificationResourceFramework) buildEntityCountRuleSpec(rule *EntityCountRuleModel) restapi.RuleSpecification {
+	conditionOperator := rule.ConditionOperator.ValueString()
+	conditionValue := rule.ConditionValue.ValueFloat64()
+
+	return restapi.RuleSpecification{
+		DType:             restapi.EntityCountRuleType,
+		Severity:          mapSeverityToInt(rule.Severity.ValueString()),
+		ConditionOperator: &conditionOperator,
+		ConditionValue:    &conditionValue,
+	}
+}
+
+// buildEntityCountVerificationRuleSpec creates an entity count verification rule specification
+func (r *customEventSpecificationResourceFramework) buildEntityCountVerificationRuleSpec(rule *EntityCountVerificationRuleModel) restapi.RuleSpecification {
+	conditionOperator := rule.ConditionOperator.ValueString()
+	conditionValue := rule.ConditionValue.ValueFloat64()
+	matchingEntityType := rule.MatchingEntityType.ValueString()
+	matchingOperator := rule.MatchingOperator.ValueString()
+	matchingEntityLabel := rule.MatchingEntityLabel.ValueString()
+
+	return restapi.RuleSpecification{
+		DType:               restapi.EntityCountVerificationRuleType,
+		Severity:            mapSeverityToInt(rule.Severity.ValueString()),
+		ConditionOperator:   &conditionOperator,
+		ConditionValue:      &conditionValue,
+		MatchingEntityType:  &matchingEntityType,
+		MatchingOperator:    &matchingOperator,
+		MatchingEntityLabel: &matchingEntityLabel,
+	}
+}
+
+// buildEntityVerificationRuleSpec creates an entity verification rule specification
+func (r *customEventSpecificationResourceFramework) buildEntityVerificationRuleSpec(rule *EntityVerificationRuleModel) restapi.RuleSpecification {
+	matchingEntityType := rule.MatchingEntityType.ValueString()
+	matchingOperator := rule.MatchingOperator.ValueString()
+	matchingEntityLabel := rule.MatchingEntityLabel.ValueString()
+	offlineDuration := int(rule.OfflineDuration.ValueInt64())
+
+	return restapi.RuleSpecification{
+		DType:               restapi.EntityVerificationRuleType,
+		Severity:            mapSeverityToInt(rule.Severity.ValueString()),
+		MatchingEntityType:  &matchingEntityType,
+		MatchingOperator:    &matchingOperator,
+		MatchingEntityLabel: &matchingEntityLabel,
+		OfflineDuration:     &offlineDuration,
+	}
+}
+
+// buildHostAvailabilityRuleSpec creates a host availability rule specification
+// Returns the specification and a boolean indicating success
+func (r *customEventSpecificationResourceFramework) buildHostAvailabilityRuleSpec(rule *HostAvailabilityRuleModel, diags *diag.Diagnostics) (restapi.RuleSpecification, bool) {
+	offlineDuration := int(rule.OfflineDuration.ValueInt64())
+
+	spec := restapi.RuleSpecification{
+		DType:           restapi.HostAvailabilityRuleType,
+		Severity:        mapSeverityToInt(rule.Severity.ValueString()),
+		OfflineDuration: &offlineDuration,
+		CloseAfter:      r.extractOptionalInt(rule.CloseAfter),
+	}
+
+	// Parse tag filter if provided
+	if !rule.TagFilter.IsNull() && rule.TagFilter.ValueString() != CustomEventSpecificationDefaultEmptyString {
+		tagFilter, err := r.parseTagFilter(rule.TagFilter.ValueString())
+		if err != nil {
+			diags.AddError(
+				CustomEventSpecificationResourceErrParseTagFilter,
+				fmt.Sprintf(CustomEventSpecificationResourceErrParseTagFilterMsg, err),
+			)
+			return restapi.RuleSpecification{}, false
+		}
+		spec.TagFilter = tagFilter
+	}
+
+	return spec, true
+}
+
+// parseTagFilter parses a tag filter string into an API model
+func (r *customEventSpecificationResourceFramework) parseTagFilter(tagFilterStr string) (*restapi.TagFilter, error) {
+	parser := tagfilter.NewParser()
+	expr, err := parser.Parse(tagFilterStr)
+	if err != nil {
+		return nil, err
+	}
+
+	mapper := tagfilter.NewMapper()
+	return mapper.ToAPIModel(expr), nil
+}
+
+// buildSystemRuleSpec creates a system rule specification
+func (r *customEventSpecificationResourceFramework) buildSystemRuleSpec(rule *SystemRuleModel) restapi.RuleSpecification {
+	systemRuleID := rule.SystemRuleID.ValueString()
+
+	return restapi.RuleSpecification{
+		DType:        restapi.SystemRuleType,
+		Severity:     mapSeverityToInt(rule.Severity.ValueString()),
+		SystemRuleID: &systemRuleID,
+	}
+}
+
+// buildThresholdRuleSpec creates a threshold rule specification
+func (r *customEventSpecificationResourceFramework) buildThresholdRuleSpec(rule *ThresholdRuleModel) restapi.RuleSpecification {
+	metricName := rule.MetricName.ValueString()
+	rollup := int(rule.Rollup.ValueInt64())
+	window := int(rule.Window.ValueInt64())
+	aggregation := rule.Aggregation.ValueString()
+	conditionOperator := rule.ConditionOperator.ValueString()
+	conditionValue := rule.ConditionValue.ValueFloat64()
+
+	return restapi.RuleSpecification{
+		DType:             restapi.ThresholdRuleType,
+		Severity:          mapSeverityToInt(rule.Severity.ValueString()),
+		MetricName:        &metricName,
+		Rollup:            &rollup,
+		Window:            &window,
+		Aggregation:       &aggregation,
+		ConditionOperator: &conditionOperator,
+		ConditionValue:    &conditionValue,
+		MetricPattern:     r.buildMetricPattern(rule.MetricPattern),
+	}
+}
+
+// buildMetricPattern creates a metric pattern from the model
+func (r *customEventSpecificationResourceFramework) buildMetricPattern(pattern *MetricPatternModel) *restapi.MetricPattern {
+	if pattern == nil {
+		return nil
+	}
+
+	return &restapi.MetricPattern{
+		Prefix:      pattern.Prefix.ValueString(),
+		Operator:    pattern.Operator.ValueString(),
+		Postfix:     r.extractOptionalString(pattern.Postfix),
+		Placeholder: r.extractOptionalString(pattern.Placeholder),
+	}
 }
 
 // mapSeverityToInt maps the severity string to an integer value
 func mapSeverityToInt(severity string) int {
 	switch severity {
-	case "warning":
+	case CustomEventSpecificationSeverityWarning:
 		return 5
-	case "critical":
+	case CustomEventSpecificationSeverityCritical:
 		return 10
 	default:
 		return 5 // Default to warning

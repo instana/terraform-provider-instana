@@ -48,7 +48,6 @@ func TestSetComputedFields(t *testing.T) {
 
 func TestMapAccessRulesToState(t *testing.T) {
 	resource := &customDashboardResourceFramework{}
-	ctx := context.Background()
 
 	t.Run("with access rules", func(t *testing.T) {
 		relatedID := "user-123"
@@ -65,32 +64,31 @@ func TestMapAccessRulesToState(t *testing.T) {
 			},
 		}
 
-		models := resource.mapAccessRulesToState(ctx, accessRules)
+		models := resource.mapAccessRulesToState(accessRules)
 		require.Len(t, models, 2)
-		
+
 		assert.Equal(t, "READ", models[0].AccessType.ValueString())
 		assert.Equal(t, "USER", models[0].RelationType.ValueString())
 		assert.Equal(t, "user-123", models[0].RelatedID.ValueString())
-		
+
 		assert.Equal(t, "READ_WRITE", models[1].AccessType.ValueString())
 		assert.Equal(t, "GLOBAL", models[1].RelationType.ValueString())
 		assert.True(t, models[1].RelatedID.IsNull())
 	})
 
 	t.Run("with empty access rules", func(t *testing.T) {
-		models := resource.mapAccessRulesToState(ctx, []restapi.AccessRule{})
+		models := resource.mapAccessRulesToState([]restapi.AccessRule{})
 		assert.Nil(t, models)
 	})
 
 	t.Run("with nil access rules", func(t *testing.T) {
-		models := resource.mapAccessRulesToState(ctx, nil)
+		models := resource.mapAccessRulesToState(nil)
 		assert.Nil(t, models)
 	})
 }
 
 func TestMapAccessRulesFromState(t *testing.T) {
 	resource := &customDashboardResourceFramework{}
-	ctx := context.Background()
 
 	t.Run("with access rules", func(t *testing.T) {
 		models := []AccessRuleModel{
@@ -106,14 +104,14 @@ func TestMapAccessRulesFromState(t *testing.T) {
 			},
 		}
 
-		accessRules := resource.mapAccessRulesFromState(ctx, models)
+		accessRules := resource.mapAccessRulesFromState(models)
 		require.Len(t, accessRules, 2)
-		
+
 		assert.Equal(t, restapi.AccessTypeRead, accessRules[0].AccessType)
 		assert.Equal(t, restapi.RelationTypeUser, accessRules[0].RelationType)
 		require.NotNil(t, accessRules[0].RelatedID)
 		assert.Equal(t, "user-123", *accessRules[0].RelatedID)
-		
+
 		assert.Equal(t, restapi.AccessTypeReadWrite, accessRules[1].AccessType)
 		assert.Equal(t, restapi.RelationTypeGlobal, accessRules[1].RelationType)
 		assert.Nil(t, accessRules[1].RelatedID)
@@ -128,18 +126,18 @@ func TestMapAccessRulesFromState(t *testing.T) {
 			},
 		}
 
-		accessRules := resource.mapAccessRulesFromState(ctx, models)
+		accessRules := resource.mapAccessRulesFromState(models)
 		require.Len(t, accessRules, 1)
 		assert.Nil(t, accessRules[0].RelatedID)
 	})
 
 	t.Run("with empty access rules", func(t *testing.T) {
-		accessRules := resource.mapAccessRulesFromState(ctx, []AccessRuleModel{})
+		accessRules := resource.mapAccessRulesFromState([]AccessRuleModel{})
 		assert.Nil(t, accessRules)
 	})
 
 	t.Run("with nil access rules", func(t *testing.T) {
-		accessRules := resource.mapAccessRulesFromState(ctx, nil)
+		accessRules := resource.mapAccessRulesFromState(nil)
 		assert.Nil(t, accessRules)
 	})
 }
@@ -149,7 +147,7 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("with plan - successful update", func(t *testing.T) {
 		resource := &customDashboardResourceFramework{}
-		
+
 		widgets := json.RawMessage(`[{"type":"chart","data":"test"}]`)
 		dashboard := &restapi.CustomDashboard{
 			ID:      "dashboard-123",
@@ -201,7 +199,7 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("without plan - successful read", func(t *testing.T) {
 		resource := &customDashboardResourceFramework{}
-		
+
 		widgets := json.RawMessage(`[{"type":"chart","data":"test"}]`)
 		relatedID := "user-789"
 		dashboard := &restapi.CustomDashboard{
@@ -239,7 +237,7 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("without plan - empty access rules", func(t *testing.T) {
 		resource := &customDashboardResourceFramework{}
-		
+
 		widgets := json.RawMessage(`[]`)
 		dashboard := &restapi.CustomDashboard{
 			ID:          "dashboard-789",
@@ -264,7 +262,7 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("without plan - invalid widgets JSON", func(t *testing.T) {
 		resource := &customDashboardResourceFramework{}
-		
+
 		// Create invalid JSON that will fail marshaling
 		widgets := json.RawMessage(`invalid json`)
 		dashboard := &restapi.CustomDashboard{
@@ -286,7 +284,7 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("with plan - multiple access rules", func(t *testing.T) {
 		resource := &customDashboardResourceFramework{}
-		
+
 		relatedID1 := "user-123"
 		relatedID2 := "role-456"
 		dashboard := &restapi.CustomDashboard{
@@ -374,7 +372,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		dashboard, diags := resource.MapStateToDataObject(ctx, plan, nil)
 		require.False(t, diags.HasError())
 		require.NotNil(t, dashboard)
-		
+
 		assert.Equal(t, "dashboard-123", dashboard.ID)
 		assert.Equal(t, "Test Dashboard", dashboard.Title)
 		assert.NotNil(t, dashboard.Widgets)
@@ -402,7 +400,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		dashboard, diags := resource.MapStateToDataObject(ctx, nil, state)
 		require.False(t, diags.HasError())
 		require.NotNil(t, dashboard)
-		
+
 		assert.Equal(t, "dashboard-456", dashboard.ID)
 		assert.Equal(t, "State Dashboard", dashboard.Title)
 		assert.Contains(t, string(dashboard.Widgets), "widgets")
@@ -422,7 +420,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		dashboard, diags := resource.MapStateToDataObject(ctx, plan, nil)
 		require.False(t, diags.HasError())
 		require.NotNil(t, dashboard)
-		
+
 		assert.Equal(t, "", dashboard.ID)
 		assert.Equal(t, "New Dashboard", dashboard.Title)
 	})
@@ -438,7 +436,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		dashboard, diags := resource.MapStateToDataObject(ctx, plan, nil)
 		require.False(t, diags.HasError())
 		require.NotNil(t, dashboard)
-		
+
 		assert.Nil(t, dashboard.Widgets)
 	})
 
@@ -454,7 +452,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		dashboard, diags := resource.MapStateToDataObject(ctx, plan, nil)
 		require.False(t, diags.HasError())
 		require.NotNil(t, dashboard)
-		
+
 		assert.Nil(t, dashboard.AccessRules)
 	})
 
@@ -476,7 +474,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		dashboard, diags := resource.MapStateToDataObject(ctx, plan, nil)
 		require.False(t, diags.HasError())
 		require.NotNil(t, dashboard)
-		
+
 		require.Len(t, dashboard.AccessRules, 1)
 		assert.Equal(t, restapi.RelationTypeGlobal, dashboard.AccessRules[0].RelationType)
 		assert.Nil(t, dashboard.AccessRules[0].RelatedID)
@@ -502,7 +500,7 @@ func TestMapStateToDataObject(t *testing.T) {
 				}
 			]
 		}`
-		
+
 		model := CustomDashboardModel{
 			ID:      types.StringValue("dashboard-complex"),
 			Title:   types.StringValue("Complex Dashboard"),
@@ -513,7 +511,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		dashboard, diags := resource.MapStateToDataObject(ctx, plan, nil)
 		require.False(t, diags.HasError())
 		require.NotNil(t, dashboard)
-		
+
 		// Verify JSON is normalized and valid
 		var widgetsMap map[string]interface{}
 		err := json.Unmarshal(dashboard.Widgets, &widgetsMap)
@@ -559,7 +557,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		dashboard, diags := resource.MapStateToDataObject(ctx, plan, nil)
 		require.False(t, diags.HasError())
 		require.NotNil(t, dashboard)
-		
+
 		require.Len(t, dashboard.AccessRules, 5)
 		assert.Equal(t, restapi.RelationTypeUser, dashboard.AccessRules[0].RelationType)
 		assert.Equal(t, restapi.RelationTypeApiToken, dashboard.AccessRules[1].RelationType)
@@ -579,11 +577,11 @@ func TestMapStateToDataObject(t *testing.T) {
 
 func TestGetRestResource(t *testing.T) {
 	resource := &customDashboardResourceFramework{}
-	
+
 	// We can't fully test this without mocking the InstanaAPI,
 	// but we can verify the method signature and that it doesn't panic
 	assert.NotNil(t, resource)
-	
+
 	// The method should be callable (even if we can't test the return value without a mock)
 	// This ensures the interface is properly implemented
 	var _ resourcehandle.ResourceHandleFramework[*restapi.CustomDashboard] = resource
