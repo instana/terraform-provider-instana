@@ -7,8 +7,6 @@ const ResourceInstanaApplicationAlertConfigFramework = "application_alert_config
 const ResourceInstanaGlobalApplicationAlertConfigFramework = "global_application_alert_config"
 
 const (
-	//ApplicationAlertConfigFieldAlertChannelIDs constant value for field alerting_channel_ids of resource instana_application_alert_config
-	ApplicationAlertConfigFieldAlertChannelIDs = "alert_channel_ids"
 	//ApplicationAlertConfigFieldBoundaryScope constant value for field boundary_scope of resource instana_application_alert_config
 	ApplicationAlertConfigFieldBoundaryScope = "boundary_scope"
 	//ApplicationAlertConfigFieldDescription constant value for field description of resource instana_application_alert_config
@@ -53,8 +51,6 @@ const (
 	ApplicationAlertConfigFieldRuleStatusCodeEnd = "status_code_end"
 	//ApplicationAlertConfigFieldRuleThroughput constant value for field rule.throughput of resource instana_application_alert_config
 	ApplicationAlertConfigFieldRuleThroughput = "throughput"
-	//ApplicationAlertConfigFieldSeverity constant value for field severity of resource instana_application_alert_config
-	ApplicationAlertConfigFieldSeverity = "severity"
 	//ApplicationAlertConfigFieldTagFilter constant value for field tag_filter of resource instana_application_alert_config
 	ApplicationAlertConfigFieldTagFilter = "tag_filter"
 	//ApplicationAlertConfigFieldTimeThreshold constant value for field time_threshold of resource instana_application_alert_config
