@@ -1,5 +1,8 @@
 package infralertconfig
 
+// ResourceInstanaInfraAlertConfigFramework the name of the terraform-provider-instana resource to manage infrastructure alert configurations
+const ResourceInstanaInfraAlertConfigFramework = "infrastructure_alert_config"
+
 // Resource description constants
 const (
 	InfraAlertConfigDescResource               = "This resource represents an infrastructure alert configuration in Instana"
@@ -24,20 +27,12 @@ const (
 	InfraAlertConfigDescTimeWindow             = "The time window if the time threshold"
 	InfraAlertConfigDescAlertChannels          = "Set of alert channel IDs associated with the severity."
 	InfraAlertConfigDescAlertChannelIDs        = "List of IDs of alert channels defined in Instana."
-)
 
-// Error message constants
-const (
 	InfraAlertConfigErrMappingTagFilter    = "Error mapping tag filter"
 	InfraAlertConfigErrMappingTagFilterMsg = "Failed to map tag filter: %s"
 	InfraAlertConfigErrParsingTagFilter    = "Error parsing tag filter"
 	InfraAlertConfigErrParsingTagFilterMsg = "Failed to parse tag filter: %s"
-)
 
-// ResourceInstanaInfraAlertConfigFramework the name of the terraform-provider-instana resource to manage infrastructure alert configurations
-const ResourceInstanaInfraAlertConfigFramework = "infrastructure_alert_config"
-
-const (
 	InfraAlertConfigFieldName                  = "name"
 	InfraAlertConfigFieldFullName              = "full_name"
 	InfraAlertConfigFieldDescription           = "description"

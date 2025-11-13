@@ -50,10 +50,9 @@ const (
 	SliConfigFieldIncludeInternal = "include_internal"
 	//SliConfigFieldIncludeSynthetic constant value for the schema field sli_entity.*.good_event_filter_expression
 	SliConfigFieldIncludeSynthetic = "include_synthetic"
-)
 
-// Resource description constants
-const (
+	// Resource description constants
+
 	// SliConfigDescResource is the description for the SLI config resource
 	SliConfigDescResource = "This resource manages SLI configurations in Instana."
 	// SliConfigDescID is the description for the ID field
@@ -106,10 +105,9 @@ const (
 	SliConfigDescWebsiteTimeBased = "The SLI entity of type websiteTimeBased to use for the SLI config"
 	// SliConfigDescFilterExpression is the description for the filter_expression field
 	SliConfigDescFilterExpression = "The tag filter expression"
-)
 
-// Error message constants
-const (
+	// Error message constants
+
 	// SliConfigErrUnsupportedEntityType is the error title for unsupported SLI entity type
 	SliConfigErrUnsupportedEntityType = "Unsupported SLI entity type"
 	// SliConfigErrUnsupportedEntityTypeMsg is the error message for unsupported SLI entity type

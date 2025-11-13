@@ -8,7 +8,6 @@ import (
 // ApplicationAlertConfigModel represents the data model for the application alert configuration resource
 type ApplicationAlertConfigModel struct {
 	ID                  types.String                `tfsdk:"id"`
-	AlertChannelIDs     []types.String              `tfsdk:"alert_channel_ids"`
 	AlertChannels       types.Map                   `tfsdk:"alert_channels"`
 	Applications        []ApplicationModel          `tfsdk:"application"`
 	BoundaryScope       types.String                `tfsdk:"boundary_scope"`
@@ -21,7 +20,6 @@ type ApplicationAlertConfigModel struct {
 	IncludeSynthetic    types.Bool                  `tfsdk:"include_synthetic"`
 	Name                types.String                `tfsdk:"name"`
 	Rules               []RuleWithThresholdModel    `tfsdk:"rules"`
-	Severity            types.String                `tfsdk:"severity"`
 	TagFilter           types.String                `tfsdk:"tag_filter"`
 	TimeThreshold       *AppAlertTimeThresholdModel `tfsdk:"time_threshold"`
 	Triggering          types.Bool                  `tfsdk:"triggering"`

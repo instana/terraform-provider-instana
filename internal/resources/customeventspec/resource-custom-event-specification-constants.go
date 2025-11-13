@@ -1,5 +1,8 @@
 package customeventspec
 
+// ResourceInstanaCustomEventSpecificationFramework the name of the terraform-provider-instana resource to manage custom event specifications
+const ResourceInstanaCustomEventSpecificationFramework = "custom_event_specification"
+
 // Resource description constants
 const (
 	CustomEventSpecificationResourceDescResource                 = "This resource represents a custom event specification in Instana"
@@ -38,18 +41,12 @@ const (
 	CustomEventSpecificationResourceDescMetricPatternPostfix     = "The postfix of the metric pattern"
 	CustomEventSpecificationResourceDescMetricPatternPlaceholder = "The placeholder of the metric pattern"
 	CustomEventSpecificationResourceDescMetricPatternOperator    = "The operator of the metric pattern"
-)
 
-// Error message constants
-const (
+	// Error message constants
+
 	CustomEventSpecificationResourceErrParseTagFilter    = "Error parsing tag filter"
 	CustomEventSpecificationResourceErrParseTagFilterMsg = "Failed to parse tag filter: %s"
-)
 
-// ResourceInstanaCustomEventSpecificationFramework the name of the terraform-provider-instana resource to manage custom event specifications
-const ResourceInstanaCustomEventSpecificationFramework = "custom_event_specification"
-
-const (
 	CustomEventSpecificationFieldName           = "name"
 	CustomEventSpecificationFieldEntityType     = "entity_type"
 	CustomEventSpecificationFieldQuery          = "query"
