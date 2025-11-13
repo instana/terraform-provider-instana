@@ -714,8 +714,6 @@ resource "instana_application_alert_config" "comprehensive" {
 * `rules` - Required - List of rules where each rule is associated with multiple thresholds and their corresponding severity levels (list). [Details](#rules-argument-reference)
 * `time_threshold` - Required - Indicates the type of violation of the defined threshold (object). [Details](#time-threshold-argument-reference)
 * `alert_channels` - Optional - Map of alert channel IDs associated with severity levels (map of sets). Keys: `warning`, `critical`
-* `alert_channel_ids` - Optional - List of IDs of alert channels defined in Instana (deprecated, use `alert_channels` instead)
-* `severity` - Optional - The severity of the alert when triggered (`critical` or `warning`) (deprecated, use `rules` with `thresholds` instead)
 * `custom_payload_field` - Optional - An optional list of custom payload fields (static key/value pairs or dynamic values added to the event). [Details](#custom-payload-field-argument-reference)
 
 ### Tag Filter Argument Reference

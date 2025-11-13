@@ -39,12 +39,6 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
-					ApplicationAlertConfigFieldAlertChannelIDs: schema.SetAttribute{
-						Optional:    true,
-						Computed:    true,
-						Description: "List of IDs of alert channels defined in Instana. Deprecated: Use alert_channels instead.",
-						ElementType: types.StringType,
-					},
 					ApplicationAlertConfigFieldAlertChannels: schema.MapAttribute{
 						Optional:    true,
 						Computed:    true,
@@ -101,13 +95,6 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 						Description: "Name for the application alert configuration",
 						Validators: []validator.String{
 							stringvalidator.LengthBetween(0, 256),
-						},
-					},
-					ApplicationAlertConfigFieldSeverity: schema.StringAttribute{
-						Optional:    true,
-						Description: "The severity of the alert when triggered. Deprecated: Use rules with thresholds instead.",
-						Validators: []validator.String{
-							stringvalidator.OneOf(restapi.SupportedSeverities.TerraformRepresentations()...),
 						},
 					},
 					ApplicationAlertConfigFieldTagFilter: schema.StringAttribute{
@@ -524,13 +511,47 @@ func (r *applicationAlertConfigResourceFrameworkImpl) SetID(data *restapi.Applic
 	data.ID = id
 }
 
+// MapStateToDataObject converts Terraform state to API data object
 func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx context.Context, state tfsdk.State) (*restapi.ApplicationAlertConfig, diag.Diagnostics) {
 	var model ApplicationAlertConfigModel
-	diags := state.Get(ctx, &model)
+	var diags diag.Diagnostics
+
+	// Extract model from state
+	diags = state.Get(ctx, &model)
 	if diags.HasError() {
 		return nil, diags
 	}
 
+	// Initialize result with basic fields
+	result := r.mapBasicFields(&model)
+
+	// Map optional and complex fields
+	if err := r.mapTagFilter(&model, result, &diags); err != nil {
+		return nil, diags
+	}
+
+	r.mapAlertChannels(ctx, &model, result, &diags)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	r.mapApplications(&model, result)
+
+	if err := r.mapCustomPayloadFields(ctx, &model, result, &diags); err != nil {
+		return nil, diags
+	}
+
+	if err := r.mapRules(&model, result, &diags); err != nil {
+		return nil, diags
+	}
+
+	r.mapTimeThreshold(&model, result)
+
+	return result, diags
+}
+
+// mapBasicFields extracts and maps basic configuration fields
+func (r *applicationAlertConfigResourceFrameworkImpl) mapBasicFields(model *ApplicationAlertConfigModel) *restapi.ApplicationAlertConfig {
 	result := &restapi.ApplicationAlertConfig{
 		ID:               model.ID.ValueString(),
 		Name:             model.Name.ValueString(),
@@ -540,329 +561,363 @@ func (r *applicationAlertConfigResourceFrameworkImpl) MapStateToDataObject(ctx c
 		IncludeInternal:  model.IncludeInternal.ValueBool(),
 		IncludeSynthetic: model.IncludeSynthetic.ValueBool(),
 		Triggering:       model.Triggering.ValueBool(),
+		GracePeriod:      extractGracePeriod(model.GracePeriod),
 	}
 
-	// Handle grace period
-
-	result.GracePeriod = extractGracePeriod(model.GracePeriod)
-
-	// Handle granularity
+	// Map granularity if present
 	if !model.Granularity.IsNull() && !model.Granularity.IsUnknown() {
 		result.Granularity = restapi.Granularity(model.Granularity.ValueInt64())
 	}
 
-	// Handle tag filter
-	if !model.TagFilter.IsNull() && !model.TagFilter.IsUnknown() {
-		tagFilterExpression := model.TagFilter.ValueString()
-		if len(tagFilterExpression) > 0 {
-			parsedExpression, err := tagfilter.ParseExpression(tagFilterExpression)
-			if err != nil {
-				return nil, diag.Diagnostics{
-					diag.NewErrorDiagnostic(
-						"Failed to parse tag filter expression",
-						fmt.Sprintf("Invalid tag filter expression: %s", err.Error()),
-					),
-				}
-			}
-			result.TagFilterExpression = parsedExpression
+	return result
+}
+
+// mapTagFilter parses and maps tag filter expression
+func (r *applicationAlertConfigResourceFrameworkImpl) mapTagFilter(model *ApplicationAlertConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
+	if model.TagFilter.IsNull() || model.TagFilter.IsUnknown() {
+		return nil
+	}
+
+	tagFilterExpression := model.TagFilter.ValueString()
+	if len(tagFilterExpression) == 0 {
+		return nil
+	}
+
+	parsedExpression, err := tagfilter.ParseExpression(tagFilterExpression)
+	if err != nil {
+		diags.AddError(
+			"Failed to parse tag filter expression",
+			fmt.Sprintf("Invalid tag filter expression: %s", err.Error()),
+		)
+		return err
+	}
+	result.TagFilterExpression = parsedExpression
+	return nil
+}
+
+// mapAlertChannels converts alert channels from state to API format
+func (r *applicationAlertConfigResourceFrameworkImpl) mapAlertChannels(ctx context.Context, model *ApplicationAlertConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) {
+	if model.AlertChannels.IsNull() || model.AlertChannels.IsUnknown() {
+		return
+	}
+
+	alertChannels := make(map[string][]string, len(model.AlertChannels.Elements()))
+	for severity, channelSet := range model.AlertChannels.Elements() {
+		var channelIDs []string
+		*diags = channelSet.(types.Set).ElementsAs(ctx, &channelIDs, false)
+		if diags.HasError() {
+			return
+		}
+		alertChannels[severity] = channelIDs
+	}
+	result.AlertChannels = alertChannels
+}
+
+// mapApplications converts application scope configuration
+func (r *applicationAlertConfigResourceFrameworkImpl) mapApplications(model *ApplicationAlertConfigModel, result *restapi.ApplicationAlertConfig) {
+	if len(model.Applications) == 0 {
+		return
+	}
+
+	result.Applications = make(map[string]restapi.IncludedApplication, len(model.Applications))
+	for _, app := range model.Applications {
+		appID := app.ApplicationID.ValueString()
+		result.Applications[appID] = restapi.IncludedApplication{
+			ApplicationID: appID,
+			Inclusive:     app.Inclusive.ValueBool(),
+			Services:      r.mapServices(app.Services),
+		}
+	}
+}
+
+// mapServices converts service scope configuration
+func (r *applicationAlertConfigResourceFrameworkImpl) mapServices(services []ServiceModel) map[string]restapi.IncludedService {
+	if len(services) == 0 {
+		return nil
+	}
+
+	result := make(map[string]restapi.IncludedService, len(services))
+	for _, svc := range services {
+		svcID := svc.ServiceID.ValueString()
+		result[svcID] = restapi.IncludedService{
+			ServiceID: svcID,
+			Inclusive: svc.Inclusive.ValueBool(),
+			Endpoints: r.mapEndpoints(svc.Endpoints),
+		}
+	}
+	return result
+}
+
+// mapEndpoints converts endpoint scope configuration
+func (r *applicationAlertConfigResourceFrameworkImpl) mapEndpoints(endpoints []EndpointModel) map[string]restapi.IncludedEndpoint {
+	if len(endpoints) == 0 {
+		return nil
+	}
+
+	result := make(map[string]restapi.IncludedEndpoint, len(endpoints))
+	for _, ep := range endpoints {
+		epID := ep.EndpointID.ValueString()
+		result[epID] = restapi.IncludedEndpoint{
+			EndpointID: epID,
+			Inclusive:  ep.Inclusive.ValueBool(),
+		}
+	}
+	return result
+}
+
+// mapCustomPayloadFields converts custom payload fields
+func (r *applicationAlertConfigResourceFrameworkImpl) mapCustomPayloadFields(ctx context.Context, model *ApplicationAlertConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
+	if model.CustomPayloadFields.IsNull() || model.CustomPayloadFields.IsUnknown() {
+		return nil
+	}
+
+	customerPayloadFields, payloadDiags := shared.MapCustomPayloadFieldsToAPIObject(ctx, model.CustomPayloadFields)
+	if payloadDiags.HasError() {
+		diags.Append(payloadDiags...)
+		return fmt.Errorf("failed to map custom payload fields")
+	}
+	result.CustomerPayloadFields = customerPayloadFields
+	return nil
+}
+
+// mapRules converts alert rules with thresholds
+func (r *applicationAlertConfigResourceFrameworkImpl) mapRules(model *ApplicationAlertConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
+	if len(model.Rules) == 0 {
+		return nil
+	}
+
+	result.Rules = make([]restapi.ApplicationAlertRuleWithThresholds, len(model.Rules))
+	for i, ruleWithThreshold := range model.Rules {
+		if err := r.mapSingleRule(i, &ruleWithThreshold, result, diags); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// mapSingleRule converts a single rule with its thresholds
+func (r *applicationAlertConfigResourceFrameworkImpl) mapSingleRule(index int, ruleWithThreshold *RuleWithThresholdModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
+	result.Rules[index] = restapi.ApplicationAlertRuleWithThresholds{
+		ThresholdOperator: ruleWithThreshold.ThresholdOperator.ValueString(),
+	}
+
+	if ruleWithThreshold.Rule != nil {
+		if err := r.mapRuleConfiguration(index, ruleWithThreshold.Rule, result, diags); err != nil {
+			return err
 		}
 	}
 
-	// Handle severity (deprecated but supported for backward compatibility)
-	if !model.Severity.IsNull() && !model.Severity.IsUnknown() {
-		severity := model.Severity.ValueString()
-		result.Severity = restapi.SeverityFromTerraformRepresentation(severity)
+	if ruleWithThreshold.Thresholds != nil {
+		r.mapThresholds(index, ruleWithThreshold.Thresholds, result)
 	}
 
-	// Handle alert channel IDs (deprecated but supported for backward compatibility)
-	if len(model.AlertChannelIDs) > 0 {
-		alertChannelIDs := make([]string, len(model.AlertChannelIDs))
-		for i, id := range model.AlertChannelIDs {
-			alertChannelIDs[i] = id.ValueString()
-		}
-		result.AlertChannelIDs = alertChannelIDs
+	return nil
+}
+
+// mapRuleConfiguration maps the rule type and its specific configuration
+func (r *applicationAlertConfigResourceFrameworkImpl) mapRuleConfiguration(index int, rule *RuleModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
+	result.Rules[index].Rule = &restapi.ApplicationAlertRule{}
+
+	// Map each rule type
+	if rule.ErrorRate != nil {
+		return r.mapErrorRateRule(index, rule.ErrorRate, result, diags)
+	}
+	if rule.Errors != nil {
+		return r.mapErrorsRule(index, rule.Errors, result, diags)
+	}
+	if rule.Logs != nil {
+		return r.mapLogsRule(index, rule.Logs, result, diags)
+	}
+	if rule.Slowness != nil {
+		return r.mapSlownessRule(index, rule.Slowness, result, diags)
+	}
+	if rule.StatusCode != nil {
+		return r.mapStatusCodeRule(index, rule.StatusCode, result, diags)
+	}
+	if rule.Throughput != nil {
+		return r.mapThroughputRule(index, rule.Throughput, result, diags)
 	}
 
-	// Handle alert channels (new format as map of severity to channel IDs)
-	if !model.AlertChannels.IsNull() && !model.AlertChannels.IsUnknown() {
-		alertChannels := make(map[string][]string)
-		for k, v := range model.AlertChannels.Elements() {
-			var channelIDs []string
-			diags = v.(types.Set).ElementsAs(ctx, &channelIDs, false)
-			if diags.HasError() {
-				return nil, diags
-			}
-			alertChannels[k] = channelIDs
-		}
-		result.AlertChannels = alertChannels
+	return nil
+}
+
+// mapErrorRateRule maps error rate rule configuration
+func (r *applicationAlertConfigResourceFrameworkImpl) mapErrorRateRule(index int, errorRate *RuleConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
+	if errorRate.MetricName.IsNull() || errorRate.MetricName.IsUnknown() {
+		diags.AddError("Validation Error", "MetricName is required for error rate rules")
+		return fmt.Errorf("missing metric name")
+	}
+	result.Rules[index].Rule.AlertType = ApplicationAlertConfigFieldRuleErrorRate
+	result.Rules[index].Rule.MetricName = errorRate.MetricName.ValueString()
+	result.Rules[index].Rule.Aggregation = restapi.Aggregation(errorRate.Aggregation.ValueString())
+	return nil
+}
+
+// mapErrorsRule maps errors rule configuration
+func (r *applicationAlertConfigResourceFrameworkImpl) mapErrorsRule(index int, errors *RuleConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
+	if errors.MetricName.IsNull() || errors.MetricName.IsUnknown() {
+		diags.AddError("Validation Error", "MetricName is required for error rules")
+		return fmt.Errorf("missing metric name")
+	}
+	result.Rules[index].Rule.AlertType = ApplicationAlertConfigFieldRuleErrors
+	result.Rules[index].Rule.MetricName = errors.MetricName.ValueString()
+	result.Rules[index].Rule.Aggregation = restapi.Aggregation(errors.Aggregation.ValueString())
+	return nil
+}
+
+// mapLogsRule maps logs rule configuration with additional fields
+func (r *applicationAlertConfigResourceFrameworkImpl) mapLogsRule(index int, logs *LogsRuleModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
+	if logs.MetricName.IsNull() || logs.MetricName.IsUnknown() ||
+		logs.Level.IsNull() || logs.Level.IsUnknown() ||
+		logs.Operator.IsNull() || logs.Operator.IsUnknown() {
+		diags.AddError("Validation Error", "MetricName, log level, and log operator are required for log rules")
+		return fmt.Errorf("missing required fields")
 	}
 
-	// Handle applications
-	if len(model.Applications) > 0 {
-		result.Applications = make(map[string]restapi.IncludedApplication)
-		for _, app := range model.Applications {
-			appID := app.ApplicationID.ValueString()
-			services := make(map[string]restapi.IncludedService)
+	result.Rules[index].Rule.AlertType = ApplicationAlertConfigFieldRuleLogs
+	result.Rules[index].Rule.MetricName = logs.MetricName.ValueString()
+	result.Rules[index].Rule.Aggregation = restapi.Aggregation(logs.Aggregation.ValueString())
 
-			if len(app.Services) > 0 {
-				for _, svc := range app.Services {
-					svcID := svc.ServiceID.ValueString()
-					endpoints := make(map[string]restapi.IncludedEndpoint)
+	level := restapi.LogLevel(logs.Level.ValueString())
+	result.Rules[index].Rule.Level = &level
 
-					if len(svc.Endpoints) > 0 {
-						for _, ep := range svc.Endpoints {
-							epID := ep.EndpointID.ValueString()
-							endpoints[epID] = restapi.IncludedEndpoint{
-								EndpointID: epID,
-								Inclusive:  ep.Inclusive.ValueBool(),
-							}
-						}
-					}
+	message := logs.Message.ValueString()
+	result.Rules[index].Rule.Message = &message
 
-					services[svcID] = restapi.IncludedService{
-						ServiceID: svcID,
-						Inclusive: svc.Inclusive.ValueBool(),
-						Endpoints: endpoints,
-					}
-				}
-			}
+	operator := restapi.ExpressionOperator(logs.Operator.ValueString())
+	result.Rules[index].Rule.Operator = &operator
 
-			result.Applications[appID] = restapi.IncludedApplication{
-				ApplicationID: appID,
-				Inclusive:     app.Inclusive.ValueBool(),
-				Services:      services,
-			}
-		}
+	return nil
+}
+
+// mapSlownessRule maps slowness rule configuration
+func (r *applicationAlertConfigResourceFrameworkImpl) mapSlownessRule(index int, slowness *RuleConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
+	if slowness.MetricName.IsNull() || slowness.MetricName.IsUnknown() {
+		diags.AddError("Validation Error", "MetricName is required for slowness rules")
+		return fmt.Errorf("missing metric name")
+	}
+	result.Rules[index].Rule.AlertType = ApplicationAlertConfigFieldRuleSlowness
+	result.Rules[index].Rule.MetricName = slowness.MetricName.ValueString()
+	result.Rules[index].Rule.Aggregation = restapi.Aggregation(slowness.Aggregation.ValueString())
+	return nil
+}
+
+// mapStatusCodeRule maps status code rule configuration with range
+func (r *applicationAlertConfigResourceFrameworkImpl) mapStatusCodeRule(index int, statusCode *StatusCodeRuleModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
+	if statusCode.MetricName.IsNull() || statusCode.MetricName.IsUnknown() {
+		diags.AddError("Validation Error", "MetricName is required for status code rules")
+		return fmt.Errorf("missing metric name")
 	}
 
-	// Handle custom payload fields
-	if !model.CustomPayloadFields.IsNull() && !model.CustomPayloadFields.IsUnknown() {
-		var customerPayloadFields []restapi.CustomPayloadField[any]
-		var payloadDiags diag.Diagnostics
-		customerPayloadFields, payloadDiags = shared.MapCustomPayloadFieldsToAPIObject(ctx, model.CustomPayloadFields)
-		if payloadDiags.HasError() {
-			diags.Append(payloadDiags...)
-			return nil, diags
-		}
-		result.CustomerPayloadFields = customerPayloadFields
+	result.Rules[index].Rule.AlertType = ApplicationAlertConfigFieldRuleStatusCode
+	result.Rules[index].Rule.MetricName = statusCode.MetricName.ValueString()
+	result.Rules[index].Rule.Aggregation = restapi.Aggregation(statusCode.Aggregation.ValueString())
+
+	statusCodeStart := int32(statusCode.StatusCodeStart.ValueInt64())
+	result.Rules[index].Rule.StatusCodeStart = &statusCodeStart
+
+	statusCodeEnd := int32(statusCode.StatusCodeEnd.ValueInt64())
+	result.Rules[index].Rule.StatusCodeEnd = &statusCodeEnd
+
+	return nil
+}
+
+// mapThroughputRule maps throughput rule configuration
+func (r *applicationAlertConfigResourceFrameworkImpl) mapThroughputRule(index int, throughput *RuleConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
+	if throughput.MetricName.IsNull() || throughput.MetricName.IsUnknown() {
+		diags.AddError("Validation Error", "MetricName is required for throughput rules")
+		return fmt.Errorf("missing metric name")
 	}
+	result.Rules[index].Rule.AlertType = ApplicationAlertConfigFieldRuleThroughput
+	result.Rules[index].Rule.MetricName = throughput.MetricName.ValueString()
+	result.Rules[index].Rule.Aggregation = restapi.Aggregation(throughput.Aggregation.ValueString())
+	return nil
+}
 
-	// Handle rules (new format with multiple thresholds and severity levels)
-	if len(model.Rules) > 0 {
-		result.Rules = make([]restapi.ApplicationAlertRuleWithThresholds, len(model.Rules))
-		for i, ruleWithThreshold := range model.Rules {
-			result.Rules[i] = restapi.ApplicationAlertRuleWithThresholds{
-				ThresholdOperator: ruleWithThreshold.ThresholdOperator.ValueString(),
-			}
+// mapThresholds converts threshold configurations for warning and critical levels
+func (r *applicationAlertConfigResourceFrameworkImpl) mapThresholds(index int, thresholds *ApplicationThresholdModel, result *restapi.ApplicationAlertConfig) {
+	thresholdMap := make(map[restapi.AlertSeverity]restapi.ThresholdRule)
 
-			// Handle rule configuration
-			if ruleWithThreshold.Rule != nil {
-				rule := ruleWithThreshold.Rule
-
-				result.Rules[i].Rule = &restapi.ApplicationAlertRule{}
-
-				// Handle error rate rule
-				if rule.ErrorRate != nil {
-					if rule.ErrorRate.MetricName.IsNull() || rule.ErrorRate.MetricName.IsUnknown() {
-						diags.AddError(
-							"MetricName is required for Error rate rules",
-							"MetricName is required for Error rate rules",
-						)
-						return nil, diags
-					}
-					result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleErrorRate
-					result.Rules[i].Rule.MetricName = rule.ErrorRate.MetricName.ValueString()
-					result.Rules[i].Rule.Aggregation = restapi.Aggregation(rule.ErrorRate.Aggregation.ValueString())
-				}
-
-				// Handle errors rule
-				if rule.Errors != nil {
-					if rule.Errors.MetricName.IsNull() || rule.Errors.MetricName.IsUnknown() {
-						diags.AddError(
-							"MetricName is required for Error rules",
-							"MetricName is required for Error rules",
-						)
-						return nil, diags
-					}
-					result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleErrors
-					result.Rules[i].Rule.MetricName = rule.Errors.MetricName.ValueString()
-					result.Rules[i].Rule.Aggregation = restapi.Aggregation(rule.Errors.Aggregation.ValueString())
-				}
-
-				// Handle logs rule
-				if rule.Logs != nil {
-					if rule.Logs.MetricName.IsNull() || rule.Logs.MetricName.IsUnknown() ||
-						rule.Logs.Level.IsNull() || rule.Logs.Level.IsUnknown() ||
-						rule.Logs.Operator.IsNull() || rule.Logs.Operator.IsUnknown() {
-						diags.AddError(
-							"MetricName,log level,log operator are required for log rules",
-							"MetricName,log level,log operator are required for log rules",
-						)
-						return nil, diags
-					}
-					result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleLogs
-					result.Rules[i].Rule.MetricName = rule.Logs.MetricName.ValueString()
-					result.Rules[i].Rule.Aggregation = restapi.Aggregation(rule.Logs.Aggregation.ValueString())
-
-					// Set additional fields for logs
-					level := restapi.LogLevel(rule.Logs.Level.ValueString())
-					result.Rules[i].Rule.Level = &level
-
-					message := rule.Logs.Message.ValueString()
-					result.Rules[i].Rule.Message = &message
-
-					operator := restapi.ExpressionOperator(rule.Logs.Operator.ValueString())
-					result.Rules[i].Rule.Operator = &operator
-				}
-
-				// Handle slowness rule
-				if rule.Slowness != nil {
-					log.Printf("Slowness : %+v\n", rule.Slowness)
-					if rule.Slowness.MetricName.IsNull() || rule.Slowness.MetricName.IsUnknown() {
-						diags.AddError(
-							"MetricName is required for slowness",
-							"MetricName is required for slowness",
-						)
-						return nil, diags
-					}
-					result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleSlowness
-					result.Rules[i].Rule.MetricName = rule.Slowness.MetricName.ValueString()
-					result.Rules[i].Rule.Aggregation = restapi.Aggregation(rule.Slowness.Aggregation.ValueString())
-				}
-
-				// Handle status code rule
-				if rule.StatusCode != nil {
-					if rule.StatusCode.MetricName.IsNull() || rule.StatusCode.MetricName.IsUnknown() {
-						diags.AddError(
-							"MetricName is required for status code",
-							"MetricName is required for statuc code",
-						)
-						return nil, diags
-					}
-					result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleStatusCode
-					result.Rules[i].Rule.MetricName = rule.StatusCode.MetricName.ValueString()
-					result.Rules[i].Rule.Aggregation = restapi.Aggregation(rule.StatusCode.Aggregation.ValueString())
-
-					// Set additional fields for status code
-					statusCodeStart := int32(rule.StatusCode.StatusCodeStart.ValueInt64())
-					result.Rules[i].Rule.StatusCodeStart = &statusCodeStart
-
-					statusCodeEnd := int32(rule.StatusCode.StatusCodeEnd.ValueInt64())
-					result.Rules[i].Rule.StatusCodeEnd = &statusCodeEnd
-				}
-
-				// Handle throughput rule
-				if rule.Throughput != nil {
-					if rule.Throughput.MetricName.IsNull() || rule.Throughput.MetricName.IsUnknown() {
-						diags.AddError(
-							"MetricName is required for througput",
-							"MetricName is required for throughput",
-						)
-						return nil, diags
-					}
-					result.Rules[i].Rule.AlertType = ApplicationAlertConfigFieldRuleThroughput
-					result.Rules[i].Rule.MetricName = rule.Throughput.MetricName.ValueString()
-					result.Rules[i].Rule.Aggregation = restapi.Aggregation(rule.Throughput.Aggregation.ValueString())
-				}
-			}
-
-			// Handle thresholds
-			if ruleWithThreshold.Thresholds != nil {
-				thresholdMap := make(map[restapi.AlertSeverity]restapi.ThresholdRule)
-
-				// Map warning threshold
-				if ruleWithThreshold.Thresholds.Warning != nil {
-					if ruleWithThreshold.Thresholds.Warning.Static != nil {
-						warningThreshold := &restapi.ThresholdRule{
-							Type: "staticThreshold",
-						}
-						if !ruleWithThreshold.Thresholds.Warning.Static.Value.IsNull() && !ruleWithThreshold.Thresholds.Warning.Static.Value.IsUnknown() {
-							value := float64(ruleWithThreshold.Thresholds.Warning.Static.Value.ValueInt64())
-							warningThreshold.Value = &value
-						}
-						thresholdMap[restapi.WarningSeverity] = *warningThreshold
-					} else if ruleWithThreshold.Thresholds.Warning.AdaptiveBaseline != nil {
-						warningThreshold := &restapi.ThresholdRule{
-							Type: "adaptiveBaseline",
-						}
-						if !ruleWithThreshold.Thresholds.Warning.AdaptiveBaseline.DeviationFactor.IsNull() && !ruleWithThreshold.Thresholds.Warning.AdaptiveBaseline.DeviationFactor.IsUnknown() {
-							deviation := ruleWithThreshold.Thresholds.Warning.AdaptiveBaseline.DeviationFactor.ValueFloat32()
-							warningThreshold.DeviationFactor = &deviation
-						}
-						if !ruleWithThreshold.Thresholds.Warning.AdaptiveBaseline.Adaptability.IsNull() && !ruleWithThreshold.Thresholds.Warning.AdaptiveBaseline.Adaptability.IsUnknown() {
-							adaptability := ruleWithThreshold.Thresholds.Warning.AdaptiveBaseline.Adaptability.ValueFloat32()
-							warningThreshold.Adaptability = &adaptability
-						}
-						if !ruleWithThreshold.Thresholds.Warning.AdaptiveBaseline.Seasonality.IsNull() && !ruleWithThreshold.Thresholds.Warning.AdaptiveBaseline.Seasonality.IsUnknown() {
-							seasonality := restapi.ThresholdSeasonality(ruleWithThreshold.Thresholds.Warning.AdaptiveBaseline.Seasonality.ValueString())
-							warningThreshold.Seasonality = &seasonality
-						}
-						thresholdMap[restapi.WarningSeverity] = *warningThreshold
-					}
-				}
-
-				// Map critical threshold
-				if ruleWithThreshold.Thresholds.Critical != nil {
-					if ruleWithThreshold.Thresholds.Critical.Static != nil {
-						criticalThreshold := &restapi.ThresholdRule{
-							Type: "staticThreshold",
-						}
-						if !ruleWithThreshold.Thresholds.Critical.Static.Value.IsNull() && !ruleWithThreshold.Thresholds.Critical.Static.Value.IsUnknown() {
-							value := float64(ruleWithThreshold.Thresholds.Critical.Static.Value.ValueInt64())
-							criticalThreshold.Value = &value
-						}
-						thresholdMap[restapi.CriticalSeverity] = *criticalThreshold
-					} else if ruleWithThreshold.Thresholds.Critical.AdaptiveBaseline != nil {
-						criticalThreshold := &restapi.ThresholdRule{
-							Type: "adaptiveBaseline",
-						}
-						if !ruleWithThreshold.Thresholds.Critical.AdaptiveBaseline.DeviationFactor.IsNull() && !ruleWithThreshold.Thresholds.Critical.AdaptiveBaseline.DeviationFactor.IsUnknown() {
-							deviation := ruleWithThreshold.Thresholds.Critical.AdaptiveBaseline.DeviationFactor.ValueFloat32()
-							criticalThreshold.DeviationFactor = &deviation
-						}
-						if !ruleWithThreshold.Thresholds.Critical.AdaptiveBaseline.Adaptability.IsNull() && !ruleWithThreshold.Thresholds.Critical.AdaptiveBaseline.Adaptability.IsUnknown() {
-							adaptability := ruleWithThreshold.Thresholds.Critical.AdaptiveBaseline.Adaptability.ValueFloat32()
-							criticalThreshold.Adaptability = &adaptability
-						}
-						if !ruleWithThreshold.Thresholds.Critical.AdaptiveBaseline.Seasonality.IsNull() && !ruleWithThreshold.Thresholds.Critical.AdaptiveBaseline.Seasonality.IsUnknown() {
-							seasonality := restapi.ThresholdSeasonality(ruleWithThreshold.Thresholds.Critical.AdaptiveBaseline.Seasonality.ValueString())
-							criticalThreshold.Seasonality = &seasonality
-						}
-						thresholdMap[restapi.CriticalSeverity] = *criticalThreshold
-					}
-				}
-
-				result.Rules[i].Thresholds = thresholdMap
-			}
+	if thresholds.Warning != nil {
+		if threshold := r.mapThresholdLevel(thresholds.Warning); threshold != nil {
+			thresholdMap[restapi.WarningSeverity] = *threshold
 		}
 	}
 
-	// Handle time threshold
-	if model.TimeThreshold != nil {
-		result.TimeThreshold = &restapi.ApplicationAlertTimeThreshold{}
-
-		// Handle request impact
-		if model.TimeThreshold.RequestImpact != nil {
-			result.TimeThreshold.Type = "requestImpact"
-			result.TimeThreshold.TimeWindow = model.TimeThreshold.RequestImpact.TimeWindow.ValueInt64()
-			result.TimeThreshold.Requests = int(model.TimeThreshold.RequestImpact.Requests.ValueInt64())
-		}
-
-		// Handle violations in period
-		if model.TimeThreshold.ViolationsInPeriod != nil {
-			result.TimeThreshold.Type = "violationsInPeriod"
-			result.TimeThreshold.TimeWindow = model.TimeThreshold.ViolationsInPeriod.TimeWindow.ValueInt64()
-			result.TimeThreshold.Violations = int(model.TimeThreshold.ViolationsInPeriod.Violations.ValueInt64())
-		}
-
-		// Handle violations in sequence
-		if model.TimeThreshold.ViolationsInSequence != nil {
-			result.TimeThreshold.Type = "violationsInSequence"
-			result.TimeThreshold.TimeWindow = model.TimeThreshold.ViolationsInSequence.TimeWindow.ValueInt64()
+	if thresholds.Critical != nil {
+		if threshold := r.mapThresholdLevel(thresholds.Critical); threshold != nil {
+			thresholdMap[restapi.CriticalSeverity] = *threshold
 		}
 	}
 
-	return result, nil
+	result.Rules[index].Thresholds = thresholdMap
+}
+
+// mapThresholdLevel converts a single threshold level (static or adaptive)
+func (r *applicationAlertConfigResourceFrameworkImpl) mapThresholdLevel(level *ThresholdLevelModel) *restapi.ThresholdRule {
+	if level.Static != nil {
+		return r.mapStaticThreshold(level.Static)
+	}
+	if level.AdaptiveBaseline != nil {
+		return r.mapAdaptiveThreshold(level.AdaptiveBaseline)
+	}
+	return nil
+}
+
+// mapStaticThreshold converts static threshold configuration
+func (r *applicationAlertConfigResourceFrameworkImpl) mapStaticThreshold(static *shared.StaticTypeModel) *restapi.ThresholdRule {
+	threshold := &restapi.ThresholdRule{Type: "staticThreshold"}
+
+	if !static.Value.IsNull() && !static.Value.IsUnknown() {
+		value := float64(static.Value.ValueInt64())
+		threshold.Value = &value
+	}
+
+	return threshold
+}
+
+// mapAdaptiveThreshold converts adaptive baseline threshold configuration
+func (r *applicationAlertConfigResourceFrameworkImpl) mapAdaptiveThreshold(adaptive *shared.AdaptiveBaselineModel) *restapi.ThresholdRule {
+	threshold := &restapi.ThresholdRule{Type: "adaptiveBaseline"}
+
+	if !adaptive.DeviationFactor.IsNull() && !adaptive.DeviationFactor.IsUnknown() {
+		deviation := adaptive.DeviationFactor.ValueFloat32()
+		threshold.DeviationFactor = &deviation
+	}
+
+	if !adaptive.Adaptability.IsNull() && !adaptive.Adaptability.IsUnknown() {
+		adaptability := adaptive.Adaptability.ValueFloat32()
+		threshold.Adaptability = &adaptability
+	}
+
+	if !adaptive.Seasonality.IsNull() && !adaptive.Seasonality.IsUnknown() {
+		seasonality := restapi.ThresholdSeasonality(adaptive.Seasonality.ValueString())
+		threshold.Seasonality = &seasonality
+	}
+
+	return threshold
+}
+
+// mapTimeThreshold converts time threshold configuration
+func (r *applicationAlertConfigResourceFrameworkImpl) mapTimeThreshold(model *ApplicationAlertConfigModel, result *restapi.ApplicationAlertConfig) {
+	if model.TimeThreshold == nil {
+		return
+	}
+
+	result.TimeThreshold = &restapi.ApplicationAlertTimeThreshold{}
+
+	if model.TimeThreshold.RequestImpact != nil {
+		result.TimeThreshold.Type = "requestImpact"
+		result.TimeThreshold.TimeWindow = model.TimeThreshold.RequestImpact.TimeWindow.ValueInt64()
+		result.TimeThreshold.Requests = int(model.TimeThreshold.RequestImpact.Requests.ValueInt64())
+	} else if model.TimeThreshold.ViolationsInPeriod != nil {
+		result.TimeThreshold.Type = "violationsInPeriod"
+		result.TimeThreshold.TimeWindow = model.TimeThreshold.ViolationsInPeriod.TimeWindow.ValueInt64()
+		result.TimeThreshold.Violations = int(model.TimeThreshold.ViolationsInPeriod.Violations.ValueInt64())
+	} else if model.TimeThreshold.ViolationsInSequence != nil {
+		result.TimeThreshold.Type = "violationsInSequence"
+		result.TimeThreshold.TimeWindow = model.TimeThreshold.ViolationsInSequence.TimeWindow.ValueInt64()
+	}
 }
 
 func extractGracePeriod(v types.Int64) *int64 {
@@ -910,29 +965,11 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 		model.TagFilter = types.StringNull()
 	}
 
-	// Handle severity (deprecated but supported for backward compatibility)
-	if data.Severity > 0 {
-		severity, err := util.ConvertSeverityFromInstanaAPIToTerraformRepresentation(data.Severity)
-		if err == nil {
-			model.Severity = types.StringValue(severity)
-		}
-	}
 	if diags.HasError() {
 		return diags
 	}
-	log.Printf("Before allertchannel id stage")
-	// Handle alert channel IDs (deprecated but supported for backward compatibility)
-	if len(data.AlertChannelIDs) > 0 {
-		model.AlertChannelIDs = make([]types.String, len(data.AlertChannelIDs))
-		for i, id := range data.AlertChannelIDs {
-			model.AlertChannelIDs[i] = types.StringValue(id)
-		}
-	} else {
-		model.AlertChannelIDs = []types.String{}
-	}
 
-	log.Printf("Before alert channel stage")
-	// Handle alert channels (new format as map of severity to channel IDs)
+	// Handle alert channels
 	if len(data.AlertChannels) > 0 {
 		elements := make(map[string]attr.Value)
 		for severity, channelIDs := range data.AlertChannels {
