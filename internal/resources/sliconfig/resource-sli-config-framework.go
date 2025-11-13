@@ -23,178 +23,307 @@ import (
 func NewSliConfigResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.SliConfig] {
 	return &sliConfigResourceFramework{
 		metaData: resourcehandle.ResourceMetaDataFramework{
-			ResourceName: ResourceInstanaSliConfigFramework,
-			Schema: schema.Schema{
-				Description: SliConfigDescResource,
-				Attributes: map[string]schema.Attribute{
-					"id": schema.StringAttribute{
-						Computed:    true,
-						Description: SliConfigDescID,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
-					},
-					"name": schema.StringAttribute{
-						Required:    true,
-						Description: SliConfigDescName,
-						Validators: []validator.String{
-							stringvalidator.LengthBetween(0, 256),
-						},
-					},
-					"initial_evaluation_timestamp": schema.Int64Attribute{
-						Optional:    true,
-						Computed:    true,
-						Description: SliConfigDescInitialEvaluationTimestamp,
-					},
-					"metric_configuration": schema.SingleNestedAttribute{
-						Description: SliConfigDescMetricConfiguration,
-						Optional:    true,
-						Attributes: map[string]schema.Attribute{
-							"metric_name": schema.StringAttribute{
-								Required:    true,
-								Description: SliConfigDescMetricName,
-							},
-							"aggregation": schema.StringAttribute{
-								Required:    true,
-								Description: SliConfigDescAggregation,
-								Validators: []validator.String{
-									stringvalidator.OneOf(
-										"SUM", "MEAN", "MAX", "MIN", "P25", "P50", "P75", "P90", "P95", "P98", "P99", "P99_9", "P99_99", "DISTRIBUTION", "DISTINCT_COUNT", "SUM_POSITIVE", "PER_SECOND",
-									),
-								},
-							},
-							"threshold": schema.Float64Attribute{
-								Required:    true,
-								Description: SliConfigDescThreshold,
-								Validators: []validator.Float64{
-									float64validator.AtLeast(0.000001),
-								},
-							},
-						},
-					},
-					"sli_entity": schema.SingleNestedAttribute{
-						Description: SliConfigDescSliEntity,
-						Optional:    true,
-						Attributes: map[string]schema.Attribute{
-							"application_time_based": schema.SingleNestedAttribute{
-								Description: SliConfigDescApplicationTimeBased,
-								Optional:    true,
-								Attributes: map[string]schema.Attribute{
-									"application_id": schema.StringAttribute{
-										Required:    true,
-										Description: SliConfigDescApplicationID,
-									},
-									"service_id": schema.StringAttribute{
-										Optional:    true,
-										Description: SliConfigDescServiceID,
-									},
-									"endpoint_id": schema.StringAttribute{
-										Optional:    true,
-										Description: SliConfigDescEndpointID,
-									},
-									"boundary_scope": schema.StringAttribute{
-										Required:    true,
-										Description: SliConfigDescBoundaryScope,
-										Validators: []validator.String{
-											stringvalidator.OneOf("ALL", "INBOUND"),
-										},
-									},
-								},
-							},
-							"application_event_based": schema.SingleNestedAttribute{
-								Description: SliConfigDescApplicationEventBased,
-								Optional:    true,
-								Attributes: map[string]schema.Attribute{
-									"application_id": schema.StringAttribute{
-										Required:    true,
-										Description: SliConfigDescApplicationID,
-									},
-									"boundary_scope": schema.StringAttribute{
-										Required:    true,
-										Description: SliConfigDescBoundaryScope,
-										Validators: []validator.String{
-											stringvalidator.OneOf("ALL", "INBOUND"),
-										},
-									},
-									"bad_event_filter_expression": schema.StringAttribute{
-										Required:    true,
-										Description: SliConfigDescBadEventFilterExpression,
-									},
-									"good_event_filter_expression": schema.StringAttribute{
-										Required:    true,
-										Description: SliConfigDescGoodEventFilterExpression,
-									},
-									"include_internal": schema.BoolAttribute{
-										Optional:    true,
-										Description: SliConfigDescIncludeInternal,
-									},
-									"include_synthetic": schema.BoolAttribute{
-										Optional:    true,
-										Description: SliConfigDescIncludeSynthetic,
-									},
-									"endpoint_id": schema.StringAttribute{
-										Optional:    true,
-										Description: SliConfigDescEndpointIDAvailability,
-									},
-									"service_id": schema.StringAttribute{
-										Optional:    true,
-										Description: SliConfigDescServiceIDAvailability,
-									},
-								},
-							},
-							"website_event_based": schema.SingleNestedAttribute{
-								Description: SliConfigDescWebsiteEventBased,
-								Optional:    true,
-								Attributes: map[string]schema.Attribute{
-									"website_id": schema.StringAttribute{
-										Required:    true,
-										Description: SliConfigDescWebsiteID,
-									},
-									"bad_event_filter_expression": schema.StringAttribute{
-										Required:    true,
-										Description: SliConfigDescBadEventFilterExpression,
-									},
-									"good_event_filter_expression": schema.StringAttribute{
-										Required:    true,
-										Description: SliConfigDescGoodEventFilterExpression,
-									},
-									"beacon_type": schema.StringAttribute{
-										Required:    true,
-										Description: SliConfigDescBeaconType,
-										Validators: []validator.String{
-											stringvalidator.OneOf("pageLoad", "resourceLoad", "httpRequest", "error", "custom", "pageChange"),
-										},
-									},
-								},
-							},
-							"website_time_based": schema.SingleNestedAttribute{
-								Description: SliConfigDescWebsiteTimeBased,
-								Optional:    true,
-								Attributes: map[string]schema.Attribute{
-									"website_id": schema.StringAttribute{
-										Required:    true,
-										Description: SliConfigDescWebsiteID,
-									},
-									"filter_expression": schema.StringAttribute{
-										Optional:    true,
-										Description: SliConfigDescFilterExpression,
-									},
-									"beacon_type": schema.StringAttribute{
-										Required:    true,
-										Description: SliConfigDescBeaconType,
-										Validators: []validator.String{
-											stringvalidator.OneOf("pageLoad", "resourceLoad", "httpRequest", "error", "custom", "pageChange"),
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
+			ResourceName:  ResourceInstanaSliConfigFramework,
+			Schema:        buildSliConfigSchema(),
 			SchemaVersion: 1,
 			CreateOnly:    true,
 		},
+	}
+}
+
+// buildSliConfigSchema constructs the complete schema for SLI configuration resource
+func buildSliConfigSchema() schema.Schema {
+	return schema.Schema{
+		Description: SliConfigDescResource,
+		Attributes: map[string]schema.Attribute{
+			SchemaFieldID:                         buildIDAttribute(),
+			SchemaFieldName:                       buildNameAttribute(),
+			SchemaFieldInitialEvaluationTimestamp: buildInitialEvaluationTimestampAttribute(),
+			SchemaFieldMetricConfiguration:        buildMetricConfigurationAttribute(),
+			SchemaFieldSliEntity:                  buildSliEntityAttribute(),
+		},
+	}
+}
+
+// buildIDAttribute creates the ID field schema attribute
+func buildIDAttribute() schema.StringAttribute {
+	return schema.StringAttribute{
+		Computed:    true,
+		Description: SliConfigDescID,
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.UseStateForUnknown(),
+		},
+	}
+}
+
+// buildNameAttribute creates the name field schema attribute
+func buildNameAttribute() schema.StringAttribute {
+	return schema.StringAttribute{
+		Required:    true,
+		Description: SliConfigDescName,
+		Validators: []validator.String{
+			stringvalidator.LengthBetween(NameMinLength, NameMaxLength),
+		},
+	}
+}
+
+// buildInitialEvaluationTimestampAttribute creates the initial evaluation timestamp field schema attribute
+func buildInitialEvaluationTimestampAttribute() schema.Int64Attribute {
+	return schema.Int64Attribute{
+		Optional:    true,
+		Computed:    true,
+		Description: SliConfigDescInitialEvaluationTimestamp,
+	}
+}
+
+// buildMetricConfigurationAttribute creates the metric configuration nested attribute
+func buildMetricConfigurationAttribute() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Description: SliConfigDescMetricConfiguration,
+		Optional:    true,
+		Attributes: map[string]schema.Attribute{
+			SchemaFieldMetricName:  buildMetricNameAttribute(),
+			SchemaFieldAggregation: buildAggregationAttribute(),
+			SchemaFieldThreshold:   buildThresholdAttribute(),
+		},
+	}
+}
+
+// buildMetricNameAttribute creates the metric name field schema attribute
+func buildMetricNameAttribute() schema.StringAttribute {
+	return schema.StringAttribute{
+		Required:    true,
+		Description: SliConfigDescMetricName,
+	}
+}
+
+// buildAggregationAttribute creates the aggregation field schema attribute with all valid values
+func buildAggregationAttribute() schema.StringAttribute {
+	return schema.StringAttribute{
+		Required:    true,
+		Description: SliConfigDescAggregation,
+		Validators: []validator.String{
+			stringvalidator.OneOf(
+				AggregationTypeSum,
+				AggregationTypeMean,
+				AggregationTypeMax,
+				AggregationTypeMin,
+				AggregationTypeP25,
+				AggregationTypeP50,
+				AggregationTypeP75,
+				AggregationTypeP90,
+				AggregationTypeP95,
+				AggregationTypeP98,
+				AggregationTypeP99,
+				AggregationTypeP99_9,
+				AggregationTypeP99_99,
+				AggregationTypeDistribution,
+				AggregationTypeDistinctCount,
+				AggregationTypeSumPositive,
+				AggregationTypePerSecond,
+			),
+		},
+	}
+}
+
+// buildThresholdAttribute creates the threshold field schema attribute
+func buildThresholdAttribute() schema.Float64Attribute {
+	return schema.Float64Attribute{
+		Required:    true,
+		Description: SliConfigDescThreshold,
+		Validators: []validator.Float64{
+			float64validator.AtLeast(ThresholdMinValue),
+		},
+	}
+}
+
+// buildSliEntityAttribute creates the SLI entity nested attribute
+func buildSliEntityAttribute() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Description: SliConfigDescSliEntity,
+		Optional:    true,
+		Attributes: map[string]schema.Attribute{
+			SchemaFieldApplicationTimeBased:  buildApplicationTimeBasedAttribute(),
+			SchemaFieldApplicationEventBased: buildApplicationEventBasedAttribute(),
+			SchemaFieldWebsiteEventBased:     buildWebsiteEventBasedAttribute(),
+			SchemaFieldWebsiteTimeBased:      buildWebsiteTimeBasedAttribute(),
+		},
+	}
+}
+
+// buildApplicationTimeBasedAttribute creates the application time-based entity nested attribute
+func buildApplicationTimeBasedAttribute() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Description: SliConfigDescApplicationTimeBased,
+		Optional:    true,
+		Attributes: map[string]schema.Attribute{
+			SchemaFieldApplicationID: buildApplicationIDAttribute(),
+			SchemaFieldServiceID:     buildServiceIDAttribute(),
+			SchemaFieldEndpointID:    buildEndpointIDAttribute(),
+			SchemaFieldBoundaryScope: buildBoundaryScopeAttribute(),
+		},
+	}
+}
+
+// buildApplicationEventBasedAttribute creates the application event-based entity nested attribute
+func buildApplicationEventBasedAttribute() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Description: SliConfigDescApplicationEventBased,
+		Optional:    true,
+		Attributes: map[string]schema.Attribute{
+			SchemaFieldApplicationID:             buildApplicationIDAttribute(),
+			SchemaFieldBoundaryScope:             buildBoundaryScopeAttribute(),
+			SchemaFieldBadEventFilterExpression:  buildBadEventFilterExpressionAttribute(),
+			SchemaFieldGoodEventFilterExpression: buildGoodEventFilterExpressionAttribute(),
+			SchemaFieldIncludeInternal:           buildIncludeInternalAttribute(),
+			SchemaFieldIncludeSynthetic:          buildIncludeSyntheticAttribute(),
+			SchemaFieldEndpointID:                buildEndpointIDAvailabilityAttribute(),
+			SchemaFieldServiceID:                 buildServiceIDAvailabilityAttribute(),
+		},
+	}
+}
+
+// buildWebsiteEventBasedAttribute creates the website event-based entity nested attribute
+func buildWebsiteEventBasedAttribute() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Description: SliConfigDescWebsiteEventBased,
+		Optional:    true,
+		Attributes: map[string]schema.Attribute{
+			SchemaFieldWebsiteID:                 buildWebsiteIDAttribute(),
+			SchemaFieldBadEventFilterExpression:  buildBadEventFilterExpressionAttribute(),
+			SchemaFieldGoodEventFilterExpression: buildGoodEventFilterExpressionAttribute(),
+			SchemaFieldBeaconType:                buildBeaconTypeAttribute(),
+		},
+	}
+}
+
+// buildWebsiteTimeBasedAttribute creates the website time-based entity nested attribute
+func buildWebsiteTimeBasedAttribute() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Description: SliConfigDescWebsiteTimeBased,
+		Optional:    true,
+		Attributes: map[string]schema.Attribute{
+			SchemaFieldWebsiteID:        buildWebsiteIDAttribute(),
+			SchemaFieldFilterExpression: buildFilterExpressionAttribute(),
+			SchemaFieldBeaconType:       buildBeaconTypeAttribute(),
+		},
+	}
+}
+
+// buildApplicationIDAttribute creates the application ID field schema attribute
+func buildApplicationIDAttribute() schema.StringAttribute {
+	return schema.StringAttribute{
+		Required:    true,
+		Description: SliConfigDescApplicationID,
+	}
+}
+
+// buildServiceIDAttribute creates the service ID field schema attribute
+func buildServiceIDAttribute() schema.StringAttribute {
+	return schema.StringAttribute{
+		Optional:    true,
+		Description: SliConfigDescServiceID,
+	}
+}
+
+// buildEndpointIDAttribute creates the endpoint ID field schema attribute
+func buildEndpointIDAttribute() schema.StringAttribute {
+	return schema.StringAttribute{
+		Optional:    true,
+		Description: SliConfigDescEndpointID,
+	}
+}
+
+// buildEndpointIDAvailabilityAttribute creates the endpoint ID field schema attribute for availability context
+func buildEndpointIDAvailabilityAttribute() schema.StringAttribute {
+	return schema.StringAttribute{
+		Optional:    true,
+		Description: SliConfigDescEndpointIDAvailability,
+	}
+}
+
+// buildServiceIDAvailabilityAttribute creates the service ID field schema attribute for availability context
+func buildServiceIDAvailabilityAttribute() schema.StringAttribute {
+	return schema.StringAttribute{
+		Optional:    true,
+		Description: SliConfigDescServiceIDAvailability,
+	}
+}
+
+// buildBoundaryScopeAttribute creates the boundary scope field schema attribute
+func buildBoundaryScopeAttribute() schema.StringAttribute {
+	return schema.StringAttribute{
+		Required:    true,
+		Description: SliConfigDescBoundaryScope,
+		Validators: []validator.String{
+			stringvalidator.OneOf(BoundaryScopeAll, BoundaryScopeInbound),
+		},
+	}
+}
+
+// buildBadEventFilterExpressionAttribute creates the bad event filter expression field schema attribute
+func buildBadEventFilterExpressionAttribute() schema.StringAttribute {
+	return schema.StringAttribute{
+		Required:    true,
+		Description: SliConfigDescBadEventFilterExpression,
+	}
+}
+
+// buildGoodEventFilterExpressionAttribute creates the good event filter expression field schema attribute
+func buildGoodEventFilterExpressionAttribute() schema.StringAttribute {
+	return schema.StringAttribute{
+		Required:    true,
+		Description: SliConfigDescGoodEventFilterExpression,
+	}
+}
+
+// buildIncludeInternalAttribute creates the include internal field schema attribute
+func buildIncludeInternalAttribute() schema.BoolAttribute {
+	return schema.BoolAttribute{
+		Optional:    true,
+		Description: SliConfigDescIncludeInternal,
+	}
+}
+
+// buildIncludeSyntheticAttribute creates the include synthetic field schema attribute
+func buildIncludeSyntheticAttribute() schema.BoolAttribute {
+	return schema.BoolAttribute{
+		Optional:    true,
+		Description: SliConfigDescIncludeSynthetic,
+	}
+}
+
+// buildWebsiteIDAttribute creates the website ID field schema attribute
+func buildWebsiteIDAttribute() schema.StringAttribute {
+	return schema.StringAttribute{
+		Required:    true,
+		Description: SliConfigDescWebsiteID,
+	}
+}
+
+// buildBeaconTypeAttribute creates the beacon type field schema attribute
+func buildBeaconTypeAttribute() schema.StringAttribute {
+	return schema.StringAttribute{
+		Required:    true,
+		Description: SliConfigDescBeaconType,
+		Validators: []validator.String{
+			stringvalidator.OneOf(
+				BeaconTypePageLoad,
+				BeaconTypeResourceLoad,
+				BeaconTypeHttpRequest,
+				BeaconTypeError,
+				BeaconTypeCustom,
+				BeaconTypePageChange,
+			),
+		},
+	}
+}
+
+// buildFilterExpressionAttribute creates the filter expression field schema attribute
+func buildFilterExpressionAttribute() schema.StringAttribute {
+	return schema.StringAttribute{
+		Optional:    true,
+		Description: SliConfigDescFilterExpression,
 	}
 }
 
@@ -206,279 +335,293 @@ func (r *sliConfigResourceFramework) GetRestResource(api restapi.InstanaAPI) res
 	return api.SliConfigs()
 }
 
-func (r *sliConfigResourceFramework) SetComputedFields(ctx context.Context, plan *tfsdk.Plan) diag.Diagnostics {
+func (r *sliConfigResourceFramework) SetComputedFields(_ context.Context, _ *tfsdk.Plan) diag.Diagnostics {
 	return nil
 }
 
-func (r *sliConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, sliConfig *restapi.SliConfig) diag.Diagnostics {
+func (r *sliConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, _ *tfsdk.Plan, sliConfig *restapi.SliConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
+
+	model := r.buildSliConfigModel(sliConfig)
+
+	sliEntityModel, entityDiags := r.mapSliEntityToState(sliConfig.SliEntity)
+	diags.Append(entityDiags...)
+	if diags.HasError() {
+		return diags
+	}
+
+	model.SliEntity = sliEntityModel
+	diags.Append(state.Set(ctx, model)...)
+	return diags
+}
+
+// buildSliConfigModel creates the base SLI config model from API response
+func (r *sliConfigResourceFramework) buildSliConfigModel(sliConfig *restapi.SliConfig) SliConfigModel {
 	model := SliConfigModel{
 		ID:                         types.StringValue(sliConfig.ID),
 		Name:                       types.StringValue(sliConfig.Name),
 		InitialEvaluationTimestamp: types.Int64Value(int64(sliConfig.InitialEvaluationTimestamp)),
 	}
 
-	// Map metric configuration if present
 	if sliConfig.MetricConfiguration != nil {
-		model.MetricConfiguration = &MetricConfigurationModel{
-			MetricName:  types.StringValue(sliConfig.MetricConfiguration.Name),
-			Aggregation: types.StringValue(sliConfig.MetricConfiguration.Aggregation),
-			Threshold:   types.Float64Value(sliConfig.MetricConfiguration.Threshold),
-		}
-	} else {
-		model.MetricConfiguration = nil
+		model.MetricConfiguration = r.mapMetricConfigurationToState(sliConfig.MetricConfiguration)
 	}
 
-	// Map SLI entity
-	sliEntityModel := &SliEntityModel{}
-	var entityDiags diag.Diagnostics
+	return model
+}
 
-	switch sliConfig.SliEntity.Type {
-	case "application":
-		sliEntityModel.ApplicationTimeBased, entityDiags = r.mapApplicationTimeBasedToState(ctx, sliConfig.SliEntity)
-	case "availability":
-		sliEntityModel.ApplicationEventBased, entityDiags = r.mapApplicationEventBasedToState(ctx, sliConfig.SliEntity)
-	case "websiteEventBased":
-		sliEntityModel.WebsiteEventBased, entityDiags = r.mapWebsiteEventBasedToState(ctx, sliConfig.SliEntity)
-	case "websiteTimeBased":
-		sliEntityModel.WebsiteTimeBased, entityDiags = r.mapWebsiteTimeBasedToState(ctx, sliConfig.SliEntity)
+// mapMetricConfigurationToState converts API metric configuration to state model
+func (r *sliConfigResourceFramework) mapMetricConfigurationToState(metricConfig *restapi.MetricConfiguration) *MetricConfigurationModel {
+	return &MetricConfigurationModel{
+		MetricName:  types.StringValue(metricConfig.Name),
+		Aggregation: types.StringValue(metricConfig.Aggregation),
+		Threshold:   types.Float64Value(metricConfig.Threshold),
+	}
+}
+
+// mapSliEntityToState routes SLI entity mapping based on entity type
+func (r *sliConfigResourceFramework) mapSliEntityToState(sliEntity restapi.SliEntity) (*SliEntityModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	sliEntityModel := &SliEntityModel{}
+
+	switch sliEntity.Type {
+	case SliEntityTypeApplication:
+		sliEntityModel.ApplicationTimeBased = r.mapApplicationTimeBasedToState(sliEntity)
+	case SliEntityTypeAvailability:
+		model, err := r.mapApplicationEventBasedToState(sliEntity)
+		if err.HasError() {
+			return nil, err
+		}
+		sliEntityModel.ApplicationEventBased = model
+	case SliEntityTypeWebsiteEventBased:
+		model, err := r.mapWebsiteEventBasedToState(sliEntity)
+		if err.HasError() {
+			return nil, err
+		}
+		sliEntityModel.WebsiteEventBased = model
+	case SliEntityTypeWebsiteTimeBased:
+		model, err := r.mapWebsiteTimeBasedToState(sliEntity)
+		if err.HasError() {
+			return nil, err
+		}
+		sliEntityModel.WebsiteTimeBased = model
 	default:
 		diags.AddError(
 			SliConfigErrUnsupportedEntityType,
-			fmt.Sprintf(SliConfigErrUnsupportedEntityTypeMsg, sliConfig.SliEntity.Type),
+			fmt.Sprintf(SliConfigErrUnsupportedEntityTypeMsg, sliEntity.Type),
 		)
-		return diags
+		return nil, diags
 	}
 
-	if entityDiags.HasError() {
-		diags.Append(entityDiags...)
-		return diags
-	}
-
-	model.SliEntity = sliEntityModel
-
-	// Set the state
-	diags.Append(state.Set(ctx, model)...)
-	return diags
+	return sliEntityModel, diags
 }
 
-func (r *sliConfigResourceFramework) mapApplicationTimeBasedToState(ctx context.Context, sliEntity restapi.SliEntity) (*ApplicationTimeBasedModel, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	appTimeBasedModel := &ApplicationTimeBasedModel{
+// mapApplicationTimeBasedToState converts application time-based entity to state model
+func (r *sliConfigResourceFramework) mapApplicationTimeBasedToState(sliEntity restapi.SliEntity) *ApplicationTimeBasedModel {
+	return &ApplicationTimeBasedModel{
 		ApplicationID: util.SetStringPointerToState(sliEntity.ApplicationID),
 		BoundaryScope: util.SetStringPointerToState(sliEntity.BoundaryScope),
 		ServiceID:     util.SetStringPointerToState(sliEntity.ServiceID),
 		EndpointID:    util.SetStringPointerToState(sliEntity.EndpointID),
 	}
-
-	return appTimeBasedModel, diags
 }
 
-func (r *sliConfigResourceFramework) mapApplicationEventBasedToState(ctx context.Context, sliEntity restapi.SliEntity) (*ApplicationEventBasedModel, diag.Diagnostics) {
+// mapApplicationEventBasedToState converts application event-based entity to state model
+func (r *sliConfigResourceFramework) mapApplicationEventBasedToState(sliEntity restapi.SliEntity) (*ApplicationEventBasedModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	appEventBasedModel := &ApplicationEventBasedModel{
+	model := &ApplicationEventBasedModel{
 		ApplicationID: util.SetStringPointerToState(sliEntity.ApplicationID),
 		BoundaryScope: util.SetStringPointerToState(sliEntity.BoundaryScope),
 		EndpointID:    util.SetStringPointerToState(sliEntity.EndpointID),
 		ServiceID:     util.SetStringPointerToState(sliEntity.ServiceID),
 	}
 
-	// Map good event filter expression
-	if sliEntity.GoodEventFilterExpression != nil {
-		goodEventFilterStr, err := tagfilter.MapTagFilterToNormalizedString(sliEntity.GoodEventFilterExpression)
-		if err != nil {
-			diags.AddError(
-				SliConfigErrMappingGoodEventFilter,
-				fmt.Sprintf(SliConfigErrMappingGoodEventFilterMsg, err),
-			)
-			return nil, diags
-		}
-		appEventBasedModel.GoodEventFilterExpression = util.SetStringPointerToState(goodEventFilterStr)
-	} else {
-		appEventBasedModel.GoodEventFilterExpression = types.StringNull()
+	goodFilterStr, err := r.mapTagFilterToString(sliEntity.GoodEventFilterExpression, ErrMsgGoodEventFilterContext)
+	if err != nil {
+		diags.AddError(SliConfigErrMappingGoodEventFilter, err.Error())
+		return nil, diags
 	}
+	model.GoodEventFilterExpression = goodFilterStr
 
-	// Map bad event filter expression
-	if sliEntity.BadEventFilterExpression != nil {
-		badEventFilterStr, err := tagfilter.MapTagFilterToNormalizedString(sliEntity.BadEventFilterExpression)
-		if err != nil {
-			diags.AddError(
-				SliConfigErrMappingBadEventFilter,
-				fmt.Sprintf(SliConfigErrMappingBadEventFilterMsg, err),
-			)
-			return nil, diags
-		}
-		appEventBasedModel.BadEventFilterExpression = util.SetStringPointerToState(badEventFilterStr)
-	} else {
-		appEventBasedModel.BadEventFilterExpression = types.StringNull()
+	badFilterStr, err := r.mapTagFilterToString(sliEntity.BadEventFilterExpression, ErrMsgBadEventFilterContext)
+	if err != nil {
+		diags.AddError(SliConfigErrMappingBadEventFilter, err.Error())
+		return nil, diags
 	}
+	model.BadEventFilterExpression = badFilterStr
 
-	// Map include internal and synthetic flags
-	if sliEntity.IncludeInternal != nil {
-		appEventBasedModel.IncludeInternal = types.BoolValue(*sliEntity.IncludeInternal)
-	} else {
-		appEventBasedModel.IncludeInternal = types.BoolValue(false)
-	}
+	model.IncludeInternal = r.mapBooleanPointerToState(sliEntity.IncludeInternal, DefaultIncludeInternalValue)
+	model.IncludeSynthetic = r.mapBooleanPointerToState(sliEntity.IncludeSynthetic, DefaultIncludeSyntheticValue)
 
-	if sliEntity.IncludeSynthetic != nil {
-		appEventBasedModel.IncludeSynthetic = types.BoolValue(*sliEntity.IncludeSynthetic)
-	} else {
-		appEventBasedModel.IncludeSynthetic = types.BoolValue(false)
-	}
-
-	return appEventBasedModel, diags
+	return model, diags
 }
 
-func (r *sliConfigResourceFramework) mapWebsiteEventBasedToState(ctx context.Context, sliEntity restapi.SliEntity) (*WebsiteEventBasedModel, diag.Diagnostics) {
+// mapWebsiteEventBasedToState converts website event-based entity to state model
+func (r *sliConfigResourceFramework) mapWebsiteEventBasedToState(sliEntity restapi.SliEntity) (*WebsiteEventBasedModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	websiteEventBasedModel := &WebsiteEventBasedModel{
+	model := &WebsiteEventBasedModel{
 		WebsiteID:  util.SetStringPointerToState(sliEntity.WebsiteId),
 		BeaconType: util.SetStringPointerToState(sliEntity.BeaconType),
 	}
 
-	// Map good event filter expression
-	if sliEntity.GoodEventFilterExpression != nil {
-		goodEventFilterStr, err := tagfilter.MapTagFilterToNormalizedString(sliEntity.GoodEventFilterExpression)
-		if err != nil {
-			diags.AddError(
-				SliConfigErrMappingGoodEventFilter,
-				fmt.Sprintf(SliConfigErrMappingGoodEventFilterMsg, err),
-			)
-			return nil, diags
-		}
-		websiteEventBasedModel.GoodEventFilterExpression = util.SetStringPointerToState(goodEventFilterStr)
-	} else {
-		websiteEventBasedModel.GoodEventFilterExpression = types.StringNull()
+	goodFilterStr, err := r.mapTagFilterToString(sliEntity.GoodEventFilterExpression, ErrMsgGoodEventFilterContext)
+	if err != nil {
+		diags.AddError(SliConfigErrMappingGoodEventFilter, err.Error())
+		return nil, diags
 	}
+	model.GoodEventFilterExpression = goodFilterStr
 
-	// Map bad event filter expression
-	if sliEntity.BadEventFilterExpression != nil {
-		badEventFilterStr, err := tagfilter.MapTagFilterToNormalizedString(sliEntity.BadEventFilterExpression)
-		if err != nil {
-			diags.AddError(
-				SliConfigErrMappingBadEventFilter,
-				fmt.Sprintf(SliConfigErrMappingBadEventFilterMsg, err),
-			)
-			return nil, diags
-		}
-		websiteEventBasedModel.BadEventFilterExpression = util.SetStringPointerToState(badEventFilterStr)
-	} else {
-		websiteEventBasedModel.BadEventFilterExpression = types.StringNull()
+	badFilterStr, err := r.mapTagFilterToString(sliEntity.BadEventFilterExpression, ErrMsgBadEventFilterContext)
+	if err != nil {
+		diags.AddError(SliConfigErrMappingBadEventFilter, err.Error())
+		return nil, diags
 	}
+	model.BadEventFilterExpression = badFilterStr
 
-	return websiteEventBasedModel, diags
+	return model, diags
 }
 
-func (r *sliConfigResourceFramework) mapWebsiteTimeBasedToState(ctx context.Context, sliEntity restapi.SliEntity) (*WebsiteTimeBasedModel, diag.Diagnostics) {
+// mapWebsiteTimeBasedToState converts website time-based entity to state model
+func (r *sliConfigResourceFramework) mapWebsiteTimeBasedToState(sliEntity restapi.SliEntity) (*WebsiteTimeBasedModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	websiteTimeBasedModel := &WebsiteTimeBasedModel{
+	model := &WebsiteTimeBasedModel{
 		WebsiteID:  util.SetStringPointerToState(sliEntity.WebsiteId),
 		BeaconType: util.SetStringPointerToState(sliEntity.BeaconType),
 	}
 
-	// Map filter expression
-	if sliEntity.FilterExpression != nil {
-		filterExprStr, err := tagfilter.MapTagFilterToNormalizedString(sliEntity.FilterExpression)
-		if err != nil {
-			diags.AddError(
-				SliConfigErrMappingFilterExpression,
-				fmt.Sprintf(SliConfigErrMappingFilterExpressionMsg, err),
-			)
-			return nil, diags
-		}
-		websiteTimeBasedModel.FilterExpression = util.SetStringPointerToState(filterExprStr)
-	} else {
-		websiteTimeBasedModel.FilterExpression = types.StringNull()
+	filterStr, err := r.mapTagFilterToString(sliEntity.FilterExpression, ErrMsgFilterExpressionContext)
+	if err != nil {
+		diags.AddError(SliConfigErrMappingFilterExpression, err.Error())
+		return nil, diags
+	}
+	model.FilterExpression = filterStr
+
+	return model, diags
+}
+
+// mapTagFilterToString converts tag filter to normalized string representation
+func (r *sliConfigResourceFramework) mapTagFilterToString(tagFilter *restapi.TagFilter, context string) (types.String, error) {
+	if tagFilter == nil {
+		return types.StringNull(), nil
 	}
 
-	return websiteTimeBasedModel, diags
+	filterStr, err := tagfilter.MapTagFilterToNormalizedString(tagFilter)
+	if err != nil {
+		return types.StringNull(), fmt.Errorf(ErrMsgFailedToParseFilterExpression, context, err)
+	}
+
+	return util.SetStringPointerToState(filterStr), nil
+}
+
+// mapBooleanPointerToState converts boolean pointer to state value with default fallback
+func (r *sliConfigResourceFramework) mapBooleanPointerToState(value *bool, defaultValue bool) types.Bool {
+	if value != nil {
+		return types.BoolValue(*value)
+	}
+	return types.BoolValue(defaultValue)
 }
 
 func (r *sliConfigResourceFramework) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.SliConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var model SliConfigModel
 
-	// Get current state from plan or state
-	if plan != nil {
-		diags.Append(plan.Get(ctx, &model)...)
-	} else if state != nil {
-		diags.Append(state.Get(ctx, &model)...)
-	}
-
+	diags.Append(r.extractModelFromPlanOrState(ctx, plan, state, &model)...)
 	if diags.HasError() {
 		return nil, diags
 	}
 
-	// Map ID
-	id := ""
-	if !model.ID.IsNull() {
-		id = model.ID.ValueString()
+	sliConfig := &restapi.SliConfig{
+		ID:                         r.extractIDFromModel(model),
+		Name:                       model.Name.ValueString(),
+		InitialEvaluationTimestamp: r.extractInitialEvaluationTimestamp(model),
+		MetricConfiguration:        r.mapMetricConfigurationFromState(model.MetricConfiguration),
 	}
 
-	// Map name
-	name := model.Name.ValueString()
-
-	// Map initial evaluation timestamp
-	initialEvaluationTimestamp := 0
-	if !model.InitialEvaluationTimestamp.IsNull() {
-		initialEvaluationTimestamp = int(model.InitialEvaluationTimestamp.ValueInt64())
+	sliEntity, err := r.mapSliEntityFromState(model.SliEntity)
+	if err != nil {
+		diags.AddError(SliConfigErrMappingSliEntity, fmt.Sprintf(SliConfigErrMappingSliEntityMsg, err))
+		return nil, diags
 	}
+	sliConfig.SliEntity = sliEntity
 
-	// Map metric configuration
-	var metricConfiguration *restapi.MetricConfiguration
-	if model.MetricConfiguration != nil {
-		metricConfiguration = &restapi.MetricConfiguration{
-			Name:        model.MetricConfiguration.MetricName.ValueString(),
-			Aggregation: model.MetricConfiguration.Aggregation.ValueString(),
-			Threshold:   model.MetricConfiguration.Threshold.ValueFloat64(),
-		}
-	}
-
-	// Map SLI entity
-	var sliEntity restapi.SliEntity
-	var entityErr error
-
-	if model.SliEntity != nil {
-		// Check which entity type is set
-		if model.SliEntity.ApplicationTimeBased != nil {
-			sliEntity, entityErr = r.mapApplicationTimeBasedFromState(ctx, model.SliEntity.ApplicationTimeBased)
-		} else if model.SliEntity.ApplicationEventBased != nil {
-			sliEntity, entityErr = r.mapApplicationEventBasedFromState(ctx, model.SliEntity.ApplicationEventBased)
-		} else if model.SliEntity.WebsiteEventBased != nil {
-			sliEntity, entityErr = r.mapWebsiteEventBasedFromState(ctx, model.SliEntity.WebsiteEventBased)
-		} else if model.SliEntity.WebsiteTimeBased != nil {
-			sliEntity, entityErr = r.mapWebsiteTimeBasedFromState(ctx, model.SliEntity.WebsiteTimeBased)
-		}
-
-		if entityErr != nil {
-			diags.AddError(
-				SliConfigErrMappingSliEntity,
-				fmt.Sprintf(SliConfigErrMappingSliEntityMsg, entityErr),
-			)
-			return nil, diags
-		}
-	}
-
-	// Create SLI config
-	return &restapi.SliConfig{
-		ID:                         id,
-		Name:                       name,
-		InitialEvaluationTimestamp: initialEvaluationTimestamp,
-		MetricConfiguration:        metricConfiguration,
-		SliEntity:                  sliEntity,
-	}, diags
+	return sliConfig, diags
 }
 
-func (r *sliConfigResourceFramework) mapApplicationTimeBasedFromState(ctx context.Context, model *ApplicationTimeBasedModel) (restapi.SliEntity, error) {
+// extractModelFromPlanOrState retrieves the model from plan or state
+func (r *sliConfigResourceFramework) extractModelFromPlanOrState(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State, model *SliConfigModel) diag.Diagnostics {
+	if plan != nil {
+		return plan.Get(ctx, model)
+	}
+	if state != nil {
+		return state.Get(ctx, model)
+	}
+	return nil
+}
+
+// extractIDFromModel extracts ID from model, returning empty string if null
+func (r *sliConfigResourceFramework) extractIDFromModel(model SliConfigModel) string {
+	if model.ID.IsNull() {
+		return ""
+	}
+	return model.ID.ValueString()
+}
+
+// extractInitialEvaluationTimestamp extracts initial evaluation timestamp from model
+func (r *sliConfigResourceFramework) extractInitialEvaluationTimestamp(model SliConfigModel) int {
+	if model.InitialEvaluationTimestamp.IsNull() {
+		return DefaultInitialEvaluationTimestamp
+	}
+	return int(model.InitialEvaluationTimestamp.ValueInt64())
+}
+
+// mapMetricConfigurationFromState converts state metric configuration to API model
+func (r *sliConfigResourceFramework) mapMetricConfigurationFromState(metricConfig *MetricConfigurationModel) *restapi.MetricConfiguration {
+	if metricConfig == nil {
+		return nil
+	}
+
+	return &restapi.MetricConfiguration{
+		Name:        metricConfig.MetricName.ValueString(),
+		Aggregation: metricConfig.Aggregation.ValueString(),
+		Threshold:   metricConfig.Threshold.ValueFloat64(),
+	}
+}
+
+// mapSliEntityFromState routes SLI entity mapping from state based on entity type
+func (r *sliConfigResourceFramework) mapSliEntityFromState(sliEntityModel *SliEntityModel) (restapi.SliEntity, error) {
+	if sliEntityModel == nil {
+		return restapi.SliEntity{}, nil
+	}
+
+	if sliEntityModel.ApplicationTimeBased != nil {
+		return r.mapApplicationTimeBasedFromState(sliEntityModel.ApplicationTimeBased)
+	}
+
+	if sliEntityModel.ApplicationEventBased != nil {
+		return r.mapApplicationEventBasedFromState(sliEntityModel.ApplicationEventBased)
+	}
+
+	if sliEntityModel.WebsiteEventBased != nil {
+		return r.mapWebsiteEventBasedFromState(sliEntityModel.WebsiteEventBased)
+	}
+
+	if sliEntityModel.WebsiteTimeBased != nil {
+		return r.mapWebsiteTimeBasedFromState(sliEntityModel.WebsiteTimeBased)
+	}
+
+	return restapi.SliEntity{}, nil
+}
+
+// mapApplicationTimeBasedFromState converts application time-based state model to API entity
+func (r *sliConfigResourceFramework) mapApplicationTimeBasedFromState(model *ApplicationTimeBasedModel) (restapi.SliEntity, error) {
 	applicationID := model.ApplicationID.ValueString()
 	boundaryScope := model.BoundaryScope.ValueString()
 
 	entity := restapi.SliEntity{
-		Type:          "application",
+		Type:          SliEntityTypeApplication,
 		ApplicationID: &applicationID,
 		BoundaryScope: &boundaryScope,
 	}
@@ -496,102 +639,110 @@ func (r *sliConfigResourceFramework) mapApplicationTimeBasedFromState(ctx contex
 	return entity, nil
 }
 
-func (r *sliConfigResourceFramework) mapTagFilterStringToAPIModel(input string) (*restapi.TagFilter, error) {
-	parser := tagfilter.NewParser()
-	expr, err := parser.Parse(input)
-	if err != nil {
-		return nil, err
-	}
-
-	mapper := tagfilter.NewMapper()
-	return mapper.ToAPIModel(expr), nil
-}
-
-func (r *sliConfigResourceFramework) mapApplicationEventBasedFromState(ctx context.Context, model *ApplicationEventBasedModel) (restapi.SliEntity, error) {
+// mapApplicationEventBasedFromState converts application event-based state model to API entity
+func (r *sliConfigResourceFramework) mapApplicationEventBasedFromState(model *ApplicationEventBasedModel) (restapi.SliEntity, error) {
 	applicationID := model.ApplicationID.ValueString()
 	boundaryScope := model.BoundaryScope.ValueString()
 
 	entity := restapi.SliEntity{
-		Type:          "availability",
+		Type:          SliEntityTypeAvailability,
 		ApplicationID: &applicationID,
 		BoundaryScope: &boundaryScope,
 	}
 
-	if !model.BadEventFilterExpression.IsNull() {
-		badEventFilter, err := r.mapTagFilterStringToAPIModel(model.BadEventFilterExpression.ValueString())
-		if err != nil {
-			return restapi.SliEntity{}, fmt.Errorf("failed to parse bad event filter expression: %v", err)
-		}
-		entity.BadEventFilterExpression = badEventFilter
+	if err := r.mapEventFilterExpressions(&entity, model.BadEventFilterExpression, model.GoodEventFilterExpression); err != nil {
+		return restapi.SliEntity{}, err
 	}
 
-	if !model.GoodEventFilterExpression.IsNull() {
-		goodEventFilter, err := r.mapTagFilterStringToAPIModel(model.GoodEventFilterExpression.ValueString())
-		if err != nil {
-			return restapi.SliEntity{}, fmt.Errorf("failed to parse good event filter expression: %v", err)
-		}
-		entity.GoodEventFilterExpression = goodEventFilter
-	}
-
-	if !model.IncludeInternal.IsNull() {
-		includeInternal := model.IncludeInternal.ValueBool()
-		entity.IncludeInternal = &includeInternal
-	}
-
-	if !model.IncludeSynthetic.IsNull() {
-		includeSynthetic := model.IncludeSynthetic.ValueBool()
-		entity.IncludeSynthetic = &includeSynthetic
-	}
+	r.mapOptionalBooleanFields(&entity, model.IncludeInternal, model.IncludeSynthetic)
 
 	return entity, nil
 }
 
-func (r *sliConfigResourceFramework) mapWebsiteEventBasedFromState(ctx context.Context, model *WebsiteEventBasedModel) (restapi.SliEntity, error) {
+// mapWebsiteEventBasedFromState converts website event-based state model to API entity
+func (r *sliConfigResourceFramework) mapWebsiteEventBasedFromState(model *WebsiteEventBasedModel) (restapi.SliEntity, error) {
 	websiteID := model.WebsiteID.ValueString()
 	beaconType := model.BeaconType.ValueString()
 
 	entity := restapi.SliEntity{
-		Type:       "websiteEventBased",
+		Type:       SliEntityTypeWebsiteEventBased,
 		WebsiteId:  &websiteID,
 		BeaconType: &beaconType,
 	}
 
-	if !model.BadEventFilterExpression.IsNull() {
-		badEventFilter, err := r.mapTagFilterStringToAPIModel(model.BadEventFilterExpression.ValueString())
-		if err != nil {
-			return restapi.SliEntity{}, fmt.Errorf("failed to parse bad event filter expression: %v", err)
-		}
-		entity.BadEventFilterExpression = badEventFilter
-	}
-
-	if !model.GoodEventFilterExpression.IsNull() {
-		goodEventFilter, err := r.mapTagFilterStringToAPIModel(model.GoodEventFilterExpression.ValueString())
-		if err != nil {
-			return restapi.SliEntity{}, fmt.Errorf("failed to parse good event filter expression: %v", err)
-		}
-		entity.GoodEventFilterExpression = goodEventFilter
+	if err := r.mapEventFilterExpressions(&entity, model.BadEventFilterExpression, model.GoodEventFilterExpression); err != nil {
+		return restapi.SliEntity{}, err
 	}
 
 	return entity, nil
 }
 
-func (r *sliConfigResourceFramework) mapWebsiteTimeBasedFromState(ctx context.Context, model *WebsiteTimeBasedModel) (restapi.SliEntity, error) {
+// mapWebsiteTimeBasedFromState converts website time-based state model to API entity
+func (r *sliConfigResourceFramework) mapWebsiteTimeBasedFromState(model *WebsiteTimeBasedModel) (restapi.SliEntity, error) {
 	websiteID := model.WebsiteID.ValueString()
 	beaconType := model.BeaconType.ValueString()
 
 	entity := restapi.SliEntity{
-		Type:       "websiteTimeBased",
+		Type:       SliEntityTypeWebsiteTimeBased,
 		WebsiteId:  &websiteID,
 		BeaconType: &beaconType,
 	}
 
 	if !model.FilterExpression.IsNull() {
-		filterExpression, err := r.mapTagFilterStringToAPIModel(model.FilterExpression.ValueString())
+		filterExpression, err := r.parseTagFilterString(model.FilterExpression.ValueString(), ErrMsgFilterExpressionContext)
 		if err != nil {
-			return restapi.SliEntity{}, fmt.Errorf("failed to parse filter expression: %v", err)
+			return restapi.SliEntity{}, err
 		}
 		entity.FilterExpression = filterExpression
 	}
 
 	return entity, nil
 }
+
+// mapEventFilterExpressions maps bad and good event filter expressions to entity
+func (r *sliConfigResourceFramework) mapEventFilterExpressions(entity *restapi.SliEntity, badFilter, goodFilter types.String) error {
+	if !badFilter.IsNull() {
+		badEventFilter, err := r.parseTagFilterString(badFilter.ValueString(), ErrMsgBadEventFilterContext)
+		if err != nil {
+			return err
+		}
+		entity.BadEventFilterExpression = badEventFilter
+	}
+
+	if !goodFilter.IsNull() {
+		goodEventFilter, err := r.parseTagFilterString(goodFilter.ValueString(), ErrMsgGoodEventFilterContext)
+		if err != nil {
+			return err
+		}
+		entity.GoodEventFilterExpression = goodEventFilter
+	}
+
+	return nil
+}
+
+// mapOptionalBooleanFields maps optional boolean fields to entity
+func (r *sliConfigResourceFramework) mapOptionalBooleanFields(entity *restapi.SliEntity, includeInternal, includeSynthetic types.Bool) {
+	if !includeInternal.IsNull() {
+		value := includeInternal.ValueBool()
+		entity.IncludeInternal = &value
+	}
+
+	if !includeSynthetic.IsNull() {
+		value := includeSynthetic.ValueBool()
+		entity.IncludeSynthetic = &value
+	}
+}
+
+// parseTagFilterString parses a tag filter string into API model
+func (r *sliConfigResourceFramework) parseTagFilterString(input, context string) (*restapi.TagFilter, error) {
+	parser := tagfilter.NewParser()
+	expr, err := parser.Parse(input)
+	if err != nil {
+		return nil, fmt.Errorf(ErrMsgFailedToParseFilterExpression, context, err)
+	}
+
+	mapper := tagfilter.NewMapper()
+	return mapper.ToAPIModel(expr), nil
+}
+
+// Made with Bob
