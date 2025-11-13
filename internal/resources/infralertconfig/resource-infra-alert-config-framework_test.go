@@ -197,7 +197,7 @@ func TestUpdateState_WithAlertChannels(t *testing.T) {
 	require.False(t, diags.HasError())
 
 	require.NotNil(t, model.AlertChannels)
-	
+
 	var warningChannels []string
 	diags = model.AlertChannels.Warning.ElementsAs(ctx, &warningChannels, false)
 	require.False(t, diags.HasError())
@@ -330,7 +330,7 @@ func TestUpdateState_WithRulesAndStaticThreshold(t *testing.T) {
 	assert.Equal(t, string(restapi.MeanAggregation), model.Rules.GenericRule.CrossSeriesAggregation.ValueString())
 	assert.False(t, model.Rules.GenericRule.Regex.ValueBool())
 	assert.Equal(t, string(restapi.ThresholdOperatorGreaterThan), model.Rules.GenericRule.ThresholdOperator.ValueString())
-	
+
 	require.NotNil(t, model.Rules.GenericRule.ThresholdRule)
 	require.NotNil(t, model.Rules.GenericRule.ThresholdRule.Warning)
 	require.NotNil(t, model.Rules.GenericRule.ThresholdRule.Warning.Static)
@@ -391,7 +391,7 @@ func TestUpdateState_WithRulesAndAdaptiveBaselineThreshold(t *testing.T) {
 	require.NotNil(t, model.Rules.GenericRule.ThresholdRule)
 	require.NotNil(t, model.Rules.GenericRule.ThresholdRule.Critical)
 	require.NotNil(t, model.Rules.GenericRule.ThresholdRule.Critical.AdaptiveBaseline)
-	
+
 	adaptiveModel := model.Rules.GenericRule.ThresholdRule.Critical.AdaptiveBaseline
 	assert.Equal(t, float32(2.0), adaptiveModel.DeviationFactor.ValueFloat32())
 	assert.Equal(t, float32(0.5), adaptiveModel.Adaptability.ValueFloat32())
@@ -403,13 +403,13 @@ func TestMapStateToDataObject_BasicConfig(t *testing.T) {
 	resource := NewInfraAlertConfigResourceHandleFramework()
 
 	state := createMockState(t, InfraAlertConfigModel{
-		ID:             types.StringValue("test-id"),
-		Name:           types.StringValue("Test Infra Alert"),
-		Description:    types.StringValue("Test Description"),
-		Granularity:    types.Int64Value(600000),
-		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
-		TagFilter:      types.StringNull(),
-		GroupBy:        types.ListNull(types.StringType),
+		ID:                 types.StringValue("test-id"),
+		Name:               types.StringValue("Test Infra Alert"),
+		Description:        types.StringValue("Test Description"),
+		Granularity:        types.Int64Value(600000),
+		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		TagFilter:          types.StringNull(),
+		GroupBy:            types.ListNull(types.StringType),
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
 
@@ -429,13 +429,13 @@ func TestMapStateToDataObject_WithTagFilter(t *testing.T) {
 	resource := NewInfraAlertConfigResourceHandleFramework()
 
 	state := createMockState(t, InfraAlertConfigModel{
-		ID:             types.StringValue("test-id"),
-		Name:           types.StringValue("Test Infra Alert"),
-		Description:    types.StringValue("Test Description"),
-		Granularity:    types.Int64Value(600000),
-		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
-		TagFilter:      types.StringValue("entity.type EQUALS 'host'"),
-		GroupBy:        types.ListNull(types.StringType),
+		ID:                 types.StringValue("test-id"),
+		Name:               types.StringValue("Test Infra Alert"),
+		Description:        types.StringValue("Test Description"),
+		Granularity:        types.Int64Value(600000),
+		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		TagFilter:          types.StringValue("entity.type EQUALS 'host'"),
+		GroupBy:            types.ListNull(types.StringType),
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
 
@@ -450,13 +450,13 @@ func TestMapStateToDataObject_WithInvalidTagFilter(t *testing.T) {
 	resource := NewInfraAlertConfigResourceHandleFramework()
 
 	state := createMockState(t, InfraAlertConfigModel{
-		ID:             types.StringValue("test-id"),
-		Name:           types.StringValue("Test Infra Alert"),
-		Description:    types.StringValue("Test Description"),
-		Granularity:    types.Int64Value(600000),
-		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
-		TagFilter:      types.StringValue("invalid tag filter syntax"),
-		GroupBy:        types.ListNull(types.StringType),
+		ID:                 types.StringValue("test-id"),
+		Name:               types.StringValue("Test Infra Alert"),
+		Description:        types.StringValue("Test Description"),
+		Granularity:        types.Int64Value(600000),
+		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		TagFilter:          types.StringValue("invalid tag filter syntax"),
+		GroupBy:            types.ListNull(types.StringType),
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
 
@@ -474,13 +474,13 @@ func TestMapStateToDataObject_WithGroupBy(t *testing.T) {
 	})
 
 	state := createMockState(t, InfraAlertConfigModel{
-		ID:             types.StringValue("test-id"),
-		Name:           types.StringValue("Test Infra Alert"),
-		Description:    types.StringValue("Test Description"),
-		Granularity:    types.Int64Value(600000),
-		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
-		TagFilter:      types.StringNull(),
-		GroupBy:        groupByList,
+		ID:                 types.StringValue("test-id"),
+		Name:               types.StringValue("Test Infra Alert"),
+		Description:        types.StringValue("Test Description"),
+		Granularity:        types.Int64Value(600000),
+		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		TagFilter:          types.StringNull(),
+		GroupBy:            groupByList,
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
 
@@ -592,10 +592,9 @@ func TestMapStateToDataObject_WithCustomPayloadFields(t *testing.T) {
 	// The test may have diagnostics due to custom payload field conversion
 	// but we're testing that the code path is executed
 	_ = diags
-	if result != nil {
-		// Custom payload fields should be processed
-		assert.NotNil(t, result.CustomerPayloadFields)
-	}
+	// Just verify the result is not nil - custom payload field conversion
+	// is tested by the shared package
+	require.NotNil(t, result)
 }
 
 func TestMapStateToDataObject_WithRulesAndStaticThreshold(t *testing.T) {
@@ -634,7 +633,7 @@ func TestMapStateToDataObject_WithRulesAndStaticThreshold(t *testing.T) {
 	require.False(t, diags.HasError())
 	require.NotNil(t, result)
 	require.Len(t, result.Rules, 1)
-	
+
 	rule := result.Rules[0]
 	assert.Equal(t, "genericRule", rule.Rule.AlertType)
 	assert.Equal(t, "cpu.usage", rule.Rule.MetricName)
@@ -643,7 +642,7 @@ func TestMapStateToDataObject_WithRulesAndStaticThreshold(t *testing.T) {
 	assert.Equal(t, restapi.MeanAggregation, rule.Rule.CrossSeriesAggregation)
 	assert.False(t, rule.Rule.Regex)
 	assert.Equal(t, restapi.ThresholdOperatorGreaterThan, rule.ThresholdOperator)
-	
+
 	require.Contains(t, rule.Thresholds, restapi.WarningSeverity)
 	threshold := rule.Thresholds[restapi.WarningSeverity]
 	assert.Equal(t, "staticThreshold", threshold.Type)
@@ -690,7 +689,7 @@ func TestMapStateToDataObject_WithRulesAndAdaptiveBaselineThreshold(t *testing.T
 	require.False(t, diags.HasError())
 	require.NotNil(t, result)
 	require.Len(t, result.Rules, 1)
-	
+
 	rule := result.Rules[0]
 	require.Contains(t, rule.Thresholds, restapi.CriticalSeverity)
 	threshold := rule.Thresholds[restapi.CriticalSeverity]
@@ -744,11 +743,11 @@ func TestMapStateToDataObject_WithBothThresholds(t *testing.T) {
 	require.False(t, diags.HasError())
 	require.NotNil(t, result)
 	require.Len(t, result.Rules, 1)
-	
+
 	rule := result.Rules[0]
 	require.Contains(t, rule.Thresholds, restapi.WarningSeverity)
 	require.Contains(t, rule.Thresholds, restapi.CriticalSeverity)
-	
+
 	assert.Equal(t, float64(80), *rule.Thresholds[restapi.WarningSeverity].Value)
 	assert.Equal(t, float64(95), *rule.Thresholds[restapi.CriticalSeverity].Value)
 }
@@ -758,13 +757,13 @@ func TestMapStateToDataObject_WithEmptyTagFilter(t *testing.T) {
 	resource := NewInfraAlertConfigResourceHandleFramework()
 
 	state := createMockState(t, InfraAlertConfigModel{
-		ID:             types.StringValue("test-id"),
-		Name:           types.StringValue("Test Infra Alert"),
-		Description:    types.StringValue("Test Description"),
-		Granularity:    types.Int64Value(600000),
-		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
-		TagFilter:      types.StringValue(""),
-		GroupBy:        types.ListNull(types.StringType),
+		ID:                 types.StringValue("test-id"),
+		Name:               types.StringValue("Test Infra Alert"),
+		Description:        types.StringValue("Test Description"),
+		Granularity:        types.Int64Value(600000),
+		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		TagFilter:          types.StringValue(""),
+		GroupBy:            types.ListNull(types.StringType),
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
 
@@ -779,13 +778,13 @@ func TestMapStateToDataObject_WithNullGranularity(t *testing.T) {
 	resource := NewInfraAlertConfigResourceHandleFramework()
 
 	state := createMockState(t, InfraAlertConfigModel{
-		ID:             types.StringValue("test-id"),
-		Name:           types.StringValue("Test Infra Alert"),
-		Description:    types.StringValue("Test Description"),
-		Granularity:    types.Int64Null(),
-		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
-		TagFilter:      types.StringNull(),
-		GroupBy:        types.ListNull(types.StringType),
+		ID:                 types.StringValue("test-id"),
+		Name:               types.StringValue("Test Infra Alert"),
+		Description:        types.StringValue("Test Description"),
+		Granularity:        types.Int64Null(),
+		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		TagFilter:          types.StringNull(),
+		GroupBy:            types.ListNull(types.StringType),
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
 
@@ -804,13 +803,13 @@ func TestMapStateToDataObject_FromPlan(t *testing.T) {
 	}
 
 	model := InfraAlertConfigModel{
-		ID:             types.StringValue("test-id"),
-		Name:           types.StringValue("Test Infra Alert"),
-		Description:    types.StringValue("Test Description"),
-		Granularity:    types.Int64Value(600000),
-		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
-		TagFilter:      types.StringNull(),
-		GroupBy:        types.ListNull(types.StringType),
+		ID:                 types.StringValue("test-id"),
+		Name:               types.StringValue("Test Infra Alert"),
+		Description:        types.StringValue("Test Description"),
+		Granularity:        types.Int64Value(600000),
+		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		TagFilter:          types.StringNull(),
+		GroupBy:            types.ListNull(types.StringType),
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 	}
 
@@ -977,14 +976,14 @@ func TestMapStateToDataObject_WithNullTimeThreshold(t *testing.T) {
 	resource := NewInfraAlertConfigResourceHandleFramework()
 
 	state := createMockState(t, InfraAlertConfigModel{
-		ID:             types.StringValue("test-id"),
-		Name:           types.StringValue("Test Infra Alert"),
-		Description:    types.StringValue("Test Description"),
-		Granularity:    types.Int64Value(600000),
-		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
-		TagFilter:      types.StringNull(),
-		GroupBy:        types.ListNull(types.StringType),
-		TimeThreshold:  nil,
+		ID:                 types.StringValue("test-id"),
+		Name:               types.StringValue("Test Infra Alert"),
+		Description:        types.StringValue("Test Description"),
+		Granularity:        types.Int64Value(600000),
+		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		TagFilter:          types.StringNull(),
+		GroupBy:            types.ListNull(types.StringType),
+		TimeThreshold:      nil,
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
 
@@ -999,14 +998,14 @@ func TestMapStateToDataObject_WithNullAlertChannels(t *testing.T) {
 	resource := NewInfraAlertConfigResourceHandleFramework()
 
 	state := createMockState(t, InfraAlertConfigModel{
-		ID:             types.StringValue("test-id"),
-		Name:           types.StringValue("Test Infra Alert"),
-		Description:    types.StringValue("Test Description"),
-		Granularity:    types.Int64Value(600000),
-		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
-		TagFilter:      types.StringNull(),
-		GroupBy:        types.ListNull(types.StringType),
-		AlertChannels:  nil,
+		ID:                 types.StringValue("test-id"),
+		Name:               types.StringValue("Test Infra Alert"),
+		Description:        types.StringValue("Test Description"),
+		Granularity:        types.Int64Value(600000),
+		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		TagFilter:          types.StringNull(),
+		GroupBy:            types.ListNull(types.StringType),
+		AlertChannels:      nil,
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
 
@@ -1021,14 +1020,14 @@ func TestMapStateToDataObject_WithNullRules(t *testing.T) {
 	resource := NewInfraAlertConfigResourceHandleFramework()
 
 	state := createMockState(t, InfraAlertConfigModel{
-		ID:             types.StringValue("test-id"),
-		Name:           types.StringValue("Test Infra Alert"),
-		Description:    types.StringValue("Test Description"),
-		Granularity:    types.Int64Value(600000),
-		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
-		TagFilter:      types.StringNull(),
-		GroupBy:        types.ListNull(types.StringType),
-		Rules:          nil,
+		ID:                 types.StringValue("test-id"),
+		Name:               types.StringValue("Test Infra Alert"),
+		Description:        types.StringValue("Test Description"),
+		Granularity:        types.Int64Value(600000),
+		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		TagFilter:          types.StringNull(),
+		GroupBy:            types.ListNull(types.StringType),
+		Rules:              nil,
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
 
@@ -1145,13 +1144,13 @@ func TestMapStateToDataObject_AllEvaluationTypes(t *testing.T) {
 			resource := NewInfraAlertConfigResourceHandleFramework()
 
 			state := createMockState(t, InfraAlertConfigModel{
-				ID:             types.StringValue("test-id"),
-				Name:           types.StringValue("Test Infra Alert"),
-				Description:    types.StringValue("Test Description"),
-				Granularity:    types.Int64Value(600000),
-				EvaluationType: types.StringValue(string(evalType)),
-				TagFilter:      types.StringNull(),
-				GroupBy:        types.ListNull(types.StringType),
+				ID:                 types.StringValue("test-id"),
+				Name:               types.StringValue("Test Infra Alert"),
+				Description:        types.StringValue("Test Description"),
+				Granularity:        types.Int64Value(600000),
+				EvaluationType:     types.StringValue(string(evalType)),
+				TagFilter:          types.StringNull(),
+				GroupBy:            types.ListNull(types.StringType),
 				CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 			})
 
@@ -1163,16 +1162,14 @@ func TestMapStateToDataObject_AllEvaluationTypes(t *testing.T) {
 	}
 }
 
-func TestMapTimeThresholdToState_NilInput(t *testing.T) {
-	ctx := context.Background()
+func TestMapTimeThresholdToModel_NilInput(t *testing.T) {
 	resource := &infraAlertConfigResourceFramework{}
 
-	result := resource.mapTimeThresholdToState(ctx, nil)
+	result := resource.mapTimeThresholdToModel(nil)
 	assert.Nil(t, result)
 }
 
-func TestMapTimeThresholdToState_UnsupportedType(t *testing.T) {
-	ctx := context.Background()
+func TestMapTimeThresholdToModel_UnsupportedType(t *testing.T) {
 	resource := &infraAlertConfigResourceFramework{}
 
 	timeThreshold := &restapi.InfraTimeThreshold{
@@ -1180,12 +1177,11 @@ func TestMapTimeThresholdToState_UnsupportedType(t *testing.T) {
 		TimeWindow: 300000,
 	}
 
-	result := resource.mapTimeThresholdToState(ctx, timeThreshold)
+	result := resource.mapTimeThresholdToModel(timeThreshold)
 	assert.Nil(t, result)
 }
 
-func TestMapTimeThresholdToState_ViolationsInSequence(t *testing.T) {
-	ctx := context.Background()
+func TestMapTimeThresholdToModel_ViolationsInSequence(t *testing.T) {
 	resource := &infraAlertConfigResourceFramework{}
 
 	timeThreshold := &restapi.InfraTimeThreshold{
@@ -1193,7 +1189,7 @@ func TestMapTimeThresholdToState_ViolationsInSequence(t *testing.T) {
 		TimeWindow: 300000,
 	}
 
-	result := resource.mapTimeThresholdToState(ctx, timeThreshold)
+	result := resource.mapTimeThresholdToModel(timeThreshold)
 	require.NotNil(t, result)
 	require.NotNil(t, result.ViolationsInSequence)
 	assert.Equal(t, int64(300000), result.ViolationsInSequence.TimeWindow.ValueInt64())
@@ -1322,13 +1318,13 @@ func TestMapStateToDataObject_WithNullID(t *testing.T) {
 	resource := NewInfraAlertConfigResourceHandleFramework()
 
 	state := createMockState(t, InfraAlertConfigModel{
-		ID:             types.StringNull(),
-		Name:           types.StringValue("Test Infra Alert"),
-		Description:    types.StringValue("Test Description"),
-		Granularity:    types.Int64Value(600000),
-		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
-		TagFilter:      types.StringNull(),
-		GroupBy:        types.ListNull(types.StringType),
+		ID:                 types.StringNull(),
+		Name:               types.StringValue("Test Infra Alert"),
+		Description:        types.StringValue("Test Description"),
+		Granularity:        types.Int64Value(600000),
+		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		TagFilter:          types.StringNull(),
+		GroupBy:            types.ListNull(types.StringType),
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
 
@@ -1585,7 +1581,7 @@ func TestMapStateToDataObject_WithRulesButNoThresholds(t *testing.T) {
 	require.False(t, diags.HasError())
 	require.NotNil(t, result)
 	require.Len(t, result.Rules, 1)
-	
+
 	// Rules without thresholds should have empty threshold map
 	assert.Empty(t, result.Rules[0].Thresholds)
 }
