@@ -125,7 +125,7 @@ func TestMapStateToDataObject_BasicConfig(t *testing.T) {
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		AlertChannelIDs:  []types.String{},
+		
 		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Applications:     []ApplicationModel{},
@@ -162,7 +162,7 @@ func TestMapStateToDataObject_WithGracePeriod(t *testing.T) {
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		AlertChannelIDs:  []types.String{},
+		
 		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Applications:     []ApplicationModel{},
@@ -190,7 +190,7 @@ func TestMapStateToDataObject_WithApplications(t *testing.T) {
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		AlertChannelIDs:  []types.String{},
+		
 		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Applications: []ApplicationModel{
@@ -286,7 +286,7 @@ func TestMapStateToDataObject_WithTimeThreshold(t *testing.T) {
 				IncludeInternal:  types.BoolValue(false),
 				IncludeSynthetic: types.BoolValue(false),
 				Triggering:       types.BoolValue(false),
-				AlertChannelIDs:  []types.String{},
+				
 				AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
 				CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 				Applications:     []ApplicationModel{},
@@ -532,7 +532,7 @@ func TestMapStateToDataObject_WithAlertChannels(t *testing.T) {
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		AlertChannelIDs:  []types.String{},
+		
 		AlertChannels:    alertChannels,
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Applications:     []ApplicationModel{},
@@ -616,7 +616,7 @@ func TestMapStateToDataObject_WithCustomPayloadFields(t *testing.T) {
 		IncludeInternal:     types.BoolValue(false),
 		IncludeSynthetic:    types.BoolValue(false),
 		Triggering:          types.BoolValue(false),
-		AlertChannelIDs:     []types.String{},
+		
 		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: customPayloadFields,
 		Applications:        []ApplicationModel{},
@@ -719,7 +719,7 @@ func TestMapStateToDataObject_WithRules(t *testing.T) {
 				IncludeInternal:  types.BoolValue(false),
 				IncludeSynthetic: types.BoolValue(false),
 				Triggering:       types.BoolValue(false),
-				AlertChannelIDs:  []types.String{},
+				
 				AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
 				CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 				Applications:     []ApplicationModel{},
@@ -755,7 +755,7 @@ func TestMapStateToDataObject_WithStaticThreshold(t *testing.T) {
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		AlertChannelIDs:  []types.String{},
+		
 		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Applications:     []ApplicationModel{},
@@ -886,40 +886,6 @@ func TestUpdateState_WithCustomPayloadFields(t *testing.T) {
 	assert.False(t, model.CustomPayloadFields.IsNull())
 }
 
-// Test UpdateState with severity
-func TestUpdateState_WithSeverity(t *testing.T) {
-	ctx := context.Background()
-	resource := &applicationAlertConfigResourceFrameworkImpl{}
-
-	data := &restapi.ApplicationAlertConfig{
-		ID:               "test-id",
-		Name:             "Test Alert",
-		Description:      "Test Description",
-		BoundaryScope:    "ALL",
-		EvaluationType:   "PER_AP",
-		Granularity:      600000,
-		IncludeInternal:  false,
-		IncludeSynthetic: false,
-		Triggering:       false,
-		Severity:         5, // Warning severity
-		AlertChannelIDs:  []string{},
-		Applications:     map[string]restapi.IncludedApplication{},
-		Rules:            []restapi.ApplicationAlertRuleWithThresholds{},
-	}
-
-	state := &tfsdk.State{
-		Schema: getTestSchema(),
-	}
-
-	diags := resource.UpdateState(ctx, state, nil, data)
-	require.False(t, diags.HasError())
-
-	var model ApplicationAlertConfigModel
-	diags = state.Get(ctx, &model)
-	require.False(t, diags.HasError())
-
-	assert.Equal(t, "warning", model.Severity.ValueString())
-}
 
 // Test UpdateState with tag filter
 func TestUpdateState_WithTagFilterExpression(t *testing.T) {
@@ -1135,39 +1101,6 @@ func TestUpdateState_WithAllRuleTypes(t *testing.T) {
 	}
 }
 
-// Test deprecated fields
-func TestMapStateToDataObject_WithDeprecatedFields(t *testing.T) {
-	ctx := context.Background()
-	resource := &applicationAlertConfigResourceFrameworkImpl{}
-
-	state := createMockState(t, ApplicationAlertConfigModel{
-		ID:               types.StringValue("test-id"),
-		Name:             types.StringValue("Test Alert"),
-		Description:      types.StringValue("Test Description"),
-		BoundaryScope:    types.StringValue("ALL"),
-		EvaluationType:   types.StringValue("PER_AP"),
-		Granularity:      types.Int64Value(600000),
-		IncludeInternal:  types.BoolValue(false),
-		IncludeSynthetic: types.BoolValue(false),
-		Triggering:       types.BoolValue(false),
-		Severity:         types.StringValue("warning"),
-		AlertChannelIDs: []types.String{
-			types.StringValue("channel-1"),
-			types.StringValue("channel-2"),
-		},
-		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
-		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
-		Applications:        []ApplicationModel{},
-		Rules:               []RuleWithThresholdModel{},
-	})
-
-	result, diags := resource.MapStateToDataObject(ctx, state)
-	require.False(t, diags.HasError())
-	require.NotNil(t, result)
-	// Severity is converted to int representation
-	assert.Equal(t, 5, int(result.Severity))
-	assert.Len(t, result.AlertChannelIDs, 2)
-}
 
 // Test tag filter expression
 func TestMapStateToDataObject_WithTagFilter(t *testing.T) {
@@ -1185,7 +1118,7 @@ func TestMapStateToDataObject_WithTagFilter(t *testing.T) {
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
 		TagFilter:        types.StringValue("entity.type EQUALS 'service'"),
-		AlertChannelIDs:  []types.String{},
+		
 		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Applications:     []ApplicationModel{},
@@ -1244,7 +1177,7 @@ func TestMapStateToDataObject_ErrorHandling(t *testing.T) {
 				IncludeInternal:  types.BoolValue(false),
 				IncludeSynthetic: types.BoolValue(false),
 				Triggering:       types.BoolValue(false),
-				AlertChannelIDs:  []types.String{},
+				
 				AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
 				CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 				Applications:     []ApplicationModel{},
@@ -1285,7 +1218,7 @@ func TestWrapperMapStateToDataObject(t *testing.T) {
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		AlertChannelIDs:  []types.String{},
+		
 		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Applications:     []ApplicationModel{},
@@ -1321,7 +1254,7 @@ func TestWrapperMapStateToDataObject_WithState(t *testing.T) {
 		IncludeInternal:  types.BoolValue(true),
 		IncludeSynthetic: types.BoolValue(true),
 		Triggering:       types.BoolValue(true),
-		AlertChannelIDs:  []types.String{},
+		
 		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Applications:     []ApplicationModel{},
@@ -1421,7 +1354,7 @@ func TestMapStateToDataObject_InvalidTagFilter(t *testing.T) {
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
 		TagFilter:        types.StringValue("invalid tag filter syntax"),
-		AlertChannelIDs:  []types.String{},
+		
 		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Applications:     []ApplicationModel{},
@@ -1452,7 +1385,7 @@ func TestMapStateToDataObject_AllBoundaryScopes(t *testing.T) {
 				IncludeInternal:  types.BoolValue(false),
 				IncludeSynthetic: types.BoolValue(false),
 				Triggering:       types.BoolValue(false),
-				AlertChannelIDs:  []types.String{},
+				
 				AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
 				CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 				Applications:     []ApplicationModel{},
@@ -1482,7 +1415,7 @@ func TestMapStateToDataObject_ComplexApplicationHierarchy(t *testing.T) {
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		AlertChannelIDs:  []types.String{},
+		
 		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Applications: []ApplicationModel{
@@ -1559,7 +1492,7 @@ func TestMapStateToDataObject_WithCriticalThreshold(t *testing.T) {
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		AlertChannelIDs:  []types.String{},
+		
 		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Applications:     []ApplicationModel{},
@@ -1608,7 +1541,7 @@ func TestMapStateToDataObject_WithBothThresholds(t *testing.T) {
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		AlertChannelIDs:  []types.String{},
+		
 		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Applications:     []ApplicationModel{},
@@ -1662,7 +1595,7 @@ func TestMapStateToDataObject_WithNullGranularity(t *testing.T) {
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		AlertChannelIDs:  []types.String{},
+		
 		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Applications:     []ApplicationModel{},
@@ -1692,7 +1625,7 @@ func TestMapStateToDataObject_WithEmptyTagFilter(t *testing.T) {
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
 		TagFilter:        types.StringValue(""),
-		AlertChannelIDs:  []types.String{},
+		
 		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Applications:     []ApplicationModel{},
@@ -1721,8 +1654,8 @@ func TestMapStateToDataObject_WithNullSeverity(t *testing.T) {
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		Severity:         types.StringNull(),
-		AlertChannelIDs:  []types.String{},
+		
+		
 		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Applications:     []ApplicationModel{},
@@ -1750,7 +1683,7 @@ func TestMapStateToDataObject_WithAdaptiveBaselineThreshold(t *testing.T) {
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		AlertChannelIDs:  []types.String{},
+		
 		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Applications:     []ApplicationModel{},
@@ -1808,7 +1741,7 @@ func TestMapStateToDataObject_WithAdaptiveBaselineCriticalThreshold(t *testing.T
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		AlertChannelIDs:  []types.String{},
+		
 		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Applications:     []ApplicationModel{},
@@ -2002,7 +1935,7 @@ func TestMapStateToDataObject_WithNullAdaptiveBaselineFields(t *testing.T) {
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		AlertChannelIDs:  []types.String{},
+		
 		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Applications:     []ApplicationModel{},
@@ -2117,7 +2050,7 @@ func TestMapStateToDataObject_WithBothAdaptiveBaselineThresholds(t *testing.T) {
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		AlertChannelIDs:  []types.String{},
+		
 		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Applications:     []ApplicationModel{},
@@ -2208,39 +2141,6 @@ func TestUpdateState_WithEmptyApplications(t *testing.T) {
 	assert.Empty(t, model.Applications)
 }
 
-// Test UpdateState with empty alert channel IDs
-func TestUpdateState_WithEmptyAlertChannelIDs(t *testing.T) {
-	ctx := context.Background()
-	resource := &applicationAlertConfigResourceFrameworkImpl{}
-
-	data := &restapi.ApplicationAlertConfig{
-		ID:               "test-id",
-		Name:             "Test Alert",
-		Description:      "Test Description",
-		BoundaryScope:    "ALL",
-		EvaluationType:   "PER_AP",
-		Granularity:      600000,
-		IncludeInternal:  false,
-		IncludeSynthetic: false,
-		Triggering:       false,
-		AlertChannelIDs:  []string{},
-		Applications:     map[string]restapi.IncludedApplication{},
-		Rules:            []restapi.ApplicationAlertRuleWithThresholds{},
-	}
-
-	state := &tfsdk.State{
-		Schema: getTestSchema(),
-	}
-
-	diags := resource.UpdateState(ctx, state, nil, data)
-	require.False(t, diags.HasError())
-
-	var model ApplicationAlertConfigModel
-	diags = state.Get(ctx, &model)
-	require.False(t, diags.HasError())
-
-	assert.Empty(t, model.AlertChannelIDs)
-}
 
 // Test UpdateState with empty alert channels map
 func TestUpdateState_WithEmptyAlertChannels(t *testing.T) {
@@ -2277,41 +2177,6 @@ func TestUpdateState_WithEmptyAlertChannels(t *testing.T) {
 	assert.True(t, model.AlertChannels.IsNull())
 }
 
-// Test UpdateState with alert channel IDs
-func TestUpdateState_WithAlertChannelIDs(t *testing.T) {
-	ctx := context.Background()
-	resource := &applicationAlertConfigResourceFrameworkImpl{}
-
-	data := &restapi.ApplicationAlertConfig{
-		ID:               "test-id",
-		Name:             "Test Alert",
-		Description:      "Test Description",
-		BoundaryScope:    "ALL",
-		EvaluationType:   "PER_AP",
-		Granularity:      600000,
-		IncludeInternal:  false,
-		IncludeSynthetic: false,
-		Triggering:       false,
-		AlertChannelIDs:  []string{"channel-1", "channel-2"},
-		Applications:     map[string]restapi.IncludedApplication{},
-		Rules:            []restapi.ApplicationAlertRuleWithThresholds{},
-	}
-
-	state := &tfsdk.State{
-		Schema: getTestSchema(),
-	}
-
-	diags := resource.UpdateState(ctx, state, nil, data)
-	require.False(t, diags.HasError())
-
-	var model ApplicationAlertConfigModel
-	diags = state.Get(ctx, &model)
-	require.False(t, diags.HasError())
-
-	require.Len(t, model.AlertChannelIDs, 2)
-	assert.Equal(t, "channel-1", model.AlertChannelIDs[0].ValueString())
-	assert.Equal(t, "channel-2", model.AlertChannelIDs[1].ValueString())
-}
 
 // Test UpdateState with null tag filter
 func TestUpdateState_WithNullTagFilter(t *testing.T) {
@@ -2348,41 +2213,6 @@ func TestUpdateState_WithNullTagFilter(t *testing.T) {
 	assert.True(t, model.TagFilter.IsNull())
 }
 
-// Test UpdateState with zero severity
-func TestUpdateState_WithZeroSeverity(t *testing.T) {
-	ctx := context.Background()
-	resource := &applicationAlertConfigResourceFrameworkImpl{}
-
-	data := &restapi.ApplicationAlertConfig{
-		ID:               "test-id",
-		Name:             "Test Alert",
-		Description:      "Test Description",
-		BoundaryScope:    "ALL",
-		EvaluationType:   "PER_AP",
-		Granularity:      600000,
-		IncludeInternal:  false,
-		IncludeSynthetic: false,
-		Triggering:       false,
-		Severity:         0,
-		AlertChannelIDs:  []string{},
-		Applications:     map[string]restapi.IncludedApplication{},
-		Rules:            []restapi.ApplicationAlertRuleWithThresholds{},
-	}
-
-	state := &tfsdk.State{
-		Schema: getTestSchema(),
-	}
-
-	diags := resource.UpdateState(ctx, state, nil, data)
-	require.False(t, diags.HasError())
-
-	var model ApplicationAlertConfigModel
-	diags = state.Get(ctx, &model)
-	require.False(t, diags.HasError())
-
-	// Zero severity should not set the severity field
-	assert.True(t, model.Severity.IsNull() || model.Severity.ValueString() == "")
-}
 
 
 // Helper functions
