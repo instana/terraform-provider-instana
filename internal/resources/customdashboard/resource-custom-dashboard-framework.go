@@ -19,6 +19,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
+// ============================================================================
+// Resource Factory
+// ============================================================================
+
 // NewCustomDashboardResourceHandleFramework creates the resource handle for Custom Dashboards
 func NewCustomDashboardResourceHandleFramework() resourcehandle.ResourceHandleFramework[*restapi.CustomDashboard] {
 	return &customDashboardResourceFramework{
@@ -79,22 +83,34 @@ func NewCustomDashboardResourceHandleFramework() resourcehandle.ResourceHandleFr
 	}
 }
 
+// ============================================================================
+// Resource Implementation
+// ============================================================================
+
 type customDashboardResourceFramework struct {
 	metaData resourcehandle.ResourceMetaDataFramework
 }
 
+// MetaData returns the resource metadata
 func (r *customDashboardResourceFramework) MetaData() *resourcehandle.ResourceMetaDataFramework {
 	return &r.metaData
 }
 
+// GetRestResource returns the REST resource for custom dashboards
 func (r *customDashboardResourceFramework) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.CustomDashboard] {
 	return api.CustomDashboards()
 }
 
+// SetComputedFields sets computed fields in the plan (none for this resource)
 func (r *customDashboardResourceFramework) SetComputedFields(_ context.Context, _ *tfsdk.Plan) diag.Diagnostics {
 	return nil
 }
 
+// ============================================================================
+// API to State Mapping
+// ============================================================================
+
+// UpdateState converts API data object to Terraform state
 func (r *customDashboardResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, dashboard *restapi.CustomDashboard) diag.Diagnostics {
 	var diags diag.Diagnostics
 
@@ -124,7 +140,7 @@ func (r *customDashboardResourceFramework) UpdateState(ctx context.Context, stat
 		model.Widgets = types.StringValue(util.NormalizeJSONString(string(widgetsBytes)))
 
 		// Map access rules
-		model.AccessRules = r.mapAccessRulesToState(ctx, dashboard.AccessRules)
+		model.AccessRules = r.mapAccessRulesToState(dashboard.AccessRules)
 	}
 
 	// Set the entire model to state
@@ -132,7 +148,8 @@ func (r *customDashboardResourceFramework) UpdateState(ctx context.Context, stat
 	return diags
 }
 
-func (r *customDashboardResourceFramework) mapAccessRulesToState(ctx context.Context, accessRules []restapi.AccessRule) []AccessRuleModel {
+// mapAccessRulesToState converts access rules from API format to state models
+func (r *customDashboardResourceFramework) mapAccessRulesToState(accessRules []restapi.AccessRule) []AccessRuleModel {
 	if len(accessRules) == 0 {
 		return nil
 	}
@@ -149,6 +166,11 @@ func (r *customDashboardResourceFramework) mapAccessRulesToState(ctx context.Con
 	return models
 }
 
+// ============================================================================
+// State to API Mapping
+// ============================================================================
+
+// MapStateToDataObject converts Terraform state to API data object
 func (r *customDashboardResourceFramework) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.CustomDashboard, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var model CustomDashboardModel
@@ -171,7 +193,7 @@ func (r *customDashboardResourceFramework) MapStateToDataObject(ctx context.Cont
 	}
 
 	// Map access rules
-	accessRules := r.mapAccessRulesFromState(ctx, model.AccessRules)
+	accessRules := r.mapAccessRulesFromState(model.AccessRules)
 
 	// Map widgets - normalize the JSON
 	var widgets json.RawMessage
@@ -188,7 +210,12 @@ func (r *customDashboardResourceFramework) MapStateToDataObject(ctx context.Cont
 	}, diags
 }
 
-func (r *customDashboardResourceFramework) mapAccessRulesFromState(ctx context.Context, accessRuleModels []AccessRuleModel) []restapi.AccessRule {
+// ============================================================================
+// Helper Methods
+// ============================================================================
+
+// mapAccessRulesFromState converts access rule models from state to API format
+func (r *customDashboardResourceFramework) mapAccessRulesFromState(accessRuleModels []AccessRuleModel) []restapi.AccessRule {
 	if len(accessRuleModels) == 0 {
 		return nil
 	}
