@@ -1,26 +1,13 @@
 # Automation Action Resource
 
-
-Management of Automation Actions.
-
-API Documentation: <https://instana.github.io/openapi/#tag/Action-Catalog>
-
 ---
-## ⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)
+## ⚠️ BREAKING CHANGES - Plugin Framework Migration
 
- **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
- 
-## Migration Guide (v5 to v6)
-### Syntax Changes Overview
+**This resource has been migrated to the Terraform Plugin Framework.** The migration introduces syntax changes for nested blocks:
 
-- Action type blocks (`script`, `http`, `manual`, etc.) now use **object syntax** with `= { }`
-- `input_parameter` now uses **list syntax** with `= [{ }]`
-- Enhanced validation for action types and parameters
-- Better error messages for configuration issues
-- Improved state management
+### Migration Guide
 
-#### OLD (v5.x) Syntax:
-
+**OLD Syntax (SDK v2):**
 ```hcl
 resource "instana_automation_action" "example" {
   name        = "Hello world"
@@ -45,8 +32,7 @@ resource "instana_automation_action" "example" {
 }
 ```
 
-#### NEW (v6.x) Syntax:
-
+**NEW Syntax (Plugin Framework):**
 ```hcl
 resource "instana_automation_action" "example" {
   name        = "Hello world"
@@ -71,9 +57,34 @@ resource "instana_automation_action" "example" {
 }
 ```
 
+**Key Changes:**
+- Action type blocks (`script`, `http`, `manual`, etc.) now use **object syntax** with `= { }`
+- `input_parameter` now uses **list syntax** with `= [{ }]`
+- Enhanced validation for action types and parameters
+- Better error messages for configuration issues
+- Improved state management
+
 ---
 
-## Example Usage
+Management of Automation Actions.
+
+API Documentation: <https://instana.github.io/openapi/#tag/Action-Catalog>
+
+---
+## ⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)
+
+ **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
+ 
+## Migration Guide (v5 to v6)
+### Syntax Changes Overview
+
+- Action type blocks (`script`, `http`, `manual`, etc.) now use **object syntax** with `= { }`
+- `input_parameter` now uses **list syntax** with `= [{ }]`
+- Enhanced validation for action types and parameters
+- Better error messages for configuration issues
+- Improved state management
+
+#### OLD (v5.x) Syntax:
 
 ### Script Action - Basic
 

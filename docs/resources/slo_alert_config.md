@@ -1,20 +1,30 @@
 # SLO Smart Alert Configuration Resource
 
+> **⚠️ BREAKING CHANGES in v3.0.0**
+> 
+> This resource has been migrated from Terraform SDK v2 to the Plugin Framework. While most configurations remain compatible, there are important syntax changes you need to be aware of.
+>
+> **Key Changes:**
+> - `threshold` block now uses attribute syntax `= { }` instead of block syntax
+> - `time_threshold` block now uses attribute syntax `= { }` instead of block syntax
+> - `burn_rate_config` now uses list syntax `= [{ }]` instead of multiple blocks
+> - `custom_payload_field` now uses list syntax `= [{ }]` instead of multiple blocks
+> - All nested objects use attribute syntax
+> - See [Migration Guide](#migration-guide-v2-to-v3) below for detailed examples
+
 Management of Smart Alerts for Service Level Objectives (SLOs) to trigger notifications when specific thresholds are surpassed, such as SLO status, the percentage of error budget consumed, or the error budget burn rate. Additionally, you can customize the alert by selecting one or more alert channels, adding custom payloads, or setting time-based thresholds.
 
 API Documentation: <https://instana.github.io/openapi/#tag/Service-Levels-Alert-Configuration>
 
 ## ⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)
 
- **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
-
-## Migration Guide (v5 to v6)
+## Migration Guide (v2 to v3)
 
 ### Syntax Changes Overview
 
-The main changes are in how nested blocks are defined. In v6, all nested configurations use attribute syntax instead of block syntax.
+The main changes are in how nested blocks are defined. In v3, all nested configurations use attribute syntax instead of block syntax.
 
-#### OLD (v5.x) Syntax:
+#### OLD (v2.x) Syntax:
 ```hcl
 resource "instana_slo_alert_config" "example" {
   name = "SLO Alert"
@@ -42,7 +52,7 @@ resource "instana_slo_alert_config" "example" {
 }
 ```
 
-#### NEW (v6.x) Syntax:
+#### NEW (v3.x) Syntax:
 ```hcl
 resource "instana_slo_alert_config" "example" {
   name = "SLO Alert"

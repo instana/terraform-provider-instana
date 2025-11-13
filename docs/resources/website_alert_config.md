@@ -1,20 +1,29 @@
 # Website Alert Configuration Resource
 
+> **⚠️ BREAKING CHANGES in v3.0.0**
+> 
+> This resource has been migrated from Terraform SDK v2 to the Plugin Framework. While most configurations remain compatible, there are important syntax changes you need to be aware of.
+>
+> **Key Changes:**
+> - `rule` block now uses attribute syntax `= { }` instead of block syntax
+> - `threshold` block now uses attribute syntax `= { }` instead of block syntax
+> - `time_threshold` block now uses attribute syntax `= { }` instead of block syntax
+> - `custom_payload_field` blocks now use list syntax `custom_payload_fields = [{ }]` instead of multiple blocks
+> - `rules` (multiple alert rules) now use list syntax `= [{ }]`
+> - All nested rule types use attribute syntax
+> - See [Migration Guide](#migration-guide-v2-to-v3) below for detailed examples
+
 Manages website alert configurations (Website Smart Alerts) in Instana. Website alerts monitor the performance and availability of your websites from the end-user perspective.
 
 API Documentation: <https://instana.github.io/openapi/#operation/findActiveWebsiteAlertConfigs>
 
-## ⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)
-
- **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
-
-## Migration Guide (v5 to v6)
+## Migration Guide (v2 to v3)
 
 ### Syntax Changes Overview
 
-The main changes are in how nested blocks are defined. In v6, they use attribute syntax instead of block syntax.
+The main changes are in how nested blocks are defined. In v3, they use attribute syntax instead of block syntax.
 
-#### OLD (v5.x) Syntax:
+#### OLD (v2.x) Syntax:
 ```hcl
 resource "instana_website_alert_config" "example" {
   name = "Website Alert"
@@ -50,7 +59,7 @@ resource "instana_website_alert_config" "example" {
 }
 ```
 
-#### NEW (v6.x) Syntax:
+#### NEW (v3.x) Syntax:
 ```hcl
 resource "instana_website_alert_config" "example" {
   name = "Website Alert"

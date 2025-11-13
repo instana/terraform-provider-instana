@@ -1,5 +1,14 @@
 # SLO Correction Configuration Resource
 
+> **⚠️ BREAKING CHANGES in v3.0.0**
+> 
+> This resource has been migrated from Terraform SDK v2 to the Plugin Framework. While most configurations remain compatible, there are important syntax changes you need to be aware of.
+>
+> **Key Changes:**
+> - `scheduling` block now uses attribute syntax `= { }` instead of block syntax
+> - All nested attributes use attribute syntax
+> - See [Migration Guide](#migration-guide-v2-to-v3) below for detailed examples
+
 Manages an SLO Correction Configuration in Instana.
 
 SLO correction windows let you exclude specific time periods from SLO calculations, providing a more accurate measurement of your Service Level Objective (SLO) performance. Common scenarios include:
@@ -12,18 +21,13 @@ Excluding these intervals helps prevent temporary or expected disruptions from d
 
 API Documentation: <https://instana.github.io/openapi/#tag/SLO-Correction-Configuration>
 
-## ⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)
-
- **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
-
-
-## Migration Guide (v5 to v6)
+## Migration Guide (v2 to v3)
 
 ### Syntax Changes Overview
 
-The main change is in how the `scheduling` block is defined. In v6, it uses attribute syntax instead of block syntax.
+The main change is in how the `scheduling` block is defined. In v3, it uses attribute syntax instead of block syntax.
 
-#### OLD (v5.x) Syntax:
+#### OLD (v2.x) Syntax:
 ```hcl
 resource "instana_slo_correction_config" "example" {
   name = "Maintenance Window"
@@ -37,7 +41,7 @@ resource "instana_slo_correction_config" "example" {
 }
 ```
 
-#### NEW (v6.x) Syntax:
+#### NEW (v3.x) Syntax:
 ```hcl
 resource "instana_slo_correction_config" "example" {
   name = "Maintenance Window"

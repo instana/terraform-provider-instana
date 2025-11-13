@@ -1,20 +1,25 @@
 # Custom Event Specification Resource
 
+> **⚠️ BREAKING CHANGES in v3.0.0**
+> 
+> This resource has been migrated from Terraform SDK v2 to the Plugin Framework. While most configurations remain compatible, there are important syntax changes you need to be aware of.
+>
+> **Key Changes:**
+> - `rules` block syntax has changed from block-style to attribute-style
+> - All nested rule types now use object syntax `= { }` instead of block syntax
+> - See [Migration Guide](#migration-guide-v2-to-v3) below for detailed examples
+
 Configuration of custom event specifications for monitoring infrastructure and application metrics. Custom events allow you to define rules that trigger incidents based on various conditions like entity counts, thresholds, host availability, and more.
 
 API Documentation: <https://instana.github.io/openapi/#operation/putCustomEventSpecification>
 
-## ⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)
+## Migration Guide (v2 to v3)
 
- **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
+### Syntax Changes
 
-## Migration Guide (v5 to v6)
+The main change is in how the `rules` block is defined. In v3, nested rule configurations use attribute syntax instead of block syntax.
 
-### Syntax Changes Overview
-
-The main change is in how the `rules` block is defined. In v6, nested rule configurations use attribute syntax instead of block syntax.
-
-#### OLD (v5.x) Syntax:
+#### OLD (v2.x) Syntax:
 ```hcl
 resource "instana_custom_event_specification" "example" {
   name = "threshold-alert"
@@ -29,7 +34,7 @@ resource "instana_custom_event_specification" "example" {
 }
 ```
 
-#### NEW (v6.x) Syntax:
+#### NEW (v3.x) Syntax:
 ```hcl
 resource "instana_custom_event_specification" "example" {
   name = "threshold-alert"
@@ -44,12 +49,11 @@ resource "instana_custom_event_specification" "example" {
 }
 ```
 
-
 ### Complete Migration Examples
 
 #### Entity Count Rule Migration
 
-**OLD (v5.x):**
+**OLD (v2.x):**
 ```hcl
 rules {  
   entity_count {
@@ -60,7 +64,7 @@ rules {
 }
 ```
 
-**NEW (v6.x):**
+**NEW (v3.x):**
 ```hcl
 rules = {
   entity_count = {
@@ -73,7 +77,7 @@ rules = {
 
 #### Threshold Rule Migration
 
-**OLD (v5.x):**
+**OLD (v2.x):**
 ```hcl
 rules { 
   threshold {
@@ -87,7 +91,7 @@ rules {
 }
 ```
 
-**NEW (v6.x):**
+**NEW (v3.x):**
 ```hcl
 rules = {
   threshold = {
@@ -103,7 +107,7 @@ rules = {
 
 #### Host Availability Rule Migration
 
-**OLD (v5.x):**
+**OLD (v2.x):**
 ```hcl
 rules {  
   host_availability {
@@ -115,7 +119,7 @@ rules {
 }
 ```
 
-**NEW (v6.x):**
+**NEW (v3.x):**
 ```hcl
 rules = {
   host_availability = {

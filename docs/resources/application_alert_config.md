@@ -1,30 +1,13 @@
 # Application Alert Configuration Resource
 
-Management of application alert configurations (Application Smart Alerts).
-
-API Documentation: <https://instana.github.io/openapi/#tag/Application-Alert-Configuration>
-
 ---
-## ⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)
+## ⚠️ BREAKING CHANGES - Plugin Framework Migration
 
- **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
+**This resource has been migrated to the Terraform Plugin Framework.** The migration introduces significant syntax changes for nested blocks:
 
-## Migration Guide (v5 to v6)
+### Migration Guide
 
-### Syntax Changes Overview
-
-- `application` → `applications` (now a list with `= [{ }]`)
-- `service` → `services` (nested list)
-- `endpoint` → `endpoints` (nested list)
-- `rule` → `rules` (list with new structure)
-- `threshold` → `thresholds` (nested in rules, supports multiple severity levels)
-- New `threshold_operator` field in rules
-- `time_threshold` now uses attribute syntax with `= { }`
-- Enhanced support for both static and adaptive baseline thresholds
-- `alert_channels` now supports severity-based routing (map of severity to channel IDs)
-
-#### OLD (v5.x) Syntax:
-
+**OLD Syntax (SDK v2):**
 ```hcl
 resource "instana_application_alert_config" "example" {
   name = "test-alert"
@@ -55,8 +38,7 @@ resource "instana_application_alert_config" "example" {
 }
 ```
 
-#### NEW (v6.x) Syntax:
-
+**NEW Syntax (Plugin Framework):**
 ```hcl
 resource "instana_application_alert_config" "example" {
   name = "test-alert"
@@ -96,10 +78,43 @@ resource "instana_application_alert_config" "example" {
 }
 ```
 
+**Key Changes:**
+- `application` → `applications` (now a list with `= [{ }]`)
+- `service` → `services` (nested list)
+- `endpoint` → `endpoints` (nested list)
+- `rule` → `rules` (list with new structure)
+- `threshold` → `thresholds` (nested in rules, supports multiple severity levels)
+- New `threshold_operator` field in rules
+- `time_threshold` now uses attribute syntax with `= { }`
+- Enhanced support for both static and adaptive baseline thresholds
+- `alert_channels` now supports severity-based routing (map of severity to channel IDs)
+
 ---
 
+Management of application alert configurations (Application Smart Alerts).
 
-## Example Usage
+API Documentation: <https://instana.github.io/openapi/#tag/Application-Alert-Configuration>
+
+---
+## ⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)
+
+ **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
+
+## Migration Guide (v5 to v6)
+
+### Syntax Changes Overview
+
+- `application` → `applications` (now a list with `= [{ }]`)
+- `service` → `services` (nested list)
+- `endpoint` → `endpoints` (nested list)
+- `rule` → `rules` (list with new structure)
+- `threshold` → `thresholds` (nested in rules, supports multiple severity levels)
+- New `threshold_operator` field in rules
+- `time_threshold` now uses attribute syntax with `= { }`
+- Enhanced support for both static and adaptive baseline thresholds
+- `alert_channels` now supports severity-based routing (map of severity to channel IDs)
+
+#### OLD (v5.x) Syntax:
 
 ### Basic Slowness Alert
 
@@ -716,6 +731,8 @@ resource "instana_application_alert_config" "comprehensive" {
 * `rules` - Required - List of rules where each rule is associated with multiple thresholds and their corresponding severity levels (list). [Details](#rules-argument-reference)
 * `time_threshold` - Required - Indicates the type of violation of the defined threshold (object). [Details](#time-threshold-argument-reference)
 * `alert_channels` - Optional - Map of alert channel IDs associated with severity levels (map of sets). Keys: `warning`, `critical`
+* `alert_channel_ids` - Optional - List of IDs of alert channels defined in Instana (deprecated, use `alert_channels` instead)
+* `severity` - Optional - The severity of the alert when triggered (`critical` or `warning`) (deprecated, use `rules` with `thresholds` instead)
 * `custom_payload_field` - Optional - An optional list of custom payload fields (static key/value pairs or dynamic values added to the event). [Details](#custom-payload-field-argument-reference)
 
 ### Tag Filter Argument Reference

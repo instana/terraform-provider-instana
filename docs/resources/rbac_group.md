@@ -1,5 +1,15 @@
 # RBAC Group Resource
 
+> **⚠️ BREAKING CHANGES in v3.0.0**
+> 
+> This resource has been migrated from Terraform SDK v2 to the Plugin Framework. While most configurations remain compatible, there are important syntax changes you need to be aware of.
+>
+> **Key Changes:**
+> - `permission_set` block now uses attribute syntax `= { }` instead of block syntax
+> - `member` now uses set syntax `= [{ }]` instead of multiple blocks
+> - All nested attributes use attribute syntax
+> - See [Migration Guide](#migration-guide-v2-to-v3) below for detailed examples
+
 Management of Groups for role-based access control (RBAC). RBAC groups allow you to define permissions and scope access to specific resources for team members.
 
 API Documentation: <https://instana.github.io/openapi/#tag/Groups>
@@ -38,6 +48,63 @@ resource "instana_rbac_group" "example" {
 ```
 
 #### NEW (v6.x) Syntax:
+```hcl
+resource "instana_rbac_group" "example" {
+  name = "DevOps Team"
+
+  permission_set = {
+    application_ids = ["app1", "app2"]
+    permissions = ["CAN_CONFIGURE_APPLICATIONS"]
+  }
+  
+  member = [
+    {
+      user_id = "user1"
+      email = "user1@example.com"
+    },
+    {
+      user_id = "user2"
+      email = "user2@example.com"
+    }
+  ]
+}
+```
+
+### Key Syntax Changes
+
+1. **Permission Set**: `permission_set { }` → `permission_set = { }`
+2. **Members**: Multiple `member { }` blocks → Single `member = [{ }, { }]` list
+3. **All nested attributes**: Use `= { }` or `= [{ }]` syntax
+
+## Migration Guide (v2 to v3)
+
+### Syntax Changes Overview
+
+The main changes are in how `permission_set` and `member` blocks are defined. In v3, these use attribute syntax instead of block syntax.
+
+#### OLD (v2.x) Syntax:
+```hcl
+resource "instana_rbac_group" "example" {
+  name = "DevOps Team"
+
+  permission_set {
+    application_ids = ["app1", "app2"]
+    permissions = ["CAN_CONFIGURE_APPLICATIONS"]
+  }
+  
+  member {
+    user_id = "user1"
+    email = "user1@example.com"
+  }
+  
+  member {
+    user_id = "user2"
+    email = "user2@example.com"
+  }
+}
+```
+
+#### NEW (v3.x) Syntax:
 ```hcl
 resource "instana_rbac_group" "example" {
   name = "DevOps Team"

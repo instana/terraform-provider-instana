@@ -1,5 +1,51 @@
 # Application Configuration Resource
 
+---
+## ⚠️ BREAKING CHANGES - Plugin Framework Migration
+
+**This resource has been migrated to the Terraform Plugin Framework.** While the basic structure remains similar, there are important syntax changes for nested blocks:
+
+### Migration Guide
+
+**OLD Syntax (SDK v2):**
+```hcl
+resource "instana_application_config" "example" {
+  label          = "My Application"
+  scope          = "INCLUDE_ALL_DOWNSTREAM"
+  boundary_scope = "INBOUND"
+  tag_filter     = "agent.tag:stage EQUALS 'test'"
+  
+  match_specification {
+    # ... match specification blocks
+  }
+}
+```
+
+**NEW Syntax (Plugin Framework):**
+```hcl
+resource "instana_application_config" "example" {
+  label          = "My Application"
+  scope          = "INCLUDE_ALL_DOWNSTREAM"
+  boundary_scope = "INBOUND"
+  tag_filter     = "agent.tag:stage EQUALS 'test'"
+  
+  access_rules = [{
+    access_type   = "READ_WRITE"
+    relation_type = "SOURCE"
+    related_id    = "group-id"
+  }]
+}
+```
+
+**Key Changes:**
+- `match_specification` has been replaced with `access_rules` (list attribute with `= [{ }]`)
+- Enhanced validation for scope and boundary_scope values
+- Improved tag filter parsing and normalization
+- Better state management with computed fields
+- Default values are now explicit (scope defaults to `INCLUDE_NO_DOWNSTREAM`, boundary_scope to `DEFAULT`)
+
+---
+
 Management of application configurations (definition of application perspectives).
 
 API Documentation: <https://instana.github.io/openapi/#operation/putApplicationConfig>
@@ -21,41 +67,6 @@ API Documentation: <https://instana.github.io/openapi/#operation/putApplicationC
 - Default values are now explicit (scope defaults to `INCLUDE_NO_DOWNSTREAM`, boundary_scope to `DEFAULT`)
 
 #### OLD (v5.x) Syntax:
-
-```hcl
-resource "instana_application_config" "example" {
-  label          = "My Application"
-  scope          = "INCLUDE_ALL_DOWNSTREAM"
-  boundary_scope = "INBOUND"
-  tag_filter     = "agent.tag:stage EQUALS 'test'"
-  
-  match_specification {
-    # ... match specification blocks
-  }
-}
-```
-
-#### NEW (v6.x) Syntax:
-
-```hcl
-resource "instana_application_config" "example" {
-  label          = "My Application"
-  scope          = "INCLUDE_ALL_DOWNSTREAM"
-  boundary_scope = "INBOUND"
-  tag_filter     = "agent.tag:stage EQUALS 'test'"
-  
-  access_rules = [{
-    access_type   = "READ_WRITE"
-    relation_type = "SOURCE"
-    related_id    = "group-id"
-  }]
-}
-```
-
----
-
-
-## Example Usage
 
 ### Basic Application Configuration
 

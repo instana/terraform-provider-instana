@@ -1,10 +1,41 @@
 # API Token Resource
 
+> **⚠️ BREAKING CHANGES - Plugin Framework Migration**
+>
+> This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework. The schema has transitioned from **block structure to attribute format**.
+>
+> **Major Changes:**
+> - All attributes are now top-level attributes (no nested blocks)
+> - Boolean attributes now use explicit `true`/`false` values with defaults
+> - The `id`, `access_granting_token`, and `internal_id` attributes are computed
+> - All permission and scope attributes have default values of `false`
+> - Attribute syntax remains the same (key = value), but schema validation is stricter
+>
+> **Migration Example:**
+> ```hcl
+> # OLD (SDK v2)
+> resource "instana_api_token" "example" {
+>   name                          = "my-token"
+>   can_configure_service_mapping = true
+>   # Omitted attributes defaulted to false
+> }
+>
+> # NEW (Plugin Framework - Same Syntax, Enhanced Validation)
+> resource "instana_api_token" "example" {
+>   name                          = "my-token"
+>   can_configure_service_mapping = true
+>   # Omitted attributes explicitly default to false
+>   # All boolean attributes now have computed defaults
+> }
+> ```
+>
+> The syntax remains largely compatible, but the framework provides better validation and clearer default behavior.
+
 Management of API Tokens for programmatic access to Instana.
 
 API Documentation: <https://instana.github.io/openapi/#operation/getApiToken
 
- **⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)**
+The ID of the resource which is also used as unique identifier in Instana is auto-generated!
 
  **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
 
@@ -19,27 +50,6 @@ API Documentation: <https://instana.github.io/openapi/#operation/getApiToken
 - Attribute syntax remains the same (key = value), but schema validation is stricter
 
 #### OLD (v5.x) Syntax:
-
-```hcl
-resource "instana_api_token" "example" {
-  name                          = "my-token"
-  can_configure_service_mapping = true
-  # Omitted attributes defaulted to false
-}
-```
-
-#### NEW (v6.x) Syntax:
-
-```hcl
-resource "instana_api_token" "example" {
-  name                          = "my-token"
-  can_configure_service_mapping = true
-  # Omitted attributes explicitly default to false
-  # All boolean attributes now have computed defaults
-}
-```
-
-## Example Usage
 
 ### Basic API Token
 

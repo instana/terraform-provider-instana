@@ -1,5 +1,44 @@
 # Alerting Configuration
 
+---
+## ⚠️ BREAKING CHANGES - Plugin Framework Migration
+
+**This resource has been migrated to the Terraform Plugin Framework.** While most configurations remain compatible, there are important syntax changes for nested blocks:
+
+### Migration Guide
+
+**OLD Syntax (SDK v2):**
+```hcl
+resource "instana_alerting_config" "example" {
+  alert_name = "name"
+  
+  custom_payload_field {
+    key   = "test"
+    value = "test123"
+  }
+}
+```
+
+**NEW Syntax (Plugin Framework):**
+```hcl
+resource "instana_alerting_config" "example" {
+  alert_name = "name"
+  
+  custom_payload_field = [{
+    key   = "test"
+    value = "test123"
+  }]
+}
+```
+
+**Key Changes:**
+- Nested blocks now use **list/set attribute syntax** with `= [{ }]` instead of block syntax `{ }`
+- All nested configurations require the equals sign
+- Enhanced validation and better error messages
+- Improved state management with computed fields
+
+---
+
 Management of alert configurations. Alert configurations define how either event types or 
 event (aka rules) are reported to integrated services (Alerting Channels).
 
@@ -18,37 +57,6 @@ API Documentation: <https://instana.github.io/openapi/#operation/putAlert>
 - All nested configurations require the equals sign
 - Enhanced validation and better error messages
 - Improved state management with computed fields
-
-#### OLD (v5.x) Syntax:
-
-```hcl
-resource "instana_alerting_config" "example" {
-  alert_name = "name"
-  
-  custom_payload_field {
-    key   = "test"
-    value = "test123"
-  }
-}
-```
-
-#### NEW (v6.x) Syntax:
-
-```hcl
-resource "instana_alerting_config" "example" {
-  alert_name = "name"
-  
-  custom_payload_field = [{
-    key   = "test"
-    value = "test123"
-  }]
-}
-```
-Please update your Terraform configurations to use the new attribute-based syntax.
----
-
-
-## Example Usage
 
 ### Basic Configuration with Rule IDs
 

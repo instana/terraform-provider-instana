@@ -1,8 +1,5 @@
 package customeventspec
 
-// ResourceInstanaCustomEventSpecification the name of the terraform-provider-instana resource to manage custom event specifications
-const ResourceInstanaCustomEventSpecification = "custom_event_specification"
-
 // Resource description constants
 const (
 	CustomEventSpecificationResourceDescResource                 = "This resource represents a custom event specification in Instana"
@@ -41,13 +38,18 @@ const (
 	CustomEventSpecificationResourceDescMetricPatternPostfix     = "The postfix of the metric pattern"
 	CustomEventSpecificationResourceDescMetricPatternPlaceholder = "The placeholder of the metric pattern"
 	CustomEventSpecificationResourceDescMetricPatternOperator    = "The operator of the metric pattern"
+)
 
-	// Error message constants
-
+// Error message constants
+const (
 	CustomEventSpecificationResourceErrParseTagFilter    = "Error parsing tag filter"
 	CustomEventSpecificationResourceErrParseTagFilterMsg = "Failed to parse tag filter: %s"
+)
 
-	CustomEventSpecificationFieldID             = "id"
+// ResourceInstanaCustomEventSpecificationFramework the name of the terraform-provider-instana resource to manage custom event specifications
+const ResourceInstanaCustomEventSpecificationFramework = "custom_event_specification"
+
+const (
 	CustomEventSpecificationFieldName           = "name"
 	CustomEventSpecificationFieldEntityType     = "entity_type"
 	CustomEventSpecificationFieldQuery          = "query"
@@ -84,17 +86,4 @@ const (
 	CustomEventSpecificationThresholdRuleFieldMetricPatternOperator    = "operator"
 	CustomEventSpecificationHostAvailabilityRuleFieldMetricCloseAfter  = "close_after"
 	CustomEventSpecificationHostAvailabilityRuleFieldTagFilter         = "tag_filter"
-	// Severity constants
-	CustomEventSpecificationSeverityWarning  = "warning"
-	CustomEventSpecificationSeverityCritical = "critical"
-
-	// Logical operator constants
-	CustomEventSpecificationLogicalOperatorAnd = "AND"
-	CustomEventSpecificationLogicalOperatorOr  = "OR"
-
-	// Metric pattern operator constants
-	CustomEventSpecificationMetricPatternOperatorEquals = "EQUALS"
-
-	// Default values
-	CustomEventSpecificationDefaultEmptyString = ""
 )

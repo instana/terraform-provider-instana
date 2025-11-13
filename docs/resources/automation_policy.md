@@ -1,28 +1,13 @@
 # Automation Policy Resource
 
-Management of Automation Policies.
-
-API Documentation: <https://instana.github.io/openapi/#tag/Policies>
-
 ---
-## ⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)
+## ⚠️ BREAKING CHANGES - Plugin Framework Migration
 
- **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
+**This resource has been migrated to the Terraform Plugin Framework.** The migration introduces syntax changes for nested blocks:
 
-## Migration Guide (v5 to v6)
+### Migration Guide
 
-### Syntax Changes Overview
-
-- `trigger` now uses **object syntax** with `= { }`
-- `type_configuration` now uses **list syntax** with `= [{ }]`
-- `action` within type_configuration uses **list syntax** with `= [{ }]`
-- `condition` now uses **object syntax** with `= { }`
-- Actions now require full action definition (not just action_id)
-- Enhanced validation and better error messages
-- Improved state management
-
-#### OLD (v5.x) Syntax:
-
+**OLD Syntax (SDK v2):**
 ```hcl
 resource "instana_automation_policy" "example" {
   name        = "Hello world"
@@ -53,8 +38,7 @@ resource "instana_automation_policy" "example" {
 }
 ```
 
-#### NEW (v6.x) Syntax:
-
+**NEW Syntax (Plugin Framework):**
 ```hcl
 resource "instana_automation_policy" "example" {
   name        = "Hello world"
@@ -91,8 +75,20 @@ resource "instana_automation_policy" "example" {
 }
 ```
 
+**Key Changes:**
+- `trigger` now uses **object syntax** with `= { }`
+- `type_configuration` now uses **list syntax** with `= [{ }]`
+- `action` within type_configuration uses **list syntax** with `= [{ }]`
+- `condition` now uses **object syntax** with `= { }`
+- Actions now require full action definition (not just action_id)
+- Enhanced validation and better error messages
+- Improved state management
+
 ---
 
+Management of Automation Policies.
+
+API Documentation: <https://instana.github.io/openapi/#tag/Policies>
 
 ## Example Usage
 
