@@ -47,6 +47,7 @@ const (
 	CustomEventSpecificationResourceErrParseTagFilter    = "Error parsing tag filter"
 	CustomEventSpecificationResourceErrParseTagFilterMsg = "Failed to parse tag filter: %s"
 
+	CustomEventSpecificationFieldID             = "id"
 	CustomEventSpecificationFieldName           = "name"
 	CustomEventSpecificationFieldEntityType     = "entity_type"
 	CustomEventSpecificationFieldQuery          = "query"
@@ -83,4 +84,17 @@ const (
 	CustomEventSpecificationThresholdRuleFieldMetricPatternOperator    = "operator"
 	CustomEventSpecificationHostAvailabilityRuleFieldMetricCloseAfter  = "close_after"
 	CustomEventSpecificationHostAvailabilityRuleFieldTagFilter         = "tag_filter"
+	// Severity constants
+	CustomEventSpecificationSeverityWarning  = "warning"
+	CustomEventSpecificationSeverityCritical = "critical"
+
+	// Logical operator constants
+	CustomEventSpecificationLogicalOperatorAnd = "AND"
+	CustomEventSpecificationLogicalOperatorOr  = "OR"
+
+	// Metric pattern operator constants
+	CustomEventSpecificationMetricPatternOperatorEquals = "EQUALS"
+
+	// Default values
+	CustomEventSpecificationDefaultEmptyString = ""
 )
