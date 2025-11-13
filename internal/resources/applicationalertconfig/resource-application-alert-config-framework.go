@@ -10,6 +10,7 @@ import (
 	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
 	"github.com/gessnerfl/terraform-provider-instana/internal/shared/tagfilter"
 	"github.com/gessnerfl/terraform-provider-instana/internal/util"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -324,8 +325,8 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 									ApplicationAlertConfigFieldTimeThresholdViolationsInPeriodViolations: schema.Int64Attribute{
 										Required:    true,
 										Description: "The violations appeared in the period",
-										Validators:  []validator.Int64{
-											// TODO: Add validator for range 1-12
+										Validators: []validator.Int64{
+											int64validator.Between(1, 12),
 										},
 									},
 								},
