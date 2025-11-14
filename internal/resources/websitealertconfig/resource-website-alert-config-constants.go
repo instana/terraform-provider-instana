@@ -123,3 +123,95 @@ const (
 	WebsiteAlertConfigErrInvalidTimeThresholdConfig    = "Invalid time threshold configuration"
 	WebsiteAlertConfigErrInvalidTimeThresholdConfigMsg = "Exactly one time threshold type configuration is required"
 )
+
+// Field name constants
+const (
+	WebsiteAlertConfigFieldID                  = "id"
+	WebsiteAlertConfigFieldStatic              = "static"
+	WebsiteAlertConfigFieldAdaptiveBaseline    = "adaptive_baseline"
+	WebsiteAlertConfigFieldHistoricBaseline    = "historic_baseline"
+	WebsiteAlertConfigFieldDeviationFactor     = "deviation_factor"
+	WebsiteAlertConfigFieldAdaptability        = "adaptability"
+	WebsiteAlertConfigFieldSeasonality         = "seasonality"
+	WebsiteAlertConfigFieldCustomPayloadFields = "custom_payload_fields"
+)
+
+// Severity value constants
+const (
+	WebsiteAlertConfigSeverityWarning  = "warning"
+	WebsiteAlertConfigSeverityCritical = "critical"
+)
+
+// Operator value constants
+const (
+	WebsiteAlertConfigOperatorGreaterThan       = ">"
+	WebsiteAlertConfigOperatorGreaterThanEquals = ">="
+	WebsiteAlertConfigOperatorLessThan          = "<"
+	WebsiteAlertConfigOperatorLessThanEquals    = "<="
+	WebsiteAlertConfigOperatorEquals            = "=="
+)
+
+// Aggregation value constants
+const (
+	WebsiteAlertConfigAggregationSUM  = "SUM"
+	WebsiteAlertConfigAggregationMEAN = "MEAN"
+	WebsiteAlertConfigAggregationMAX  = "MAX"
+	WebsiteAlertConfigAggregationMIN  = "MIN"
+	WebsiteAlertConfigAggregationP25  = "P25"
+	WebsiteAlertConfigAggregationP50  = "P50"
+	WebsiteAlertConfigAggregationP75  = "P75"
+	WebsiteAlertConfigAggregationP90  = "P90"
+	WebsiteAlertConfigAggregationP95  = "P95"
+	WebsiteAlertConfigAggregationP98  = "P98"
+	WebsiteAlertConfigAggregationP99  = "P99"
+)
+
+// Impact measurement method constants
+const (
+	WebsiteAlertConfigImpactMethodAggregated = "AGGREGATED"
+	WebsiteAlertConfigImpactMethodPerWindow  = "PER_WINDOW"
+)
+
+// Alert type constants
+const (
+	WebsiteAlertConfigAlertTypeThroughput      = "throughput"
+	WebsiteAlertConfigAlertTypeSlowness        = "slowness"
+	WebsiteAlertConfigAlertTypeStatusCode      = "statusCode"
+	WebsiteAlertConfigAlertTypeSpecificJsError = "specificJsError"
+)
+
+// Threshold type constants
+const (
+	WebsiteAlertConfigThresholdTypeStatic   = "staticThreshold"
+	WebsiteAlertConfigThresholdTypeAdaptive = "adaptiveBaseline"
+	WebsiteAlertConfigThresholdTypeHistoric = "historicBaseline"
+)
+
+// Time threshold type constants
+const (
+	WebsiteAlertConfigTimeThresholdTypeViolationsInSequence = "violationsInSequence"
+	WebsiteAlertConfigTimeThresholdTypeUserImpact           = "userImpactOfViolationsInSequence"
+	WebsiteAlertConfigTimeThresholdTypeViolationsInPeriod   = "violationsInPeriod"
+)
+
+// Tag filter constants
+const (
+	WebsiteAlertConfigTagFilterTypeExpression = "EXPRESSION"
+	WebsiteAlertConfigLogicalOperatorAND      = "AND"
+)
+
+// Default value constants
+const (
+	WebsiteAlertConfigDefaultTriggering  = false
+	WebsiteAlertConfigDefaultGranularity = 600000
+)
+
+// Validation limit constants
+const (
+	WebsiteAlertConfigMinNameLength        = 0
+	WebsiteAlertConfigMaxNameLength        = 256
+	WebsiteAlertConfigMinDescriptionLength = 0
+	WebsiteAlertConfigMaxDescriptionLength = 65536
+	WebsiteAlertConfigMinWebsiteIDLength   = 0
+	WebsiteAlertConfigMaxWebsiteIDLength   = 64
+)
