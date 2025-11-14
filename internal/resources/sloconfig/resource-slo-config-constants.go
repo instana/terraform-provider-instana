@@ -236,4 +236,53 @@ const (
 	SloConfigAPIIndicatorMeasurementTypeEventBased = "eventBased"
 	SloConfigAPITrafficIndicatorTypeAll            = "all"
 	SloConfigAPITrafficIndicatorTypeErroneous      = "erroneous"
+	// Schema field identifier constants
+
+	// SchemaFieldID represents the id field identifier
+	SchemaFieldID = "id"
+	// SchemaFieldDisplayName represents the display_name field identifier
+	SchemaFieldDisplayName = "display_name"
+	// SchemaFieldRolling represents the rolling field identifier
+	SchemaFieldRolling = "rolling"
+	// SchemaFieldFixed represents the fixed field identifier
+	SchemaFieldFixed = "fixed"
+	// SchemaFieldTimeBasedLatency represents the time_based_latency field identifier
+	SchemaFieldTimeBasedLatency = "time_based_latency"
+	// SchemaFieldEventBasedLatency represents the event_based_latency field identifier
+	SchemaFieldEventBasedLatency = "event_based_latency"
+	// SchemaFieldTimeBasedAvailability represents the time_based_availability field identifier
+	SchemaFieldTimeBasedAvailability = "time_based_availability"
+	// SchemaFieldEventBasedAvailability represents the event_based_availability field identifier
+	SchemaFieldEventBasedAvailability = "event_based_availability"
+	// SchemaFieldTraffic represents the traffic field identifier
+	SchemaFieldTraffic = "traffic"
+	// SchemaFieldCustom represents the custom field identifier
+	SchemaFieldCustom = "custom"
+	// SchemaFieldOperator represents the operator field identifier
+	SchemaFieldOperator = "operator"
+
+	// Operator constants
+
+	// OperatorGreaterThan represents the > operator
+	OperatorGreaterThan = ">"
+	// OperatorGreaterThanOrEqual represents the >= operator
+	OperatorGreaterThanOrEqual = ">="
+	// OperatorLessThan represents the < operator
+	OperatorLessThan = "<"
+	// OperatorLessThanOrEqual represents the <= operator
+	OperatorLessThanOrEqual = "<="
+
+	// Tag filter constants
+
+	// TagFilterTypeExpression represents the EXPRESSION tag filter type
+	TagFilterTypeExpression = "EXPRESSION"
+	// LogicalOperatorAnd represents the AND logical operator
+	LogicalOperatorAnd = "AND"
+
+	// Default values
+
+	// DefaultAggregation represents the default aggregation type
+	DefaultAggregation = "MEAN"
+	// EmptyString represents an empty string constant
+	EmptyString = ""
 )
