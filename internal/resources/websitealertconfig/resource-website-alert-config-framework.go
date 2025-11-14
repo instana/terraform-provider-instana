@@ -15,7 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -212,181 +211,6 @@ func NewWebsiteAlertConfigResourceHandleFramework() resourcehandle.ResourceHandl
 						},
 					},
 					WebsiteAlertConfigFieldCustomPayloadFields: shared.GetCustomPayloadFieldsSchema(),
-					WebsiteAlertConfigFieldThreshold: schema.SingleNestedAttribute{
-						Description: WebsiteAlertConfigDescThreshold,
-						Optional:    true,
-						Attributes: map[string]schema.Attribute{
-							WebsiteAlertConfigFieldStatic: schema.SingleNestedAttribute{
-								Description: WebsiteAlertConfigDescThresholdStatic,
-								Optional:    true,
-								Attributes: map[string]schema.Attribute{
-									WebsiteAlertConfigFieldRuleOperator: schema.StringAttribute{
-										Description: WebsiteAlertConfigDescThresholdOperator,
-										Optional:    true,
-										Validators: []validator.String{
-											stringvalidator.OneOf(WebsiteAlertConfigOperatorGreaterThanEquals, WebsiteAlertConfigOperatorGreaterThan, WebsiteAlertConfigOperatorLessThanEquals, WebsiteAlertConfigOperatorLessThan, WebsiteAlertConfigOperatorEquals),
-										},
-									},
-									WebsiteAlertConfigFieldRuleValue: schema.Int64Attribute{
-										Description: WebsiteAlertConfigDescThresholdValue,
-										Optional:    true,
-									},
-								},
-								PlanModifiers: []planmodifier.Object{
-									objectplanmodifier.UseStateForUnknown(),
-								},
-							},
-							WebsiteAlertConfigFieldAdaptiveBaseline: schema.SingleNestedAttribute{
-								Description: WebsiteAlertConfigDescThresholdAdaptive,
-								Optional:    true,
-								Attributes: map[string]schema.Attribute{
-									WebsiteAlertConfigFieldRuleOperator: schema.StringAttribute{
-										Description: WebsiteAlertConfigDescThresholdOperator,
-										Optional:    true,
-										Validators: []validator.String{
-											stringvalidator.OneOf(WebsiteAlertConfigOperatorGreaterThanEquals, WebsiteAlertConfigOperatorGreaterThan, WebsiteAlertConfigOperatorLessThanEquals, WebsiteAlertConfigOperatorLessThan, WebsiteAlertConfigOperatorEquals),
-										},
-									},
-									WebsiteAlertConfigFieldDeviationFactor: schema.Float32Attribute{
-										Description: WebsiteAlertConfigDescThresholdDeviationFactor,
-										Optional:    true,
-									},
-									WebsiteAlertConfigFieldAdaptability: schema.Float32Attribute{
-										Description: WebsiteAlertConfigDescThresholdAdaptability,
-										Optional:    true,
-									},
-									WebsiteAlertConfigFieldSeasonality: schema.StringAttribute{
-										Description: WebsiteAlertConfigDescThresholdSeasonality,
-										Optional:    true,
-									},
-								},
-								PlanModifiers: []planmodifier.Object{
-									objectplanmodifier.UseStateForUnknown(),
-								},
-							},
-							WebsiteAlertConfigFieldHistoricBaseline: shared.HistoricAttributeSchema(),
-						},
-					},
-					WebsiteAlertConfigFieldRule: schema.SingleNestedAttribute{
-						Description: WebsiteAlertConfigDescRule,
-						Optional:    true,
-						Attributes: map[string]schema.Attribute{
-							WebsiteAlertConfigFieldRuleSlowness: schema.SingleNestedAttribute{
-								Description: WebsiteAlertConfigDescRuleSlowness,
-								Optional:    true,
-								Attributes: map[string]schema.Attribute{
-									WebsiteAlertConfigFieldRuleMetricName: schema.StringAttribute{
-										Optional:    true,
-										Computed:    true,
-										Description: WebsiteAlertConfigDescRuleMetricName,
-									},
-									WebsiteAlertConfigFieldRuleAggregation: schema.StringAttribute{
-										Optional:    true,
-										Computed:    true,
-										Description: WebsiteAlertConfigDescRuleAggregation,
-										Validators: []validator.String{
-											stringvalidator.OneOf(WebsiteAlertConfigAggregationSUM, WebsiteAlertConfigAggregationMEAN, WebsiteAlertConfigAggregationMAX, WebsiteAlertConfigAggregationMIN, WebsiteAlertConfigAggregationP25, WebsiteAlertConfigAggregationP50, WebsiteAlertConfigAggregationP75, WebsiteAlertConfigAggregationP90, WebsiteAlertConfigAggregationP95, WebsiteAlertConfigAggregationP98, WebsiteAlertConfigAggregationP99),
-										},
-									},
-								},
-								PlanModifiers: []planmodifier.Object{
-									objectplanmodifier.UseStateForUnknown(),
-								},
-							},
-							WebsiteAlertConfigFieldRuleSpecificJsError: schema.SingleNestedAttribute{
-								Description: WebsiteAlertConfigDescRuleSpecificJsError,
-								Optional:    true,
-								Attributes: map[string]schema.Attribute{
-									WebsiteAlertConfigFieldRuleMetricName: schema.StringAttribute{
-										Optional:    true,
-										Computed:    true,
-										Description: WebsiteAlertConfigDescRuleMetricName,
-									},
-									WebsiteAlertConfigFieldRuleAggregation: schema.StringAttribute{
-										Optional:    true,
-										Computed:    true,
-										Description: WebsiteAlertConfigDescRuleAggregation,
-										Validators: []validator.String{
-											stringvalidator.OneOf(WebsiteAlertConfigAggregationSUM, WebsiteAlertConfigAggregationMEAN, WebsiteAlertConfigAggregationMAX, WebsiteAlertConfigAggregationMIN, WebsiteAlertConfigAggregationP25, WebsiteAlertConfigAggregationP50, WebsiteAlertConfigAggregationP75, WebsiteAlertConfigAggregationP90, WebsiteAlertConfigAggregationP95, WebsiteAlertConfigAggregationP98, WebsiteAlertConfigAggregationP99),
-										},
-									},
-									WebsiteAlertConfigFieldRuleOperator: schema.StringAttribute{
-										Optional:    true,
-										Computed:    true,
-										Description: WebsiteAlertConfigDescRuleOperatorEval,
-										Validators: []validator.String{
-											stringvalidator.OneOf(shared.SupportedOparators...),
-										},
-									},
-									WebsiteAlertConfigFieldRuleValue: schema.StringAttribute{
-										Optional:    true,
-										Computed:    true,
-										Description: WebsiteAlertConfigDescRuleValueJsError,
-									},
-								},
-								PlanModifiers: []planmodifier.Object{
-									objectplanmodifier.UseStateForUnknown(),
-								},
-							},
-							WebsiteAlertConfigFieldRuleStatusCode: schema.SingleNestedAttribute{
-								Description: WebsiteAlertConfigDescRuleStatusCode,
-								Optional:    true,
-								Attributes: map[string]schema.Attribute{
-									WebsiteAlertConfigFieldRuleMetricName: schema.StringAttribute{
-										Optional:    true,
-										Computed:    true,
-										Description: WebsiteAlertConfigDescRuleMetricName,
-									},
-									WebsiteAlertConfigFieldRuleAggregation: schema.StringAttribute{
-										Optional:    true,
-										Computed:    true,
-										Description: WebsiteAlertConfigDescRuleAggregation,
-										Validators: []validator.String{
-											stringvalidator.OneOf(WebsiteAlertConfigAggregationSUM, WebsiteAlertConfigAggregationMEAN, WebsiteAlertConfigAggregationMAX, WebsiteAlertConfigAggregationMIN, WebsiteAlertConfigAggregationP25, WebsiteAlertConfigAggregationP50, WebsiteAlertConfigAggregationP75, WebsiteAlertConfigAggregationP90, WebsiteAlertConfigAggregationP95, WebsiteAlertConfigAggregationP98, WebsiteAlertConfigAggregationP99),
-										},
-									},
-									WebsiteAlertConfigFieldRuleOperator: schema.StringAttribute{
-										Optional:    true,
-										Computed:    true,
-										Description: WebsiteAlertConfigDescRuleOperatorEval,
-										Validators: []validator.String{
-											stringvalidator.OneOf(shared.SupportedOparators...),
-										},
-									},
-									WebsiteAlertConfigFieldRuleValue: schema.StringAttribute{
-										Optional:    true,
-										Computed:    true,
-										Description: WebsiteAlertConfigDescRuleValueStatusCode,
-									},
-								},
-								PlanModifiers: []planmodifier.Object{
-									objectplanmodifier.UseStateForUnknown(),
-								},
-							},
-							WebsiteAlertConfigFieldRuleThroughput: schema.SingleNestedAttribute{
-								Description: WebsiteAlertConfigDescRuleThroughput,
-								Optional:    true,
-								Attributes: map[string]schema.Attribute{
-									WebsiteAlertConfigFieldRuleMetricName: schema.StringAttribute{
-										Optional:    true,
-										Computed:    true,
-										Description: WebsiteAlertConfigDescRuleMetricName,
-									},
-									WebsiteAlertConfigFieldRuleAggregation: schema.StringAttribute{
-										Optional:    true,
-										Computed:    true,
-										Description: WebsiteAlertConfigDescRuleAggregation,
-										Validators: []validator.String{
-											stringvalidator.OneOf(WebsiteAlertConfigAggregationSUM, WebsiteAlertConfigAggregationMEAN, WebsiteAlertConfigAggregationMAX, WebsiteAlertConfigAggregationMIN, WebsiteAlertConfigAggregationP25, WebsiteAlertConfigAggregationP50, WebsiteAlertConfigAggregationP75, WebsiteAlertConfigAggregationP90, WebsiteAlertConfigAggregationP95, WebsiteAlertConfigAggregationP98, WebsiteAlertConfigAggregationP99),
-										},
-									},
-								},
-								PlanModifiers: []planmodifier.Object{
-									objectplanmodifier.UseStateForUnknown(),
-								},
-							},
-						},
-					},
 					WebsiteAlertConfigFieldTimeThreshold: schema.SingleNestedAttribute{
 						Description: WebsiteAlertConfigDescTimeThreshold,
 						Optional:    true,
@@ -515,20 +339,6 @@ func (r *websiteAlertConfigResourceFramework) MapStateToDataObject(ctx context.C
 		return nil, diags
 	}
 
-	// Map rule
-	rule, ruleDiags := r.mapRuleFromModel(model)
-	diags.Append(ruleDiags...)
-	if diags.HasError() {
-		return nil, diags
-	}
-
-	// Map threshold
-	threshold, thresholdDiags := r.mapThresholdFromModel(ctx, model)
-	diags.Append(thresholdDiags...)
-	if diags.HasError() {
-		return nil, diags
-	}
-
 	// Map time threshold
 	timeThreshold, timeThresholdDiags := r.mapTimeThresholdFromModel(ctx, model)
 	diags.Append(timeThresholdDiags...)
@@ -555,8 +365,6 @@ func (r *websiteAlertConfigResourceFramework) MapStateToDataObject(ctx context.C
 		AlertChannelIDs:       alertChannelIDs,
 		Granularity:           restapi.Granularity(model.Granularity.ValueInt64()),
 		CustomerPayloadFields: customPayloadFields,
-		Rule:                  rule,
-		Threshold:             threshold,
 		TimeThreshold:         *timeThreshold,
 		Rules:                 rules,
 	}, diags
@@ -687,32 +495,6 @@ func (r *websiteAlertConfigResourceFramework) mapSingleRuleFromCollection(ctx co
 	return nil, diags
 }
 
-func (r *websiteAlertConfigResourceFramework) mapRuleFromModel(model WebsiteAlertConfigModel) (*restapi.WebsiteAlertRule, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	// Check if rule is set
-	if model.Rule == nil {
-		//diags.AddError("Rule is required", "Website alert config rule is required")
-		return nil, diags
-	}
-
-	ruleModel := model.Rule
-
-	// Check which rule type is set
-	if ruleModel.Slowness != nil {
-		return r.mapSlownessRule(*ruleModel.Slowness), diags
-	} else if ruleModel.SpecificJsError != nil {
-		return r.mapSpecificJsErrorRule(*ruleModel.SpecificJsError), diags
-	} else if ruleModel.StatusCode != nil {
-		return r.mapStatusCodeRule(*ruleModel.StatusCode), diags
-	} else if ruleModel.Throughput != nil {
-		return r.mapThroughputRule(*ruleModel.Throughput), diags
-	}
-
-	diags.AddError(WebsiteAlertConfigErrInvalidRuleConfig, WebsiteAlertConfigErrInvalidRuleConfigMsg)
-	return nil, diags
-}
-
 func (r *websiteAlertConfigResourceFramework) mapThroughputRule(throughputModel WebsiteAlertRuleConfigModel) *restapi.WebsiteAlertRule {
 	var aggregationPtr *restapi.Aggregation
 	if !throughputModel.Aggregation.IsNull() && !throughputModel.Aggregation.IsUnknown() {
@@ -779,49 +561,6 @@ func (r *websiteAlertConfigResourceFramework) mapSlownessRule(slownessModel Webs
 		MetricName:  slownessModel.MetricName.ValueString(),
 		Aggregation: &aggregation,
 	}
-}
-
-func (r *websiteAlertConfigResourceFramework) mapThresholdFromModel(ctx context.Context, model WebsiteAlertConfigModel) (*restapi.Threshold, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	// Check if threshold is set
-	if model.Threshold == nil {
-		//diags.AddError("Threshold is required", "Website alert config threshold is required")
-		return nil, diags
-	}
-
-	threshold := &restapi.Threshold{}
-
-	if model.Threshold.Static != nil {
-		value := float64(model.Threshold.Static.Value.ValueInt64())
-		threshold.Value = &value
-		threshold.Type = WebsiteAlertConfigThresholdTypeStatic
-
-		threshold.Operator = restapi.ThresholdOperator(model.Threshold.Static.Operator.ValueString())
-
-	}
-	if model.Threshold.AdaptiveBaseline != nil {
-		threshold.Type = WebsiteAlertConfigThresholdTypeAdaptive
-		threshold.Operator = restapi.ThresholdOperator(model.Threshold.AdaptiveBaseline.Operator.ValueString())
-		deviationFactor := model.Threshold.AdaptiveBaseline.DeviationFactor.ValueFloat32()
-		threshold.DeviationFactor = &deviationFactor
-		adaptability := model.Threshold.AdaptiveBaseline.Adaptability.ValueFloat32()
-		threshold.Adaptability = &adaptability
-		seasonality := restapi.ThresholdSeasonality(model.Threshold.AdaptiveBaseline.Seasonality.ValueString())
-		threshold.Seasonality = &seasonality
-
-	}
-	if model.Threshold.HistoricBaseline != nil {
-		threshold.Type = WebsiteAlertConfigThresholdTypeHistoric
-		deviationFactor := model.Threshold.HistoricBaseline.Deviation.ValueFloat32()
-		threshold.DeviationFactor = &deviationFactor
-		seasonality := restapi.ThresholdSeasonality(model.Threshold.HistoricBaseline.Seasonality.ValueString())
-		threshold.Seasonality = &seasonality
-		baseline, _ := shared.MapBaselineFromState(ctx, model.Threshold.HistoricBaseline.Baseline)
-		threshold.Baseline = baseline
-
-	}
-	return threshold, diags
 }
 
 // mapTimeThresholdFromModel converts the time threshold configuration from the Terraform model to the API representation.
@@ -969,9 +708,6 @@ func (r *websiteAlertConfigResourceFramework) UpdateState(ctx context.Context, s
 	// Map alert channel IDs
 	r.mapAlertChannelIDsToState(&model, apiObject)
 
-	// Map rule
-	model.Rule = r.mapRuleToState(ctx, apiObject.Rule)
-
 	// Map rules collection
 	model.Rules = r.mapRulesToState(ctx, apiObject)
 
@@ -981,9 +717,6 @@ func (r *websiteAlertConfigResourceFramework) UpdateState(ctx context.Context, s
 	if diags.HasError() {
 		return diags
 	}
-
-	// Map threshold
-	model.Threshold = r.mapThresholdToState(ctx, apiObject.Threshold)
 
 	// Map time threshold
 	model.TimeThreshold = r.mapTimeThresholdToState(apiObject.TimeThreshold)
@@ -1076,49 +809,6 @@ func (r *websiteAlertConfigResourceFramework) mapTimeThresholdToState(timeThresh
 	return &websiteTimeThresholdModel
 }
 
-func (r *websiteAlertConfigResourceFramework) mapThresholdToState(ctx context.Context, threshold *restapi.Threshold) *WebsiteThresholdModel {
-	if threshold == nil {
-		return nil
-	}
-
-	websiteThresholdModel := WebsiteThresholdModel{
-		Static:           nil,
-		AdaptiveBaseline: nil,
-	}
-
-	thresholdVal := *threshold
-
-	if thresholdVal.Type == WebsiteAlertConfigThresholdTypeStatic {
-		staticModel := shared.StaticTypeModel{
-			Operator: types.StringValue(string(thresholdVal.Operator)),
-			Value:    util.SetInt64PointerToState(thresholdVal.Value),
-		}
-		websiteThresholdModel.Static = &staticModel
-	}
-	if thresholdVal.Type == WebsiteAlertConfigThresholdTypeAdaptive {
-		adaptiveBaselineModel := shared.AdaptiveBaselineModel{
-			Operator:        types.StringValue(string(thresholdVal.Operator)),
-			DeviationFactor: util.SetFloat32PointerToState(thresholdVal.DeviationFactor),
-			Adaptability:    util.SetFloat32PointerToState(thresholdVal.Adaptability),
-			Seasonality:     types.StringValue(string(*thresholdVal.Seasonality)),
-		}
-		websiteThresholdModel.AdaptiveBaseline = &adaptiveBaselineModel
-	}
-	if thresholdVal.Type == WebsiteAlertConfigThresholdTypeHistoric {
-		historicBaselineModel := shared.HistoricBaselineModel{
-			Deviation:   util.SetFloat32PointerToState(thresholdVal.DeviationFactor),
-			Seasonality: types.StringValue(string(*thresholdVal.Seasonality)),
-		}
-		thresholdRules := restapi.ThresholdRule{
-			Baseline: thresholdVal.Baseline,
-		}
-		historicBaselineModel.Baseline, _ = shared.MapBaselineToState(&thresholdRules)
-		websiteThresholdModel.HistoricBaseline = &historicBaselineModel
-	}
-
-	return &websiteThresholdModel
-
-}
 func (r *websiteAlertConfigResourceFramework) mapRuleToState(ctx context.Context, rule *restapi.WebsiteAlertRule) *WebsiteAlertRuleModel {
 	websiteAlertRuleModel := WebsiteAlertRuleModel{
 		Slowness:        nil,
