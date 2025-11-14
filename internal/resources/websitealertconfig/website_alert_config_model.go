@@ -17,8 +17,6 @@ type WebsiteAlertConfigModel struct {
 	AlertChannelIDs     types.Set                      `tfsdk:"alert_channel_ids"`
 	Granularity         types.Int64                    `tfsdk:"granularity"`
 	CustomPayloadFields types.List                     `tfsdk:"custom_payload_fields"`
-	Rule                *WebsiteAlertRuleModel         `tfsdk:"rule"`
-	Threshold           *WebsiteThresholdModel         `tfsdk:"threshold"`
 	TimeThreshold       *WebsiteTimeThresholdModel     `tfsdk:"time_threshold"`
 	Rules               []RuleWithThresholdPluginModel `tfsdk:"rules"`
 }
