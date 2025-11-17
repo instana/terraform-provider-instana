@@ -93,14 +93,6 @@ func NewWebsiteAlertConfigResourceHandleFramework() resourcehandle.ResourceHandl
 						Computed:    true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
-								WebsiteAlertConfigFieldRuleOperator: schema.StringAttribute{
-									Optional:    true,
-									Computed:    true,
-									Description: WebsiteAlertConfigDescRuleOperator,
-									Validators: []validator.String{
-										stringvalidator.OneOf(WebsiteAlertConfigOperatorGreaterThan, WebsiteAlertConfigOperatorGreaterThanEquals, WebsiteAlertConfigOperatorLessThan, WebsiteAlertConfigOperatorLessThanEquals),
-									},
-								},
 								WebsiteAlertConfigFieldRule: schema.SingleNestedAttribute{
 									Description: WebsiteAlertConfigDescRule,
 									Optional:    true,
@@ -138,16 +130,17 @@ func NewWebsiteAlertConfigResourceHandleFramework() resourcehandle.ResourceHandl
 														stringvalidator.OneOf(WebsiteAlertConfigAggregationSUM, WebsiteAlertConfigAggregationMEAN, WebsiteAlertConfigAggregationMAX, WebsiteAlertConfigAggregationMIN, WebsiteAlertConfigAggregationP25, WebsiteAlertConfigAggregationP50, WebsiteAlertConfigAggregationP75, WebsiteAlertConfigAggregationP90, WebsiteAlertConfigAggregationP95, WebsiteAlertConfigAggregationP98, WebsiteAlertConfigAggregationP99),
 													},
 												},
-												WebsiteAlertConfigFieldRuleOperator: schema.StringAttribute{
-													Required:    true,
-													Description: WebsiteAlertConfigDescRuleOperatorEval,
-													Validators: []validator.String{
-														stringvalidator.OneOf(shared.SupportedOparators...),
-													},
-												},
 												WebsiteAlertConfigFieldRuleValue: schema.StringAttribute{
 													Optional:    true,
 													Description: WebsiteAlertConfigDescRuleValueJsError,
+												},
+												WebsiteAlertConfigFieldRuleOperator: schema.StringAttribute{
+													Optional:    true,
+													Computed:    true,
+													Description: WebsiteAlertConfigDescRuleOperator,
+													Validators: []validator.String{
+														stringvalidator.OneOf(shared.SupportedOparators...),
+													},
 												},
 											},
 										},
@@ -196,6 +189,14 @@ func NewWebsiteAlertConfigResourceHandleFramework() resourcehandle.ResourceHandl
 												},
 											},
 										},
+									},
+								},
+								WebsiteAlertConfigFieldRuleOperator: schema.StringAttribute{
+									Optional:    true,
+									Computed:    true,
+									Description: "The operator to apply for threshold comparison",
+									Validators: []validator.String{
+										stringvalidator.OneOf(">", ">=", "<", "<="),
 									},
 								},
 								WebsiteAlertConfigFieldThreshold: schema.SingleNestedAttribute{
