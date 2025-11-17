@@ -3,6 +3,7 @@ package shared
 import (
 	"context"
 	"log"
+	"math"
 
 	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/internal/util"
@@ -55,21 +56,22 @@ const (
 )
 
 type AdaptiveBaselineModel struct {
-	Operator        types.String  `tfsdk:"operator"`
+	//Operator        types.String  `tfsdk:"operator"`
 	DeviationFactor types.Float32 `tfsdk:"deviation_factor"`
 	Adaptability    types.Float32 `tfsdk:"adaptability"`
 	Seasonality     types.String  `tfsdk:"seasonality"`
 }
 
 type HistoricBaselineModel struct {
+	//Operator    types.String  `tfsdk:"operator"`
 	Baseline    types.List    `tfsdk:"baseline"`
 	Deviation   types.Float32 `tfsdk:"deviation_factor"`
 	Seasonality types.String  `tfsdk:"seasonality"`
 }
 
 type StaticTypeModel struct {
-	Operator types.String `tfsdk:"operator"`
-	Value    types.Int64  `tfsdk:"value"`
+	//Operator types.String  `tfsdk:"operator"`
+	Value types.Float32 `tfsdk:"value"`
 }
 type ThresholdPluginModel struct {
 	Warning  *ThresholdTypeModel `tfsdk:"warning"`
@@ -106,16 +108,18 @@ func StaticAttributeSchema() schema.SingleNestedAttribute {
 		Optional:    true,
 		Description: "Static threshold configuration",
 		Attributes: map[string]schema.Attribute{
-			"operator": schema.StringAttribute{
+			LogAlertConfigFieldValue: schema.Float32Attribute{
 				Optional:    true,
-				Computed:    true,
-				Description: "The operator for the static threshold",
-			},
-			LogAlertConfigFieldValue: schema.Int64Attribute{
-				Optional:    true,
-				Computed:    true,
 				Description: "The value of the threshold",
 			},
+			// ResourceFieldThresholdOperator: schema.StringAttribute{
+			// 	Optional:    true,
+			// 	Computed:    true,
+			// 	Description: "The operator for the adaptive baseline threshold",
+			// 	Validators: []validator.String{
+			// 		stringvalidator.OneOf(">", ">=", "<", "<="),
+			// 	},
+			// },
 		},
 	}
 }
@@ -127,24 +131,24 @@ func AdaptiveAttributeSchema() schema.SingleNestedAttribute {
 		Attributes: map[string]schema.Attribute{
 			ThresholdFieldAdaptiveBaselineDeviation: schema.Float32Attribute{
 				Optional:    true,
-				Computed:    true,
 				Description: "The deviation factor for the adaptive baseline threshold",
 			},
 			ThresholdFieldAdaptiveBaselineAdaptability: schema.Float32Attribute{
 				Optional:    true,
-				Computed:    true,
 				Description: "The adaptability for the adaptive baseline threshold",
 			},
 			ThresholdFieldAdaptiveBaselineSeasonality: schema.StringAttribute{
 				Optional:    true,
-				Computed:    true,
 				Description: "The seasonality for the adaptive baseline threshold",
 			},
-			"operator": schema.StringAttribute{
-				Optional:    true,
-				Computed:    true,
-				Description: "The operator for the adaptive baseline threshold",
-			},
+			// ResourceFieldThresholdOperator: schema.StringAttribute{
+			// 	Optional:    true,
+			// 	Computed:    true,
+			// 	Description: "The operator for the adaptive baseline threshold",
+			// 	Validators: []validator.String{
+			// 		stringvalidator.OneOf(">", ">=", "<", "<="),
+			// 	},
+			// },
 		},
 	}
 }
@@ -170,6 +174,14 @@ func HistoricAttributeSchema() schema.SingleNestedAttribute {
 				Computed:    true,
 				Description: "The seasonality for the adaptive baseline threshold",
 			},
+			// ResourceFieldThresholdOperator: schema.StringAttribute{
+			// 	Optional:    true,
+			// 	Computed:    true,
+			// 	Description: "The operator for the adaptive baseline threshold",
+			// 	Validators: []validator.String{
+			// 		stringvalidator.OneOf(">", ">=", "<", "<="),
+			// 	},
+			// },
 		},
 	}
 }
@@ -178,7 +190,7 @@ func StaticAndAdaptiveThresholdAttributeSchema() schema.SingleNestedAttribute {
 	return schema.SingleNestedAttribute{
 		Description: "Threshold configuration",
 		Optional:    true,
-		Computed:    true,
+		//Computed:    true,
 		Attributes: map[string]schema.Attribute{
 			ThresholdFieldStatic:           StaticAttributeSchema(),
 			ThresholdFieldAdaptiveBaseline: AdaptiveAttributeSchema(),
@@ -254,11 +266,12 @@ func MapThresholdRulePluginFromState(ctx context.Context, thresholdObj *Threshol
 	// Check for static threshold
 	if thresholdObj.Static != nil {
 		staticVal := thresholdObj.Static
-		valueFloat := float64(staticVal.Value.ValueInt64())
+		valueFloat := float64(staticVal.Value.ValueFloat32())
+		rounded := math.Round(valueFloat*100) / 100
 		return &restapi.ThresholdRule{
-			Type:     "staticThreshold",
-			Value:    &valueFloat,
-			Operator: staticVal.Operator.ValueStringPointer(),
+			Type:  "staticThreshold",
+			Value: &rounded,
+			//Operator: staticVal.Operator.ValueStringPointer(),
 		}, diags
 	}
 
@@ -268,13 +281,13 @@ func MapThresholdRulePluginFromState(ctx context.Context, thresholdObj *Threshol
 		seasonality := restapi.ThresholdSeasonality(adaptiveVal.Seasonality.ValueString())
 		deviationFactor := float32(adaptiveVal.DeviationFactor.ValueFloat32())
 		adaptability := adaptiveVal.Adaptability.ValueFloat32()
-		operator := util.SetStringPointerFromState(adaptiveVal.Operator)
+		//operator := util.SetStringPointerFromState(adaptiveVal.Operator)
 		return &restapi.ThresholdRule{
 			Type:            "adaptiveBaseline",
 			Seasonality:     &seasonality,
 			DeviationFactor: &deviationFactor,
 			Adaptability:    &adaptability,
-			Operator:        operator,
+			//Operator:        operator,
 		}, diags
 	}
 	return nil, diags
@@ -331,10 +344,14 @@ func MapThresholdRuleAllPluginFromState(ctx context.Context, thresholdObj *Thres
 		log.Printf("inside static thresh")
 
 		staticVal := thresholdObj.Static
-		valueFloat := float64(staticVal.Value.ValueInt64())
+		//operator := util.SetStringPointerFromState(staticVal.Operator)
+
+		valueFloat := float64(staticVal.Value.ValueFloat32())
+		rounded := math.Round(valueFloat*100) / 100
 		return &restapi.ThresholdRule{
 			Type:  "staticThreshold",
-			Value: &valueFloat,
+			Value: &rounded,
+			//Operator: operator,
 		}, diags
 	}
 
@@ -346,13 +363,13 @@ func MapThresholdRuleAllPluginFromState(ctx context.Context, thresholdObj *Thres
 		seasonality := restapi.ThresholdSeasonality(adaptiveVal.Seasonality.ValueString())
 		deviationFactor := float32(adaptiveVal.DeviationFactor.ValueFloat32())
 		adaptability := adaptiveVal.Adaptability.ValueFloat32()
-		operator := util.SetStringPointerFromState(adaptiveVal.Operator)
+		//operator := util.SetStringPointerFromState(adaptiveVal.Operator)
 		return &restapi.ThresholdRule{
 			Type:            "adaptiveBaseline",
 			Seasonality:     &seasonality,
 			DeviationFactor: &deviationFactor,
 			Adaptability:    &adaptability,
-			Operator:        operator,
+			//Operator:        operator,
 		}, diags
 	}
 
@@ -361,6 +378,7 @@ func MapThresholdRuleAllPluginFromState(ctx context.Context, thresholdObj *Thres
 		log.Printf("inside histori thresh")
 
 		baselineVal := thresholdObj.HistoricBaseline
+		//operator := util.SetStringPointerFromState(baselineVal.Operator)
 		seasonality := restapi.ThresholdSeasonality(baselineVal.Seasonality.ValueString())
 		deviationFactor := float32(baselineVal.Deviation.ValueFloat32())
 		baseline, _ := MapBaselineFromState(ctx, baselineVal.Baseline)
@@ -369,6 +387,7 @@ func MapThresholdRuleAllPluginFromState(ctx context.Context, thresholdObj *Thres
 			Seasonality:     &seasonality,
 			DeviationFactor: &deviationFactor,
 			Baseline:        baseline,
+			//Operator:        operator,
 		}, diags
 	}
 	return nil, diags
@@ -438,7 +457,7 @@ func MapThresholdPluginToState(ctx context.Context, threshold *restapi.Threshold
 	switch threshold.Type {
 	case "adaptiveBaseline":
 		adaptiveBaselineModel := AdaptiveBaselineModel{
-			Operator:        util.SetStringPointerToState(threshold.Operator),
+			//Operator:        util.SetStringPointerToState(threshold.Operator),
 			DeviationFactor: util.SetFloat32PointerToState(threshold.DeviationFactor),
 			Adaptability:    util.SetFloat32PointerToState(threshold.Adaptability),
 			Seasonality:     types.StringValue(string(*threshold.Seasonality)),
@@ -447,8 +466,8 @@ func MapThresholdPluginToState(ctx context.Context, threshold *restapi.Threshold
 	default:
 		// Default to static threshold for all other types
 		static := StaticTypeModel{
-			Operator: util.SetStringPointerToState(threshold.Operator),
-			Value:    util.SetInt64PointerToState(threshold.Value),
+			//Operator: util.SetStringPointerToState(threshold.Operator),
+			Value: util.SetFloat32PointerToState(threshold.Value),
 		}
 		thresholdTypeModel.Static = &static
 	}
@@ -465,15 +484,16 @@ func MapAllThresholdPluginToState(ctx context.Context, threshold *restapi.Thresh
 	switch threshold.Type {
 	case "adaptiveBaseline":
 		adaptiveBaselineModel := AdaptiveBaselineModel{
-			Operator:        util.SetStringPointerToState(threshold.Operator),
+			//Operator:        util.SetStringPointerToState(threshold.Operator),
 			DeviationFactor: util.SetFloat32PointerToState(threshold.DeviationFactor),
 			Adaptability:    util.SetFloat32PointerToState(threshold.Adaptability),
 			Seasonality:     types.StringValue(string(*threshold.Seasonality)),
 		}
 		thresholdTypeModel.AdaptiveBaseline = &adaptiveBaselineModel
 	case "historicBaseline":
+		baselineVal, _ := MapBaselineToState(threshold)
 		historicBaselineModel := HistoricBaselineModel{
-			//Baseline:    threshold.Baseline,
+			Baseline:    baselineVal,
 			Deviation:   util.SetFloat32PointerToState(threshold.DeviationFactor),
 			Seasonality: types.StringValue(string(*threshold.Seasonality)),
 		}
@@ -482,8 +502,8 @@ func MapAllThresholdPluginToState(ctx context.Context, threshold *restapi.Thresh
 	default:
 		// Default to static threshold for all other types
 		static := StaticTypeModel{
-			Operator: util.SetStringPointerToState(threshold.Operator),
-			Value:    util.SetInt64PointerToState(threshold.Value),
+			//Operator: util.SetStringPointerToState(threshold.Operator),
+			Value: util.SetFloat32PointerToState(threshold.Value),
 		}
 		thresholdTypeModel.Static = &static
 	}

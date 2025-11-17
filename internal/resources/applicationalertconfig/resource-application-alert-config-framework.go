@@ -882,7 +882,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapStaticThreshold(static 
 	threshold := &restapi.ThresholdRule{Type: ThresholdTypeStatic}
 
 	if !static.Value.IsNull() && !static.Value.IsUnknown() {
-		value := float64(static.Value.ValueInt64())
+		value := float64(static.Value.ValueFloat32())
 		threshold.Value = &value
 	}
 
@@ -1255,8 +1255,8 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapThresholdLevelToModel(t
 	case ThresholdTypeStatic:
 		if threshold.Value != nil {
 			levelModel.Static = &shared.StaticTypeModel{
-				Value:    types.Int64Value(int64(*threshold.Value)),
-				Operator: util.SetStringPointerToState(threshold.Operator),
+				Value: types.Float32Value(float32(*threshold.Value)),
+				//Operator: util.SetStringPointerToState(threshold.Operator),
 			}
 		}
 
@@ -1265,6 +1265,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapThresholdLevelToModel(t
 			DeviationFactor: util.SetFloat32PointerToState(threshold.DeviationFactor),
 			Adaptability:    util.SetFloat32PointerToState(threshold.Adaptability),
 			Seasonality:     util.SetStringPointerToState((*string)(threshold.Seasonality)),
+			//Operator:        util.SetStringPointerToState(threshold.Operator),
 		}
 	}
 
