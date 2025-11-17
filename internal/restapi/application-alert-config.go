@@ -11,7 +11,6 @@ type ApplicationAlertConfig struct {
 	ID                    string                               `json:"id"`
 	Name                  string                               `json:"name"`
 	Description           string                               `json:"description"`
-	Severity              int                                  `json:"severity"`
 	Triggering            bool                                 `json:"triggering"`
 	Applications          map[string]IncludedApplication       `json:"applications"`
 	BoundaryScope         BoundaryScope                        `json:"boundaryScope"`

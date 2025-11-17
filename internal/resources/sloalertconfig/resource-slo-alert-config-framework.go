@@ -526,7 +526,7 @@ func (r *sloAlertConfigResourceFramework) normalizeAlertType(alertType string) s
 
 // mapThresholdFromState converts state threshold to API threshold
 func (r *sloAlertConfigResourceFramework) mapThresholdFromState(alertType string, threshold *SloAlertThresholdModel) *restapi.SloAlertThreshold {
-	if alertType == SloAlertConfigBurnRateV2 || threshold == nil {
+	if threshold == nil {
 		return nil
 	}
 

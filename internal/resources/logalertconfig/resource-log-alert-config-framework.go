@@ -2,6 +2,7 @@ package logalertconfig
 
 import (
 	"context"
+	"math"
 
 	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
 	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
@@ -159,10 +160,11 @@ func buildRulesSchema() schema.SingleNestedAttribute {
 				},
 			},
 			LogAlertConfigFieldThresholdOperator: schema.StringAttribute{
-				Required:    true,
-				Description: LogAlertConfigDescThresholdOperator,
+				Optional:    true,
+				Computed:    true,
+				Description: "The operator to apply for threshold comparison",
 				Validators: []validator.String{
-					stringvalidator.OneOf(restapi.SupportedThresholdOperators.ToStringSlice()...),
+					stringvalidator.OneOf(">", ">=", "<", "<="),
 				},
 			},
 			LogAlertConfigFieldThreshold: schema.SingleNestedAttribute{
@@ -428,8 +430,8 @@ func (r *logAlertConfigResourceFramework) mapThresholdsToModel(thresholds map[re
 func (r *logAlertConfigResourceFramework) createStaticThresholdModel(threshold restapi.ThresholdRule) *shared.ThresholdStaticTypeModel {
 	return &shared.ThresholdStaticTypeModel{
 		Static: &shared.StaticTypeModel{
-			Operator: types.StringNull(),
-			Value:    types.Int64Value(int64(*threshold.Value)),
+			//Operator: types.StringValue(*threshold.Operator),
+			Value: types.Float32Value(float32(*threshold.Value)),
 		},
 	}
 }
@@ -673,18 +675,20 @@ func (r *logAlertConfigResourceFramework) mapModelThresholdsToAPI(thresholdModel
 	}
 
 	if r.hasValidStaticThreshold(thresholdModel.Warning) {
-		valueFloat := float64(thresholdModel.Warning.Static.Value.ValueInt64())
+		valueFloat := float64(thresholdModel.Warning.Static.Value.ValueFloat32())
+		rounded := math.Round(valueFloat*100) / 100
 		thresholdMap[restapi.WarningSeverity] = restapi.ThresholdRule{
 			Type:  ThresholdTypeStatic,
-			Value: &valueFloat,
+			Value: &rounded,
 		}
 	}
 
 	if r.hasValidStaticThreshold(thresholdModel.Critical) {
-		valueFloat := float64(thresholdModel.Critical.Static.Value.ValueInt64())
+		valueFloat := float64(thresholdModel.Critical.Static.Value.ValueFloat32())
+		rounded := math.Round(valueFloat*100) / 100
 		thresholdMap[restapi.CriticalSeverity] = restapi.ThresholdRule{
 			Type:  ThresholdTypeStatic,
-			Value: &valueFloat,
+			Value: &rounded,
 		}
 	}
 
