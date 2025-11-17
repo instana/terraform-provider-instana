@@ -192,7 +192,12 @@ func (e *ComparisonExpression) Render() string {
 	} else if e.BooleanValue != nil {
 		return fmt.Sprintf("%s %s %t", e.Entity.Render(), e.Operator, *e.BooleanValue)
 	}
-	return fmt.Sprintf("%s %s '%s'", e.Entity.Render(), e.Operator, *e.StringValue)
+	return fmt.Sprintf("%s %s '%s'", e.Entity.Render(), e.Operator, escapeStringValue(*e.StringValue))
+}
+
+// escapeStringValue escapes single quotes in string values by replacing them with backslash-escaped quotes
+func escapeStringValue(value string) string {
+	return strings.ReplaceAll(value, "'", "\\'")
 }
 
 // UnaryOperationExpression representation of a unary expression
@@ -215,7 +220,7 @@ var (
 		`|(?P<TagKeySeparator>(?i):)` +
 		`|(?P<Ident>[a-zA-Z_][\.a-zA-Z0-9_\-/]*)` +
 		`|(?P<Number>[-+]?\d+)` +
-		`|(?P<String>'[^']*'|"[^"]*")`,
+		`|(?P<String>'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")`,
 	))
 	filterParser = participle.MustBuild(
 		&FilterExpression{},
