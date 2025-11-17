@@ -656,6 +656,50 @@ func TestShouldParseEntityOriginFromUnaryExpression(t *testing.T) {
 	shouldSuccessfullyParseExpression(expression, expectedResult, t)
 }
 
+func TestShouldParseStringWithEscapedSingleQuotes(t *testing.T) {
+	expression := "log.exception.type@na EQUALS '<class \\'ConnectionResetError\\'>'"
+	expectedResult := &FilterExpression{
+		Expression: &LogicalOrExpression{
+			Left: &LogicalAndExpression{
+				Left: &BracketExpression{
+					Primary: &PrimaryExpression{
+						Comparison: &ComparisonExpression{
+							Entity:      &EntitySpec{Identifier: "log.exception.type", Origin: utils.StringPtr(EntityOriginNotApplicable.Key())},
+							Operator:    Operator(restapi.EqualsOperator),
+							StringValue: utils.StringPtr("<class 'ConnectionResetError'>"),
+						},
+					},
+				},
+			},
+		},
+	}
+
+	shouldSuccessfullyParseExpression(expression, expectedResult, t)
+}
+
+func TestShouldRenderStringWithSingleQuotesEscaped(t *testing.T) {
+	sut := &FilterExpression{
+		Expression: &LogicalOrExpression{
+			Left: &LogicalAndExpression{
+				Left: &BracketExpression{
+					Primary: &PrimaryExpression{
+						Comparison: &ComparisonExpression{
+							Entity:      &EntitySpec{Identifier: "log.exception.type", Origin: utils.StringPtr(EntityOriginNotApplicable.Key())},
+							Operator:    Operator(restapi.EqualsOperator),
+							StringValue: utils.StringPtr("<class 'ConnectionResetError'>"),
+						},
+					},
+				},
+			},
+		},
+	}
+
+	rendered := sut.Render()
+	expected := "log.exception.type@na EQUALS '<class \\'ConnectionResetError\\'>'"
+
+	require.Equal(t, expected, rendered)
+}
+
 func shouldSuccessfullyParseExpression(input string, expectedResult *FilterExpression, t *testing.T) {
 	sut := NewParser()
 	result, err := sut.Parse(input)
@@ -1049,4 +1093,46 @@ type normalizationTestSet struct {
 	name     string
 	input    string
 	expected string
+}
+
+func TestShouldHandleRoundTripConversionWithSingleQuotesInValue(t *testing.T) {
+	// This test verifies the fix for the issue where single quotes within string values
+	// caused parsing errors during round-trip conversion (API -> Model -> String -> Parse -> API)
+
+	// Original API model with single quotes in the value
+	originalAPIModel := restapi.NewStringTagFilter(
+		restapi.TagFilterEntityNotApplicable,
+		"log.exception.type",
+		restapi.EqualsOperator,
+		"<class 'ConnectionResetError'>",
+	)
+
+	mapper := NewMapper()
+
+	// Step 1: Convert API model to filter expression
+	filterExpr, err := mapper.FromAPIModel(originalAPIModel)
+	require.NoError(t, err)
+	require.NotNil(t, filterExpr)
+
+	// Step 2: Render the filter expression to string
+	renderedString := filterExpr.Render()
+	expectedRendered := "log.exception.type@na EQUALS '<class \\'ConnectionResetError\\'>'"
+	require.Equal(t, expectedRendered, renderedString)
+
+	// Step 3: Parse the rendered string back to filter expression
+	parser := NewParser()
+	parsedExpr, err := parser.Parse(renderedString)
+	require.NoError(t, err)
+	require.NotNil(t, parsedExpr)
+
+	// Step 4: Convert parsed expression back to API model
+	convertedAPIModel := mapper.ToAPIModel(parsedExpr)
+	require.NotNil(t, convertedAPIModel)
+
+	// Step 5: Verify the round-trip conversion preserved the original value
+	require.Equal(t, restapi.TagFilterType, convertedAPIModel.GetType())
+	require.Equal(t, "log.exception.type", *convertedAPIModel.Name)
+	require.Equal(t, restapi.EqualsOperator, *convertedAPIModel.Operator)
+	require.Equal(t, "<class 'ConnectionResetError'>", *convertedAPIModel.StringValue)
+	require.Equal(t, restapi.TagFilterEntityNotApplicable, *convertedAPIModel.Entity)
 }
