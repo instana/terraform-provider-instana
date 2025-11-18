@@ -1043,8 +1043,18 @@ func (r *applicationAlertConfigResourceFrameworkImpl) updateTagFilter(model *App
 func (r *applicationAlertConfigResourceFrameworkImpl) updateAlertChannels(ctx context.Context, model *ApplicationAlertConfigModel, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	if len(data.AlertChannels) == 0 {
+	if data.AlertChannels == nil {
 		model.AlertChannels = types.MapNull(types.SetType{ElemType: types.StringType})
+		return diags
+	}
+
+	if len(data.AlertChannels) == 0 {
+		emptyMap, mapDiags := types.MapValue(types.SetType{ElemType: types.StringType}, map[string]attr.Value{})
+		if mapDiags.HasError() {
+			diags.Append(mapDiags...)
+			return diags
+		}
+		model.AlertChannels = emptyMap
 		return diags
 	}
 
