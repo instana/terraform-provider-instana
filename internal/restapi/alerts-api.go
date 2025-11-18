@@ -5,9 +5,10 @@ const AlertsResourcePath = EventSettingsBasePath + "/alerts"
 
 // EventFilteringConfiguration type definiton of an EventFilteringConfiguration of a AlertingConfiguration of the Instana ReST AOI
 type EventFilteringConfiguration struct {
-	Query      *string          `json:"query"`
-	RuleIDs    []string         `json:"ruleIds"`
-	EventTypes []AlertEventType `json:"eventTypes"`
+	Query                     *string          `json:"query"`
+	RuleIDs                   []string         `json:"ruleIds"`
+	EventTypes                []AlertEventType `json:"eventTypes"`
+	ApplicationAlertConfigIds []string         `json:"applicationAlertConfigIds"`
 }
 
 // AlertingConfiguration type definition of an Alerting Configuration in Instana REST API

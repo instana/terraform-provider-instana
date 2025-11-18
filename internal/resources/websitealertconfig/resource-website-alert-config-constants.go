@@ -36,8 +36,6 @@ const (
 	//WebsiteAlertConfigFieldRuleSpecificJsError constant value for field rule.specific_js_error of resource instana_website_alert_config
 	WebsiteAlertConfigFieldRuleSpecificJsError = "specific_js_error"
 
-	//WebsiteAlertConfigFieldSeverity constant value for field severity of resource instana_website_alert_config
-	WebsiteAlertConfigFieldSeverity = "severity"
 	//WebsiteAlertConfigFieldTagFilter constant value for field tag_filter of resource instana_website_alert_config
 	WebsiteAlertConfigFieldTagFilter = "tag_filter"
 
@@ -69,7 +67,6 @@ const (
 	WebsiteAlertConfigDescID              = "The ID of the Website Alert Configuration."
 	WebsiteAlertConfigDescName            = "The name of the Website Alert Configuration."
 	WebsiteAlertConfigDescDescription     = "The description of the Website Alert Configuration."
-	WebsiteAlertConfigDescSeverity        = "The severity of the alert when triggered."
 	WebsiteAlertConfigDescTriggering      = "Flag to indicate whether also an Incident is triggered or not."
 	WebsiteAlertConfigDescWebsiteID       = "Unique ID of the website."
 	WebsiteAlertConfigDescTagFilter       = "The tag filter expression for the Website Alert Configuration."
@@ -112,7 +109,6 @@ const (
 	WebsiteAlertConfigDescTimeThresholdViolationsInSequence = "Time threshold base on violations in sequence."
 
 	// Error message constants
-	WebsiteAlertConfigErrConvertSeverity               = "Error converting severity"
 	WebsiteAlertConfigErrParseTagFilter                = "Error parsing tag filter"
 	WebsiteAlertConfigErrMapFilterExpression           = "Error mapping filter expression"
 	WebsiteAlertConfigErrMapFilterExpressionMsg        = "Failed to map filter expression: %s"
@@ -134,12 +130,6 @@ const (
 	WebsiteAlertConfigFieldAdaptability        = "adaptability"
 	WebsiteAlertConfigFieldSeasonality         = "seasonality"
 	WebsiteAlertConfigFieldCustomPayloadFields = "custom_payload_fields"
-)
-
-// Severity value constants
-const (
-	WebsiteAlertConfigSeverityWarning  = "warning"
-	WebsiteAlertConfigSeverityCritical = "critical"
 )
 
 // Operator value constants
