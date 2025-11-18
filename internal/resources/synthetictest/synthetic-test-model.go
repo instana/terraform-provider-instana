@@ -57,7 +57,7 @@ type HttpActionConfigModel struct {
 	ExpectMatch       types.String `tfsdk:"expect_match"`
 	ExpectExists      types.Set    `tfsdk:"expect_exists"`
 	ExpectNotEmpty    types.Set    `tfsdk:"expect_not_empty"`
-	ExpectJson        types.Map    `tfsdk:"expect_json"`
+	ExpectJson        types.String `tfsdk:"expect_json"`
 }
 
 // HttpScriptConfigModel represents the Terraform model for HTTP Script configuration
