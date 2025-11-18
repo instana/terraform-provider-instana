@@ -1666,8 +1666,15 @@ func (r *syntheticTestResourceFramework) mapWebpageScriptConfigToModel(config re
 		Retries:           types.Int64Value(int64(config.Retries)),
 		RetryInterval:     types.Int64Value(int64(config.RetryInterval)),
 		Timeout:           util.SetStringPointerToState(config.Timeout),
-		Script:            util.SetStringPointerToState(config.Script),
 		Browser:           util.SetStringPointerToState(config.Browser),
+	}
+
+	// Normalize the script JSON to match jsonencode() formatting
+	if config.Script != nil && *config.Script != "" {
+		normalizedScript := util.NormalizeJSONObjectString(*config.Script)
+		webpageScriptModel.Script = types.StringValue(normalizedScript)
+	} else {
+		webpageScriptModel.Script = types.StringNull()
 	}
 
 	if config.FileName != nil && *config.FileName != "" {

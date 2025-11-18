@@ -80,8 +80,6 @@ func createCustomEventSpecificationSchema() schema.Schema {
 			CustomEventSpecificationFieldQuery: schema.StringAttribute{
 				Description: CustomEventSpecificationResourceDescQuery,
 				Optional:    true,
-				Computed:    true,
-				Default:     stringdefault.StaticString(CustomEventSpecificationDefaultEmptyString),
 			},
 			CustomEventSpecificationFieldTriggering: schema.BoolAttribute{
 				Description: CustomEventSpecificationResourceDescTriggering,
@@ -92,8 +90,6 @@ func createCustomEventSpecificationSchema() schema.Schema {
 			CustomEventSpecificationFieldDescription: schema.StringAttribute{
 				Description: CustomEventSpecificationResourceDescDescription,
 				Optional:    true,
-				Computed:    true,
-				Default:     stringdefault.StaticString(CustomEventSpecificationDefaultEmptyString),
 			},
 			CustomEventSpecificationFieldExpirationTime: schema.Int64Attribute{
 				Description: CustomEventSpecificationResourceDescExpirationTime,

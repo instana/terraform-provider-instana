@@ -240,7 +240,7 @@ const (
 	SyntheticTestMinDescriptionLength  = 0
 	SyntheticTestMaxDescriptionLength  = 512
 	SyntheticTestMinTestFrequency      = int64(1)
-	SyntheticTestMaxTestFrequency      = int64(120)
+	SyntheticTestMaxTestFrequency      = int64(1440)
 	SyntheticTestMinRetries            = int64(0)
 	SyntheticTestMaxRetries            = int64(2)
 	SyntheticTestMinRetryInterval      = int64(1)

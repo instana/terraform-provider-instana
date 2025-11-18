@@ -194,13 +194,28 @@ func NormalizeJSONString(jsonString string) string {
 	return string(bytes)
 }
 
+// NormalizeJSONObjectString normalizes a JSON object string (not an array)
+// This is useful for webpage scripts and other single JSON objects
+func NormalizeJSONObjectString(jsonString string) string {
+	var raw map[string]interface{}
+	err := json.Unmarshal([]byte(jsonString), &raw)
+	if err != nil {
+		return jsonString
+	}
+	bytes, err := json.Marshal(raw)
+	if err != nil {
+		return jsonString
+	}
+	return string(bytes)
+}
+
 // this interface to handle the conversion of differnt numeric types
 type numericPtr interface {
 	~*int32 | ~*int64 | ~*float32 | ~*float64 | ~*int
 }
 
 func SetStringPointerToState(i *string) types.String {
-	if i == nil {
+	if i == nil || *i == "" {
 		return types.StringNull()
 	} else {
 		return types.StringValue(*i)
