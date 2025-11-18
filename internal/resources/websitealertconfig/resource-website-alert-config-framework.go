@@ -51,14 +51,6 @@ func NewWebsiteAlertConfigResourceHandleFramework() resourcehandle.ResourceHandl
 							stringvalidator.LengthBetween(WebsiteAlertConfigMinDescriptionLength, WebsiteAlertConfigMaxDescriptionLength),
 						},
 					},
-					WebsiteAlertConfigFieldSeverity: schema.StringAttribute{
-						Optional:    true,
-						Computed:    true,
-						Description: WebsiteAlertConfigDescSeverity,
-						Validators: []validator.String{
-							stringvalidator.OneOf(WebsiteAlertConfigSeverityWarning, WebsiteAlertConfigSeverityCritical),
-						},
-					},
 					WebsiteAlertConfigFieldTriggering: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
@@ -312,13 +304,6 @@ func (r *websiteAlertConfigResourceFramework) MapStateToDataObject(ctx context.C
 		return nil, diags
 	}
 
-	// Convert severity
-	severity, severityDiags := r.convertSeverityToAPI(model)
-	diags.Append(severityDiags...)
-	if diags.HasError() {
-		return nil, diags
-	}
-
 	// Map tag filter
 	tagFilter, tagFilterDiags := r.mapTagFilterToAPI(model)
 	diags.Append(tagFilterDiags...)
@@ -359,7 +344,7 @@ func (r *websiteAlertConfigResourceFramework) MapStateToDataObject(ctx context.C
 		ID:                    model.ID.ValueString(),
 		Name:                  model.Name.ValueString(),
 		Description:           model.Description.ValueString(),
-		Severity:              severity,
+		Severity:              nil,
 		Triggering:            model.Triggering.ValueBool(),
 		WebsiteID:             model.WebsiteID.ValueString(),
 		TagFilterExpression:   tagFilter,
@@ -369,23 +354,6 @@ func (r *websiteAlertConfigResourceFramework) MapStateToDataObject(ctx context.C
 		TimeThreshold:         *timeThreshold,
 		Rules:                 rules,
 	}, diags
-}
-
-// convertSeverityToAPI converts severity from Terraform to API representation
-func (r *websiteAlertConfigResourceFramework) convertSeverityToAPI(model WebsiteAlertConfigModel) (*int, diag.Diagnostics) {
-	var diags diag.Diagnostics
-	var severity *int
-
-	if !model.Severity.IsNull() && !model.Severity.IsUnknown() {
-		severityVal, err := util.ConvertSeverityFromTerraformToInstanaAPIRepresentation(model.Severity.ValueString())
-		severity = &severityVal
-		if err != nil {
-			diags.AddError(WebsiteAlertConfigErrConvertSeverity, err.Error())
-			return nil, diags
-		}
-	}
-
-	return severity, diags
 }
 
 // mapTagFilterToAPI maps tag filter expression from model to API
@@ -681,19 +649,11 @@ func (r *websiteAlertConfigResourceFramework) mapOptionalInt64ToInt32Field(field
 func (r *websiteAlertConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *restapi.WebsiteAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	// Convert severity
-	severity, severityDiags := r.convertSeverityFromAPI(apiObject)
-	diags.Append(severityDiags...)
-	if diags.HasError() {
-		return diags
-	}
-
 	// Create base model
 	model := WebsiteAlertConfigModel{
 		ID:          types.StringValue(apiObject.ID),
 		Name:        types.StringValue(apiObject.Name),
 		Description: types.StringValue(apiObject.Description),
-		Severity:    types.StringValue(severity),
 		Triggering:  types.BoolValue(apiObject.Triggering),
 		WebsiteID:   types.StringValue(apiObject.WebsiteID),
 		Granularity: types.Int64Value(int64(apiObject.Granularity)),
@@ -725,19 +685,6 @@ func (r *websiteAlertConfigResourceFramework) UpdateState(ctx context.Context, s
 	// Set state
 	diags.Append(state.Set(ctx, &model)...)
 	return diags
-}
-
-// convertSeverityFromAPI converts severity from API to Terraform representation
-func (r *websiteAlertConfigResourceFramework) convertSeverityFromAPI(apiObject *restapi.WebsiteAlertConfig) (string, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	severity, err := util.ConvertSeverityFromInstanaAPIToTerraformRepresentation(*apiObject.Severity)
-	if err != nil {
-		diags.AddError(WebsiteAlertConfigErrConvertSeverity, err.Error())
-		return "", diags
-	}
-
-	return severity, diags
 }
 
 // mapTagFilterExpressionToState maps tag filter expression from API to state
