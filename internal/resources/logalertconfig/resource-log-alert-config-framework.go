@@ -77,7 +77,7 @@ func buildLogAlertConfigSchema() schema.Schema {
 				},
 			},
 			LogAlertConfigFieldTagFilter: schema.StringAttribute{
-				Required:    true,
+				Optional:    true,
 				Description: LogAlertConfigDescTagFilter,
 			},
 			shared.DefaultCustomPayloadFieldsName: shared.GetCustomPayloadFieldsSchema(),
@@ -428,9 +428,12 @@ func (r *logAlertConfigResourceFramework) mapThresholdsToModel(thresholds map[re
 
 // createStaticThresholdModel creates a static threshold model from API threshold rule
 func (r *logAlertConfigResourceFramework) createStaticThresholdModel(threshold restapi.ThresholdRule) *shared.ThresholdStaticTypeModel {
+	// Only create static threshold if Value is present
+	if threshold.Value == nil {
+		return nil // or handle adaptive baseline
+	}
 	return &shared.ThresholdStaticTypeModel{
 		Static: &shared.StaticTypeModel{
-			//Operator: types.StringValue(*threshold.Operator),
 			Value: types.Float32Value(float32(*threshold.Value)),
 		},
 	}
