@@ -212,10 +212,10 @@ func buildTimeThresholdWarmUpAttribute() schema.Int64Attribute {
 // buildTimeThresholdCoolDownAttribute creates the cool_down field schema attribute
 func buildTimeThresholdCoolDownAttribute() schema.Int64Attribute {
 	return schema.Int64Attribute{
-		Required:    true,
+		Optional:    true,
 		Description: SloAlertConfigDescTimeThresholdCoolDown,
 		Validators: []validator.Int64{
-			int64validator.AtLeast(TimeThresholdMinValue),
+			int64validator.AtLeast(0),
 		},
 	}
 }
@@ -353,6 +353,10 @@ func (r *sloAlertConfigResourceFramework) mapAPIAlertTypeToTerraform(rule restap
 		}
 		if rule.Metric == APIMetricBurnRateV2 {
 			return SloAlertConfigBurnRateV2
+		}
+		// Handle legacy BURN_RATE metric as error_budget
+		if rule.Metric == APIMetricBurnRate {
+			return SloAlertConfigErrorBudget
 		}
 	}
 
