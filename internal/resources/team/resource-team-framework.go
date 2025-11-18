@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -85,10 +86,17 @@ func buildMemberNestedObject() schema.NestedAttributeObject {
 				Optional:    true,
 				Computed:    true,
 				Description: TeamDescMemberEmail,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			TeamFieldMemberName: schema.StringAttribute{
 				Optional:    true,
+				Computed:    true,
 				Description: TeamDescMemberName,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			TeamFieldMemberRoles: schema.SetNestedAttribute{
 				Description:  TeamDescMemberRoles,
@@ -109,11 +117,19 @@ func buildMemberRoleNestedObject() schema.NestedAttributeObject {
 			},
 			TeamFieldMemberRoleName: schema.StringAttribute{
 				Optional:    true,
+				Computed:    true,
 				Description: TeamDescMemberRoleName,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			TeamFieldMemberRoleViaIdP: schema.BoolAttribute{
 				Optional:    true,
+				Computed:    true,
 				Description: TeamDescMemberRoleViaIdP,
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
 			},
 		},
 	}
