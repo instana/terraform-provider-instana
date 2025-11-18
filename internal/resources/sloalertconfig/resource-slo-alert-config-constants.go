@@ -109,6 +109,8 @@ const (
 	APIMetricStatus = "STATUS"
 	// APIMetricBurnedPercentage represents the BURNED_PERCENTAGE API metric
 	APIMetricBurnedPercentage = "BURNED_PERCENTAGE"
+	// APIMetricBurnRate represents the legacy BURN_RATE API metric
+	APIMetricBurnRate = "BURN_RATE"
 	// APIMetricBurnRateV2 represents the BURN_RATE_V2 API metric
 	APIMetricBurnRateV2 = "BURN_RATE_V2"
 
