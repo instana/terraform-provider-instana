@@ -173,6 +173,8 @@ func (client *restClientImpl) createRequest() *resty.Request {
 		terraformProviderVersion = scanner.Text()
 		terraformProviderVersion = strings.Split(terraformProviderVersion, "]")[0]
 		terraformProviderVersion = strings.Split(terraformProviderVersion, "[")[1]
+		// Remove 'v' prefix and add 'Terraform/' prefix
+		terraformProviderVersion = "Terraform/" + strings.TrimPrefix(terraformProviderVersion, "v")
 	}
 
 	//return client with headers needed for every call
