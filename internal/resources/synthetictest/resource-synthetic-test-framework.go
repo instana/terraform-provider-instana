@@ -2,7 +2,9 @@ package synthetictest
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"log"
 	"regexp"
 
 	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
@@ -227,10 +229,9 @@ func buildHttpActionSchema() schema.SingleNestedAttribute {
 		Description: SyntheticTestDescExpectNotEmpty,
 		ElementType: types.StringType,
 	}
-	attrs[SyntheticTestFieldExpectJson] = schema.MapAttribute{
+	attrs[SyntheticTestFieldExpectJson] = schema.StringAttribute{
 		Optional:    true,
 		Description: SyntheticTestDescExpectJson,
-		ElementType: types.StringType,
 	}
 
 	return schema.SingleNestedAttribute{
@@ -766,9 +767,9 @@ func (r *syntheticTestResourceFramework) mapWebsitesFromModel(ctx context.Contex
 }
 
 // mapCustomPropertiesFromModel maps custom properties from model
-func (r *syntheticTestResourceFramework) mapCustomPropertiesFromModel(ctx context.Context, model SyntheticTestModel) (map[string]interface{}, diag.Diagnostics) {
+func (r *syntheticTestResourceFramework) mapCustomPropertiesFromModel(ctx context.Context, model SyntheticTestModel) (map[string]string, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	customProperties := make(map[string]interface{})
+	customProperties := make(map[string]string)
 	if !model.CustomProperties.IsNull() && !model.CustomProperties.IsUnknown() {
 		diags.Append(model.CustomProperties.ElementsAs(ctx, &customProperties, false)...)
 	}
@@ -878,7 +879,7 @@ func (r *syntheticTestResourceFramework) mapHttpActionFromModel(ctx context.Cont
 
 	// Map headers
 	if !httpActionModel.Headers.IsNull() && !httpActionModel.Headers.IsUnknown() {
-		var headers map[string]interface{}
+		var headers map[string]string
 		diags.Append(httpActionModel.Headers.ElementsAs(ctx, &headers, false)...)
 		if !diags.HasError() {
 			config.Headers = headers
@@ -905,11 +906,9 @@ func (r *syntheticTestResourceFramework) mapHttpActionFromModel(ctx context.Cont
 
 	// Map expect json
 	if !httpActionModel.ExpectJson.IsNull() && !httpActionModel.ExpectJson.IsUnknown() {
-		var expectJson map[string]interface{}
-		diags.Append(httpActionModel.ExpectJson.ElementsAs(ctx, &expectJson, false)...)
-		if !diags.HasError() {
-			config.ExpectJson = expectJson
-		}
+		normalizedWidgets := util.NormalizeJSONString(httpActionModel.ExpectJson.ValueString())
+		widgets := json.RawMessage(normalizedWidgets)
+		config.ExpectJson = widgets
 	}
 
 	return config, diags
@@ -1143,9 +1142,32 @@ func (r *syntheticTestResourceFramework) mapConfigurationFromModel(ctx context.C
 
 func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *restapi.SyntheticTest) diag.Diagnostics {
 	var diags diag.Diagnostics
+	var model SyntheticTestModel
 
+	// Get current state from plan or state
+	//diags.Append(r.getModelFromState(ctx, plan, state, &model)...)
 	// Map basic fields
-	model := r.mapBasicFieldsToModel(apiObject)
+	if plan != nil {
+		log.Printf("lloading from plan")
+		diags.Append(plan.Get(ctx, &model)...)
+		model.ID = types.StringValue(apiObject.ID)
+		model.Label = types.StringValue(apiObject.Label)
+		model.Active = types.BoolValue(apiObject.Active)
+		model.PlaybackMode = types.StringValue(apiObject.PlaybackMode)
+		model.Description = util.SetStringPointerToState(apiObject.Description)
+		model.ApplicationID = util.SetStringPointerToState(apiObject.ApplicationID)
+	} else if state != nil {
+		diags.Append(state.Get(ctx, &model)...)
+		log.Printf("lloading from state")
+		model.ID = types.StringValue(apiObject.ID)
+		model.Label = types.StringValue(apiObject.Label)
+		model.Active = types.BoolValue(apiObject.Active)
+		model.PlaybackMode = types.StringValue(apiObject.PlaybackMode)
+		model.Description = util.SetStringPointerToState(apiObject.Description)
+		model.ApplicationID = util.SetStringPointerToState(apiObject.ApplicationID)
+	} else {
+		model = r.mapBasicFieldsToModel(apiObject)
+	}
 
 	// Map collection fields
 	model.Applications = r.mapApplicationsToModel(apiObject)
@@ -1159,7 +1181,7 @@ func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state 
 	// Map configuration based on synthetic type
 	switch apiObject.Configuration.SyntheticType {
 	case SyntheticTestTypeHTTPAction:
-		model.HttpAction = r.mapHttpActionConfigToModel(apiObject.Configuration)
+		model.HttpAction = r.mapHttpActionConfigToModel(apiObject.Configuration, model.HttpAction)
 		r.clearOtherConfigTypes(&model, SyntheticTestTypeHTTPAction)
 	case SyntheticTestTypeHTTPScript:
 		model.HttpScript = r.mapHttpScriptConfigToModel(apiObject.Configuration)
@@ -1317,7 +1339,7 @@ func (r *syntheticTestResourceFramework) mapRbacTagsToModel(apiObject *restapi.S
 }
 
 // mapHttpActionConfigToModel maps HTTP Action configuration to model
-func (r *syntheticTestResourceFramework) mapHttpActionConfigToModel(config restapi.SyntheticTestConfig) *HttpActionConfigModel {
+func (r *syntheticTestResourceFramework) mapHttpActionConfigToModel(config restapi.SyntheticTestConfig, httpModel *HttpActionConfigModel) *HttpActionConfigModel {
 	httpActionModel := &HttpActionConfigModel{
 		MarkSyntheticCall: types.BoolValue(config.MarkSyntheticCall),
 		Retries:           types.Int64Value(int64(config.Retries)),
@@ -1343,7 +1365,13 @@ func (r *syntheticTestResourceFramework) mapHttpActionConfigToModel(config resta
 	httpActionModel.Headers = r.mapHeadersToModel(config.Headers)
 	httpActionModel.ExpectExists = r.mapExpectExistsToModel(config.ExpectExists)
 	httpActionModel.ExpectNotEmpty = r.mapExpectNotEmptyToModel(config.ExpectNotEmpty)
-	httpActionModel.ExpectJson = r.mapExpectJsonToModel(config.ExpectJson)
+	if httpModel != nil {
+		httpActionModelCurrent := *httpModel
+		httpActionModel.ExpectJson = httpActionModelCurrent.ExpectJson
+	} else {
+		log.Printf("updating json again")
+		httpActionModel.ExpectJson = r.mapExpectJsonToModel(config.ExpectJson)
+	}
 
 	return httpActionModel
 }
@@ -1368,7 +1396,7 @@ func buildSchema() schema.Schema {
 }
 
 // mapHeadersToModel maps headers to model
-func (r *syntheticTestResourceFramework) mapHeadersToModel(headers map[string]interface{}) types.Map {
+func (r *syntheticTestResourceFramework) mapHeadersToModel(headers map[string]string) types.Map {
 	if len(headers) > 0 {
 		headersMap := make(map[string]attr.Value)
 		for k, v := range headers {
@@ -1404,15 +1432,17 @@ func (r *syntheticTestResourceFramework) mapExpectNotEmptyToModel(expectNotEmpty
 }
 
 // mapExpectJsonToModel maps expect json to model
-func (r *syntheticTestResourceFramework) mapExpectJsonToModel(expectJson map[string]interface{}) types.Map {
-	if len(expectJson) > 0 {
-		expectJsonMap := make(map[string]attr.Value)
-		for k, v := range expectJson {
-			expectJsonMap[k] = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		return types.MapValueMust(types.StringType, expectJsonMap)
+func (r *syntheticTestResourceFramework) mapExpectJsonToModel(expectJson json.RawMessage) types.String {
+	if expectJson == nil || len(expectJson) == 0 {
+		return types.StringNull()
 	}
-	return types.MapNull(types.StringType)
+	jsonBytes, _ := expectJson.MarshalJSON()
+	jsonString := string(jsonBytes)
+	// Check if the JSON is null
+	if jsonString == "null" {
+		return types.StringNull()
+	}
+	return types.StringValue(util.NormalizeJSONString(jsonString))
 }
 
 // mapHttpScriptConfigToModel maps HTTP Script configuration to model

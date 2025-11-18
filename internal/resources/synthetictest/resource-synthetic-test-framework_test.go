@@ -71,10 +71,10 @@ func TestMetaData(t *testing.T) {
 func TestGetRestResource(t *testing.T) {
 	t.Run("should return synthetic test rest resource", func(t *testing.T) {
 		resource := &syntheticTestResourceFramework{}
-		
+
 		mockAPI := &mockInstanaAPI{}
 		restResource := resource.GetRestResource(mockAPI)
-		
+
 		assert.NotNil(t, restResource)
 	})
 }
@@ -82,31 +82,63 @@ func TestGetRestResource(t *testing.T) {
 // Mock API for testing
 type mockInstanaAPI struct{}
 
-func (m *mockInstanaAPI) CustomEventSpecifications() restapi.RestResource[*restapi.CustomEventSpecification] { return nil }
-func (m *mockInstanaAPI) BuiltinEventSpecifications() restapi.ReadOnlyRestResource[*restapi.BuiltinEventSpecification] { return nil }
+func (m *mockInstanaAPI) CustomEventSpecifications() restapi.RestResource[*restapi.CustomEventSpecification] {
+	return nil
+}
+func (m *mockInstanaAPI) BuiltinEventSpecifications() restapi.ReadOnlyRestResource[*restapi.BuiltinEventSpecification] {
+	return nil
+}
 func (m *mockInstanaAPI) APITokens() restapi.RestResource[*restapi.APIToken] { return nil }
-func (m *mockInstanaAPI) ApplicationConfigs() restapi.RestResource[*restapi.ApplicationConfig] { return nil }
-func (m *mockInstanaAPI) ApplicationAlertConfigs() restapi.RestResource[*restapi.ApplicationAlertConfig] { return nil }
-func (m *mockInstanaAPI) GlobalApplicationAlertConfigs() restapi.RestResource[*restapi.ApplicationAlertConfig] { return nil }
-func (m *mockInstanaAPI) AlertingChannels() restapi.RestResource[*restapi.AlertingChannel] { return nil }
-func (m *mockInstanaAPI) AlertingConfigurations() restapi.RestResource[*restapi.AlertingConfiguration] { return nil }
-func (m *mockInstanaAPI) SliConfigs() restapi.RestResource[*restapi.SliConfig] { return nil }
-func (m *mockInstanaAPI) SloConfigs() restapi.RestResource[*restapi.SloConfig] { return nil }
+func (m *mockInstanaAPI) ApplicationConfigs() restapi.RestResource[*restapi.ApplicationConfig] {
+	return nil
+}
+func (m *mockInstanaAPI) ApplicationAlertConfigs() restapi.RestResource[*restapi.ApplicationAlertConfig] {
+	return nil
+}
+func (m *mockInstanaAPI) GlobalApplicationAlertConfigs() restapi.RestResource[*restapi.ApplicationAlertConfig] {
+	return nil
+}
+func (m *mockInstanaAPI) AlertingChannels() restapi.RestResource[*restapi.AlertingChannel] {
+	return nil
+}
+func (m *mockInstanaAPI) AlertingConfigurations() restapi.RestResource[*restapi.AlertingConfiguration] {
+	return nil
+}
+func (m *mockInstanaAPI) SliConfigs() restapi.RestResource[*restapi.SliConfig]          { return nil }
+func (m *mockInstanaAPI) SloConfigs() restapi.RestResource[*restapi.SloConfig]          { return nil }
 func (m *mockInstanaAPI) SloAlertConfig() restapi.RestResource[*restapi.SloAlertConfig] { return nil }
-func (m *mockInstanaAPI) SloCorrectionConfig() restapi.RestResource[*restapi.SloCorrectionConfig] { return nil }
-func (m *mockInstanaAPI) WebsiteMonitoringConfig() restapi.RestResource[*restapi.WebsiteMonitoringConfig] { return nil }
-func (m *mockInstanaAPI) WebsiteAlertConfig() restapi.RestResource[*restapi.WebsiteAlertConfig] { return nil }
-func (m *mockInstanaAPI) InfraAlertConfig() restapi.RestResource[*restapi.InfraAlertConfig] { return nil }
+func (m *mockInstanaAPI) SloCorrectionConfig() restapi.RestResource[*restapi.SloCorrectionConfig] {
+	return nil
+}
+func (m *mockInstanaAPI) WebsiteMonitoringConfig() restapi.RestResource[*restapi.WebsiteMonitoringConfig] {
+	return nil
+}
+func (m *mockInstanaAPI) WebsiteAlertConfig() restapi.RestResource[*restapi.WebsiteAlertConfig] {
+	return nil
+}
+func (m *mockInstanaAPI) InfraAlertConfig() restapi.RestResource[*restapi.InfraAlertConfig] {
+	return nil
+}
 func (m *mockInstanaAPI) Groups() restapi.RestResource[*restapi.Group] { return nil }
-func (m *mockInstanaAPI) CustomDashboards() restapi.RestResource[*restapi.CustomDashboard] { return nil }
+func (m *mockInstanaAPI) CustomDashboards() restapi.RestResource[*restapi.CustomDashboard] {
+	return nil
+}
 func (m *mockInstanaAPI) SyntheticTest() restapi.RestResource[*restapi.SyntheticTest] {
 	return &mockSyntheticTestRestResource{}
 }
-func (m *mockInstanaAPI) SyntheticLocation() restapi.ReadOnlyRestResource[*restapi.SyntheticLocation] { return nil }
-func (m *mockInstanaAPI) SyntheticAlertConfigs() restapi.RestResource[*restapi.SyntheticAlertConfig] { return nil }
-func (m *mockInstanaAPI) AutomationActions() restapi.RestResource[*restapi.AutomationAction] { return nil }
-func (m *mockInstanaAPI) AutomationPolicies() restapi.RestResource[*restapi.AutomationPolicy] { return nil }
-func (m *mockInstanaAPI) HostAgents() restapi.ReadOnlyRestResource[*restapi.HostAgent] { return nil }
+func (m *mockInstanaAPI) SyntheticLocation() restapi.ReadOnlyRestResource[*restapi.SyntheticLocation] {
+	return nil
+}
+func (m *mockInstanaAPI) SyntheticAlertConfigs() restapi.RestResource[*restapi.SyntheticAlertConfig] {
+	return nil
+}
+func (m *mockInstanaAPI) AutomationActions() restapi.RestResource[*restapi.AutomationAction] {
+	return nil
+}
+func (m *mockInstanaAPI) AutomationPolicies() restapi.RestResource[*restapi.AutomationPolicy] {
+	return nil
+}
+func (m *mockInstanaAPI) HostAgents() restapi.ReadOnlyRestResource[*restapi.HostAgent]  { return nil }
 func (m *mockInstanaAPI) LogAlertConfig() restapi.RestResource[*restapi.LogAlertConfig] { return nil }
 
 // Mock rest resource
@@ -179,7 +211,7 @@ func TestMapStateToDataObject(t *testing.T) {
 			CustomProperties: types.MapNull(types.StringType),
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
-			RbacTags:         types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
+			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
 				"name":  types.StringType,
 				"value": types.StringType,
 			}}),
@@ -199,7 +231,7 @@ func TestMapStateToDataObject(t *testing.T) {
 				ExpectMatch:       types.StringNull(),
 				ExpectExists:      types.SetNull(types.StringType),
 				ExpectNotEmpty:    types.SetNull(types.StringType),
-				ExpectJson:        types.MapNull(types.StringType),
+				ExpectJson:        types.StringNull(),
 			},
 		}
 
@@ -242,7 +274,7 @@ func TestMapStateToDataObject(t *testing.T) {
 			CustomProperties: types.MapNull(types.StringType),
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
-			RbacTags:         types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
+			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
 				"name":  types.StringType,
 				"value": types.StringType,
 			}}),
@@ -288,7 +320,7 @@ func TestMapStateToDataObject(t *testing.T) {
 			CustomProperties: types.MapNull(types.StringType),
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
-			RbacTags:         types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
+			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
 				"name":  types.StringType,
 				"value": types.StringType,
 			}}),
@@ -336,7 +368,7 @@ func TestMapStateToDataObject(t *testing.T) {
 			CustomProperties: types.MapNull(types.StringType),
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
-			RbacTags:         types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
+			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
 				"name":  types.StringType,
 				"value": types.StringType,
 			}}),
@@ -354,7 +386,7 @@ func TestMapStateToDataObject(t *testing.T) {
 				LookupServerName:  types.BoolNull(),
 				RecursiveLookups:  types.BoolNull(),
 				ServerRetries:     types.Int64Null(),
-				TargetValues:      types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
+				TargetValues: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
 					"key":      types.StringType,
 					"operator": types.StringType,
 					"value":    types.StringType,
@@ -393,7 +425,7 @@ func TestMapStateToDataObject(t *testing.T) {
 			CustomProperties: types.MapNull(types.StringType),
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
-			RbacTags:         types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
+			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
 				"name":  types.StringType,
 				"value": types.StringType,
 			}}),
@@ -406,7 +438,7 @@ func TestMapStateToDataObject(t *testing.T) {
 				DaysRemainingCheck:   types.Int64Value(30),
 				AcceptSelfSignedCert: types.BoolNull(),
 				Port:                 types.Int64Null(),
-				ValidationRules:      types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
+				ValidationRules: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
 					"key":      types.StringType,
 					"operator": types.StringType,
 					"value":    types.StringType,
@@ -445,7 +477,7 @@ func TestMapStateToDataObject(t *testing.T) {
 			CustomProperties: types.MapNull(types.StringType),
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
-			RbacTags:         types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
+			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
 				"name":  types.StringType,
 				"value": types.StringType,
 			}}),
@@ -491,7 +523,7 @@ func TestMapStateToDataObject(t *testing.T) {
 			CustomProperties: types.MapNull(types.StringType),
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
-			RbacTags:         types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
+			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
 				"name":  types.StringType,
 				"value": types.StringType,
 			}}),
@@ -538,7 +570,7 @@ func TestMapStateToDataObject(t *testing.T) {
 			CustomProperties: types.MapNull(types.StringType),
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
-			RbacTags:         types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
+			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
 				"name":  types.StringType,
 				"value": types.StringType,
 			}}),
@@ -574,7 +606,7 @@ func TestMapStateToDataObject(t *testing.T) {
 			CustomProperties: types.MapNull(types.StringType),
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
-			RbacTags:         types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
+			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
 				"name":  types.StringType,
 				"value": types.StringType,
 			}}),
@@ -594,7 +626,7 @@ func TestMapStateToDataObject(t *testing.T) {
 				ExpectMatch:       types.StringNull(),
 				ExpectExists:      types.SetNull(types.StringType),
 				ExpectNotEmpty:    types.SetNull(types.StringType),
-				ExpectJson:        types.MapNull(types.StringType),
+				ExpectJson:        types.StringNull(),
 			},
 			HttpScript: &HttpScriptConfigModel{
 				MarkSyntheticCall: types.BoolValue(false),
@@ -670,7 +702,7 @@ func TestMapStateToDataObject(t *testing.T) {
 				ExpectMatch:       types.StringNull(),
 				ExpectExists:      types.SetNull(types.StringType),
 				ExpectNotEmpty:    types.SetNull(types.StringType),
-				ExpectJson:        types.MapNull(types.StringType),
+				ExpectJson:        types.StringNull(),
 			},
 		}
 
@@ -726,7 +758,7 @@ func TestMapStateToDataObject(t *testing.T) {
 			CustomProperties: types.MapNull(types.StringType),
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
-			RbacTags:         types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
+			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
 				"name":  types.StringType,
 				"value": types.StringType,
 			}}),
@@ -746,7 +778,7 @@ func TestMapStateToDataObject(t *testing.T) {
 				ExpectMatch:       types.StringValue(".*success.*"),
 				ExpectExists:      expectExists,
 				ExpectNotEmpty:    expectNotEmpty,
-				ExpectJson:        types.MapNull(types.StringType),
+				ExpectJson:        types.StringNull(),
 			},
 		}
 
@@ -801,7 +833,7 @@ func TestMapStateToDataObject(t *testing.T) {
 			CustomProperties: types.MapNull(types.StringType),
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
-			RbacTags:         types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
+			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
 				"name":  types.StringType,
 				"value": types.StringType,
 			}}),
@@ -868,7 +900,7 @@ func TestMapStateToDataObject(t *testing.T) {
 			CustomProperties: types.MapNull(types.StringType),
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
-			RbacTags:         types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
+			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
 				"name":  types.StringType,
 				"value": types.StringType,
 			}}),
@@ -888,7 +920,7 @@ func TestMapStateToDataObject(t *testing.T) {
 				ExpectMatch:       types.StringNull(),
 				ExpectExists:      types.SetNull(types.StringType),
 				ExpectNotEmpty:    types.SetNull(types.StringType),
-				ExpectJson:        types.MapNull(types.StringType),
+				ExpectJson:        types.StringNull(),
 			},
 		}
 
@@ -935,7 +967,7 @@ func TestMapStateToDataObject(t *testing.T) {
 			CustomProperties: types.MapNull(types.StringType),
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
-			RbacTags:         types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
+			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
 				"name":  types.StringType,
 				"value": types.StringType,
 			}}),
@@ -1599,7 +1631,7 @@ func TestUpdateState(t *testing.T) {
 			Active:           true,
 			PlaybackMode:     "Simultaneous",
 			Locations:        []string{"loc-1"},
-			CustomProperties: map[string]interface{}{},
+			CustomProperties: map[string]string{},
 			Configuration: restapi.SyntheticTestConfig{
 				MarkSyntheticCall: false,
 				Retries:           0,
@@ -1636,8 +1668,8 @@ func TestUpdateState(t *testing.T) {
 				RetryInterval:     1,
 				SyntheticType:     "HTTPAction",
 				URL:               &url,
-				Headers:           map[string]interface{}{},
-				ExpectJson:        map[string]interface{}{},
+				Headers:           map[string]string{},
+				ExpectJson:        nil,
 			},
 		}
 
@@ -1742,7 +1774,7 @@ func TestUpdateState(t *testing.T) {
 			Websites:      []string{"web-1"},
 			Locations:     []string{"loc-1"},
 			TestFrequency: &testFreq,
-			CustomProperties: map[string]interface{}{
+			CustomProperties: map[string]string{
 				"env": "prod",
 			},
 			RbacTags: []restapi.ApiTag{
@@ -1789,7 +1821,7 @@ func TestMapStateToDataObjectEdgeCases(t *testing.T) {
 			Schema: resource.metaData.Schema,
 		}
 		// Don't set any data in the plan, which should cause an error when trying to get locations
-		
+
 		result, resultDiags := resource.MapStateToDataObject(ctx, plan, nil)
 		// The function should handle the error gracefully
 		assert.True(t, resultDiags.HasError() || result != nil)
@@ -1808,7 +1840,7 @@ func TestMapStateToDataObjectEdgeCases(t *testing.T) {
 			CustomProperties: types.MapValueMust(types.StringType, map[string]attr.Value{}),
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
-			RbacTags:         types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
+			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
 				"name":  types.StringType,
 				"value": types.StringType,
 			}}),
@@ -1828,7 +1860,7 @@ func TestMapStateToDataObjectEdgeCases(t *testing.T) {
 				ExpectMatch:       types.StringNull(),
 				ExpectExists:      types.SetNull(types.StringType),
 				ExpectNotEmpty:    types.SetNull(types.StringType),
-				ExpectJson:        types.MapNull(types.StringType),
+				ExpectJson:        types.StringNull(),
 			},
 		}
 
@@ -1908,16 +1940,13 @@ func TestUpdateStateEdgeCases(t *testing.T) {
 				RetryInterval:     1,
 				SyntheticType:     "HTTPAction",
 				URL:               &url,
-				Headers: map[string]interface{}{
-					"Content-Type": "application/json",
+				Headers: map[string]string{
+					"Content-Type":  "application/json",
 					"Authorization": "Bearer token",
 				},
-				ExpectExists: []string{"$.data", "$.status"},
+				ExpectExists:   []string{"$.data", "$.status"},
 				ExpectNotEmpty: []string{"$.items"},
-				ExpectJson: map[string]interface{}{
-					"status": "success",
-					"code":   200,
-				},
+				ExpectJson:     []byte(`{"status":"success","code":200}`),
 			},
 		}
 
@@ -2087,7 +2116,7 @@ func TestMapConfigurationOptionalFields(t *testing.T) {
 			CustomProperties: types.MapNull(types.StringType),
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
-			RbacTags:         types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
+			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
 				"name":  types.StringType,
 				"value": types.StringType,
 			}}),
@@ -2137,7 +2166,7 @@ func TestMapConfigurationOptionalFields(t *testing.T) {
 			CustomProperties: types.MapNull(types.StringType),
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
-			RbacTags:         types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
+			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
 				"name":  types.StringType,
 				"value": types.StringType,
 			}}),
@@ -2189,7 +2218,7 @@ func TestMapConfigurationOptionalFields(t *testing.T) {
 			CustomProperties: types.MapNull(types.StringType),
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
-			RbacTags:         types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
+			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
 				"name":  types.StringType,
 				"value": types.StringType,
 			}}),
@@ -2208,7 +2237,7 @@ func TestMapConfigurationOptionalFields(t *testing.T) {
 				RecursiveLookups:  types.BoolValue(true),
 				ServerRetries:     types.Int64Value(3),
 				QueryTime:         nil,
-				TargetValues:      types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
+				TargetValues: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
 					"key":      types.StringType,
 					"operator": types.StringType,
 					"value":    types.StringType,
@@ -2248,7 +2277,7 @@ func TestMapConfigurationOptionalFields(t *testing.T) {
 			CustomProperties: types.MapNull(types.StringType),
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
-			RbacTags:         types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
+			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
 				"name":  types.StringType,
 				"value": types.StringType,
 			}}),
@@ -2261,7 +2290,7 @@ func TestMapConfigurationOptionalFields(t *testing.T) {
 				DaysRemainingCheck:   types.Int64Value(30),
 				Port:                 types.Int64Value(443),
 				AcceptSelfSignedCert: types.BoolValue(true),
-				ValidationRules:      types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
+				ValidationRules: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
 					"key":      types.StringType,
 					"operator": types.StringType,
 					"value":    types.StringType,
@@ -2328,7 +2357,7 @@ func TestInt64Validator(t *testing.T) {
 
 	t.Run("should validate value within range", func(t *testing.T) {
 		v := int64Validator{min: 1, max: 10}
-		
+
 		assert.Equal(t, "Value must be between 1 and 10", v.Description(ctx))
 		assert.Equal(t, "Value must be between 1 and 10", v.MarkdownDescription(ctx))
 	})
