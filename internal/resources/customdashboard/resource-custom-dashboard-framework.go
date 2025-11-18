@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
 	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
 	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/gessnerfl/terraform-provider-instana/utils"
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -45,7 +47,10 @@ func NewCustomDashboardResourceHandleFramework() resourcehandle.ResourceHandleFr
 					CustomDashboardFieldWidgets: schema.StringAttribute{
 						Required:    true,
 						Description: CustomDashboardDescWidgets,
-						// Note: In Plugin Framework, we handle JSON normalization in the resource methods
+						CustomType:  jsontypes.NormalizedType{},
+						PlanModifiers: []planmodifier.String{
+							CanonicalizeJSONPlanModifier{},
+						},
 					},
 					CustomDashboardFieldAccessRule: schema.ListNestedAttribute{
 						Description: CustomDashboardDescAccessRule,
@@ -116,19 +121,32 @@ func (r *customDashboardResourceFramework) UpdateState(ctx context.Context, stat
 
 	var model CustomDashboardModel
 	if plan != nil {
+		log.Printf("from plan")
 		// Create a model from the current plan to overcome the unknown values issue after updation
 		diags.Append(plan.Get(ctx, &model)...)
-		model.ID = types.StringValue(dashboard.ID)
-		model.Title = types.StringValue(dashboard.Title)
+		// model.ID = types.StringValue(dashboard.ID)
+		// model.Title = types.StringValue(dashboard.Title)
 
+	} else if state != nil {
+		log.Printf("from state")
+		diags.Append(state.Get(ctx, &model)...)
+		// model.ID = types.StringValue(dashboard.ID)
+		// model.Title = types.StringValue(dashboard.Title)
 	} else {
-		// Create a model and populate it with values from the dashboard
-		model = CustomDashboardModel{
-			ID:    types.StringValue(dashboard.ID),
-			Title: types.StringValue(dashboard.Title),
-		}
+		model = CustomDashboardModel{}
+	}
+	// Create a model and populate it with values from the dashboard
+	// model = CustomDashboardModel{
+	// 	ID:    types.StringValue(dashboard.ID),
+	// 	Title: types.StringValue(dashboard.Title),
+	// }
+	model.ID = types.StringValue(dashboard.ID)
+	model.Title = types.StringValue(dashboard.Title)
 
-		// Handle widgets
+	// Handle widgets
+	if model.Widgets.IsNull() || model.Widgets.IsUnknown() {
+		log.Printf("adding new widget value")
+
 		widgetsBytes, err := dashboard.Widgets.MarshalJSON()
 		if err != nil {
 			diags.AddError(
@@ -137,11 +155,15 @@ func (r *customDashboardResourceFramework) UpdateState(ctx context.Context, stat
 			)
 			return diags
 		}
-		model.Widgets = types.StringValue(util.NormalizeJSONString(string(widgetsBytes)))
-
-		// Map access rules
-		model.AccessRules = r.mapAccessRulesToState(dashboard.AccessRules)
+		json, _ := util.CanonicalizeJSON(string(widgetsBytes))
+		model.Widgets = jsontypes.NewNormalizedValue(json)
+	} else {
+		log.Printf("keep existing value")
 	}
+	// else we keep the existing values
+
+	// Map access rules
+	model.AccessRules = r.mapAccessRulesToState(dashboard.AccessRules)
 
 	// Set the entire model to state
 	diags.Append(state.Set(ctx, model)...)
@@ -237,4 +259,31 @@ func (r *customDashboardResourceFramework) mapAccessRulesFromState(accessRuleMod
 	}
 
 	return accessRules
+}
+
+type CanonicalizeJSONPlanModifier struct{}
+
+func (m CanonicalizeJSONPlanModifier) Description(ctx context.Context) string {
+	return "Canonicalize JSON plan value into deterministic normalized JSON"
+}
+func (m CanonicalizeJSONPlanModifier) MarkdownDescription(ctx context.Context) string {
+	return m.Description(ctx)
+}
+
+func (m CanonicalizeJSONPlanModifier) PlanModifyString(ctx context.Context, req planmodifier.StringRequest, resp *planmodifier.StringResponse) {
+	// Nothing to do if config not set / unknown
+	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {
+		return
+	}
+
+	// Get the string value - works for both types.String and jsontypes.Normalized
+	raw := req.ConfigValue.ValueString()
+
+	canon, err := util.CanonicalizeJSON(raw)
+	if err != nil {
+		resp.Diagnostics.AddError("JSON canonicalization", fmt.Sprintf("failed to canonicalize config JSON: %s", err))
+		return
+	}
+
+	resp.PlanValue = types.StringValue(canon)
 }
