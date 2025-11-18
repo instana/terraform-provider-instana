@@ -199,8 +199,27 @@ func (m *tagFilterMapper) mapTagFilter(tagFilter *restapi.TagFilter) (*PrimaryEx
 
 func (m *tagFilterMapper) mapStringOrTagValue(tagFilter *restapi.TagFilter) *string {
 	if tagFilter.Key != nil {
-		tagValue := tagFilter.Value.(string)
-		return &tagValue
+		// Handle different value types from the API
+		switch v := tagFilter.Value.(type) {
+		case string:
+			return &v
+		case float64:
+			// Convert numeric values to string
+			strValue := fmt.Sprintf("%.0f", v)
+			return &strValue
+		case int:
+			// Handle integer values
+			strValue := fmt.Sprintf("%d", v)
+			return &strValue
+		case int64:
+			// Handle int64 values
+			strValue := fmt.Sprintf("%d", v)
+			return &strValue
+		default:
+			// Fallback: convert to string using fmt.Sprintf
+			strValue := fmt.Sprintf("%v", v)
+			return &strValue
+		}
 	}
 	return tagFilter.StringValue
 }
