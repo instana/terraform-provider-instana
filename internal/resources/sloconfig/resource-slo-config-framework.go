@@ -128,9 +128,10 @@ func buildEntityAttribute() schema.SingleNestedAttribute {
 		Description: SloConfigDescEntity,
 		Optional:    true,
 		Attributes: map[string]schema.Attribute{
-			SloConfigApplicationEntity: buildApplicationEntityAttribute(),
-			SloConfigWebsiteEntity:     buildWebsiteEntityAttribute(),
-			SloConfigSyntheticEntity:   buildSyntheticEntityAttribute(),
+			SloConfigApplicationEntity:   buildApplicationEntityAttribute(),
+			SloConfigWebsiteEntity:       buildWebsiteEntityAttribute(),
+			SloConfigSyntheticEntity:     buildSyntheticEntityAttribute(),
+			SloConfigInfrastructureEntity: buildInfrastructureEntityAttribute(),
 		},
 	}
 }
@@ -214,6 +215,24 @@ func buildSyntheticEntityAttribute() schema.SingleNestedAttribute {
 	}
 }
 
+// buildInfrastructureEntityAttribute creates the infrastructure entity nested attribute
+func buildInfrastructureEntityAttribute() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Description: SloConfigDescInfrastructureEntity,
+		Optional:    true,
+		Attributes: map[string]schema.Attribute{
+			SloConfigFieldInfraType: schema.StringAttribute{
+				Optional:    true,
+				Description: SloConfigDescInfraType,
+			},
+			SloConfigFieldFilterExpression: schema.StringAttribute{
+				Optional:    true,
+				Description: SloConfigDescEntityFilter,
+			},
+		},
+	}
+}
+
 // buildIndicatorAttribute creates the indicator nested attribute
 func buildIndicatorAttribute() schema.SingleNestedAttribute {
 	return schema.SingleNestedAttribute{
@@ -226,6 +245,7 @@ func buildIndicatorAttribute() schema.SingleNestedAttribute {
 			SchemaFieldEventBasedAvailability: buildEventBasedAvailabilityIndicatorAttribute(),
 			SchemaFieldTraffic:                buildTrafficIndicatorAttribute(),
 			SchemaFieldCustom:                 buildCustomIndicatorAttribute(),
+			SchemaFieldSaturation:             buildSaturationIndicatorAttribute(),
 		},
 	}
 }
@@ -327,6 +347,35 @@ func buildCustomIndicatorAttribute() schema.SingleNestedAttribute {
 			SloConfigFieldBadEventFilterExpression: schema.StringAttribute{
 				Optional:    true,
 				Description: SloConfigDescBadEventFilterExpression,
+			},
+		},
+	}
+}
+
+// buildSaturationIndicatorAttribute creates the saturation indicator attribute
+func buildSaturationIndicatorAttribute() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Description: SloConfigDescSaturation,
+		Optional:    true,
+		Attributes: map[string]schema.Attribute{
+			SloConfigFieldMetricName: schema.StringAttribute{
+				Optional:    true,
+				Description: SloConfigDescMetricName,
+			},
+			SloConfigFieldThreshold: schema.Float64Attribute{
+				Optional:    true,
+				Description: SloConfigDescThreshold,
+			},
+			SloConfigFieldAggregation: schema.StringAttribute{
+				Optional:    true,
+				Description: SloConfigDescAggregation,
+			},
+			SchemaFieldOperator: schema.StringAttribute{
+				Optional:    true,
+				Description: SloConfigDescOperator,
+				Validators: []validator.String{
+					stringvalidator.OneOf(OperatorGreaterThan, OperatorGreaterThanOrEqual, OperatorLessThan, OperatorLessThanOrEqual),
+				},
 			},
 		},
 	}
@@ -489,6 +538,10 @@ func (r *sloConfigResourceFramework) mapEntityFromState(entityObj EntityModel) (
 		return r.validateAndMapSyntheticEntity(entityObj.SyntheticEntityModel)
 	}
 
+	if entityObj.InfrastructureEntityModel != nil {
+		return r.validateAndMapInfrastructureEntity(entityObj.InfrastructureEntityModel)
+	}
+
 	var diags diag.Diagnostics
 	diags.AddError(SloConfigErrMissingEntity, SloConfigErrExactlyOneEntity)
 	return restapi.SloEntity{}, diags
@@ -631,6 +684,46 @@ func (r *sloConfigResourceFramework) buildSyntheticEntity(model *SyntheticEntity
 	}
 }
 
+// validateAndMapInfrastructureEntity validates and maps infrastructure entity from state
+func (r *sloConfigResourceFramework) validateAndMapInfrastructureEntity(model *InfrastructureEntityModel) (restapi.SloEntity, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if err := r.validateInfrastructureEntityFields(model); err.HasError() {
+		return restapi.SloEntity{}, err
+	}
+
+	entity := r.buildInfrastructureEntity(model)
+
+	filterExpr, filterDiags := r.mapFilterExpressionToEntity(model.FilterExpression)
+	diags.Append(filterDiags...)
+	if diags.HasError() {
+		return restapi.SloEntity{}, diags
+	}
+
+	entity.FilterExpression = filterExpr
+	return entity, diags
+}
+
+// validateInfrastructureEntityFields validates required fields for infrastructure entity
+func (r *sloConfigResourceFramework) validateInfrastructureEntityFields(model *InfrastructureEntityModel) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	if model.InfraType.IsNull() || model.InfraType.IsUnknown() {
+		diags.AddError("Infrastructure type required", "infra_type is required for infrastructure entity")
+	}
+
+	return diags
+}
+
+// buildInfrastructureEntity constructs infrastructure entity from model
+func (r *sloConfigResourceFramework) buildInfrastructureEntity(model *InfrastructureEntityModel) restapi.SloEntity {
+	infraType := model.InfraType.ValueString()
+	return restapi.SloEntity{
+		Type:      SloConfigInfrastructureEntity,
+		InfraType: &infraType,
+	}
+}
+
 // mapFilterExpressionToEntity converts filter expression to API model
 func (r *sloConfigResourceFramework) mapFilterExpressionToEntity(filterExpression types.String) (*restapi.TagFilter, diag.Diagnostics) {
 	var diags diag.Diagnostics
@@ -682,6 +775,10 @@ func (r *sloConfigResourceFramework) mapIndicatorFromState(indicatorModel Indica
 
 	if indicatorModel.CustomIndicatorModel != nil {
 		return r.mapCustomIndicator(indicatorModel.CustomIndicatorModel)
+	}
+
+	if indicatorModel.SaturationIndicatorModel != nil {
+		return r.mapSaturationIndicator(indicatorModel.SaturationIndicatorModel)
 	}
 
 	var diags diag.Diagnostics
@@ -809,6 +906,30 @@ func (r *sloConfigResourceFramework) mapCustomIndicator(model *CustomIndicatorMo
 		GoodEventFilterExpression: goodEventFilter,
 		BadEventFilterExpression:  badEventFilter,
 		Aggregation:               defaultAgg,
+	}, diags
+}
+
+// mapSaturationIndicator maps saturation indicator from state
+func (r *sloConfigResourceFramework) mapSaturationIndicator(model *SaturationIndicatorModel) (restapi.SloIndicator, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if model.Threshold.IsNull() || model.Threshold.IsUnknown() ||
+		model.Operator.IsNull() || model.Operator.IsUnknown() {
+		diags.AddError("Saturation indicator fields required", "threshold and operator are required for saturation indicator")
+		return restapi.SloIndicator{}, diags
+	}
+
+	aggregation := model.Aggregation.ValueString()
+	operator := model.Operator.ValueString()
+	metricName := model.MetricName.ValueString()
+
+	return restapi.SloIndicator{
+		Blueprint:   SloConfigAPIIndicatorBlueprintSaturation,
+		Type:        SloConfigAPIIndicatorMeasurementTypeTimeBased,
+		Threshold:   model.Threshold.ValueFloat64(),
+		Aggregation: &aggregation,
+		Operator:    &operator,
+		MetricName:  &metricName,
 	}, diags
 }
 
@@ -1002,6 +1123,12 @@ func (r *sloConfigResourceFramework) mapEntityToState(apiObject *restapi.SloConf
 		if !diags.HasError() {
 			entityModel.SyntheticEntityModel = &syntheticModel
 		}
+	case SloConfigInfrastructureEntity:
+		infraModel, infraDiags := r.mapInfrastructureEntityToState(apiObject.Entity)
+		diags.Append(infraDiags...)
+		if !diags.HasError() {
+			entityModel.InfrastructureEntityModel = &infraModel
+		}
 	default:
 		diags.AddError(SloConfigErrMappingEntityToState, fmt.Sprintf(SloConfigErrUnsupportedEntityType, apiObject.Entity.Type))
 	}
@@ -1073,6 +1200,23 @@ func (r *sloConfigResourceFramework) mapSyntheticEntityToState(entity restapi.Sl
 	return model, diags
 }
 
+// mapInfrastructureEntityToState converts infrastructure entity from API to state
+func (r *sloConfigResourceFramework) mapInfrastructureEntityToState(entity restapi.SloEntity) (InfrastructureEntityModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	model := InfrastructureEntityModel{
+		InfraType: util.SetStringPointerToState(entity.InfraType),
+	}
+
+	filterExpr, filterDiags := r.mapFilterExpressionToState(entity.FilterExpression)
+	diags.Append(filterDiags...)
+	if !diags.HasError() {
+		model.FilterExpression = filterExpr
+	}
+
+	return model, diags
+}
+
 // mapFilterExpressionToState converts filter expression from API to state
 func (r *sloConfigResourceFramework) mapFilterExpressionToState(filterExpression *restapi.TagFilter) (types.String, diag.Diagnostics) {
 	var diags diag.Diagnostics
@@ -1119,6 +1263,9 @@ func (r *sloConfigResourceFramework) mapIndicatorToState(apiObject *restapi.SloC
 			indicatorModel.CustomIndicatorModel = customModel
 		}
 
+	case indicator.Type == SloConfigAPIIndicatorMeasurementTypeTimeBased && indicator.Blueprint == SloConfigAPIIndicatorBlueprintSaturation:
+		indicatorModel.SaturationIndicatorModel = r.createSaturationModel(indicator)
+
 	default:
 		diags.AddError(SloConfigErrMappingIndicatorToState, fmt.Sprintf(SloConfigErrUnsupportedIndicatorType, indicator.Type, indicator.Blueprint))
 	}
@@ -1159,7 +1306,7 @@ func (r *sloConfigResourceFramework) createTrafficModel(indicator restapi.SloInd
 	return &TrafficIndicatorModel{
 		TrafficType: util.SetStringPointerToState(indicator.TrafficType),
 		Threshold:   types.Float64Value(indicator.Threshold),
-		Aggregation: util.SetStringPointerToState(indicator.Aggregation),
+		Operator:    util.SetStringPointerToState(indicator.Operator),
 	}
 }
 
@@ -1181,6 +1328,16 @@ func (r *sloConfigResourceFramework) createCustomModel(indicator restapi.SloIndi
 	}
 
 	return model, diags
+}
+
+// createSaturationModel creates saturation indicator model
+func (r *sloConfigResourceFramework) createSaturationModel(indicator restapi.SloIndicator) *SaturationIndicatorModel {
+	return &SaturationIndicatorModel{
+		MetricName:  util.SetStringPointerToState(indicator.MetricName),
+		Threshold:   types.Float64Value(indicator.Threshold),
+		Aggregation: util.SetStringPointerToState(indicator.Aggregation),
+		Operator:    util.SetStringPointerToState(indicator.Operator),
+	}
 }
 
 func (r *sloConfigResourceFramework) mapTimeWindowToState(apiObject *restapi.SloConfig) (TimeWindowModel, diag.Diagnostics) {
