@@ -328,3 +328,17 @@ func SetInt32PointerToInt64State(i *int32) types.Int64 {
 	}
 	return types.Int64Value(int64(*i))
 }
+
+// canonicalizeJSON returns a compact, deterministic JSON string or an error.
+func CanonicalizeJSON(input string) (string, error) {
+	var v interface{}
+	if err := json.Unmarshal([]byte(input), &v); err != nil {
+		return "", err
+	}
+	// json.Marshal produces deterministic ordering for map keys in Go
+	b, err := json.Marshal(v)
+	if err != nil {
+		return "", err
+	}
+	return string(b), nil
+}
