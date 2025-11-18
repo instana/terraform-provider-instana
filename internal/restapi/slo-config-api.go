@@ -83,6 +83,7 @@ type SloIndicator struct {
 	Aggregation               *string    `json:"aggregation"`
 	Operator                  *string    `json:"operator"`
 	TrafficType               *string    `json:"trafficType"`
+	MetricName                *string    `json:"metricName,omitempty"`
 	GoodEventFilterExpression *TagFilter `json:"goodEventsFilter"`
 	BadEventFilterExpression  *TagFilter `json:"badEventsFilter"`
 }

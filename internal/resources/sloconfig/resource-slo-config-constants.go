@@ -52,6 +52,10 @@ const (
 	SloConfigDescSyntheticEntity = "Synthetic entity of SLO"
 	// SloConfigDescSyntheticTestIDs is the description for the synthetic_test_ids field
 	SloConfigDescSyntheticTestIDs = "The synthetics ID of the entity"
+	// SloConfigDescInfrastructureEntity is the description for the infrastructure entity block
+	SloConfigDescInfrastructureEntity = "Infrastructure entity of SLO"
+	// SloConfigDescInfraType is the description for the infra_type field
+	SloConfigDescInfraType = "The infrastructure type (e.g., kubernetesCluster)"
 	// SloConfigDescIndicator is the description for the indicator block
 	SloConfigDescIndicator = "The indicator to use for the SLO configuration"
 	// SloConfigDescTimeBasedLatency is the description for the time_based_latency indicator
@@ -66,6 +70,10 @@ const (
 	SloConfigDescTraffic = "Traffic indicator"
 	// SloConfigDescCustom is the description for the custom indicator
 	SloConfigDescCustom = "Custom indicator"
+	// SloConfigDescSaturation is the description for the saturation indicator
+	SloConfigDescSaturation = "Saturation indicator"
+	// SloConfigDescMetricName is the description for the metric_name field
+	SloConfigDescMetricName = "The metric name for saturation indicator"
 	// SloConfigDescThreshold is the description for the threshold field
 	SloConfigDescThreshold = "The threshold for the metric configuration"
 	// SloConfigDescAggregation is the description for the aggregation field
@@ -177,6 +185,7 @@ const (
 	SloConfigFieldApplicationID             = "application_id"
 	SloConfigFieldWebsiteID                 = "website_id"
 	SloConfigFieldSyntheticTestIDs          = "synthetic_test_ids"
+	SloConfigFieldInfraType                 = "infra_type"
 	SloConfigFieldFilterExpression          = "filter_expression"
 	SloConfigFieldServiceID                 = "service_id"
 	SloConfigFieldEndpointID                = "endpoint_id"
@@ -189,15 +198,17 @@ const (
 	SloConfigFieldBadEventFilterExpression  = "bad_event_filter_expression"
 	SloConfigFieldGoodEventFilterExpression = "good_event_filter_expression"
 	SloConfigFieldTrafficType               = "traffic_type"
+	SloConfigFieldMetricName                = "metric_name"
 	SloConfigFieldDuration                  = "duration"
 	SloConfigFieldDurationUnit              = "duration_unit"
 	SloConfigFieldTimezone                  = "timezone"
 	SloConfigFieldStartTimestamp            = "start_timestamp"
 
 	// Slo entity types for terraform
-	SloConfigApplicationEntity = "application"
-	SloConfigWebsiteEntity     = "website"
-	SloConfigSyntheticEntity   = "synthetic"
+	SloConfigApplicationEntity   = "application"
+	SloConfigWebsiteEntity       = "website"
+	SloConfigSyntheticEntity     = "synthetic"
+	SloConfigInfrastructureEntity = "infrastructure"
 
 	// Slo time windows types
 	SloConfigRollingTimeWindow = "rolling"
@@ -228,6 +239,7 @@ const (
 	SloConfigAPIIndicatorBlueprintAvailability = "availability"
 	SloConfigAPIIndicatorBlueprintTraffic      = "traffic"
 	SloConfigAPIIndicatorBlueprintCustom       = "custom"
+	SloConfigAPIIndicatorBlueprintSaturation   = "saturation"
 
 	SloConfigAPIFieldBlueprint = "blueprint"
 	SloConfigAPIFieldType      = "type"
@@ -258,6 +270,8 @@ const (
 	SchemaFieldTraffic = "traffic"
 	// SchemaFieldCustom represents the custom field identifier
 	SchemaFieldCustom = "custom"
+	// SchemaFieldSaturation represents the saturation field identifier
+	SchemaFieldSaturation = "saturation"
 	// SchemaFieldOperator represents the operator field identifier
 	SchemaFieldOperator = "operator"
 
