@@ -19,6 +19,8 @@ const (
 	AlertingConfigFieldEventFilterEventTypes = "event_filter_event_types"
 	// AlertingConfigFieldEventFilterRuleIDs constant value for the schema field event_filter_rule_ids
 	AlertingConfigFieldEventFilterRuleIDs = "event_filter_rule_ids"
+	// AlertingConfigFieldEventFilterApplicationAlertIDs constant value for the schema field event_filter_application_alert_ids
+	AlertingConfigFieldEventFilterApplicationAlertIDs = "event_filter_application_alert_ids"
 	// AlertingConfigFieldID constant value for the schema field id
 	AlertingConfigFieldID = "id"
 
@@ -38,4 +40,6 @@ const (
 	AlertingConfigDescEventFilterEventTypes = "Configures the list of Event Types IDs which should trigger an alert."
 	// AlertingConfigDescEventFilterRuleIDs description for the event_filter_rule_ids field
 	AlertingConfigDescEventFilterRuleIDs = "Configures the list of Rule IDs which should trigger an alert."
+	// AlertingConfigDescEventFilterApplicationAlertIDs description for the event_filter_application_alert_ids field
+	AlertingConfigDescEventFilterApplicationAlertIDs = "Configures the list of Application Alert Config IDs which should trigger an alert."
 )

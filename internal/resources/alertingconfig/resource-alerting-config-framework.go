@@ -81,6 +81,17 @@ func NewAlertingConfigResourceHandleFramework() resourcehandle.ResourceHandleFra
 							setplanmodifier.RequiresReplace(),
 						},
 					},
+					AlertingConfigFieldEventFilterApplicationAlertIDs: schema.SetAttribute{
+						Optional:    true,
+						Description: AlertingConfigDescEventFilterApplicationAlertIDs,
+						ElementType: types.StringType,
+						Validators: []validator.Set{
+							setvalidator.SizeBetween(0, 1024),
+						},
+						PlanModifiers: []planmodifier.Set{
+							setplanmodifier.UseStateForUnknown(),
+						},
+					},
 					shared.DefaultCustomPayloadFieldsName: shared.GetCustomPayloadFieldsSchema(),
 				},
 			},
@@ -183,6 +194,17 @@ func (r *alertingConfigResourceFramework) mapEventFilteringConfig(ctx context.Co
 		model.EventFilterRuleIDs = ruleIDsSet
 	} else {
 		model.EventFilterRuleIDs = types.SetNull(types.StringType)
+	}
+
+	// Set event filter application alert config IDs
+	if len(config.EventFilteringConfiguration.ApplicationAlertConfigIds) > 0 {
+		appAlertIDsSet, appAlertDiags := types.SetValueFrom(ctx, types.StringType, config.EventFilteringConfiguration.ApplicationAlertConfigIds)
+		if appAlertDiags.HasError() {
+			return appAlertDiags
+		}
+		model.EventFilterApplicationAlertIDs = appAlertIDsSet
+	} else {
+		model.EventFilterApplicationAlertIDs = types.SetNull(types.StringType)
 	}
 
 	return diags
@@ -296,10 +318,20 @@ func (r *alertingConfigResourceFramework) extractEventFilteringConfig(ctx contex
 		}
 	}
 
+	// Map event filter application alert config IDs
+	var applicationAlertConfigIds []string
+	if !model.EventFilterApplicationAlertIDs.IsNull() {
+		diags.Append(model.EventFilterApplicationAlertIDs.ElementsAs(ctx, &applicationAlertConfigIds, false)...)
+		if diags.HasError() {
+			return restapi.EventFilteringConfiguration{}, diags
+		}
+	}
+
 	return restapi.EventFilteringConfiguration{
-		Query:      query,
-		RuleIDs:    ruleIDs,
-		EventTypes: eventTypes,
+		Query:                     query,
+		RuleIDs:                   ruleIDs,
+		EventTypes:                eventTypes,
+		ApplicationAlertConfigIds: applicationAlertConfigIds,
 	}, diags
 }
 
