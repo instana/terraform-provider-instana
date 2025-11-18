@@ -4,6 +4,7 @@ Management of Teams for role-based access control (RBAC). RBAC teams allow you t
 
 API Documentation: <https://instana.github.io/openapi/#tag/Teams>
 
+The ID of the resource which is also used as unique identifier in Instana is auto generated!
 
 ## Example Usage
 
@@ -32,6 +33,8 @@ resource "instana_rbac_team" "dev_team" {
   member = [
     {
       user_id = "user-id-1"
+      email   = "developer1@example.com"
+      name    = "John Doe"
       roles = [
         {
           role_id = "role-id-1"
@@ -40,9 +43,12 @@ resource "instana_rbac_team" "dev_team" {
     },
     {
       user_id = "user-id-2"
+      email   = "developer2@example.com"
+      name    = "Jane Smith"
       roles = [
         {
           role_id = "role-id-2"
+          role_name = "Developer"
         }
       ]
     }
@@ -228,6 +234,7 @@ resource "instana_rbac_team" "restricted_team" {
   scope = {
     restricted_application_filter = {
       label = "Production Services"
+      restricting_application_id = "app-id-1"
       scope = "INCLUDE_IMMEDIATE_DOWNSTREAM_DATABASE_AND_MESSAGING"
       tag_filter_expression = "entity.tag.environment:production"
     }
@@ -251,20 +258,27 @@ resource "instana_rbac_team" "complete_team" {
   member = [
     {
       user_id = "user-1"
+      email   = "user1@example.com"
+      name    = "User One"
       roles = [
         {
           role_id   = "role-1"
+          role_name = "Admin"
         }
       ]
     },
     {
       user_id = "user-2"
+      email   = "user2@example.com"
+      name    = "User Two"
       roles = [
         {
           role_id   = "role-2"
+          role_name = "Developer"
         },
         {
           role_id   = "role-3"
+          role_name = "Viewer"
         }
       ]
     }
@@ -315,11 +329,15 @@ resource "instana_rbac_team" "complete_team" {
 ### Member Reference
 
 * `user_id` - Required - The user ID of the team member
+* `email` - Optional - The email address of the team member
+* `name` - Optional - The name of the team member
 * `roles` - Optional - List of roles assigned to the member [Details](#role-reference)
 
 ### Role Reference
 
 * `role_id` - Required - The ID of the role
+* `role_name` - Optional - The name of the role
+* `via_idp` - Optional - Whether the role is assigned via Identity Provider
 
 ### Scope Reference
 
@@ -366,6 +384,7 @@ resource "instana_rbac_team" "complete_team" {
 ### Restricted Application Filter Reference
 
 * `label` - Optional - Label for the restricted application filter
+* `restricting_application_id` - Optional - The ID of the restricting application
 * `scope` - Optional - The scope of the filter. Allowed values:
   * `INCLUDE_NO_DOWNSTREAM` - Include no downstream services
   * `INCLUDE_IMMEDIATE_DOWNSTREAM_DATABASE_AND_MESSAGING` - Include immediate downstream database and messaging

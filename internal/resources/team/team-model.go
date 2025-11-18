@@ -19,12 +19,16 @@ type TeamInfoModel struct {
 // TeamMemberModel represents a member in the team
 type TeamMemberModel struct {
 	UserID types.String     `tfsdk:"user_id"`
+	Email  types.String     `tfsdk:"email"`
+	Name   types.String     `tfsdk:"name"`
 	Roles  []TeamMemberRole `tfsdk:"roles"`
 }
 
 // TeamMemberRole represents a role assigned to a team member
 type TeamMemberRole struct {
-	RoleID types.String `tfsdk:"role_id"`
+	RoleID   types.String `tfsdk:"role_id"`
+	RoleName types.String `tfsdk:"role_name"`
+	ViaIdP   types.Bool   `tfsdk:"via_idp"`
 }
 
 // TeamScopeModel represents the scope configuration for the team
@@ -48,9 +52,10 @@ type TeamScopeModel struct {
 
 // TeamRestrictedApplicationFilterModel represents the restricted application filter configuration
 type TeamRestrictedApplicationFilterModel struct {
-	Label               types.String `tfsdk:"label"`
-	Scope               types.String `tfsdk:"scope"`
-	TagFilterExpression types.String `tfsdk:"tag_filter_expression"`
+	Label                    types.String `tfsdk:"label"`
+	RestrictingApplicationID types.String `tfsdk:"restricting_application_id"`
+	Scope                    types.String `tfsdk:"scope"`
+	TagFilterExpression      types.String `tfsdk:"tag_filter_expression"`
 }
 
 // Made with Bob

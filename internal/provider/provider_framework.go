@@ -24,6 +24,7 @@ import (
 	"github.com/gessnerfl/terraform-provider-instana/internal/resources/slocorrectionconfig"
 	"github.com/gessnerfl/terraform-provider-instana/internal/resources/syntheticalertconfig"
 	"github.com/gessnerfl/terraform-provider-instana/internal/resources/synthetictest"
+	"github.com/gessnerfl/terraform-provider-instana/internal/resources/team"
 	"github.com/gessnerfl/terraform-provider-instana/internal/resources/websitealertconfig"
 	"github.com/gessnerfl/terraform-provider-instana/internal/resources/websitemonitoringconfig"
 	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
@@ -184,6 +185,7 @@ func (p *InstanaProvider) Resources(_ context.Context) []func() resource.Resourc
 		addResouceHandle(customeventspec.NewCustomEventSpecificationResourceHandleFramework),
 		addResouceHandle(infralertconfig.NewInfraAlertConfigResourceHandleFramework),
 		addResouceHandle(group.NewGroupResourceHandleFramework),
+		addResouceHandle(team.NewTeamResourceHandleFramework),
 		addResouceHandle(sliconfig.NewSliConfigResourceHandleFramework),
 		addResouceHandle(sloalertconfig.NewSloAlertConfigResourceHandleFramework),
 		addResouceHandle(slocorrectionconfig.NewSloCorrectionConfigResourceHandleFramework),
