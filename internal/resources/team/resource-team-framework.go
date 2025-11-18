@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -82,22 +81,6 @@ func buildMemberNestedObject() schema.NestedAttributeObject {
 				Required:    true,
 				Description: TeamDescMemberUserID,
 			},
-			TeamFieldMemberEmail: schema.StringAttribute{
-				Optional:    true,
-				Computed:    true,
-				Description: TeamDescMemberEmail,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			TeamFieldMemberName: schema.StringAttribute{
-				Optional:    true,
-				Computed:    true,
-				Description: TeamDescMemberName,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
 			TeamFieldMemberRoles: schema.SetNestedAttribute{
 				Description:  TeamDescMemberRoles,
 				Optional:     true,
@@ -114,22 +97,6 @@ func buildMemberRoleNestedObject() schema.NestedAttributeObject {
 			TeamFieldMemberRoleID: schema.StringAttribute{
 				Required:    true,
 				Description: TeamDescMemberRoleID,
-			},
-			TeamFieldMemberRoleName: schema.StringAttribute{
-				Optional:    true,
-				Computed:    true,
-				Description: TeamDescMemberRoleName,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			TeamFieldMemberRoleViaIdP: schema.BoolAttribute{
-				Optional:    true,
-				Computed:    true,
-				Description: TeamDescMemberRoleViaIdP,
-				PlanModifiers: []planmodifier.Bool{
-					boolplanmodifier.UseStateForUnknown(),
-				},
 			},
 		},
 	}
@@ -220,14 +187,6 @@ func buildRestrictedApplicationFilterAttributes() map[string]schema.Attribute {
 			Optional:    true,
 			Description: TeamDescScopeRestrictedApplicationFilterLabel,
 		},
-		TeamFieldScopeRestrictedApplicationFilterRestrictingApplicationID: schema.StringAttribute{
-			Optional:    true,
-			Computed:    true,
-			Description: TeamDescScopeRestrictedApplicationFilterRestrictingApplicationID,
-			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
-			},
-		},
 		TeamFieldScopeRestrictedApplicationFilterScope: schema.StringAttribute{
 			Optional:    true,
 			Description: TeamDescScopeRestrictedApplicationFilterScope,
@@ -312,8 +271,6 @@ func (r *teamResourceFramework) mapMembersToModel(apiMembers []restapi.TeamMembe
 	for i, apiMember := range apiMembers {
 		members[i] = TeamMemberModel{
 			UserID: types.StringValue(apiMember.UserID),
-			Email:  util.SetStringPointerToState(apiMember.Email),
-			Name:   util.SetStringPointerToState(apiMember.Name),
 			Roles:  r.mapRolesToModel(apiMember.Roles),
 		}
 	}
@@ -329,9 +286,7 @@ func (r *teamResourceFramework) mapRolesToModel(apiRoles []restapi.TeamRole) []T
 	roles := make([]TeamMemberRole, len(apiRoles))
 	for i, apiRole := range apiRoles {
 		roles[i] = TeamMemberRole{
-			RoleID:   types.StringValue(apiRole.RoleID),
-			RoleName: util.SetStringPointerToState(apiRole.RoleName),
-			ViaIdP:   util.SetBoolPointerToState(apiRole.ViaIdP),
+			RoleID: types.StringValue(apiRole.RoleID),
 		}
 	}
 	return roles
@@ -374,8 +329,7 @@ func (r *teamResourceFramework) mapRestrictedApplicationFilterToModel(apiFilter 
 	var diags diag.Diagnostics
 
 	filterModel := &TeamRestrictedApplicationFilterModel{
-		Label:                    util.SetStringPointerToState(apiFilter.Label),
-		RestrictingApplicationID: util.SetStringPointerToState(apiFilter.RestrictingApplicationID),
+		Label: util.SetStringPointerToState(apiFilter.Label),
 	}
 
 	if apiFilter.Scope != nil {
@@ -478,16 +432,6 @@ func (r *teamResourceFramework) mapModelMembersToAPI(modelMembers []TeamMemberMo
 			UserID: memberModel.UserID.ValueString(),
 		}
 
-		if !memberModel.Email.IsNull() && !memberModel.Email.IsUnknown() {
-			email := memberModel.Email.ValueString()
-			apiMember.Email = &email
-		}
-
-		if !memberModel.Name.IsNull() && !memberModel.Name.IsUnknown() {
-			name := memberModel.Name.ValueString()
-			apiMember.Name = &name
-		}
-
 		if len(memberModel.Roles) > 0 {
 			apiMember.Roles = r.mapModelRolesToAPI(memberModel.Roles)
 		}
@@ -506,21 +450,9 @@ func (r *teamResourceFramework) mapModelRolesToAPI(modelRoles []TeamMemberRole) 
 
 	apiRoles := make([]restapi.TeamRole, len(modelRoles))
 	for i, roleModel := range modelRoles {
-		apiRole := restapi.TeamRole{
+		apiRoles[i] = restapi.TeamRole{
 			RoleID: roleModel.RoleID.ValueString(),
 		}
-
-		if !roleModel.RoleName.IsNull() && !roleModel.RoleName.IsUnknown() {
-			roleName := roleModel.RoleName.ValueString()
-			apiRole.RoleName = &roleName
-		}
-
-		if !roleModel.ViaIdP.IsNull() && !roleModel.ViaIdP.IsUnknown() {
-			viaIdP := roleModel.ViaIdP.ValueBool()
-			apiRole.ViaIdP = &viaIdP
-		}
-
-		apiRoles[i] = apiRole
 	}
 
 	return apiRoles
@@ -579,11 +511,6 @@ func (r *teamResourceFramework) mapModelRestrictedApplicationFilterToAPI(modelFi
 	if !modelFilter.Label.IsNull() && !modelFilter.Label.IsUnknown() {
 		label := modelFilter.Label.ValueString()
 		apiFilter.Label = &label
-	}
-
-	if !modelFilter.RestrictingApplicationID.IsNull() && !modelFilter.RestrictingApplicationID.IsUnknown() {
-		appID := modelFilter.RestrictingApplicationID.ValueString()
-		apiFilter.RestrictingApplicationID = &appID
 	}
 
 	if !modelFilter.Scope.IsNull() && !modelFilter.Scope.IsUnknown() {

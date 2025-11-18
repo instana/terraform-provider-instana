@@ -321,7 +321,6 @@ resource "instana_rbac_team" "complete_team" {
 ### Role Reference
 
 * `role_id` - Required - The ID of the role
-* `via_idp` - Optional - Whether the role is assigned via Identity Provider
 
 ### Scope Reference
 
