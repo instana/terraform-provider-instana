@@ -1,5 +1,7 @@
 package restapi
 
+import "encoding/json"
+
 // ApiTag represents an RBAC tag
 type ApiTag struct {
 	Name  string `json:"name"`
@@ -28,9 +30,9 @@ type DNSFilterTargetValue struct {
 
 // SSLCertificateValidation represents SSL certificate validation rule
 type SSLCertificateValidation struct {
-	Key      string      `json:"key"`
-	Operator string      `json:"operator"`
-	Value    interface{} `json:"value"`
+	Key      string `json:"key"`
+	Operator string `json:"operator"`
+	Value    string `json:"value"`
 }
 
 type SyntheticTestConfig struct {
@@ -41,18 +43,18 @@ type SyntheticTestConfig struct {
 	Timeout           *string `json:"timeout,omitempty"`
 
 	// HttpAction fields
-	URL              *string                `json:"url,omitempty"`
-	Operation        *string                `json:"operation,omitempty"`
-	Headers          map[string]interface{} `json:"headers,omitempty"`
-	Body             *string                `json:"body,omitempty"`
-	ValidationString *string                `json:"validationString,omitempty"`
-	FollowRedirect   *bool                  `json:"followRedirect,omitempty"`
-	AllowInsecure    *bool                  `json:"allowInsecure,omitempty"`
-	ExpectStatus     *int32                 `json:"expectStatus,omitempty"`
-	ExpectMatch      *string                `json:"expectMatch,omitempty"`
-	ExpectExists     []string               `json:"expectExists,omitempty"`
-	ExpectNotEmpty   []string               `json:"expectNotEmpty,omitempty"`
-	ExpectJson       map[string]interface{} `json:"expectJson,omitempty"`
+	URL              *string           `json:"url,omitempty"`
+	Operation        *string           `json:"operation,omitempty"`
+	Headers          map[string]string `json:"headers,omitempty"`
+	Body             *string           `json:"body,omitempty"`
+	ValidationString *string           `json:"validationString,omitempty"`
+	FollowRedirect   *bool             `json:"followRedirect,omitempty"`
+	AllowInsecure    *bool             `json:"allowInsecure,omitempty"`
+	ExpectStatus     *int32            `json:"expectStatus,omitempty"`
+	ExpectMatch      *string           `json:"expectMatch,omitempty"`
+	ExpectExists     []string          `json:"expectExists,omitempty"`
+	ExpectNotEmpty   []string          `json:"expectNotEmpty,omitempty"`
+	ExpectJson       json.RawMessage   `json:"expectJson,omitempty"`
 
 	// HttpScript fields
 	Script     *string                       `json:"script,omitempty"`
@@ -92,21 +94,21 @@ type SyntheticTestConfig struct {
 }
 
 type SyntheticTest struct {
-	ID               string                 `json:"id"`
-	Label            string                 `json:"label"`
-	Description      *string                `json:"description,omitempty"`
-	Active           bool                   `json:"active"`
-	ApplicationID    *string                `json:"applicationId,omitempty"`
-	Applications     []string               `json:"applications,omitempty"`
-	MobileApps       []string               `json:"mobileApps,omitempty"`
-	Websites         []string               `json:"websites,omitempty"`
-	Configuration    SyntheticTestConfig    `json:"configuration"`
-	CustomProperties map[string]interface{} `json:"customProperties,omitempty"`
-	Locations        []string               `json:"locations"`
-	PlaybackMode     string                 `json:"playbackMode"`
-	TestFrequency    *int32                 `json:"testFrequency,omitempty"`
-	RbacTags         []ApiTag               `json:"rbacTags,omitempty"`
-	TenantId         *string                `json:"tenantId,omitempty"`
+	ID               string              `json:"id"`
+	Label            string              `json:"label"`
+	Description      *string             `json:"description,omitempty"`
+	Active           bool                `json:"active"`
+	ApplicationID    *string             `json:"applicationId,omitempty"`
+	Applications     []string            `json:"applications,omitempty"`
+	MobileApps       []string            `json:"mobileApps,omitempty"`
+	Websites         []string            `json:"websites,omitempty"`
+	Configuration    SyntheticTestConfig `json:"configuration"`
+	CustomProperties map[string]string   `json:"customProperties,omitempty"`
+	Locations        []string            `json:"locations"`
+	PlaybackMode     string              `json:"playbackMode"`
+	TestFrequency    *int32              `json:"testFrequency,omitempty"`
+	RbacTags         []ApiTag            `json:"rbacTags,omitempty"`
+	TenantId         *string             `json:"tenantId,omitempty"`
 }
 
 // GetIDForResourcePath implementation of the interface InstanaDataObject for SyntheticTest
