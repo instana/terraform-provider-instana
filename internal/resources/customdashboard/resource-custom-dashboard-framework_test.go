@@ -7,6 +7,7 @@ import (
 
 	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
 	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/stretchr/testify/assert"
@@ -166,7 +167,7 @@ func TestUpdateState(t *testing.T) {
 		planModel := CustomDashboardModel{
 			ID:      types.StringValue("dashboard-123"),
 			Title:   types.StringValue("Test Dashboard"),
-			Widgets: types.StringValue(`[{"type":"chart","data":"test"}]`),
+			Widgets: jsontypes.NewNormalizedValue(`[{"type":"chart","data":"test"}]`),
 			AccessRules: []AccessRuleModel{
 				{
 					AccessType:   types.StringValue("READ"),
@@ -308,7 +309,7 @@ func TestUpdateState(t *testing.T) {
 		planModel := CustomDashboardModel{
 			ID:      types.StringValue("dashboard-multi"),
 			Title:   types.StringValue("Multi Access Dashboard"),
-			Widgets: types.StringValue(`[]`),
+			Widgets: jsontypes.NewNormalizedValue(`[]`),
 			AccessRules: []AccessRuleModel{
 				{
 					AccessType:   types.StringValue("READ"),
@@ -353,7 +354,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		model := CustomDashboardModel{
 			ID:      types.StringValue("dashboard-123"),
 			Title:   types.StringValue("Test Dashboard"),
-			Widgets: types.StringValue(`[{"type":"chart","data":"test"}]`),
+			Widgets: jsontypes.NewNormalizedValue(`[{"type":"chart","data":"test"}]`),
 			AccessRules: []AccessRuleModel{
 				{
 					AccessType:   types.StringValue("READ"),
@@ -386,7 +387,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		model := CustomDashboardModel{
 			ID:      types.StringValue("dashboard-456"),
 			Title:   types.StringValue("State Dashboard"),
-			Widgets: types.StringValue(`{"widgets":[{"id":"w1"}]}`),
+			Widgets: jsontypes.NewNormalizedValue(`{"widgets":[{"id":"w1"}]}`),
 			AccessRules: []AccessRuleModel{
 				{
 					AccessType:   types.StringValue("READ_WRITE"),
@@ -413,7 +414,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		model := CustomDashboardModel{
 			ID:      types.StringNull(),
 			Title:   types.StringValue("New Dashboard"),
-			Widgets: types.StringValue(`[]`),
+			Widgets: jsontypes.NewNormalizedValue(`[]`),
 		}
 
 		plan := createMockPlan(t, ctx, model)
@@ -429,7 +430,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		model := CustomDashboardModel{
 			ID:      types.StringValue("dashboard-789"),
 			Title:   types.StringValue("No Widgets Dashboard"),
-			Widgets: types.StringNull(),
+			Widgets: jsontypes.NewNormalizedNull(),
 		}
 
 		plan := createMockPlan(t, ctx, model)
@@ -444,7 +445,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		model := CustomDashboardModel{
 			ID:          types.StringValue("dashboard-empty"),
 			Title:       types.StringValue("Empty Rules Dashboard"),
-			Widgets:     types.StringValue(`[]`),
+			Widgets:     jsontypes.NewNormalizedValue(`[]`),
 			AccessRules: []AccessRuleModel{},
 		}
 
@@ -460,7 +461,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		model := CustomDashboardModel{
 			ID:      types.StringValue("dashboard-global"),
 			Title:   types.StringValue("Global Dashboard"),
-			Widgets: types.StringValue(`[]`),
+			Widgets: jsontypes.NewNormalizedValue(`[]`),
 			AccessRules: []AccessRuleModel{
 				{
 					AccessType:   types.StringValue("READ"),
@@ -504,7 +505,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		model := CustomDashboardModel{
 			ID:      types.StringValue("dashboard-complex"),
 			Title:   types.StringValue("Complex Dashboard"),
-			Widgets: types.StringValue(complexWidgets),
+			Widgets: jsontypes.NewNormalizedValue(complexWidgets),
 		}
 
 		plan := createMockPlan(t, ctx, model)
@@ -523,7 +524,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		model := CustomDashboardModel{
 			ID:      types.StringValue("dashboard-all-types"),
 			Title:   types.StringValue("All Types Dashboard"),
-			Widgets: types.StringValue(`[]`),
+			Widgets: jsontypes.NewNormalizedValue(`[]`),
 			AccessRules: []AccessRuleModel{
 				{
 					AccessType:   types.StringValue("READ"),
@@ -650,7 +651,7 @@ func TestCustomDashboardModelValidation(t *testing.T) {
 		model := CustomDashboardModel{
 			ID:      types.StringValue("dashboard-123"),
 			Title:   types.StringValue("Test Dashboard"),
-			Widgets: types.StringValue(`[]`),
+			Widgets: jsontypes.NewNormalizedValue(`[]`),
 			AccessRules: []AccessRuleModel{
 				{
 					AccessType:   types.StringValue("READ"),
@@ -670,7 +671,7 @@ func TestCustomDashboardModelValidation(t *testing.T) {
 		model := CustomDashboardModel{
 			ID:          types.StringNull(),
 			Title:       types.StringValue("Minimal Dashboard"),
-			Widgets:     types.StringValue(`[]`),
+			Widgets:     jsontypes.NewNormalizedValue(`[]`),
 			AccessRules: nil,
 		}
 
