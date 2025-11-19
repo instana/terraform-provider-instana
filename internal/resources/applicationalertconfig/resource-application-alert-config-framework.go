@@ -952,8 +952,6 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 	var model ApplicationAlertConfigModel
 	if plan != nil {
 		diags.Append(plan.Get(ctx, &model)...)
-	} else if state != nil {
-		diags.Append(state.Get(ctx, &model)...)
 	} else {
 		model = ApplicationAlertConfigModel{}
 	}
