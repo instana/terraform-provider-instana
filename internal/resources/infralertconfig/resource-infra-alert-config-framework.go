@@ -282,19 +282,28 @@ func (r *infraAlertConfigResourceFramework) mapGroupByToModel(groupBy []string) 
 func (r *infraAlertConfigResourceFramework) mapAlertChannelsToModel(ctx context.Context, alertChannels map[restapi.AlertSeverity][]string) (*InfraAlertChannelsModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
+	// Always return a model structure with null lists to maintain consistency
+	// with Terraform's expected schema structure, even when the API returns
+	// an empty map. This prevents "inconsistent result after apply" errors
+	// when the plan has alert_channels defined but empty.
 	if len(alertChannels) == 0 {
 		return nil, diags
 	}
+	alertChannelsModel := &InfraAlertChannelsModel{
+		Warning:  types.ListNull(types.StringType),
+		Critical: types.ListNull(types.StringType),
+	}
 
-	alertChannelsModel := &InfraAlertChannelsModel{}
+	// Only populate the lists if there are actual channels in the API response
+	if len(alertChannels) > 0 {
+		warningChannels, warningDiags := r.mapSeverityChannelsToModel(ctx, alertChannels, restapi.WarningSeverity)
+		diags.Append(warningDiags...)
+		alertChannelsModel.Warning = warningChannels
 
-	warningChannels, warningDiags := r.mapSeverityChannelsToModel(ctx, alertChannels, restapi.WarningSeverity)
-	diags.Append(warningDiags...)
-	alertChannelsModel.Warning = warningChannels
-
-	criticalChannels, criticalDiags := r.mapSeverityChannelsToModel(ctx, alertChannels, restapi.CriticalSeverity)
-	diags.Append(criticalDiags...)
-	alertChannelsModel.Critical = criticalChannels
+		criticalChannels, criticalDiags := r.mapSeverityChannelsToModel(ctx, alertChannels, restapi.CriticalSeverity)
+		diags.Append(criticalDiags...)
+		alertChannelsModel.Critical = criticalChannels
+	}
 
 	return alertChannelsModel, diags
 }
@@ -481,17 +490,21 @@ func (r *infraAlertConfigResourceFramework) mapModelAlertChannelsToAPI(ctx conte
 		return alertChannels, diags
 	}
 
+	// When alert_channels block is defined, always include both severity levels
+	// with empty arrays if no channels are specified, to maintain consistency
 	warningChannels, warningDiags := r.extractChannelsForSeverity(ctx, alertChannelsModel.Warning)
 	diags.Append(warningDiags...)
-	if len(warningChannels) > 0 {
-		alertChannels[restapi.WarningSeverity] = warningChannels
+	if warningChannels == nil {
+		warningChannels = []string{}
 	}
+	alertChannels[restapi.WarningSeverity] = warningChannels
 
 	criticalChannels, criticalDiags := r.extractChannelsForSeverity(ctx, alertChannelsModel.Critical)
 	diags.Append(criticalDiags...)
-	if len(criticalChannels) > 0 {
-		alertChannels[restapi.CriticalSeverity] = criticalChannels
+	if criticalChannels == nil {
+		criticalChannels = []string{}
 	}
+	alertChannels[restapi.CriticalSeverity] = criticalChannels
 
 	return alertChannels, diags
 }

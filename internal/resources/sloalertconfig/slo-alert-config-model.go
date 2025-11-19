@@ -12,7 +12,6 @@ type SloAlertConfigModel struct {
 	Description     types.String                  `tfsdk:"description"`
 	Severity        types.Int64                   `tfsdk:"severity"`
 	Triggering      types.Bool                    `tfsdk:"triggering"`
-	Enabled         types.Bool                    `tfsdk:"enabled"`
 	AlertType       types.String                  `tfsdk:"alert_type"`
 	Threshold       *SloAlertThresholdModel       `tfsdk:"threshold"`
 	SloIds          types.Set                     `tfsdk:"slo_ids"`
