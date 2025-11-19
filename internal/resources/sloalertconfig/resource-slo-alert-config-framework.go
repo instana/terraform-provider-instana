@@ -293,9 +293,9 @@ func (r *sloAlertConfigResourceFramework) UpdateState(ctx context.Context, state
 	var diags diag.Diagnostics
 	var model SloAlertConfigModel
 	if plan != nil {
-		return plan.Get(ctx, &model)
-	} else if state != nil {
-		return state.Get(ctx, &model)
+		diags.Append(plan.Get(ctx, &model)...)
+		// } else if state != nil {
+		// 	return state.Get(ctx, &model)
 	} else {
 		model = SloAlertConfigModel{}
 	}
@@ -316,12 +316,22 @@ func (r *sloAlertConfigResourceFramework) UpdateState(ctx context.Context, state
 	model.SloIds = r.mapStringSliceToSet(sloAlertConfig.SloIds)
 	model.AlertChannelIds = r.mapStringSliceToSet(sloAlertConfig.AlertChannelIds)
 
-	burnRateConfigs, burnRateDiags := r.mapBurnRateConfigsToState(sloAlertConfig.BurnRateConfigs)
-	diags.Append(burnRateDiags...)
-	if diags.HasError() {
-		return diags
+	if len(model.BurnRateConfig) == 0 {
+		burnRateConfigs, burnRateDiags := r.mapBurnRateConfigsToState(sloAlertConfig.BurnRateConfigs)
+		diags.Append(burnRateDiags...)
+		if diags.HasError() {
+			return diags
+		}
+		model.BurnRateConfig = burnRateConfigs
 	}
-	model.BurnRateConfig = burnRateConfigs
+
+	// // Map burn rate config from API response
+	// burnRateConfigs, burnRateDiags := r.mapBurnRateConfigsToState(sloAlertConfig.BurnRateConfigs)
+	// diags.Append(burnRateDiags...)
+	// if diags.HasError() {
+	// 	return diags
+	// }
+	// model.BurnRateConfig = burnRateConfigs
 
 	customPayloadFieldsList, payloadDiags := shared.CustomPayloadFieldsToTerraform(ctx, sloAlertConfig.CustomerPayloadFields)
 	diags.Append(payloadDiags...)
