@@ -289,10 +289,24 @@ func (r *sloAlertConfigResourceFramework) SetComputedFields(_ context.Context, _
 	return nil
 }
 
-func (r *sloAlertConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, _ *tfsdk.Plan, sloAlertConfig *restapi.SloAlertConfig) diag.Diagnostics {
+func (r *sloAlertConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, sloAlertConfig *restapi.SloAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
+	var model SloAlertConfigModel
+	if plan != nil {
+		return plan.Get(ctx, &model)
+	} else if state != nil {
+		return state.Get(ctx, &model)
+	} else {
+		model = SloAlertConfigModel{}
+	}
 
-	model := r.buildBaseSloAlertConfigModel(sloAlertConfig)
+	model.ID = types.StringValue(sloAlertConfig.ID)
+	model.Name = types.StringValue(sloAlertConfig.Name)
+	model.Description = types.StringValue(sloAlertConfig.Description)
+	model.Severity = types.Int64Value(int64(sloAlertConfig.Severity))
+	model.Triggering = types.BoolValue(sloAlertConfig.Triggering)
+
+	// model := r.buildBaseSloAlertConfigModel(sloAlertConfig)
 
 	terraformAlertType := r.mapAPIAlertTypeToTerraform(sloAlertConfig.Rule)
 	model.AlertType = types.StringValue(terraformAlertType)
