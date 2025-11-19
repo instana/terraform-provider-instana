@@ -125,8 +125,8 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 									Description: "Threshold configuration for different severity levels",
 									Optional:    true,
 									Attributes: map[string]schema.Attribute{
-										shared.LogAlertConfigFieldWarning:  shared.StaticAndAdaptiveThresholdAttributeSchema(),
-										shared.LogAlertConfigFieldCritical: shared.StaticAndAdaptiveThresholdAttributeSchema(),
+										shared.LogAlertConfigFieldWarning:  shared.AllThresholdAttributeSchema(),
+										shared.LogAlertConfigFieldCritical: shared.AllThresholdAttributeSchema(),
 									},
 								},
 								ApplicationAlertConfigFieldRule: schema.SingleNestedAttribute{
@@ -727,14 +727,18 @@ func (r *applicationAlertConfigResourceFrameworkImpl) validateRuleThresholds(ind
 
 	// Check if at least one threshold level is defined
 	hasWarning := ruleWithThreshold.Thresholds.Warning != nil &&
-		(ruleWithThreshold.Thresholds.Warning.Static != nil || ruleWithThreshold.Thresholds.Warning.AdaptiveBaseline != nil)
+		(ruleWithThreshold.Thresholds.Warning.Static != nil ||
+			ruleWithThreshold.Thresholds.Warning.AdaptiveBaseline != nil ||
+			ruleWithThreshold.Thresholds.Warning.HistoricBaseline != nil)
 	hasCritical := ruleWithThreshold.Thresholds.Critical != nil &&
-		(ruleWithThreshold.Thresholds.Critical.Static != nil || ruleWithThreshold.Thresholds.Critical.AdaptiveBaseline != nil)
+		(ruleWithThreshold.Thresholds.Critical.Static != nil ||
+			ruleWithThreshold.Thresholds.Critical.AdaptiveBaseline != nil ||
+			ruleWithThreshold.Thresholds.Critical.HistoricBaseline != nil)
 
 	if !hasWarning && !hasCritical {
 		diags.AddError(
 			ErrorMessageValidationError,
-			fmt.Sprintf("Rule at index %d must have at least one threshold defined (warning or critical) with either static or adaptive_baseline configuration", index),
+			fmt.Sprintf("Rule at index %d must have at least one threshold defined (warning or critical) with either static, adaptive_baseline, or historic_baseline configuration", index),
 		)
 		return errors.New("no valid threshold configuration found")
 	}
@@ -881,68 +885,30 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapThroughputRule(index in
 	return nil
 }
 
-// mapThresholds converts threshold configurations for warning and critical severity levels
+// mapThresholds converts threshold configurations for warning and critical severity levels using shared mapping
 func (r *applicationAlertConfigResourceFrameworkImpl) mapThresholds(index int, thresholds *ApplicationThresholdModel, result *restapi.ApplicationAlertConfig) {
-	thresholdMap := make(map[restapi.AlertSeverity]restapi.ThresholdRule)
+	// Convert ApplicationThresholdModel to shared.ThresholdAllPluginModel
+	sharedThresholds := &shared.ThresholdAllPluginModel{}
 
 	if thresholds.Warning != nil {
-		if threshold := r.mapThresholdLevel(thresholds.Warning); threshold != nil {
-			thresholdMap[restapi.WarningSeverity] = *threshold
+		sharedThresholds.Warning = &shared.ThresholdAllTypeModel{
+			Static:           thresholds.Warning.Static,
+			AdaptiveBaseline: thresholds.Warning.AdaptiveBaseline,
+			HistoricBaseline: thresholds.Warning.HistoricBaseline,
 		}
 	}
 
 	if thresholds.Critical != nil {
-		if threshold := r.mapThresholdLevel(thresholds.Critical); threshold != nil {
-			thresholdMap[restapi.CriticalSeverity] = *threshold
+		sharedThresholds.Critical = &shared.ThresholdAllTypeModel{
+			Static:           thresholds.Critical.Static,
+			AdaptiveBaseline: thresholds.Critical.AdaptiveBaseline,
+			HistoricBaseline: thresholds.Critical.HistoricBaseline,
 		}
 	}
 
+	// Use shared mapping function
+	thresholdMap, _ := shared.MapThresholdsAllPluginFromState(nil, sharedThresholds)
 	result.Rules[index].Thresholds = thresholdMap
-}
-
-// mapThresholdLevel converts a single threshold level (static or adaptive)
-func (r *applicationAlertConfigResourceFrameworkImpl) mapThresholdLevel(level *ThresholdLevelModel) *restapi.ThresholdRule {
-	if level.Static != nil {
-		return r.mapStaticThreshold(level.Static)
-	}
-	if level.AdaptiveBaseline != nil {
-		return r.mapAdaptiveThreshold(level.AdaptiveBaseline)
-	}
-	return nil
-}
-
-// mapStaticThreshold converts static threshold configuration to API format
-func (r *applicationAlertConfigResourceFrameworkImpl) mapStaticThreshold(static *shared.StaticTypeModel) *restapi.ThresholdRule {
-	threshold := &restapi.ThresholdRule{Type: ThresholdTypeStatic}
-
-	if !static.Value.IsNull() && !static.Value.IsUnknown() {
-		value := float64(static.Value.ValueFloat32())
-		threshold.Value = &value
-	}
-
-	return threshold
-}
-
-// mapAdaptiveThreshold converts adaptive baseline threshold configuration to API format
-func (r *applicationAlertConfigResourceFrameworkImpl) mapAdaptiveThreshold(adaptive *shared.AdaptiveBaselineModel) *restapi.ThresholdRule {
-	threshold := &restapi.ThresholdRule{Type: ThresholdTypeAdaptiveBaseline}
-
-	if !adaptive.DeviationFactor.IsNull() && !adaptive.DeviationFactor.IsUnknown() {
-		deviation := adaptive.DeviationFactor.ValueFloat32()
-		threshold.DeviationFactor = &deviation
-	}
-
-	if !adaptive.Adaptability.IsNull() && !adaptive.Adaptability.IsUnknown() {
-		adaptability := adaptive.Adaptability.ValueFloat32()
-		threshold.Adaptability = &adaptability
-	}
-
-	if !adaptive.Seasonality.IsNull() && !adaptive.Seasonality.IsUnknown() {
-		seasonality := restapi.ThresholdSeasonality(adaptive.Seasonality.ValueString())
-		threshold.Seasonality = &seasonality
-	}
-
-	return threshold
 }
 
 // mapTimeThreshold converts time threshold configuration
@@ -1289,7 +1255,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) createRuleModelByType(rule
 	return ruleModel
 }
 
-// mapThresholdsToModel converts threshold map to model format
+// mapThresholdsToModel converts threshold map to model format using shared mapping
 func (r *applicationAlertConfigResourceFrameworkImpl) mapThresholdsToModel(thresholds map[restapi.AlertSeverity]restapi.ThresholdRule) *ApplicationThresholdModel {
 	if len(thresholds) == 0 {
 		return nil
@@ -1298,39 +1264,30 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapThresholdsToModel(thres
 	thresholdModel := &ApplicationThresholdModel{}
 
 	if warningThreshold, ok := thresholds[restapi.WarningSeverity]; ok {
-		thresholdModel.Warning = r.mapThresholdLevelToModel(&warningThreshold)
+		// Use shared mapping function
+		sharedWarning := shared.MapAllThresholdPluginToState(nil, &warningThreshold, true)
+		if sharedWarning != nil {
+			thresholdModel.Warning = &ThresholdLevelModel{
+				Static:           sharedWarning.Static,
+				AdaptiveBaseline: sharedWarning.AdaptiveBaseline,
+				HistoricBaseline: sharedWarning.HistoricBaseline,
+			}
+		}
 	}
 
 	if criticalThreshold, ok := thresholds[restapi.CriticalSeverity]; ok {
-		thresholdModel.Critical = r.mapThresholdLevelToModel(&criticalThreshold)
+		// Use shared mapping function
+		sharedCritical := shared.MapAllThresholdPluginToState(nil, &criticalThreshold, true)
+		if sharedCritical != nil {
+			thresholdModel.Critical = &ThresholdLevelModel{
+				Static:           sharedCritical.Static,
+				AdaptiveBaseline: sharedCritical.AdaptiveBaseline,
+				HistoricBaseline: sharedCritical.HistoricBaseline,
+			}
+		}
 	}
 
 	return thresholdModel
-}
-
-// mapThresholdLevelToModel converts a threshold rule from API to threshold level model
-func (r *applicationAlertConfigResourceFrameworkImpl) mapThresholdLevelToModel(threshold *restapi.ThresholdRule) *ThresholdLevelModel {
-	levelModel := &ThresholdLevelModel{}
-
-	switch threshold.Type {
-	case ThresholdTypeStatic:
-		if threshold.Value != nil {
-			levelModel.Static = &shared.StaticTypeModel{
-				Value: types.Float32Value(float32(*threshold.Value)),
-				//Operator: util.SetStringPointerToState(threshold.Operator),
-			}
-		}
-
-	case ThresholdTypeAdaptiveBaseline:
-		levelModel.AdaptiveBaseline = &shared.AdaptiveBaselineModel{
-			DeviationFactor: util.SetFloat32PointerToState(threshold.DeviationFactor),
-			Adaptability:    util.SetFloat32PointerToState(threshold.Adaptability),
-			Seasonality:     util.SetStringPointerToState((*string)(threshold.Seasonality)),
-			//Operator:        util.SetStringPointerToState(threshold.Operator),
-		}
-	}
-
-	return levelModel
 }
 
 // updateTimeThreshold handles time threshold mapping from API to state
