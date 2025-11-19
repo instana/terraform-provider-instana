@@ -704,7 +704,39 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapRules(model *Applicatio
 		if err := r.mapSingleRule(i, &ruleWithThreshold, result, diags); err != nil {
 			return err
 		}
+		
+		// Validate that at least one threshold is defined for each rule
+		if err := r.validateRuleThresholds(i, &ruleWithThreshold, diags); err != nil {
+			return err
+		}
 	}
+	return nil
+}
+
+// validateRuleThresholds validates that at least one threshold is defined for a rule
+func (r *applicationAlertConfigResourceFrameworkImpl) validateRuleThresholds(index int, ruleWithThreshold *RuleWithThresholdModel, diags *diag.Diagnostics) error {
+	if ruleWithThreshold.Thresholds == nil {
+		diags.AddError(
+			ErrorMessageValidationError,
+			fmt.Sprintf("Rule at index %d must have at least one threshold defined (warning or critical)", index),
+		)
+		return errors.New("missing threshold definition")
+	}
+
+	// Check if at least one threshold level is defined
+	hasWarning := ruleWithThreshold.Thresholds.Warning != nil &&
+		(ruleWithThreshold.Thresholds.Warning.Static != nil || ruleWithThreshold.Thresholds.Warning.AdaptiveBaseline != nil)
+	hasCritical := ruleWithThreshold.Thresholds.Critical != nil &&
+		(ruleWithThreshold.Thresholds.Critical.Static != nil || ruleWithThreshold.Thresholds.Critical.AdaptiveBaseline != nil)
+
+	if !hasWarning && !hasCritical {
+		diags.AddError(
+			ErrorMessageValidationError,
+			fmt.Sprintf("Rule at index %d must have at least one threshold defined (warning or critical) with either static or adaptive_baseline configuration", index),
+		)
+		return errors.New("no valid threshold configuration found")
+	}
+
 	return nil
 }
 
@@ -760,7 +792,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapErrorRateRule(index int
 		diags.AddError(ErrorMessageValidationError, fmt.Sprintf(ErrorMessageMetricNameRequired, "error rate"))
 		return errors.New(ErrorMessageMissingMetricName)
 	}
-	result.Rules[index].Rule.AlertType = ApplicationAlertConfigFieldRuleErrorRate
+	result.Rules[index].Rule.AlertType = APIAlertTypeErrorRate
 	result.Rules[index].Rule.MetricName = errorRate.MetricName.ValueString()
 	result.Rules[index].Rule.Aggregation = restapi.Aggregation(errorRate.Aggregation.ValueString())
 	return nil
@@ -772,7 +804,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapErrorsRule(index int, e
 		diags.AddError(ErrorMessageValidationError, fmt.Sprintf(ErrorMessageMetricNameRequired, "error"))
 		return errors.New(ErrorMessageMissingMetricName)
 	}
-	result.Rules[index].Rule.AlertType = ApplicationAlertConfigFieldRuleErrors
+	result.Rules[index].Rule.AlertType = APIAlertTypeErrors
 	result.Rules[index].Rule.MetricName = errorsRule.MetricName.ValueString()
 	result.Rules[index].Rule.Aggregation = restapi.Aggregation(errorsRule.Aggregation.ValueString())
 	return nil
@@ -787,7 +819,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapLogsRule(index int, log
 		return errors.New(ErrorMessageMissingRequiredFields)
 	}
 
-	result.Rules[index].Rule.AlertType = ApplicationAlertConfigFieldRuleLogs
+	result.Rules[index].Rule.AlertType = APIAlertTypeLogs
 	result.Rules[index].Rule.MetricName = logs.MetricName.ValueString()
 	result.Rules[index].Rule.Aggregation = restapi.Aggregation(logs.Aggregation.ValueString())
 
@@ -809,7 +841,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapSlownessRule(index int,
 		diags.AddError(ErrorMessageValidationError, fmt.Sprintf(ErrorMessageMetricNameRequired, "slowness"))
 		return errors.New(ErrorMessageMissingMetricName)
 	}
-	result.Rules[index].Rule.AlertType = ApplicationAlertConfigFieldRuleSlowness
+	result.Rules[index].Rule.AlertType = APIAlertTypeSlowness
 	result.Rules[index].Rule.MetricName = slowness.MetricName.ValueString()
 	result.Rules[index].Rule.Aggregation = restapi.Aggregation(slowness.Aggregation.ValueString())
 	return nil
@@ -822,7 +854,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapStatusCodeRule(index in
 		return errors.New(ErrorMessageMissingMetricName)
 	}
 
-	result.Rules[index].Rule.AlertType = ApplicationAlertConfigFieldRuleStatusCode
+	result.Rules[index].Rule.AlertType = APIAlertTypeStatusCode
 	result.Rules[index].Rule.MetricName = statusCode.MetricName.ValueString()
 	result.Rules[index].Rule.Aggregation = restapi.Aggregation(statusCode.Aggregation.ValueString())
 
@@ -841,7 +873,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapThroughputRule(index in
 		diags.AddError(ErrorMessageValidationError, fmt.Sprintf(ErrorMessageMetricNameRequired, "throughput"))
 		return errors.New(ErrorMessageMissingMetricName)
 	}
-	result.Rules[index].Rule.AlertType = ApplicationAlertConfigFieldRuleThroughput
+	result.Rules[index].Rule.AlertType = APIAlertTypeThroughput
 	result.Rules[index].Rule.MetricName = throughput.MetricName.ValueString()
 	result.Rules[index].Rule.Aggregation = restapi.Aggregation(throughput.Aggregation.ValueString())
 	return nil
@@ -1193,19 +1225,19 @@ func (r *applicationAlertConfigResourceFrameworkImpl) createRuleModelByType(rule
 	ruleModel := RuleModel{}
 
 	switch rule.AlertType {
-	case ApplicationAlertConfigFieldRuleErrorRate:
+	case APIAlertTypeErrorRate:
 		ruleModel.ErrorRate = &RuleConfigModel{
 			MetricName:  types.StringValue(rule.MetricName),
 			Aggregation: types.StringValue(string(rule.Aggregation)),
 		}
 
-	case ApplicationAlertConfigFieldRuleErrors:
+	case APIAlertTypeErrors:
 		ruleModel.Errors = &RuleConfigModel{
 			MetricName:  types.StringValue(rule.MetricName),
 			Aggregation: types.StringValue(string(rule.Aggregation)),
 		}
 
-	case ApplicationAlertConfigFieldRuleLogs:
+	case APIAlertTypeLogs:
 		ruleModel.Logs = &LogsRuleModel{
 			MetricName:  types.StringValue(rule.MetricName),
 			Aggregation: types.StringValue(string(rule.Aggregation)),
@@ -1214,13 +1246,13 @@ func (r *applicationAlertConfigResourceFrameworkImpl) createRuleModelByType(rule
 			Operator:    util.SetStringPointerToState((*string)(rule.Operator)),
 		}
 
-	case ApplicationAlertConfigFieldRuleSlowness:
+	case APIAlertTypeSlowness:
 		ruleModel.Slowness = &RuleConfigModel{
 			MetricName:  types.StringValue(rule.MetricName),
 			Aggregation: types.StringValue(string(rule.Aggregation)),
 		}
 
-	case ApplicationAlertConfigFieldRuleStatusCode:
+	case APIAlertTypeStatusCode:
 		ruleModel.StatusCode = &StatusCodeRuleModel{
 			MetricName:      types.StringValue(rule.MetricName),
 			Aggregation:     types.StringValue(string(rule.Aggregation)),
@@ -1228,7 +1260,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) createRuleModelByType(rule
 			StatusCodeEnd:   util.SetInt32PointerToInt64State(rule.StatusCodeEnd),
 		}
 
-	case ApplicationAlertConfigFieldRuleThroughput:
+	case APIAlertTypeThroughput:
 		ruleModel.Throughput = &RuleConfigModel{
 			MetricName:  types.StringValue(rule.MetricName),
 			Aggregation: types.StringValue(string(rule.Aggregation)),
