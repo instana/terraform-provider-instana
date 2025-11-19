@@ -220,7 +220,7 @@ func (r *customDashboardResourceFramework) MapStateToDataObject(ctx context.Cont
 	// Map widgets - normalize the JSON
 	var widgets json.RawMessage
 	if !model.Widgets.IsNull() {
-		normalizedWidgets := util.NormalizeJSONString(model.Widgets.ValueString())
+		normalizedWidgets, _ := util.CanonicalizeJSON(model.Widgets.ValueString())
 		widgets = json.RawMessage(normalizedWidgets)
 	}
 
