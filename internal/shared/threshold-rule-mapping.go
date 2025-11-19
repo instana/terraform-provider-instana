@@ -399,7 +399,9 @@ func MapBaselineToState(threshold *restapi.ThresholdRule) (basetypes.ListValue, 
 	for _, baselineArray := range *threshold.Baseline {
 		innerListValues := []attr.Value{}
 		for _, value := range baselineArray {
-			innerListValues = append(innerListValues, types.Float64Value(value))
+			// Round to 4 decimal places to avoid floating-point precision issues
+			rounded := math.Round(value*10000) / 10000
+			innerListValues = append(innerListValues, types.Float64Value(rounded))
 		}
 
 		innerSet, innerSetDiags := types.ListValue(types.Float64Type, innerListValues)
@@ -442,7 +444,12 @@ func MapBaselineFromState(ctx context.Context, baselineList types.List) (*[][]fl
 		if diags.HasError() {
 			return nil, diags
 		}
-		baseline = append(baseline, innerValues)
+		// Round the values to 4 decimal places to avoid floating-point precision issues
+		roundedValues := make([]float64, len(innerValues))
+		for i, v := range innerValues {
+			roundedValues[i] = math.Round(v*10000) / 10000
+		}
+		baseline = append(baseline, roundedValues)
 	}
 
 	return &baseline, diags

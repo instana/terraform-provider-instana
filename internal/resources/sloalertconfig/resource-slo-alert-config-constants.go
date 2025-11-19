@@ -20,7 +20,6 @@ const (
 	SloAlertConfigFieldTimeThreshold                   = "time_threshold"
 	SloAlertConfigFieldTimeThresholdWarmUp             = "warm_up"
 	SloAlertConfigFieldTimeThresholdCoolDown           = "cool_down"
-	SloAlertConfigFieldEnabled                         = "enabled"
 	SloAlertConfigFieldBurnRateConfig                  = "burn_rate_config"
 	SloAlertConfigFieldBurnRateConfigDuration          = "duration"
 	SloAlertConfigFieldBurnRateConfigThresholdValue    = "threshold_value"
@@ -47,8 +46,6 @@ const (
 	SloAlertConfigDescSeverity = "The severity of the alert when triggered"
 	// SloAlertConfigDescTriggering is the description for the triggering field
 	SloAlertConfigDescTriggering = "Optional flag to indicate whether also an Incident is triggered or not. The default is false"
-	// SloAlertConfigDescEnabled is the description for the enabled field
-	SloAlertConfigDescEnabled = "Optional flag to indicate whether this Alert is Enabled"
 	// SloAlertConfigDescAlertType is the description for the alert_type field
 	SloAlertConfigDescAlertType = "What do you want to be alerted on? (Type of Smart Alert: status, error_budget, burn_rate_v2)"
 	// SloAlertConfigDescSloIds is the description for the slo_ids field
@@ -146,8 +143,6 @@ const (
 	SchemaFieldSeverity = "severity"
 	// SchemaFieldTriggering represents the triggering field identifier
 	SchemaFieldTriggering = "triggering"
-	// SchemaFieldEnabled represents the enabled field identifier
-	SchemaFieldEnabled = "enabled"
 	// SchemaFieldAlertType represents the alert_type field identifier
 	SchemaFieldAlertType = "alert_type"
 	// SchemaFieldSloIds represents the slo_ids field identifier

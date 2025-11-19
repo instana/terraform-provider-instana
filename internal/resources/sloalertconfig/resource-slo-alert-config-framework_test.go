@@ -60,7 +60,6 @@ func TestUpdateState_StatusAlertType(t *testing.T) {
 	assert.Equal(t, "Test Description", model.Description.ValueString())
 	assert.Equal(t, int64(5), model.Severity.ValueInt64())
 	assert.True(t, model.Triggering.ValueBool())
-	assert.True(t, model.Enabled.ValueBool())
 	assert.Equal(t, "status", model.AlertType.ValueString())
 	assert.NotNil(t, model.Threshold)
 	assert.Equal(t, "staticThreshold", model.Threshold.Type.ValueString())
@@ -296,7 +295,6 @@ func TestUpdateState_WithNullThreshold(t *testing.T) {
 
 	assert.Equal(t, "test-id-5", model.ID.ValueString())
 	assert.Nil(t, model.Threshold)
-	assert.False(t, model.Enabled.ValueBool())
 }
 
 func TestUpdateState_WithEmptyBurnRateConfigs(t *testing.T) {
@@ -400,8 +398,8 @@ func TestMapStateToDataObject_StatusAlertType(t *testing.T) {
 		Description: types.StringValue("Test Description"),
 		Severity:    types.Int64Value(5),
 		Triggering:  types.BoolValue(true),
-		Enabled:     types.BoolValue(true),
-		AlertType:   types.StringValue("status"),
+
+		AlertType: types.StringValue("status"),
 		Threshold: &SloAlertThresholdModel{
 			Type:     types.StringValue("staticThreshold"),
 			Operator: types.StringValue(">="),
@@ -456,8 +454,8 @@ func TestMapStateToDataObject_ErrorBudgetAlertType(t *testing.T) {
 		Description: types.StringValue("Error Budget Description"),
 		Severity:    types.Int64Value(8),
 		Triggering:  types.BoolValue(false),
-		Enabled:     types.BoolValue(true),
-		AlertType:   types.StringValue("error_budget"),
+
+		AlertType: types.StringValue("error_budget"),
 		Threshold: &SloAlertThresholdModel{
 			Type:     types.StringValue("staticThreshold"),
 			Operator: types.StringValue("<="),
@@ -505,9 +503,9 @@ func TestMapStateToDataObject_BurnRateV2AlertType(t *testing.T) {
 		Description: types.StringValue("Burn Rate Description"),
 		Severity:    types.Int64Value(10),
 		Triggering:  types.BoolValue(true),
-		Enabled:     types.BoolValue(true),
-		AlertType:   types.StringValue("burn_rate_v2"),
-		Threshold:   nil,
+
+		AlertType: types.StringValue("burn_rate_v2"),
+		Threshold: nil,
 		TimeThreshold: &SloAlertTimeThresholdModel{
 			WarmUp:   types.Int64Value(180000),
 			CoolDown: types.Int64Value(360000),
@@ -623,8 +621,8 @@ func TestMapStateToDataObject_WithNormalizedAlertTypes(t *testing.T) {
 				Description: types.StringValue("Test Description"),
 				Severity:    types.Int64Value(5),
 				Triggering:  types.BoolValue(true),
-				Enabled:     types.BoolValue(true),
-				AlertType:   types.StringValue(tc.inputAlertType),
+
+				AlertType: types.StringValue(tc.inputAlertType),
 				TimeThreshold: &SloAlertTimeThresholdModel{
 					WarmUp:   types.Int64Value(300000),
 					CoolDown: types.Int64Value(600000),
@@ -648,7 +646,7 @@ func TestMapStateToDataObject_WithNormalizedAlertTypes(t *testing.T) {
 
 			state := createMockState(t, model)
 
-	apiConfig, diags := resource.MapStateToDataObject(ctx, nil, &state)
+			apiConfig, diags := resource.MapStateToDataObject(ctx, nil, &state)
 			require.False(t, diags.HasError())
 			require.NotNil(t, apiConfig)
 
@@ -668,8 +666,8 @@ func TestMapStateToDataObject_InvalidAlertType(t *testing.T) {
 		Description: types.StringValue("Test Description"),
 		Severity:    types.Int64Value(5),
 		Triggering:  types.BoolValue(true),
-		Enabled:     types.BoolValue(true),
-		AlertType:   types.StringValue("invalid_type"),
+
+		AlertType: types.StringValue("invalid_type"),
 		TimeThreshold: &SloAlertTimeThresholdModel{
 			WarmUp:   types.Int64Value(300000),
 			CoolDown: types.Int64Value(600000),
@@ -701,8 +699,8 @@ func TestMapStateToDataObject_InvalidDuration(t *testing.T) {
 		Description: types.StringValue("Test Description"),
 		Severity:    types.Int64Value(5),
 		Triggering:  types.BoolValue(true),
-		Enabled:     types.BoolValue(true),
-		AlertType:   types.StringValue("burn_rate_v2"),
+
+		AlertType: types.StringValue("burn_rate_v2"),
 		TimeThreshold: &SloAlertTimeThresholdModel{
 			WarmUp:   types.Int64Value(300000),
 			CoolDown: types.Int64Value(600000),
@@ -743,8 +741,8 @@ func TestMapStateToDataObject_InvalidThresholdValue(t *testing.T) {
 		Description: types.StringValue("Test Description"),
 		Severity:    types.Int64Value(5),
 		Triggering:  types.BoolValue(true),
-		Enabled:     types.BoolValue(true),
-		AlertType:   types.StringValue("burn_rate_v2"),
+
+		AlertType: types.StringValue("burn_rate_v2"),
 		TimeThreshold: &SloAlertTimeThresholdModel{
 			WarmUp:   types.Int64Value(300000),
 			CoolDown: types.Int64Value(600000),
@@ -785,8 +783,8 @@ func TestMapStateToDataObject_WithNullThresholdType(t *testing.T) {
 		Description: types.StringValue("Test Description"),
 		Severity:    types.Int64Value(5),
 		Triggering:  types.BoolValue(true),
-		Enabled:     types.BoolValue(true),
-		AlertType:   types.StringValue("status"),
+
+		AlertType: types.StringValue("status"),
 		Threshold: &SloAlertThresholdModel{
 			Type:     types.StringNull(),
 			Operator: types.StringValue(">="),
@@ -825,8 +823,8 @@ func TestMapStateToDataObject_BurnRateV2WithoutBurnRateConfig(t *testing.T) {
 		Description: types.StringValue("Test Description"),
 		Severity:    types.Int64Value(5),
 		Triggering:  types.BoolValue(true),
-		Enabled:     types.BoolValue(true),
-		AlertType:   types.StringValue("burn_rate_v2"),
+
+		AlertType: types.StringValue("burn_rate_v2"),
 		TimeThreshold: &SloAlertTimeThresholdModel{
 			WarmUp:   types.Int64Value(300000),
 			CoolDown: types.Int64Value(600000),
@@ -863,8 +861,8 @@ func TestMapStateToDataObject_FromState(t *testing.T) {
 		Description: types.StringValue("Test Description"),
 		Severity:    types.Int64Value(5),
 		Triggering:  types.BoolValue(true),
-		Enabled:     types.BoolValue(true),
-		AlertType:   types.StringValue("status"),
+
+		AlertType: types.StringValue("status"),
 		Threshold: &SloAlertThresholdModel{
 			Type:     types.StringValue("staticThreshold"),
 			Operator: types.StringValue(">="),
@@ -905,8 +903,8 @@ func TestMapStateToDataObject_WithEmptyID(t *testing.T) {
 		Description: types.StringValue("Test Description"),
 		Severity:    types.Int64Value(5),
 		Triggering:  types.BoolValue(true),
-		Enabled:     types.BoolValue(true),
-		AlertType:   types.StringValue("status"),
+
+		AlertType: types.StringValue("status"),
 		Threshold: &SloAlertThresholdModel{
 			Type:     types.StringValue("staticThreshold"),
 			Operator: types.StringValue(">="),
@@ -948,8 +946,8 @@ func TestMapStateToDataObject_WithDifferentOperators(t *testing.T) {
 				Description: types.StringValue("Test Description"),
 				Severity:    types.Int64Value(5),
 				Triggering:  types.BoolValue(true),
-				Enabled:     types.BoolValue(true),
-				AlertType:   types.StringValue("status"),
+
+				AlertType: types.StringValue("status"),
 				Threshold: &SloAlertThresholdModel{
 					Type:     types.StringValue("staticThreshold"),
 					Operator: types.StringValue(operator),
@@ -970,7 +968,7 @@ func TestMapStateToDataObject_WithDifferentOperators(t *testing.T) {
 
 			state := createMockState(t, model)
 
-	apiConfig, diags := resource.MapStateToDataObject(ctx, nil, &state)
+			apiConfig, diags := resource.MapStateToDataObject(ctx, nil, &state)
 			require.False(t, diags.HasError())
 			require.NotNil(t, apiConfig)
 
