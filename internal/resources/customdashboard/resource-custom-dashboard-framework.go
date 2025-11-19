@@ -121,17 +121,9 @@ func (r *customDashboardResourceFramework) UpdateState(ctx context.Context, stat
 
 	var model CustomDashboardModel
 	if plan != nil {
-		log.Printf("from plan")
-		// Create a model from the current plan to overcome the unknown values issue after updation
 		diags.Append(plan.Get(ctx, &model)...)
-		// model.ID = types.StringValue(dashboard.ID)
-		// model.Title = types.StringValue(dashboard.Title)
-
 	} else if state != nil {
-		log.Printf("from state")
 		diags.Append(state.Get(ctx, &model)...)
-		// model.ID = types.StringValue(dashboard.ID)
-		// model.Title = types.StringValue(dashboard.Title)
 	} else {
 		model = CustomDashboardModel{}
 	}

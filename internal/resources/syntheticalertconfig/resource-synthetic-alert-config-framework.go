@@ -527,19 +527,31 @@ func (r *syntheticAlertConfigResourceFramework) setOptionalFieldsOnAPIObject(api
 }
 
 func (r *syntheticAlertConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *restapi.SyntheticAlertConfig) diag.Diagnostics {
-	model := r.buildModelFromAPIObject(apiObject)
 	var diags diag.Diagnostics
+	var model SyntheticAlertConfigModel
+	if plan != nil {
+		diags.Append(plan.Get(ctx, &model)...)
+	} else if state != nil {
+		diags.Append(state.Get(ctx, &model)...)
+	}
+
+	model.ID = types.StringValue(apiObject.ID)
+	model.Name = types.StringValue(apiObject.Name)
+	model.Description = types.StringValue(apiObject.Description)
+	model.Severity = types.Int64Value(int64(apiObject.Severity))
 
 	gracePeriodValue := r.mapGracePeriodToState(apiObject.GracePeriod)
 	model.GracePeriod = gracePeriodValue
 
-	tagFilterValue, tagFilterDiags := r.mapTagFilterToState(apiObject.TagFilterExpression)
-	diags.Append(tagFilterDiags...)
-	if diags.HasError() {
-		return diags
+	// to preserve the existing value in plan/state to handle the value drift
+	if model.TagFilter.IsNull() || model.TagFilter.IsUnknown() {
+		tagFilterValue, tagFilterDiags := r.mapTagFilterToState(apiObject.TagFilterExpression)
+		diags.Append(tagFilterDiags...)
+		if diags.HasError() {
+			return diags
+		}
+		model.TagFilter = tagFilterValue
 	}
-	model.TagFilter = tagFilterValue
-
 	ruleModel := r.mapRuleToModel(apiObject.Rule)
 	model.Rule = ruleModel
 
@@ -569,16 +581,6 @@ func (r *syntheticAlertConfigResourceFramework) UpdateState(ctx context.Context,
 
 	diags.Append(state.Set(ctx, model)...)
 	return diags
-}
-
-// buildModelFromAPIObject creates a model with basic fields from API object
-func (r *syntheticAlertConfigResourceFramework) buildModelFromAPIObject(apiObject *restapi.SyntheticAlertConfig) SyntheticAlertConfigModel {
-	return SyntheticAlertConfigModel{
-		ID:          types.StringValue(apiObject.ID),
-		Name:        types.StringValue(apiObject.Name),
-		Description: types.StringValue(apiObject.Description),
-		Severity:    types.Int64Value(int64(apiObject.Severity)),
-	}
 }
 
 // mapGracePeriodToState converts grace period to state value

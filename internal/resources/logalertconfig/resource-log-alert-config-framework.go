@@ -216,34 +216,28 @@ func (r *logAlertConfigResourceFramework) SetComputedFields(_ context.Context, _
 }
 
 // UpdateState updates the Terraform state with data from the API response
-func (r *logAlertConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, _ *tfsdk.Plan, config *restapi.LogAlertConfig) diag.Diagnostics {
+func (r *logAlertConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, config *restapi.LogAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	model, modelDiags := r.buildLogAlertConfigModelFromAPIResponse(ctx, config)
-	diags.Append(modelDiags...)
-	if diags.HasError() {
-		return diags
+	var model LogAlertConfigModel
+	if plan != nil {
+		diags.Append(plan.Get(ctx, &model)...)
+	} else if state != nil {
+		diags.Append(state.Get(ctx, &model)...)
 	}
 
-	diags.Append(state.Set(ctx, model)...)
-	return diags
-}
+	model.ID = types.StringValue(config.ID)
+	model.Name = types.StringValue(config.Name)
+	model.Description = types.StringValue(config.Description)
+	model.Granularity = types.Int64Value(int64(config.Granularity))
+	model.GracePeriod = r.mapGracePeriodToModel(config.GracePeriod)
 
-// buildLogAlertConfigModelFromAPIResponse constructs a LogAlertConfigModel from the API response
-func (r *logAlertConfigResourceFramework) buildLogAlertConfigModelFromAPIResponse(ctx context.Context, config *restapi.LogAlertConfig) (LogAlertConfigModel, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	model := LogAlertConfigModel{
-		ID:          types.StringValue(config.ID),
-		Name:        types.StringValue(config.Name),
-		Description: types.StringValue(config.Description),
-		Granularity: types.Int64Value(int64(config.Granularity)),
-		GracePeriod: r.mapGracePeriodToModel(config.GracePeriod),
+	// to preserve the existing value in plan/state to handle the value drift
+	if model.TagFilter.IsNull() || model.TagFilter.IsUnknown() {
+		tagFilter, tagFilterDiags := r.mapTagFilterToModel(config.TagFilterExpression)
+		diags.Append(tagFilterDiags...)
+		model.TagFilter = tagFilter
 	}
-
-	tagFilter, tagFilterDiags := r.mapTagFilterToModel(config.TagFilterExpression)
-	diags.Append(tagFilterDiags...)
-	model.TagFilter = tagFilter
 
 	groupBy, groupByDiags := r.mapGroupByToModel(config.GroupBy)
 	diags.Append(groupByDiags...)
@@ -263,7 +257,12 @@ func (r *logAlertConfigResourceFramework) buildLogAlertConfigModelFromAPIRespons
 	diags.Append(payloadDiags...)
 	model.CustomPayloadFields = customPayloadFields
 
-	return model, diags
+	if diags.HasError() {
+		return diags
+	}
+
+	diags.Append(state.Set(ctx, model)...)
+	return diags
 }
 
 // mapGracePeriodToModel converts grace period to model representation

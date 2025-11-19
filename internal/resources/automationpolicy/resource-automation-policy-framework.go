@@ -190,9 +190,8 @@ func (r *automationPolicyResourceFramework) UpdateState(ctx context.Context, sta
 	// This is important for fields that might not be returned by the API
 	if plan != nil {
 		diags.Append(plan.Get(ctx, &model)...)
-		if diags.HasError() {
-			return diags
-		}
+	} else if state != nil {
+		diags.Append(state.Get(ctx, &model)...)
 	}
 
 	// Update model with values from API response
