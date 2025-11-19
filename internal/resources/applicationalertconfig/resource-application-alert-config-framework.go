@@ -628,11 +628,13 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapAlertChannels(ctx conte
 
 // mapApplications converts application scope configuration
 func (r *applicationAlertConfigResourceFrameworkImpl) mapApplications(model *ApplicationAlertConfigModel, result *restapi.ApplicationAlertConfig) {
+	// Always initialize as empty map, never nil
+	result.Applications = make(map[string]restapi.IncludedApplication)
+
 	if len(model.Applications) == 0 {
 		return
 	}
 
-	result.Applications = make(map[string]restapi.IncludedApplication, len(model.Applications))
 	for _, app := range model.Applications {
 		appID := app.ApplicationID.ValueString()
 		result.Applications[appID] = restapi.IncludedApplication{
@@ -704,7 +706,7 @@ func (r *applicationAlertConfigResourceFrameworkImpl) mapRules(model *Applicatio
 		if err := r.mapSingleRule(i, &ruleWithThreshold, result, diags); err != nil {
 			return err
 		}
-		
+
 		// Validate that at least one threshold is defined for each rule
 		if err := r.validateRuleThresholds(i, &ruleWithThreshold, diags); err != nil {
 			return err
@@ -981,9 +983,24 @@ func extractGracePeriod(v types.Int64) *int64 {
 // UpdateState converts API data object to Terraform state
 func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
-
+	var model ApplicationAlertConfigModel
+	if plan != nil {
+		diags.Append(plan.Get(ctx, &model)...)
+	} else if state != nil {
+		diags.Append(state.Get(ctx, &model)...)
+	} else {
+		model = ApplicationAlertConfigModel{}
+	}
 	// Build base model with simple fields
-	model := r.buildBaseModel(data)
+	model.ID = types.StringValue(data.ID)
+	model.Name = types.StringValue(data.Name)
+	model.Description = types.StringValue(data.Description)
+	model.BoundaryScope = types.StringValue(string(data.BoundaryScope))
+	model.EvaluationType = types.StringValue(string(data.EvaluationType))
+	model.Granularity = types.Int64Value(int64(data.Granularity))
+	model.IncludeInternal = types.BoolValue(data.IncludeInternal)
+	model.IncludeSynthetic = types.BoolValue(data.IncludeSynthetic)
+	model.Triggering = types.BoolValue(data.Triggering)
 
 	// Map complex fields with error handling
 	if err := r.updateGracePeriod(&model, data); err != nil {
@@ -991,9 +1008,11 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 		return diags
 	}
 
-	if err := r.updateTagFilter(&model, data); err != nil {
-		diags.Append(err...)
-		return diags
+	if model.TagFilter.IsNull() || model.TagFilter.IsUnknown() {
+		if err := r.updateTagFilter(&model, data); err != nil {
+			diags.Append(err...)
+			return diags
+		}
 	}
 
 	if err := r.updateAlertChannels(ctx, &model, data); err != nil {
