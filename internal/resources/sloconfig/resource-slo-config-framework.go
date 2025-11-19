@@ -128,9 +128,9 @@ func buildEntityAttribute() schema.SingleNestedAttribute {
 		Description: SloConfigDescEntity,
 		Optional:    true,
 		Attributes: map[string]schema.Attribute{
-			SloConfigApplicationEntity:   buildApplicationEntityAttribute(),
-			SloConfigWebsiteEntity:       buildWebsiteEntityAttribute(),
-			SloConfigSyntheticEntity:     buildSyntheticEntityAttribute(),
+			SloConfigApplicationEntity:    buildApplicationEntityAttribute(),
+			SloConfigWebsiteEntity:        buildWebsiteEntityAttribute(),
+			SloConfigSyntheticEntity:      buildSyntheticEntityAttribute(),
 			SloConfigInfrastructureEntity: buildInfrastructureEntityAttribute(),
 		},
 	}
@@ -858,8 +858,7 @@ func (r *sloConfigResourceFramework) mapEventBasedAvailabilityIndicator() (resta
 func (r *sloConfigResourceFramework) mapTrafficIndicator(model *TrafficIndicatorModel) (restapi.SloIndicator, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	if model.Threshold.IsNull() || model.Threshold.IsUnknown() ||
-		model.Operator.IsNull() || model.Operator.IsUnknown() {
+	if model.Threshold.IsNull() || model.Threshold.IsUnknown() {
 		diags.AddError(SloConfigErrTrafficRequired, SloConfigErrTrafficRequired)
 		return restapi.SloIndicator{}, diags
 	}
