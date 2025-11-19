@@ -42,6 +42,7 @@ type ApplicationThresholdModel struct {
 type ThresholdLevelModel struct {
 	Static           *shared.StaticTypeModel       `tfsdk:"static"`
 	AdaptiveBaseline *shared.AdaptiveBaselineModel `tfsdk:"adaptive_baseline"`
+	HistoricBaseline *shared.HistoricBaselineModel `tfsdk:"historic_baseline"`
 }
 
 // ServiceModel represents a service in the application alert config
