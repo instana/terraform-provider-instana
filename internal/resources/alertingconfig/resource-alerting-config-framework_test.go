@@ -21,7 +21,7 @@ func TestNewAlertingConfigResourceHandleFramework(t *testing.T) {
 	metadata := handle.MetaData()
 	require.NotNil(t, metadata)
 	assert.Equal(t, ResourceInstanaAlertingConfigFramework, metadata.ResourceName)
-	assert.Equal(t, int64(2), metadata.SchemaVersion)
+	assert.Equal(t, int64(1), metadata.SchemaVersion)
 	assert.NotNil(t, metadata.Schema)
 }
 
@@ -29,14 +29,14 @@ func TestMetaData(t *testing.T) {
 	resource := &alertingConfigResourceFramework{
 		metaData: resourcehandle.ResourceMetaDataFramework{
 			ResourceName:  "test_resource",
-			SchemaVersion: 2,
+			SchemaVersion: 1,
 		},
 	}
 
 	metadata := resource.MetaData()
 	require.NotNil(t, metadata)
 	assert.Equal(t, "test_resource", metadata.ResourceName)
-	assert.Equal(t, int64(2), metadata.SchemaVersion)
+	assert.Equal(t, int64(1), metadata.SchemaVersion)
 }
 
 func TestSetComputedFields(t *testing.T) {
@@ -218,13 +218,14 @@ func TestMapStateToDataObject(t *testing.T) {
 		integrationIDsSet, _ := types.SetValueFrom(ctx, types.StringType, integrationIDs)
 
 		model := AlertingConfigModel{
-			ID:                    types.StringValue("test-id"),
-			AlertName:             types.StringValue("test-alert"),
-			IntegrationIDs:        integrationIDsSet,
-			EventFilterQuery:      types.StringNull(),
-			EventFilterEventTypes: types.SetNull(types.StringType),
-			EventFilterRuleIDs:    types.SetNull(types.StringType),
-			CustomPayloadFields:   types.ListNull(shared.GetCustomPayloadFieldType()),
+			ID:                             types.StringValue("test-id"),
+			AlertName:                      types.StringValue("test-alert"),
+			IntegrationIDs:                 integrationIDsSet,
+			EventFilterQuery:               types.StringNull(),
+			EventFilterEventTypes:          types.SetNull(types.StringType),
+			EventFilterRuleIDs:             types.SetNull(types.StringType),
+			EventFilterApplicationAlertIDs: types.SetNull(types.StringType),
+			CustomPayloadFields:            types.ListNull(shared.GetCustomPayloadFieldType()),
 		}
 
 		state := createMockState(t, ctx, model)
@@ -244,13 +245,14 @@ func TestMapStateToDataObject(t *testing.T) {
 		integrationIDsSet, _ := types.SetValueFrom(ctx, types.StringType, integrationIDs)
 
 		model := AlertingConfigModel{
-			ID:                    types.StringValue(""),
-			AlertName:             types.StringValue("test-alert"),
-			IntegrationIDs:        integrationIDsSet,
-			EventFilterQuery:      types.StringNull(),
-			EventFilterEventTypes: types.SetNull(types.StringType),
-			EventFilterRuleIDs:    types.SetNull(types.StringType),
-			CustomPayloadFields:   types.ListNull(shared.GetCustomPayloadFieldType()),
+			ID:                             types.StringValue(""),
+			AlertName:                      types.StringValue("test-alert"),
+			IntegrationIDs:                 integrationIDsSet,
+			EventFilterQuery:               types.StringNull(),
+			EventFilterEventTypes:          types.SetNull(types.StringType),
+			EventFilterRuleIDs:             types.SetNull(types.StringType),
+			EventFilterApplicationAlertIDs: types.SetNull(types.StringType),
+			CustomPayloadFields:            types.ListNull(shared.GetCustomPayloadFieldType()),
 		}
 
 		plan := createMockPlan(t, ctx, model)
@@ -266,13 +268,14 @@ func TestMapStateToDataObject(t *testing.T) {
 		integrationIDsSet, _ := types.SetValueFrom(ctx, types.StringType, integrationIDs)
 
 		model := AlertingConfigModel{
-			ID:                    types.StringValue("test-id"),
-			AlertName:             types.StringValue("test-alert"),
-			IntegrationIDs:        integrationIDsSet,
-			EventFilterQuery:      types.StringValue("entity.type:host"),
-			EventFilterEventTypes: types.SetNull(types.StringType),
-			EventFilterRuleIDs:    types.SetNull(types.StringType),
-			CustomPayloadFields:   types.ListNull(shared.GetCustomPayloadFieldType()),
+			ID:                             types.StringValue("test-id"),
+			AlertName:                      types.StringValue("test-alert"),
+			IntegrationIDs:                 integrationIDsSet,
+			EventFilterQuery:               types.StringValue("entity.type:host"),
+			EventFilterEventTypes:          types.SetNull(types.StringType),
+			EventFilterRuleIDs:             types.SetNull(types.StringType),
+			EventFilterApplicationAlertIDs: types.SetNull(types.StringType),
+			CustomPayloadFields:            types.ListNull(shared.GetCustomPayloadFieldType()),
 		}
 
 		state := createMockState(t, ctx, model)
@@ -290,13 +293,14 @@ func TestMapStateToDataObject(t *testing.T) {
 		eventTypesSet, _ := types.SetValueFrom(ctx, types.StringType, eventTypes)
 
 		model := AlertingConfigModel{
-			ID:                    types.StringValue("test-id"),
-			AlertName:             types.StringValue("test-alert"),
-			IntegrationIDs:        integrationIDsSet,
-			EventFilterQuery:      types.StringNull(),
-			EventFilterEventTypes: eventTypesSet,
-			EventFilterRuleIDs:    types.SetNull(types.StringType),
-			CustomPayloadFields:   types.ListNull(shared.GetCustomPayloadFieldType()),
+			ID:                             types.StringValue("test-id"),
+			AlertName:                      types.StringValue("test-alert"),
+			IntegrationIDs:                 integrationIDsSet,
+			EventFilterQuery:               types.StringNull(),
+			EventFilterEventTypes:          eventTypesSet,
+			EventFilterRuleIDs:             types.SetNull(types.StringType),
+			EventFilterApplicationAlertIDs: types.SetNull(types.StringType),
+			CustomPayloadFields:            types.ListNull(shared.GetCustomPayloadFieldType()),
 		}
 
 		state := createMockState(t, ctx, model)
@@ -316,13 +320,14 @@ func TestMapStateToDataObject(t *testing.T) {
 		ruleIDsSet, _ := types.SetValueFrom(ctx, types.StringType, ruleIDs)
 
 		model := AlertingConfigModel{
-			ID:                    types.StringValue("test-id"),
-			AlertName:             types.StringValue("test-alert"),
-			IntegrationIDs:        integrationIDsSet,
-			EventFilterQuery:      types.StringNull(),
-			EventFilterEventTypes: types.SetNull(types.StringType),
-			EventFilterRuleIDs:    ruleIDsSet,
-			CustomPayloadFields:   types.ListNull(shared.GetCustomPayloadFieldType()),
+			ID:                             types.StringValue("test-id"),
+			AlertName:                      types.StringValue("test-alert"),
+			IntegrationIDs:                 integrationIDsSet,
+			EventFilterQuery:               types.StringNull(),
+			EventFilterEventTypes:          types.SetNull(types.StringType),
+			EventFilterRuleIDs:             ruleIDsSet,
+			EventFilterApplicationAlertIDs: types.SetNull(types.StringType),
+			CustomPayloadFields:            types.ListNull(shared.GetCustomPayloadFieldType()),
 		}
 
 		state := createMockState(t, ctx, model)
@@ -343,13 +348,14 @@ func TestMapStateToDataObject(t *testing.T) {
 		customFieldsList, _ := types.ListValue(shared.GetCustomPayloadFieldType(), customFields)
 
 		model := AlertingConfigModel{
-			ID:                    types.StringValue("test-id"),
-			AlertName:             types.StringValue("test-alert"),
-			IntegrationIDs:        integrationIDsSet,
-			EventFilterQuery:      types.StringNull(),
-			EventFilterEventTypes: types.SetNull(types.StringType),
-			EventFilterRuleIDs:    types.SetNull(types.StringType),
-			CustomPayloadFields:   customFieldsList,
+			ID:                             types.StringValue("test-id"),
+			AlertName:                      types.StringValue("test-alert"),
+			IntegrationIDs:                 integrationIDsSet,
+			EventFilterQuery:               types.StringNull(),
+			EventFilterEventTypes:          types.SetNull(types.StringType),
+			EventFilterRuleIDs:             types.SetNull(types.StringType),
+			EventFilterApplicationAlertIDs: types.SetNull(types.StringType),
+			CustomPayloadFields:            customFieldsList,
 		}
 
 		state := createMockState(t, ctx, model)
@@ -577,13 +583,14 @@ func TestMapStateToDataObjectWithDynamicCustomPayloadFields(t *testing.T) {
 		customFieldsList, _ := types.ListValue(shared.GetCustomPayloadFieldType(), customFields)
 
 		model := AlertingConfigModel{
-			ID:                    types.StringValue("test-id"),
-			AlertName:             types.StringValue("test-alert"),
-			IntegrationIDs:        integrationIDsSet,
-			EventFilterQuery:      types.StringNull(),
-			EventFilterEventTypes: types.SetNull(types.StringType),
-			EventFilterRuleIDs:    types.SetNull(types.StringType),
-			CustomPayloadFields:   customFieldsList,
+			ID:                             types.StringValue("test-id"),
+			AlertName:                      types.StringValue("test-alert"),
+			IntegrationIDs:                 integrationIDsSet,
+			EventFilterQuery:               types.StringNull(),
+			EventFilterEventTypes:          types.SetNull(types.StringType),
+			EventFilterRuleIDs:             types.SetNull(types.StringType),
+			EventFilterApplicationAlertIDs: types.SetNull(types.StringType),
+			CustomPayloadFields:            customFieldsList,
 		}
 
 		state := createMockState(t, ctx, model)
@@ -665,13 +672,14 @@ func TestMapStateToDataObjectEdgeCases(t *testing.T) {
 		customFieldsList, _ := types.ListValue(shared.GetCustomPayloadFieldType(), customFields)
 
 		model := AlertingConfigModel{
-			ID:                    types.StringValue("test-id-complex"),
-			AlertName:             types.StringValue("comprehensive-alert-config"),
-			IntegrationIDs:        integrationIDsSet,
-			EventFilterQuery:      types.StringValue("entity.type:host AND entity.label:production AND entity.zone:us-east-1"),
-			EventFilterEventTypes: eventTypesSet,
-			EventFilterRuleIDs:    ruleIDsSet,
-			CustomPayloadFields:   customFieldsList,
+			ID:                             types.StringValue("test-id-complex"),
+			AlertName:                      types.StringValue("comprehensive-alert-config"),
+			IntegrationIDs:                 integrationIDsSet,
+			EventFilterQuery:               types.StringValue("entity.type:host AND entity.label:production AND entity.zone:us-east-1"),
+			EventFilterEventTypes:          eventTypesSet,
+			EventFilterRuleIDs:             ruleIDsSet,
+			EventFilterApplicationAlertIDs: types.SetNull(types.StringType),
+			CustomPayloadFields:            customFieldsList,
 		}
 
 		state := createMockState(t, ctx, model)
@@ -694,13 +702,14 @@ func TestMapStateToDataObjectEdgeCases(t *testing.T) {
 		integrationIDsSet, _ := types.SetValueFrom(ctx, types.StringType, integrationIDs)
 
 		model := AlertingConfigModel{
-			ID:                    types.StringValue(""),
-			AlertName:             types.StringValue("test-alert"),
-			IntegrationIDs:        integrationIDsSet,
-			EventFilterQuery:      types.StringValue(""),
-			EventFilterEventTypes: types.SetNull(types.StringType),
-			EventFilterRuleIDs:    types.SetNull(types.StringType),
-			CustomPayloadFields:   types.ListNull(shared.GetCustomPayloadFieldType()),
+			ID:                             types.StringValue(""),
+			AlertName:                      types.StringValue("test-alert"),
+			IntegrationIDs:                 integrationIDsSet,
+			EventFilterQuery:               types.StringValue(""),
+			EventFilterEventTypes:          types.SetNull(types.StringType),
+			EventFilterRuleIDs:             types.SetNull(types.StringType),
+			EventFilterApplicationAlertIDs: types.SetNull(types.StringType),
+			CustomPayloadFields:            types.ListNull(shared.GetCustomPayloadFieldType()),
 		}
 
 		state := createMockState(t, ctx, model)

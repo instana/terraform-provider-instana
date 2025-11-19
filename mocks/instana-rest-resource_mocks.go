@@ -7,7 +7,7 @@ package mocks
 import (
 	reflect "reflect"
 
-	restapi "github.com/instana/terraform-provider-instana/internal/restapi"
+	restapi "github.com/gessnerfl/terraform-provider-instana/internal/restapi"
 	gomock "go.uber.org/mock/gomock"
 )
 

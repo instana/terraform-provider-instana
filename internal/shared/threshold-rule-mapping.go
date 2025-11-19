@@ -460,11 +460,17 @@ func MapThresholdPluginToState(ctx context.Context, threshold *restapi.Threshold
 	}
 	switch threshold.Type {
 	case "adaptiveBaseline":
+		var seasonality types.String
+		if threshold.Seasonality != nil {
+			seasonality = types.StringValue(string(*threshold.Seasonality))
+		} else {
+			seasonality = types.StringNull()
+		}
 		adaptiveBaselineModel := AdaptiveBaselineModel{
 			//Operator:        util.SetStringPointerToState(threshold.Operator),
 			DeviationFactor: util.SetFloat32PointerToState(threshold.DeviationFactor),
 			Adaptability:    util.SetFloat32PointerToState(threshold.Adaptability),
-			Seasonality:     types.StringValue(string(*threshold.Seasonality)),
+			Seasonality:     seasonality,
 		}
 		thresholdTypeModel.AdaptiveBaseline = &adaptiveBaselineModel
 	default:
@@ -487,11 +493,17 @@ func MapAllThresholdPluginToState(ctx context.Context, threshold *restapi.Thresh
 	}
 	switch threshold.Type {
 	case "adaptiveBaseline":
+		var seasonality types.String
+		if threshold.Seasonality != nil {
+			seasonality = types.StringValue(string(*threshold.Seasonality))
+		} else {
+			seasonality = types.StringNull()
+		}
 		adaptiveBaselineModel := AdaptiveBaselineModel{
 			//Operator:        util.SetStringPointerToState(threshold.Operator),
 			DeviationFactor: util.SetFloat32PointerToState(threshold.DeviationFactor),
 			Adaptability:    util.SetFloat32PointerToState(threshold.Adaptability),
-			Seasonality:     types.StringValue(string(*threshold.Seasonality)),
+			Seasonality:     seasonality,
 		}
 		thresholdTypeModel.AdaptiveBaseline = &adaptiveBaselineModel
 	case "historicBaseline":
@@ -499,10 +511,16 @@ func MapAllThresholdPluginToState(ctx context.Context, threshold *restapi.Thresh
 		if threshold.Baseline != nil {
 			baseline = *threshold.Baseline
 		}
+		var seasonality types.String
+		if threshold.Seasonality != nil {
+			seasonality = types.StringValue(string(*threshold.Seasonality))
+		} else {
+			seasonality = types.StringNull()
+		}
 		historicBaselineModel := HistoricBaselineModel{
 			Baseline:    baseline,
 			Deviation:   util.SetFloat32PointerToState(threshold.DeviationFactor),
-			Seasonality: types.StringValue(string(*threshold.Seasonality)),
+			Seasonality: seasonality,
 		}
 		thresholdTypeModel.HistoricBaseline = &historicBaselineModel
 	default:

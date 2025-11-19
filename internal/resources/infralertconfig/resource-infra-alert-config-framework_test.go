@@ -78,7 +78,26 @@ func TestUpdateState_BasicConfig(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	// Initialize state with minimal model to prevent errors during UpdateState
+	initModel := InfraAlertConfigModel{
+		ID:                 types.StringNull(),
+		Name:               types.StringNull(),
+		Description:        types.StringNull(),
+		TagFilter:          types.StringNull(),
+		GroupBy:            types.ListNull(types.StringType),
+		Granularity:        types.Int64Null(),
+		EvaluationType:     types.StringNull(),
+		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
+	}
+	diags := state.Set(ctx, initModel)
+	require.False(t, diags.HasError())
+
+	diags = resource.UpdateState(ctx, state, nil, data)
+	if diags.HasError() {
+		for _, d := range diags.Errors() {
+			t.Logf("Error: %s - %s", d.Summary(), d.Detail())
+		}
+	}
 	require.False(t, diags.HasError())
 
 	var model InfraAlertConfigModel
@@ -122,7 +141,21 @@ func TestUpdateState_WithTagFilter(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	// Initialize state with minimal model to prevent errors during UpdateState
+	initModel := InfraAlertConfigModel{
+		ID:                 types.StringNull(),
+		Name:               types.StringNull(),
+		Description:        types.StringNull(),
+		TagFilter:          types.StringNull(),
+		GroupBy:            types.ListNull(types.StringType),
+		Granularity:        types.Int64Null(),
+		EvaluationType:     types.StringNull(),
+		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
+	}
+	diags := state.Set(ctx, initModel)
+	require.False(t, diags.HasError())
+
+	diags = resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model InfraAlertConfigModel
@@ -152,7 +185,21 @@ func TestUpdateState_WithGroupBy(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	// Initialize state with minimal model to prevent errors during UpdateState
+	initModel := InfraAlertConfigModel{
+		ID:                 types.StringNull(),
+		Name:               types.StringNull(),
+		Description:        types.StringNull(),
+		TagFilter:          types.StringNull(),
+		GroupBy:            types.ListNull(types.StringType),
+		Granularity:        types.Int64Null(),
+		EvaluationType:     types.StringNull(),
+		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
+	}
+	diags := state.Set(ctx, initModel)
+	require.False(t, diags.HasError())
+
+	diags = resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model InfraAlertConfigModel
@@ -188,6 +235,8 @@ func TestUpdateState_WithAlertChannels(t *testing.T) {
 	state := &tfsdk.State{
 		Schema: getTestSchema(),
 	}
+
+	initializeEmptyState(ctx, t, state)
 
 	diags := resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
@@ -231,6 +280,8 @@ func TestUpdateState_WithTimeThreshold(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
+	initializeEmptyState(ctx, t, state)
+
 	diags := resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
 
@@ -267,6 +318,8 @@ func TestUpdateState_WithCustomPayloadFields(t *testing.T) {
 	state := &tfsdk.State{
 		Schema: getTestSchema(),
 	}
+
+	initializeEmptyState(ctx, t, state)
 
 	diags := resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
@@ -315,6 +368,8 @@ func TestUpdateState_WithRulesAndStaticThreshold(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
+	initializeEmptyState(ctx, t, state)
+
 	diags := resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
 
@@ -334,7 +389,7 @@ func TestUpdateState_WithRulesAndStaticThreshold(t *testing.T) {
 	require.NotNil(t, model.Rules.GenericRule.ThresholdRule)
 	require.NotNil(t, model.Rules.GenericRule.ThresholdRule.Warning)
 	require.NotNil(t, model.Rules.GenericRule.ThresholdRule.Warning.Static)
-	assert.Equal(t, int64(100), model.Rules.GenericRule.ThresholdRule.Warning.Static.Value.ValueInt64())
+	assert.Equal(t, float32(100), model.Rules.GenericRule.ThresholdRule.Warning.Static.Value.ValueFloat32())
 }
 
 func TestUpdateState_WithRulesAndAdaptiveBaselineThreshold(t *testing.T) {
@@ -378,6 +433,8 @@ func TestUpdateState_WithRulesAndAdaptiveBaselineThreshold(t *testing.T) {
 	state := &tfsdk.State{
 		Schema: getTestSchema(),
 	}
+
+	initializeEmptyState(ctx, t, state)
 
 	diags := resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
@@ -620,7 +677,7 @@ func TestMapStateToDataObject_WithRulesAndStaticThreshold(t *testing.T) {
 				ThresholdRule: &shared.ThresholdPluginModel{
 					Warning: &shared.ThresholdTypeModel{
 						Static: &shared.StaticTypeModel{
-							Value: types.Int64Value(100),
+							Value: types.Float32Value(float32(100)),
 						},
 					},
 				},
@@ -673,7 +730,6 @@ func TestMapStateToDataObject_WithRulesAndAdaptiveBaselineThreshold(t *testing.T
 				ThresholdRule: &shared.ThresholdPluginModel{
 					Critical: &shared.ThresholdTypeModel{
 						AdaptiveBaseline: &shared.AdaptiveBaselineModel{
-							Operator:        types.StringValue(">="),
 							DeviationFactor: types.Float32Value(2.0),
 							Adaptability:    types.Float32Value(0.5),
 							Seasonality:     types.StringValue("DAILY"),
@@ -725,12 +781,12 @@ func TestMapStateToDataObject_WithBothThresholds(t *testing.T) {
 				ThresholdRule: &shared.ThresholdPluginModel{
 					Warning: &shared.ThresholdTypeModel{
 						Static: &shared.StaticTypeModel{
-							Value: types.Int64Value(80),
+							Value: types.Float32Value(float32(80)),
 						},
 					},
 					Critical: &shared.ThresholdTypeModel{
 						Static: &shared.StaticTypeModel{
-							Value: types.Int64Value(95),
+							Value: types.Float32Value(float32(95)),
 						},
 					},
 				},
@@ -841,6 +897,8 @@ func TestUpdateState_WithEmptyAlertChannels(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
+	initializeEmptyState(ctx, t, state)
+
 	diags := resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
 
@@ -869,6 +927,8 @@ func TestUpdateState_WithNullTagFilter(t *testing.T) {
 	state := &tfsdk.State{
 		Schema: getTestSchema(),
 	}
+
+	initializeEmptyState(ctx, t, state)
 
 	diags := resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
@@ -899,6 +959,8 @@ func TestUpdateState_WithEmptyGroupBy(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
+	initializeEmptyState(ctx, t, state)
+
 	diags := resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
 
@@ -927,6 +989,8 @@ func TestUpdateState_WithNullTimeThreshold(t *testing.T) {
 	state := &tfsdk.State{
 		Schema: getTestSchema(),
 	}
+
+	initializeEmptyState(ctx, t, state)
 
 	diags := resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
@@ -959,6 +1023,8 @@ func TestUpdateState_WithUnsupportedTimeThresholdType(t *testing.T) {
 	state := &tfsdk.State{
 		Schema: getTestSchema(),
 	}
+
+	initializeEmptyState(ctx, t, state)
 
 	diags := resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
@@ -1057,6 +1123,8 @@ func TestUpdateState_WithOnlyWarningAlertChannel(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
+	initializeEmptyState(ctx, t, state)
+
 	diags := resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
 
@@ -1088,6 +1156,8 @@ func TestUpdateState_WithOnlyCriticalAlertChannel(t *testing.T) {
 	state := &tfsdk.State{
 		Schema: getTestSchema(),
 	}
+
+	initializeEmptyState(ctx, t, state)
 
 	diags := resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
@@ -1127,9 +1197,11 @@ func TestMapStateToDataObject_WithOnlyWarningAlertChannel(t *testing.T) {
 	result, diags := resource.MapStateToDataObject(ctx, nil, &state)
 	require.False(t, diags.HasError())
 	require.NotNil(t, result)
-	require.Len(t, result.AlertChannels, 1)
+	require.Len(t, result.AlertChannels, 2)
 	assert.Contains(t, result.AlertChannels, restapi.WarningSeverity)
-	assert.NotContains(t, result.AlertChannels, restapi.CriticalSeverity)
+	assert.Contains(t, result.AlertChannels, restapi.CriticalSeverity)
+	assert.Len(t, result.AlertChannels[restapi.WarningSeverity], 1)
+	assert.Len(t, result.AlertChannels[restapi.CriticalSeverity], 0)
 }
 
 func TestMapStateToDataObject_AllEvaluationTypes(t *testing.T) {
@@ -1197,6 +1269,22 @@ func TestMapTimeThresholdToModel_ViolationsInSequence(t *testing.T) {
 
 // Helper functions
 
+func initializeEmptyState(ctx context.Context, t *testing.T, state *tfsdk.State) {
+	// Initialize state with minimal model to prevent errors during UpdateState
+	initModel := InfraAlertConfigModel{
+		ID:                 types.StringNull(),
+		Name:               types.StringNull(),
+		Description:        types.StringNull(),
+		TagFilter:          types.StringNull(),
+		GroupBy:            types.ListNull(types.StringType),
+		Granularity:        types.Int64Null(),
+		EvaluationType:     types.StringNull(),
+		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
+	}
+	diags := state.Set(ctx, initModel)
+	require.False(t, diags.HasError())
+}
+
 func createMockState(t *testing.T, model InfraAlertConfigModel) tfsdk.State {
 	state := tfsdk.State{
 		Schema: getTestSchema(),
@@ -1225,6 +1313,8 @@ func TestUpdateState_WithEmptyRules(t *testing.T) {
 	state := &tfsdk.State{
 		Schema: getTestSchema(),
 	}
+
+	initializeEmptyState(ctx, t, state)
 
 	diags := resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
@@ -1277,6 +1367,8 @@ func TestUpdateState_WithBothThresholds(t *testing.T) {
 	state := &tfsdk.State{
 		Schema: getTestSchema(),
 	}
+
+	initializeEmptyState(ctx, t, state)
 
 	diags := resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
@@ -1365,6 +1457,8 @@ func TestUpdateState_ErrorInTagFilterMapping(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
+	initializeEmptyState(ctx, t, state)
+
 	diags := resource.UpdateState(ctx, state, nil, data)
 	// This may or may not error depending on the tag filter validation
 	// The test ensures the error handling path is covered
@@ -1397,9 +1491,11 @@ func TestMapStateToDataObject_WithOnlyCriticalAlertChannel(t *testing.T) {
 	result, diags := resource.MapStateToDataObject(ctx, nil, &state)
 	require.False(t, diags.HasError())
 	require.NotNil(t, result)
-	require.Len(t, result.AlertChannels, 1)
+	require.Len(t, result.AlertChannels, 2)
 	assert.Contains(t, result.AlertChannels, restapi.CriticalSeverity)
-	assert.NotContains(t, result.AlertChannels, restapi.WarningSeverity)
+	assert.Contains(t, result.AlertChannels, restapi.WarningSeverity)
+	assert.Len(t, result.AlertChannels[restapi.CriticalSeverity], 1)
+	assert.Len(t, result.AlertChannels[restapi.WarningSeverity], 0)
 }
 
 func TestUpdateState_WithEmptyCustomPayloadFields(t *testing.T) {
@@ -1420,6 +1516,8 @@ func TestUpdateState_WithEmptyCustomPayloadFields(t *testing.T) {
 	state := &tfsdk.State{
 		Schema: getTestSchema(),
 	}
+
+	initializeEmptyState(ctx, t, state)
 
 	diags := resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
@@ -1457,8 +1555,10 @@ func TestMapStateToDataObject_WithEmptyAlertChannelLists(t *testing.T) {
 	result, diags := resource.MapStateToDataObject(ctx, nil, &state)
 	require.False(t, diags.HasError())
 	require.NotNil(t, result)
-	// Empty lists should not be added to the map
-	assert.Empty(t, result.AlertChannels)
+	// Empty lists are added to the map as empty arrays
+	require.Len(t, result.AlertChannels, 2)
+	assert.Len(t, result.AlertChannels[restapi.WarningSeverity], 0)
+	assert.Len(t, result.AlertChannels[restapi.CriticalSeverity], 0)
 }
 
 func TestUpdateState_WithEmptyGroupByList(t *testing.T) {
@@ -1479,6 +1579,8 @@ func TestUpdateState_WithEmptyGroupByList(t *testing.T) {
 	state := &tfsdk.State{
 		Schema: getTestSchema(),
 	}
+
+	initializeEmptyState(ctx, t, state)
 
 	diags := resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
@@ -1537,6 +1639,8 @@ func TestUpdateState_WithEmptyAlertChannelSeverities(t *testing.T) {
 	state := &tfsdk.State{
 		Schema: getTestSchema(),
 	}
+
+	initializeEmptyState(ctx, t, state)
 
 	diags := resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
