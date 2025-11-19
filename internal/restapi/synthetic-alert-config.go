@@ -8,7 +8,7 @@ type SyntheticAlertConfig struct {
 	ID                    string                      `json:"id,omitempty"`
 	Name                  string                      `json:"name"`
 	Description           string                      `json:"description,omitempty"`
-	SyntheticTestIds      []string                    `json:"syntheticTestIds,omitempty"`
+	SyntheticTestIds      []string                    `json:"syntheticTestIds"`
 	Severity              int                         `json:"severity"`
 	TagFilterExpression   *TagFilter                  `json:"tagFilterExpression,omitempty"`
 	Rule                  SyntheticAlertRule          `json:"rule"`

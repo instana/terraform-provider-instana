@@ -106,7 +106,7 @@ func (r *syntheticAlertConfigResourceFramework) buildDescriptionValidators() []v
 // buildSyntheticTestIdsAttribute creates the synthetic_test_ids attribute schema
 func (r *syntheticAlertConfigResourceFramework) buildSyntheticTestIdsAttribute() schema.Attribute {
 	return schema.SetAttribute{
-		Required:    true,
+		Optional:    true,
 		Description: SyntheticAlertConfigDescSyntheticTestIds,
 		ElementType: types.StringType,
 	}
