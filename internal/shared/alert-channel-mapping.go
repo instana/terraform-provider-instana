@@ -86,6 +86,27 @@ type ServiceNowModel struct {
 	AutoCloseIncidents types.Bool   `tfsdk:"auto_close_incidents"`
 }
 
+type SlackAppModel struct {
+	AppID          types.String `tfsdk:"app_id"`
+	TeamID         types.String `tfsdk:"team_id"`
+	TeamName       types.String `tfsdk:"team_name"`
+	ChannelID      types.String `tfsdk:"channel_id"`
+	ChannelName    types.String `tfsdk:"channel_name"`
+	EmojiRendering types.Bool   `tfsdk:"emoji_rendering"`
+}
+
+type MsTeamsAppModel struct {
+	APITokenID types.String `tfsdk:"api_token_id"`
+	TeamID     types.String `tfsdk:"team_id"`
+	TeamName   types.String `tfsdk:"team_name"`
+	ChannelID  types.String `tfsdk:"channel_id"`
+	ChannelName types.String `tfsdk:"channel_name"`
+	InstanaURL types.String `tfsdk:"instana_url"`
+	ServiceURL types.String `tfsdk:"service_url"`
+	TenantID   types.String `tfsdk:"tenant_id"`
+	TenantName types.String `tfsdk:"tenant_name"`
+}
+
 func MapAlertChannelsToState(ctx context.Context, alertChannels map[restapi.AlertSeverity][]string) (types.Object, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
@@ -457,4 +478,45 @@ func CreateHTTPHeaderMapFromList(headers []string) map[string]string {
 		}
 	}
 	return result
+}
+
+func MapSlackAppChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*SlackAppModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Create Slack App model
+	model := &SlackAppModel{
+		AppID:       util.SetStringPointerToState(channel.AppID),
+		TeamID:      util.SetStringPointerToState(channel.TeamID),
+		TeamName:    util.SetStringPointerToState(channel.TeamName),
+		ChannelID:   util.SetStringPointerToState(channel.ChannelID),
+		ChannelName: util.SetStringPointerToState(channel.ChannelName),
+	}
+
+	// Add optional emoji rendering field
+	if channel.EmojiRendering != nil {
+		model.EmojiRendering = types.BoolValue(*channel.EmojiRendering)
+	} else {
+		model.EmojiRendering = types.BoolNull()
+	}
+
+	return model, diags
+}
+
+func MapMsTeamsAppChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*MsTeamsAppModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// Create MS Teams App model
+	model := &MsTeamsAppModel{
+		APITokenID: util.SetStringPointerToState(channel.APITokenID),
+		TeamID:     util.SetStringPointerToState(channel.TeamID),
+		TeamName:   util.SetStringPointerToState(channel.TeamName),
+		ChannelID:  util.SetStringPointerToState(channel.ChannelID),
+		ChannelName: util.SetStringPointerToState(channel.ChannelName),
+		InstanaURL: util.SetStringPointerToState(channel.InstanaURL),
+		ServiceURL: util.SetStringPointerToState(channel.ServiceURL),
+		TenantID:   util.SetStringPointerToState(channel.TenantID),
+		TenantName: util.SetStringPointerToState(channel.TenantName),
+	}
+
+	return model, diags
 }

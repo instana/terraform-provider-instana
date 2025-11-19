@@ -291,6 +291,78 @@ func NewAlertingChannelResourceHandleFramework() resourcehandle.ResourceHandleFr
 							},
 						},
 					},
+					AlertingChannelFieldChannelSlackApp: schema.SingleNestedAttribute{
+						Optional:    true,
+						Description: AlertingChannelDescSlackApp,
+						Attributes: map[string]schema.Attribute{
+							AlertingChannelSlackAppFieldAppID: schema.StringAttribute{
+								Required:    true,
+								Description: AlertingChannelDescSlackAppAppID,
+							},
+							AlertingChannelSlackAppFieldTeamID: schema.StringAttribute{
+								Required:    true,
+								Description: AlertingChannelDescSlackAppTeamID,
+							},
+							AlertingChannelSlackAppFieldTeamName: schema.StringAttribute{
+								Required:    true,
+								Description: AlertingChannelDescSlackAppTeamName,
+							},
+							AlertingChannelSlackAppFieldChannelID: schema.StringAttribute{
+								Required:    true,
+								Description: AlertingChannelDescSlackAppChannelID,
+							},
+							AlertingChannelSlackAppFieldChannelName: schema.StringAttribute{
+								Required:    true,
+								Description: AlertingChannelDescSlackAppChannelName,
+							},
+							AlertingChannelSlackAppFieldEmojiRendering: schema.BoolAttribute{
+								Optional:    true,
+								Description: AlertingChannelDescSlackAppEmojiRendering,
+							},
+						},
+					},
+					AlertingChannelFieldChannelMsTeamsApp: schema.SingleNestedAttribute{
+						Optional:    true,
+						Description: AlertingChannelDescMsTeamsApp,
+						Attributes: map[string]schema.Attribute{
+							AlertingChannelMsTeamsAppFieldAPITokenID: schema.StringAttribute{
+								Required:    true,
+								Description: AlertingChannelDescMsTeamsAppAPITokenID,
+							},
+							AlertingChannelMsTeamsAppFieldTeamID: schema.StringAttribute{
+								Required:    true,
+								Description: AlertingChannelDescMsTeamsAppTeamID,
+							},
+							AlertingChannelMsTeamsAppFieldTeamName: schema.StringAttribute{
+								Required:    true,
+								Description: AlertingChannelDescMsTeamsAppTeamName,
+							},
+							AlertingChannelMsTeamsAppFieldChannelID: schema.StringAttribute{
+								Required:    true,
+								Description: AlertingChannelDescMsTeamsAppChannelID,
+							},
+							AlertingChannelMsTeamsAppFieldChannelName: schema.StringAttribute{
+								Required:    true,
+								Description: AlertingChannelDescMsTeamsAppChannelName,
+							},
+							AlertingChannelMsTeamsAppFieldInstanaURL: schema.StringAttribute{
+								Required:    true,
+								Description: AlertingChannelDescMsTeamsAppInstanaURL,
+							},
+							AlertingChannelMsTeamsAppFieldServiceURL: schema.StringAttribute{
+								Required:    true,
+								Description: AlertingChannelDescMsTeamsAppServiceURL,
+							},
+							AlertingChannelMsTeamsAppFieldTenantID: schema.StringAttribute{
+								Required:    true,
+								Description: AlertingChannelDescMsTeamsAppTenantID,
+							},
+							AlertingChannelMsTeamsAppFieldTenantName: schema.StringAttribute{
+								Required:    true,
+								Description: AlertingChannelDescMsTeamsAppTenantName,
+							},
+						},
+					},
 				},
 			},
 			SchemaVersion: 1,
@@ -376,6 +448,10 @@ func (r *alertingChannelResourceFramework) mapChannelTypeToModel(ctx context.Con
 		return r.mapWebexTeamsWebhookToModel(ctx, alertingChannel, model)
 	case restapi.WatsonAIOpsWebhookChannelType:
 		return r.mapWatsonAIOpsWebhookToModel(ctx, alertingChannel, model)
+	case restapi.SlackAppChannelType:
+		return r.mapSlackAppToModel(ctx, alertingChannel, model)
+	case restapi.MsTeamsAppChannelType:
+		return r.mapMsTeamsAppToModel(ctx, alertingChannel, model)
 	default:
 		diags.AddError(
 			AlertingChannelErrUnsupportedType,
@@ -494,6 +570,22 @@ func (r *alertingChannelResourceFramework) mapWatsonAIOpsWebhookToModel(ctx cont
 	watsonChannel, diags := shared.MapWatsonAIOpsWebhookChannelToState(ctx, channel)
 	if !diags.HasError() {
 		model.WatsonAIOpsWebhook = watsonChannel
+	}
+	return diags
+}
+
+func (r *alertingChannelResourceFramework) mapSlackAppToModel(ctx context.Context, channel *restapi.AlertingChannel, model *AlertingChannelModel) diag.Diagnostics {
+	slackAppChannel, diags := shared.MapSlackAppChannelToState(ctx, channel)
+	if !diags.HasError() {
+		model.SlackApp = slackAppChannel
+	}
+	return diags
+}
+
+func (r *alertingChannelResourceFramework) mapMsTeamsAppToModel(ctx context.Context, channel *restapi.AlertingChannel, model *AlertingChannelModel) diag.Diagnostics {
+	msTeamsAppChannel, diags := shared.MapMsTeamsAppChannelToState(ctx, channel)
+	if !diags.HasError() {
+		model.MsTeamsApp = msTeamsAppChannel
 	}
 	return diags
 }
@@ -830,6 +922,64 @@ func (r *alertingChannelResourceFramework) mapWatsonAIOpsWebhookChannelFromState
 	return result, nil
 }
 
+// mapSlackAppChannelFromState converts Slack App channel state to API object
+func (r *alertingChannelResourceFramework) mapSlackAppChannelFromState(ctx context.Context, id string, name string, slackApp *shared.SlackAppModel) (*restapi.AlertingChannel, diag.Diagnostics) {
+	appIDValue := slackApp.AppID.ValueString()
+	teamIDValue := slackApp.TeamID.ValueString()
+	teamNameValue := slackApp.TeamName.ValueString()
+	channelIDValue := slackApp.ChannelID.ValueString()
+	channelNameValue := slackApp.ChannelName.ValueString()
+
+	result := &restapi.AlertingChannel{
+		ID:          id,
+		Name:        name,
+		Kind:        restapi.SlackAppChannelType,
+		AppID:       &appIDValue,
+		TeamID:      &teamIDValue,
+		TeamName:    &teamNameValue,
+		ChannelID:   &channelIDValue,
+		ChannelName: &channelNameValue,
+	}
+
+	// Add optional emoji rendering field
+	if !slackApp.EmojiRendering.IsNull() {
+		emojiRenderingValue := slackApp.EmojiRendering.ValueBool()
+		result.EmojiRendering = &emojiRenderingValue
+	}
+
+	return result, nil
+}
+
+// mapMsTeamsAppChannelFromState converts MS Teams App channel state to API object
+func (r *alertingChannelResourceFramework) mapMsTeamsAppChannelFromState(ctx context.Context, id string, name string, msTeamsApp *shared.MsTeamsAppModel) (*restapi.AlertingChannel, diag.Diagnostics) {
+	apiTokenIDValue := msTeamsApp.APITokenID.ValueString()
+	teamIDValue := msTeamsApp.TeamID.ValueString()
+	teamNameValue := msTeamsApp.TeamName.ValueString()
+	channelIDValue := msTeamsApp.ChannelID.ValueString()
+	channelNameValue := msTeamsApp.ChannelName.ValueString()
+	instanaURLValue := msTeamsApp.InstanaURL.ValueString()
+	serviceURLValue := msTeamsApp.ServiceURL.ValueString()
+	tenantIDValue := msTeamsApp.TenantID.ValueString()
+	tenantNameValue := msTeamsApp.TenantName.ValueString()
+
+	result := &restapi.AlertingChannel{
+		ID:          id,
+		Name:        name,
+		Kind:        restapi.MsTeamsAppChannelType,
+		APITokenID:  &apiTokenIDValue,
+		TeamID:      &teamIDValue,
+		TeamName:    &teamNameValue,
+		ChannelID:   &channelIDValue,
+		ChannelName: &channelNameValue,
+		InstanaURL:  &instanaURLValue,
+		ServiceURL:  &serviceURLValue,
+		TenantID:    &tenantIDValue,
+		TenantName:  &tenantNameValue,
+	}
+
+	return result, nil
+}
+
 // ============================================================================
 // Main Mapping Method
 // ============================================================================
@@ -922,6 +1072,12 @@ func (r *alertingChannelResourceFramework) mapConfiguredChannelType(ctx context.
 	}
 	if model.WatsonAIOpsWebhook != nil {
 		return r.mapWatsonAIOpsWebhookChannelFromState(ctx, id, name, model.WatsonAIOpsWebhook)
+	}
+	if model.SlackApp != nil {
+		return r.mapSlackAppChannelFromState(ctx, id, name, model.SlackApp)
+	}
+	if model.MsTeamsApp != nil {
+		return r.mapMsTeamsAppChannelFromState(ctx, id, name, model.MsTeamsApp)
 	}
 
 	// No valid channel type configured

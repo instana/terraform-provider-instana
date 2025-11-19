@@ -108,6 +108,42 @@ const (
 	//AlertingChannelFieldChannelWatsonAIOpsWebhook const for schema field of the Watson AIOps Webhook channel
 	AlertingChannelFieldChannelWatsonAIOpsWebhook = "watson_aiops_webhook"
 
+	//AlertingChannelFieldChannelSlackApp const for schema field of the Slack App channel
+	AlertingChannelFieldChannelSlackApp = "slack_app"
+	//AlertingChannelSlackAppFieldAppID const for the appId field of the Slack App alerting channel
+	AlertingChannelSlackAppFieldAppID = "app_id"
+	//AlertingChannelSlackAppFieldTeamID const for the teamId field of the Slack App alerting channel
+	AlertingChannelSlackAppFieldTeamID = "team_id"
+	//AlertingChannelSlackAppFieldTeamName const for the teamName field of the Slack App alerting channel
+	AlertingChannelSlackAppFieldTeamName = "team_name"
+	//AlertingChannelSlackAppFieldChannelID const for the channelId field of the Slack App alerting channel
+	AlertingChannelSlackAppFieldChannelID = "channel_id"
+	//AlertingChannelSlackAppFieldChannelName const for the channelName field of the Slack App alerting channel
+	AlertingChannelSlackAppFieldChannelName = "channel_name"
+	//AlertingChannelSlackAppFieldEmojiRendering const for the emojiRendering field of the Slack App alerting channel
+	AlertingChannelSlackAppFieldEmojiRendering = "emoji_rendering"
+
+	//AlertingChannelFieldChannelMsTeamsApp const for schema field of the MS Teams App channel
+	AlertingChannelFieldChannelMsTeamsApp = "ms_teams_app"
+	//AlertingChannelMsTeamsAppFieldAPITokenID const for the apiTokenId field of the MS Teams App alerting channel
+	AlertingChannelMsTeamsAppFieldAPITokenID = "api_token_id"
+	//AlertingChannelMsTeamsAppFieldTeamID const for the teamId field of the MS Teams App alerting channel
+	AlertingChannelMsTeamsAppFieldTeamID = "team_id"
+	//AlertingChannelMsTeamsAppFieldTeamName const for the teamName field of the MS Teams App alerting channel
+	AlertingChannelMsTeamsAppFieldTeamName = "team_name"
+	//AlertingChannelMsTeamsAppFieldChannelID const for the channelId field of the MS Teams App alerting channel
+	AlertingChannelMsTeamsAppFieldChannelID = "channel_id"
+	//AlertingChannelMsTeamsAppFieldChannelName const for the channelName field of the MS Teams App alerting channel
+	AlertingChannelMsTeamsAppFieldChannelName = "channel_name"
+	//AlertingChannelMsTeamsAppFieldInstanaURL const for the instanaUrl field of the MS Teams App alerting channel
+	AlertingChannelMsTeamsAppFieldInstanaURL = "instana_url"
+	//AlertingChannelMsTeamsAppFieldServiceURL const for the serviceUrl field of the MS Teams App alerting channel
+	AlertingChannelMsTeamsAppFieldServiceURL = "service_url"
+	//AlertingChannelMsTeamsAppFieldTenantID const for the tenantId field of the MS Teams App alerting channel
+	AlertingChannelMsTeamsAppFieldTenantID = "tenant_id"
+	//AlertingChannelMsTeamsAppFieldTenantName const for the tenantName field of the MS Teams App alerting channel
+	AlertingChannelMsTeamsAppFieldTenantName = "tenant_name"
+
 	// OpsGenie regions
 	OpsGenieRegionEU = "EU"
 	OpsGenieRegionUS = "US"
@@ -171,6 +207,23 @@ const (
 	AlertingChannelDescWatsonAIOpsWebhook          = "The configuration of the Watson AIOps Webhook channel"
 	AlertingChannelDescWatsonAIOpsWebhookURL       = "The webhook URL of the Watson AIOps Webhook alerting channel"
 	AlertingChannelDescWatsonAIOpsHTTPHeaders      = "The list of HTTP headers for the Watson AIOps Webhook alerting channel"
+	AlertingChannelDescSlackApp                    = "The configuration of the Slack App (bidirectional) channel"
+	AlertingChannelDescSlackAppAppID               = "The App ID of the Slack App alerting channel"
+	AlertingChannelDescSlackAppTeamID              = "The Team ID of the Slack App alerting channel"
+	AlertingChannelDescSlackAppTeamName            = "The Team Name of the Slack App alerting channel"
+	AlertingChannelDescSlackAppChannelID           = "The Channel ID of the Slack App alerting channel"
+	AlertingChannelDescSlackAppChannelName         = "The Channel Name of the Slack App alerting channel"
+	AlertingChannelDescSlackAppEmojiRendering      = "Whether to enable emoji rendering in the Slack App alerting channel"
+	AlertingChannelDescMsTeamsApp                  = "The configuration of the MS Teams App (bidirectional) channel"
+	AlertingChannelDescMsTeamsAppAPITokenID        = "The API Token ID of the MS Teams App alerting channel"
+	AlertingChannelDescMsTeamsAppTeamID            = "The Team ID of the MS Teams App alerting channel"
+	AlertingChannelDescMsTeamsAppTeamName          = "The Team Name of the MS Teams App alerting channel"
+	AlertingChannelDescMsTeamsAppChannelID         = "The Channel ID of the MS Teams App alerting channel"
+	AlertingChannelDescMsTeamsAppChannelName       = "The Channel Name of the MS Teams App alerting channel"
+	AlertingChannelDescMsTeamsAppInstanaURL        = "The Instana URL for the MS Teams App alerting channel"
+	AlertingChannelDescMsTeamsAppServiceURL        = "The Service URL of the MS Teams App alerting channel"
+	AlertingChannelDescMsTeamsAppTenantID          = "The Tenant ID of the MS Teams App alerting channel"
+	AlertingChannelDescMsTeamsAppTenantName        = "The Tenant Name of the MS Teams App alerting channel"
 
 	// Error messages
 	AlertingChannelErrUnsupportedType       = "Unsupported alerting channel type"

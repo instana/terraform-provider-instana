@@ -38,6 +38,18 @@ type AlertingChannel struct {
 	SnowStatusOnCloseEvent         *int    `json:"snowStatusOnCloseEvent"`
 	// Prometheus Webhook fields
 	Receiver *string `json:"receiver"`
+	// Bidirectional Slack App fields
+	AppID          *string `json:"appId"`
+	TeamID         *string `json:"teamId"`
+	TeamName       *string `json:"teamName"`
+	ChannelID      *string `json:"channelId"`
+	ChannelName    *string `json:"channelName"`
+	EmojiRendering *bool   `json:"emojiRendering"`
+	// Bidirectional MS Teams App fields
+	APITokenID *string `json:"apiTokenId"`
+	ServiceURL *string `json:"serviceUrl"`
+	TenantID   *string `json:"tenantId"`
+	TenantName *string `json:"tenantName"`
 }
 
 // GetIDForResourcePath implementation of the interface InstanaDataObject
