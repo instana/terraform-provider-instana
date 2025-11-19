@@ -121,15 +121,15 @@ func TestMapStateToDataObject_BasicConfig(t *testing.T) {
 		Description:      types.StringValue("Test Description"),
 		BoundaryScope:    types.StringValue("ALL"),
 		EvaluationType:   types.StringValue("PER_AP"),
-		Granularity:      types.Int64Value(600000),
+		Granularity:      types.Int64Value(int64(600000)),
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		
-		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
+
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
-		Applications:     []ApplicationModel{},
-		Rules:            []RuleWithThresholdModel{},
+		Applications:        []ApplicationModel{},
+		Rules:               []RuleWithThresholdModel{},
 	})
 
 	result, diags := resource.MapStateToDataObject(ctx, state)
@@ -157,16 +157,16 @@ func TestMapStateToDataObject_WithGracePeriod(t *testing.T) {
 		Description:      types.StringValue("Test Description"),
 		BoundaryScope:    types.StringValue("ALL"),
 		EvaluationType:   types.StringValue("PER_AP"),
-		GracePeriod:      types.Int64Value(300000),
-		Granularity:      types.Int64Value(600000),
+		GracePeriod:      types.Int64Value(int64(300000)),
+		Granularity:      types.Int64Value(int64(600000)),
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		
-		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
+
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
-		Applications:     []ApplicationModel{},
-		Rules:            []RuleWithThresholdModel{},
+		Applications:        []ApplicationModel{},
+		Rules:               []RuleWithThresholdModel{},
 	})
 
 	result, diags := resource.MapStateToDataObject(ctx, state)
@@ -186,12 +186,12 @@ func TestMapStateToDataObject_WithApplications(t *testing.T) {
 		Description:      types.StringValue("Test Description"),
 		BoundaryScope:    types.StringValue("ALL"),
 		EvaluationType:   types.StringValue("PER_AP"),
-		Granularity:      types.Int64Value(600000),
+		Granularity:      types.Int64Value(int64(600000)),
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		
-		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
+
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Applications: []ApplicationModel{
 			{
@@ -244,8 +244,8 @@ func TestMapStateToDataObject_WithTimeThreshold(t *testing.T) {
 			name: "request_impact",
 			timeThreshold: &AppAlertTimeThresholdModel{
 				RequestImpact: &AppAlertRequestImpactModel{
-					TimeWindow: types.Int64Value(600000),
-					Requests:   types.Int64Value(100),
+					TimeWindow: types.Int64Value(int64(600000)),
+					Requests:   types.Int64Value(int64(100)),
 				},
 			},
 			expectedType: "requestImpact",
@@ -254,8 +254,8 @@ func TestMapStateToDataObject_WithTimeThreshold(t *testing.T) {
 			name: "violations_in_period",
 			timeThreshold: &AppAlertTimeThresholdModel{
 				ViolationsInPeriod: &AppAlertViolationsInPeriodModel{
-					TimeWindow: types.Int64Value(600000),
-					Violations: types.Int64Value(5),
+					TimeWindow: types.Int64Value(int64(600000)),
+					Violations: types.Int64Value(int64(5)),
 				},
 			},
 			expectedType: "violationsInPeriod",
@@ -264,7 +264,7 @@ func TestMapStateToDataObject_WithTimeThreshold(t *testing.T) {
 			name: "violations_in_sequence",
 			timeThreshold: &AppAlertTimeThresholdModel{
 				ViolationsInSequence: &AppAlertViolationsInSequenceModel{
-					TimeWindow: types.Int64Value(600000),
+					TimeWindow: types.Int64Value(int64(600000)),
 				},
 			},
 			expectedType: "violationsInSequence",
@@ -282,16 +282,16 @@ func TestMapStateToDataObject_WithTimeThreshold(t *testing.T) {
 				Description:      types.StringValue("Test Description"),
 				BoundaryScope:    types.StringValue("ALL"),
 				EvaluationType:   types.StringValue("PER_AP"),
-				Granularity:      types.Int64Value(600000),
+				Granularity:      types.Int64Value(int64(600000)),
 				IncludeInternal:  types.BoolValue(false),
 				IncludeSynthetic: types.BoolValue(false),
 				Triggering:       types.BoolValue(false),
-				
-				AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
+
+				AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 				CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
-				Applications:     []ApplicationModel{},
-				Rules:            []RuleWithThresholdModel{},
-				TimeThreshold:    tt.timeThreshold,
+				Applications:        []ApplicationModel{},
+				Rules:               []RuleWithThresholdModel{},
+				TimeThreshold:       tt.timeThreshold,
 			})
 
 			result, diags := resource.MapStateToDataObject(ctx, state)
@@ -476,7 +476,7 @@ func TestExtractGracePeriod(t *testing.T) {
 	}{
 		{
 			name:     "with_value",
-			input:    types.Int64Value(300000),
+			input:    types.Int64Value(int64(300000)),
 			expected: func() *int64 { v := int64(300000); return &v }(),
 		},
 		{
@@ -528,15 +528,15 @@ func TestMapStateToDataObject_WithAlertChannels(t *testing.T) {
 		Description:      types.StringValue("Test Description"),
 		BoundaryScope:    types.StringValue("ALL"),
 		EvaluationType:   types.StringValue("PER_AP"),
-		Granularity:      types.Int64Value(600000),
+		Granularity:      types.Int64Value(int64(600000)),
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		
-		AlertChannels:    alertChannels,
+
+		AlertChannels:       alertChannels,
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
-		Applications:     []ApplicationModel{},
-		Rules:            []RuleWithThresholdModel{},
+		Applications:        []ApplicationModel{},
+		Rules:               []RuleWithThresholdModel{},
 	})
 
 	result, diags := resource.MapStateToDataObject(ctx, state)
@@ -607,16 +607,16 @@ func TestMapStateToDataObject_WithCustomPayloadFields(t *testing.T) {
 	)
 
 	state := createMockState(t, ApplicationAlertConfigModel{
-		ID:                  types.StringValue("test-id"),
-		Name:                types.StringValue("Test Alert"),
-		Description:         types.StringValue("Test Description"),
-		BoundaryScope:       types.StringValue("ALL"),
-		EvaluationType:      types.StringValue("PER_AP"),
-		Granularity:         types.Int64Value(600000),
-		IncludeInternal:     types.BoolValue(false),
-		IncludeSynthetic:    types.BoolValue(false),
-		Triggering:          types.BoolValue(false),
-		
+		ID:               types.StringValue("test-id"),
+		Name:             types.StringValue("Test Alert"),
+		Description:      types.StringValue("Test Description"),
+		BoundaryScope:    types.StringValue("ALL"),
+		EvaluationType:   types.StringValue("PER_AP"),
+		Granularity:      types.Int64Value(int64(600000)),
+		IncludeInternal:  types.BoolValue(false),
+		IncludeSynthetic: types.BoolValue(false),
+		Triggering:       types.BoolValue(false),
+
 		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: customPayloadFields,
 		Applications:        []ApplicationModel{},
@@ -645,7 +645,7 @@ func TestMapStateToDataObject_WithRules(t *testing.T) {
 					Aggregation: types.StringValue("sum"),
 				},
 			},
-			expected: ApplicationAlertConfigFieldRuleErrorRate,
+			expected: APIAlertTypeErrorRate,
 		},
 		{
 			name: "errors",
@@ -655,7 +655,7 @@ func TestMapStateToDataObject_WithRules(t *testing.T) {
 					Aggregation: types.StringValue("sum"),
 				},
 			},
-			expected: ApplicationAlertConfigFieldRuleErrors,
+			expected: APIAlertTypeErrors,
 		},
 		{
 			name: "logs",
@@ -665,10 +665,10 @@ func TestMapStateToDataObject_WithRules(t *testing.T) {
 					Aggregation: types.StringValue("sum"),
 					Level:       types.StringValue("ERROR"),
 					Message:     types.StringValue("test message"),
-					Operator:    types.StringValue("contains"),
+					Operator:    types.StringValue("CONTAINS"),
 				},
 			},
-			expected: ApplicationAlertConfigFieldRuleLogs,
+			expected: APIAlertTypeLogs,
 		},
 		{
 			name: "slowness",
@@ -678,7 +678,7 @@ func TestMapStateToDataObject_WithRules(t *testing.T) {
 					Aggregation: types.StringValue("mean"),
 				},
 			},
-			expected: ApplicationAlertConfigFieldRuleSlowness,
+			expected: APIAlertTypeSlowness,
 		},
 		{
 			name: "status_code",
@@ -686,11 +686,11 @@ func TestMapStateToDataObject_WithRules(t *testing.T) {
 				StatusCode: &StatusCodeRuleModel{
 					MetricName:      types.StringValue("statusCode"),
 					Aggregation:     types.StringValue("sum"),
-					StatusCodeStart: types.Int64Value(500),
-					StatusCodeEnd:   types.Int64Value(599),
+					StatusCodeStart: types.Int64Value(int64(500)),
+					StatusCodeEnd:   types.Int64Value(int64(599)),
 				},
 			},
-			expected: ApplicationAlertConfigFieldRuleStatusCode,
+			expected: APIAlertTypeStatusCode,
 		},
 		{
 			name: "throughput",
@@ -700,7 +700,7 @@ func TestMapStateToDataObject_WithRules(t *testing.T) {
 					Aggregation: types.StringValue("sum"),
 				},
 			},
-			expected: ApplicationAlertConfigFieldRuleThroughput,
+			expected: APIAlertTypeThroughput,
 		},
 	}
 
@@ -715,18 +715,25 @@ func TestMapStateToDataObject_WithRules(t *testing.T) {
 				Description:      types.StringValue("Test Description"),
 				BoundaryScope:    types.StringValue("ALL"),
 				EvaluationType:   types.StringValue("PER_AP"),
-				Granularity:      types.Int64Value(600000),
+				Granularity:      types.Int64Value(int64(600000)),
 				IncludeInternal:  types.BoolValue(false),
 				IncludeSynthetic: types.BoolValue(false),
 				Triggering:       types.BoolValue(false),
-				
-				AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
+
+				AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 				CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
-				Applications:     []ApplicationModel{},
+				Applications:        []ApplicationModel{},
 				Rules: []RuleWithThresholdModel{
 					{
 						Rule:              tt.rule,
 						ThresholdOperator: types.StringValue(">"),
+						Thresholds: &ApplicationThresholdModel{
+							Warning: &ThresholdLevelModel{
+								Static: &shared.StaticTypeModel{
+									Value: types.Float32Value(float32(100)),
+								},
+							},
+						},
 					},
 				},
 			})
@@ -751,14 +758,14 @@ func TestMapStateToDataObject_WithStaticThreshold(t *testing.T) {
 		Description:      types.StringValue("Test Description"),
 		BoundaryScope:    types.StringValue("ALL"),
 		EvaluationType:   types.StringValue("PER_AP"),
-		Granularity:      types.Int64Value(600000),
+		Granularity:      types.Int64Value(int64(600000)),
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		
-		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
+
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
-		Applications:     []ApplicationModel{},
+		Applications:        []ApplicationModel{},
 		Rules: []RuleWithThresholdModel{
 			{
 				Rule: &RuleModel{
@@ -771,7 +778,7 @@ func TestMapStateToDataObject_WithStaticThreshold(t *testing.T) {
 				Thresholds: &ApplicationThresholdModel{
 					Warning: &ThresholdLevelModel{
 						Static: &shared.StaticTypeModel{
-							Value: types.Int64Value(100),
+							Value: types.Float32Value(float32(100)),
 						},
 					},
 				},
@@ -842,7 +849,7 @@ func TestUpdateState_WithRulesAndThresholds(t *testing.T) {
 	require.NotNil(t, model.Rules[0].Thresholds)
 	require.NotNil(t, model.Rules[0].Thresholds.Warning)
 	require.NotNil(t, model.Rules[0].Thresholds.Warning.Static)
-	assert.Equal(t, int64(100), model.Rules[0].Thresholds.Warning.Static.Value.ValueInt64())
+	assert.Equal(t, float32(100), model.Rules[0].Thresholds.Warning.Static.Value.ValueFloat32())
 }
 
 // Test UpdateState with custom payload fields
@@ -886,7 +893,6 @@ func TestUpdateState_WithCustomPayloadFields(t *testing.T) {
 	assert.False(t, model.CustomPayloadFields.IsNull())
 }
 
-
 // Test UpdateState with tag filter
 func TestUpdateState_WithTagFilterExpression(t *testing.T) {
 	ctx := context.Background()
@@ -895,7 +901,7 @@ func TestUpdateState_WithTagFilterExpression(t *testing.T) {
 	entityType := "entity.type"
 	serviceValue := "service"
 	equalsOp := restapi.EqualsOperator
-	
+
 	tagFilter := &restapi.TagFilter{
 		Type:     restapi.TagFilterExpressionType,
 		Name:     &entityType,
@@ -904,19 +910,19 @@ func TestUpdateState_WithTagFilterExpression(t *testing.T) {
 	}
 
 	data := &restapi.ApplicationAlertConfig{
-		ID:                   "test-id",
-		Name:                 "Test Alert",
-		Description:          "Test Description",
-		BoundaryScope:        "ALL",
-		EvaluationType:       "PER_AP",
-		Granularity:          600000,
-		IncludeInternal:      false,
-		IncludeSynthetic:     false,
-		Triggering:           false,
-		AlertChannelIDs:      []string{},
-		Applications:         map[string]restapi.IncludedApplication{},
-		Rules:                []restapi.ApplicationAlertRuleWithThresholds{},
-		TagFilterExpression:  tagFilter,
+		ID:                  "test-id",
+		Name:                "Test Alert",
+		Description:         "Test Description",
+		BoundaryScope:       "ALL",
+		EvaluationType:      "PER_AP",
+		Granularity:         600000,
+		IncludeInternal:     false,
+		IncludeSynthetic:    false,
+		Triggering:          false,
+		AlertChannelIDs:     []string{},
+		Applications:        map[string]restapi.IncludedApplication{},
+		Rules:               []restapi.ApplicationAlertRuleWithThresholds{},
+		TagFilterExpression: tagFilter,
 	}
 
 	state := &tfsdk.State{
@@ -1101,7 +1107,6 @@ func TestUpdateState_WithAllRuleTypes(t *testing.T) {
 	}
 }
 
-
 // Test tag filter expression
 func TestMapStateToDataObject_WithTagFilter(t *testing.T) {
 	ctx := context.Background()
@@ -1113,16 +1118,16 @@ func TestMapStateToDataObject_WithTagFilter(t *testing.T) {
 		Description:      types.StringValue("Test Description"),
 		BoundaryScope:    types.StringValue("ALL"),
 		EvaluationType:   types.StringValue("PER_AP"),
-		Granularity:      types.Int64Value(600000),
+		Granularity:      types.Int64Value(int64(600000)),
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
 		TagFilter:        types.StringValue("entity.type EQUALS 'service'"),
-		
-		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
+
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
-		Applications:     []ApplicationModel{},
-		Rules:            []RuleWithThresholdModel{},
+		Applications:        []ApplicationModel{},
+		Rules:               []RuleWithThresholdModel{},
 	})
 
 	result, diags := resource.MapStateToDataObject(ctx, state)
@@ -1173,14 +1178,14 @@ func TestMapStateToDataObject_ErrorHandling(t *testing.T) {
 				Description:      types.StringValue("Test Description"),
 				BoundaryScope:    types.StringValue("ALL"),
 				EvaluationType:   types.StringValue("PER_AP"),
-				Granularity:      types.Int64Value(600000),
+				Granularity:      types.Int64Value(int64(600000)),
 				IncludeInternal:  types.BoolValue(false),
 				IncludeSynthetic: types.BoolValue(false),
 				Triggering:       types.BoolValue(false),
-				
-				AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
+
+				AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 				CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
-				Applications:     []ApplicationModel{},
+				Applications:        []ApplicationModel{},
 				Rules: []RuleWithThresholdModel{
 					{
 						Rule:              tt.rule,
@@ -1198,6 +1203,7 @@ func TestMapStateToDataObject_ErrorHandling(t *testing.T) {
 		})
 	}
 }
+
 // Test wrapper MapStateToDataObject function
 func TestWrapperMapStateToDataObject(t *testing.T) {
 	ctx := context.Background()
@@ -1207,24 +1213,24 @@ func TestWrapperMapStateToDataObject(t *testing.T) {
 	plan := &tfsdk.Plan{
 		Schema: resource.MetaData().Schema,
 	}
-	
+
 	model := ApplicationAlertConfigModel{
 		ID:               types.StringValue("test-id"),
 		Name:             types.StringValue("Test Alert"),
 		Description:      types.StringValue("Test Description"),
 		BoundaryScope:    types.StringValue("ALL"),
 		EvaluationType:   types.StringValue("PER_AP"),
-		Granularity:      types.Int64Value(600000),
+		Granularity:      types.Int64Value(int64(600000)),
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		
-		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
+
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
-		Applications:     []ApplicationModel{},
-		Rules:            []RuleWithThresholdModel{},
+		Applications:        []ApplicationModel{},
+		Rules:               []RuleWithThresholdModel{},
 	}
-	
+
 	diags := plan.Set(ctx, model)
 	require.False(t, diags.HasError())
 
@@ -1243,24 +1249,24 @@ func TestWrapperMapStateToDataObject_WithState(t *testing.T) {
 	state := &tfsdk.State{
 		Schema: resource.MetaData().Schema,
 	}
-	
+
 	model := ApplicationAlertConfigModel{
 		ID:               types.StringValue("test-id-2"),
 		Name:             types.StringValue("Test Alert 2"),
 		Description:      types.StringValue("Test Description 2"),
 		BoundaryScope:    types.StringValue("INBOUND"),
 		EvaluationType:   types.StringValue("PER_AP"),
-		Granularity:      types.Int64Value(600000),
+		Granularity:      types.Int64Value(int64(600000)),
 		IncludeInternal:  types.BoolValue(true),
 		IncludeSynthetic: types.BoolValue(true),
 		Triggering:       types.BoolValue(true),
-		
-		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
+
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
-		Applications:     []ApplicationModel{},
-		Rules:            []RuleWithThresholdModel{},
+		Applications:        []ApplicationModel{},
+		Rules:               []RuleWithThresholdModel{},
 	}
-	
+
 	diags := state.Set(ctx, model)
 	require.False(t, diags.HasError())
 
@@ -1318,7 +1324,7 @@ func TestNewResource(t *testing.T) {
 	impl, diags := resource.NewResource(ctx, nil)
 	require.False(t, diags.HasError())
 	require.NotNil(t, impl)
-	
+
 	// Test that it's the correct implementation
 	assert.IsType(t, &applicationAlertConfigResourceFrameworkImpl{}, impl)
 }
@@ -1333,7 +1339,7 @@ func TestNewResource_Global(t *testing.T) {
 	impl, diags := resource.NewResource(ctx, nil)
 	require.False(t, diags.HasError())
 	require.NotNil(t, impl)
-	
+
 	implTyped := impl.(*applicationAlertConfigResourceFrameworkImpl)
 	assert.True(t, implTyped.isGlobal)
 }
@@ -1349,16 +1355,16 @@ func TestMapStateToDataObject_InvalidTagFilter(t *testing.T) {
 		Description:      types.StringValue("Test Description"),
 		BoundaryScope:    types.StringValue("ALL"),
 		EvaluationType:   types.StringValue("PER_AP"),
-		Granularity:      types.Int64Value(600000),
+		Granularity:      types.Int64Value(int64(600000)),
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
 		TagFilter:        types.StringValue("invalid tag filter syntax"),
-		
-		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
+
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
-		Applications:     []ApplicationModel{},
-		Rules:            []RuleWithThresholdModel{},
+		Applications:        []ApplicationModel{},
+		Rules:               []RuleWithThresholdModel{},
 	})
 
 	_, diags := resource.MapStateToDataObject(ctx, state)
@@ -1369,7 +1375,7 @@ func TestMapStateToDataObject_InvalidTagFilter(t *testing.T) {
 // Test MapStateToDataObject with all boundary scopes
 func TestMapStateToDataObject_AllBoundaryScopes(t *testing.T) {
 	scopes := []string{"ALL", "INBOUND", "DEFAULT"}
-	
+
 	for _, scope := range scopes {
 		t.Run(scope, func(t *testing.T) {
 			ctx := context.Background()
@@ -1381,15 +1387,15 @@ func TestMapStateToDataObject_AllBoundaryScopes(t *testing.T) {
 				Description:      types.StringValue("Test Description"),
 				BoundaryScope:    types.StringValue(scope),
 				EvaluationType:   types.StringValue("PER_AP"),
-				Granularity:      types.Int64Value(600000),
+				Granularity:      types.Int64Value(int64(600000)),
 				IncludeInternal:  types.BoolValue(false),
 				IncludeSynthetic: types.BoolValue(false),
 				Triggering:       types.BoolValue(false),
-				
-				AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
+
+				AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 				CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
-				Applications:     []ApplicationModel{},
-				Rules:            []RuleWithThresholdModel{},
+				Applications:        []ApplicationModel{},
+				Rules:               []RuleWithThresholdModel{},
 			})
 
 			result, diags := resource.MapStateToDataObject(ctx, state)
@@ -1411,12 +1417,12 @@ func TestMapStateToDataObject_ComplexApplicationHierarchy(t *testing.T) {
 		Description:      types.StringValue("Test Description"),
 		BoundaryScope:    types.StringValue("ALL"),
 		EvaluationType:   types.StringValue("PER_AP"),
-		Granularity:      types.Int64Value(600000),
+		Granularity:      types.Int64Value(int64(600000)),
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		
-		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
+
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Applications: []ApplicationModel{
 			{
@@ -1457,21 +1463,21 @@ func TestMapStateToDataObject_ComplexApplicationHierarchy(t *testing.T) {
 	require.False(t, diags.HasError())
 	require.NotNil(t, result)
 	require.Len(t, result.Applications, 2)
-	
+
 	app1 := result.Applications["app-1"]
 	assert.Equal(t, "app-1", app1.ApplicationID)
 	assert.True(t, app1.Inclusive)
 	require.Len(t, app1.Services, 2)
-	
+
 	svc1 := app1.Services["svc-1"]
 	assert.Equal(t, "svc-1", svc1.ServiceID)
 	assert.True(t, svc1.Inclusive)
 	require.Len(t, svc1.Endpoints, 2)
-	
+
 	ep1 := svc1.Endpoints["ep-1"]
 	assert.Equal(t, "ep-1", ep1.EndpointID)
 	assert.True(t, ep1.Inclusive)
-	
+
 	ep2 := svc1.Endpoints["ep-2"]
 	assert.Equal(t, "ep-2", ep2.EndpointID)
 	assert.False(t, ep2.Inclusive)
@@ -1488,14 +1494,14 @@ func TestMapStateToDataObject_WithCriticalThreshold(t *testing.T) {
 		Description:      types.StringValue("Test Description"),
 		BoundaryScope:    types.StringValue("ALL"),
 		EvaluationType:   types.StringValue("PER_AP"),
-		Granularity:      types.Int64Value(600000),
+		Granularity:      types.Int64Value(int64(600000)),
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		
-		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
+
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
-		Applications:     []ApplicationModel{},
+		Applications:        []ApplicationModel{},
 		Rules: []RuleWithThresholdModel{
 			{
 				Rule: &RuleModel{
@@ -1508,7 +1514,7 @@ func TestMapStateToDataObject_WithCriticalThreshold(t *testing.T) {
 				Thresholds: &ApplicationThresholdModel{
 					Critical: &ThresholdLevelModel{
 						Static: &shared.StaticTypeModel{
-							Value: types.Int64Value(200),
+							Value: types.Float32Value(float32(200)),
 						},
 					},
 				},
@@ -1537,14 +1543,14 @@ func TestMapStateToDataObject_WithBothThresholds(t *testing.T) {
 		Description:      types.StringValue("Test Description"),
 		BoundaryScope:    types.StringValue("ALL"),
 		EvaluationType:   types.StringValue("PER_AP"),
-		Granularity:      types.Int64Value(600000),
+		Granularity:      types.Int64Value(int64(600000)),
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		
-		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
+
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
-		Applications:     []ApplicationModel{},
+		Applications:        []ApplicationModel{},
 		Rules: []RuleWithThresholdModel{
 			{
 				Rule: &RuleModel{
@@ -1557,12 +1563,12 @@ func TestMapStateToDataObject_WithBothThresholds(t *testing.T) {
 				Thresholds: &ApplicationThresholdModel{
 					Warning: &ThresholdLevelModel{
 						Static: &shared.StaticTypeModel{
-							Value: types.Int64Value(100),
+							Value: types.Float32Value(float32(100)),
 						},
 					},
 					Critical: &ThresholdLevelModel{
 						Static: &shared.StaticTypeModel{
-							Value: types.Int64Value(200),
+							Value: types.Float32Value(float32(200)),
 						},
 					},
 				},
@@ -1595,11 +1601,11 @@ func TestMapStateToDataObject_WithNullGranularity(t *testing.T) {
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		
-		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
+
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
-		Applications:     []ApplicationModel{},
-		Rules:            []RuleWithThresholdModel{},
+		Applications:        []ApplicationModel{},
+		Rules:               []RuleWithThresholdModel{},
 	})
 
 	result, diags := resource.MapStateToDataObject(ctx, state)
@@ -1620,16 +1626,16 @@ func TestMapStateToDataObject_WithEmptyTagFilter(t *testing.T) {
 		Description:      types.StringValue("Test Description"),
 		BoundaryScope:    types.StringValue("ALL"),
 		EvaluationType:   types.StringValue("PER_AP"),
-		Granularity:      types.Int64Value(600000),
+		Granularity:      types.Int64Value(int64(600000)),
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
 		TagFilter:        types.StringValue(""),
-		
-		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
+
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
-		Applications:     []ApplicationModel{},
-		Rules:            []RuleWithThresholdModel{},
+		Applications:        []ApplicationModel{},
+		Rules:               []RuleWithThresholdModel{},
 	})
 
 	result, diags := resource.MapStateToDataObject(ctx, state)
@@ -1650,24 +1656,24 @@ func TestMapStateToDataObject_WithNullSeverity(t *testing.T) {
 		Description:      types.StringValue("Test Description"),
 		BoundaryScope:    types.StringValue("ALL"),
 		EvaluationType:   types.StringValue("PER_AP"),
-		Granularity:      types.Int64Value(600000),
+		Granularity:      types.Int64Value(int64(600000)),
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		
-		
-		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
+
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
-		Applications:     []ApplicationModel{},
-		Rules:            []RuleWithThresholdModel{},
+		Applications:        []ApplicationModel{},
+		Rules:               []RuleWithThresholdModel{},
 	})
 
 	result, diags := resource.MapStateToDataObject(ctx, state)
 	require.False(t, diags.HasError())
 	require.NotNil(t, result)
 	// Null severity should result in 0
-	assert.Equal(t, 0, int(result.Severity))
+	// Severity field removed from model
 }
+
 // Test MapStateToDataObject with adaptive baseline threshold
 func TestMapStateToDataObject_WithAdaptiveBaselineThreshold(t *testing.T) {
 	ctx := context.Background()
@@ -1679,14 +1685,14 @@ func TestMapStateToDataObject_WithAdaptiveBaselineThreshold(t *testing.T) {
 		Description:      types.StringValue("Test Description"),
 		BoundaryScope:    types.StringValue("ALL"),
 		EvaluationType:   types.StringValue("PER_AP"),
-		Granularity:      types.Int64Value(600000),
+		Granularity:      types.Int64Value(int64(600000)),
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		
-		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
+
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
-		Applications:     []ApplicationModel{},
+		Applications:        []ApplicationModel{},
 		Rules: []RuleWithThresholdModel{
 			{
 				Rule: &RuleModel{
@@ -1699,7 +1705,6 @@ func TestMapStateToDataObject_WithAdaptiveBaselineThreshold(t *testing.T) {
 				Thresholds: &ApplicationThresholdModel{
 					Warning: &ThresholdLevelModel{
 						AdaptiveBaseline: &shared.AdaptiveBaselineModel{
-							Operator:        types.StringValue(">"),
 							DeviationFactor: types.Float32Value(2.0),
 							Adaptability:    types.Float32Value(0.5),
 							Seasonality:     types.StringValue("DAILY"),
@@ -1715,7 +1720,7 @@ func TestMapStateToDataObject_WithAdaptiveBaselineThreshold(t *testing.T) {
 	require.NotNil(t, result)
 	require.Len(t, result.Rules, 1)
 	require.Contains(t, result.Rules[0].Thresholds, restapi.WarningSeverity)
-	
+
 	threshold := result.Rules[0].Thresholds[restapi.WarningSeverity]
 	assert.Equal(t, "adaptiveBaseline", threshold.Type)
 	require.NotNil(t, threshold.DeviationFactor)
@@ -1737,14 +1742,14 @@ func TestMapStateToDataObject_WithAdaptiveBaselineCriticalThreshold(t *testing.T
 		Description:      types.StringValue("Test Description"),
 		BoundaryScope:    types.StringValue("ALL"),
 		EvaluationType:   types.StringValue("PER_AP"),
-		Granularity:      types.Int64Value(600000),
+		Granularity:      types.Int64Value(int64(600000)),
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		
-		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
+
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
-		Applications:     []ApplicationModel{},
+		Applications:        []ApplicationModel{},
 		Rules: []RuleWithThresholdModel{
 			{
 				Rule: &RuleModel{
@@ -1757,7 +1762,6 @@ func TestMapStateToDataObject_WithAdaptiveBaselineCriticalThreshold(t *testing.T
 				Thresholds: &ApplicationThresholdModel{
 					Critical: &ThresholdLevelModel{
 						AdaptiveBaseline: &shared.AdaptiveBaselineModel{
-							Operator:        types.StringValue(">="),
 							DeviationFactor: types.Float32Value(3.0),
 							Adaptability:    types.Float32Value(0.8),
 							Seasonality:     types.StringValue("WEEKLY"),
@@ -1773,7 +1777,7 @@ func TestMapStateToDataObject_WithAdaptiveBaselineCriticalThreshold(t *testing.T
 	require.NotNil(t, result)
 	require.Len(t, result.Rules, 1)
 	require.Contains(t, result.Rules[0].Thresholds, restapi.CriticalSeverity)
-	
+
 	threshold := result.Rules[0].Thresholds[restapi.CriticalSeverity]
 	assert.Equal(t, "adaptiveBaseline", threshold.Type)
 	require.NotNil(t, threshold.DeviationFactor)
@@ -1792,7 +1796,7 @@ func TestUpdateState_WithAdaptiveBaselineThreshold(t *testing.T) {
 	deviationFactor := float32(2.0)
 	adaptability := float32(0.5)
 	seasonality := restapi.ThresholdSeasonality("DAILY")
-	
+
 	data := &restapi.ApplicationAlertConfig{
 		ID:               "test-id",
 		Name:             "Test Alert",
@@ -1840,7 +1844,7 @@ func TestUpdateState_WithAdaptiveBaselineThreshold(t *testing.T) {
 	require.NotNil(t, model.Rules[0].Thresholds)
 	require.NotNil(t, model.Rules[0].Thresholds.Warning)
 	require.NotNil(t, model.Rules[0].Thresholds.Warning.AdaptiveBaseline)
-	
+
 	adaptiveModel := model.Rules[0].Thresholds.Warning.AdaptiveBaseline
 	assert.Equal(t, float32(2.0), adaptiveModel.DeviationFactor.ValueFloat32())
 	assert.Equal(t, float32(0.5), adaptiveModel.Adaptability.ValueFloat32())
@@ -1856,7 +1860,7 @@ func TestUpdateState_WithMixedThresholds(t *testing.T) {
 	criticalDeviationFactor := float32(3.0)
 	criticalAdaptability := float32(0.8)
 	criticalSeasonality := restapi.ThresholdSeasonality("WEEKLY")
-	
+
 	data := &restapi.ApplicationAlertConfig{
 		ID:               "test-id",
 		Name:             "Test Alert",
@@ -1906,12 +1910,12 @@ func TestUpdateState_WithMixedThresholds(t *testing.T) {
 
 	require.Len(t, model.Rules, 1)
 	require.NotNil(t, model.Rules[0].Thresholds)
-	
+
 	// Check warning static threshold
 	require.NotNil(t, model.Rules[0].Thresholds.Warning)
 	require.NotNil(t, model.Rules[0].Thresholds.Warning.Static)
-	assert.Equal(t, int64(100), model.Rules[0].Thresholds.Warning.Static.Value.ValueInt64())
-	
+	assert.Equal(t, float32(100), model.Rules[0].Thresholds.Warning.Static.Value.ValueFloat32())
+
 	// Check critical adaptive baseline threshold
 	require.NotNil(t, model.Rules[0].Thresholds.Critical)
 	require.NotNil(t, model.Rules[0].Thresholds.Critical.AdaptiveBaseline)
@@ -1931,14 +1935,14 @@ func TestMapStateToDataObject_WithNullAdaptiveBaselineFields(t *testing.T) {
 		Description:      types.StringValue("Test Description"),
 		BoundaryScope:    types.StringValue("ALL"),
 		EvaluationType:   types.StringValue("PER_AP"),
-		Granularity:      types.Int64Value(600000),
+		Granularity:      types.Int64Value(int64(600000)),
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		
-		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
+
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
-		Applications:     []ApplicationModel{},
+		Applications:        []ApplicationModel{},
 		Rules: []RuleWithThresholdModel{
 			{
 				Rule: &RuleModel{
@@ -1951,7 +1955,6 @@ func TestMapStateToDataObject_WithNullAdaptiveBaselineFields(t *testing.T) {
 				Thresholds: &ApplicationThresholdModel{
 					Warning: &ThresholdLevelModel{
 						AdaptiveBaseline: &shared.AdaptiveBaselineModel{
-							Operator:        types.StringNull(),
 							DeviationFactor: types.Float32Null(),
 							Adaptability:    types.Float32Null(),
 							Seasonality:     types.StringNull(),
@@ -1967,13 +1970,16 @@ func TestMapStateToDataObject_WithNullAdaptiveBaselineFields(t *testing.T) {
 	require.NotNil(t, result)
 	require.Len(t, result.Rules, 1)
 	require.Contains(t, result.Rules[0].Thresholds, restapi.WarningSeverity)
-	
+
 	threshold := result.Rules[0].Thresholds[restapi.WarningSeverity]
 	assert.Equal(t, "adaptiveBaseline", threshold.Type)
-	// Null fields should result in nil pointers
-	assert.Nil(t, threshold.DeviationFactor)
-	assert.Nil(t, threshold.Adaptability)
-	assert.Nil(t, threshold.Seasonality)
+	// Null fields are converted to zero values by the shared mapping function
+	require.NotNil(t, threshold.DeviationFactor)
+	assert.Equal(t, float32(0), *threshold.DeviationFactor)
+	require.NotNil(t, threshold.Adaptability)
+	assert.Equal(t, float32(0), *threshold.Adaptability)
+	require.NotNil(t, threshold.Seasonality)
+	assert.Equal(t, restapi.ThresholdSeasonality(""), *threshold.Seasonality)
 }
 
 // Test UpdateState with null adaptive baseline fields
@@ -2028,7 +2034,7 @@ func TestUpdateState_WithNullAdaptiveBaselineFields(t *testing.T) {
 	require.NotNil(t, model.Rules[0].Thresholds)
 	require.NotNil(t, model.Rules[0].Thresholds.Warning)
 	require.NotNil(t, model.Rules[0].Thresholds.Warning.AdaptiveBaseline)
-	
+
 	adaptiveModel := model.Rules[0].Thresholds.Warning.AdaptiveBaseline
 	assert.True(t, adaptiveModel.DeviationFactor.IsNull())
 	assert.True(t, adaptiveModel.Adaptability.IsNull())
@@ -2046,14 +2052,14 @@ func TestMapStateToDataObject_WithBothAdaptiveBaselineThresholds(t *testing.T) {
 		Description:      types.StringValue("Test Description"),
 		BoundaryScope:    types.StringValue("ALL"),
 		EvaluationType:   types.StringValue("PER_AP"),
-		Granularity:      types.Int64Value(600000),
+		Granularity:      types.Int64Value(int64(600000)),
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
-		
-		AlertChannels:    types.MapNull(types.SetType{ElemType: types.StringType}),
+
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
-		Applications:     []ApplicationModel{},
+		Applications:        []ApplicationModel{},
 		Rules: []RuleWithThresholdModel{
 			{
 				Rule: &RuleModel{
@@ -2062,11 +2068,10 @@ func TestMapStateToDataObject_WithBothAdaptiveBaselineThresholds(t *testing.T) {
 						Aggregation: types.StringValue("sum"),
 					},
 				},
-				ThresholdOperator: types.StringValue("<"),
+				ThresholdOperator: types.StringValue(">"),
 				Thresholds: &ApplicationThresholdModel{
 					Warning: &ThresholdLevelModel{
 						AdaptiveBaseline: &shared.AdaptiveBaselineModel{
-							Operator:        types.StringValue("<"),
 							DeviationFactor: types.Float32Value(1.5),
 							Adaptability:    types.Float32Value(0.3),
 							Seasonality:     types.StringValue("DAILY"),
@@ -2074,7 +2079,6 @@ func TestMapStateToDataObject_WithBothAdaptiveBaselineThresholds(t *testing.T) {
 					},
 					Critical: &ThresholdLevelModel{
 						AdaptiveBaseline: &shared.AdaptiveBaselineModel{
-							Operator:        types.StringValue("<="),
 							DeviationFactor: types.Float32Value(2.5),
 							Adaptability:    types.Float32Value(0.6),
 							Seasonality:     types.StringValue("WEEKLY"),
@@ -2091,14 +2095,14 @@ func TestMapStateToDataObject_WithBothAdaptiveBaselineThresholds(t *testing.T) {
 	require.Len(t, result.Rules, 1)
 	require.Contains(t, result.Rules[0].Thresholds, restapi.WarningSeverity)
 	require.Contains(t, result.Rules[0].Thresholds, restapi.CriticalSeverity)
-	
+
 	// Check warning threshold
 	warningThreshold := result.Rules[0].Thresholds[restapi.WarningSeverity]
 	assert.Equal(t, "adaptiveBaseline", warningThreshold.Type)
 	assert.Equal(t, float32(1.5), *warningThreshold.DeviationFactor)
 	assert.Equal(t, float32(0.3), *warningThreshold.Adaptability)
 	assert.Equal(t, restapi.ThresholdSeasonality("DAILY"), *warningThreshold.Seasonality)
-	
+
 	// Check critical threshold
 	criticalThreshold := result.Rules[0].Thresholds[restapi.CriticalSeverity]
 	assert.Equal(t, "adaptiveBaseline", criticalThreshold.Type)
@@ -2141,7 +2145,6 @@ func TestUpdateState_WithEmptyApplications(t *testing.T) {
 	assert.Empty(t, model.Applications)
 }
 
-
 // Test UpdateState with empty alert channels map
 func TestUpdateState_WithEmptyAlertChannels(t *testing.T) {
 	ctx := context.Background()
@@ -2174,9 +2177,11 @@ func TestUpdateState_WithEmptyAlertChannels(t *testing.T) {
 	diags = state.Get(ctx, &model)
 	require.False(t, diags.HasError())
 
-	assert.True(t, model.AlertChannels.IsNull())
+	// Empty map should result in an empty map value, not null
+	assert.False(t, model.AlertChannels.IsNull())
+	assert.False(t, model.AlertChannels.IsUnknown())
+	assert.Equal(t, 0, len(model.AlertChannels.Elements()))
 }
-
 
 // Test UpdateState with null tag filter
 func TestUpdateState_WithNullTagFilter(t *testing.T) {
@@ -2212,8 +2217,6 @@ func TestUpdateState_WithNullTagFilter(t *testing.T) {
 
 	assert.True(t, model.TagFilter.IsNull())
 }
-
-
 
 // Helper functions
 

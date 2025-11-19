@@ -1,0 +1,2237 @@
+# github.com/gessnerfl/terraform-provider-instana/internal/restapi
+mocks/Instana-api_mocks.go:10:2: no required module provides package github.com/gessnerfl/terraform-provider-instana/instana/restapi; to add it:
+	go get github.com/gessnerfl/terraform-provider-instana/instana/restapi
+FAIL	github.com/gessnerfl/terraform-provider-instana/internal/restapi [setup failed]
+# github.com/gessnerfl/terraform-provider-instana/mocks
+mocks/Instana-api_mocks.go:10:2: no required module provides package github.com/gessnerfl/terraform-provider-instana/instana/restapi; to add it:
+	go get github.com/gessnerfl/terraform-provider-instana/instana/restapi
+FAIL	github.com/gessnerfl/terraform-provider-instana/mocks [setup failed]
+# github.com/gessnerfl/terraform-provider-instana/internal/resources/sloconfig [github.com/gessnerfl/terraform-provider-instana/internal/resources/sloconfig.test]
+internal/resources/sloconfig/resource-slo-config-framework_test.go:1307:56: result.TrafficIndicatorModel.Aggregation undefined (type *TrafficIndicatorModel has no field or method Aggregation)
+# github.com/gessnerfl/terraform-provider-instana/internal/resources/applicationalertconfig [github.com/gessnerfl/terraform-provider-instana/internal/resources/applicationalertconfig.test]
+internal/resources/applicationalertconfig/resource-application-alert-config-framework_test.go:774:15: cannot use types.Int64Value(100) (value of struct type basetypes.Int64Value) as types.Float32 value in struct literal
+internal/resources/applicationalertconfig/resource-application-alert-config-framework_test.go:845:77: model.Rules[0].Thresholds.Warning.Static.Value.ValueInt64 undefined (type types.Float32 has no field or method ValueInt64)
+internal/resources/applicationalertconfig/resource-application-alert-config-framework_test.go:1511:15: cannot use types.Int64Value(200) (value of struct type basetypes.Int64Value) as types.Float32 value in struct literal
+internal/resources/applicationalertconfig/resource-application-alert-config-framework_test.go:1560:15: cannot use types.Int64Value(100) (value of struct type basetypes.Int64Value) as types.Float32 value in struct literal
+internal/resources/applicationalertconfig/resource-application-alert-config-framework_test.go:1565:15: cannot use types.Int64Value(200) (value of struct type basetypes.Int64Value) as types.Float32 value in struct literal
+internal/resources/applicationalertconfig/resource-application-alert-config-framework_test.go:1669:32: result.Severity undefined (type *restapi.ApplicationAlertConfig has no field or method Severity)
+internal/resources/applicationalertconfig/resource-application-alert-config-framework_test.go:1702:8: unknown field Operator in struct literal of type shared.AdaptiveBaselineModel
+internal/resources/applicationalertconfig/resource-application-alert-config-framework_test.go:1760:8: unknown field Operator in struct literal of type shared.AdaptiveBaselineModel
+internal/resources/applicationalertconfig/resource-application-alert-config-framework_test.go:1913:77: model.Rules[0].Thresholds.Warning.Static.Value.ValueInt64 undefined (type types.Float32 has no field or method ValueInt64)
+internal/resources/applicationalertconfig/resource-application-alert-config-framework_test.go:1954:8: unknown field Operator in struct literal of type shared.AdaptiveBaselineModel
+internal/resources/applicationalertconfig/resource-application-alert-config-framework_test.go:1954:8: too many errors
+# github.com/gessnerfl/terraform-provider-instana/internal/resources/infralertconfig [github.com/gessnerfl/terraform-provider-instana/internal/resources/infralertconfig.test]
+internal/resources/infralertconfig/resource-infra-alert-config-framework_test.go:337:89: model.Rules.GenericRule.ThresholdRule.Warning.Static.Value.ValueInt64 undefined (type types.Float32 has no field or method ValueInt64)
+internal/resources/infralertconfig/resource-infra-alert-config-framework_test.go:623:15: cannot use types.Int64Value(100) (value of struct type basetypes.Int64Value) as types.Float32 value in struct literal
+internal/resources/infralertconfig/resource-infra-alert-config-framework_test.go:676:8: unknown field Operator in struct literal of type shared.AdaptiveBaselineModel
+internal/resources/infralertconfig/resource-infra-alert-config-framework_test.go:728:15: cannot use types.Int64Value(80) (value of struct type basetypes.Int64Value) as types.Float32 value in struct literal
+internal/resources/infralertconfig/resource-infra-alert-config-framework_test.go:733:15: cannot use types.Int64Value(95) (value of struct type basetypes.Int64Value) as types.Float32 value in struct literal
+# github.com/gessnerfl/terraform-provider-instana/internal/resources/slocorrectionconfig [github.com/gessnerfl/terraform-provider-instana/internal/resources/slocorrectionconfig.test]
+internal/resources/slocorrectionconfig/resource-slo-correction-config-framework_test.go:61:44: cannot use mockAPI (variable of type *mockInstanaAPI) as restapi.InstanaAPI value in argument to resource.GetRestResource: *mockInstanaAPI does not implement restapi.InstanaAPI (missing method Teams)
+# github.com/gessnerfl/terraform-provider-instana/internal/resources/syntheticalertconfig [github.com/gessnerfl/terraform-provider-instana/internal/resources/syntheticalertconfig.test]
+internal/resources/syntheticalertconfig/resource-synthetic-alert-config-framework_test.go:65:44: cannot use mockAPI (variable of type *mockInstanaAPI) as restapi.InstanaAPI value in argument to resource.GetRestResource: *mockInstanaAPI does not implement restapi.InstanaAPI (missing method Teams)
+# github.com/gessnerfl/terraform-provider-instana/internal/resources/synthetictest [github.com/gessnerfl/terraform-provider-instana/internal/resources/synthetictest.test]
+internal/resources/synthetictest/resource-synthetic-test-framework_test.go:76:44: cannot use mockAPI (variable of type *mockInstanaAPI) as restapi.InstanaAPI value in argument to resource.GetRestResource: *mockInstanaAPI does not implement restapi.InstanaAPI (missing method Teams)
+# github.com/gessnerfl/terraform-provider-instana/internal/resources/websitealertconfig [github.com/gessnerfl/terraform-provider-instana/internal/resources/websitealertconfig.test]
+internal/resources/websitealertconfig/resource-website-alert-config-framework_test.go:67:44: cannot use mockAPI (variable of type *mockInstanaAPI) as restapi.InstanaAPI value in argument to resource.GetRestResource: *mockInstanaAPI does not implement restapi.InstanaAPI (missing method Teams)
+internal/resources/websitealertconfig/resource-website-alert-config-framework_test.go:177:4: unknown field Severity in struct literal of type WebsiteAlertConfigModel
+internal/resources/websitealertconfig/resource-website-alert-config-framework_test.go:194:16: cannot use types.Int64Value(1000) (value of struct type basetypes.Int64Value) as types.Float32 value in struct literal
+internal/resources/websitealertconfig/resource-website-alert-config-framework_test.go:199:16: cannot use types.Int64Value(2000) (value of struct type basetypes.Int64Value) as types.Float32 value in struct literal
+internal/resources/websitealertconfig/resource-website-alert-config-framework_test.go:376:4: unknown field Severity in struct literal of type WebsiteAlertConfigModel
+internal/resources/websitealertconfig/resource-website-alert-config-framework_test.go:422:4: unknown field Severity in struct literal of type WebsiteAlertConfigModel
+internal/resources/websitealertconfig/resource-website-alert-config-framework_test.go:481:4: unknown field Severity in struct literal of type WebsiteAlertConfigModel
+internal/resources/websitealertconfig/resource-website-alert-config-framework_test.go:579:4: unknown field Severity in struct literal of type WebsiteAlertConfigModel
+internal/resources/websitealertconfig/resource-website-alert-config-framework_test.go:625:4: unknown field Severity in struct literal of type WebsiteAlertConfigModel
+internal/resources/websitealertconfig/resource-website-alert-config-framework_test.go:660:4: unknown field Severity in struct literal of type WebsiteAlertConfigModel
+internal/resources/websitealertconfig/resource-website-alert-config-framework_test.go:660:4: too many errors
+	github.com/gessnerfl/terraform-provider-instana		coverage: 0.0% of statements
+	github.com/gessnerfl/terraform-provider-instana/internal/datasources		coverage: 0.0% of statements
+	github.com/gessnerfl/terraform-provider-instana/internal/provider		coverage: 0.0% of statements
+?   	github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle	[no test files]
+=== RUN   TestNewAlertingChannelResourceHandleFramework
+--- PASS: TestNewAlertingChannelResourceHandleFramework (0.00s)
+=== RUN   TestMetaData
+--- PASS: TestMetaData (0.00s)
+=== RUN   TestSetComputedFields
+--- PASS: TestSetComputedFields (0.00s)
+=== RUN   TestMapEmailChannelFromState
+--- PASS: TestMapEmailChannelFromState (0.00s)
+=== RUN   TestMapOpsGenieChannelFromState
+--- PASS: TestMapOpsGenieChannelFromState (0.00s)
+=== RUN   TestMapPagerDutyChannelFromState
+--- PASS: TestMapPagerDutyChannelFromState (0.00s)
+=== RUN   TestMapSlackChannelFromState
+=== RUN   TestMapSlackChannelFromState/with_all_fields
+=== RUN   TestMapSlackChannelFromState/with_only_required_fields
+--- PASS: TestMapSlackChannelFromState (0.00s)
+    --- PASS: TestMapSlackChannelFromState/with_all_fields (0.00s)
+    --- PASS: TestMapSlackChannelFromState/with_only_required_fields (0.00s)
+=== RUN   TestMapSplunkChannelFromState
+--- PASS: TestMapSplunkChannelFromState (0.00s)
+=== RUN   TestMapVictorOpsChannelFromState
+--- PASS: TestMapVictorOpsChannelFromState (0.00s)
+=== RUN   TestMapWebhookChannelFromState
+=== RUN   TestMapWebhookChannelFromState/with_headers
+=== RUN   TestMapWebhookChannelFromState/without_headers
+--- PASS: TestMapWebhookChannelFromState (0.00s)
+    --- PASS: TestMapWebhookChannelFromState/with_headers (0.00s)
+    --- PASS: TestMapWebhookChannelFromState/without_headers (0.00s)
+=== RUN   TestMapWebhookBasedChannelFromState
+=== RUN   TestMapWebhookBasedChannelFromState/Office365
+=== RUN   TestMapWebhookBasedChannelFromState/GoogleChat
+=== RUN   TestMapWebhookBasedChannelFromState/WebexTeamsWebhook
+--- PASS: TestMapWebhookBasedChannelFromState (0.00s)
+    --- PASS: TestMapWebhookBasedChannelFromState/Office365 (0.00s)
+    --- PASS: TestMapWebhookBasedChannelFromState/GoogleChat (0.00s)
+    --- PASS: TestMapWebhookBasedChannelFromState/WebexTeamsWebhook (0.00s)
+=== RUN   TestMapServiceNowChannelFromState
+=== RUN   TestMapServiceNowChannelFromState/with_all_fields
+2025/11/19 20:02:50 passwordValue: test-password
+=== RUN   TestMapServiceNowChannelFromState/missing_password
+--- PASS: TestMapServiceNowChannelFromState (0.00s)
+    --- PASS: TestMapServiceNowChannelFromState/with_all_fields (0.00s)
+    --- PASS: TestMapServiceNowChannelFromState/missing_password (0.00s)
+=== RUN   TestMapServiceNowApplicationChannelFromState
+=== RUN   TestMapServiceNowApplicationChannelFromState/with_all_fields
+2025/11/19 20:02:50 passwordValue: test-password
+2025/11/19 20:02:50 Inatna url : user https://instana.example.com
+2025/11/19 20:02:50 [DEBUG] mapServiceNowApplicationChannelFromState: &{test-id test-name SERVICE_NOW_APPLICATION [] <nil> <nil> <nil> <nil> <nil> <nil> <nil> <nil> <nil> <nil> [] [] 0x14000232d90 0x14000232da0 0x14000232db0 0x140000ab7a0 0x14000232dc0 0x14000232dd0 0x14000232df0 0x140000ab7a1 0x140000ab7a2 0x140000ab7a3 0x140000ab7a4 0x140000ab7a5 0x140000ab7a8 <nil> <nil> <nil> <nil> <nil> <nil> <nil> <nil> <nil> <nil> <nil>}
+2025/11/19 20:02:50 [DEBUG] intana url: https://instana.example.com
+=== RUN   TestMapServiceNowApplicationChannelFromState/missing_password
+=== RUN   TestMapServiceNowApplicationChannelFromState/missing_InstanaURL
+2025/11/19 20:02:50 passwordValue: test-password
+2025/11/19 20:02:50 Inatna url : user 
+--- PASS: TestMapServiceNowApplicationChannelFromState (0.00s)
+    --- PASS: TestMapServiceNowApplicationChannelFromState/with_all_fields (0.00s)
+    --- PASS: TestMapServiceNowApplicationChannelFromState/missing_password (0.00s)
+    --- PASS: TestMapServiceNowApplicationChannelFromState/missing_InstanaURL (0.00s)
+=== RUN   TestMapPrometheusWebhookChannelFromState
+=== RUN   TestMapPrometheusWebhookChannelFromState/with_receiver
+=== RUN   TestMapPrometheusWebhookChannelFromState/without_receiver
+--- PASS: TestMapPrometheusWebhookChannelFromState (0.00s)
+    --- PASS: TestMapPrometheusWebhookChannelFromState/with_receiver (0.00s)
+    --- PASS: TestMapPrometheusWebhookChannelFromState/without_receiver (0.00s)
+=== RUN   TestMapWatsonAIOpsWebhookChannelFromState
+=== RUN   TestMapWatsonAIOpsWebhookChannelFromState/with_headers
+=== RUN   TestMapWatsonAIOpsWebhookChannelFromState/without_headers
+--- PASS: TestMapWatsonAIOpsWebhookChannelFromState (0.00s)
+    --- PASS: TestMapWatsonAIOpsWebhookChannelFromState/with_headers (0.00s)
+    --- PASS: TestMapWatsonAIOpsWebhookChannelFromState/without_headers (0.00s)
+=== RUN   TestMapStateToDataObject
+=== RUN   TestMapStateToDataObject/Email_channel
+2025/11/19 20:02:50 Model from state
+=== RUN   TestMapStateToDataObject/OpsGenie_channel
+2025/11/19 20:02:50 Model from state
+=== RUN   TestMapStateToDataObject/PagerDuty_channel
+2025/11/19 20:02:50 Model from state
+=== RUN   TestMapStateToDataObject/Slack_channel
+2025/11/19 20:02:50 Model from state
+=== RUN   TestMapStateToDataObject/Splunk_channel
+2025/11/19 20:02:50 Model from state
+=== RUN   TestMapStateToDataObject/VictorOps_channel
+2025/11/19 20:02:50 Model from state
+=== RUN   TestMapStateToDataObject/Webhook_channel
+2025/11/19 20:02:50 Model from state
+=== RUN   TestMapStateToDataObject/Office365_channel
+2025/11/19 20:02:50 Model from state
+=== RUN   TestMapStateToDataObject/GoogleChat_channel
+2025/11/19 20:02:50 Model from state
+=== RUN   TestMapStateToDataObject/ServiceNow_channel
+2025/11/19 20:02:50 Model from state
+2025/11/19 20:02:50 passwordValue: pass
+=== RUN   TestMapStateToDataObject/ServiceNowApplication_channel
+2025/11/19 20:02:50 Model from state
+2025/11/19 20:02:50 passwordValue: pass
+2025/11/19 20:02:50 Inatna url : user https://instana.com
+2025/11/19 20:02:50 [DEBUG] mapServiceNowApplicationChannelFromState: &{test-id test-name SERVICE_NOW_APPLICATION [] <nil> <nil> <nil> <nil> <nil> <nil> <nil> <nil> <nil> <nil> [] [] 0x1400051ae90 0x1400051aea0 0x1400051aeb0 <nil> 0x1400051aec0 0x1400051aed0 0x1400051aef0 <nil> <nil> <nil> <nil> <nil> <nil> <nil> <nil> <nil> <nil> <nil> <nil> <nil> <nil> <nil> <nil> <nil>}
+2025/11/19 20:02:50 [DEBUG] intana url: https://instana.com
+=== RUN   TestMapStateToDataObject/PrometheusWebhook_channel
+2025/11/19 20:02:50 Model from state
+=== RUN   TestMapStateToDataObject/WebexTeamsWebhook_channel
+2025/11/19 20:02:50 Model from state
+=== RUN   TestMapStateToDataObject/WatsonAIOpsWebhook_channel
+2025/11/19 20:02:50 Model from state
+=== RUN   TestMapStateToDataObject/No_channel_configured
+2025/11/19 20:02:50 Model from state
+--- PASS: TestMapStateToDataObject (0.00s)
+    --- PASS: TestMapStateToDataObject/Email_channel (0.00s)
+    --- PASS: TestMapStateToDataObject/OpsGenie_channel (0.00s)
+    --- PASS: TestMapStateToDataObject/PagerDuty_channel (0.00s)
+    --- PASS: TestMapStateToDataObject/Slack_channel (0.00s)
+    --- PASS: TestMapStateToDataObject/Splunk_channel (0.00s)
+    --- PASS: TestMapStateToDataObject/VictorOps_channel (0.00s)
+    --- PASS: TestMapStateToDataObject/Webhook_channel (0.00s)
+    --- PASS: TestMapStateToDataObject/Office365_channel (0.00s)
+    --- PASS: TestMapStateToDataObject/GoogleChat_channel (0.00s)
+    --- PASS: TestMapStateToDataObject/ServiceNow_channel (0.00s)
+    --- PASS: TestMapStateToDataObject/ServiceNowApplication_channel (0.00s)
+    --- PASS: TestMapStateToDataObject/PrometheusWebhook_channel (0.00s)
+    --- PASS: TestMapStateToDataObject/WebexTeamsWebhook_channel (0.00s)
+    --- PASS: TestMapStateToDataObject/WatsonAIOpsWebhook_channel (0.00s)
+    --- PASS: TestMapStateToDataObject/No_channel_configured (0.00s)
+=== RUN   TestUpdateState
+=== RUN   TestUpdateState/Email_channel
+=== RUN   TestUpdateState/OpsGenie_channel
+=== RUN   TestUpdateState/PagerDuty_channel
+=== RUN   TestUpdateState/Slack_channel
+=== RUN   TestUpdateState/Splunk_channel
+=== RUN   TestUpdateState/VictorOps_channel
+=== RUN   TestUpdateState/Webhook_channel
+=== RUN   TestUpdateState/Office365_channel
+=== RUN   TestUpdateState/GoogleChat_channel
+=== RUN   TestUpdateState/ServiceNow_channel
+=== RUN   TestUpdateState/ServiceNowApplication_channel
+=== RUN   TestUpdateState/PrometheusWebhook_channel
+=== RUN   TestUpdateState/WebexTeamsWebhook_channel
+=== RUN   TestUpdateState/WatsonAIOpsWebhook_channel
+=== RUN   TestUpdateState/Unsupported_channel_type
+--- PASS: TestUpdateState (0.00s)
+    --- PASS: TestUpdateState/Email_channel (0.00s)
+    --- PASS: TestUpdateState/OpsGenie_channel (0.00s)
+    --- PASS: TestUpdateState/PagerDuty_channel (0.00s)
+    --- PASS: TestUpdateState/Slack_channel (0.00s)
+    --- PASS: TestUpdateState/Splunk_channel (0.00s)
+    --- PASS: TestUpdateState/VictorOps_channel (0.00s)
+    --- PASS: TestUpdateState/Webhook_channel (0.00s)
+    --- PASS: TestUpdateState/Office365_channel (0.00s)
+    --- PASS: TestUpdateState/GoogleChat_channel (0.00s)
+    --- PASS: TestUpdateState/ServiceNow_channel (0.00s)
+    --- PASS: TestUpdateState/ServiceNowApplication_channel (0.00s)
+    --- PASS: TestUpdateState/PrometheusWebhook_channel (0.00s)
+    --- PASS: TestUpdateState/WebexTeamsWebhook_channel (0.00s)
+    --- PASS: TestUpdateState/WatsonAIOpsWebhook_channel (0.00s)
+    --- PASS: TestUpdateState/Unsupported_channel_type (0.00s)
+PASS
+coverage: 85.6% of statements
+ok  	github.com/gessnerfl/terraform-provider-instana/internal/resources/alertingchannel	1.297s	coverage: 85.6% of statements
+=== RUN   TestNewAlertingConfigResourceHandleFramework
+    resource-alerting-config-framework_test.go:24: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/alertingconfig/resource-alerting-config-framework_test.go:24
+        	Error:      	Not equal: 
+        	            	expected: 2
+        	            	actual  : 1
+        	Test:       	TestNewAlertingConfigResourceHandleFramework
+--- FAIL: TestNewAlertingConfigResourceHandleFramework (0.00s)
+=== RUN   TestMetaData
+--- PASS: TestMetaData (0.00s)
+=== RUN   TestSetComputedFields
+--- PASS: TestSetComputedFields (0.00s)
+=== RUN   TestUpdateState
+=== RUN   TestUpdateState/basic_configuration
+=== RUN   TestUpdateState/with_event_filter_query
+=== RUN   TestUpdateState/with_event_types
+=== RUN   TestUpdateState/with_rule_IDs
+=== RUN   TestUpdateState/with_custom_payload_fields
+--- PASS: TestUpdateState (0.00s)
+    --- PASS: TestUpdateState/basic_configuration (0.00s)
+    --- PASS: TestUpdateState/with_event_filter_query (0.00s)
+    --- PASS: TestUpdateState/with_event_types (0.00s)
+    --- PASS: TestUpdateState/with_rule_IDs (0.00s)
+    --- PASS: TestUpdateState/with_custom_payload_fields (0.00s)
+=== RUN   TestMapStateToDataObject
+=== RUN   TestMapStateToDataObject/basic_configuration_from_state
+    resource-alerting-config-framework_test.go:498: Failed to set state: [{{An unexpected error was encountered while verifying an attribute value matched its expected type to prevent unexpected behavior or panics. This is always an error in the provider. Please report the following to the provider developer:
+        
+        Expected framework type from provider logic: types.SetType[basetypes.StringType] / underlying type: tftypes.Set[tftypes.String]
+        Received framework type from provider logic: types.SetType[!!! MISSING TYPE !!!] / underlying type: tftypes.Set[tftypes.DynamicPseudoType]
+        Path: event_filter_application_alert_ids Value Conversion Error} {[event_filter_application_alert_ids]}}]
+=== RUN   TestMapStateToDataObject/configuration_from_plan
+    resource-alerting-config-framework_test.go:512: Failed to set plan: [{{An unexpected error was encountered while verifying an attribute value matched its expected type to prevent unexpected behavior or panics. This is always an error in the provider. Please report the following to the provider developer:
+        
+        Expected framework type from provider logic: types.SetType[basetypes.StringType] / underlying type: tftypes.Set[tftypes.String]
+        Received framework type from provider logic: types.SetType[!!! MISSING TYPE !!!] / underlying type: tftypes.Set[tftypes.DynamicPseudoType]
+        Path: event_filter_application_alert_ids Value Conversion Error} {[event_filter_application_alert_ids]}}]
+=== RUN   TestMapStateToDataObject/with_event_filter_query
+    resource-alerting-config-framework_test.go:498: Failed to set state: [{{An unexpected error was encountered while verifying an attribute value matched its expected type to prevent unexpected behavior or panics. This is always an error in the provider. Please report the following to the provider developer:
+        
+        Expected framework type from provider logic: types.SetType[basetypes.StringType] / underlying type: tftypes.Set[tftypes.String]
+        Received framework type from provider logic: types.SetType[!!! MISSING TYPE !!!] / underlying type: tftypes.Set[tftypes.DynamicPseudoType]
+        Path: event_filter_application_alert_ids Value Conversion Error} {[event_filter_application_alert_ids]}}]
+=== RUN   TestMapStateToDataObject/with_event_types
+    resource-alerting-config-framework_test.go:498: Failed to set state: [{{An unexpected error was encountered while verifying an attribute value matched its expected type to prevent unexpected behavior or panics. This is always an error in the provider. Please report the following to the provider developer:
+        
+        Expected framework type from provider logic: types.SetType[basetypes.StringType] / underlying type: tftypes.Set[tftypes.String]
+        Received framework type from provider logic: types.SetType[!!! MISSING TYPE !!!] / underlying type: tftypes.Set[tftypes.DynamicPseudoType]
+        Path: event_filter_application_alert_ids Value Conversion Error} {[event_filter_application_alert_ids]}}]
+=== RUN   TestMapStateToDataObject/with_rule_IDs
+    resource-alerting-config-framework_test.go:498: Failed to set state: [{{An unexpected error was encountered while verifying an attribute value matched its expected type to prevent unexpected behavior or panics. This is always an error in the provider. Please report the following to the provider developer:
+        
+        Expected framework type from provider logic: types.SetType[basetypes.StringType] / underlying type: tftypes.Set[tftypes.String]
+        Received framework type from provider logic: types.SetType[!!! MISSING TYPE !!!] / underlying type: tftypes.Set[tftypes.DynamicPseudoType]
+        Path: event_filter_application_alert_ids Value Conversion Error} {[event_filter_application_alert_ids]}}]
+=== RUN   TestMapStateToDataObject/with_custom_payload_fields
+    resource-alerting-config-framework_test.go:498: Failed to set state: [{{An unexpected error was encountered while verifying an attribute value matched its expected type to prevent unexpected behavior or panics. This is always an error in the provider. Please report the following to the provider developer:
+        
+        Expected framework type from provider logic: types.SetType[basetypes.StringType] / underlying type: tftypes.Set[tftypes.String]
+        Received framework type from provider logic: types.SetType[!!! MISSING TYPE !!!] / underlying type: tftypes.Set[tftypes.DynamicPseudoType]
+        Path: event_filter_application_alert_ids Value Conversion Error} {[event_filter_application_alert_ids]}}]
+--- FAIL: TestMapStateToDataObject (0.00s)
+    --- FAIL: TestMapStateToDataObject/basic_configuration_from_state (0.00s)
+    --- FAIL: TestMapStateToDataObject/configuration_from_plan (0.00s)
+    --- FAIL: TestMapStateToDataObject/with_event_filter_query (0.00s)
+    --- FAIL: TestMapStateToDataObject/with_event_types (0.00s)
+    --- FAIL: TestMapStateToDataObject/with_rule_IDs (0.00s)
+    --- FAIL: TestMapStateToDataObject/with_custom_payload_fields (0.00s)
+=== RUN   TestConvertEventTypesToHarmonizedStringRepresentation
+=== RUN   TestConvertEventTypesToHarmonizedStringRepresentation/empty_slice
+=== RUN   TestConvertEventTypesToHarmonizedStringRepresentation/single_event_type
+=== RUN   TestConvertEventTypesToHarmonizedStringRepresentation/multiple_event_types
+=== RUN   TestConvertEventTypesToHarmonizedStringRepresentation/all_supported_event_types
+--- PASS: TestConvertEventTypesToHarmonizedStringRepresentation (0.00s)
+    --- PASS: TestConvertEventTypesToHarmonizedStringRepresentation/empty_slice (0.00s)
+    --- PASS: TestConvertEventTypesToHarmonizedStringRepresentation/single_event_type (0.00s)
+    --- PASS: TestConvertEventTypesToHarmonizedStringRepresentation/multiple_event_types (0.00s)
+    --- PASS: TestConvertEventTypesToHarmonizedStringRepresentation/all_supported_event_types (0.00s)
+=== RUN   TestReadEventTypesFromStrings
+=== RUN   TestReadEventTypesFromStrings/empty_slice
+=== RUN   TestReadEventTypesFromStrings/single_event_type
+=== RUN   TestReadEventTypesFromStrings/multiple_event_types
+=== RUN   TestReadEventTypesFromStrings/mixed_case_input
+--- PASS: TestReadEventTypesFromStrings (0.00s)
+    --- PASS: TestReadEventTypesFromStrings/empty_slice (0.00s)
+    --- PASS: TestReadEventTypesFromStrings/single_event_type (0.00s)
+    --- PASS: TestReadEventTypesFromStrings/multiple_event_types (0.00s)
+    --- PASS: TestReadEventTypesFromStrings/mixed_case_input (0.00s)
+=== RUN   TestConvertSupportedEventTypesToStringSlice
+--- PASS: TestConvertSupportedEventTypesToStringSlice (0.00s)
+=== RUN   TestSupportedEventTypes
+--- PASS: TestSupportedEventTypes (0.00s)
+=== RUN   TestGetRestResource
+--- PASS: TestGetRestResource (0.00s)
+=== RUN   TestMapStateToDataObjectWithDynamicCustomPayloadFields
+=== RUN   TestMapStateToDataObjectWithDynamicCustomPayloadFields/with_dynamic_custom_payload_fields
+    resource-alerting-config-framework_test.go:498: Failed to set state: [{{An unexpected error was encountered while verifying an attribute value matched its expected type to prevent unexpected behavior or panics. This is always an error in the provider. Please report the following to the provider developer:
+        
+        Expected framework type from provider logic: types.SetType[basetypes.StringType] / underlying type: tftypes.Set[tftypes.String]
+        Received framework type from provider logic: types.SetType[!!! MISSING TYPE !!!] / underlying type: tftypes.Set[tftypes.DynamicPseudoType]
+        Path: event_filter_application_alert_ids Value Conversion Error} {[event_filter_application_alert_ids]}}]
+--- FAIL: TestMapStateToDataObjectWithDynamicCustomPayloadFields (0.00s)
+    --- FAIL: TestMapStateToDataObjectWithDynamicCustomPayloadFields/with_dynamic_custom_payload_fields (0.00s)
+=== RUN   TestUpdateStateWithComplexCustomPayloadFields
+=== RUN   TestUpdateStateWithComplexCustomPayloadFields/with_dynamic_custom_payload_fields
+--- PASS: TestUpdateStateWithComplexCustomPayloadFields (0.00s)
+    --- PASS: TestUpdateStateWithComplexCustomPayloadFields/with_dynamic_custom_payload_fields (0.00s)
+=== RUN   TestMapStateToDataObjectEdgeCases
+=== RUN   TestMapStateToDataObjectEdgeCases/with_all_fields_populated_including_complex_scenarios
+    resource-alerting-config-framework_test.go:498: Failed to set state: [{{An unexpected error was encountered while verifying an attribute value matched its expected type to prevent unexpected behavior or panics. This is always an error in the provider. Please report the following to the provider developer:
+        
+        Expected framework type from provider logic: types.SetType[basetypes.StringType] / underlying type: tftypes.Set[tftypes.String]
+        Received framework type from provider logic: types.SetType[!!! MISSING TYPE !!!] / underlying type: tftypes.Set[tftypes.DynamicPseudoType]
+        Path: event_filter_application_alert_ids Value Conversion Error} {[event_filter_application_alert_ids]}}]
+=== RUN   TestMapStateToDataObjectEdgeCases/with_empty_string_values
+    resource-alerting-config-framework_test.go:498: Failed to set state: [{{An unexpected error was encountered while verifying an attribute value matched its expected type to prevent unexpected behavior or panics. This is always an error in the provider. Please report the following to the provider developer:
+        
+        Expected framework type from provider logic: types.SetType[basetypes.StringType] / underlying type: tftypes.Set[tftypes.String]
+        Received framework type from provider logic: types.SetType[!!! MISSING TYPE !!!] / underlying type: tftypes.Set[tftypes.DynamicPseudoType]
+        Path: event_filter_application_alert_ids Value Conversion Error} {[event_filter_application_alert_ids]}}]
+--- FAIL: TestMapStateToDataObjectEdgeCases (0.00s)
+    --- FAIL: TestMapStateToDataObjectEdgeCases/with_all_fields_populated_including_complex_scenarios (0.00s)
+    --- FAIL: TestMapStateToDataObjectEdgeCases/with_empty_string_values (0.00s)
+=== RUN   TestUpdateStateWithAllEventTypes
+=== RUN   TestUpdateStateWithAllEventTypes/with_all_supported_event_types
+=== RUN   TestUpdateStateWithAllEventTypes/with_mixed_payload_fields_and_all_filters
+--- PASS: TestUpdateStateWithAllEventTypes (0.00s)
+    --- PASS: TestUpdateStateWithAllEventTypes/with_all_supported_event_types (0.00s)
+    --- PASS: TestUpdateStateWithAllEventTypes/with_mixed_payload_fields_and_all_filters (0.00s)
+FAIL
+coverage: 42.6% of statements
+FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/alertingconfig	0.997s
+=== RUN   TestNewAPITokenResourceHandleFramework
+--- PASS: TestNewAPITokenResourceHandleFramework (0.00s)
+=== RUN   TestMetaData
+--- PASS: TestMetaData (0.00s)
+=== RUN   TestSetComputedFields
+--- PASS: TestSetComputedFields (0.00s)
+=== RUN   TestUpdateState
+=== RUN   TestUpdateState/basic_API_token
+=== RUN   TestUpdateState/API_token_with_permissions
+=== RUN   TestUpdateState/API_token_with_scope_limitations
+=== RUN   TestUpdateState/API_token_with_all_permissions_enabled
+--- PASS: TestUpdateState (0.00s)
+    --- PASS: TestUpdateState/basic_API_token (0.00s)
+    --- PASS: TestUpdateState/API_token_with_permissions (0.00s)
+    --- PASS: TestUpdateState/API_token_with_scope_limitations (0.00s)
+    --- PASS: TestUpdateState/API_token_with_all_permissions_enabled (0.00s)
+=== RUN   TestMapStateToDataObject
+=== RUN   TestMapStateToDataObject/basic_API_token_from_state
+=== RUN   TestMapStateToDataObject/API_token_from_plan
+=== RUN   TestMapStateToDataObject/API_token_with_permissions
+=== RUN   TestMapStateToDataObject/API_token_with_scope_limitations
+=== RUN   TestMapStateToDataObject/API_token_with_all_fields_populated
+--- PASS: TestMapStateToDataObject (0.00s)
+    --- PASS: TestMapStateToDataObject/basic_API_token_from_state (0.00s)
+    --- PASS: TestMapStateToDataObject/API_token_from_plan (0.00s)
+    --- PASS: TestMapStateToDataObject/API_token_with_permissions (0.00s)
+    --- PASS: TestMapStateToDataObject/API_token_with_scope_limitations (0.00s)
+    --- PASS: TestMapStateToDataObject/API_token_with_all_fields_populated (0.00s)
+=== RUN   TestGetRestResource
+--- PASS: TestGetRestResource (0.00s)
+=== RUN   TestRoundTripConversion
+=== RUN   TestRoundTripConversion/state_to_API_and_back_to_state
+--- PASS: TestRoundTripConversion (0.00s)
+    --- PASS: TestRoundTripConversion/state_to_API_and_back_to_state (0.00s)
+=== RUN   TestEdgeCases
+=== RUN   TestEdgeCases/empty_name
+=== RUN   TestEdgeCases/all_permissions_false
+--- PASS: TestEdgeCases (0.00s)
+    --- PASS: TestEdgeCases/empty_name (0.00s)
+    --- PASS: TestEdgeCases/all_permissions_false (0.00s)
+PASS
+coverage: 99.0% of statements
+ok  	github.com/gessnerfl/terraform-provider-instana/internal/resources/apitoken	2.078s	coverage: 99.0% of statements
+FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/applicationalertconfig [build failed]
+=== RUN   TestNewApplicationConfigResourceHandleFramework
+--- PASS: TestNewApplicationConfigResourceHandleFramework (0.00s)
+=== RUN   TestMetaData
+--- PASS: TestMetaData (0.00s)
+=== RUN   TestSetComputedFields
+--- PASS: TestSetComputedFields (0.00s)
+=== RUN   TestGetRestResource
+--- PASS: TestGetRestResource (0.00s)
+=== RUN   TestMapStateToDataObject_BasicConfig
+--- PASS: TestMapStateToDataObject_BasicConfig (0.00s)
+=== RUN   TestMapStateToDataObject_WithTagFilter
+--- PASS: TestMapStateToDataObject_WithTagFilter (0.00s)
+=== RUN   TestMapStateToDataObject_WithMultipleAccessRules
+--- PASS: TestMapStateToDataObject_WithMultipleAccessRules (0.00s)
+=== RUN   TestMapStateToDataObject_WithEmptyAccessRules
+--- PASS: TestMapStateToDataObject_WithEmptyAccessRules (0.00s)
+=== RUN   TestMapStateToDataObject_WithNullID
+--- PASS: TestMapStateToDataObject_WithNullID (0.00s)
+=== RUN   TestMapStateToDataObject_WithInvalidTagFilter
+--- PASS: TestMapStateToDataObject_WithInvalidTagFilter (0.00s)
+=== RUN   TestMapStateToDataObject_FromPlan
+--- PASS: TestMapStateToDataObject_FromPlan (0.00s)
+=== RUN   TestUpdateState_BasicConfig
+    resource-application-config-framework_test.go:311: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/applicationconfig/resource-application-config-framework_test.go:311
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_BasicConfig
+--- FAIL: TestUpdateState_BasicConfig (0.00s)
+=== RUN   TestUpdateState_WithTagFilter
+    resource-application-config-framework_test.go:363: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/applicationconfig/resource-application-config-framework_test.go:363
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithTagFilter
+--- FAIL: TestUpdateState_WithTagFilter (0.00s)
+=== RUN   TestUpdateState_WithMultipleAccessRules
+    resource-application-config-framework_test.go:417: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/applicationconfig/resource-application-config-framework_test.go:417
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithMultipleAccessRules
+--- FAIL: TestUpdateState_WithMultipleAccessRules (0.00s)
+=== RUN   TestUpdateState_WithEmptyAccessRules
+    resource-application-config-framework_test.go:458: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/applicationconfig/resource-application-config-framework_test.go:458
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithEmptyAccessRules
+--- FAIL: TestUpdateState_WithEmptyAccessRules (0.00s)
+=== RUN   TestUpdateState_WithNullTagFilter
+    resource-application-config-framework_test.go:491: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/applicationconfig/resource-application-config-framework_test.go:491
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithNullTagFilter
+--- FAIL: TestUpdateState_WithNullTagFilter (0.00s)
+=== RUN   TestMapStateToDataObject_AllScopes
+=== RUN   TestMapStateToDataObject_AllScopes/INCLUDE_NO_DOWNSTREAM
+=== RUN   TestMapStateToDataObject_AllScopes/INCLUDE_IMMEDIATE_DOWNSTREAM_DATABASE_AND_MESSAGING
+=== RUN   TestMapStateToDataObject_AllScopes/INCLUDE_ALL_DOWNSTREAM
+--- PASS: TestMapStateToDataObject_AllScopes (0.00s)
+    --- PASS: TestMapStateToDataObject_AllScopes/INCLUDE_NO_DOWNSTREAM (0.00s)
+    --- PASS: TestMapStateToDataObject_AllScopes/INCLUDE_IMMEDIATE_DOWNSTREAM_DATABASE_AND_MESSAGING (0.00s)
+    --- PASS: TestMapStateToDataObject_AllScopes/INCLUDE_ALL_DOWNSTREAM (0.00s)
+=== RUN   TestMapStateToDataObject_AllBoundaryScopes
+=== RUN   TestMapStateToDataObject_AllBoundaryScopes/ALL
+=== RUN   TestMapStateToDataObject_AllBoundaryScopes/INBOUND
+=== RUN   TestMapStateToDataObject_AllBoundaryScopes/DEFAULT
+--- PASS: TestMapStateToDataObject_AllBoundaryScopes (0.00s)
+    --- PASS: TestMapStateToDataObject_AllBoundaryScopes/ALL (0.00s)
+    --- PASS: TestMapStateToDataObject_AllBoundaryScopes/INBOUND (0.00s)
+    --- PASS: TestMapStateToDataObject_AllBoundaryScopes/DEFAULT (0.00s)
+=== RUN   TestMapStateToDataObject_AllAccessTypes
+=== RUN   TestMapStateToDataObject_AllAccessTypes/READ
+=== RUN   TestMapStateToDataObject_AllAccessTypes/READ_WRITE
+--- PASS: TestMapStateToDataObject_AllAccessTypes (0.00s)
+    --- PASS: TestMapStateToDataObject_AllAccessTypes/READ (0.00s)
+    --- PASS: TestMapStateToDataObject_AllAccessTypes/READ_WRITE (0.00s)
+=== RUN   TestMapStateToDataObject_AllRelationTypes
+=== RUN   TestMapStateToDataObject_AllRelationTypes/USER
+=== RUN   TestMapStateToDataObject_AllRelationTypes/API_TOKEN
+=== RUN   TestMapStateToDataObject_AllRelationTypes/ROLE
+=== RUN   TestMapStateToDataObject_AllRelationTypes/TEAM
+=== RUN   TestMapStateToDataObject_AllRelationTypes/GLOBAL
+--- PASS: TestMapStateToDataObject_AllRelationTypes (0.00s)
+    --- PASS: TestMapStateToDataObject_AllRelationTypes/USER (0.00s)
+    --- PASS: TestMapStateToDataObject_AllRelationTypes/API_TOKEN (0.00s)
+    --- PASS: TestMapStateToDataObject_AllRelationTypes/ROLE (0.00s)
+    --- PASS: TestMapStateToDataObject_AllRelationTypes/TEAM (0.00s)
+    --- PASS: TestMapStateToDataObject_AllRelationTypes/GLOBAL (0.00s)
+=== RUN   TestMapStateToDataObject_WithEmptyRelatedID
+--- PASS: TestMapStateToDataObject_WithEmptyRelatedID (0.00s)
+=== RUN   TestMapAccessRulesToState_EmptyRules
+--- PASS: TestMapAccessRulesToState_EmptyRules (0.00s)
+=== RUN   TestMapAccessRulesToState_WithRules
+--- PASS: TestMapAccessRulesToState_WithRules (0.00s)
+=== RUN   TestMapAccessRulesFromState_EmptyRules
+--- PASS: TestMapAccessRulesFromState_EmptyRules (0.00s)
+=== RUN   TestMapAccessRulesFromState_WithRules
+--- PASS: TestMapAccessRulesFromState_WithRules (0.00s)
+=== RUN   TestUpdateState_AllScopes
+=== RUN   TestUpdateState_AllScopes/INCLUDE_NO_DOWNSTREAM
+    resource-application-config-framework_test.go:759: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/applicationconfig/resource-application-config-framework_test.go:759
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_AllScopes/INCLUDE_NO_DOWNSTREAM
+=== RUN   TestUpdateState_AllScopes/INCLUDE_IMMEDIATE_DOWNSTREAM_DATABASE_AND_MESSAGING
+    resource-application-config-framework_test.go:759: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/applicationconfig/resource-application-config-framework_test.go:759
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_AllScopes/INCLUDE_IMMEDIATE_DOWNSTREAM_DATABASE_AND_MESSAGING
+=== RUN   TestUpdateState_AllScopes/INCLUDE_ALL_DOWNSTREAM
+    resource-application-config-framework_test.go:759: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/applicationconfig/resource-application-config-framework_test.go:759
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_AllScopes/INCLUDE_ALL_DOWNSTREAM
+--- FAIL: TestUpdateState_AllScopes (0.00s)
+    --- FAIL: TestUpdateState_AllScopes/INCLUDE_NO_DOWNSTREAM (0.00s)
+    --- FAIL: TestUpdateState_AllScopes/INCLUDE_IMMEDIATE_DOWNSTREAM_DATABASE_AND_MESSAGING (0.00s)
+    --- FAIL: TestUpdateState_AllScopes/INCLUDE_ALL_DOWNSTREAM (0.00s)
+=== RUN   TestUpdateState_AllBoundaryScopes
+=== RUN   TestUpdateState_AllBoundaryScopes/ALL
+    resource-application-config-framework_test.go:801: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/applicationconfig/resource-application-config-framework_test.go:801
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_AllBoundaryScopes/ALL
+=== RUN   TestUpdateState_AllBoundaryScopes/INBOUND
+    resource-application-config-framework_test.go:801: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/applicationconfig/resource-application-config-framework_test.go:801
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_AllBoundaryScopes/INBOUND
+=== RUN   TestUpdateState_AllBoundaryScopes/DEFAULT
+    resource-application-config-framework_test.go:801: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/applicationconfig/resource-application-config-framework_test.go:801
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_AllBoundaryScopes/DEFAULT
+--- FAIL: TestUpdateState_AllBoundaryScopes (0.00s)
+    --- FAIL: TestUpdateState_AllBoundaryScopes/ALL (0.00s)
+    --- FAIL: TestUpdateState_AllBoundaryScopes/INBOUND (0.00s)
+    --- FAIL: TestUpdateState_AllBoundaryScopes/DEFAULT (0.00s)
+FAIL
+coverage: 93.1% of statements
+FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/applicationconfig	0.624s
+=== RUN   TestNewAutomationActionResourceHandleFramework
+--- PASS: TestNewAutomationActionResourceHandleFramework (0.00s)
+=== RUN   TestMetaData
+--- PASS: TestMetaData (0.00s)
+=== RUN   TestSetComputedFields
+--- PASS: TestSetComputedFields (0.00s)
+=== RUN   TestGetRestResource
+--- PASS: TestGetRestResource (0.00s)
+=== RUN   TestMapStateToDataObject_ScriptAction
+--- PASS: TestMapStateToDataObject_ScriptAction (0.00s)
+=== RUN   TestMapStateToDataObject_HttpAction
+--- PASS: TestMapStateToDataObject_HttpAction (0.00s)
+=== RUN   TestMapStateToDataObject_HttpActionWithBasicAuth
+--- PASS: TestMapStateToDataObject_HttpActionWithBasicAuth (0.00s)
+=== RUN   TestMapStateToDataObject_HttpActionWithBearerToken
+--- PASS: TestMapStateToDataObject_HttpActionWithBearerToken (0.00s)
+=== RUN   TestMapStateToDataObject_HttpActionWithApiKey
+--- PASS: TestMapStateToDataObject_HttpActionWithApiKey (0.00s)
+=== RUN   TestMapStateToDataObject_HttpActionWithHeaders
+--- PASS: TestMapStateToDataObject_HttpActionWithHeaders (0.00s)
+=== RUN   TestMapStateToDataObject_ManualAction
+--- PASS: TestMapStateToDataObject_ManualAction (0.00s)
+=== RUN   TestMapStateToDataObject_JiraAction
+--- PASS: TestMapStateToDataObject_JiraAction (0.00s)
+=== RUN   TestMapStateToDataObject_GitHubAction
+--- PASS: TestMapStateToDataObject_GitHubAction (0.00s)
+=== RUN   TestMapStateToDataObject_DocLinkAction
+--- PASS: TestMapStateToDataObject_DocLinkAction (0.00s)
+=== RUN   TestMapStateToDataObject_GitLabAction
+--- PASS: TestMapStateToDataObject_GitLabAction (0.00s)
+=== RUN   TestMapStateToDataObject_AnsibleAction
+--- PASS: TestMapStateToDataObject_AnsibleAction (0.00s)
+=== RUN   TestMapStateToDataObject_WithTags
+--- PASS: TestMapStateToDataObject_WithTags (0.00s)
+=== RUN   TestMapStateToDataObject_WithInputParameters
+--- PASS: TestMapStateToDataObject_WithInputParameters (0.00s)
+=== RUN   TestMapStateToDataObject_InvalidConfig
+--- PASS: TestMapStateToDataObject_InvalidConfig (0.00s)
+=== RUN   TestUpdateState_ScriptAction
+--- PASS: TestUpdateState_ScriptAction (0.00s)
+=== RUN   TestUpdateState_HttpAction
+--- PASS: TestUpdateState_HttpAction (0.00s)
+=== RUN   TestUpdateState_WithTags
+--- PASS: TestUpdateState_WithTags (0.00s)
+=== RUN   TestUpdateState_WithInputParameters
+--- PASS: TestUpdateState_WithInputParameters (0.00s)
+=== RUN   TestMapTagsToState
+=== RUN   TestMapTagsToState/valid_tags
+=== RUN   TestMapTagsToState/nil_tags
+=== RUN   TestMapTagsToState/empty_tags
+=== RUN   TestMapTagsToState/invalid_tag_type
+--- PASS: TestMapTagsToState (0.00s)
+    --- PASS: TestMapTagsToState/valid_tags (0.00s)
+    --- PASS: TestMapTagsToState/nil_tags (0.00s)
+    --- PASS: TestMapTagsToState/empty_tags (0.00s)
+    --- PASS: TestMapTagsToState/invalid_tag_type (0.00s)
+=== RUN   TestMapTagsFromState
+=== RUN   TestMapTagsFromState/with_tags
+=== RUN   TestMapTagsFromState/null_tags
+--- PASS: TestMapTagsFromState (0.00s)
+    --- PASS: TestMapTagsFromState/with_tags (0.00s)
+    --- PASS: TestMapTagsFromState/null_tags (0.00s)
+=== RUN   TestMapInputParametersFromState
+--- PASS: TestMapInputParametersFromState (0.00s)
+=== RUN   TestMapInputParametersFromState_Empty
+--- PASS: TestMapInputParametersFromState_Empty (0.00s)
+=== RUN   TestMapActionTypeAndFields_AllHTTPMethods
+=== RUN   TestMapActionTypeAndFields_AllHTTPMethods/GET
+=== RUN   TestMapActionTypeAndFields_AllHTTPMethods/POST
+=== RUN   TestMapActionTypeAndFields_AllHTTPMethods/PUT
+=== RUN   TestMapActionTypeAndFields_AllHTTPMethods/DELETE
+--- PASS: TestMapActionTypeAndFields_AllHTTPMethods (0.00s)
+    --- PASS: TestMapActionTypeAndFields_AllHTTPMethods/GET (0.00s)
+    --- PASS: TestMapActionTypeAndFields_AllHTTPMethods/POST (0.00s)
+    --- PASS: TestMapActionTypeAndFields_AllHTTPMethods/PUT (0.00s)
+    --- PASS: TestMapActionTypeAndFields_AllHTTPMethods/DELETE (0.00s)
+=== RUN   TestMapActionTypeAndFields_AllParameterTypes
+=== RUN   TestMapActionTypeAndFields_AllParameterTypes/static
+=== RUN   TestMapActionTypeAndFields_AllParameterTypes/dynamic
+=== RUN   TestMapActionTypeAndFields_AllParameterTypes/vault
+--- PASS: TestMapActionTypeAndFields_AllParameterTypes (0.00s)
+    --- PASS: TestMapActionTypeAndFields_AllParameterTypes/static (0.00s)
+    --- PASS: TestMapActionTypeAndFields_AllParameterTypes/dynamic (0.00s)
+    --- PASS: TestMapActionTypeAndFields_AllParameterTypes/vault (0.00s)
+=== RUN   TestMapStateToDataObject_FromPlan
+--- PASS: TestMapStateToDataObject_FromPlan (0.00s)
+=== RUN   TestUpdateState_NullTags
+--- PASS: TestUpdateState_NullTags (0.00s)
+=== RUN   TestUpdateState_EmptyInputParameters
+--- PASS: TestUpdateState_EmptyInputParameters (0.00s)
+=== RUN   TestMapStateToDataObject_NullID
+--- PASS: TestMapStateToDataObject_NullID (0.00s)
+=== RUN   TestMapActionTypeAndFields_ScriptWithAllFields
+--- PASS: TestMapActionTypeAndFields_ScriptWithAllFields (0.00s)
+=== RUN   TestMapActionTypeAndFields_HttpWithAllOptionalFields
+--- PASS: TestMapActionTypeAndFields_HttpWithAllOptionalFields (0.00s)
+=== RUN   TestUpdateState_AllActionTypes
+=== RUN   TestUpdateState_AllActionTypes/Manual
+=== RUN   TestUpdateState_AllActionTypes/Jira
+=== RUN   TestUpdateState_AllActionTypes/GitHub
+=== RUN   TestUpdateState_AllActionTypes/DocLink
+=== RUN   TestUpdateState_AllActionTypes/GitLab
+=== RUN   TestUpdateState_AllActionTypes/Ansible
+--- PASS: TestUpdateState_AllActionTypes (0.00s)
+    --- PASS: TestUpdateState_AllActionTypes/Manual (0.00s)
+    --- PASS: TestUpdateState_AllActionTypes/Jira (0.00s)
+    --- PASS: TestUpdateState_AllActionTypes/GitHub (0.00s)
+    --- PASS: TestUpdateState_AllActionTypes/DocLink (0.00s)
+    --- PASS: TestUpdateState_AllActionTypes/GitLab (0.00s)
+    --- PASS: TestUpdateState_AllActionTypes/Ansible (0.00s)
+=== RUN   TestMapStateToDataObject_FromState
+--- PASS: TestMapStateToDataObject_FromState (0.00s)
+=== RUN   TestMapTagsFromState_NullTags
+--- PASS: TestMapTagsFromState_NullTags (0.00s)
+=== RUN   TestMapActionTypeAndFields_InvalidConfiguration
+--- PASS: TestMapActionTypeAndFields_InvalidConfiguration (0.00s)
+=== RUN   TestMapActionTypeAndFields_HTTPAuthNoAuth
+=== RUN   TestMapActionTypeAndFields_HTTPAuthNoAuth/NoAuth_with_nil_auth
+=== RUN   TestMapActionTypeAndFields_HTTPAuthNoAuth/NoAuth_with_empty_auth
+--- PASS: TestMapActionTypeAndFields_HTTPAuthNoAuth (0.00s)
+    --- PASS: TestMapActionTypeAndFields_HTTPAuthNoAuth/NoAuth_with_nil_auth (0.00s)
+    --- PASS: TestMapActionTypeAndFields_HTTPAuthNoAuth/NoAuth_with_empty_auth (0.00s)
+=== RUN   TestMapActionTypeAndFields_HTTPWithHeaders
+--- PASS: TestMapActionTypeAndFields_HTTPWithHeaders (0.00s)
+=== RUN   TestMapActionTypeAndFields_AllOptionalFieldsPopulated
+=== RUN   TestMapActionTypeAndFields_AllOptionalFieldsPopulated/Script_with_all_fields
+=== RUN   TestMapActionTypeAndFields_AllOptionalFieldsPopulated/HTTP_with_all_fields
+=== RUN   TestMapActionTypeAndFields_AllOptionalFieldsPopulated/Jira_with_all_fields
+=== RUN   TestMapActionTypeAndFields_AllOptionalFieldsPopulated/GitHub_with_all_fields
+=== RUN   TestMapActionTypeAndFields_AllOptionalFieldsPopulated/GitLab_with_all_fields
+=== RUN   TestMapActionTypeAndFields_AllOptionalFieldsPopulated/Ansible_with_all_fields
+--- PASS: TestMapActionTypeAndFields_AllOptionalFieldsPopulated (0.00s)
+    --- PASS: TestMapActionTypeAndFields_AllOptionalFieldsPopulated/Script_with_all_fields (0.00s)
+    --- PASS: TestMapActionTypeAndFields_AllOptionalFieldsPopulated/HTTP_with_all_fields (0.00s)
+    --- PASS: TestMapActionTypeAndFields_AllOptionalFieldsPopulated/Jira_with_all_fields (0.00s)
+    --- PASS: TestMapActionTypeAndFields_AllOptionalFieldsPopulated/GitHub_with_all_fields (0.00s)
+    --- PASS: TestMapActionTypeAndFields_AllOptionalFieldsPopulated/GitLab_with_all_fields (0.00s)
+    --- PASS: TestMapActionTypeAndFields_AllOptionalFieldsPopulated/Ansible_with_all_fields (0.00s)
+=== RUN   TestMapStateToDataObject_NilPlanAndState
+--- PASS: TestMapStateToDataObject_NilPlanAndState (0.00s)
+=== RUN   TestMapActionTypeAndFields_ScriptMinimalFields
+--- PASS: TestMapActionTypeAndFields_ScriptMinimalFields (0.00s)
+=== RUN   TestMapActionTypeAndFields_JiraMinimalFields
+--- PASS: TestMapActionTypeAndFields_JiraMinimalFields (0.00s)
+=== RUN   TestMapActionTypeAndFields_GitHubMinimalFields
+--- PASS: TestMapActionTypeAndFields_GitHubMinimalFields (0.00s)
+=== RUN   TestMapActionTypeAndFields_GitLabMinimalFields
+--- PASS: TestMapActionTypeAndFields_GitLabMinimalFields (0.00s)
+=== RUN   TestMapActionTypeAndFields_AnsibleMinimalFields
+--- PASS: TestMapActionTypeAndFields_AnsibleMinimalFields (0.00s)
+=== RUN   TestMapActionTypeAndFields_HTTPMinimalFields
+--- PASS: TestMapActionTypeAndFields_HTTPMinimalFields (0.00s)
+=== RUN   TestUpdateState_WithInterfaceTags
+--- PASS: TestUpdateState_WithInterfaceTags (0.00s)
+=== RUN   TestMapTagsFromState_WithValidTags
+--- PASS: TestMapTagsFromState_WithValidTags (0.00s)
+=== RUN   TestMapActionTypeAndFields_HTTPWithEmptyAuth
+--- PASS: TestMapActionTypeAndFields_HTTPWithEmptyAuth (0.00s)
+=== RUN   TestMapActionTypeAndFields_HTTPWithNullBasicAuthFields
+--- PASS: TestMapActionTypeAndFields_HTTPWithNullBasicAuthFields (0.00s)
+=== RUN   TestMapActionTypeAndFields_HTTPWithNullTokenField
+--- PASS: TestMapActionTypeAndFields_HTTPWithNullTokenField (0.00s)
+=== RUN   TestMapActionTypeAndFields_HTTPWithNullApiKeyField
+--- PASS: TestMapActionTypeAndFields_HTTPWithNullApiKeyField (0.00s)
+PASS
+coverage: 91.6% of statements
+ok  	github.com/gessnerfl/terraform-provider-instana/internal/resources/automationaction	1.649s	coverage: 91.6% of statements
+=== RUN   TestNewAutomationPolicyResourceHandleFramework
+--- PASS: TestNewAutomationPolicyResourceHandleFramework (0.00s)
+=== RUN   TestMetaData
+--- PASS: TestMetaData (0.00s)
+=== RUN   TestSetComputedFields
+--- PASS: TestSetComputedFields (0.00s)
+=== RUN   TestGetRestResource
+--- PASS: TestGetRestResource (0.00s)
+=== RUN   TestMapStateToDataObject_BasicPolicy
+--- PASS: TestMapStateToDataObject_BasicPolicy (0.00s)
+=== RUN   TestMapStateToDataObject_WithTags
+--- PASS: TestMapStateToDataObject_WithTags (0.00s)
+=== RUN   TestMapStateToDataObject_WithScheduling
+--- PASS: TestMapStateToDataObject_WithScheduling (0.00s)
+=== RUN   TestMapStateToDataObject_WithCondition
+--- PASS: TestMapStateToDataObject_WithCondition (0.00s)
+=== RUN   TestMapStateToDataObject_WithMultipleActions
+--- PASS: TestMapStateToDataObject_WithMultipleActions (0.00s)
+=== RUN   TestMapStateToDataObject_FromPlan
+--- PASS: TestMapStateToDataObject_FromPlan (0.00s)
+=== RUN   TestMapStateToDataObject_NullID
+--- PASS: TestMapStateToDataObject_NullID (0.00s)
+=== RUN   TestUpdateState_BasicPolicy
+    resource-automation-policy-framework_test.go:432: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/automationpolicy/resource-automation-policy-framework_test.go:432
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_BasicPolicy
+--- FAIL: TestUpdateState_BasicPolicy (0.00s)
+=== RUN   TestUpdateState_WithTags
+    resource-automation-policy-framework_test.go:483: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/automationpolicy/resource-automation-policy-framework_test.go:483
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithTags
+--- FAIL: TestUpdateState_WithTags (0.00s)
+=== RUN   TestUpdateState_WithScheduling
+    resource-automation-policy-framework_test.go:546: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/automationpolicy/resource-automation-policy-framework_test.go:546
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithScheduling
+--- FAIL: TestUpdateState_WithScheduling (0.00s)
+=== RUN   TestMapTagsToState
+=== RUN   TestMapTagsToState/valid_tags
+=== RUN   TestMapTagsToState/nil_tags
+=== RUN   TestMapTagsToState/empty_tags
+=== RUN   TestMapTagsToState/invalid_tag_type
+=== RUN   TestMapTagsToState/invalid_tags_format
+--- PASS: TestMapTagsToState (0.00s)
+    --- PASS: TestMapTagsToState/valid_tags (0.00s)
+    --- PASS: TestMapTagsToState/nil_tags (0.00s)
+    --- PASS: TestMapTagsToState/empty_tags (0.00s)
+    --- PASS: TestMapTagsToState/invalid_tag_type (0.00s)
+    --- PASS: TestMapTagsToState/invalid_tags_format (0.00s)
+=== RUN   TestMapTagsFromState
+=== RUN   TestMapTagsFromState/with_tags
+=== RUN   TestMapTagsFromState/null_tags
+--- PASS: TestMapTagsFromState (0.00s)
+    --- PASS: TestMapTagsFromState/with_tags (0.00s)
+    --- PASS: TestMapTagsFromState/null_tags (0.00s)
+=== RUN   TestMapTriggerToState
+=== RUN   TestMapTriggerToState/basic_trigger
+=== RUN   TestMapTriggerToState/trigger_with_name_and_description
+=== RUN   TestMapTriggerToState/trigger_with_scheduling
+--- PASS: TestMapTriggerToState (0.00s)
+    --- PASS: TestMapTriggerToState/basic_trigger (0.00s)
+    --- PASS: TestMapTriggerToState/trigger_with_name_and_description (0.00s)
+    --- PASS: TestMapTriggerToState/trigger_with_scheduling (0.00s)
+=== RUN   TestMapTriggerFromState
+=== RUN   TestMapTriggerFromState/basic_trigger
+=== RUN   TestMapTriggerFromState/trigger_with_optional_fields
+=== RUN   TestMapTriggerFromState/trigger_with_scheduling
+--- PASS: TestMapTriggerFromState (0.00s)
+    --- PASS: TestMapTriggerFromState/basic_trigger (0.00s)
+    --- PASS: TestMapTriggerFromState/trigger_with_optional_fields (0.00s)
+    --- PASS: TestMapTriggerFromState/trigger_with_scheduling (0.00s)
+=== RUN   TestMapConditionFromState
+=== RUN   TestMapConditionFromState/nil_condition
+=== RUN   TestMapConditionFromState/with_query
+--- PASS: TestMapConditionFromState (0.00s)
+    --- PASS: TestMapConditionFromState/nil_condition (0.00s)
+    --- PASS: TestMapConditionFromState/with_query (0.00s)
+=== RUN   TestMapTypeConfigurationsToState
+--- PASS: TestMapTypeConfigurationsToState (0.00s)
+=== RUN   TestMapTypeConfigurationsFromState
+--- PASS: TestMapTypeConfigurationsFromState (0.00s)
+=== RUN   TestMapActionsToState
+--- PASS: TestMapActionsToState (0.00s)
+=== RUN   TestMapRunnableFromState
+--- PASS: TestMapRunnableFromState (0.00s)
+=== RUN   TestMapRunnableFromState_EmptyActions
+--- PASS: TestMapRunnableFromState_EmptyActions (0.00s)
+=== RUN   TestUpdateState_AllTriggerTypes
+=== RUN   TestUpdateState_AllTriggerTypes/customEvent
+    resource-automation-policy-framework_test.go:1033: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/automationpolicy/resource-automation-policy-framework_test.go:1033
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_AllTriggerTypes/customEvent
+=== RUN   TestUpdateState_AllTriggerTypes/builtinEvent
+    resource-automation-policy-framework_test.go:1033: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/automationpolicy/resource-automation-policy-framework_test.go:1033
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_AllTriggerTypes/builtinEvent
+=== RUN   TestUpdateState_AllTriggerTypes/applicationSmartAlert
+    resource-automation-policy-framework_test.go:1033: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/automationpolicy/resource-automation-policy-framework_test.go:1033
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_AllTriggerTypes/applicationSmartAlert
+=== RUN   TestUpdateState_AllTriggerTypes/globalApplicationSmartAlert
+    resource-automation-policy-framework_test.go:1033: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/automationpolicy/resource-automation-policy-framework_test.go:1033
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_AllTriggerTypes/globalApplicationSmartAlert
+=== RUN   TestUpdateState_AllTriggerTypes/websiteSmartAlert
+    resource-automation-policy-framework_test.go:1033: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/automationpolicy/resource-automation-policy-framework_test.go:1033
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_AllTriggerTypes/websiteSmartAlert
+=== RUN   TestUpdateState_AllTriggerTypes/infraSmartAlert
+    resource-automation-policy-framework_test.go:1033: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/automationpolicy/resource-automation-policy-framework_test.go:1033
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_AllTriggerTypes/infraSmartAlert
+=== RUN   TestUpdateState_AllTriggerTypes/mobileAppSmartAlert
+    resource-automation-policy-framework_test.go:1033: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/automationpolicy/resource-automation-policy-framework_test.go:1033
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_AllTriggerTypes/mobileAppSmartAlert
+=== RUN   TestUpdateState_AllTriggerTypes/syntheticsSmartAlert
+    resource-automation-policy-framework_test.go:1033: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/automationpolicy/resource-automation-policy-framework_test.go:1033
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_AllTriggerTypes/syntheticsSmartAlert
+=== RUN   TestUpdateState_AllTriggerTypes/logSmartAlert
+    resource-automation-policy-framework_test.go:1033: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/automationpolicy/resource-automation-policy-framework_test.go:1033
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_AllTriggerTypes/logSmartAlert
+=== RUN   TestUpdateState_AllTriggerTypes/sloSmartAlert
+    resource-automation-policy-framework_test.go:1033: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/automationpolicy/resource-automation-policy-framework_test.go:1033
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_AllTriggerTypes/sloSmartAlert
+=== RUN   TestUpdateState_AllTriggerTypes/schedule
+    resource-automation-policy-framework_test.go:1033: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/automationpolicy/resource-automation-policy-framework_test.go:1033
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_AllTriggerTypes/schedule
+--- FAIL: TestUpdateState_AllTriggerTypes (0.01s)
+    --- FAIL: TestUpdateState_AllTriggerTypes/customEvent (0.00s)
+    --- FAIL: TestUpdateState_AllTriggerTypes/builtinEvent (0.00s)
+    --- FAIL: TestUpdateState_AllTriggerTypes/applicationSmartAlert (0.00s)
+    --- FAIL: TestUpdateState_AllTriggerTypes/globalApplicationSmartAlert (0.00s)
+    --- FAIL: TestUpdateState_AllTriggerTypes/websiteSmartAlert (0.00s)
+    --- FAIL: TestUpdateState_AllTriggerTypes/infraSmartAlert (0.00s)
+    --- FAIL: TestUpdateState_AllTriggerTypes/mobileAppSmartAlert (0.00s)
+    --- FAIL: TestUpdateState_AllTriggerTypes/syntheticsSmartAlert (0.00s)
+    --- FAIL: TestUpdateState_AllTriggerTypes/logSmartAlert (0.00s)
+    --- FAIL: TestUpdateState_AllTriggerTypes/sloSmartAlert (0.00s)
+    --- FAIL: TestUpdateState_AllTriggerTypes/schedule (0.00s)
+=== RUN   TestUpdateState_AllPolicyTypes
+=== RUN   TestUpdateState_AllPolicyTypes/manual
+    resource-automation-policy-framework_test.go:1082: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/automationpolicy/resource-automation-policy-framework_test.go:1082
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_AllPolicyTypes/manual
+=== RUN   TestUpdateState_AllPolicyTypes/automatic
+    resource-automation-policy-framework_test.go:1082: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/automationpolicy/resource-automation-policy-framework_test.go:1082
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_AllPolicyTypes/automatic
+--- FAIL: TestUpdateState_AllPolicyTypes (0.00s)
+    --- FAIL: TestUpdateState_AllPolicyTypes/manual (0.00s)
+    --- FAIL: TestUpdateState_AllPolicyTypes/automatic (0.00s)
+=== RUN   TestMapTriggerToState_EmptyOptionalFields
+--- PASS: TestMapTriggerToState_EmptyOptionalFields (0.00s)
+=== RUN   TestMapTriggerToState_WithExistingModel
+--- PASS: TestMapTriggerToState_WithExistingModel (0.00s)
+=== RUN   TestMapTypeConfigurationsToState_WithoutCondition
+--- PASS: TestMapTypeConfigurationsToState_WithoutCondition (0.00s)
+=== RUN   TestMapTypeConfigurationsToState_WithEmptyCondition
+--- PASS: TestMapTypeConfigurationsToState_WithEmptyCondition (0.00s)
+=== RUN   TestUpdateState_WithPlan
+--- PASS: TestUpdateState_WithPlan (0.00s)
+=== RUN   TestUpdateState_ErrorInPlanGet
+--- PASS: TestUpdateState_ErrorInPlanGet (0.00s)
+=== RUN   TestMapStateToDataObject_ErrorInStateGet
+--- PASS: TestMapStateToDataObject_ErrorInStateGet (0.00s)
+=== RUN   TestMapStateToDataObject_ErrorInTriggerMapping
+--- PASS: TestMapStateToDataObject_ErrorInTriggerMapping (0.00s)
+=== RUN   TestMapTypeConfigurationsFromState_ErrorInCondition
+--- PASS: TestMapTypeConfigurationsFromState_ErrorInCondition (0.00s)
+=== RUN   TestMapRunnableFromState_WithInputParameters
+--- PASS: TestMapRunnableFromState_WithInputParameters (0.00s)
+=== RUN   TestMapRunnableFromState_MultipleActionsSetRunnableID
+--- PASS: TestMapRunnableFromState_MultipleActionsSetRunnableID (0.00s)
+=== RUN   TestMapTagsFromState_ErrorInElementsAs
+--- PASS: TestMapTagsFromState_ErrorInElementsAs (0.00s)
+=== RUN   TestUpdateState_WithSchedulingEmptyFields
+    resource-automation-policy-framework_test.go:1569: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/automationpolicy/resource-automation-policy-framework_test.go:1569
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithSchedulingEmptyFields
+--- FAIL: TestUpdateState_WithSchedulingEmptyFields (0.00s)
+=== RUN   TestMapTriggerToState_WithSchedulingPreserved
+--- PASS: TestMapTriggerToState_WithSchedulingPreserved (0.00s)
+=== RUN   TestMapActionsToState_WithTags
+--- PASS: TestMapActionsToState_WithTags (0.00s)
+=== RUN   TestMapActionsToState_WithInputParameters
+--- PASS: TestMapActionsToState_WithInputParameters (0.00s)
+=== RUN   TestUpdateState_NullTags
+    resource-automation-policy-framework_test.go:1717: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/automationpolicy/resource-automation-policy-framework_test.go:1717
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_NullTags
+--- FAIL: TestUpdateState_NullTags (0.00s)
+FAIL
+coverage: 95.3% of statements
+FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/automationpolicy	2.371s
+=== RUN   TestNewCustomDashboardResourceHandleFramework
+--- PASS: TestNewCustomDashboardResourceHandleFramework (0.00s)
+=== RUN   TestMetaData
+--- PASS: TestMetaData (0.00s)
+=== RUN   TestSetComputedFields
+--- PASS: TestSetComputedFields (0.00s)
+=== RUN   TestMapAccessRulesToState
+=== RUN   TestMapAccessRulesToState/with_access_rules
+=== RUN   TestMapAccessRulesToState/with_empty_access_rules
+=== RUN   TestMapAccessRulesToState/with_nil_access_rules
+--- PASS: TestMapAccessRulesToState (0.00s)
+    --- PASS: TestMapAccessRulesToState/with_access_rules (0.00s)
+    --- PASS: TestMapAccessRulesToState/with_empty_access_rules (0.00s)
+    --- PASS: TestMapAccessRulesToState/with_nil_access_rules (0.00s)
+=== RUN   TestMapAccessRulesFromState
+=== RUN   TestMapAccessRulesFromState/with_access_rules
+=== RUN   TestMapAccessRulesFromState/with_empty_related_ID
+=== RUN   TestMapAccessRulesFromState/with_empty_access_rules
+=== RUN   TestMapAccessRulesFromState/with_nil_access_rules
+--- PASS: TestMapAccessRulesFromState (0.00s)
+    --- PASS: TestMapAccessRulesFromState/with_access_rules (0.00s)
+    --- PASS: TestMapAccessRulesFromState/with_empty_related_ID (0.00s)
+    --- PASS: TestMapAccessRulesFromState/with_empty_access_rules (0.00s)
+    --- PASS: TestMapAccessRulesFromState/with_nil_access_rules (0.00s)
+=== RUN   TestUpdateState
+=== RUN   TestUpdateState/with_plan_-_successful_update
+2025/11/19 20:02:52 keep existing value
+=== RUN   TestUpdateState/without_plan_-_successful_read
+2025/11/19 20:02:52 adding new widget value
+    resource-custom-dashboard-framework_test.go:225: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/customdashboard/resource-custom-dashboard-framework_test.go:225
+        	Error:      	Should be false
+        	Test:       	TestUpdateState/without_plan_-_successful_read
+=== RUN   TestUpdateState/without_plan_-_empty_access_rules
+2025/11/19 20:02:52 adding new widget value
+    resource-custom-dashboard-framework_test.go:256: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/customdashboard/resource-custom-dashboard-framework_test.go:256
+        	Error:      	Should be false
+        	Test:       	TestUpdateState/without_plan_-_empty_access_rules
+=== RUN   TestUpdateState/without_plan_-_invalid_widgets_JSON
+2025/11/19 20:02:52 adding new widget value
+    resource-custom-dashboard-framework_test.go:283: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/customdashboard/resource-custom-dashboard-framework_test.go:283
+        	Error:      	Should be false
+        	Test:       	TestUpdateState/without_plan_-_invalid_widgets_JSON
+=== RUN   TestUpdateState/with_plan_-_multiple_access_rules
+2025/11/19 20:02:52 keep existing value
+--- FAIL: TestUpdateState (0.00s)
+    --- PASS: TestUpdateState/with_plan_-_successful_update (0.00s)
+    --- FAIL: TestUpdateState/without_plan_-_successful_read (0.00s)
+    --- FAIL: TestUpdateState/without_plan_-_empty_access_rules (0.00s)
+    --- FAIL: TestUpdateState/without_plan_-_invalid_widgets_JSON (0.00s)
+    --- PASS: TestUpdateState/with_plan_-_multiple_access_rules (0.00s)
+=== RUN   TestMapStateToDataObject
+=== RUN   TestMapStateToDataObject/from_plan_-_complete_dashboard
+=== RUN   TestMapStateToDataObject/from_state_-_complete_dashboard
+=== RUN   TestMapStateToDataObject/with_null_ID
+=== RUN   TestMapStateToDataObject/with_null_widgets
+=== RUN   TestMapStateToDataObject/with_empty_access_rules
+=== RUN   TestMapStateToDataObject/with_global_access_rule_without_related_ID
+=== RUN   TestMapStateToDataObject/with_complex_widgets_JSON
+=== RUN   TestMapStateToDataObject/with_all_access_types
+=== RUN   TestMapStateToDataObject/error_when_neither_plan_nor_state_provided
+--- PASS: TestMapStateToDataObject (0.00s)
+    --- PASS: TestMapStateToDataObject/from_plan_-_complete_dashboard (0.00s)
+    --- PASS: TestMapStateToDataObject/from_state_-_complete_dashboard (0.00s)
+    --- PASS: TestMapStateToDataObject/with_null_ID (0.00s)
+    --- PASS: TestMapStateToDataObject/with_null_widgets (0.00s)
+    --- PASS: TestMapStateToDataObject/with_empty_access_rules (0.00s)
+    --- PASS: TestMapStateToDataObject/with_global_access_rule_without_related_ID (0.00s)
+    --- PASS: TestMapStateToDataObject/with_complex_widgets_JSON (0.00s)
+    --- PASS: TestMapStateToDataObject/with_all_access_types (0.00s)
+    --- PASS: TestMapStateToDataObject/error_when_neither_plan_nor_state_provided (0.00s)
+=== RUN   TestGetRestResource
+--- PASS: TestGetRestResource (0.00s)
+=== RUN   TestSchemaValidation
+=== RUN   TestSchemaValidation/has_required_attributes
+=== RUN   TestSchemaValidation/id_is_computed
+=== RUN   TestSchemaValidation/title_is_required
+=== RUN   TestSchemaValidation/widgets_is_required
+=== RUN   TestSchemaValidation/access_rule_is_optional
+--- PASS: TestSchemaValidation (0.00s)
+    --- PASS: TestSchemaValidation/has_required_attributes (0.00s)
+    --- PASS: TestSchemaValidation/id_is_computed (0.00s)
+    --- PASS: TestSchemaValidation/title_is_required (0.00s)
+    --- PASS: TestSchemaValidation/widgets_is_required (0.00s)
+    --- PASS: TestSchemaValidation/access_rule_is_optional (0.00s)
+=== RUN   TestAccessRuleModelValidation
+=== RUN   TestAccessRuleModelValidation/valid_access_rule_model
+=== RUN   TestAccessRuleModelValidation/access_rule_model_with_null_related_ID
+--- PASS: TestAccessRuleModelValidation (0.00s)
+    --- PASS: TestAccessRuleModelValidation/valid_access_rule_model (0.00s)
+    --- PASS: TestAccessRuleModelValidation/access_rule_model_with_null_related_ID (0.00s)
+=== RUN   TestCustomDashboardModelValidation
+=== RUN   TestCustomDashboardModelValidation/complete_dashboard_model
+=== RUN   TestCustomDashboardModelValidation/minimal_dashboard_model
+--- PASS: TestCustomDashboardModelValidation (0.00s)
+    --- PASS: TestCustomDashboardModelValidation/complete_dashboard_model (0.00s)
+    --- PASS: TestCustomDashboardModelValidation/minimal_dashboard_model (0.00s)
+FAIL
+coverage: 77.9% of statements
+FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/customdashboard	2.717s
+=== RUN   TestNewCustomEventSpecificationResourceHandleFramework
+--- PASS: TestNewCustomEventSpecificationResourceHandleFramework (0.00s)
+=== RUN   TestMetaData
+--- PASS: TestMetaData (0.00s)
+=== RUN   TestSetComputedFields
+--- PASS: TestSetComputedFields (0.00s)
+=== RUN   TestGetRestResource
+--- PASS: TestGetRestResource (0.00s)
+=== RUN   TestMapIntToSeverityString
+=== RUN   TestMapIntToSeverityString/warning_severity
+=== RUN   TestMapIntToSeverityString/critical_severity
+=== RUN   TestMapIntToSeverityString/unknown_severity_defaults_to_warning
+=== RUN   TestMapIntToSeverityString/zero_severity_defaults_to_warning
+--- PASS: TestMapIntToSeverityString (0.00s)
+    --- PASS: TestMapIntToSeverityString/warning_severity (0.00s)
+    --- PASS: TestMapIntToSeverityString/critical_severity (0.00s)
+    --- PASS: TestMapIntToSeverityString/unknown_severity_defaults_to_warning (0.00s)
+    --- PASS: TestMapIntToSeverityString/zero_severity_defaults_to_warning (0.00s)
+=== RUN   TestMapSeverityToInt
+=== RUN   TestMapSeverityToInt/warning_severity
+=== RUN   TestMapSeverityToInt/critical_severity
+=== RUN   TestMapSeverityToInt/unknown_severity_defaults_to_warning
+=== RUN   TestMapSeverityToInt/empty_severity_defaults_to_warning
+--- PASS: TestMapSeverityToInt (0.00s)
+    --- PASS: TestMapSeverityToInt/warning_severity (0.00s)
+    --- PASS: TestMapSeverityToInt/critical_severity (0.00s)
+    --- PASS: TestMapSeverityToInt/unknown_severity_defaults_to_warning (0.00s)
+    --- PASS: TestMapSeverityToInt/empty_severity_defaults_to_warning (0.00s)
+=== RUN   TestMapStateToDataObject_BasicConfig
+--- PASS: TestMapStateToDataObject_BasicConfig (0.00s)
+=== RUN   TestMapStateToDataObject_WithEntityCountRule
+--- PASS: TestMapStateToDataObject_WithEntityCountRule (0.00s)
+=== RUN   TestMapStateToDataObject_WithEntityCountVerificationRule
+--- PASS: TestMapStateToDataObject_WithEntityCountVerificationRule (0.00s)
+=== RUN   TestMapStateToDataObject_WithEntityVerificationRule
+--- PASS: TestMapStateToDataObject_WithEntityVerificationRule (0.00s)
+=== RUN   TestMapStateToDataObject_WithHostAvailabilityRule
+--- PASS: TestMapStateToDataObject_WithHostAvailabilityRule (0.00s)
+=== RUN   TestMapStateToDataObject_WithHostAvailabilityRuleNoCloseAfter
+--- PASS: TestMapStateToDataObject_WithHostAvailabilityRuleNoCloseAfter (0.00s)
+=== RUN   TestMapStateToDataObject_WithInvalidTagFilter
+--- PASS: TestMapStateToDataObject_WithInvalidTagFilter (0.00s)
+=== RUN   TestMapStateToDataObject_WithSystemRule
+--- PASS: TestMapStateToDataObject_WithSystemRule (0.00s)
+=== RUN   TestMapStateToDataObject_WithThresholdRule
+--- PASS: TestMapStateToDataObject_WithThresholdRule (0.00s)
+=== RUN   TestMapStateToDataObject_WithThresholdRuleAndMetricPattern
+--- PASS: TestMapStateToDataObject_WithThresholdRuleAndMetricPattern (0.00s)
+=== RUN   TestMapStateToDataObject_WithThresholdRuleAndEmptyMetricPattern
+--- PASS: TestMapStateToDataObject_WithThresholdRuleAndEmptyMetricPattern (0.00s)
+=== RUN   TestMapStateToDataObject_WithMultipleRules
+--- PASS: TestMapStateToDataObject_WithMultipleRules (0.00s)
+=== RUN   TestMapStateToDataObject_FromPlan
+--- PASS: TestMapStateToDataObject_FromPlan (0.00s)
+=== RUN   TestMapStateToDataObject_WithNullOptionalFields
+--- PASS: TestMapStateToDataObject_WithNullOptionalFields (0.00s)
+=== RUN   TestUpdateState_BasicConfig
+    resource-custom-event-specification-framework_test.go:649: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/customeventspec/resource-custom-event-specification-framework_test.go:649
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_BasicConfig
+--- FAIL: TestUpdateState_BasicConfig (0.00s)
+=== RUN   TestUpdateState_WithEntityCountRule
+    resource-custom-event-specification-framework_test.go:694: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/customeventspec/resource-custom-event-specification-framework_test.go:694
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithEntityCountRule
+--- FAIL: TestUpdateState_WithEntityCountRule (0.00s)
+=== RUN   TestUpdateState_WithEntityCountVerificationRule
+    resource-custom-event-specification-framework_test.go:742: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/customeventspec/resource-custom-event-specification-framework_test.go:742
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithEntityCountVerificationRule
+--- FAIL: TestUpdateState_WithEntityCountVerificationRule (0.00s)
+=== RUN   TestUpdateState_WithEntityVerificationRule
+    resource-custom-event-specification-framework_test.go:791: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/customeventspec/resource-custom-event-specification-framework_test.go:791
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithEntityVerificationRule
+--- FAIL: TestUpdateState_WithEntityVerificationRule (0.00s)
+=== RUN   TestUpdateState_WithHostAvailabilityRule
+    resource-custom-event-specification-framework_test.go:844: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/customeventspec/resource-custom-event-specification-framework_test.go:844
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithHostAvailabilityRule
+--- FAIL: TestUpdateState_WithHostAvailabilityRule (0.00s)
+=== RUN   TestUpdateState_WithHostAvailabilityRuleNoCloseAfter
+    resource-custom-event-specification-framework_test.go:887: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/customeventspec/resource-custom-event-specification-framework_test.go:887
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithHostAvailabilityRuleNoCloseAfter
+--- FAIL: TestUpdateState_WithHostAvailabilityRuleNoCloseAfter (0.00s)
+=== RUN   TestUpdateState_WithSystemRule
+    resource-custom-event-specification-framework_test.go:926: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/customeventspec/resource-custom-event-specification-framework_test.go:926
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithSystemRule
+--- FAIL: TestUpdateState_WithSystemRule (0.00s)
+=== RUN   TestUpdateState_WithThresholdRule
+    resource-custom-event-specification-framework_test.go:975: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/customeventspec/resource-custom-event-specification-framework_test.go:975
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithThresholdRule
+--- FAIL: TestUpdateState_WithThresholdRule (0.00s)
+=== RUN   TestUpdateState_WithThresholdRuleAndMetricPattern
+    resource-custom-event-specification-framework_test.go:1038: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/customeventspec/resource-custom-event-specification-framework_test.go:1038
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithThresholdRuleAndMetricPattern
+--- FAIL: TestUpdateState_WithThresholdRuleAndMetricPattern (0.00s)
+=== RUN   TestUpdateState_WithMultipleRules
+    resource-custom-event-specification-framework_test.go:1104: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/customeventspec/resource-custom-event-specification-framework_test.go:1104
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithMultipleRules
+--- FAIL: TestUpdateState_WithMultipleRules (0.00s)
+=== RUN   TestUpdateState_WithNoRules
+    resource-custom-event-specification-framework_test.go:1135: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/customeventspec/resource-custom-event-specification-framework_test.go:1135
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithNoRules
+--- FAIL: TestUpdateState_WithNoRules (0.00s)
+=== RUN   TestUpdateState_WithNullOptionalFields
+    resource-custom-event-specification-framework_test.go:1166: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/customeventspec/resource-custom-event-specification-framework_test.go:1166
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithNullOptionalFields
+--- FAIL: TestUpdateState_WithNullOptionalFields (0.00s)
+=== RUN   TestUpdateState_SkipsIncompleteRules
+    resource-custom-event-specification-framework_test.go:1204: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/customeventspec/resource-custom-event-specification-framework_test.go:1204
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_SkipsIncompleteRules
+--- FAIL: TestUpdateState_SkipsIncompleteRules (0.00s)
+=== RUN   TestSchemaValidation
+=== RUN   TestSchemaValidation/has_required_attributes
+=== RUN   TestSchemaValidation/id_is_computed
+=== RUN   TestSchemaValidation/name_is_required
+=== RUN   TestSchemaValidation/entity_type_is_required
+--- PASS: TestSchemaValidation (0.00s)
+    --- PASS: TestSchemaValidation/has_required_attributes (0.00s)
+    --- PASS: TestSchemaValidation/id_is_computed (0.00s)
+    --- PASS: TestSchemaValidation/name_is_required (0.00s)
+    --- PASS: TestSchemaValidation/entity_type_is_required (0.00s)
+FAIL
+coverage: 69.9% of statements
+FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/customeventspec	2.965s
+=== RUN   TestNewGroupResourceHandleFramework
+--- PASS: TestNewGroupResourceHandleFramework (0.00s)
+=== RUN   TestMetaData
+--- PASS: TestMetaData (0.00s)
+=== RUN   TestGetRestResource
+--- PASS: TestGetRestResource (0.00s)
+=== RUN   TestSetComputedFields
+--- PASS: TestSetComputedFields (0.00s)
+=== RUN   TestUpdateState
+=== RUN   TestUpdateState/basic_group_without_members_or_permissions
+=== RUN   TestUpdateState/group_with_members
+=== RUN   TestUpdateState/group_with_application_IDs
+=== RUN   TestUpdateState/group_with_infra_DFQ_filter
+=== RUN   TestUpdateState/group_with_empty_infra_DFQ_filter
+=== RUN   TestUpdateState/group_with_kubernetes_cluster_UUIDs
+=== RUN   TestUpdateState/group_with_kubernetes_namespace_UIDs
+=== RUN   TestUpdateState/group_with_mobile_app_IDs
+=== RUN   TestUpdateState/group_with_website_IDs
+=== RUN   TestUpdateState/group_with_permissions
+=== RUN   TestUpdateState/group_with_all_permission_set_fields
+--- PASS: TestUpdateState (0.00s)
+    --- PASS: TestUpdateState/basic_group_without_members_or_permissions (0.00s)
+    --- PASS: TestUpdateState/group_with_members (0.00s)
+    --- PASS: TestUpdateState/group_with_application_IDs (0.00s)
+    --- PASS: TestUpdateState/group_with_infra_DFQ_filter (0.00s)
+    --- PASS: TestUpdateState/group_with_empty_infra_DFQ_filter (0.00s)
+    --- PASS: TestUpdateState/group_with_kubernetes_cluster_UUIDs (0.00s)
+    --- PASS: TestUpdateState/group_with_kubernetes_namespace_UIDs (0.00s)
+    --- PASS: TestUpdateState/group_with_mobile_app_IDs (0.00s)
+    --- PASS: TestUpdateState/group_with_website_IDs (0.00s)
+    --- PASS: TestUpdateState/group_with_permissions (0.00s)
+    --- PASS: TestUpdateState/group_with_all_permission_set_fields (0.00s)
+=== RUN   TestMapStateToDataObject
+=== RUN   TestMapStateToDataObject/basic_group_from_state
+=== RUN   TestMapStateToDataObject/group_from_plan
+=== RUN   TestMapStateToDataObject/group_with_null_ID
+=== RUN   TestMapStateToDataObject/group_with_members
+=== RUN   TestMapStateToDataObject/group_with_member_email_unknown
+=== RUN   TestMapStateToDataObject/group_with_application_IDs
+=== RUN   TestMapStateToDataObject/group_with_infra_DFQ_filter
+=== RUN   TestMapStateToDataObject/group_with_null_infra_DFQ_filter
+=== RUN   TestMapStateToDataObject/group_with_unknown_infra_DFQ_filter
+=== RUN   TestMapStateToDataObject/group_with_kubernetes_cluster_UUIDs
+=== RUN   TestMapStateToDataObject/group_with_kubernetes_namespace_UIDs
+=== RUN   TestMapStateToDataObject/group_with_mobile_app_IDs
+=== RUN   TestMapStateToDataObject/group_with_website_IDs
+=== RUN   TestMapStateToDataObject/group_with_permissions
+=== RUN   TestMapStateToDataObject/group_with_all_permission_set_fields
+=== RUN   TestMapStateToDataObject/group_without_permission_set
+--- PASS: TestMapStateToDataObject (0.00s)
+    --- PASS: TestMapStateToDataObject/basic_group_from_state (0.00s)
+    --- PASS: TestMapStateToDataObject/group_from_plan (0.00s)
+    --- PASS: TestMapStateToDataObject/group_with_null_ID (0.00s)
+    --- PASS: TestMapStateToDataObject/group_with_members (0.00s)
+    --- PASS: TestMapStateToDataObject/group_with_member_email_unknown (0.00s)
+    --- PASS: TestMapStateToDataObject/group_with_application_IDs (0.00s)
+    --- PASS: TestMapStateToDataObject/group_with_infra_DFQ_filter (0.00s)
+    --- PASS: TestMapStateToDataObject/group_with_null_infra_DFQ_filter (0.00s)
+    --- PASS: TestMapStateToDataObject/group_with_unknown_infra_DFQ_filter (0.00s)
+    --- PASS: TestMapStateToDataObject/group_with_kubernetes_cluster_UUIDs (0.00s)
+    --- PASS: TestMapStateToDataObject/group_with_kubernetes_namespace_UIDs (0.00s)
+    --- PASS: TestMapStateToDataObject/group_with_mobile_app_IDs (0.00s)
+    --- PASS: TestMapStateToDataObject/group_with_website_IDs (0.00s)
+    --- PASS: TestMapStateToDataObject/group_with_permissions (0.00s)
+    --- PASS: TestMapStateToDataObject/group_with_all_permission_set_fields (0.00s)
+    --- PASS: TestMapStateToDataObject/group_without_permission_set (0.00s)
+=== RUN   TestRoundTripConversion
+=== RUN   TestRoundTripConversion/state_to_API_and_back_to_state
+--- PASS: TestRoundTripConversion (0.00s)
+    --- PASS: TestRoundTripConversion/state_to_API_and_back_to_state (0.00s)
+=== RUN   TestEdgeCases
+=== RUN   TestEdgeCases/empty_group_name
+=== RUN   TestEdgeCases/empty_members_list
+=== RUN   TestEdgeCases/empty_permission_set_arrays
+=== RUN   TestEdgeCases/nil_infra_DFQ_filter
+--- PASS: TestEdgeCases (0.00s)
+    --- PASS: TestEdgeCases/empty_group_name (0.00s)
+    --- PASS: TestEdgeCases/empty_members_list (0.00s)
+    --- PASS: TestEdgeCases/empty_permission_set_arrays (0.00s)
+    --- PASS: TestEdgeCases/nil_infra_DFQ_filter (0.00s)
+PASS
+coverage: 98.0% of statements
+ok  	github.com/gessnerfl/terraform-provider-instana/internal/resources/group	3.883s	coverage: 98.0% of statements
+FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/infralertconfig [build failed]
+=== RUN   TestNewLogAlertConfigResourceHandleFramework
+--- PASS: TestNewLogAlertConfigResourceHandleFramework (0.00s)
+=== RUN   TestMetaData
+--- PASS: TestMetaData (0.00s)
+=== RUN   TestSetComputedFields
+--- PASS: TestSetComputedFields (0.00s)
+=== RUN   TestGetRestResource
+--- PASS: TestGetRestResource (0.00s)
+=== RUN   TestUpdateState_BasicConfig
+    resource-log-alert-config-framework_test.go:76: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/logalertconfig/resource-log-alert-config-framework_test.go:76
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_BasicConfig
+--- FAIL: TestUpdateState_BasicConfig (0.00s)
+=== RUN   TestUpdateState_WithGracePeriod
+    resource-log-alert-config-framework_test.go:107: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/logalertconfig/resource-log-alert-config-framework_test.go:107
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithGracePeriod
+--- FAIL: TestUpdateState_WithGracePeriod (0.00s)
+=== RUN   TestUpdateState_WithZeroGracePeriod
+    resource-log-alert-config-framework_test.go:136: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/logalertconfig/resource-log-alert-config-framework_test.go:136
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithZeroGracePeriod
+--- FAIL: TestUpdateState_WithZeroGracePeriod (0.00s)
+=== RUN   TestUpdateState_WithTagFilter
+    resource-log-alert-config-framework_test.go:170: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/logalertconfig/resource-log-alert-config-framework_test.go:170
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithTagFilter
+        	Messages:   	UpdateState should not have errors: [{{An unexpected error was encountered trying to build a value. This is always an error in the provider. Please report the following to the provider developer:
+        	            	
+        	            	Received null value, however the target type cannot handle null values. Use the corresponding `types` package type, a pointer type or a custom type that handles null values.
+        	            	
+        	            	Path: 
+        	            	Target Type: logalertconfig.LogAlertConfigModel
+        	            	Suggested `types` Type: basetypes.ObjectValue
+        	            	Suggested Pointer Type: *logalertconfig.LogAlertConfigModel Value Conversion Error} {[]}}]
+--- FAIL: TestUpdateState_WithTagFilter (0.00s)
+=== RUN   TestUpdateState_WithGroupBy
+    resource-log-alert-config-framework_test.go:204: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/logalertconfig/resource-log-alert-config-framework_test.go:204
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithGroupBy
+--- FAIL: TestUpdateState_WithGroupBy (0.00s)
+=== RUN   TestUpdateState_WithAlertChannels
+    resource-log-alert-config-framework_test.go:238: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/logalertconfig/resource-log-alert-config-framework_test.go:238
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithAlertChannels
+--- FAIL: TestUpdateState_WithAlertChannels (0.00s)
+=== RUN   TestUpdateState_WithTimeThreshold
+    resource-log-alert-config-framework_test.go:279: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/logalertconfig/resource-log-alert-config-framework_test.go:279
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithTimeThreshold
+--- FAIL: TestUpdateState_WithTimeThreshold (0.00s)
+=== RUN   TestUpdateState_WithRulesAndThresholds
+    resource-log-alert-config-framework_test.go:330: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/logalertconfig/resource-log-alert-config-framework_test.go:330
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithRulesAndThresholds
+--- FAIL: TestUpdateState_WithRulesAndThresholds (0.00s)
+=== RUN   TestUpdateState_WithCustomPayloadFields
+    resource-log-alert-config-framework_test.go:377: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/logalertconfig/resource-log-alert-config-framework_test.go:377
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithCustomPayloadFields
+--- FAIL: TestUpdateState_WithCustomPayloadFields (0.00s)
+=== RUN   TestMapStateToDataObject_BasicConfig
+--- PASS: TestMapStateToDataObject_BasicConfig (0.00s)
+=== RUN   TestMapStateToDataObject_WithGracePeriod
+--- PASS: TestMapStateToDataObject_WithGracePeriod (0.00s)
+=== RUN   TestMapStateToDataObject_WithNullGranularity
+--- PASS: TestMapStateToDataObject_WithNullGranularity (0.00s)
+=== RUN   TestMapStateToDataObject_WithTagFilter
+--- PASS: TestMapStateToDataObject_WithTagFilter (0.00s)
+=== RUN   TestMapStateToDataObject_WithInvalidTagFilter
+--- PASS: TestMapStateToDataObject_WithInvalidTagFilter (0.00s)
+=== RUN   TestMapStateToDataObject_WithGroupBy
+--- PASS: TestMapStateToDataObject_WithGroupBy (0.00s)
+=== RUN   TestMapStateToDataObject_WithAlertChannels
+--- PASS: TestMapStateToDataObject_WithAlertChannels (0.00s)
+=== RUN   TestMapStateToDataObject_WithTimeThreshold
+--- PASS: TestMapStateToDataObject_WithTimeThreshold (0.00s)
+=== RUN   TestMapStateToDataObject_WithRules
+--- PASS: TestMapStateToDataObject_WithRules (0.00s)
+=== RUN   TestUpdateState_WithEmptyAlertChannels
+    resource-log-alert-config-framework_test.go:643: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/logalertconfig/resource-log-alert-config-framework_test.go:643
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithEmptyAlertChannels
+--- FAIL: TestUpdateState_WithEmptyAlertChannels (0.00s)
+=== RUN   TestUpdateState_WithNullTagFilter
+    resource-log-alert-config-framework_test.go:671: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/logalertconfig/resource-log-alert-config-framework_test.go:671
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithNullTagFilter
+--- FAIL: TestUpdateState_WithNullTagFilter (0.00s)
+=== RUN   TestUpdateState_WithEmptyGroupBy
+    resource-log-alert-config-framework_test.go:699: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/logalertconfig/resource-log-alert-config-framework_test.go:699
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithEmptyGroupBy
+--- FAIL: TestUpdateState_WithEmptyGroupBy (0.00s)
+=== RUN   TestUpdateState_WithNullTimeThreshold
+    resource-log-alert-config-framework_test.go:727: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/logalertconfig/resource-log-alert-config-framework_test.go:727
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithNullTimeThreshold
+--- FAIL: TestUpdateState_WithNullTimeThreshold (0.00s)
+=== RUN   TestUpdateState_WithUnsupportedTimeThresholdType
+    resource-log-alert-config-framework_test.go:758: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/logalertconfig/resource-log-alert-config-framework_test.go:758
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithUnsupportedTimeThresholdType
+--- FAIL: TestUpdateState_WithUnsupportedTimeThresholdType (0.00s)
+=== RUN   TestMapStateToDataObject_WithNullTimeThreshold
+--- PASS: TestMapStateToDataObject_WithNullTimeThreshold (0.00s)
+=== RUN   TestMapStateToDataObject_WithNullAlertChannels
+--- PASS: TestMapStateToDataObject_WithNullAlertChannels (0.00s)
+=== RUN   TestMapStateToDataObject_WithNullRules
+--- PASS: TestMapStateToDataObject_WithNullRules (0.00s)
+=== RUN   TestMapStateToDataObject_FromPlan
+--- PASS: TestMapStateToDataObject_FromPlan (0.00s)
+=== RUN   TestMapStateToDataObject_WithEmptyGroupBy
+--- PASS: TestMapStateToDataObject_WithEmptyGroupBy (0.00s)
+=== RUN   TestMapStateToDataObject_WithNullTimeWindowInTimeThreshold
+--- PASS: TestMapStateToDataObject_WithNullTimeWindowInTimeThreshold (0.00s)
+=== RUN   TestUpdateState_WithEmptyRules
+    resource-log-alert-config-framework_test.go:916: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/logalertconfig/resource-log-alert-config-framework_test.go:916
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithEmptyRules
+--- FAIL: TestUpdateState_WithEmptyRules (0.00s)
+=== RUN   TestUpdateState_WithRulesWithoutAggregation
+    resource-log-alert-config-framework_test.go:960: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/logalertconfig/resource-log-alert-config-framework_test.go:960
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithRulesWithoutAggregation
+--- FAIL: TestUpdateState_WithRulesWithoutAggregation (0.00s)
+=== RUN   TestMapStateToDataObject_WithEmptyAlertChannelLists
+    resource-log-alert-config-framework_test.go:994: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/logalertconfig/resource-log-alert-config-framework_test.go:994
+        	Error:      	Should be empty, but was map[CRITICAL:[] WARNING:[]]
+        	Test:       	TestMapStateToDataObject_WithEmptyAlertChannelLists
+--- FAIL: TestMapStateToDataObject_WithEmptyAlertChannelLists (0.00s)
+=== RUN   TestMapStateToDataObject_WithNullID
+--- PASS: TestMapStateToDataObject_WithNullID (0.00s)
+=== RUN   TestMapTimeThresholdToModel_NilInput
+--- PASS: TestMapTimeThresholdToModel_NilInput (0.00s)
+=== RUN   TestMapTimeThresholdToModel_UnsupportedType
+--- PASS: TestMapTimeThresholdToModel_UnsupportedType (0.00s)
+=== RUN   TestMapTimeThresholdToModel_ViolationsInSequence
+--- PASS: TestMapTimeThresholdToModel_ViolationsInSequence (0.00s)
+=== RUN   TestMapModelTimeThresholdToAPI_NilInput
+--- PASS: TestMapModelTimeThresholdToAPI_NilInput (0.00s)
+=== RUN   TestMapModelTimeThresholdToAPI_NullTimeWindow
+--- PASS: TestMapModelTimeThresholdToAPI_NullTimeWindow (0.00s)
+=== RUN   TestUpdateState_WithSingleWarningAlertChannel
+    resource-log-alert-config-framework_test.go:1089: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/logalertconfig/resource-log-alert-config-framework_test.go:1089
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithSingleWarningAlertChannel
+--- FAIL: TestUpdateState_WithSingleWarningAlertChannel (0.00s)
+=== RUN   TestUpdateState_WithSingleCriticalAlertChannel
+    resource-log-alert-config-framework_test.go:1120: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/logalertconfig/resource-log-alert-config-framework_test.go:1120
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithSingleCriticalAlertChannel
+--- FAIL: TestUpdateState_WithSingleCriticalAlertChannel (0.00s)
+=== RUN   TestMapStateToDataObject_WithSingleWarningAlertChannel
+    resource-log-alert-config-framework_test.go:1155: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/logalertconfig/resource-log-alert-config-framework_test.go:1155
+        	Error:      	"map[CRITICAL:[] WARNING:[channel-1]]" should have 1 item(s), but has 2
+        	Test:       	TestMapStateToDataObject_WithSingleWarningAlertChannel
+--- FAIL: TestMapStateToDataObject_WithSingleWarningAlertChannel (0.00s)
+=== RUN   TestMapStateToDataObject_WithSingleCriticalAlertChannel
+    resource-log-alert-config-framework_test.go:1184: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/logalertconfig/resource-log-alert-config-framework_test.go:1184
+        	Error:      	"map[CRITICAL:[channel-1] WARNING:[]]" should have 1 item(s), but has 2
+        	Test:       	TestMapStateToDataObject_WithSingleCriticalAlertChannel
+--- FAIL: TestMapStateToDataObject_WithSingleCriticalAlertChannel (0.00s)
+=== RUN   TestMapStateToDataObject_WithRulesWithoutThreshold
+--- PASS: TestMapStateToDataObject_WithRulesWithoutThreshold (0.00s)
+=== RUN   TestMapStateToDataObject_WithRulesWithOnlyWarningThreshold
+--- PASS: TestMapStateToDataObject_WithRulesWithOnlyWarningThreshold (0.00s)
+=== RUN   TestMapStateToDataObject_WithRulesWithOnlyCriticalThreshold
+--- PASS: TestMapStateToDataObject_WithRulesWithOnlyCriticalThreshold (0.00s)
+=== RUN   TestMapStateToDataObject_WithRulesWithNullThresholdValues
+--- PASS: TestMapStateToDataObject_WithRulesWithNullThresholdValues (0.00s)
+=== RUN   TestUpdateState_WithRulesWithOnlyWarningThreshold
+    resource-log-alert-config-framework_test.go:1361: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/logalertconfig/resource-log-alert-config-framework_test.go:1361
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithRulesWithOnlyWarningThreshold
+--- FAIL: TestUpdateState_WithRulesWithOnlyWarningThreshold (0.00s)
+=== RUN   TestUpdateState_WithRulesWithOnlyCriticalThreshold
+    resource-log-alert-config-framework_test.go:1408: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/logalertconfig/resource-log-alert-config-framework_test.go:1408
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithRulesWithOnlyCriticalThreshold
+--- FAIL: TestUpdateState_WithRulesWithOnlyCriticalThreshold (0.00s)
+=== RUN   TestMapStateToDataObject_WithNullAggregation
+--- PASS: TestMapStateToDataObject_WithNullAggregation (0.00s)
+=== RUN   TestMapStateToDataObject_WithUnknownAlertChannels
+    resource-log-alert-config-framework_test.go:1474: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/logalertconfig/resource-log-alert-config-framework_test.go:1474
+        	Error:      	Should be empty, but was map[CRITICAL:[] WARNING:[]]
+        	Test:       	TestMapStateToDataObject_WithUnknownAlertChannels
+--- FAIL: TestMapStateToDataObject_WithUnknownAlertChannels (0.00s)
+=== RUN   TestMapStateToDataObject_WithUnknownGroupBy
+--- PASS: TestMapStateToDataObject_WithUnknownGroupBy (0.00s)
+=== RUN   TestMapStateToDataObject_WithCustomPayloadFields
+--- PASS: TestMapStateToDataObject_WithCustomPayloadFields (0.00s)
+=== RUN   TestUpdateState_WithMultipleRules
+    resource-log-alert-config-framework_test.go:1606: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/logalertconfig/resource-log-alert-config-framework_test.go:1606
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithMultipleRules
+--- FAIL: TestUpdateState_WithMultipleRules (0.00s)
+=== RUN   TestUpdateState_WithEmptyAlertChannelsMap
+    resource-log-alert-config-framework_test.go:1638: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/logalertconfig/resource-log-alert-config-framework_test.go:1638
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithEmptyAlertChannelsMap
+--- FAIL: TestUpdateState_WithEmptyAlertChannelsMap (0.00s)
+=== RUN   TestMapStateToDataObject_WithUnknownCustomPayloadFields
+--- PASS: TestMapStateToDataObject_WithUnknownCustomPayloadFields (0.00s)
+=== RUN   TestMapStateToDataObject_WithNullTagFilter
+--- PASS: TestMapStateToDataObject_WithNullTagFilter (0.00s)
+=== RUN   TestMapStateToDataObject_WithEmptyTagFilter
+--- PASS: TestMapStateToDataObject_WithEmptyTagFilter (0.00s)
+=== RUN   TestUpdateState_WithEmptyWarningChannelList
+    resource-log-alert-config-framework_test.go:1727: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/logalertconfig/resource-log-alert-config-framework_test.go:1727
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithEmptyWarningChannelList
+--- FAIL: TestUpdateState_WithEmptyWarningChannelList (0.00s)
+=== RUN   TestUpdateState_WithEmptyCriticalChannelList
+    resource-log-alert-config-framework_test.go:1759: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/logalertconfig/resource-log-alert-config-framework_test.go:1759
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithEmptyCriticalChannelList
+--- FAIL: TestUpdateState_WithEmptyCriticalChannelList (0.00s)
+FAIL
+coverage: 93.3% of statements
+FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/logalertconfig	3.561s
+=== RUN   TestNewSliConfigResourceHandleFramework
+--- PASS: TestNewSliConfigResourceHandleFramework (0.00s)
+=== RUN   TestMetaData
+--- PASS: TestMetaData (0.00s)
+=== RUN   TestSetComputedFields
+--- PASS: TestSetComputedFields (0.00s)
+=== RUN   TestGetRestResource
+--- PASS: TestGetRestResource (0.00s)
+=== RUN   TestUpdateState_ApplicationTimeBased_Basic
+--- PASS: TestUpdateState_ApplicationTimeBased_Basic (0.00s)
+=== RUN   TestUpdateState_ApplicationTimeBased_WithServiceAndEndpoint
+--- PASS: TestUpdateState_ApplicationTimeBased_WithServiceAndEndpoint (0.00s)
+=== RUN   TestUpdateState_ApplicationTimeBased_WithMetricConfiguration
+--- PASS: TestUpdateState_ApplicationTimeBased_WithMetricConfiguration (0.00s)
+=== RUN   TestUpdateState_ApplicationEventBased_Basic
+--- PASS: TestUpdateState_ApplicationEventBased_Basic (0.00s)
+=== RUN   TestUpdateState_ApplicationEventBased_WithIncludeFlags
+--- PASS: TestUpdateState_ApplicationEventBased_WithIncludeFlags (0.00s)
+=== RUN   TestUpdateState_ApplicationEventBased_WithNullIncludeFlags
+--- PASS: TestUpdateState_ApplicationEventBased_WithNullIncludeFlags (0.00s)
+=== RUN   TestUpdateState_WebsiteEventBased_Basic
+--- PASS: TestUpdateState_WebsiteEventBased_Basic (0.00s)
+=== RUN   TestUpdateState_WebsiteTimeBased_Basic
+--- PASS: TestUpdateState_WebsiteTimeBased_Basic (0.00s)
+=== RUN   TestUpdateState_WebsiteTimeBased_WithoutFilterExpression
+--- PASS: TestUpdateState_WebsiteTimeBased_WithoutFilterExpression (0.00s)
+=== RUN   TestUpdateState_UnsupportedEntityType
+--- PASS: TestUpdateState_UnsupportedEntityType (0.00s)
+=== RUN   TestUpdateState_WithoutMetricConfiguration
+--- PASS: TestUpdateState_WithoutMetricConfiguration (0.00s)
+=== RUN   TestMapStateToDataObject_ApplicationTimeBased_Basic
+--- PASS: TestMapStateToDataObject_ApplicationTimeBased_Basic (0.00s)
+=== RUN   TestMapStateToDataObject_ApplicationTimeBased_WithServiceAndEndpoint
+--- PASS: TestMapStateToDataObject_ApplicationTimeBased_WithServiceAndEndpoint (0.00s)
+=== RUN   TestMapStateToDataObject_ApplicationTimeBased_WithMetricConfiguration
+--- PASS: TestMapStateToDataObject_ApplicationTimeBased_WithMetricConfiguration (0.00s)
+=== RUN   TestMapStateToDataObject_ApplicationEventBased_Basic
+--- PASS: TestMapStateToDataObject_ApplicationEventBased_Basic (0.00s)
+=== RUN   TestMapStateToDataObject_ApplicationEventBased_WithIncludeFlags
+--- PASS: TestMapStateToDataObject_ApplicationEventBased_WithIncludeFlags (0.00s)
+=== RUN   TestMapStateToDataObject_ApplicationEventBased_WithNullIncludeFlags
+--- PASS: TestMapStateToDataObject_ApplicationEventBased_WithNullIncludeFlags (0.00s)
+=== RUN   TestMapStateToDataObject_WebsiteEventBased_Basic
+--- PASS: TestMapStateToDataObject_WebsiteEventBased_Basic (0.00s)
+=== RUN   TestMapStateToDataObject_WebsiteTimeBased_Basic
+--- PASS: TestMapStateToDataObject_WebsiteTimeBased_Basic (0.00s)
+=== RUN   TestMapStateToDataObject_WebsiteTimeBased_WithoutFilterExpression
+--- PASS: TestMapStateToDataObject_WebsiteTimeBased_WithoutFilterExpression (0.00s)
+=== RUN   TestMapStateToDataObject_WithNullID
+--- PASS: TestMapStateToDataObject_WithNullID (0.00s)
+=== RUN   TestMapStateToDataObject_WithNullInitialEvaluationTimestamp
+--- PASS: TestMapStateToDataObject_WithNullInitialEvaluationTimestamp (0.00s)
+=== RUN   TestMapStateToDataObject_WithNullMetricConfiguration
+--- PASS: TestMapStateToDataObject_WithNullMetricConfiguration (0.00s)
+=== RUN   TestMapStateToDataObject_FromPlan
+--- PASS: TestMapStateToDataObject_FromPlan (0.00s)
+=== RUN   TestMapStateToDataObject_ApplicationEventBased_InvalidGoodEventFilter
+--- PASS: TestMapStateToDataObject_ApplicationEventBased_InvalidGoodEventFilter (0.00s)
+=== RUN   TestMapStateToDataObject_ApplicationEventBased_InvalidBadEventFilter
+--- PASS: TestMapStateToDataObject_ApplicationEventBased_InvalidBadEventFilter (0.00s)
+=== RUN   TestMapStateToDataObject_WebsiteEventBased_InvalidGoodEventFilter
+--- PASS: TestMapStateToDataObject_WebsiteEventBased_InvalidGoodEventFilter (0.00s)
+=== RUN   TestMapStateToDataObject_WebsiteTimeBased_InvalidFilterExpression
+--- PASS: TestMapStateToDataObject_WebsiteTimeBased_InvalidFilterExpression (0.00s)
+=== RUN   TestUpdateState_ApplicationEventBased_WithNullGoodEventFilter
+--- PASS: TestUpdateState_ApplicationEventBased_WithNullGoodEventFilter (0.00s)
+=== RUN   TestUpdateState_ApplicationEventBased_WithNullBadEventFilter
+--- PASS: TestUpdateState_ApplicationEventBased_WithNullBadEventFilter (0.00s)
+=== RUN   TestUpdateState_WebsiteEventBased_WithNullGoodEventFilter
+--- PASS: TestUpdateState_WebsiteEventBased_WithNullGoodEventFilter (0.00s)
+=== RUN   TestUpdateState_WebsiteEventBased_WithNullBadEventFilter
+--- PASS: TestUpdateState_WebsiteEventBased_WithNullBadEventFilter (0.00s)
+=== RUN   TestMapStateToDataObject_ApplicationEventBased_WithNullGoodEventFilter
+--- PASS: TestMapStateToDataObject_ApplicationEventBased_WithNullGoodEventFilter (0.00s)
+=== RUN   TestMapStateToDataObject_ApplicationEventBased_WithNullBadEventFilter
+--- PASS: TestMapStateToDataObject_ApplicationEventBased_WithNullBadEventFilter (0.00s)
+=== RUN   TestMapStateToDataObject_WebsiteEventBased_WithNullGoodEventFilter
+--- PASS: TestMapStateToDataObject_WebsiteEventBased_WithNullGoodEventFilter (0.00s)
+=== RUN   TestMapStateToDataObject_WebsiteEventBased_WithNullBadEventFilter
+--- PASS: TestMapStateToDataObject_WebsiteEventBased_WithNullBadEventFilter (0.00s)
+PASS
+coverage: 90.5% of statements
+ok  	github.com/gessnerfl/terraform-provider-instana/internal/resources/sliconfig	3.806s	coverage: 90.5% of statements
+=== RUN   TestUpdateState_StatusAlertType
+    resource-slo-alert-config-framework_test.go:52: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/sloalertconfig/resource-slo-alert-config-framework_test.go:52
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_StatusAlertType
+--- FAIL: TestUpdateState_StatusAlertType (0.00s)
+=== RUN   TestUpdateState_ErrorBudgetAlertType
+    resource-slo-alert-config-framework_test.go:107: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/sloalertconfig/resource-slo-alert-config-framework_test.go:107
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_ErrorBudgetAlertType
+--- FAIL: TestUpdateState_ErrorBudgetAlertType (0.00s)
+=== RUN   TestUpdateState_BurnRateV2AlertType
+    resource-slo-alert-config-framework_test.go:175: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/sloalertconfig/resource-slo-alert-config-framework_test.go:175
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_BurnRateV2AlertType
+--- FAIL: TestUpdateState_BurnRateV2AlertType (0.00s)
+=== RUN   TestUpdateState_WithCustomPayloadFields
+    resource-slo-alert-config-framework_test.go:249: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/sloalertconfig/resource-slo-alert-config-framework_test.go:249
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithCustomPayloadFields
+--- FAIL: TestUpdateState_WithCustomPayloadFields (0.00s)
+=== RUN   TestUpdateState_WithNullThreshold
+    resource-slo-alert-config-framework_test.go:290: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/sloalertconfig/resource-slo-alert-config-framework_test.go:290
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithNullThreshold
+--- FAIL: TestUpdateState_WithNullThreshold (0.00s)
+=== RUN   TestUpdateState_WithEmptyBurnRateConfigs
+    resource-slo-alert-config-framework_test.go:335: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/sloalertconfig/resource-slo-alert-config-framework_test.go:335
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithEmptyBurnRateConfigs
+--- FAIL: TestUpdateState_WithEmptyBurnRateConfigs (0.00s)
+=== RUN   TestUpdateState_WithMultipleSloIds
+    resource-slo-alert-config-framework_test.go:380: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/sloalertconfig/resource-slo-alert-config-framework_test.go:380
+        	Error:      	Should be false
+        	Test:       	TestUpdateState_WithMultipleSloIds
+--- FAIL: TestUpdateState_WithMultipleSloIds (0.00s)
+=== RUN   TestMapStateToDataObject_StatusAlertType
+    resource-slo-alert-config-framework_test.go:434: 
+        	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/sloalertconfig/resource-slo-alert-config-framework_test.go:434
+        	Error:      	Should be true
+        	Test:       	TestMapStateToDataObject_StatusAlertType
+--- FAIL: TestMapStateToDataObject_StatusAlertType (0.00s)
+=== RUN   TestMapStateToDataObject_ErrorBudgetAlertType
+--- PASS: TestMapStateToDataObject_ErrorBudgetAlertType (0.00s)
+=== RUN   TestMapStateToDataObject_BurnRateV2AlertType
+--- PASS: TestMapStateToDataObject_BurnRateV2AlertType (0.00s)
+=== RUN   TestMapStateToDataObject_WithNormalizedAlertTypes
+=== RUN   TestMapStateToDataObject_WithNormalizedAlertTypes/errorBudget_normalized
+=== RUN   TestMapStateToDataObject_WithNormalizedAlertTypes/ErrorBudget_normalized
+=== RUN   TestMapStateToDataObject_WithNormalizedAlertTypes/status_normalized
+=== RUN   TestMapStateToDataObject_WithNormalizedAlertTypes/Status_normalized
+=== RUN   TestMapStateToDataObject_WithNormalizedAlertTypes/burnRateV2_normalized
+=== RUN   TestMapStateToDataObject_WithNormalizedAlertTypes/BurnRateV2_normalized
+--- PASS: TestMapStateToDataObject_WithNormalizedAlertTypes (0.00s)
+    --- PASS: TestMapStateToDataObject_WithNormalizedAlertTypes/errorBudget_normalized (0.00s)
+    --- PASS: TestMapStateToDataObject_WithNormalizedAlertTypes/ErrorBudget_normalized (0.00s)
+    --- PASS: TestMapStateToDataObject_WithNormalizedAlertTypes/status_normalized (0.00s)
+    --- PASS: TestMapStateToDataObject_WithNormalizedAlertTypes/Status_normalized (0.00s)
+    --- PASS: TestMapStateToDataObject_WithNormalizedAlertTypes/burnRateV2_normalized (0.00s)
+    --- PASS: TestMapStateToDataObject_WithNormalizedAlertTypes/BurnRateV2_normalized (0.00s)
+=== RUN   TestMapStateToDataObject_InvalidAlertType
+--- PASS: TestMapStateToDataObject_InvalidAlertType (0.00s)
+=== RUN   TestMapStateToDataObject_InvalidDuration
+--- PASS: TestMapStateToDataObject_InvalidDuration (0.00s)
+=== RUN   TestMapStateToDataObject_InvalidThresholdValue
+--- PASS: TestMapStateToDataObject_InvalidThresholdValue (0.00s)
+=== RUN   TestMapStateToDataObject_WithNullThresholdType
+--- PASS: TestMapStateToDataObject_WithNullThresholdType (0.00s)
+=== RUN   TestMapStateToDataObject_BurnRateV2WithoutBurnRateConfig
+--- PASS: TestMapStateToDataObject_BurnRateV2WithoutBurnRateConfig (0.00s)
+=== RUN   TestMapStateToDataObject_FromState
+--- PASS: TestMapStateToDataObject_FromState (0.00s)
+=== RUN   TestMapStateToDataObject_WithEmptyID
+--- PASS: TestMapStateToDataObject_WithEmptyID (0.00s)
+=== RUN   TestMapStateToDataObject_WithDifferentOperators
+=== RUN   TestMapStateToDataObject_WithDifferentOperators/operator_>
+=== RUN   TestMapStateToDataObject_WithDifferentOperators/operator_>=
+=== RUN   TestMapStateToDataObject_WithDifferentOperators/operator_=
+=== RUN   TestMapStateToDataObject_WithDifferentOperators/operator_<=
+=== RUN   TestMapStateToDataObject_WithDifferentOperators/operator_<
+--- PASS: TestMapStateToDataObject_WithDifferentOperators (0.00s)
+    --- PASS: TestMapStateToDataObject_WithDifferentOperators/operator_> (0.00s)
+    --- PASS: TestMapStateToDataObject_WithDifferentOperators/operator_>= (0.00s)
+    --- PASS: TestMapStateToDataObject_WithDifferentOperators/operator_= (0.00s)
+    --- PASS: TestMapStateToDataObject_WithDifferentOperators/operator_<= (0.00s)
+    --- PASS: TestMapStateToDataObject_WithDifferentOperators/operator_< (0.00s)
+=== RUN   TestSetComputedFields
+--- PASS: TestSetComputedFields (0.00s)
+=== RUN   TestMetaData
+--- PASS: TestMetaData (0.00s)
+=== RUN   TestNewSloAlertConfigResourceHandleFramework
+--- PASS: TestNewSloAlertConfigResourceHandleFramework (0.00s)
+FAIL
+coverage: 87.0% of statements
+FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/sloalertconfig	3.744s
+FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/sloconfig [build failed]
+FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/slocorrectionconfig [build failed]
+FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/syntheticalertconfig [build failed]
+FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/synthetictest [build failed]
+	github.com/gessnerfl/terraform-provider-instana/internal/resources/team		coverage: 0.0% of statements
+FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/websitealertconfig [build failed]
+=== RUN   TestNewWebsiteMonitoringConfigResourceHandleFramework
+=== RUN   TestNewWebsiteMonitoringConfigResourceHandleFramework/should_create_resource_handle_with_correct_metadata
+=== RUN   TestNewWebsiteMonitoringConfigResourceHandleFramework/should_have_correct_schema_attributes
+--- PASS: TestNewWebsiteMonitoringConfigResourceHandleFramework (0.00s)
+    --- PASS: TestNewWebsiteMonitoringConfigResourceHandleFramework/should_create_resource_handle_with_correct_metadata (0.00s)
+    --- PASS: TestNewWebsiteMonitoringConfigResourceHandleFramework/should_have_correct_schema_attributes (0.00s)
+=== RUN   TestMetaData
+=== RUN   TestMetaData/should_return_metadata
+--- PASS: TestMetaData (0.00s)
+    --- PASS: TestMetaData/should_return_metadata (0.00s)
+=== RUN   TestSetComputedFields
+=== RUN   TestSetComputedFields/should_return_no_diagnostics
+--- PASS: TestSetComputedFields (0.00s)
+    --- PASS: TestSetComputedFields/should_return_no_diagnostics (0.00s)
+=== RUN   TestMapStateToDataObject
+=== RUN   TestMapStateToDataObject/should_map_state_to_API_object_from_plan
+=== RUN   TestMapStateToDataObject/should_map_state_to_API_object_from_state
+=== RUN   TestMapStateToDataObject/should_handle_empty_ID
+=== RUN   TestMapStateToDataObject/should_handle_null_values
+=== RUN   TestMapStateToDataObject/should_prefer_plan_over_state_when_both_provided
+--- PASS: TestMapStateToDataObject (0.00s)
+    --- PASS: TestMapStateToDataObject/should_map_state_to_API_object_from_plan (0.00s)
+    --- PASS: TestMapStateToDataObject/should_map_state_to_API_object_from_state (0.00s)
+    --- PASS: TestMapStateToDataObject/should_handle_empty_ID (0.00s)
+    --- PASS: TestMapStateToDataObject/should_handle_null_values (0.00s)
+    --- PASS: TestMapStateToDataObject/should_prefer_plan_over_state_when_both_provided (0.00s)
+=== RUN   TestUpdateState
+=== RUN   TestUpdateState/should_update_state_with_complete_API_object
+=== RUN   TestUpdateState/should_update_state_with_minimal_API_object
+=== RUN   TestUpdateState/should_handle_empty_strings_in_API_object
+=== RUN   TestUpdateState/should_update_state_with_special_characters_in_name
+=== RUN   TestUpdateState/should_update_state_with_unicode_characters
+--- PASS: TestUpdateState (0.00s)
+    --- PASS: TestUpdateState/should_update_state_with_complete_API_object (0.00s)
+    --- PASS: TestUpdateState/should_update_state_with_minimal_API_object (0.00s)
+    --- PASS: TestUpdateState/should_handle_empty_strings_in_API_object (0.00s)
+    --- PASS: TestUpdateState/should_update_state_with_special_characters_in_name (0.00s)
+    --- PASS: TestUpdateState/should_update_state_with_unicode_characters (0.00s)
+=== RUN   TestMapStateToDataObject_UnknownValues
+=== RUN   TestMapStateToDataObject_UnknownValues/should_handle_unknown_values
+--- PASS: TestMapStateToDataObject_UnknownValues (0.00s)
+    --- PASS: TestMapStateToDataObject_UnknownValues/should_handle_unknown_values (0.00s)
+=== RUN   TestGetRestResource
+=== RUN   TestGetRestResource/should_have_GetRestResource_method
+--- PASS: TestGetRestResource (0.00s)
+    --- PASS: TestGetRestResource/should_have_GetRestResource_method (0.00s)
+=== RUN   TestMapStateToDataObject_WithInvalidState
+=== RUN   TestMapStateToDataObject_WithInvalidState/should_return_error_when_state_Get_fails
+--- PASS: TestMapStateToDataObject_WithInvalidState (0.00s)
+    --- PASS: TestMapStateToDataObject_WithInvalidState/should_return_error_when_state_Get_fails (0.00s)
+=== RUN   TestMapStateToDataObject_WithNilPlanAndState
+=== RUN   TestMapStateToDataObject_WithNilPlanAndState/should_return_error_when_both_plan_and_state_are_nil
+--- PASS: TestMapStateToDataObject_WithNilPlanAndState (0.00s)
+    --- PASS: TestMapStateToDataObject_WithNilPlanAndState/should_return_error_when_both_plan_and_state_are_nil (0.00s)
+=== RUN   TestGetRestResource_WithMockAPI
+=== RUN   TestGetRestResource_WithMockAPI/should_return_WebsiteMonitoringConfig_REST_resource_from_API
+--- PASS: TestGetRestResource_WithMockAPI (0.00s)
+    --- PASS: TestGetRestResource_WithMockAPI/should_return_WebsiteMonitoringConfig_REST_resource_from_API (0.00s)
+=== RUN   TestValidateMapStateToDataObjectInputs
+=== RUN   TestValidateMapStateToDataObjectInputs/should_return_error_when_context_is_nil
+--- PASS: TestValidateMapStateToDataObjectInputs (0.00s)
+    --- PASS: TestValidateMapStateToDataObjectInputs/should_return_error_when_context_is_nil (0.00s)
+=== RUN   TestValidateUpdateStateInputs
+=== RUN   TestValidateUpdateStateInputs/should_return_error_when_context_is_nil
+=== RUN   TestValidateUpdateStateInputs/should_return_error_when_state_is_nil
+=== RUN   TestValidateUpdateStateInputs/should_return_error_when_API_object_is_nil
+--- PASS: TestValidateUpdateStateInputs (0.00s)
+    --- PASS: TestValidateUpdateStateInputs/should_return_error_when_context_is_nil (0.00s)
+    --- PASS: TestValidateUpdateStateInputs/should_return_error_when_state_is_nil (0.00s)
+    --- PASS: TestValidateUpdateStateInputs/should_return_error_when_API_object_is_nil (0.00s)
+=== RUN   TestMapModelToAPIObject_ValidationErrors
+=== RUN   TestMapModelToAPIObject_ValidationErrors/should_return_error_when_name_is_too_short
+=== RUN   TestMapModelToAPIObject_ValidationErrors/should_return_error_when_name_is_too_long
+=== RUN   TestMapModelToAPIObject_ValidationErrors/should_return_error_when_name_is_null
+=== RUN   TestMapModelToAPIObject_ValidationErrors/should_return_error_when_name_is_unknown
+--- PASS: TestMapModelToAPIObject_ValidationErrors (0.00s)
+    --- PASS: TestMapModelToAPIObject_ValidationErrors/should_return_error_when_name_is_too_short (0.00s)
+    --- PASS: TestMapModelToAPIObject_ValidationErrors/should_return_error_when_name_is_too_long (0.00s)
+    --- PASS: TestMapModelToAPIObject_ValidationErrors/should_return_error_when_name_is_null (0.00s)
+    --- PASS: TestMapModelToAPIObject_ValidationErrors/should_return_error_when_name_is_unknown (0.00s)
+=== RUN   TestUpdateState_WithInvalidState
+=== RUN   TestUpdateState_WithInvalidState/should_return_error_when_state_Set_fails
+--- PASS: TestUpdateState_WithInvalidState (0.00s)
+    --- PASS: TestUpdateState_WithInvalidState/should_return_error_when_state_Set_fails (0.00s)
+=== RUN   TestMapStateToDataObject_ValidNameLengths
+=== RUN   TestMapStateToDataObject_ValidNameLengths/should_accept_name_at_minimum_length
+=== RUN   TestMapStateToDataObject_ValidNameLengths/should_accept_name_at_maximum_length
+--- PASS: TestMapStateToDataObject_ValidNameLengths (0.00s)
+    --- PASS: TestMapStateToDataObject_ValidNameLengths/should_accept_name_at_minimum_length (0.00s)
+    --- PASS: TestMapStateToDataObject_ValidNameLengths/should_accept_name_at_maximum_length (0.00s)
+PASS
+coverage: 96.1% of statements
+ok  	github.com/gessnerfl/terraform-provider-instana/internal/resources/websitemonitoringconfig	3.570s	coverage: 96.1% of statements
+	github.com/gessnerfl/terraform-provider-instana/internal/shared		coverage: 0.0% of statements
+=== RUN   TestShouldMapEmptyTagFilterExpressionFromInstanaAPI
+=== RUN   TestShouldMapEmptyTagFilterExpressionFromInstanaAPI/TestShouldMapEmptyANDTagFilterExpressionFromInstnaAPI
+=== RUN   TestShouldMapEmptyTagFilterExpressionFromInstanaAPI/TestShouldMapEmptyORTagFilterExpressionFromInstnaAPI
+--- PASS: TestShouldMapEmptyTagFilterExpressionFromInstanaAPI (0.00s)
+    --- PASS: TestShouldMapEmptyTagFilterExpressionFromInstanaAPI/TestShouldMapEmptyANDTagFilterExpressionFromInstnaAPI (0.00s)
+    --- PASS: TestShouldMapEmptyTagFilterExpressionFromInstanaAPI/TestShouldMapEmptyORTagFilterExpressionFromInstnaAPI (0.00s)
+=== RUN   TestShouldMapStringTagFilterFromInstanaAPI
+--- PASS: TestShouldMapStringTagFilterFromInstanaAPI (0.00s)
+=== RUN   TestShouldMapNumberTagFilterFromInstanaAPI
+--- PASS: TestShouldMapNumberTagFilterFromInstanaAPI (0.00s)
+=== RUN   TestShouldMapBooleanTagFilterFromInstanaAPI
+--- PASS: TestShouldMapBooleanTagFilterFromInstanaAPI (0.00s)
+=== RUN   TestShouldMapComparisonTagFilterWithTagKeyValueFromInstanaAPI
+--- PASS: TestShouldMapComparisonTagFilterWithTagKeyValueFromInstanaAPI (0.00s)
+=== RUN   TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI
+=== RUN   TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI/test_mapping_of_EQUALS
+=== RUN   TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI/test_mapping_of_NOT_EQUAL
+=== RUN   TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI/test_mapping_of_CONTAINS
+=== RUN   TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI/test_mapping_of_NOT_CONTAIN
+=== RUN   TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI/test_mapping_of_STARTS_WITH
+=== RUN   TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI/test_mapping_of_ENDS_WITH
+=== RUN   TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI/test_mapping_of_NOT_STARTS_WITH
+=== RUN   TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI/test_mapping_of_NOT_ENDS_WITH
+=== RUN   TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI/test_mapping_of_GREATER_OR_EQUAL_THAN
+=== RUN   TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI/test_mapping_of_LESS_OR_EQUAL_THAN
+=== RUN   TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI/test_mapping_of_GREATER_THAN
+=== RUN   TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI/test_mapping_of_LESS_THAN
+=== RUN   TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI/test_mapping_of_REGEX_MATCH
+--- PASS: TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI (0.00s)
+    --- PASS: TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI/test_mapping_of_EQUALS (0.00s)
+    --- PASS: TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI/test_mapping_of_NOT_EQUAL (0.00s)
+    --- PASS: TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI/test_mapping_of_CONTAINS (0.00s)
+    --- PASS: TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI/test_mapping_of_NOT_CONTAIN (0.00s)
+    --- PASS: TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI/test_mapping_of_STARTS_WITH (0.00s)
+    --- PASS: TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI/test_mapping_of_ENDS_WITH (0.00s)
+    --- PASS: TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI/test_mapping_of_NOT_STARTS_WITH (0.00s)
+    --- PASS: TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI/test_mapping_of_NOT_ENDS_WITH (0.00s)
+    --- PASS: TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI/test_mapping_of_GREATER_OR_EQUAL_THAN (0.00s)
+    --- PASS: TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI/test_mapping_of_LESS_OR_EQUAL_THAN (0.00s)
+    --- PASS: TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI/test_mapping_of_GREATER_THAN (0.00s)
+    --- PASS: TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI/test_mapping_of_LESS_THAN (0.00s)
+    --- PASS: TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI/test_mapping_of_REGEX_MATCH (0.00s)
+=== RUN   TestShouldFailToMapTagFilterFromInstanaAPIWhenOperatorIsNotSupported
+--- PASS: TestShouldFailToMapTagFilterFromInstanaAPIWhenOperatorIsNotSupported (0.00s)
+=== RUN   TestShouldMapAllSupportedUnaryOperationsFromInstanaAPI
+=== RUN   TestShouldMapAllSupportedUnaryOperationsFromInstanaAPI/test_mapping_of_IS_EMPTY_
+=== RUN   TestShouldMapAllSupportedUnaryOperationsFromInstanaAPI/test_mapping_of_NOT_EMPTY_
+=== RUN   TestShouldMapAllSupportedUnaryOperationsFromInstanaAPI/test_mapping_of_IS_BLANK_
+=== RUN   TestShouldMapAllSupportedUnaryOperationsFromInstanaAPI/test_mapping_of_NOT_BLANK_
+--- PASS: TestShouldMapAllSupportedUnaryOperationsFromInstanaAPI (0.00s)
+    --- PASS: TestShouldMapAllSupportedUnaryOperationsFromInstanaAPI/test_mapping_of_IS_EMPTY_ (0.00s)
+    --- PASS: TestShouldMapAllSupportedUnaryOperationsFromInstanaAPI/test_mapping_of_NOT_EMPTY_ (0.00s)
+    --- PASS: TestShouldMapAllSupportedUnaryOperationsFromInstanaAPI/test_mapping_of_IS_BLANK_ (0.00s)
+    --- PASS: TestShouldMapAllSupportedUnaryOperationsFromInstanaAPI/test_mapping_of_NOT_BLANK_ (0.00s)
+=== RUN   TestShouldMapUnaryTagFilterWithTagKeyFromInstanaAPI
+--- PASS: TestShouldMapUnaryTagFilterWithTagKeyFromInstanaAPI (0.00s)
+=== RUN   TestShouldFailToMapTagFilterFromInstanaAPIWhenUnaryOperationIsNotSupported
+--- PASS: TestShouldFailToMapTagFilterFromInstanaAPIWhenUnaryOperationIsNotSupported (0.00s)
+=== RUN   TestShouldFailToMapTagFilterExpressionElementFromInstanaAPIWhenTypeIsMissing
+--- PASS: TestShouldFailToMapTagFilterExpressionElementFromInstanaAPIWhenTypeIsMissing (0.00s)
+=== RUN   TestShouldMapLogicalAndWithTwoPrimaryExpressionsFromInstanaAPI
+--- PASS: TestShouldMapLogicalAndWithTwoPrimaryExpressionsFromInstanaAPI (0.00s)
+=== RUN   TestShouldMapLogicalAndWithThreePrimaryExpressionsFromInstanaAPI
+--- PASS: TestShouldMapLogicalAndWithThreePrimaryExpressionsFromInstanaAPI (0.00s)
+=== RUN   TestShouldMapLogicalAndWithTwoElementsFromInstanaAPIWhereTheFirstElementIsAPrimaryExpressionAndTheSecondElementIsAnotherLogicalAnd
+--- PASS: TestShouldMapLogicalAndWithTwoElementsFromInstanaAPIWhereTheFirstElementIsAPrimaryExpressionAndTheSecondElementIsAnotherLogicalAnd (0.00s)
+=== RUN   TestShouldMapLogicalAndWithTwoElementsFromInstanaAPIWhereTheFirstElementIsAPrimaryExpressionAndTheSecondElementIsALogicalOr
+--- PASS: TestShouldMapLogicalAndWithTwoElementsFromInstanaAPIWhereTheFirstElementIsAPrimaryExpressionAndTheSecondElementIsALogicalOr (0.00s)
+=== RUN   TestShouldUnwrapLogicalAndFromInstanaAPIWhenOnlyOneElementIsProvided
+--- PASS: TestShouldUnwrapLogicalAndFromInstanaAPIWhenOnlyOneElementIsProvided (0.00s)
+=== RUN   TestShouldMapLogicalOrWithTwoPrimaryExpressionsFromInstanaAPI
+--- PASS: TestShouldMapLogicalOrWithTwoPrimaryExpressionsFromInstanaAPI (0.00s)
+=== RUN   TestShouldMapLogicalOrWithThreePrimaryExpressionsFromInstanaAPI
+--- PASS: TestShouldMapLogicalOrWithThreePrimaryExpressionsFromInstanaAPI (0.00s)
+=== RUN   TestShouldMapLogicalOrWithTwoElementsFromInstanaAPIWhereFirstElementIsALogicalAndAndTheOtherElementIsPrimaryExpression
+--- PASS: TestShouldMapLogicalOrWithTwoElementsFromInstanaAPIWhereFirstElementIsALogicalAndAndTheOtherElementIsPrimaryExpression (0.00s)
+=== RUN   TestShouldMapLogicalOrWithTwoElementsFromInstanaAPIWhereFirstElementIsAPrimaryExpressionAndTheOtherElementIsALogicalOr
+--- PASS: TestShouldMapLogicalOrWithTwoElementsFromInstanaAPIWhereFirstElementIsAPrimaryExpressionAndTheOtherElementIsALogicalOr (0.00s)
+=== RUN   TestShouldMapLogicalOrWithTwoElementsWhereFirstElementIsAPrimaryExpressionAndTheOtherElementIsALogicalAnd
+--- PASS: TestShouldMapLogicalOrWithTwoElementsWhereFirstElementIsAPrimaryExpressionAndTheOtherElementIsALogicalAnd (0.00s)
+=== RUN   TestShouldFailToMapLogicalOrWhenFirstElementIsALogicalOrExpression
+--- PASS: TestShouldFailToMapLogicalOrWhenFirstElementIsALogicalOrExpression (0.00s)
+=== RUN   TestShouldFailToMapLogicalOrWhenOnlyOneElementIsProvided
+--- PASS: TestShouldFailToMapLogicalOrWhenOnlyOneElementIsProvided (0.00s)
+=== RUN   TestShouldFailToMapTagFilterExpressionFromInstanaAPIWhenLogicalOperatorIsNotValid
+--- PASS: TestShouldFailToMapTagFilterExpressionFromInstanaAPIWhenLogicalOperatorIsNotValid (0.00s)
+=== RUN   TestShouldReturnMappingErrorWhenAnyElementOfTagFilterExpressionIsNotValid
+=== RUN   TestShouldReturnMappingErrorWhenAnyElementOfTagFilterExpressionIsNotValid/TestShouldReturnMappingErrorWhenElement0OfTagFilterExpressionIsNotValid
+=== RUN   TestShouldReturnMappingErrorWhenAnyElementOfTagFilterExpressionIsNotValid/TestShouldReturnMappingErrorWhenElement1OfTagFilterExpressionIsNotValid
+=== RUN   TestShouldReturnMappingErrorWhenAnyElementOfTagFilterExpressionIsNotValid/TestShouldReturnMappingErrorWhenElement2OfTagFilterExpressionIsNotValid
+=== RUN   TestShouldReturnMappingErrorWhenAnyElementOfTagFilterExpressionIsNotValid/TestShouldReturnMappingErrorWhenElement3OfTagFilterExpressionIsNotValid
+=== RUN   TestShouldReturnMappingErrorWhenAnyElementOfTagFilterExpressionIsNotValid/TestShouldReturnMappingErrorWhenElement4OfTagFilterExpressionIsNotValid
+--- PASS: TestShouldReturnMappingErrorWhenAnyElementOfTagFilterExpressionIsNotValid (0.00s)
+    --- PASS: TestShouldReturnMappingErrorWhenAnyElementOfTagFilterExpressionIsNotValid/TestShouldReturnMappingErrorWhenElement0OfTagFilterExpressionIsNotValid (0.00s)
+    --- PASS: TestShouldReturnMappingErrorWhenAnyElementOfTagFilterExpressionIsNotValid/TestShouldReturnMappingErrorWhenElement1OfTagFilterExpressionIsNotValid (0.00s)
+    --- PASS: TestShouldReturnMappingErrorWhenAnyElementOfTagFilterExpressionIsNotValid/TestShouldReturnMappingErrorWhenElement2OfTagFilterExpressionIsNotValid (0.00s)
+    --- PASS: TestShouldReturnMappingErrorWhenAnyElementOfTagFilterExpressionIsNotValid/TestShouldReturnMappingErrorWhenElement3OfTagFilterExpressionIsNotValid (0.00s)
+    --- PASS: TestShouldReturnMappingErrorWhenAnyElementOfTagFilterExpressionIsNotValid/TestShouldReturnMappingErrorWhenElement4OfTagFilterExpressionIsNotValid (0.00s)
+=== RUN   TestShouldReturnNilWhenMappingEmptyTagFilterExpressionToNormalizedString
+--- PASS: TestShouldReturnNilWhenMappingEmptyTagFilterExpressionToNormalizedString (0.00s)
+=== RUN   TestShouldReturnErrorWhenMappingAnInvalidTagFilterExpressionToNormalizedString
+--- PASS: TestShouldReturnErrorWhenMappingAnInvalidTagFilterExpressionToNormalizedString (0.00s)
+=== RUN   TestShouldReturnStringWhenMappingAValidTagFilterExpressionToNormalizedString
+--- PASS: TestShouldReturnStringWhenMappingAValidTagFilterExpressionToNormalizedString (0.00s)
+=== RUN   TestShouldParseStringComparisonExpression
+--- PASS: TestShouldParseStringComparisonExpression (0.00s)
+=== RUN   TestShouldParseNumberComparisonExpression
+--- PASS: TestShouldParseNumberComparisonExpression (0.00s)
+=== RUN   TestShouldParseBoolComparisonExpression
+--- PASS: TestShouldParseBoolComparisonExpression (0.00s)
+=== RUN   TestShouldParseStringTagComparisonExpression
+--- PASS: TestShouldParseStringTagComparisonExpression (0.00s)
+=== RUN   TestShouldParseStringTagComparisonExpressionWithTagAsStringValue
+--- PASS: TestShouldParseStringTagComparisonExpressionWithTagAsStringValue (0.00s)
+=== RUN   TestShouldParseNumberTagComparisonExpression
+--- PASS: TestShouldParseNumberTagComparisonExpression (0.00s)
+=== RUN   TestShouldParseBooleanTagComparisonExpression
+--- PASS: TestShouldParseBooleanTagComparisonExpression (0.00s)
+=== RUN   TestShouldHandlePrecedenceWhenParseExpressions
+--- PASS: TestShouldHandlePrecedenceWhenParseExpressions (0.00s)
+=== RUN   TestShouldParseExpressionStartingWithABracketExpression
+--- PASS: TestShouldParseExpressionStartingWithABracketExpression (0.00s)
+=== RUN   TestShouldParseExpressionEndingWithABracketExpression
+--- PASS: TestShouldParseExpressionEndingWithABracketExpression (0.00s)
+=== RUN   TestShouldSuccessfullyParseComplexExpression
+--- PASS: TestShouldSuccessfullyParseComplexExpression (0.00s)
+=== RUN   TestShouldParseKeywordsCaseInsensitive
+--- PASS: TestShouldParseKeywordsCaseInsensitive (0.00s)
+=== RUN   TestShouldParseAllSupportedComparisonOperators
+=== RUN   TestShouldParseAllSupportedComparisonOperators/TestShouldParseComparisionOperatorEQUALS
+=== RUN   TestShouldParseAllSupportedComparisonOperators/TestShouldParseComparisionOperatorNOT_EQUAL
+=== RUN   TestShouldParseAllSupportedComparisonOperators/TestShouldParseComparisionOperatorCONTAINS
+=== RUN   TestShouldParseAllSupportedComparisonOperators/TestShouldParseComparisionOperatorNOT_CONTAIN
+=== RUN   TestShouldParseAllSupportedComparisonOperators/TestShouldParseComparisionOperatorSTARTS_WITH
+=== RUN   TestShouldParseAllSupportedComparisonOperators/TestShouldParseComparisionOperatorENDS_WITH
+=== RUN   TestShouldParseAllSupportedComparisonOperators/TestShouldParseComparisionOperatorNOT_STARTS_WITH
+=== RUN   TestShouldParseAllSupportedComparisonOperators/TestShouldParseComparisionOperatorNOT_ENDS_WITH
+=== RUN   TestShouldParseAllSupportedComparisonOperators/TestShouldParseComparisionOperatorGREATER_OR_EQUAL_THAN
+=== RUN   TestShouldParseAllSupportedComparisonOperators/TestShouldParseComparisionOperatorLESS_OR_EQUAL_THAN
+=== RUN   TestShouldParseAllSupportedComparisonOperators/TestShouldParseComparisionOperatorGREATER_THAN
+=== RUN   TestShouldParseAllSupportedComparisonOperators/TestShouldParseComparisionOperatorLESS_THAN
+=== RUN   TestShouldParseAllSupportedComparisonOperators/TestShouldParseComparisionOperatorREGEX_MATCH
+--- PASS: TestShouldParseAllSupportedComparisonOperators (0.00s)
+    --- PASS: TestShouldParseAllSupportedComparisonOperators/TestShouldParseComparisionOperatorEQUALS (0.00s)
+    --- PASS: TestShouldParseAllSupportedComparisonOperators/TestShouldParseComparisionOperatorNOT_EQUAL (0.00s)
+    --- PASS: TestShouldParseAllSupportedComparisonOperators/TestShouldParseComparisionOperatorCONTAINS (0.00s)
+    --- PASS: TestShouldParseAllSupportedComparisonOperators/TestShouldParseComparisionOperatorNOT_CONTAIN (0.00s)
+    --- PASS: TestShouldParseAllSupportedComparisonOperators/TestShouldParseComparisionOperatorSTARTS_WITH (0.00s)
+    --- PASS: TestShouldParseAllSupportedComparisonOperators/TestShouldParseComparisionOperatorENDS_WITH (0.00s)
+    --- PASS: TestShouldParseAllSupportedComparisonOperators/TestShouldParseComparisionOperatorNOT_STARTS_WITH (0.00s)
+    --- PASS: TestShouldParseAllSupportedComparisonOperators/TestShouldParseComparisionOperatorNOT_ENDS_WITH (0.00s)
+    --- PASS: TestShouldParseAllSupportedComparisonOperators/TestShouldParseComparisionOperatorGREATER_OR_EQUAL_THAN (0.00s)
+    --- PASS: TestShouldParseAllSupportedComparisonOperators/TestShouldParseComparisionOperatorLESS_OR_EQUAL_THAN (0.00s)
+    --- PASS: TestShouldParseAllSupportedComparisonOperators/TestShouldParseComparisionOperatorGREATER_THAN (0.00s)
+    --- PASS: TestShouldParseAllSupportedComparisonOperators/TestShouldParseComparisionOperatorLESS_THAN (0.00s)
+    --- PASS: TestShouldParseAllSupportedComparisonOperators/TestShouldParseComparisionOperatorREGEX_MATCH (0.00s)
+=== RUN   TestShouldParseAllSupportedUnaryOperators
+=== RUN   TestShouldParseAllSupportedUnaryOperators/TestShouldParseUnaryOperatorIS_EMPTY
+=== RUN   TestShouldParseAllSupportedUnaryOperators/TestShouldParseUnaryOperatorNOT_EMPTY
+=== RUN   TestShouldParseAllSupportedUnaryOperators/TestShouldParseUnaryOperatorIS_BLANK
+=== RUN   TestShouldParseAllSupportedUnaryOperators/TestShouldParseUnaryOperatorNOT_BLANK
+--- PASS: TestShouldParseAllSupportedUnaryOperators (0.00s)
+    --- PASS: TestShouldParseAllSupportedUnaryOperators/TestShouldParseUnaryOperatorIS_EMPTY (0.00s)
+    --- PASS: TestShouldParseAllSupportedUnaryOperators/TestShouldParseUnaryOperatorNOT_EMPTY (0.00s)
+    --- PASS: TestShouldParseAllSupportedUnaryOperators/TestShouldParseUnaryOperatorIS_BLANK (0.00s)
+    --- PASS: TestShouldParseAllSupportedUnaryOperators/TestShouldParseUnaryOperatorNOT_BLANK (0.00s)
+=== RUN   TestShouldParseFullySpecifiedUnaryTagFilter
+--- PASS: TestShouldParseFullySpecifiedUnaryTagFilter (0.00s)
+=== RUN   TestShouldParseComparisonOperationsCaseInsensitive
+--- PASS: TestShouldParseComparisonOperationsCaseInsensitive (0.00s)
+=== RUN   TestShouldParseUnaryOperationsCaseInsensitive
+--- PASS: TestShouldParseUnaryOperationsCaseInsensitive (0.00s)
+=== RUN   TestShouldParseIdentifiersWithDashes
+--- PASS: TestShouldParseIdentifiersWithDashes (0.00s)
+=== RUN   TestShouldParseIdentifierWithSlashes
+--- PASS: TestShouldParseIdentifierWithSlashes (0.00s)
+=== RUN   TestShouldParseEntityOriginFromComparisonExpression
+--- PASS: TestShouldParseEntityOriginFromComparisonExpression (0.00s)
+=== RUN   TestShouldParseEntityOriginFromUnaryExpression
+--- PASS: TestShouldParseEntityOriginFromUnaryExpression (0.00s)
+=== RUN   TestShouldParseStringWithEscapedSingleQuotes
+--- PASS: TestShouldParseStringWithEscapedSingleQuotes (0.00s)
+=== RUN   TestShouldRenderStringWithSingleQuotesEscaped
+--- PASS: TestShouldRenderStringWithSingleQuotesEscaped (0.00s)
+=== RUN   TestShouldFailToParseInvalidExpression
+--- PASS: TestShouldFailToParseInvalidExpression (0.00s)
+=== RUN   TestShouldRenderComplexExpressionInNormalizedForm
+--- PASS: TestShouldRenderComplexExpressionInNormalizedForm (0.00s)
+=== RUN   TestShouldRenderLogicalOrExpression
+--- PASS: TestShouldRenderLogicalOrExpression (0.00s)
+=== RUN   TestShouldRenderLogicalAndExpression
+--- PASS: TestShouldRenderLogicalAndExpression (0.00s)
+=== RUN   TestShouldRenderBracketExpression
+--- PASS: TestShouldRenderBracketExpression (0.00s)
+=== RUN   TestShouldRenderPrimaryStringComparisonExpression
+--- PASS: TestShouldRenderPrimaryStringComparisonExpression (0.00s)
+=== RUN   TestShouldRenderPrimaryNumberComparisonExpression
+--- PASS: TestShouldRenderPrimaryNumberComparisonExpression (0.00s)
+=== RUN   TestShouldRenderPrimaryBooleanComparisonExpression
+--- PASS: TestShouldRenderPrimaryBooleanComparisonExpression (0.00s)
+=== RUN   TestShouldRenderPrimaryTagComparisonExpression
+--- PASS: TestShouldRenderPrimaryTagComparisonExpression (0.00s)
+=== RUN   TestShouldRenderPrimaryTagComparisonExpressionWithString
+--- PASS: TestShouldRenderPrimaryTagComparisonExpressionWithString (0.00s)
+=== RUN   TestShouldRenderUnaryOperationExpression
+--- PASS: TestShouldRenderUnaryOperationExpression (0.00s)
+=== RUN   TestShouldGetEntityOriginByKey
+=== RUN   TestShouldGetEntityOriginByKey/TestShouldGetEntityOriginForKeysrc
+=== RUN   TestShouldGetEntityOriginByKey/TestShouldGetEntityOriginForKeydest
+=== RUN   TestShouldGetEntityOriginByKey/TestShouldGetEntityOriginForKeyna
+--- PASS: TestShouldGetEntityOriginByKey (0.00s)
+    --- PASS: TestShouldGetEntityOriginByKey/TestShouldGetEntityOriginForKeysrc (0.00s)
+    --- PASS: TestShouldGetEntityOriginByKey/TestShouldGetEntityOriginForKeydest (0.00s)
+    --- PASS: TestShouldGetEntityOriginByKey/TestShouldGetEntityOriginForKeyna (0.00s)
+=== RUN   TestShouldReturnEntityOriginDestinationAsFallbackValueWhenKeyIsNotValid
+2025/11/19 20:02:55 entity origin with key invalid is not supported; fall back to default origin dest
+--- PASS: TestShouldReturnEntityOriginDestinationAsFallbackValueWhenKeyIsNotValid (0.00s)
+=== RUN   TestShouldGetEntityOriginByInstanaAPIEntity
+=== RUN   TestShouldGetEntityOriginByInstanaAPIEntity/TestShouldGetEntityOriginForInstanaAPIEntitySOURCE
+=== RUN   TestShouldGetEntityOriginByInstanaAPIEntity/TestShouldGetEntityOriginForInstanaAPIEntityDESTINATION
+=== RUN   TestShouldGetEntityOriginByInstanaAPIEntity/TestShouldGetEntityOriginForInstanaAPIEntityNOT_APPLICABLE
+--- PASS: TestShouldGetEntityOriginByInstanaAPIEntity (0.00s)
+    --- PASS: TestShouldGetEntityOriginByInstanaAPIEntity/TestShouldGetEntityOriginForInstanaAPIEntitySOURCE (0.00s)
+    --- PASS: TestShouldGetEntityOriginByInstanaAPIEntity/TestShouldGetEntityOriginForInstanaAPIEntityDESTINATION (0.00s)
+    --- PASS: TestShouldGetEntityOriginByInstanaAPIEntity/TestShouldGetEntityOriginForInstanaAPIEntityNOT_APPLICABLE (0.00s)
+=== RUN   TestShouldReturnEntityOriginDestinationAsFallbackValueWhenMatcherExpressionEntityIsNotValid
+2025/11/19 20:02:55 tag filter entity invalid is not supported; fall back to default origin dest
+--- PASS: TestShouldReturnEntityOriginDestinationAsFallbackValueWhenMatcherExpressionEntityIsNotValid (0.00s)
+=== RUN   TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput
+=== RUN   TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBasicComparison0
+=== RUN   TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBasicComparison1
+=== RUN   TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBasicComparison2
+=== RUN   TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionAndWithBracketedOr0
+=== RUN   TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionAndWithBracketedOr1
+=== RUN   TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionAndWithBracketedOr2
+=== RUN   TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBracketedOrWithAnd0
+=== RUN   TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBracketedOrWithAnd1
+=== RUN   TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBracketedOrWithAnd2
+=== RUN   TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionOrWithBracketedAnd0
+=== RUN   TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionOrWithBracketedAnd1
+=== RUN   TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionOrWithBracketedAnd2
+=== RUN   TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBracketedAndWithOr0
+=== RUN   TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBracketedAndWithOr1
+=== RUN   TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBracketedAndWithOr2
+=== RUN   TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionAndWithBracketedAnd0
+=== RUN   TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionAndWithBracketedAnd1
+=== RUN   TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionAndWithBracketedAnd2
+=== RUN   TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBracketedAndWithAnd0
+=== RUN   TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBracketedAndWithAnd1
+=== RUN   TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBracketedAndWithAnd2
+=== RUN   TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionOrWithBracketedOr0
+=== RUN   TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionOrWithBracketedOr1
+=== RUN   TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionOrWithBracketedOr2
+=== RUN   TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBracketedOrWithOr0
+=== RUN   TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBracketedOrWithOr1
+=== RUN   TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBracketedOrWithOr2
+--- PASS: TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput (0.00s)
+    --- PASS: TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBasicComparison0 (0.00s)
+    --- PASS: TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBasicComparison1 (0.00s)
+    --- PASS: TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBasicComparison2 (0.00s)
+    --- PASS: TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionAndWithBracketedOr0 (0.00s)
+    --- PASS: TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionAndWithBracketedOr1 (0.00s)
+    --- PASS: TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionAndWithBracketedOr2 (0.00s)
+    --- PASS: TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBracketedOrWithAnd0 (0.00s)
+    --- PASS: TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBracketedOrWithAnd1 (0.00s)
+    --- PASS: TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBracketedOrWithAnd2 (0.00s)
+    --- PASS: TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionOrWithBracketedAnd0 (0.00s)
+    --- PASS: TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionOrWithBracketedAnd1 (0.00s)
+    --- PASS: TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionOrWithBracketedAnd2 (0.00s)
+    --- PASS: TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBracketedAndWithOr0 (0.00s)
+    --- PASS: TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBracketedAndWithOr1 (0.00s)
+    --- PASS: TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBracketedAndWithOr2 (0.00s)
+    --- PASS: TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionAndWithBracketedAnd0 (0.00s)
+    --- PASS: TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionAndWithBracketedAnd1 (0.00s)
+    --- PASS: TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionAndWithBracketedAnd2 (0.00s)
+    --- PASS: TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBracketedAndWithAnd0 (0.00s)
+    --- PASS: TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBracketedAndWithAnd1 (0.00s)
+    --- PASS: TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBracketedAndWithAnd2 (0.00s)
+    --- PASS: TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionOrWithBracketedOr0 (0.00s)
+    --- PASS: TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionOrWithBracketedOr1 (0.00s)
+    --- PASS: TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionOrWithBracketedOr2 (0.00s)
+    --- PASS: TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBracketedOrWithOr0 (0.00s)
+    --- PASS: TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBracketedOrWithOr1 (0.00s)
+    --- PASS: TestShouldNormalizeExpressionAndProduceTheSameResultWhenPerformedMultipleTimesOnOutput/TestShouldNormalizeExpressionBracketedOrWithOr2 (0.00s)
+=== RUN   TestShouldFailToNormalizeExpressionWhenExpressionIsNotValid
+--- PASS: TestShouldFailToNormalizeExpressionWhenExpressionIsNotValid (0.00s)
+=== RUN   TestShouldHandleRoundTripConversionWithSingleQuotesInValue
+--- PASS: TestShouldHandleRoundTripConversionWithSingleQuotesInValue (0.00s)
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_string_value_using_operatore_EQUALS
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_number_value_using_operatore_of_EQUALS
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_boolean_value_using_operatore_of_EQUALS
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_tag_using_operatore_of_EQUALS
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_string_value_using_operatore_NOT_EQUAL
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_number_value_using_operatore_of_NOT_EQUAL
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_boolean_value_using_operatore_of_NOT_EQUAL
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_tag_using_operatore_of_NOT_EQUAL
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_string_value_using_operatore_CONTAINS
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_number_value_using_operatore_of_CONTAINS
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_boolean_value_using_operatore_of_CONTAINS
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_tag_using_operatore_of_CONTAINS
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_string_value_using_operatore_NOT_CONTAIN
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_number_value_using_operatore_of_NOT_CONTAIN
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_boolean_value_using_operatore_of_NOT_CONTAIN
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_tag_using_operatore_of_NOT_CONTAIN
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_string_value_using_operatore_STARTS_WITH
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_number_value_using_operatore_of_STARTS_WITH
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_boolean_value_using_operatore_of_STARTS_WITH
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_tag_using_operatore_of_STARTS_WITH
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_string_value_using_operatore_ENDS_WITH
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_number_value_using_operatore_of_ENDS_WITH
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_boolean_value_using_operatore_of_ENDS_WITH
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_tag_using_operatore_of_ENDS_WITH
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_string_value_using_operatore_NOT_STARTS_WITH
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_number_value_using_operatore_of_NOT_STARTS_WITH
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_boolean_value_using_operatore_of_NOT_STARTS_WITH
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_tag_using_operatore_of_NOT_STARTS_WITH
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_string_value_using_operatore_NOT_ENDS_WITH
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_number_value_using_operatore_of_NOT_ENDS_WITH
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_boolean_value_using_operatore_of_NOT_ENDS_WITH
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_tag_using_operatore_of_NOT_ENDS_WITH
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_string_value_using_operatore_GREATER_OR_EQUAL_THAN
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_number_value_using_operatore_of_GREATER_OR_EQUAL_THAN
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_boolean_value_using_operatore_of_GREATER_OR_EQUAL_THAN
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_tag_using_operatore_of_GREATER_OR_EQUAL_THAN
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_string_value_using_operatore_LESS_OR_EQUAL_THAN
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_number_value_using_operatore_of_LESS_OR_EQUAL_THAN
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_boolean_value_using_operatore_of_LESS_OR_EQUAL_THAN
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_tag_using_operatore_of_LESS_OR_EQUAL_THAN
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_string_value_using_operatore_GREATER_THAN
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_number_value_using_operatore_of_GREATER_THAN
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_boolean_value_using_operatore_of_GREATER_THAN
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_tag_using_operatore_of_GREATER_THAN
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_string_value_using_operatore_LESS_THAN
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_number_value_using_operatore_of_LESS_THAN
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_boolean_value_using_operatore_of_LESS_THAN
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_tag_using_operatore_of_LESS_THAN
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_string_value_using_operatore_REGEX_MATCH
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_number_value_using_operatore_of_REGEX_MATCH
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_boolean_value_using_operatore_of_REGEX_MATCH
+=== RUN   TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_tag_using_operatore_of_REGEX_MATCH
+--- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_string_value_using_operatore_EQUALS (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_number_value_using_operatore_of_EQUALS (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_boolean_value_using_operatore_of_EQUALS (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_tag_using_operatore_of_EQUALS (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_string_value_using_operatore_NOT_EQUAL (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_number_value_using_operatore_of_NOT_EQUAL (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_boolean_value_using_operatore_of_NOT_EQUAL (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_tag_using_operatore_of_NOT_EQUAL (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_string_value_using_operatore_CONTAINS (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_number_value_using_operatore_of_CONTAINS (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_boolean_value_using_operatore_of_CONTAINS (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_tag_using_operatore_of_CONTAINS (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_string_value_using_operatore_NOT_CONTAIN (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_number_value_using_operatore_of_NOT_CONTAIN (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_boolean_value_using_operatore_of_NOT_CONTAIN (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_tag_using_operatore_of_NOT_CONTAIN (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_string_value_using_operatore_STARTS_WITH (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_number_value_using_operatore_of_STARTS_WITH (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_boolean_value_using_operatore_of_STARTS_WITH (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_tag_using_operatore_of_STARTS_WITH (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_string_value_using_operatore_ENDS_WITH (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_number_value_using_operatore_of_ENDS_WITH (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_boolean_value_using_operatore_of_ENDS_WITH (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_tag_using_operatore_of_ENDS_WITH (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_string_value_using_operatore_NOT_STARTS_WITH (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_number_value_using_operatore_of_NOT_STARTS_WITH (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_boolean_value_using_operatore_of_NOT_STARTS_WITH (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_tag_using_operatore_of_NOT_STARTS_WITH (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_string_value_using_operatore_NOT_ENDS_WITH (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_number_value_using_operatore_of_NOT_ENDS_WITH (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_boolean_value_using_operatore_of_NOT_ENDS_WITH (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_tag_using_operatore_of_NOT_ENDS_WITH (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_string_value_using_operatore_GREATER_OR_EQUAL_THAN (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_number_value_using_operatore_of_GREATER_OR_EQUAL_THAN (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_boolean_value_using_operatore_of_GREATER_OR_EQUAL_THAN (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_tag_using_operatore_of_GREATER_OR_EQUAL_THAN (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_string_value_using_operatore_LESS_OR_EQUAL_THAN (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_number_value_using_operatore_of_LESS_OR_EQUAL_THAN (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_boolean_value_using_operatore_of_LESS_OR_EQUAL_THAN (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_tag_using_operatore_of_LESS_OR_EQUAL_THAN (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_string_value_using_operatore_GREATER_THAN (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_number_value_using_operatore_of_GREATER_THAN (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_boolean_value_using_operatore_of_GREATER_THAN (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_tag_using_operatore_of_GREATER_THAN (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_string_value_using_operatore_LESS_THAN (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_number_value_using_operatore_of_LESS_THAN (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_boolean_value_using_operatore_of_LESS_THAN (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_tag_using_operatore_of_LESS_THAN (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_string_value_using_operatore_REGEX_MATCH (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_number_value_using_operatore_of_REGEX_MATCH (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_boolean_value_using_operatore_of_REGEX_MATCH (0.00s)
+    --- PASS: TestShouldMapComparisonToRepresentationOfInstanaAPI/test_comparison_of_tag_using_operatore_of_REGEX_MATCH (0.00s)
+=== RUN   TestShouldMapTagComparisonToRepresentationOfInstanaAPIUsingAStringValue
+--- PASS: TestShouldMapTagComparisonToRepresentationOfInstanaAPIUsingAStringValue (0.00s)
+=== RUN   TestShouldMapTagComparisonToRepresentationOfInstanaAPIUsingANumberValue
+--- PASS: TestShouldMapTagComparisonToRepresentationOfInstanaAPIUsingANumberValue (0.00s)
+=== RUN   TestShouldMapTagComparisonToRepresentationOfInstanaAPIUsingABooleanValue
+--- PASS: TestShouldMapTagComparisonToRepresentationOfInstanaAPIUsingABooleanValue (0.00s)
+=== RUN   TestShouldMapUnaryOperatorToRepresentationOfInstanaAPI
+=== RUN   TestShouldMapUnaryOperatorToRepresentationOfInstanaAPI/test_mapping_of_IS_EMPTY
+=== RUN   TestShouldMapUnaryOperatorToRepresentationOfInstanaAPI/test_mapping_of_NOT_EMPTY
+=== RUN   TestShouldMapUnaryOperatorToRepresentationOfInstanaAPI/test_mapping_of_IS_BLANK
+=== RUN   TestShouldMapUnaryOperatorToRepresentationOfInstanaAPI/test_mapping_of_NOT_BLANK
+--- PASS: TestShouldMapUnaryOperatorToRepresentationOfInstanaAPI (0.00s)
+    --- PASS: TestShouldMapUnaryOperatorToRepresentationOfInstanaAPI/test_mapping_of_IS_EMPTY (0.00s)
+    --- PASS: TestShouldMapUnaryOperatorToRepresentationOfInstanaAPI/test_mapping_of_NOT_EMPTY (0.00s)
+    --- PASS: TestShouldMapUnaryOperatorToRepresentationOfInstanaAPI/test_mapping_of_IS_BLANK (0.00s)
+    --- PASS: TestShouldMapUnaryOperatorToRepresentationOfInstanaAPI/test_mapping_of_NOT_BLANK (0.00s)
+=== RUN   TestShouldMapLogicalAndExpression
+--- PASS: TestShouldMapLogicalAndExpression (0.00s)
+=== RUN   TestShouldMapLogicalAndExpressionWithNestedAnd
+--- PASS: TestShouldMapLogicalAndExpressionWithNestedAnd (0.00s)
+=== RUN   TestShouldMapLogicalAndExpressionWithNestedOrInBrackets
+--- PASS: TestShouldMapLogicalAndExpressionWithNestedOrInBrackets (0.00s)
+=== RUN   TestShouldMapLogicalOrExpression
+--- PASS: TestShouldMapLogicalOrExpression (0.00s)
+=== RUN   TestShouldMapLogicalOrExpressionWithNestedOr
+--- PASS: TestShouldMapLogicalOrExpressionWithNestedOr (0.00s)
+=== RUN   TestShouldMapLogicalOrExpressionWithNestedAndInBrackets
+--- PASS: TestShouldMapLogicalOrExpressionWithNestedAndInBrackets (0.00s)
+PASS
+coverage: 87.0% of statements
+ok  	github.com/gessnerfl/terraform-provider-instana/internal/shared/tagfilter	3.359s	coverage: 87.0% of statements
+	github.com/gessnerfl/terraform-provider-instana/internal/util		coverage: 0.0% of statements
+=== RUN   TestShouldStartNewInstanceWithDynamicPortAndStopTheServerOnClose
+2025/11/19 20:02:56 http: TLS handshake error from 127.0.0.1:53336: remote error: tls: bad certificate
+2025/11/19 20:02:56 http: TLS handshake error from 127.0.0.1:53338: remote error: tls: bad certificate
+2025/11/19 20:02:56 http: TLS handshake error from 127.0.0.1:53340: remote error: tls: bad certificate
+2025/11/19 20:02:56 http: TLS handshake error from 127.0.0.1:53342: remote error: tls: bad certificate
+2025/11/19 20:02:56 http: TLS handshake error from 127.0.0.1:53344: remote error: tls: bad certificate
+--- PASS: TestShouldStartNewInstanceWithDynamicPortAndStopTheServerOnClose (0.42s)
+PASS
+coverage: 27.2% of statements
+ok  	github.com/gessnerfl/terraform-provider-instana/testutils	3.773s	coverage: 27.2% of statements
+=== RUN   TestShouldCreateBoolPointerFromBool
+--- PASS: TestShouldCreateBoolPointerFromBool (0.00s)
+=== RUN   TestShouldReturn1ForIntegers
+--- PASS: TestShouldReturn1ForIntegers (0.00s)
+=== RUN   TestShouldReturnEmptyStringForString
+--- PASS: TestShouldReturnEmptyStringForString (0.00s)
+=== RUN   TestShouldReturnNilStringForPointers
+--- PASS: TestShouldReturnNilStringForPointers (0.00s)
+=== RUN   TestShouldCreateInt64PointerFromInt64
+--- PASS: TestShouldCreateInt64PointerFromInt64 (0.00s)
+=== RUN   TestShouldReturnTrueWhenCheckingForUniqueElementsStringSliceAndSliceIsEmpty
+--- PASS: TestShouldReturnTrueWhenCheckingForUniqueElementsStringSliceAndSliceIsEmpty (0.00s)
+=== RUN   TestShouldReturnTrueWhenCheckingForUniqueElementsInStringSliceAndSliceContainsUniqueElementsOnly
+--- PASS: TestShouldReturnTrueWhenCheckingForUniqueElementsInStringSliceAndSliceContainsUniqueElementsOnly (0.00s)
+=== RUN   TestShouldReturnFalseWhenCheckingForUniqueElementsInStringSliceAndSliceContainsDuplicateElements
+--- PASS: TestShouldReturnFalseWhenCheckingForUniqueElementsInStringSliceAndSliceContainsDuplicateElements (0.00s)
+=== RUN   TestShouldReturnTrueWhenStringIsEmpty
+--- PASS: TestShouldReturnTrueWhenStringIsEmpty (0.00s)
+=== RUN   TestShouldReturnTrueWhenStringContainsOnlySpaces
+--- PASS: TestShouldReturnTrueWhenStringContainsOnlySpaces (0.00s)
+=== RUN   TestShouldReturnFalseWhenStringContainsNonWhitespaceCharacters
+--- PASS: TestShouldReturnFalseWhenStringContainsNonWhitespaceCharacters (0.00s)
+=== RUN   TestShouldCreateStringPointerFromString
+--- PASS: TestShouldCreateStringPointerFromString (0.00s)
+=== RUN   TestShouldProperlyConvertMultilineStringToSingleLineIncludingFormatting
+--- PASS: TestShouldProperlyConvertMultilineStringToSingleLineIncludingFormatting (0.00s)
+PASS
+coverage: 100.0% of statements
+ok  	github.com/gessnerfl/terraform-provider-instana/utils	2.968s	coverage: 100.0% of statements
+FAIL

@@ -119,6 +119,7 @@ func (m *mockInstanaAPI) WebsiteAlertConfig() restapi.RestResource[*restapi.Webs
 func (m *mockInstanaAPI) InfraAlertConfig() restapi.RestResource[*restapi.InfraAlertConfig] {
 	return nil
 }
+func (m *mockInstanaAPI) Teams() restapi.RestResource[*restapi.Team] { return nil }
 func (m *mockInstanaAPI) Groups() restapi.RestResource[*restapi.Group] { return nil }
 func (m *mockInstanaAPI) CustomDashboards() restapi.RestResource[*restapi.CustomDashboard] {
 	return nil
