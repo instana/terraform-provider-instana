@@ -407,7 +407,7 @@ func (r *syntheticAlertConfigResourceFramework) mapTimeThresholdFromModel(model 
 // extractSyntheticTestIdsFromModel extracts synthetic test IDs from the model
 func (r *syntheticAlertConfigResourceFramework) extractSyntheticTestIdsFromModel(ctx context.Context, model *SyntheticAlertConfigModel) ([]string, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	var syntheticTestIds []string
+	syntheticTestIds := []string{}
 
 	if !model.SyntheticTestIds.IsNull() {
 		diags.Append(model.SyntheticTestIds.ElementsAs(ctx, &syntheticTestIds, false)...)
