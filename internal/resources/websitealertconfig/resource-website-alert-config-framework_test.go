@@ -33,7 +33,6 @@ func TestNewWebsiteAlertConfigResourceHandleFramework(t *testing.T) {
 		assert.NotNil(t, schema.Attributes["id"])
 		assert.NotNil(t, schema.Attributes["name"])
 		assert.NotNil(t, schema.Attributes["description"])
-		assert.NotNil(t, schema.Attributes["severity"])
 		assert.NotNil(t, schema.Attributes["triggering"])
 		assert.NotNil(t, schema.Attributes["website_id"])
 		assert.NotNil(t, schema.Attributes["tag_filter"])
@@ -79,38 +78,57 @@ func (m *mockInstanaAPI) CustomEventSpecifications() restapi.RestResource[*resta
 func (m *mockInstanaAPI) BuiltinEventSpecifications() restapi.ReadOnlyRestResource[*restapi.BuiltinEventSpecification] {
 	return nil
 }
-func (m *mockInstanaAPI) APITokens() restapi.RestResource[*restapi.APIToken]                     { return nil }
-func (m *mockInstanaAPI) ApplicationConfigs() restapi.RestResource[*restapi.ApplicationConfig]   { return nil }
+func (m *mockInstanaAPI) APITokens() restapi.RestResource[*restapi.APIToken] { return nil }
+func (m *mockInstanaAPI) ApplicationConfigs() restapi.RestResource[*restapi.ApplicationConfig] {
+	return nil
+}
 func (m *mockInstanaAPI) ApplicationAlertConfigs() restapi.RestResource[*restapi.ApplicationAlertConfig] {
 	return nil
 }
 func (m *mockInstanaAPI) GlobalApplicationAlertConfigs() restapi.RestResource[*restapi.ApplicationAlertConfig] {
 	return nil
 }
-func (m *mockInstanaAPI) AlertingChannels() restapi.RestResource[*restapi.AlertingChannel]             { return nil }
-func (m *mockInstanaAPI) AlertingConfigurations() restapi.RestResource[*restapi.AlertingConfiguration] { return nil }
-func (m *mockInstanaAPI) SliConfigs() restapi.RestResource[*restapi.SliConfig]                         { return nil }
-func (m *mockInstanaAPI) SloConfigs() restapi.RestResource[*restapi.SloConfig]                         { return nil }
-func (m *mockInstanaAPI) SloAlertConfig() restapi.RestResource[*restapi.SloAlertConfig]                { return nil }
-func (m *mockInstanaAPI) SloCorrectionConfig() restapi.RestResource[*restapi.SloCorrectionConfig]      { return nil }
+func (m *mockInstanaAPI) AlertingChannels() restapi.RestResource[*restapi.AlertingChannel] {
+	return nil
+}
+func (m *mockInstanaAPI) AlertingConfigurations() restapi.RestResource[*restapi.AlertingConfiguration] {
+	return nil
+}
+func (m *mockInstanaAPI) SliConfigs() restapi.RestResource[*restapi.SliConfig]          { return nil }
+func (m *mockInstanaAPI) SloConfigs() restapi.RestResource[*restapi.SloConfig]          { return nil }
+func (m *mockInstanaAPI) SloAlertConfig() restapi.RestResource[*restapi.SloAlertConfig] { return nil }
+func (m *mockInstanaAPI) SloCorrectionConfig() restapi.RestResource[*restapi.SloCorrectionConfig] {
+	return nil
+}
 func (m *mockInstanaAPI) WebsiteMonitoringConfig() restapi.RestResource[*restapi.WebsiteMonitoringConfig] {
 	return nil
 }
 func (m *mockInstanaAPI) WebsiteAlertConfig() restapi.RestResource[*restapi.WebsiteAlertConfig] {
 	return &mockWebsiteAlertConfigRestResource{}
 }
-func (m *mockInstanaAPI) InfraAlertConfig() restapi.RestResource[*restapi.InfraAlertConfig]         { return nil }
-func (m *mockInstanaAPI) Groups() restapi.RestResource[*restapi.Group]                              { return nil }
-func (m *mockInstanaAPI) CustomDashboards() restapi.RestResource[*restapi.CustomDashboard]          { return nil }
-func (m *mockInstanaAPI) SyntheticTest() restapi.RestResource[*restapi.SyntheticTest]               { return nil }
-func (m *mockInstanaAPI) SyntheticLocation() restapi.ReadOnlyRestResource[*restapi.SyntheticLocation] { return nil }
+func (m *mockInstanaAPI) InfraAlertConfig() restapi.RestResource[*restapi.InfraAlertConfig] {
+	return nil
+}
+func (m *mockInstanaAPI) Teams() restapi.RestResource[*restapi.Team]   { return nil }
+func (m *mockInstanaAPI) Groups() restapi.RestResource[*restapi.Group] { return nil }
+func (m *mockInstanaAPI) CustomDashboards() restapi.RestResource[*restapi.CustomDashboard] {
+	return nil
+}
+func (m *mockInstanaAPI) SyntheticTest() restapi.RestResource[*restapi.SyntheticTest] { return nil }
+func (m *mockInstanaAPI) SyntheticLocation() restapi.ReadOnlyRestResource[*restapi.SyntheticLocation] {
+	return nil
+}
 func (m *mockInstanaAPI) SyntheticAlertConfigs() restapi.RestResource[*restapi.SyntheticAlertConfig] {
 	return nil
 }
-func (m *mockInstanaAPI) AutomationActions() restapi.RestResource[*restapi.AutomationAction]   { return nil }
-func (m *mockInstanaAPI) AutomationPolicies() restapi.RestResource[*restapi.AutomationPolicy] { return nil }
-func (m *mockInstanaAPI) HostAgents() restapi.ReadOnlyRestResource[*restapi.HostAgent]        { return nil }
-func (m *mockInstanaAPI) LogAlertConfig() restapi.RestResource[*restapi.LogAlertConfig]       { return nil }
+func (m *mockInstanaAPI) AutomationActions() restapi.RestResource[*restapi.AutomationAction] {
+	return nil
+}
+func (m *mockInstanaAPI) AutomationPolicies() restapi.RestResource[*restapi.AutomationPolicy] {
+	return nil
+}
+func (m *mockInstanaAPI) HostAgents() restapi.ReadOnlyRestResource[*restapi.HostAgent]  { return nil }
+func (m *mockInstanaAPI) LogAlertConfig() restapi.RestResource[*restapi.LogAlertConfig] { return nil }
 
 // Mock rest resource
 type mockWebsiteAlertConfigRestResource struct{}
@@ -174,7 +192,6 @@ func TestMapStateToDataObject_WithRules(t *testing.T) {
 			ID:          types.StringValue("test-id"),
 			Name:        types.StringValue("Multi Rule Alert"),
 			Description: types.StringValue("Multi Rule Description"),
-			Severity:    types.StringValue("warning"),
 			Triggering:  types.BoolValue(true),
 			WebsiteID:   types.StringValue("website-1"),
 			TagFilter:   types.StringNull(),
@@ -191,12 +208,12 @@ func TestMapStateToDataObject_WithRules(t *testing.T) {
 					Thresholds: &shared.ThresholdAllPluginModel{
 						Warning: &shared.ThresholdAllTypeModel{
 							Static: &shared.StaticTypeModel{
-								Value: types.Int64Value(1000),
+								Value: types.Float32Value(float32(1000)),
 							},
 						},
 						Critical: &shared.ThresholdAllTypeModel{
 							Static: &shared.StaticTypeModel{
-								Value: types.Int64Value(2000),
+								Value: types.Float32Value(float32(2000)),
 							},
 						},
 					},
@@ -288,6 +305,9 @@ func TestUpdateState(t *testing.T) {
 			Schema: resource.metaData.Schema,
 		}
 
+		// Initialize state with empty model to ensure Rules is an empty slice, not nil
+		initializeEmptyState(t, ctx, state)
+
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 
 		assert.False(t, diags.HasError())
@@ -310,15 +330,15 @@ func TestUpdateState(t *testing.T) {
 		severity := 5
 		aggregation := restapi.Aggregation("MEAN")
 		apiObject := &restapi.WebsiteAlertConfig{
-			ID:                    "api-id-no-tag",
-			Name:                  "No Tag Filter",
-			Description:           "No Tag Filter Description",
-			Severity:              &severity,
-			Triggering:            true,
-			WebsiteID:             "website-no-tag",
-			TagFilterExpression:   nil,
-			AlertChannelIDs:       []string{"channel-g"},
-			Granularity:           600000,
+			ID:                  "api-id-no-tag",
+			Name:                "No Tag Filter",
+			Description:         "No Tag Filter Description",
+			Severity:            &severity,
+			Triggering:          true,
+			WebsiteID:           "website-no-tag",
+			TagFilterExpression: nil,
+			AlertChannelIDs:     []string{"channel-g"},
+			Granularity:         600000,
 			TimeThreshold: restapi.WebsiteTimeThreshold{
 				Type:       "violationsInSequence",
 				TimeWindow: func() *int64 { v := int64(300000); return &v }(),
@@ -345,6 +365,9 @@ func TestUpdateState(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 
@@ -373,7 +396,6 @@ func TestMapStateToDataObject_NullSeverity(t *testing.T) {
 			ID:          types.StringValue("test-id"),
 			Name:        types.StringValue("Test"),
 			Description: types.StringValue("Desc"),
-			Severity:    types.StringNull(),
 			Triggering:  types.BoolValue(true),
 			WebsiteID:   types.StringValue("website-1"),
 			TagFilter:   types.StringNull(),
@@ -419,7 +441,6 @@ func TestMapStateToDataObject_MissingTimeThreshold(t *testing.T) {
 			ID:            types.StringValue("test-id"),
 			Name:          types.StringValue("Test"),
 			Description:   types.StringValue("Desc"),
-			Severity:      types.StringValue("warning"),
 			Triggering:    types.BoolValue(true),
 			WebsiteID:     types.StringValue("website-1"),
 			TagFilter:     types.StringNull(),
@@ -473,12 +494,11 @@ func TestMapStateToDataObject_InvalidSeverity(t *testing.T) {
 	}
 	ctx := context.Background()
 
-	t.Run("should return error for invalid severity", func(t *testing.T) {
+	t.Run("should handle missing severity field", func(t *testing.T) {
 		model := WebsiteAlertConfigModel{
 			ID:          types.StringValue("test-id"),
 			Name:        types.StringValue("Test"),
 			Description: types.StringValue("Desc"),
-			Severity:    types.StringValue("invalid_severity"),
 			Triggering:  types.BoolValue(true),
 			WebsiteID:   types.StringValue("website-1"),
 			TagFilter:   types.StringNull(),
@@ -503,8 +523,9 @@ func TestMapStateToDataObject_InvalidSeverity(t *testing.T) {
 
 		result, resultDiags := resource.MapStateToDataObject(ctx, nil, state)
 
-		assert.True(t, resultDiags.HasError())
-		assert.Nil(t, result)
+		assert.False(t, resultDiags.HasError())
+		assert.NotNil(t, result)
+		assert.Nil(t, result.Severity)
 	})
 }
 
@@ -576,7 +597,6 @@ func TestMapStateToDataObject_InvalidTimeThresholdConfig(t *testing.T) {
 			ID:          types.StringValue("test-id"),
 			Name:        types.StringValue("Test"),
 			Description: types.StringValue("Desc"),
-			Severity:    types.StringValue("warning"),
 			Triggering:  types.BoolValue(true),
 			WebsiteID:   types.StringValue("website-1"),
 			TagFilter:   types.StringNull(),
@@ -622,7 +642,6 @@ func TestMapStateToDataObject_WithTagFilter(t *testing.T) {
 			ID:          types.StringValue("test-id"),
 			Name:        types.StringValue("Test"),
 			Description: types.StringValue("Desc"),
-			Severity:    types.StringValue("warning"),
 			Triggering:  types.BoolValue(true),
 			WebsiteID:   types.StringValue("website-1"),
 			TagFilter:   types.StringValue("entity.type EQUALS 'website'"),
@@ -657,7 +676,6 @@ func TestMapStateToDataObject_WithTagFilter(t *testing.T) {
 			ID:          types.StringValue("test-id"),
 			Name:        types.StringValue("Test"),
 			Description: types.StringValue("Desc"),
-			Severity:    types.StringValue("warning"),
 			Triggering:  types.BoolValue(true),
 			WebsiteID:   types.StringValue("website-1"),
 			TagFilter:   types.StringValue("invalid{{{syntax"),
@@ -702,7 +720,6 @@ func TestMapStateToDataObject_AllRuleTypes(t *testing.T) {
 			ID:          types.StringValue("test-id"),
 			Name:        types.StringValue("Test"),
 			Description: types.StringValue("Desc"),
-			Severity:    types.StringValue("warning"),
 			Triggering:  types.BoolValue(true),
 			WebsiteID:   types.StringValue("website-1"),
 			TagFilter:   types.StringNull(),
@@ -719,7 +736,7 @@ func TestMapStateToDataObject_AllRuleTypes(t *testing.T) {
 					Thresholds: &shared.ThresholdAllPluginModel{
 						Warning: &shared.ThresholdAllTypeModel{
 							Static: &shared.StaticTypeModel{
-								Value: types.Int64Value(100),
+								Value: types.Float32Value(float32(100)),
 							},
 						},
 					},
@@ -755,7 +772,6 @@ func TestMapStateToDataObject_AllRuleTypes(t *testing.T) {
 			ID:          types.StringValue("test-id"),
 			Name:        types.StringValue("Test"),
 			Description: types.StringValue("Desc"),
-			Severity:    types.StringValue("critical"),
 			Triggering:  types.BoolValue(true),
 			WebsiteID:   types.StringValue("website-1"),
 			TagFilter:   types.StringNull(),
@@ -774,7 +790,7 @@ func TestMapStateToDataObject_AllRuleTypes(t *testing.T) {
 					Thresholds: &shared.ThresholdAllPluginModel{
 						Critical: &shared.ThresholdAllTypeModel{
 							Static: &shared.StaticTypeModel{
-								Value: types.Int64Value(10),
+								Value: types.Float32Value(float32(10)),
 							},
 						},
 					},
@@ -812,7 +828,6 @@ func TestMapStateToDataObject_AllRuleTypes(t *testing.T) {
 			ID:          types.StringValue("test-id"),
 			Name:        types.StringValue("Test"),
 			Description: types.StringValue("Desc"),
-			Severity:    types.StringValue("warning"),
 			Triggering:  types.BoolValue(true),
 			WebsiteID:   types.StringValue("website-1"),
 			TagFilter:   types.StringNull(),
@@ -831,7 +846,7 @@ func TestMapStateToDataObject_AllRuleTypes(t *testing.T) {
 					Thresholds: &shared.ThresholdAllPluginModel{
 						Warning: &shared.ThresholdAllTypeModel{
 							Static: &shared.StaticTypeModel{
-								Value: types.Int64Value(1),
+								Value: types.Float32Value(float32(1)),
 							},
 						},
 					},
@@ -918,6 +933,9 @@ func TestUpdateState_AllRuleTypes(t *testing.T) {
 			Schema: resource.metaData.Schema,
 		}
 
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
+
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
 
@@ -971,6 +989,9 @@ func TestUpdateState_AllRuleTypes(t *testing.T) {
 			Schema: resource.metaData.Schema,
 		}
 
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
+
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
 
@@ -996,11 +1017,14 @@ func TestUpdateState_AllRuleTypes(t *testing.T) {
 			WebsiteID:   "website-1",
 			Granularity: 600000,
 			TimeThreshold: restapi.WebsiteTimeThreshold{
-				Type:                    "userImpactOfViolationsInSequence",
-				TimeWindow:              func() *int64 { v := int64(300000); return &v }(),
-				ImpactMeasurementMethod: func() *restapi.WebsiteImpactMeasurementMethod { v := restapi.WebsiteImpactMeasurementMethod("AGGREGATED"); return &v }(),
-				UserPercentage:          func() *float64 { v := float64(10.5); return &v }(),
-				Users:                   func() *int32 { v := int32(100); return &v }(),
+				Type:       "userImpactOfViolationsInSequence",
+				TimeWindow: func() *int64 { v := int64(300000); return &v }(),
+				ImpactMeasurementMethod: func() *restapi.WebsiteImpactMeasurementMethod {
+					v := restapi.WebsiteImpactMeasurementMethod("AGGREGATED")
+					return &v
+				}(),
+				UserPercentage: func() *float64 { v := float64(10.5); return &v }(),
+				Users:          func() *int32 { v := int32(100); return &v }(),
 			},
 			CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
 			Rules: []restapi.WebsiteAlertRuleWithThresholds{
@@ -1027,6 +1051,9 @@ func TestUpdateState_AllRuleTypes(t *testing.T) {
 			Schema: resource.metaData.Schema,
 		}
 
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
+
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
 
@@ -1039,6 +1066,23 @@ func TestUpdateState_AllRuleTypes(t *testing.T) {
 	})
 }
 
-
+// initializeEmptyState initializes the state with an empty model to ensure proper state initialization
+func initializeEmptyState(t *testing.T, ctx context.Context, state *tfsdk.State) {
+	emptyModel := WebsiteAlertConfigModel{
+		ID:                  types.StringNull(),
+		Name:                types.StringNull(),
+		Description:         types.StringNull(),
+		Triggering:          types.BoolNull(),
+		WebsiteID:           types.StringNull(),
+		TagFilter:           types.StringNull(),
+		AlertChannelIDs:     types.SetNull(types.StringType),
+		Granularity:         types.Int64Null(),
+		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
+		TimeThreshold:       nil,
+		Rules:               []RuleWithThresholdPluginModel{},
+	}
+	diags := state.Set(ctx, emptyModel)
+	require.False(t, diags.HasError(), "Failed to initialize empty state")
+}
 
 // Made with Bob

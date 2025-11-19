@@ -467,6 +467,7 @@ func (r *sloAlertConfigResourceFramework) MapStateToDataObject(ctx context.Conte
 		Description:           model.Description.ValueString(),
 		Severity:              int(model.Severity.ValueInt64()),
 		Triggering:            model.Triggering.ValueBool(),
+		Enabled:               true,
 		Rule:                  rule,
 		Threshold:             threshold,
 		TimeThreshold:         timeThreshold,

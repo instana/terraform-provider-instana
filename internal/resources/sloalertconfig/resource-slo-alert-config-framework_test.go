@@ -47,6 +47,7 @@ func TestUpdateState_StatusAlertType(t *testing.T) {
 	state := tfsdk.State{
 		Schema: resource.MetaData().Schema,
 	}
+	initializeEmptyState(ctx, &state)
 
 	diags := resource.UpdateState(ctx, &state, nil, apiConfig)
 	require.False(t, diags.HasError())
@@ -102,6 +103,7 @@ func TestUpdateState_ErrorBudgetAlertType(t *testing.T) {
 	state := tfsdk.State{
 		Schema: resource.MetaData().Schema,
 	}
+	initializeEmptyState(ctx, &state)
 
 	diags := resource.UpdateState(ctx, &state, nil, apiConfig)
 	require.False(t, diags.HasError())
@@ -170,6 +172,7 @@ func TestUpdateState_BurnRateV2AlertType(t *testing.T) {
 	state := tfsdk.State{
 		Schema: resource.MetaData().Schema,
 	}
+	initializeEmptyState(ctx, &state)
 
 	diags := resource.UpdateState(ctx, &state, nil, apiConfig)
 	require.False(t, diags.HasError())
@@ -244,6 +247,7 @@ func TestUpdateState_WithCustomPayloadFields(t *testing.T) {
 	state := tfsdk.State{
 		Schema: resource.MetaData().Schema,
 	}
+	initializeEmptyState(ctx, &state)
 
 	diags := resource.UpdateState(ctx, &state, nil, apiConfig)
 	require.False(t, diags.HasError())
@@ -285,6 +289,7 @@ func TestUpdateState_WithNullThreshold(t *testing.T) {
 	state := tfsdk.State{
 		Schema: resource.MetaData().Schema,
 	}
+	initializeEmptyState(ctx, &state)
 
 	diags := resource.UpdateState(ctx, &state, nil, apiConfig)
 	require.False(t, diags.HasError())
@@ -330,6 +335,7 @@ func TestUpdateState_WithEmptyBurnRateConfigs(t *testing.T) {
 	state := tfsdk.State{
 		Schema: resource.MetaData().Schema,
 	}
+	initializeEmptyState(ctx, &state)
 
 	diags := resource.UpdateState(ctx, &state, nil, apiConfig)
 	require.False(t, diags.HasError())
@@ -375,6 +381,7 @@ func TestUpdateState_WithMultipleSloIds(t *testing.T) {
 	state := tfsdk.State{
 		Schema: resource.MetaData().Schema,
 	}
+	initializeEmptyState(ctx, &state)
 
 	diags := resource.UpdateState(ctx, &state, nil, apiConfig)
 	require.False(t, diags.HasError())
@@ -1009,6 +1016,24 @@ func TestNewSloAlertConfigResourceHandleFramework(t *testing.T) {
 }
 
 // Helper functions
+
+func initializeEmptyState(ctx context.Context, state *tfsdk.State) {
+	emptyModel := SloAlertConfigModel{
+		ID:              types.StringNull(),
+		Name:            types.StringNull(),
+		Description:     types.StringNull(),
+		Severity:        types.Int64Null(),
+		Triggering:      types.BoolNull(),
+		AlertType:       types.StringNull(),
+		Threshold:       nil,
+		SloIds:          types.SetNull(types.StringType),
+		AlertChannelIds: types.SetNull(types.StringType),
+		TimeThreshold:   nil,
+		BurnRateConfig:  nil,
+		CustomPayload:   types.ListNull(shared.GetCustomPayloadFieldType()),
+	}
+	state.Set(ctx, &emptyModel)
+}
 
 func createMockState(t *testing.T, model SloAlertConfigModel) tfsdk.State {
 	state := tfsdk.State{

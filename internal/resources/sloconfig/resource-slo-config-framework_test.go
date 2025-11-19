@@ -17,7 +17,7 @@ import (
 func TestNewSloConfigResourceHandleFramework(t *testing.T) {
 	t.Run("should create resource handle with correct metadata", func(t *testing.T) {
 		handle := NewSloConfigResourceHandleFramework()
-		
+
 		require.NotNil(t, handle)
 		metadata := handle.MetaData()
 		require.NotNil(t, metadata)
@@ -45,12 +45,12 @@ func TestSetComputedFields(t *testing.T) {
 			},
 		}
 		ctx := context.Background()
-		
+
 		// Create a properly initialized plan
 		plan := &tfsdk.Plan{
 			Schema: resource.metaData.Schema,
 		}
-		
+
 		diags := resource.SetComputedFields(ctx, plan)
 		// The function will try to set the ID, which may fail with mock plan
 		// but we're testing that the function executes without panic
@@ -74,9 +74,9 @@ func TestMapStateToDataObject_ApplicationEntity(t *testing.T) {
 				FilterExpression: types.StringValue("entity.tag.name EQUALS 'value'"),
 			},
 		}
-		
+
 		result, diags := resource.mapEntityFromState(entityModel)
-		
+
 		assert.False(t, diags.HasError())
 		assert.Equal(t, SloConfigApplicationEntity, result.Type)
 		require.NotNil(t, result.ApplicationID)
@@ -88,7 +88,7 @@ func TestMapStateToDataObject_ApplicationEntity(t *testing.T) {
 	t.Run("should return error when both plan and state are nil", func(t *testing.T) {
 		ctx := context.Background()
 		result, diags := resource.MapStateToDataObject(ctx, nil, nil)
-		
+
 		assert.Nil(t, result)
 		assert.True(t, diags.HasError())
 		assert.Contains(t, diags[0].Summary(), SloConfigErrMappingState)
@@ -108,8 +108,8 @@ func TestMapStateToDataObject_ApplicationEntity(t *testing.T) {
 		}
 
 		// Test the entity mapping directly
-		_, diags := resource.mapEntityFromState( model.Entity)
-		
+		_, diags := resource.mapEntityFromState(model.Entity)
+
 		assert.True(t, diags.HasError())
 		assert.Contains(t, diags[0].Summary(), SloConfigErrApplicationIDRequired)
 	})
@@ -127,8 +127,8 @@ func TestMapStateToDataObject_WebsiteEntity(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapEntityFromState( model)
-		
+		result, diags := resource.mapEntityFromState(model)
+
 		assert.False(t, diags.HasError())
 		assert.Equal(t, SloConfigWebsiteEntity, result.Type)
 		require.NotNil(t, result.WebsiteId)
@@ -145,8 +145,8 @@ func TestMapStateToDataObject_WebsiteEntity(t *testing.T) {
 			},
 		}
 
-		_, diags := resource.mapEntityFromState( model)
-		
+		_, diags := resource.mapEntityFromState(model)
+
 		assert.True(t, diags.HasError())
 		assert.Contains(t, diags[0].Summary(), SloConfigErrWebsiteIDRequired)
 	})
@@ -166,8 +166,8 @@ func TestMapStateToDataObject_SyntheticEntity(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapEntityFromState( model)
-		
+		result, diags := resource.mapEntityFromState(model)
+
 		assert.False(t, diags.HasError())
 		assert.Equal(t, SloConfigSyntheticEntity, result.Type)
 		require.NotNil(t, result.SyntheticTestIDs)
@@ -181,8 +181,8 @@ func TestMapStateToDataObject_SyntheticEntity(t *testing.T) {
 			},
 		}
 
-		_, diags := resource.mapEntityFromState( model)
-		
+		_, diags := resource.mapEntityFromState(model)
+
 		assert.True(t, diags.HasError())
 		assert.Contains(t, diags[0].Summary(), SloConfigErrSyntheticTestIDsRequired)
 	})
@@ -190,8 +190,8 @@ func TestMapStateToDataObject_SyntheticEntity(t *testing.T) {
 	t.Run("should return error when no entity is provided", func(t *testing.T) {
 		model := EntityModel{}
 
-		_, diags := resource.mapEntityFromState( model)
-		
+		_, diags := resource.mapEntityFromState(model)
+
 		assert.True(t, diags.HasError())
 		assert.Contains(t, diags[0].Summary(), SloConfigErrMissingEntity)
 	})
@@ -208,8 +208,8 @@ func TestMapIndicatorFromState_TimeBasedLatency(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapIndicatorFromState( model)
-		
+		result, diags := resource.mapIndicatorFromState(model)
+
 		assert.False(t, diags.HasError())
 		assert.Equal(t, SloConfigAPIIndicatorBlueprintLatency, result.Blueprint)
 		assert.Equal(t, SloConfigAPIIndicatorMeasurementTypeTimeBased, result.Type)
@@ -226,8 +226,8 @@ func TestMapIndicatorFromState_TimeBasedLatency(t *testing.T) {
 			},
 		}
 
-		_, diags := resource.mapIndicatorFromState( model)
-		
+		_, diags := resource.mapIndicatorFromState(model)
+
 		assert.True(t, diags.HasError())
 		assert.Contains(t, diags[0].Summary(), SloConfigErrTimeBasedLatencyRequired)
 	})
@@ -240,8 +240,8 @@ func TestMapIndicatorFromState_TimeBasedLatency(t *testing.T) {
 			},
 		}
 
-		_, diags := resource.mapIndicatorFromState( model)
-		
+		_, diags := resource.mapIndicatorFromState(model)
+
 		assert.True(t, diags.HasError())
 		assert.Contains(t, diags[0].Summary(), SloConfigErrTimeBasedLatencyRequired)
 	})
@@ -257,8 +257,8 @@ func TestMapIndicatorFromState_EventBasedLatency(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapIndicatorFromState( model)
-		
+		result, diags := resource.mapIndicatorFromState(model)
+
 		assert.False(t, diags.HasError())
 		assert.Equal(t, SloConfigAPIIndicatorBlueprintLatency, result.Blueprint)
 		assert.Equal(t, SloConfigAPIIndicatorMeasurementTypeEventBased, result.Type)
@@ -272,8 +272,8 @@ func TestMapIndicatorFromState_EventBasedLatency(t *testing.T) {
 			},
 		}
 
-		_, diags := resource.mapIndicatorFromState( model)
-		
+		_, diags := resource.mapIndicatorFromState(model)
+
 		assert.True(t, diags.HasError())
 	})
 }
@@ -289,8 +289,8 @@ func TestMapIndicatorFromState_TimeBasedAvailability(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapIndicatorFromState( model)
-		
+		result, diags := resource.mapIndicatorFromState(model)
+
 		assert.False(t, diags.HasError())
 		assert.Equal(t, SloConfigAPIIndicatorBlueprintAvailability, result.Blueprint)
 		assert.Equal(t, SloConfigAPIIndicatorMeasurementTypeTimeBased, result.Type)
@@ -307,8 +307,8 @@ func TestMapIndicatorFromState_TimeBasedAvailability(t *testing.T) {
 			},
 		}
 
-		_, diags := resource.mapIndicatorFromState( model)
-		
+		_, diags := resource.mapIndicatorFromState(model)
+
 		assert.True(t, diags.HasError())
 	})
 }
@@ -321,8 +321,8 @@ func TestMapIndicatorFromState_EventBasedAvailability(t *testing.T) {
 			EventBasedAvailabilityIndicatorModel: &EventBasedAvailabilityIndicatorModel{},
 		}
 
-		result, diags := resource.mapIndicatorFromState( model)
-		
+		result, diags := resource.mapIndicatorFromState(model)
+
 		assert.False(t, diags.HasError())
 		assert.Equal(t, SloConfigAPIIndicatorBlueprintAvailability, result.Blueprint)
 		assert.Equal(t, SloConfigAPIIndicatorMeasurementTypeEventBased, result.Type)
@@ -341,8 +341,8 @@ func TestMapIndicatorFromState_Traffic(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapIndicatorFromState( model)
-		
+		result, diags := resource.mapIndicatorFromState(model)
+
 		assert.False(t, diags.HasError())
 		assert.Equal(t, SloConfigAPIIndicatorBlueprintTraffic, result.Blueprint)
 		assert.Equal(t, SloConfigAPIIndicatorMeasurementTypeTimeBased, result.Type)
@@ -361,8 +361,8 @@ func TestMapIndicatorFromState_Traffic(t *testing.T) {
 			},
 		}
 
-		_, diags := resource.mapIndicatorFromState( model)
-		
+		_, diags := resource.mapIndicatorFromState(model)
+
 		assert.True(t, diags.HasError())
 	})
 }
@@ -378,8 +378,8 @@ func TestMapIndicatorFromState_Custom(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapIndicatorFromState( model)
-		
+		result, diags := resource.mapIndicatorFromState(model)
+
 		assert.False(t, diags.HasError())
 		assert.Equal(t, SloConfigAPIIndicatorBlueprintCustom, result.Blueprint)
 		assert.Equal(t, SloConfigAPIIndicatorMeasurementTypeEventBased, result.Type)
@@ -394,8 +394,8 @@ func TestMapIndicatorFromState_Custom(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapIndicatorFromState( model)
-		
+		result, diags := resource.mapIndicatorFromState(model)
+
 		assert.False(t, diags.HasError())
 		assert.NotNil(t, result.GoodEventFilterExpression)
 		assert.NotNil(t, result.BadEventFilterExpression)
@@ -408,16 +408,16 @@ func TestMapIndicatorFromState_Custom(t *testing.T) {
 			},
 		}
 
-		_, diags := resource.mapIndicatorFromState( model)
-		
+		_, diags := resource.mapIndicatorFromState(model)
+
 		assert.True(t, diags.HasError())
 	})
 
 	t.Run("should return error when no indicator is provided", func(t *testing.T) {
 		model := IndicatorModel{}
 
-		_, diags := resource.mapIndicatorFromState( model)
-		
+		_, diags := resource.mapIndicatorFromState(model)
+
 		assert.True(t, diags.HasError())
 		assert.Contains(t, diags[0].Summary(), "Missing indicator configuration")
 	})
@@ -435,8 +435,8 @@ func TestMapTimeWindowFromState_Rolling(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapTimeWindowFromState( model)
-		
+		result, diags := resource.mapTimeWindowFromState(model)
+
 		assert.False(t, diags.HasError())
 		assert.Equal(t, SloConfigRollingTimeWindow, result.Type)
 		assert.Equal(t, 7, result.Duration)
@@ -453,8 +453,8 @@ func TestMapTimeWindowFromState_Rolling(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapTimeWindowFromState( model)
-		
+		result, diags := resource.mapTimeWindowFromState(model)
+
 		assert.False(t, diags.HasError())
 		assert.Equal(t, SloConfigRollingTimeWindow, result.Type)
 		assert.Equal(t, 30, result.Duration)
@@ -468,8 +468,8 @@ func TestMapTimeWindowFromState_Rolling(t *testing.T) {
 			},
 		}
 
-		_, diags := resource.mapTimeWindowFromState( model)
-		
+		_, diags := resource.mapTimeWindowFromState(model)
+
 		assert.True(t, diags.HasError())
 	})
 }
@@ -487,8 +487,8 @@ func TestMapTimeWindowFromState_Fixed(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapTimeWindowFromState( model)
-		
+		result, diags := resource.mapTimeWindowFromState(model)
+
 		assert.False(t, diags.HasError())
 		assert.Equal(t, SloConfigFixedTimeWindow, result.Type)
 		assert.Equal(t, 1, result.Duration)
@@ -506,16 +506,16 @@ func TestMapTimeWindowFromState_Fixed(t *testing.T) {
 			},
 		}
 
-		_, diags := resource.mapTimeWindowFromState( model)
-		
+		_, diags := resource.mapTimeWindowFromState(model)
+
 		assert.True(t, diags.HasError())
 	})
 
 	t.Run("should return error when no time window is provided", func(t *testing.T) {
 		model := TimeWindowModel{}
 
-		_, diags := resource.mapTimeWindowFromState( model)
-		
+		_, diags := resource.mapTimeWindowFromState(model)
+
 		assert.True(t, diags.HasError())
 		assert.Contains(t, diags[0].Summary(), "Missing time window configuration")
 	})
@@ -537,7 +537,7 @@ func TestMapRbacTags(t *testing.T) {
 		}
 
 		result := resource.mapRbacTagsFromState(rbacTags)
-		
+
 		assert.Len(t, result, 2)
 		assert.Equal(t, "Team A", result[0].DisplayName)
 		assert.Equal(t, "team-a-id", result[0].ID)
@@ -547,28 +547,28 @@ func TestMapRbacTags(t *testing.T) {
 
 	t.Run("should return empty slice for no RBAC tags", func(t *testing.T) {
 		result := resource.mapRbacTagsFromState([]RbacTagModel{})
-		
+
 		assert.Empty(t, result)
 	})
 }
 
 func TestMapTagFilterFromState(t *testing.T) {
 	resource := &sloConfigResourceFramework{}
-	
+
 	t.Run("should parse valid filter expression", func(t *testing.T) {
 		filterExpression := types.StringValue("entity.tag.name EQUALS 'value'")
-		
+
 		result, diags := resource.mapFilterExpressionToEntity(filterExpression)
-		
+
 		assert.False(t, diags.HasError())
 		assert.NotNil(t, result)
 	})
 
 	t.Run("should return default filter for null expression", func(t *testing.T) {
 		filterExpression := types.StringNull()
-		
+
 		result, diags := resource.mapFilterExpressionToEntity(filterExpression)
-		
+
 		assert.False(t, diags.HasError())
 		assert.NotNil(t, result)
 		assert.Equal(t, restapi.TagFilterExpressionElementType("EXPRESSION"), result.Type)
@@ -576,9 +576,9 @@ func TestMapTagFilterFromState(t *testing.T) {
 
 	t.Run("should return error for invalid filter expression", func(t *testing.T) {
 		filterExpression := types.StringValue("invalid((filter")
-		
+
 		_, diags := resource.mapFilterExpressionToEntity(filterExpression)
-		
+
 		assert.True(t, diags.HasError())
 		assert.Contains(t, diags[0].Summary(), SloConfigErrParsingFilterExpression)
 	})
@@ -625,9 +625,9 @@ func TestUpdateState(t *testing.T) {
 
 		state := &tfsdk.State{}
 		state.Schema = resource.metaData.Schema
-		
+
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
-		
+
 		// May have errors due to mock state, but we're testing the logic
 		if !diags.HasError() {
 			assert.False(t, diags.HasError())
@@ -667,9 +667,9 @@ func TestUpdateState(t *testing.T) {
 
 		state := &tfsdk.State{}
 		state.Schema = resource.metaData.Schema
-		
+
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
-		
+
 		// Testing logic, may have mock-related errors
 		_ = diags
 	})
@@ -698,8 +698,8 @@ func TestMapEntityToState(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapEntityToState( apiObject)
-		
+		result, diags := resource.mapEntityToState(apiObject)
+
 		assert.False(t, diags.HasError())
 		assert.NotNil(t, result.ApplicationEntityModel)
 		assert.Nil(t, result.WebsiteEntityModel)
@@ -718,8 +718,8 @@ func TestMapEntityToState(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapEntityToState( apiObject)
-		
+		result, diags := resource.mapEntityToState(apiObject)
+
 		assert.False(t, diags.HasError())
 		assert.Nil(t, result.ApplicationEntityModel)
 		assert.NotNil(t, result.WebsiteEntityModel)
@@ -734,8 +734,8 @@ func TestMapEntityToState(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapEntityToState( apiObject)
-		
+		result, diags := resource.mapEntityToState(apiObject)
+
 		assert.False(t, diags.HasError())
 		assert.Nil(t, result.ApplicationEntityModel)
 		assert.Nil(t, result.WebsiteEntityModel)
@@ -749,8 +749,8 @@ func TestMapEntityToState(t *testing.T) {
 			},
 		}
 
-		_, diags := resource.mapEntityToState( apiObject)
-		
+		_, diags := resource.mapEntityToState(apiObject)
+
 		assert.True(t, diags.HasError())
 	})
 }
@@ -769,8 +769,8 @@ func TestMapIndicatorToState(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapIndicatorToState( apiObject)
-		
+		result, diags := resource.mapIndicatorToState(apiObject)
+
 		assert.False(t, diags.HasError())
 		assert.NotNil(t, result.TimeBasedLatencyIndicatorModel)
 		assert.Nil(t, result.EventBasedLatencyIndicatorModel)
@@ -785,8 +785,8 @@ func TestMapIndicatorToState(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapIndicatorToState( apiObject)
-		
+		result, diags := resource.mapIndicatorToState(apiObject)
+
 		assert.False(t, diags.HasError())
 		assert.Nil(t, result.TimeBasedLatencyIndicatorModel)
 		assert.NotNil(t, result.EventBasedLatencyIndicatorModel)
@@ -803,8 +803,8 @@ func TestMapIndicatorToState(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapIndicatorToState( apiObject)
-		
+		result, diags := resource.mapIndicatorToState(apiObject)
+
 		assert.False(t, diags.HasError())
 		assert.NotNil(t, result.TimeBasedAvailabilityIndicatorModel)
 	})
@@ -817,8 +817,8 @@ func TestMapIndicatorToState(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapIndicatorToState( apiObject)
-		
+		result, diags := resource.mapIndicatorToState(apiObject)
+
 		assert.False(t, diags.HasError())
 		assert.NotNil(t, result.EventBasedAvailabilityIndicatorModel)
 	})
@@ -836,8 +836,8 @@ func TestMapIndicatorToState(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapIndicatorToState( apiObject)
-		
+		result, diags := resource.mapIndicatorToState(apiObject)
+
 		assert.False(t, diags.HasError())
 		assert.NotNil(t, result.TrafficIndicatorModel)
 	})
@@ -845,7 +845,7 @@ func TestMapIndicatorToState(t *testing.T) {
 	t.Run("should map custom indicator to state", func(t *testing.T) {
 		goodFilter := &restapi.TagFilter{Type: "EXPRESSION"}
 		badFilter := &restapi.TagFilter{Type: "EXPRESSION"}
-		
+
 		apiObject := &restapi.SloConfig{
 			Indicator: restapi.SloIndicator{
 				Blueprint:                 SloConfigAPIIndicatorBlueprintCustom,
@@ -855,8 +855,8 @@ func TestMapIndicatorToState(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapIndicatorToState( apiObject)
-		
+		result, diags := resource.mapIndicatorToState(apiObject)
+
 		assert.False(t, diags.HasError())
 		assert.NotNil(t, result.CustomIndicatorModel)
 	})
@@ -869,8 +869,8 @@ func TestMapIndicatorToState(t *testing.T) {
 			},
 		}
 
-		_, diags := resource.mapIndicatorToState( apiObject)
-		
+		_, diags := resource.mapIndicatorToState(apiObject)
+
 		assert.True(t, diags.HasError())
 	})
 }
@@ -888,8 +888,8 @@ func TestMapTimeWindowToState(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapTimeWindowToState( apiObject)
-		
+		result, diags := resource.mapTimeWindowToState(apiObject)
+
 		assert.False(t, diags.HasError())
 		assert.NotNil(t, result.RollingTimeWindowModel)
 		assert.Nil(t, result.FixedTimeWindowModel)
@@ -908,8 +908,8 @@ func TestMapTimeWindowToState(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapTimeWindowToState( apiObject)
-		
+		result, diags := resource.mapTimeWindowToState(apiObject)
+
 		assert.False(t, diags.HasError())
 		assert.NotNil(t, result.RollingTimeWindowModel)
 		assert.True(t, result.RollingTimeWindowModel.Timezone.IsNull())
@@ -926,8 +926,8 @@ func TestMapTimeWindowToState(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapTimeWindowToState( apiObject)
-		
+		result, diags := resource.mapTimeWindowToState(apiObject)
+
 		assert.False(t, diags.HasError())
 		assert.Nil(t, result.RollingTimeWindowModel)
 		assert.NotNil(t, result.FixedTimeWindowModel)
@@ -944,8 +944,8 @@ func TestMapTimeWindowToState(t *testing.T) {
 			},
 		}
 
-		_, diags := resource.mapTimeWindowToState( apiObject)
-		
+		_, diags := resource.mapTimeWindowToState(apiObject)
+
 		assert.True(t, diags.HasError())
 	})
 }
@@ -970,8 +970,8 @@ func TestMapApplicationEntityToState(t *testing.T) {
 			IncludeSynthetic: &includeSynthetic,
 		}
 
-		result, diags := resource.mapApplicationEntityToState( entity)
-		
+		result, diags := resource.mapApplicationEntityToState(entity)
+
 		assert.False(t, diags.HasError())
 		assert.Equal(t, "app-123", result.ApplicationID.ValueString())
 		assert.Equal(t, "ALL", result.BoundaryScope.ValueString())
@@ -990,8 +990,8 @@ func TestMapApplicationEntityToState(t *testing.T) {
 			BoundaryScope: &boundaryScope,
 		}
 
-		result, diags := resource.mapApplicationEntityToState( entity)
-		
+		result, diags := resource.mapApplicationEntityToState(entity)
+
 		assert.False(t, diags.HasError())
 		assert.True(t, result.ServiceID.IsNull())
 		assert.True(t, result.EndpointID.IsNull())
@@ -1010,8 +1010,8 @@ func TestMapWebsiteEntityToState(t *testing.T) {
 			BeaconType: &beaconType,
 		}
 
-		result, diags := resource.mapWebsiteEntityToState( entity)
-		
+		result, diags := resource.mapWebsiteEntityToState(entity)
+
 		assert.False(t, diags.HasError())
 		assert.Equal(t, "website-123", result.WebsiteID.ValueString())
 		assert.Equal(t, "pageLoad", result.BeaconType.ValueString())
@@ -1026,8 +1026,8 @@ func TestMapSyntheticEntityToState(t *testing.T) {
 			SyntheticTestIDs: []interface{}{"test-1", "test-2", "test-3"},
 		}
 
-		result, diags := resource.mapSyntheticEntityToState( entity)
-		
+		result, diags := resource.mapSyntheticEntityToState(entity)
+
 		assert.False(t, diags.HasError())
 		assert.Len(t, result.SyntheticTestIDs, 3)
 		assert.Equal(t, "test-1", result.SyntheticTestIDs[0].ValueString())
@@ -1040,8 +1040,8 @@ func TestMapSyntheticEntityToState(t *testing.T) {
 			SyntheticTestIDs: []interface{}{},
 		}
 
-		result, diags := resource.mapSyntheticEntityToState( entity)
-		
+		result, diags := resource.mapSyntheticEntityToState(entity)
+
 		assert.False(t, diags.HasError())
 		assert.Empty(t, result.SyntheticTestIDs)
 	})
@@ -1051,8 +1051,8 @@ func TestMapSyntheticEntityToState(t *testing.T) {
 			SyntheticTestIDs: []interface{}{"test-1", 123, "test-3"},
 		}
 
-		result, diags := resource.mapSyntheticEntityToState( entity)
-		
+		result, diags := resource.mapSyntheticEntityToState(entity)
+
 		assert.False(t, diags.HasError())
 		// Only string values should be converted
 		assert.Len(t, result.SyntheticTestIDs, 2)
@@ -1079,7 +1079,7 @@ func TestEdgeCases(t *testing.T) {
 		model := SloConfigModel{
 			Tags: []types.String{},
 		}
-		
+
 		// Test that empty tags are handled correctly
 		assert.NotNil(t, model.Tags)
 		assert.Empty(t, model.Tags)
@@ -1093,7 +1093,7 @@ func TestEdgeCases(t *testing.T) {
 				types.StringValue("tag2"),
 			},
 		}
-		
+
 		// Verify tags with null values
 		assert.Len(t, model.Tags, 3)
 	})
@@ -1106,8 +1106,8 @@ func TestEdgeCases(t *testing.T) {
 			},
 		}
 
-		_, diags := resource.mapEntityFromState( model)
-		
+		_, diags := resource.mapEntityFromState(model)
+
 		// Should return error for unknown required fields
 		assert.True(t, diags.HasError())
 	})
@@ -1119,7 +1119,7 @@ func TestEdgeCases(t *testing.T) {
 func TestGetRestResource(t *testing.T) {
 	t.Run("should return SLO config rest resource", func(t *testing.T) {
 		resource := &sloConfigResourceFramework{}
-		
+
 		// We can't fully test this without a real API, but we can verify it doesn't panic
 		// and returns a non-nil value when called with a mock API
 		assert.NotNil(t, resource)
@@ -1139,8 +1139,8 @@ func TestFilterExpressionErrorHandling(t *testing.T) {
 			},
 		}
 
-		_, diags := resource.mapEntityFromState( model)
-		
+		_, diags := resource.mapEntityFromState(model)
+
 		assert.True(t, diags.HasError())
 	})
 
@@ -1153,8 +1153,8 @@ func TestFilterExpressionErrorHandling(t *testing.T) {
 			},
 		}
 
-		_, diags := resource.mapEntityFromState( model)
-		
+		_, diags := resource.mapEntityFromState(model)
+
 		assert.True(t, diags.HasError())
 	})
 
@@ -1166,12 +1166,11 @@ func TestFilterExpressionErrorHandling(t *testing.T) {
 			},
 		}
 
-		_, diags := resource.mapEntityFromState( model)
-		
+		_, diags := resource.mapEntityFromState(model)
+
 		assert.True(t, diags.HasError())
 	})
 }
-
 
 // Additional comprehensive tests for better coverage
 
@@ -1233,7 +1232,7 @@ func TestMapStateToDataObjectWithFullModel(t *testing.T) {
 		require.False(t, diags.HasError())
 
 		result, resultDiags := resource.MapStateToDataObject(ctx, nil, state)
-		
+
 		assert.False(t, resultDiags.HasError())
 		assert.NotNil(t, result)
 		assert.Equal(t, "test-id", result.ID)
@@ -1256,8 +1255,8 @@ func TestTrafficIndicatorWithOperator(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapIndicatorFromState( model)
-		
+		result, diags := resource.mapIndicatorFromState(model)
+
 		assert.False(t, diags.HasError())
 		assert.Equal(t, SloConfigAPIIndicatorBlueprintTraffic, result.Blueprint)
 		assert.NotNil(t, result.Operator)
@@ -1273,8 +1272,8 @@ func TestTrafficIndicatorWithOperator(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapIndicatorFromState( model)
-		
+		result, diags := resource.mapIndicatorFromState(model)
+
 		assert.False(t, diags.HasError())
 		assert.Equal(t, SloConfigAPIIndicatorBlueprintTraffic, result.Blueprint)
 		assert.NotNil(t, result.Operator)
@@ -1287,24 +1286,24 @@ func TestMapIndicatorToStateWithTrafficOperator(t *testing.T) {
 
 	t.Run("should map traffic indicator with operator to state", func(t *testing.T) {
 		trafficType := "all"
-		aggregation := "MEAN"
+		operator := ">="
 		apiObject := &restapi.SloConfig{
 			Indicator: restapi.SloIndicator{
 				Blueprint:   SloConfigAPIIndicatorBlueprintTraffic,
 				Type:        SloConfigAPIIndicatorMeasurementTypeTimeBased,
 				TrafficType: &trafficType,
 				Threshold:   1000.0,
-				Aggregation: &aggregation,
+				Operator:    &operator,
 			},
 		}
 
-		result, diags := resource.mapIndicatorToState( apiObject)
-		
+		result, diags := resource.mapIndicatorToState(apiObject)
+
 		assert.False(t, diags.HasError())
 		assert.NotNil(t, result.TrafficIndicatorModel)
 		assert.Equal(t, "all", result.TrafficIndicatorModel.TrafficType.ValueString())
 		assert.Equal(t, 1000.0, result.TrafficIndicatorModel.Threshold.ValueFloat64())
-		assert.Equal(t, "MEAN", result.TrafficIndicatorModel.Aggregation.ValueString())
+		assert.Equal(t, ">=", result.TrafficIndicatorModel.Operator.ValueString())
 	})
 }
 
@@ -1321,8 +1320,8 @@ func TestFixedTimeWindowWithTimezone(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapTimeWindowFromState( model)
-		
+		result, diags := resource.mapTimeWindowFromState(model)
+
 		assert.False(t, diags.HasError())
 		assert.Equal(t, SloConfigFixedTimeWindow, result.Type)
 		assert.Equal(t, "America/New_York", result.Timezone)
@@ -1344,8 +1343,8 @@ func TestApplicationEntityWithOptionalFields(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapEntityFromState( model)
-		
+		result, diags := resource.mapEntityFromState(model)
+
 		assert.False(t, diags.HasError())
 		assert.Equal(t, SloConfigApplicationEntity, result.Type)
 		assert.NotNil(t, result.ServiceID)
@@ -1369,8 +1368,8 @@ func TestWebsiteEntityWithDifferentBeaconTypes(t *testing.T) {
 				},
 			}
 
-			result, diags := resource.mapEntityFromState( model)
-			
+			result, diags := resource.mapEntityFromState(model)
+
 			assert.False(t, diags.HasError())
 			assert.Equal(t, SloConfigWebsiteEntity, result.Type)
 			assert.NotNil(t, result.BeaconType)
@@ -1395,8 +1394,8 @@ func TestSyntheticEntityWithMultipleTestIDs(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapEntityFromState( model)
-		
+		result, diags := resource.mapEntityFromState(model)
+
 		assert.False(t, diags.HasError())
 		assert.Equal(t, SloConfigSyntheticEntity, result.Type)
 		assert.Len(t, result.SyntheticTestIDs, 5)
@@ -1444,9 +1443,9 @@ func TestUpdateStateWithEmptyTags(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
-		
+
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
-		
+
 		assert.False(t, diags.HasError())
 	})
 }
@@ -1463,7 +1462,7 @@ func TestMapRbacTagsWithMultipleTags(t *testing.T) {
 		}
 
 		result := resource.mapRbacTagsFromState(rbacTags)
-		
+
 		assert.Len(t, result, 4)
 		assert.Equal(t, "Team A", result[0].DisplayName)
 		assert.Equal(t, "team-a", result[0].ID)
@@ -1479,7 +1478,7 @@ func TestUpdateStateWithMappingErrors(t *testing.T) {
 	t.Run("should handle error in entity mapping", func(t *testing.T) {
 		ctx := context.Background()
 		aggregation := "MEAN"
-		
+
 		apiObject := &restapi.SloConfig{
 			ID:     "test-id",
 			Name:   "Test SLO",
@@ -1503,9 +1502,9 @@ func TestUpdateStateWithMappingErrors(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
-		
+
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
-		
+
 		assert.True(t, diags.HasError())
 	})
 
@@ -1513,7 +1512,7 @@ func TestUpdateStateWithMappingErrors(t *testing.T) {
 		ctx := context.Background()
 		appID := "app-123"
 		boundaryScope := "ALL"
-		
+
 		apiObject := &restapi.SloConfig{
 			ID:     "test-id",
 			Name:   "Test SLO",
@@ -1537,9 +1536,9 @@ func TestUpdateStateWithMappingErrors(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
-		
+
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
-		
+
 		assert.True(t, diags.HasError())
 	})
 
@@ -1548,7 +1547,7 @@ func TestUpdateStateWithMappingErrors(t *testing.T) {
 		appID := "app-123"
 		boundaryScope := "ALL"
 		aggregation := "MEAN"
-		
+
 		apiObject := &restapi.SloConfig{
 			ID:     "test-id",
 			Name:   "Test SLO",
@@ -1572,9 +1571,9 @@ func TestUpdateStateWithMappingErrors(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
-		
+
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
-		
+
 		assert.True(t, diags.HasError())
 	})
 }

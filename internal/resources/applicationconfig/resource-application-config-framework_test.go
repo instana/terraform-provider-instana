@@ -307,7 +307,15 @@ func TestUpdateState_BasicConfig(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	// Initialize state with a model that has TagFilter set to null
+	// This is necessary because UpdateState checks if TagFilter is null/unknown
+	initialModel := ApplicationConfigModel{
+		TagFilter: types.StringNull(),
+	}
+	diags := state.Set(ctx, initialModel)
+	require.False(t, diags.HasError())
+
+	diags = resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model ApplicationConfigModel
@@ -359,7 +367,15 @@ func TestUpdateState_WithTagFilter(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	// Initialize state with a model that has TagFilter set to null
+	// This is necessary because UpdateState checks if TagFilter is null/unknown
+	initialModel := ApplicationConfigModel{
+		TagFilter: types.StringNull(),
+	}
+	diags := state.Set(ctx, initialModel)
+	require.False(t, diags.HasError())
+
+	diags = resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model ApplicationConfigModel
@@ -413,7 +429,15 @@ func TestUpdateState_WithMultipleAccessRules(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	// Initialize state with a model that has TagFilter set to null
+	// This is necessary because UpdateState checks if TagFilter is null/unknown
+	initialModel := ApplicationConfigModel{
+		TagFilter: types.StringNull(),
+	}
+	diags := state.Set(ctx, initialModel)
+	require.False(t, diags.HasError())
+
+	diags = resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model ApplicationConfigModel
@@ -454,7 +478,15 @@ func TestUpdateState_WithEmptyAccessRules(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	// Initialize state with a model that has TagFilter set to null
+	// This is necessary because UpdateState checks if TagFilter is null/unknown
+	initialModel := ApplicationConfigModel{
+		TagFilter: types.StringNull(),
+	}
+	diags := state.Set(ctx, initialModel)
+	require.False(t, diags.HasError())
+
+	diags = resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model ApplicationConfigModel
@@ -487,7 +519,15 @@ func TestUpdateState_WithNullTagFilter(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	// Initialize state with a model that has TagFilter set to null
+	// This is necessary because UpdateState checks if TagFilter is null/unknown
+	initialModel := ApplicationConfigModel{
+		TagFilter: types.StringNull(),
+	}
+	diags := state.Set(ctx, initialModel)
+	require.False(t, diags.HasError())
+
+	diags = resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model ApplicationConfigModel
@@ -755,7 +795,15 @@ func TestUpdateState_AllScopes(t *testing.T) {
 				Schema: getTestSchema(),
 			}
 
-			diags := resource.UpdateState(ctx, state, nil, data)
+			// Initialize state with a model that has TagFilter set to null
+			// This is necessary because UpdateState checks if TagFilter is null/unknown
+			initialModel := ApplicationConfigModel{
+				TagFilter: types.StringNull(),
+			}
+			diags := state.Set(ctx, initialModel)
+			require.False(t, diags.HasError())
+
+			diags = resource.UpdateState(ctx, state, nil, data)
 			require.False(t, diags.HasError())
 
 			var model ApplicationConfigModel
@@ -797,7 +845,15 @@ func TestUpdateState_AllBoundaryScopes(t *testing.T) {
 				Schema: getTestSchema(),
 			}
 
-			diags := resource.UpdateState(ctx, state, nil, data)
+			// Initialize state with a model that has TagFilter set to null
+			// This is necessary because UpdateState checks if TagFilter is null/unknown
+			initialModel := ApplicationConfigModel{
+				TagFilter: types.StringNull(),
+			}
+			diags := state.Set(ctx, initialModel)
+			require.False(t, diags.HasError())
+
+			diags = resource.UpdateState(ctx, state, nil, data)
 			require.False(t, diags.HasError())
 
 			var model ApplicationConfigModel
