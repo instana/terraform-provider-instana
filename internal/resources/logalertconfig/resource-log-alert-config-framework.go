@@ -438,7 +438,7 @@ func (r *logAlertConfigResourceFramework) createThresholdModel(threshold restapi
 			},
 		}
 	}
-	
+
 	// Default to static threshold
 	if threshold.Value == nil {
 		return nil
@@ -591,15 +591,18 @@ func (r *logAlertConfigResourceFramework) mapModelAlertChannelsToAPI(ctx context
 
 	warningChannels, warningDiags := r.extractChannelsForSeverity(ctx, alertChannelsModel.Warning)
 	diags.Append(warningDiags...)
-	if len(warningChannels) > 0 {
-		alertChannels[restapi.WarningSeverity] = warningChannels
+	if warningChannels == nil {
+		warningChannels = []string{}
 	}
+
+	alertChannels[restapi.WarningSeverity] = warningChannels
 
 	criticalChannels, criticalDiags := r.extractChannelsForSeverity(ctx, alertChannelsModel.Critical)
 	diags.Append(criticalDiags...)
-	if len(criticalChannels) > 0 {
-		alertChannels[restapi.CriticalSeverity] = criticalChannels
+	if criticalChannels == nil {
+		criticalChannels = []string{}
 	}
+	alertChannels[restapi.CriticalSeverity] = criticalChannels
 
 	return alertChannels, diags
 }

@@ -128,7 +128,7 @@ const (
 	// SloConfigErrTimeBasedAvailabilityRequired is the error message for missing time_based_availability fields
 	SloConfigErrTimeBasedAvailabilityRequired = "threshold and  aggregation are required for time_based_availability indicator"
 	// SloConfigErrTrafficRequired is the error message for missing traffic fields
-	SloConfigErrTrafficRequired = "threshold and  operator are required for time_based_latency indicator"
+	SloConfigErrTrafficRequired = "threshold is required for time_based_latency traffic indicator"
 	// SloConfigErrCustomRequired is the error message for missing custom indicator fields
 	SloConfigErrCustomRequired = "good_event_filter_expression is required for custom indicator"
 	// SloConfigErrMissingIndicator is the error title for missing indicator configuration
@@ -205,9 +205,9 @@ const (
 	SloConfigFieldStartTimestamp            = "start_timestamp"
 
 	// Slo entity types for terraform
-	SloConfigApplicationEntity   = "application"
-	SloConfigWebsiteEntity       = "website"
-	SloConfigSyntheticEntity     = "synthetic"
+	SloConfigApplicationEntity    = "application"
+	SloConfigWebsiteEntity        = "website"
+	SloConfigSyntheticEntity      = "synthetic"
 	SloConfigInfrastructureEntity = "infrastructure"
 
 	// Slo time windows types
