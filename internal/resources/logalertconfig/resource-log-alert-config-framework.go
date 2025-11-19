@@ -171,8 +171,8 @@ func buildRulesSchema() schema.SingleNestedAttribute {
 				Description: LogAlertConfigDescThreshold,
 				Optional:    true,
 				Attributes: map[string]schema.Attribute{
-					LogAlertConfigFieldWarning:  shared.StaticThresholdAttributeSchema(),
-					LogAlertConfigFieldCritical: shared.StaticThresholdAttributeSchema(),
+					LogAlertConfigFieldWarning:  shared.StaticAndAdaptiveThresholdAttributeSchema(),
+					LogAlertConfigFieldCritical: shared.StaticAndAdaptiveThresholdAttributeSchema(),
 				},
 			},
 		},
@@ -416,23 +416,34 @@ func (r *logAlertConfigResourceFramework) mapThresholdsToModel(thresholds map[re
 	thresholdModel := &ThresholdModel{}
 
 	if warningThreshold, hasWarning := thresholds[restapi.WarningSeverity]; hasWarning {
-		thresholdModel.Warning = r.createStaticThresholdModel(warningThreshold)
+		thresholdModel.Warning = r.createThresholdModel(warningThreshold)
 	}
 
 	if criticalThreshold, hasCritical := thresholds[restapi.CriticalSeverity]; hasCritical {
-		thresholdModel.Critical = r.createStaticThresholdModel(criticalThreshold)
+		thresholdModel.Critical = r.createThresholdModel(criticalThreshold)
 	}
 
 	return thresholdModel
 }
 
-// createStaticThresholdModel creates a static threshold model from API threshold rule
-func (r *logAlertConfigResourceFramework) createStaticThresholdModel(threshold restapi.ThresholdRule) *shared.ThresholdStaticTypeModel {
-	// Only create static threshold if Value is present
-	if threshold.Value == nil {
-		return nil // or handle adaptive baseline
+// createThresholdModel creates a threshold model from API threshold rule
+func (r *logAlertConfigResourceFramework) createThresholdModel(threshold restapi.ThresholdRule) *shared.ThresholdTypeModel {
+	// Handle adaptive baseline
+	if threshold.Type == "adaptiveBaseline" {
+		return &shared.ThresholdTypeModel{
+			AdaptiveBaseline: &shared.AdaptiveBaselineModel{
+				DeviationFactor: util.SetFloat32PointerToState(threshold.DeviationFactor),
+				Adaptability:    util.SetFloat32PointerToState(threshold.Adaptability),
+				Seasonality:     types.StringValue(string(*threshold.Seasonality)),
+			},
+		}
 	}
-	return &shared.ThresholdStaticTypeModel{
+	
+	// Default to static threshold
+	if threshold.Value == nil {
+		return nil
+	}
+	return &shared.ThresholdTypeModel{
 		Static: &shared.StaticTypeModel{
 			Value: types.Float32Value(float32(*threshold.Value)),
 		},
@@ -677,32 +688,57 @@ func (r *logAlertConfigResourceFramework) mapModelThresholdsToAPI(thresholdModel
 		return thresholdMap, diags
 	}
 
-	if r.hasValidStaticThreshold(thresholdModel.Warning) {
-		valueFloat := float64(thresholdModel.Warning.Static.Value.ValueFloat32())
-		rounded := math.Round(valueFloat*100) / 100
-		thresholdMap[restapi.WarningSeverity] = restapi.ThresholdRule{
-			Type:  ThresholdTypeStatic,
-			Value: &rounded,
+	if thresholdModel.Warning != nil {
+		warningRule, warningDiags := r.convertThresholdModelToAPI(thresholdModel.Warning)
+		diags.Append(warningDiags...)
+		if warningRule != nil {
+			thresholdMap[restapi.WarningSeverity] = *warningRule
 		}
 	}
 
-	if r.hasValidStaticThreshold(thresholdModel.Critical) {
-		valueFloat := float64(thresholdModel.Critical.Static.Value.ValueFloat32())
-		rounded := math.Round(valueFloat*100) / 100
-		thresholdMap[restapi.CriticalSeverity] = restapi.ThresholdRule{
-			Type:  ThresholdTypeStatic,
-			Value: &rounded,
+	if thresholdModel.Critical != nil {
+		criticalRule, criticalDiags := r.convertThresholdModelToAPI(thresholdModel.Critical)
+		diags.Append(criticalDiags...)
+		if criticalRule != nil {
+			thresholdMap[restapi.CriticalSeverity] = *criticalRule
 		}
 	}
 
 	return thresholdMap, diags
 }
 
-// hasValidStaticThreshold checks if a static threshold model is valid
-func (r *logAlertConfigResourceFramework) hasValidStaticThreshold(threshold *shared.ThresholdStaticTypeModel) bool {
-	return threshold != nil &&
-		threshold.Static != nil &&
-		!threshold.Static.Value.IsNull()
+// convertThresholdModelToAPI converts a threshold model to API representation
+func (r *logAlertConfigResourceFramework) convertThresholdModelToAPI(threshold *shared.ThresholdTypeModel) (*restapi.ThresholdRule, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if threshold == nil {
+		return nil, diags
+	}
+
+	// Handle static threshold
+	if threshold.Static != nil && !threshold.Static.Value.IsNull() {
+		valueFloat := float64(threshold.Static.Value.ValueFloat32())
+		rounded := math.Round(valueFloat*100) / 100
+		return &restapi.ThresholdRule{
+			Type:  ThresholdTypeStatic,
+			Value: &rounded,
+		}, diags
+	}
+
+	// Handle adaptive baseline threshold
+	if threshold.AdaptiveBaseline != nil {
+		seasonality := restapi.ThresholdSeasonality(threshold.AdaptiveBaseline.Seasonality.ValueString())
+		deviationFactor := threshold.AdaptiveBaseline.DeviationFactor.ValueFloat32()
+		adaptability := threshold.AdaptiveBaseline.Adaptability.ValueFloat32()
+		return &restapi.ThresholdRule{
+			Type:            "adaptiveBaseline",
+			Seasonality:     &seasonality,
+			DeviationFactor: &deviationFactor,
+			Adaptability:    &adaptability,
+		}, diags
+	}
+
+	return nil, diags
 }
 
 // Made with Bob
