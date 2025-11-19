@@ -187,6 +187,18 @@ type ComparisonExpression struct {
 
 // Render implementation of ExpressionRenderer.Render
 func (e *ComparisonExpression) Render() string {
+	// For tag filters (entity with tag key), always render values as strings
+	// This ensures consistency when API returns numeric values as strings
+	if e.Entity.TagKey != nil {
+		if e.NumberValue != nil {
+			return fmt.Sprintf("%s %s '%d'", e.Entity.Render(), e.Operator, *e.NumberValue)
+		} else if e.BooleanValue != nil {
+			return fmt.Sprintf("%s %s '%t'", e.Entity.Render(), e.Operator, *e.BooleanValue)
+		}
+		return fmt.Sprintf("%s %s '%s'", e.Entity.Render(), e.Operator, escapeStringValue(*e.StringValue))
+	}
+	
+	// For regular entity filters (without tag key), preserve original type rendering
 	if e.NumberValue != nil {
 		return fmt.Sprintf("%s %s %d", e.Entity.Render(), e.Operator, *e.NumberValue)
 	} else if e.BooleanValue != nil {
