@@ -197,34 +197,27 @@ func (r *infraAlertConfigResourceFramework) SetComputedFields(_ context.Context,
 }
 
 // UpdateState updates the Terraform state with data from the API response
-func (r *infraAlertConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, _ *tfsdk.Plan, resource *restapi.InfraAlertConfig) diag.Diagnostics {
+func (r *infraAlertConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, resource *restapi.InfraAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
-
-	model, modelDiags := r.buildInfraAlertConfigModelFromAPIResponse(ctx, resource)
-	diags.Append(modelDiags...)
-	if diags.HasError() {
-		return diags
+	var model InfraAlertConfigModel
+	if plan != nil {
+		diags.Append(plan.Get(ctx, &model)...)
+	} else if state != nil {
+		diags.Append(state.Get(ctx, &model)...)
 	}
 
-	diags.Append(state.Set(ctx, model)...)
-	return diags
-}
+	model.ID = types.StringValue(resource.ID)
+	model.Name = types.StringValue(resource.Name)
+	model.Description = types.StringValue(resource.Description)
+	model.Granularity = types.Int64Value(int64(resource.Granularity))
+	model.EvaluationType = types.StringValue(string(resource.EvaluationType))
 
-// buildInfraAlertConfigModelFromAPIResponse constructs an InfraAlertConfigModel from the API response
-func (r *infraAlertConfigResourceFramework) buildInfraAlertConfigModelFromAPIResponse(ctx context.Context, resource *restapi.InfraAlertConfig) (InfraAlertConfigModel, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	model := InfraAlertConfigModel{
-		ID:             types.StringValue(resource.ID),
-		Name:           types.StringValue(resource.Name),
-		Description:    types.StringValue(resource.Description),
-		Granularity:    types.Int64Value(int64(resource.Granularity)),
-		EvaluationType: types.StringValue(string(resource.EvaluationType)),
+	// to preserve the existing value in plan/state to handle the value drift
+	if model.TagFilter.IsNull() || model.TagFilter.IsUnknown() {
+		tagFilter, tagFilterDiags := r.mapTagFilterToModel(resource.TagFilterExpression)
+		diags.Append(tagFilterDiags...)
+		model.TagFilter = tagFilter
 	}
-
-	tagFilter, tagFilterDiags := r.mapTagFilterToModel(resource.TagFilterExpression)
-	diags.Append(tagFilterDiags...)
-	model.TagFilter = tagFilter
 
 	model.GroupBy = r.mapGroupByToModel(resource.GroupBy)
 
@@ -242,7 +235,12 @@ func (r *infraAlertConfigResourceFramework) buildInfraAlertConfigModelFromAPIRes
 	diags.Append(rulesDiags...)
 	model.Rules = rules
 
-	return model, diags
+	if diags.HasError() {
+		return diags
+	}
+
+	diags.Append(state.Set(ctx, model)...)
+	return diags
 }
 
 // mapTagFilterToModel converts API tag filter to model representation

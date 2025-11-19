@@ -294,8 +294,8 @@ func (r *sloAlertConfigResourceFramework) UpdateState(ctx context.Context, state
 	var model SloAlertConfigModel
 	if plan != nil {
 		diags.Append(plan.Get(ctx, &model)...)
-		// } else if state != nil {
-		// 	return state.Get(ctx, &model)
+	} else if state != nil {
+		diags.Append(state.Get(ctx, &model)...)
 	} else {
 		model = SloAlertConfigModel{}
 	}

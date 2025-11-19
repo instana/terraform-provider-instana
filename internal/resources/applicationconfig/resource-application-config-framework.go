@@ -134,18 +134,24 @@ func (r *applicationConfigResourceFramework) SetComputedFields(_ context.Context
 // UpdateState converts API data object to Terraform state
 func (r *applicationConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, config *restapi.ApplicationConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
+	var model ApplicationConfigModel
 
-	// Create a model and populate it with values from the config
-	model := ApplicationConfigModel{
-		ID:            types.StringValue(config.ID),
-		Label:         types.StringValue(config.Label),
-		Scope:         types.StringValue(string(config.Scope)),
-		BoundaryScope: types.StringValue(string(config.BoundaryScope)),
+	if plan != nil {
+		diags.Append(plan.Get(ctx, &model)...)
+	} else if state != nil {
+		diags.Append(state.Get(ctx, &model)...)
 	}
 
+	model.ID = types.StringValue(config.ID)
+	model.Label = types.StringValue(config.Label)
+	model.Scope = types.StringValue(string(config.Scope))
+	model.BoundaryScope = types.StringValue(string(config.BoundaryScope))
+
 	// Map tag filter with error handling
-	if err := r.mapTagFilterToState(config, &model); err != nil {
-		return err
+	if model.TagFilter.IsNull() || model.TagFilter.IsUnknown() {
+		if err := r.mapTagFilterToState(config, &model); err != nil {
+			return err
+		}
 	}
 
 	// Map access rules
