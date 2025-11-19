@@ -325,6 +325,7 @@ func buildTrafficIndicatorAttribute() schema.SingleNestedAttribute {
 			},
 			SchemaFieldOperator: schema.StringAttribute{
 				Optional:    true,
+				Computed:    true,
 				Description: SloConfigDescOperator,
 				Validators: []validator.String{
 					stringvalidator.OneOf(OperatorGreaterThan, OperatorGreaterThanOrEqual, OperatorLessThan, OperatorLessThanOrEqual),
