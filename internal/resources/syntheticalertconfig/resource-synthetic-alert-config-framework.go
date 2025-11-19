@@ -409,8 +409,13 @@ func (r *syntheticAlertConfigResourceFramework) extractSyntheticTestIdsFromModel
 	var diags diag.Diagnostics
 	syntheticTestIds := []string{}
 
-	if !model.SyntheticTestIds.IsNull() {
+	if !model.SyntheticTestIds.IsNull() && !model.SyntheticTestIds.IsUnknown() {
 		diags.Append(model.SyntheticTestIds.ElementsAs(ctx, &syntheticTestIds, false)...)
+	}
+
+	// Ensure we always return an initialized empty slice, never nil
+	if syntheticTestIds == nil {
+		syntheticTestIds = []string{}
 	}
 
 	return syntheticTestIds, diags
@@ -419,10 +424,15 @@ func (r *syntheticAlertConfigResourceFramework) extractSyntheticTestIdsFromModel
 // extractAlertChannelIdsFromModel extracts alert channel IDs from the model
 func (r *syntheticAlertConfigResourceFramework) extractAlertChannelIdsFromModel(ctx context.Context, model *SyntheticAlertConfigModel) ([]string, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	var alertChannelIds []string
+	alertChannelIds := []string{}
 
-	if !model.AlertChannelIds.IsNull() {
+	if !model.AlertChannelIds.IsNull() && !model.AlertChannelIds.IsUnknown() {
 		diags.Append(model.AlertChannelIds.ElementsAs(ctx, &alertChannelIds, false)...)
+	}
+
+	// Ensure we always return an initialized empty slice, never nil
+	if alertChannelIds == nil {
+		alertChannelIds = []string{}
 	}
 
 	return alertChannelIds, diags

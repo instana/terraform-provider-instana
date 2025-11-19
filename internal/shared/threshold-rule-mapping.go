@@ -444,12 +444,9 @@ func MapBaselineFromState(ctx context.Context, baselineList types.List) (*[][]fl
 		if diags.HasError() {
 			return nil, diags
 		}
-		// Round the values to 4 decimal places to avoid floating-point precision issues
-		roundedValues := make([]float64, len(innerValues))
-		for i, v := range innerValues {
-			roundedValues[i] = math.Round(v*10000) / 10000
-		}
-		baseline = append(baseline, roundedValues)
+		// Use the exact values from state without rounding
+		// Rounding should only happen when converting FROM API TO state
+		baseline = append(baseline, innerValues)
 	}
 
 	return &baseline, diags
