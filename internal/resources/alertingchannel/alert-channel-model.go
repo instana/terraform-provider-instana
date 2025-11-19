@@ -23,4 +23,6 @@ type AlertingChannelModel struct {
 	PrometheusWebhook     *shared.PrometheusWebhookModel     `tfsdk:"prometheus_webhook"`
 	WebexTeamsWebhook     *shared.WebhookBasedModel          `tfsdk:"webex_teams_webhook"`
 	WatsonAIOpsWebhook    *shared.WatsonAIOpsWebhookModel    `tfsdk:"watson_aiops_webhook"`
+	SlackApp              *shared.SlackAppModel              `tfsdk:"slack_app"`
+	MsTeamsApp            *shared.MsTeamsAppModel            `tfsdk:"ms_teams_app"`
 }
