@@ -51,6 +51,6 @@ type LogAlertRuleModel struct {
 
 // ThresholdModel represents a threshold in the Terraform model
 type ThresholdModel struct {
-	Warning  *shared.ThresholdStaticTypeModel `tfsdk:"warning"`
-	Critical *shared.ThresholdStaticTypeModel `tfsdk:"critical"`
+	Warning  *shared.ThresholdTypeModel `tfsdk:"warning"`
+	Critical *shared.ThresholdTypeModel `tfsdk:"critical"`
 }

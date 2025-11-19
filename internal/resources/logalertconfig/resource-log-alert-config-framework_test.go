@@ -342,11 +342,11 @@ func TestUpdateState_WithRulesAndThresholds(t *testing.T) {
 	require.NotNil(t, model.Rules.Threshold)
 	require.NotNil(t, model.Rules.Threshold.Warning)
 	require.NotNil(t, model.Rules.Threshold.Warning.Static)
-	assert.Equal(t, int64(100), model.Rules.Threshold.Warning.Static.Value.ValueInt64())
+	assert.Equal(t, float32(100), model.Rules.Threshold.Warning.Static.Value.ValueFloat32())
 
 	require.NotNil(t, model.Rules.Threshold.Critical)
 	require.NotNil(t, model.Rules.Threshold.Critical.Static)
-	assert.Equal(t, int64(200), model.Rules.Threshold.Critical.Static.Value.ValueInt64())
+	assert.Equal(t, float32(200), model.Rules.Threshold.Critical.Static.Value.ValueFloat32())
 }
 
 func TestUpdateState_WithCustomPayloadFields(t *testing.T) {
@@ -589,14 +589,14 @@ func TestMapStateToDataObject_WithRules(t *testing.T) {
 			Aggregation:       types.StringValue(string(restapi.SumAggregation)),
 			ThresholdOperator: types.StringValue(string(restapi.ThresholdOperatorGreaterThan)),
 			Threshold: &ThresholdModel{
-				Warning: &shared.ThresholdStaticTypeModel{
+				Warning: &shared.ThresholdTypeModel{
 					Static: &shared.StaticTypeModel{
-						Value: types.Int64Value(100),
+						Value: types.Float32Value(100),
 					},
 				},
-				Critical: &shared.ThresholdStaticTypeModel{
+				Critical: &shared.ThresholdTypeModel{
 					Static: &shared.StaticTypeModel{
-						Value: types.Int64Value(200),
+						Value: types.Float32Value(200),
 					},
 				},
 			},
@@ -1229,9 +1229,9 @@ func TestMapStateToDataObject_WithRulesWithOnlyWarningThreshold(t *testing.T) {
 			Aggregation:       types.StringValue(string(restapi.SumAggregation)),
 			ThresholdOperator: types.StringValue(string(restapi.ThresholdOperatorGreaterThan)),
 			Threshold: &ThresholdModel{
-				Warning: &shared.ThresholdStaticTypeModel{
+				Warning: &shared.ThresholdTypeModel{
 					Static: &shared.StaticTypeModel{
-						Value: types.Int64Value(100),
+						Value: types.Float32Value(100),
 					},
 				},
 				Critical: nil,
@@ -1266,9 +1266,9 @@ func TestMapStateToDataObject_WithRulesWithOnlyCriticalThreshold(t *testing.T) {
 			ThresholdOperator: types.StringValue(string(restapi.ThresholdOperatorGreaterThan)),
 			Threshold: &ThresholdModel{
 				Warning: nil,
-				Critical: &shared.ThresholdStaticTypeModel{
+				Critical: &shared.ThresholdTypeModel{
 					Static: &shared.StaticTypeModel{
-						Value: types.Int64Value(200),
+						Value: types.Float32Value(200),
 					},
 				},
 			},
@@ -1301,14 +1301,14 @@ func TestMapStateToDataObject_WithRulesWithNullThresholdValues(t *testing.T) {
 			Aggregation:       types.StringValue(string(restapi.SumAggregation)),
 			ThresholdOperator: types.StringValue(string(restapi.ThresholdOperatorGreaterThan)),
 			Threshold: &ThresholdModel{
-				Warning: &shared.ThresholdStaticTypeModel{
+				Warning: &shared.ThresholdTypeModel{
 					Static: &shared.StaticTypeModel{
-						Value: types.Int64Null(),
+						Value: types.Float32Null(),
 					},
 				},
-				Critical: &shared.ThresholdStaticTypeModel{
+				Critical: &shared.ThresholdTypeModel{
 					Static: &shared.StaticTypeModel{
-						Value: types.Int64Null(),
+						Value: types.Float32Null(),
 					},
 				},
 			},
@@ -1433,9 +1433,9 @@ func TestMapStateToDataObject_WithNullAggregation(t *testing.T) {
 			Aggregation:       types.StringNull(),
 			ThresholdOperator: types.StringValue(string(restapi.ThresholdOperatorGreaterThan)),
 			Threshold: &ThresholdModel{
-				Warning: &shared.ThresholdStaticTypeModel{
+				Warning: &shared.ThresholdTypeModel{
 					Static: &shared.StaticTypeModel{
-						Value: types.Int64Value(100),
+						Value: types.Float32Value(100),
 					},
 				},
 			},
