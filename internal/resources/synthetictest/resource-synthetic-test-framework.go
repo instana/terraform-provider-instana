@@ -1145,29 +1145,19 @@ func (r *syntheticTestResourceFramework) UpdateState(ctx context.Context, state 
 	var model SyntheticTestModel
 
 	// Get current state from plan or state
-	//diags.Append(r.getModelFromState(ctx, plan, state, &model)...)
-	// Map basic fields
 	if plan != nil {
-		log.Printf("lloading from plan")
 		diags.Append(plan.Get(ctx, &model)...)
-		model.ID = types.StringValue(apiObject.ID)
-		model.Label = types.StringValue(apiObject.Label)
-		model.Active = types.BoolValue(apiObject.Active)
-		model.PlaybackMode = types.StringValue(apiObject.PlaybackMode)
-		model.Description = util.SetStringPointerToState(apiObject.Description)
-		model.ApplicationID = util.SetStringPointerToState(apiObject.ApplicationID)
 	} else if state != nil {
 		diags.Append(state.Get(ctx, &model)...)
-		log.Printf("lloading from state")
-		model.ID = types.StringValue(apiObject.ID)
-		model.Label = types.StringValue(apiObject.Label)
-		model.Active = types.BoolValue(apiObject.Active)
-		model.PlaybackMode = types.StringValue(apiObject.PlaybackMode)
-		model.Description = util.SetStringPointerToState(apiObject.Description)
-		model.ApplicationID = util.SetStringPointerToState(apiObject.ApplicationID)
-	} else {
-		model = r.mapBasicFieldsToModel(apiObject)
 	}
+
+	// mapBasicFieldsToModel maps basic fields from API object to model
+	model.ID = types.StringValue(apiObject.ID)
+	model.Label = types.StringValue(apiObject.Label)
+	model.Active = types.BoolValue(apiObject.Active)
+	model.PlaybackMode = types.StringValue(apiObject.PlaybackMode)
+	model.Description = util.SetStringPointerToState(apiObject.Description)
+	model.ApplicationID = util.SetStringPointerToState(apiObject.ApplicationID)
 
 	// Map collection fields
 	model.Applications = r.mapApplicationsToModel(apiObject)
