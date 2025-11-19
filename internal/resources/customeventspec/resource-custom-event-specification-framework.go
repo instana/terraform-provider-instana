@@ -320,46 +320,39 @@ func (r *customEventSpecificationResourceFramework) SetComputedFields(_ context.
 }
 
 // UpdateState converts API data object to Terraform state
-func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, _ *tfsdk.Plan, spec *restapi.CustomEventSpecification) diag.Diagnostics {
+func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, spec *restapi.CustomEventSpecification) diag.Diagnostics {
 	var diags diag.Diagnostics
-
+	var model CustomEventSpecificationModel
 	// Validate input
 	if spec == nil {
 		diags.AddError("Invalid Input", "CustomEventSpecification cannot be nil")
 		return diags
 	}
 
-	// Build model from spec
-	model := r.buildModelFromSpec(spec, &diags)
-	if diags.HasError() {
-		return diags
+	if plan != nil {
+		diags.Append(plan.Get(ctx, &model)...)
+	} else if state != nil {
+		diags.Append(state.Get(ctx, &model)...)
+	}
+
+	model.ID = types.StringValue(spec.ID)
+	model.Name = types.StringValue(spec.Name)
+	model.EntityType = types.StringValue(spec.EntityType)
+	model.Triggering = types.BoolValue(spec.Triggering)
+	model.Enabled = types.BoolValue(spec.Enabled)
+	model.RuleLogicalOperator = types.StringValue(spec.RuleLogicalOperator)
+	model.Query = util.SetStringPointerToState(spec.Query)
+	model.Description = util.SetStringPointerToState(spec.Description)
+	model.ExpirationTime = util.SetInt64PointerToState(spec.ExpirationTime)
+
+	// Process rules if present (preserve the value from plan/model to handle the value drift)
+	if len(spec.Rules) == 0 {
+		model.Rules = r.buildRulesModel(spec.Rules, &diags)
 	}
 
 	// Set the model to state
 	diags.Append(state.Set(ctx, model)...)
 	return diags
-}
-
-// buildModelFromSpec constructs the model from API specification
-func (r *customEventSpecificationResourceFramework) buildModelFromSpec(spec *restapi.CustomEventSpecification, diags *diag.Diagnostics) CustomEventSpecificationModel {
-	model := CustomEventSpecificationModel{
-		ID:                  types.StringValue(spec.ID),
-		Name:                types.StringValue(spec.Name),
-		EntityType:          types.StringValue(spec.EntityType),
-		Triggering:          types.BoolValue(spec.Triggering),
-		Enabled:             types.BoolValue(spec.Enabled),
-		RuleLogicalOperator: types.StringValue(spec.RuleLogicalOperator),
-		Query:               util.SetStringPointerToState(spec.Query),
-		Description:         util.SetStringPointerToState(spec.Description),
-		ExpirationTime:      util.SetInt64PointerToState(spec.ExpirationTime),
-	}
-
-	// Process rules if present
-	if len(spec.Rules) > 0 {
-		model.Rules = r.buildRulesModel(spec.Rules, diags)
-	}
-
-	return model
 }
 
 // buildRulesModel processes all rules and returns a RulesModel

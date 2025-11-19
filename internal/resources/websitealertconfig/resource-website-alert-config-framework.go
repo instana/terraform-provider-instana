@@ -3,6 +3,7 @@ package websitealertconfig
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
 	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
@@ -648,16 +649,21 @@ func (r *websiteAlertConfigResourceFramework) mapOptionalInt64ToInt32Field(field
 
 func (r *websiteAlertConfigResourceFramework) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *restapi.WebsiteAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
-
-	// Create base model
-	model := WebsiteAlertConfigModel{
-		ID:          types.StringValue(apiObject.ID),
-		Name:        types.StringValue(apiObject.Name),
-		Description: types.StringValue(apiObject.Description),
-		Triggering:  types.BoolValue(apiObject.Triggering),
-		WebsiteID:   types.StringValue(apiObject.WebsiteID),
-		Granularity: types.Int64Value(int64(apiObject.Granularity)),
+	var model WebsiteAlertConfigModel
+	if plan != nil {
+		diags.Append(plan.Get(ctx, &model)...)
+	} else if state != nil {
+		diags.Append(state.Get(ctx, &model)...)
+	} else {
+		model = WebsiteAlertConfigModel{}
 	}
+	// Create base model
+	model.ID = types.StringValue(apiObject.ID)
+	model.Name = types.StringValue(apiObject.Name)
+	model.Description = types.StringValue(apiObject.Description)
+	model.Triggering = types.BoolValue(apiObject.Triggering)
+	model.WebsiteID = types.StringValue(apiObject.WebsiteID)
+	model.Granularity = types.Int64Value(int64(apiObject.Granularity))
 
 	// Map tag filter expression
 	tagFilterDiags := r.mapTagFilterExpressionToState(&model, apiObject)
@@ -669,8 +675,13 @@ func (r *websiteAlertConfigResourceFramework) UpdateState(ctx context.Context, s
 	// Map alert channel IDs
 	r.mapAlertChannelIDsToState(&model, apiObject)
 
-	// Map rules collection
-	model.Rules = r.mapRulesToState(ctx, apiObject)
+	// Map rules collection (preserve the plan values / update only if empty)
+	if len(model.Rules) == 0 {
+		log.Printf("inside rule update from api")
+		model.Rules = r.mapRulesToState(ctx, apiObject)
+	} else {
+		log.Printf("inside rule update from plan")
+	}
 
 	// Map custom payload fields
 	customPayloadDiags := r.mapCustomPayloadFieldsToState(ctx, &model, apiObject)
