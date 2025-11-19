@@ -42,7 +42,6 @@ func buildSloAlertConfigSchema() schema.Schema {
 			SchemaFieldDescription:         buildDescriptionAttribute(),
 			SchemaFieldSeverity:            buildSeverityAttribute(),
 			SchemaFieldTriggering:          buildTriggeringAttribute(),
-			SchemaFieldEnabled:             buildEnabledAttribute(),
 			SchemaFieldAlertType:           buildAlertTypeAttribute(),
 			SchemaFieldSloIds:              buildSloIdsAttribute(),
 			SchemaFieldAlertChannelIds:     buildAlertChannelIdsAttribute(),
@@ -97,14 +96,6 @@ func buildTriggeringAttribute() schema.BoolAttribute {
 	return schema.BoolAttribute{
 		Optional:    true,
 		Description: SloAlertConfigDescTriggering,
-	}
-}
-
-// buildEnabledAttribute creates the enabled field schema attribute
-func buildEnabledAttribute() schema.BoolAttribute {
-	return schema.BoolAttribute{
-		Optional:    true,
-		Description: SloAlertConfigDescEnabled,
 	}
 }
 
@@ -337,7 +328,6 @@ func (r *sloAlertConfigResourceFramework) buildBaseSloAlertConfigModel(sloAlertC
 		Description: types.StringValue(sloAlertConfig.Description),
 		Severity:    types.Int64Value(int64(sloAlertConfig.Severity)),
 		Triggering:  types.BoolValue(sloAlertConfig.Triggering),
-		Enabled:     types.BoolValue(sloAlertConfig.Enabled),
 	}
 }
 
@@ -453,7 +443,6 @@ func (r *sloAlertConfigResourceFramework) MapStateToDataObject(ctx context.Conte
 		Description:           model.Description.ValueString(),
 		Severity:              int(model.Severity.ValueInt64()),
 		Triggering:            model.Triggering.ValueBool(),
-		Enabled:               model.Enabled.ValueBool(),
 		Rule:                  rule,
 		Threshold:             threshold,
 		TimeThreshold:         timeThreshold,
