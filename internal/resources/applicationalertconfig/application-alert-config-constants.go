@@ -116,3 +116,13 @@ const (
 	TimeThresholdTypeViolationsInPeriod   = "violationsInPeriod"
 	TimeThresholdTypeViolationsInSequence = "violationsInSequence"
 )
+
+// API Alert Type constants (what the API expects)
+const (
+	APIAlertTypeErrorRate  = "errorRate"
+	APIAlertTypeErrors     = "errors"
+	APIAlertTypeLogs       = "logs"
+	APIAlertTypeSlowness   = "slowness"
+	APIAlertTypeStatusCode = "statusCode"
+	APIAlertTypeThroughput = "throughput"
+)

@@ -555,7 +555,7 @@ func (r *automationActionResourceFramework) mapActionTypeAndFields(ctx context.C
 		return r.mapDocLinkAction(model)
 	} else if model.GitLab != nil && !model.GitLab.ProjectId.IsNull() {
 		return r.mapGitLabAction(model)
-	} else if model.Ansible != nil && !model.Ansible.WorkflowId.IsNull() {
+	} else if model.Ansible != nil && (!model.Ansible.WorkflowId.IsNull() || !model.Ansible.PlaybookId.IsNull() || !model.Ansible.PlaybookFileName.IsNull() || !model.Ansible.AnsibleUrl.IsNull() || !model.Ansible.HostId.IsNull()) {
 		return r.mapAnsibleAction(model)
 	}
 
