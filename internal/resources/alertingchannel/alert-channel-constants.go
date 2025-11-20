@@ -236,11 +236,5 @@ const (
 	AlertingChannelErrInvalidConfigMsg      = "No valid alerting channel configuration found. Please configure exactly one channel type."
 
 	// Log messages
-	AlertingChannelLogPasswordValue    = "passwordValue: %s"
-	AlertingChannelLogInstanaURL       = "Inatna url : user %v"
-	AlertingChannelLogMapServiceNowApp = "[DEBUG] mapServiceNowApplicationChannelFromState: %v"
-	AlertingChannelLogInstanaURLDebug  = "[DEBUG] intana url: %v"
-	AlertingChannelLogModelFromPlan    = "Model from plan"
-	AlertingChannelLogModelFromState   = "Model from state"
-	AlertingChannelLogDebugCall        = "[DEBUG] Call %s %s\n"
+	AlertingChannelLogInstanaURL = "Inatna url : user %v"
 )
