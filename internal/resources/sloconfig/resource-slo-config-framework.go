@@ -330,6 +330,9 @@ func buildTrafficIndicatorAttribute() schema.SingleNestedAttribute {
 				Validators: []validator.String{
 					stringvalidator.OneOf(OperatorGreaterThan, OperatorGreaterThanOrEqual, OperatorLessThan, OperatorLessThanOrEqual),
 				},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 		},
 	}
