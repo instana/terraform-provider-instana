@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
 	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
@@ -114,12 +113,9 @@ func (r *terraformResourceImplFramework[T]) Create(ctx context.Context, req reso
 		)
 		return
 	}
-	log.Printf("before calling updateState")
 
 	// Update state with created object
 	diags = r.resourceHandle.UpdateState(ctx, &resp.State, &req.Plan, createdObject)
-	log.Printf("After calling updateState")
-	log.Printf("Error : %+v\n", diags)
 	resp.Diagnostics.Append(diags...)
 }
 

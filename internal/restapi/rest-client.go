@@ -153,7 +153,7 @@ func (client *restClientImpl) createRequest() *resty.Request {
 	basepath := filepath.Join(filepath.Dir(b), "../..")
 
 	//open CHANGELOG.md from root directory (only file storing updated version number)
-	terraformProviderVersion := ""
+	terraformProviderVersion := "Terraform"
 	file, err := os.Open(basepath + "/CHANGELOG.md")
 	if err != nil {
 		log.Println("Error: couldn't open file", basepath+"/CHANGELOG.md", err)

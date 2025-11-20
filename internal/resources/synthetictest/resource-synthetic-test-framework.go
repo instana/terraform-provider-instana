@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"regexp"
 
 	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
@@ -1359,7 +1358,6 @@ func (r *syntheticTestResourceFramework) mapHttpActionConfigToModel(config resta
 		httpActionModelCurrent := *httpModel
 		httpActionModel.ExpectJson = httpActionModelCurrent.ExpectJson
 	} else {
-		log.Printf("updating json again")
 		httpActionModel.ExpectJson = r.mapExpectJsonToModel(config.ExpectJson)
 	}
 

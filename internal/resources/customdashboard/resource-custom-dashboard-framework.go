@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 
 	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
 	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
@@ -137,7 +136,6 @@ func (r *customDashboardResourceFramework) UpdateState(ctx context.Context, stat
 
 	// Handle widgets
 	if model.Widgets.IsNull() || model.Widgets.IsUnknown() {
-		log.Printf("adding new widget value")
 
 		widgetsBytes, err := dashboard.Widgets.MarshalJSON()
 		if err != nil {
@@ -149,9 +147,7 @@ func (r *customDashboardResourceFramework) UpdateState(ctx context.Context, stat
 		}
 		json, _ := util.CanonicalizeJSON(string(widgetsBytes))
 		model.Widgets = jsontypes.NewNormalizedValue(json)
-	} else {
-		log.Printf("keep existing value")
-	}
+	} 
 	// else we keep the existing values
 
 	// Map access rules
