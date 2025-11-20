@@ -1,27 +1,21 @@
 # Synthetic Test Resource
 
-> **⚠️ BREAKING CHANGES in v3.0.0**
-> 
-> This resource has been migrated from Terraform SDK v2 to the Plugin Framework. While most configurations remain compatible, there are important syntax changes you need to be aware of.
->
-> **Key Changes:**
-> - All test configuration blocks now use attribute syntax `= { }` instead of block syntax
-> - Test types: `http_action`, `http_script`, `browser_script`, `dns`, `ssl_certificate`, `webpage_action`, `webpage_script`
-> - Nested configurations like `scripts`, `query_time`, `target_values`, `validation_rules` use attribute syntax
-> - `rbac_tags` uses set syntax `= [{ }]` instead of multiple blocks
-> - See [Migration Guide](#migration-guide-v2-to-v3) below for detailed examples
-
 Manages synthetic test configurations in Instana. Synthetic tests monitor the availability and performance of your applications and services from various locations around the world.
 
 API Documentation: <https://instana.github.io/openapi/#operation/getSyntheticTests>
 
-## Migration Guide (v2 to v3)
+## ⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)
+
+ **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block struture.
+
+
+## Migration Guide (v5 to v6)
 
 ### Syntax Changes Overview
 
 The main change is that all test configuration blocks now use attribute syntax instead of block syntax.
 
-#### OLD (v2.x) Syntax:
+#### OLD (v5.x) Syntax:
 ```hcl
 resource "instana_synthetic_test" "example" {
   label = "HTTP Test"
@@ -33,7 +27,7 @@ resource "instana_synthetic_test" "example" {
 }
 ```
 
-#### NEW (v3.x) Syntax:
+#### NEW (v6.x) Syntax:
 ```hcl
 resource "instana_synthetic_test" "example" {
   label = "HTTP Test"
