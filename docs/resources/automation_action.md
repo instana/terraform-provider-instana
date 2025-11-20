@@ -8,11 +8,19 @@ API Documentation: <https://instana.github.io/openapi/#tag/Action-Catalog>
 ---
 ## ⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)
 
- **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block struture.
+ **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
  
 ## Migration Guide (v5 to v6)
 ### Syntax Changes Overview
-**OLD Syntax (SDK v2):**
+
+- Action type blocks (`script`, `http`, `manual`, etc.) now use **object syntax** with `= { }`
+- `input_parameter` now uses **list syntax** with `= [{ }]`
+- Enhanced validation for action types and parameters
+- Better error messages for configuration issues
+- Improved state management
+
+#### OLD (v5.x) Syntax:
+
 ```hcl
 resource "instana_automation_action" "example" {
   name        = "Hello world"
@@ -37,7 +45,8 @@ resource "instana_automation_action" "example" {
 }
 ```
 
-**NEW Syntax (Plugin Framework):**
+#### NEW (v6.x) Syntax:
+
 ```hcl
 resource "instana_automation_action" "example" {
   name        = "Hello world"
@@ -61,13 +70,6 @@ resource "instana_automation_action" "example" {
   }]
 }
 ```
-
-**Key Changes:**
-- Action type blocks (`script`, `http`, `manual`, etc.) now use **object syntax** with `= { }`
-- `input_parameter` now uses **list syntax** with `= [{ }]`
-- Enhanced validation for action types and parameters
-- Better error messages for configuration issues
-- Improved state management
 
 ---
 

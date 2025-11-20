@@ -6,36 +6,41 @@ API Documentation: <https://instana.github.io/openapi/#operation/getAlertingChan
 
 ## ⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)
 
- **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block struture.
+ **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
+ 
 ## Migration Guide (v5 to v6)
 
 ### Syntax Changes Overview
- - All channel configurations (email, slack, webhook, etc.) are now **single nested attributes** instead of blocks
- - Use `attribute = { ... }` syntax instead of `attribute { ... }` block syntax
- - Channel configurations must use the equals sign (`=`) before the opening brace
- - All nested configurations within channels follow the same attribute pattern
- - The `id` attribute is now computed and uses a plan modifier for state management
 
- **Migration Example:**
- ```hcl
- # OLD (SDK v2 - Block Structure)
- resource "instana_alerting_channel" "example" {
-   name = "my-channel"
-   email {
-     emails = ["user@example.com"]
-   }
- }
+- All channel configurations (email, slack, webhook, etc.) are now **single nested attributes** instead of blocks
+- Use `attribute = { ... }` syntax instead of `attribute { ... }` block syntax
+- Channel configurations must use the equals sign (`=`) before the opening brace
+- All nested configurations within channels follow the same attribute pattern
+- The `id` attribute is now computed and uses a plan modifier for state management
 
- # NEW (Plugin Framework - Attribute Structure)
- resource "instana_alerting_channel" "example" {
-   name = "my-channel"
-   email = {
-     emails = ["user@example.com"]
-   }
- }
- ```
+#### OLD (v5.x) Syntax:
 
- Please update your Terraform configurations to use the new attribute-based syntax.
+```hcl
+resource "instana_alerting_channel" "example" {
+  name = "my-channel"
+  email {
+    emails = ["user@example.com"]
+  }
+}
+```
+
+#### NEW (v6.x) Syntax:
+
+```hcl
+resource "instana_alerting_channel" "example" {
+  name = "my-channel"
+  email = {
+    emails = ["user@example.com"]
+  }
+}
+```
+
+Please update your Terraform configurations to use the new attribute-based syntax.
 
 
 ## Example Usage

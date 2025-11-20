@@ -7,13 +7,24 @@ API Documentation: <https://instana.github.io/openapi/#tag/Application-Alert-Con
 ---
 ## ⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)
 
- **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block struture.
+ **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
 
 ## Migration Guide (v5 to v6)
 
 ### Syntax Changes Overview
 
-**OLD Syntax (SDK v2):**
+- `application` → `applications` (now a list with `= [{ }]`)
+- `service` → `services` (nested list)
+- `endpoint` → `endpoints` (nested list)
+- `rule` → `rules` (list with new structure)
+- `threshold` → `thresholds` (nested in rules, supports multiple severity levels)
+- New `threshold_operator` field in rules
+- `time_threshold` now uses attribute syntax with `= { }`
+- Enhanced support for both static and adaptive baseline thresholds
+- `alert_channels` now supports severity-based routing (map of severity to channel IDs)
+
+#### OLD (v5.x) Syntax:
+
 ```hcl
 resource "instana_application_alert_config" "example" {
   name = "test-alert"
@@ -44,7 +55,8 @@ resource "instana_application_alert_config" "example" {
 }
 ```
 
-**NEW Syntax (Plugin Framework):**
+#### NEW (v6.x) Syntax:
+
 ```hcl
 resource "instana_application_alert_config" "example" {
   name = "test-alert"
@@ -83,17 +95,6 @@ resource "instana_application_alert_config" "example" {
   }
 }
 ```
-
-**Key Changes:**
-- `application` → `applications` (now a list with `= [{ }]`)
-- `service` → `services` (nested list)
-- `endpoint` → `endpoints` (nested list)
-- `rule` → `rules` (list with new structure)
-- `threshold` → `thresholds` (nested in rules, supports multiple severity levels)
-- New `threshold_operator` field in rules
-- `time_threshold` now uses attribute syntax with `= { }`
-- Enhanced support for both static and adaptive baseline thresholds
-- `alert_channels` now supports severity-based routing (map of severity to channel IDs)
 
 ---
 
