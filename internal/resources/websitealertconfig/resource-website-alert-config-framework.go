@@ -677,10 +677,7 @@ func (r *websiteAlertConfigResourceFramework) UpdateState(ctx context.Context, s
 
 	// Map rules collection (preserve the plan values / update only if empty)
 	if len(model.Rules) == 0 {
-		log.Printf("inside rule update from api")
 		model.Rules = r.mapRulesToState(ctx, apiObject)
-	} else {
-		log.Printf("inside rule update from plan")
 	}
 
 	// Map custom payload fields

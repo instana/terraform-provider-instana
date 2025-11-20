@@ -871,9 +871,7 @@ func (r *alertingChannelResourceFramework) mapServiceNowApplicationChannelFromSt
 		snowStatusValue := int(serviceNowApp.SnowStatusOnCloseEvent.ValueInt64())
 		result.SnowStatusOnCloseEvent = &snowStatusValue
 	}
-
-	log.Printf(AlertingChannelLogMapServiceNowApp, result)
-	log.Printf(AlertingChannelLogInstanaURLDebug, *result.InstanaURL)
+	
 	return result, nil
 }
 
@@ -1006,10 +1004,8 @@ func (r *alertingChannelResourceFramework) getModelFromPlanOrState(ctx context.C
 	var model AlertingChannelModel
 
 	if plan != nil {
-		log.Printf(AlertingChannelLogModelFromPlan)
 		diags.Append(plan.Get(ctx, &model)...)
 	} else {
-		log.Printf(AlertingChannelLogModelFromState)
 		diags.Append(state.Get(ctx, &model)...)
 	}
 
