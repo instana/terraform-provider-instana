@@ -1359,7 +1359,6 @@ func (r *syntheticTestResourceFramework) mapHttpActionConfigToModel(config resta
 		httpActionModelCurrent := *httpModel
 		httpActionModel.ExpectJson = httpActionModelCurrent.ExpectJson
 	} else {
-		log.Printf("updating json again")
 		httpActionModel.ExpectJson = r.mapExpectJsonToModel(config.ExpectJson)
 	}
 
