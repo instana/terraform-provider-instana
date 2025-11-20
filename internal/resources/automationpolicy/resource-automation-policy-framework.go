@@ -210,7 +210,7 @@ func (r *automationPolicyResourceFramework) UpdateState(ctx context.Context, sta
 	}
 
 	// Map trigger
-	model.Trigger = r.mapTriggerToState(&policy.Trigger, model.Trigger)
+	model.Trigger = r.mapTriggerToState(&policy.Trigger)
 
 	// Map type configurations
 	model.TypeConfiguration = r.mapTypeConfigurationsToState(ctx, policy.TypeConfigurations)
@@ -254,8 +254,8 @@ func (r *automationPolicyResourceFramework) mapTagsToState(ctx context.Context, 
 }
 
 // mapTriggerToState maps trigger data from API to state model
-func (r *automationPolicyResourceFramework) mapTriggerToState(trigger *restapi.Trigger, triggerModel TriggerModel) TriggerModel {
-
+func (r *automationPolicyResourceFramework) mapTriggerToState(trigger *restapi.Trigger) TriggerModel {
+	triggerModel := TriggerModel{}
 	triggerModel.ID = types.StringValue(trigger.Id)
 
 	triggerModel.Type = types.StringValue(trigger.Type)
