@@ -9,8 +9,6 @@ const (
 
 	// SyntheticAlertConfigFieldName constant value for the schema field name
 	SyntheticAlertConfigFieldName = "name"
-	// SyntheticAlertConfigFieldFullName constant value for the schema field full name
-	SyntheticAlertConfigFieldFullName = "full_name"
 	// SyntheticAlertConfigFieldDescription constant value for the schema field description
 	SyntheticAlertConfigFieldDescription = "description"
 	// SyntheticAlertConfigFieldSyntheticTestIds constant value for the schema field synthetic_test_ids

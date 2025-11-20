@@ -13,11 +13,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Helper function to create pointer
-func ptr[T any](v T) *T {
-	return &v
-}
-
 func TestNewSliConfigResourceHandleFramework(t *testing.T) {
 	resource := NewSliConfigResourceHandleFramework()
 	require.NotNil(t, resource)

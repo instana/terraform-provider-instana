@@ -15,11 +15,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Helper function to create pointer
-func ptr[T any](v T) *T {
-	return &v
-}
-
 // TestNewAutomationActionResourceHandleFramework tests the resource initialization
 func TestNewAutomationActionResourceHandleFramework(t *testing.T) {
 	resource := NewAutomationActionResourceHandleFramework()

@@ -181,9 +181,8 @@ const (
 	SloConfigFromTerraformIdPrefix = "SLOTF"
 
 	//SloConfigField names for terraform
-	SloConfigFieldName                      = "name"
-	SloConfigFieldFullName                  = "full_name"
-	SloConfigFieldTarget                    = "target"
+	SloConfigFieldName   = "name"
+	SloConfigFieldTarget = "target"
 	SloConfigFieldTags                      = "tags"
 	SloConfigFieldLastUpdated               = "last_updated"
 	SloConfigFieldCreatedDate               = "created_date"

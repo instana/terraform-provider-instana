@@ -15,11 +15,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Helper function to create pointer
-func ptr[T any](v T) *T {
-	return &v
-}
-
 func TestNewInfraAlertConfigResourceHandleFramework(t *testing.T) {
 	resource := NewInfraAlertConfigResourceHandleFramework()
 	require.NotNil(t, resource)
