@@ -167,6 +167,14 @@ const (
 	SloConfigErrMappingTimeWindowToState = "Error mapping time window to state"
 	// SloConfigErrUnsupportedTimeWindowType is the error message for unsupported time window type
 	SloConfigErrUnsupportedTimeWindowType = "Unsupported time window type: %s"
+	// SloConfigErrInfraTypeRequired is the error title for missing infrastructure type
+	SloConfigErrInfraTypeRequired = "Infrastructure type required"
+	// SloConfigErrInfraTypeRequiredMsg is the error message for missing infrastructure type
+	SloConfigErrInfraTypeRequiredMsg = "infra_type is required for infrastructure entity"
+	// SloConfigErrSaturationRequired is the error title for missing saturation indicator fields
+	SloConfigErrSaturationRequired = "Saturation indicator fields required"
+	// SloConfigErrSaturationRequiredMsg is the error message for missing saturation indicator fields
+	SloConfigErrSaturationRequiredMsg = "threshold and operator are required for saturation indicator"
 
 	// ResourceInstanaSloConfig the name of the terraform-provider-instana resource to manage SLI configurations
 	ResourceInstanaSloConfig       = "instana_slo_config"
