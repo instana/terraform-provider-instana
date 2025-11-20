@@ -1,7 +1,7 @@
 package automationaction
 
-// ResourceInstanaAutomationActionFramework the name of the terraform-provider-instana resource to manage automation actions
-const ResourceInstanaAutomationActionFramework = "automation_action"
+// ResourceInstanaAutomationAction the name of the terraform-provider-instana resource to manage automation actions
+const ResourceInstanaAutomationAction = "automation_action"
 
 // Resource description
 const AutomationActionDescResource = "This resource manages automation actions in Instana."

@@ -1,4 +1,4 @@
-module github.com/gessnerfl/terraform-provider-instana
+module github.com/instana/terraform-provider-instana
 
 go 1.24.0
 

@@ -1,13 +1,13 @@
 package slocorrectionconfig
 
-// ResourceInstanaSloCorrectionConfigFramework the name of the terraform-provider-instana resource to manage SLO correction configurations
-const ResourceInstanaSloCorrectionConfigFramework = "slo_correction_config"
+// ResourceInstanaSloCorrectionConfig the name of the terraform-provider-instana resource to manage SLO correction configurations
+const ResourceInstanaSloCorrectionConfig = "slo_correction_config"
 
 const (
 	// Slo Correction Config Field names for Terraform
-	SloCorrectionConfigFieldID          = "id"
-	SloCorrectionConfigFieldName        = "name"
-	SloCorrectionConfigFieldDescription = "description"
+	SloCorrectionConfigFieldID                      = "id"
+	SloCorrectionConfigFieldName                    = "name"
+	SloCorrectionConfigFieldDescription             = "description"
 	SloCorrectionConfigFieldActive                  = "active"
 	SloCorrectionConfigFieldScheduling              = "scheduling"
 	SloCorrectionConfigFieldSloIds                  = "slo_ids"

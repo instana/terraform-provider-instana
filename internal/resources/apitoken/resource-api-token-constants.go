@@ -2,8 +2,8 @@ package apitoken
 
 // Description constants for API Token resource
 const (
-	// ResourceInstanaAPITokenFramework the name of the terraform-provider-instana resource to manage API tokens
-	ResourceInstanaAPITokenFramework = "api_token"
+	// ResourceInstanaAPIToken the name of the terraform-provider-instana resource to manage API tokens
+	ResourceInstanaAPIToken = "api_token"
 
 	// Common field names
 	APITokenFieldID = "id"
@@ -97,7 +97,7 @@ const (
 	APITokenDescCanConfigureApdex                         = "Configures if the API token is allowed to configure Apdex"
 	APITokenDescCanConfigureServiceLevelCorrectionWindows = "Configures if the API token is allowed to configure service level Correction Windows"
 	APITokenDescCanConfigureServiceLevelSmartAlerts       = "Configures if the API token is allowed to configure service level smart alerts"
-	APITokenDescCanConfigureServiceLevels = "Configures if the API token is allowed to configure service levels"
+	APITokenDescCanConfigureServiceLevels                 = "Configures if the API token is allowed to configure service levels"
 
 	//APITokenFieldAccessGrantingToken constant value for the schema field access_granting_token
 	APITokenFieldAccessGrantingToken = "access_granting_token"

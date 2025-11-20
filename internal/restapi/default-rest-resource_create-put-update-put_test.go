@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"testing"
 
-	. "github.com/gessnerfl/terraform-provider-instana/internal/restapi"
-	"github.com/gessnerfl/terraform-provider-instana/mocks"
+	. "github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/terraform-provider-instana/mocks"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )

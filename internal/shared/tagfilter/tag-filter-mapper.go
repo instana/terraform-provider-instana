@@ -1,7 +1,7 @@
 package tagfilter
 
 import (
-	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
+	"github.com/instana/terraform-provider-instana/internal/restapi"
 )
 
 // NewMapper creates a new instance of the Mapper

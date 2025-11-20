@@ -2,8 +2,8 @@ package datasources
 
 // Data source name constants
 const (
-	// DataSourceInstanaHostAgentsFramework the name of the terraform-provider-instana data source to read host agents
-	DataSourceInstanaHostAgentsFramework = "host_agents"
+	// DataSourceInstanaHostAgents the name of the terraform-provider-instana data source to read host agents
+	DataSourceInstanaHostAgents = "host_agents"
 	// DataSourceHostAgents the name of the terraform-provider-instana data source
 	DataSourceHostAgents = "instana_host_agents"
 )

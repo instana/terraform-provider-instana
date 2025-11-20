@@ -1,7 +1,7 @@
 package team
 
-// ResourceInstanaTeamFramework the name of the terraform-provider-instana resource to manage teams for role based access control
-const ResourceInstanaTeamFramework = "rbac_team"
+// ResourceInstanaTeam the name of the terraform-provider-instana resource to manage teams for role based access control
+const ResourceInstanaTeam = "rbac_team"
 
 //nolint:gosec
 const (

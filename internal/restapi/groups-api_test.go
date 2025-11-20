@@ -3,7 +3,7 @@ package restapi_test
 import (
 	"testing"
 
-	. "github.com/gessnerfl/terraform-provider-instana/internal/restapi"
+	. "github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
