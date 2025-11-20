@@ -32,7 +32,7 @@ func NewCustomDashboardResourceHandleFramework() resourcehandle.ResourceHandleFr
 			Schema: schema.Schema{
 				Description: CustomDashboardDescResource,
 				Attributes: map[string]schema.Attribute{
-					"id": schema.StringAttribute{
+					CustomDashboardFieldID: schema.StringAttribute{
 						Computed:    true,
 						Description: CustomDashboardDescID,
 						PlanModifiers: []planmodifier.String{

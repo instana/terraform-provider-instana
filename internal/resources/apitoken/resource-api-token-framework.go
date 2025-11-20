@@ -25,7 +25,7 @@ func NewAPITokenResourceHandleFramework() resourcehandle.ResourceHandleFramework
 			Schema: schema.Schema{
 				Description: APITokenDescResource,
 				Attributes: map[string]schema.Attribute{
-					"id": schema.StringAttribute{
+					APITokenFieldID: schema.StringAttribute{
 						Computed:    true,
 						Description: APITokenDescID,
 						PlanModifiers: []planmodifier.String{
