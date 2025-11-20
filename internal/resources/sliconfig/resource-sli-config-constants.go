@@ -6,8 +6,6 @@ const ResourceInstanaSliConfigFramework = "sli_config"
 const (
 	//SliConfigFieldName constant value for the schema field name
 	SliConfigFieldName = "name"
-	//SliConfigFieldFullName constant value for schema field full_name
-	SliConfigFieldFullName = "full_name"
 	//SliConfigFieldInitialEvaluationTimestamp constant value for the schema field initial_evaluation_timestamp
 	SliConfigFieldInitialEvaluationTimestamp = "initial_evaluation_timestamp"
 	//SliConfigFieldMetricConfiguration constant value for the schema field metric_configuration

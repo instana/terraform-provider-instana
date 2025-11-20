@@ -9,8 +9,6 @@ const (
 	InfraAlertConfigFieldID = "id"
 	// InfraAlertConfigFieldName constant value for the schema field name
 	InfraAlertConfigFieldName = "name"
-	// InfraAlertConfigFieldFullName constant value for the schema field full_name
-	InfraAlertConfigFieldFullName = "full_name"
 	// InfraAlertConfigFieldDescription constant value for the schema field description
 	InfraAlertConfigFieldDescription = "description"
 	// InfraAlertConfigFieldTagFilter constant value for the schema field tag_filter

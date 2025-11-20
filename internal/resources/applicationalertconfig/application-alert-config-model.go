@@ -120,8 +120,3 @@ type RuleWithThresholdModel struct {
 	ThresholdOperator types.String               `tfsdk:"threshold_operator"`
 	Thresholds        *ApplicationThresholdModel `tfsdk:"threshold"`
 }
-
-// ThresholdConfigRuleModel represents a threshold configuration for a rule
-type ThresholdConfigRuleModel struct {
-	Value types.Float64 `tfsdk:"value"`
-}
