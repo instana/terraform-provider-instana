@@ -254,8 +254,8 @@ func (r *automationPolicyResourceFramework) mapTagsToState(ctx context.Context, 
 }
 
 // mapTriggerToState maps trigger data from API to state model
-func (r *automationPolicyResourceFramework) mapTriggerToState(trigger restapi.Trigger) TriggerModel {
-	triggerModel := TriggerModel{}
+func (r *automationPolicyResourceFramework) mapTriggerToState(trigger restapi.Trigger) *TriggerModel {
+	triggerModel := &TriggerModel{}
 	triggerModel.ID = types.StringValue(trigger.Id)
 
 	triggerModel.Type = types.StringValue(trigger.Type)
@@ -421,7 +421,7 @@ func (r *automationPolicyResourceFramework) MapStateToDataObject(ctx context.Con
 }
 
 // mapTriggerFromState converts trigger from state model to API format
-func (r *automationPolicyResourceFramework) mapTriggerFromState(ctx context.Context, triggerModel TriggerModel) (restapi.Trigger, diag.Diagnostics) {
+func (r *automationPolicyResourceFramework) mapTriggerFromState(ctx context.Context, triggerModel *TriggerModel) (restapi.Trigger, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	trigger := restapi.Trigger{
