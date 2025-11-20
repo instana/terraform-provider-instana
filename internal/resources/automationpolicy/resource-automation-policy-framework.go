@@ -210,7 +210,7 @@ func (r *automationPolicyResourceFramework) UpdateState(ctx context.Context, sta
 	}
 
 	// Map trigger (only update if not in plan or state to handle the drift)
-	if model.Trigger != nil {
+	if model.Trigger == nil {
 		model.Trigger = r.mapTriggerToState(policy.Trigger)
 	}
 
