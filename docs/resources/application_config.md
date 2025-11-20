@@ -1,11 +1,18 @@
 # Application Configuration Resource
 
+Management of application configurations (definition of application perspectives).
+
+API Documentation: <https://instana.github.io/openapi/#operation/putApplicationConfig>
+
 ---
-## ⚠️ BREAKING CHANGES - Plugin Framework Migration
+## ⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)
 
-**This resource has been migrated to the Terraform Plugin Framework.** While the basic structure remains similar, there are important syntax changes for nested blocks:
+ **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block struture.
 
-### Migration Guide
+
+## Migration Guide (v5 to v6)
+
+### Syntax Changes Overview
 
 **OLD Syntax (SDK v2):**
 ```hcl
@@ -46,12 +53,6 @@ resource "instana_application_config" "example" {
 
 ---
 
-Management of application configurations (definition of application perspectives).
-
-API Documentation: <https://instana.github.io/openapi/#operation/putApplicationConfig>
-
----
-## ⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)
 
  **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
 

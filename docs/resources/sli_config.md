@@ -1,32 +1,25 @@
 # SLI Configuration Resource
 
-> **⚠️ BREAKING CHANGES in v3.0.0**
-> 
-> This resource has been migrated from Terraform SDK v2 to the Plugin Framework. While most configurations remain compatible, there are important syntax changes you need to be aware of.
->
-> **Key Changes:**
-> - `metric_configuration` block now uses attribute syntax `= { }` instead of block syntax
-> - `sli_entity` block now uses attribute syntax `= { }` instead of block syntax
-> - All nested entity type blocks use attribute syntax
-> - **IMPORTANT**: SLI Configurations are immutable - updates will result in errors
-> - See [Migration Guide](#migration-guide-v2-to-v3) below for detailed examples
-
 Management of SLI configurations. A service level indicator (SLI) is the defined quantitative measure of one characteristic of the level of service that is provided to a customer. Common examples of such indicators are error rate or response latency of a service.
 
 API Documentation: <https://instana.github.io/openapi/#operation/createSli>
 **Note:** SLI Configurations cannot be changed. An update of the resource will result in an error. To update an SLI you need to create a new SLI and delete the old one.
 
+
 ## ⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)
+
+ **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block struture.
+
 
 **Note:** SLI Configurations cannot be changed. An update of the resource will result in an error. To update an SLI you need to create a new SLI and delete the old one.
 
-## Migration Guide (v2 to v3)
+## Migration Guide (v5 to v6)
 
 ### Syntax Changes Overview
 
-The main changes are in how `metric_configuration` and `sli_entity` blocks are defined. In v3, all nested configurations use attribute syntax instead of block syntax.
+The main changes are in how `metric_configuration` and `sli_entity` blocks are defined. In v6, all nested configurations use attribute syntax instead of block syntax.
 
-#### OLD (v2.x) Syntax:
+#### OLD (v5.x) Syntax:
 ```hcl
 resource "instana_sli_config" "example" {
   name = "API Latency SLI"
@@ -46,7 +39,7 @@ resource "instana_sli_config" "example" {
 }
 ```
 
-#### NEW (v3.x) Syntax:
+#### NEW (v6.x) Syntax:
 ```hcl
 resource "instana_sli_config" "example" {
   name = "API Latency SLI"

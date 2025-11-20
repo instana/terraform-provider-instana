@@ -1,33 +1,36 @@
 # Website Monitoring Config Resource
 
-> **⚠️ BREAKING CHANGES - Plugin Framework Migration**
->
-> This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework. The schema has transitioned from **block structure to attribute format**.
->
-> **Major Changes:**
-> - All attributes remain top-level (no nested blocks in this resource)
-> - The `id` attribute is now computed with a plan modifier for state management
-> - The `app_name` attribute is computed and returned by the API
-> - Attribute syntax remains the same, but schema validation is enhanced
->
-> **Migration Example:**
-> ```hcl
-> # OLD (SDK v2)
-> resource "instana_website_monitoring_config" "example" {
->   name = "my-website"
-> }
->
-> # NEW (Plugin Framework - Same Syntax)
-> resource "instana_website_monitoring_config" "example" {
->   name = "my-website"
-> }
-> ```
->
-> The syntax is fully compatible, but the framework provides better validation and state management.
-
 Resource to configure websites in Instana for Real User Monitoring (RUM).
 
 API Documentation: <https://instana.github.io/openapi/#tag/Website-Configuration
+
+ **⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)**
+
+ **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block struture.
+
+ This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework. The schema has transitioned from **block structure to attribute format**.
+
+## Migration Guide (v5 to v6)
+
+### Syntax Changes Overview
+ - All attributes remain top-level (no nested blocks in this resource)
+ - The `id` attribute is now computed with a plan modifier for state management
+ - The `app_name` attribute is computed and returned by the API
+ - Attribute syntax remains the same, but schema validation is enhanced
+
+ **Migration Example:**
+ ```hcl
+ # OLD (SDK v2)
+ resource "instana_website_monitoring_config" "example" {
+   name = "my-website"
+ }
+
+ # NEW (Plugin Framework - Same Syntax)
+ resource "instana_website_monitoring_config" "example" {
+   name = "my-website"
+ }
+ ```
+
 
  **⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)**
 
@@ -307,7 +310,7 @@ output "website_ids" {
   description = "Map of website names to their IDs"
   value = {
     for name, config in instana_website_monitoring_config.websites :
-    name => config.id
+    name = config.id
   }
 }
 ```
@@ -478,7 +481,7 @@ $ terraform import instana_website_monitoring_config.my_website 60845e4e5e6b9cf8
 After creating a website monitoring configuration:
 
 1. **Obtain the JavaScript Snippet**: Use the Instana UI to get the JavaScript snippet for your website
-2. **Install the Snippet**: Add the snippet to your website's HTML (typically in the `<head>` section)
+2. **Install the Snippet**: Add the snippet to your website's HTML (typically in the `<head` section)
 3. **Verify Data Collection**: Check the Instana UI to confirm that data is being collected
 
 ### Application Name

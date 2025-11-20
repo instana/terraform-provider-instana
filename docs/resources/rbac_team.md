@@ -4,7 +4,6 @@ Management of Teams for role-based access control (RBAC). RBAC teams allow you t
 
 API Documentation: <https://instana.github.io/openapi/#tag/Teams>
 
-The ID of the resource which is also used as unique identifier in Instana is auto generated!
 
 ## Example Usage
 

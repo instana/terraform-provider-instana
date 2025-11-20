@@ -1,81 +1,84 @@
 # SLO Configuration Resource
 
-> **⚠️ BREAKING CHANGES - Plugin Framework Migration**
->
-> This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework. The schema has transitioned from **block structure to attribute format**.
->
-> **Major Changes:**
-> - All nested configurations (`entity`, `indicator`, `time_window`) are now **single nested attributes** instead of blocks
-> - Use `attribute = { ... }` syntax instead of `attribute { ... }` block syntax
-> - All nested attributes within entity, indicator, and time_window follow the same pattern
-> - The `id` attribute is now computed with a special prefix (`terraform-slo-config-`)
-> - Tag filter expressions are validated and normalized
-> - RBAC tags are now structured as list of objects with `display_name` and `id`
->
-> **Migration Example:**
-> ```hcl
-> # OLD (SDK v2 - Block Structure)
-> resource "instana_slo_config" "example" {
->   name   = "my-slo"
->   target = 0.99
->   
->   entity {
->     application {
->       application_id = "app-123"
->       boundary_scope = "ALL"
->     }
->   }
->   
->   indicator {
->     time_based_latency {
->       threshold   = 500
->       aggregation = "P95"
->     }
->   }
->   
->   time_window {
->     rolling {
->       duration      = 7
->       duration_unit = "day"
->     }
->   }
-> }
->
-> # NEW (Plugin Framework - Attribute Structure)
-> resource "instana_slo_config" "example" {
->   name   = "my-slo"
->   target = 0.99
->   
->   entity = {
->     application = {
->       application_id = "app-123"
->       boundary_scope = "ALL"
->     }
->   }
->   
->   indicator = {
->     time_based_latency = {
->       threshold   = 500
->       aggregation = "P95"
->     }
->   }
->   
->   time_window = {
->     rolling = {
->       duration      = 7
->       duration_unit = "day"
->     }
->   }
-> }
-> ```
->
-> Please update your Terraform configurations to use the new attribute-based syntax with equals signs.
-
 An SLO (Service Level Objective) is a specific, measurable target that defines the expected level of performance, reliability, or availability of a service, agreed upon between a service provider and its users or customers. For instance, an SLO could state that a specific SLI (Service Level Indicator), such as availability, must reach 99.9% over a set period.
 
 API Documentation: <https://instana.github.io/openapi/#operation/createSloConfig
 
-The ID of the resource which is also used as unique identifier in Instana is auto-generated with the prefix `terraform-slo-config-`!
+ **⚠️ BREAKING CHANGES - Plugin Framework Migration**
+
+ **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block struture.
+
+
+## Migration Guide (v5 to v6)
+
+### Syntax Changes Overview
+
+ **Major Changes:**
+ - All nested configurations (`entity`, `indicator`, `time_window`) are now **single nested attributes** instead of blocks
+ - Use `attribute = { ... }` syntax instead of `attribute { ... }` block syntax
+ - All nested attributes within entity, indicator, and time_window follow the same pattern
+ - The `id` attribute is now computed with a special prefix (`terraform-slo-config-`)
+ - Tag filter expressions are validated and normalized
+ - RBAC tags are now structured as list of objects with `display_name` and `id`
+
+ **Migration Example:**
+ ```hcl
+ # OLD (SDK v2 - Block Structure)
+ resource "instana_slo_config" "example" {
+   name   = "my-slo"
+   target = 0.99
+   
+   entity {
+     application {
+       application_id = "app-123"
+       boundary_scope = "ALL"
+     }
+   }
+   
+   indicator {
+     time_based_latency {
+       threshold   = 500
+       aggregation = "P95"
+     }
+   }
+   
+   time_window {
+     rolling {
+       duration      = 7
+       duration_unit = "day"
+     }
+   }
+ }
+
+ # NEW (Plugin Framework - Attribute Structure)
+ resource "instana_slo_config" "example" {
+   name   = "my-slo"
+   target = 0.99
+   
+   entity = {
+     application = {
+       application_id = "app-123"
+       boundary_scope = "ALL"
+     }
+   }
+   
+   indicator = {
+     time_based_latency = {
+       threshold   = 500
+       aggregation = "P95"
+     }
+   }
+   
+   time_window = {
+     rolling = {
+       duration      = 7
+       duration_unit = "day"
+     }
+   }
+ }
+ ```
+
+ Please update your Terraform configurations to use the new attribute-based syntax with equals signs.
 
 ## Example Usage
 
@@ -341,7 +344,7 @@ resource "instana_slo_config" "website_traffic" {
     traffic = {
       traffic_type = "all"
       threshold    = 1000.0
-      operator     = ">="
+      operator     = "="
     }
   }
   
@@ -1010,7 +1013,7 @@ No additional attributes required. This is an empty object: `event_based_availab
 
 * `traffic_type` - (Required) The type of traffic to measure. Valid values: `all`, `erroneous`
 * `threshold` - (Required) The traffic threshold. Must be greater than 0
-* `operator` - (Required) The comparison operator. Valid values: `>`, `>=`, `<`, `<=`
+* `operator` - (Required) The comparison operator. Valid values: ``, `=`, `<`, `<=`
 
 #### Custom Indicator Attributes
 
