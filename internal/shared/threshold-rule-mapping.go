@@ -299,7 +299,6 @@ func MapThresholdsAllPluginFromState(ctx context.Context, thresholdStruct *Thres
 	if thresholdStruct != nil {
 		// Process warning threshold
 		if thresholdStruct.Warning != nil {
-			log.Printf("inside warning thresh")
 
 			warningThreshold, warningDiags := MapThresholdRuleAllPluginFromState(ctx, thresholdStruct.Warning)
 			diags.Append(warningDiags...)
@@ -314,7 +313,6 @@ func MapThresholdsAllPluginFromState(ctx context.Context, thresholdStruct *Thres
 
 		// Process critical threshold
 		if thresholdStruct.Critical != nil {
-			log.Printf("inside warning thresh")
 
 			criticalThreshold, criticalDiags := MapThresholdRuleAllPluginFromState(ctx, thresholdStruct.Critical)
 			diags.Append(criticalDiags...)
@@ -341,7 +339,6 @@ func MapThresholdRuleAllPluginFromState(ctx context.Context, thresholdObj *Thres
 
 	// Check for static threshold
 	if thresholdObj.Static != nil {
-		log.Printf("inside static thresh")
 
 		staticVal := thresholdObj.Static
 		//operator := util.SetStringPointerFromState(staticVal.Operator)
@@ -357,7 +354,6 @@ func MapThresholdRuleAllPluginFromState(ctx context.Context, thresholdObj *Thres
 
 	// Check for adaptive baseline threshold
 	if thresholdObj.AdaptiveBaseline != nil {
-		log.Printf("inside adaptive thresh")
 
 		adaptiveVal := thresholdObj.AdaptiveBaseline
 		seasonality := restapi.ThresholdSeasonality(adaptiveVal.Seasonality.ValueString())
@@ -375,7 +371,6 @@ func MapThresholdRuleAllPluginFromState(ctx context.Context, thresholdObj *Thres
 
 	// Check for historic baseline threshold
 	if thresholdObj.HistoricBaseline != nil {
-		log.Printf("inside histori thresh")
 
 		baselineVal := thresholdObj.HistoricBaseline
 		//operator := util.SetStringPointerFromState(baselineVal.Operator)
