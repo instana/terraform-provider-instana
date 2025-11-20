@@ -32,7 +32,7 @@ func NewAutomationActionResourceHandleFramework() resourcehandle.ResourceHandleF
 			Schema: schema.Schema{
 				Description: AutomationActionDescResource,
 				Attributes: map[string]schema.Attribute{
-					"id": schema.StringAttribute{
+					AutomationActionFieldID: schema.StringAttribute{
 						Computed:    true,
 						Description: AutomationActionDescID,
 						PlanModifiers: []planmodifier.String{
@@ -86,7 +86,7 @@ func NewAutomationActionResourceHandleFramework() resourcehandle.ResourceHandleF
 								Required:    true,
 								Description: AutomationActionDescHttpMethod,
 								Validators: []validator.String{
-									stringvalidator.OneOf("GET", "POST", "PUT", "DELETE"),
+									stringvalidator.OneOf(HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT, HTTPMethodDELETE),
 								},
 							},
 							AutomationActionFieldBody: schema.StringAttribute{
@@ -761,9 +761,9 @@ func (r *automationActionResourceFramework) mapHttpAuth(httpModel shared.HttpMod
 // marshalBasicAuth marshals basic authentication to JSON string
 func (r *automationActionResourceFramework) marshalBasicAuth(basicAuth *shared.BasicAuthModel, diags *diag.Diagnostics) string {
 	authMap := map[string]string{
-		"type":     AutomationActionAuthTypeBasicAuth,
-		"username": basicAuth.UserName.ValueString(),
-		"password": basicAuth.Password.ValueString(),
+		AuthJSONFieldType:     AutomationActionAuthTypeBasicAuth,
+		AuthJSONFieldUsername: basicAuth.UserName.ValueString(),
+		AuthJSONFieldPassword: basicAuth.Password.ValueString(),
 	}
 	authJson, err := json.Marshal(authMap)
 	if err != nil {
@@ -779,8 +779,8 @@ func (r *automationActionResourceFramework) marshalBasicAuth(basicAuth *shared.B
 // marshalBearerToken marshals bearer token authentication to JSON string
 func (r *automationActionResourceFramework) marshalBearerToken(token *shared.BearerTokenModel, diags *diag.Diagnostics) string {
 	authMap := map[string]string{
-		"type":        AutomationActionAuthTypeBearerToken,
-		"bearerToken": token.BearerToken.ValueString(),
+		AuthJSONFieldType:        AutomationActionAuthTypeBearerToken,
+		AuthJSONFieldBearerToken: token.BearerToken.ValueString(),
 	}
 	authJson, err := json.Marshal(authMap)
 	if err != nil {
@@ -796,10 +796,10 @@ func (r *automationActionResourceFramework) marshalBearerToken(token *shared.Bea
 // marshalApiKey marshals API key authentication to JSON string
 func (r *automationActionResourceFramework) marshalApiKey(apiKey *shared.ApiKeyModel, diags *diag.Diagnostics) string {
 	authMap := map[string]string{
-		"type":        AutomationActionAuthTypeApiKey,
-		"apiKey":      apiKey.Key.ValueString(),
-		"apiKeyValue": apiKey.Value.ValueString(),
-		"apiKeyAddTo": apiKey.KeyLocation.ValueString(),
+		AuthJSONFieldType:        AutomationActionAuthTypeApiKey,
+		AuthJSONFieldAPIKey:      apiKey.Key.ValueString(),
+		AuthJSONFieldAPIKeyValue: apiKey.Value.ValueString(),
+		AuthJSONFieldAPIKeyAddTo: apiKey.KeyLocation.ValueString(),
 	}
 	authJson, err := json.Marshal(authMap)
 	if err != nil {
@@ -815,7 +815,7 @@ func (r *automationActionResourceFramework) marshalApiKey(apiKey *shared.ApiKeyM
 // marshalNoAuth marshals no authentication to JSON string
 func (r *automationActionResourceFramework) marshalNoAuth(diags *diag.Diagnostics) string {
 	authMap := map[string]string{
-		"type": AutomationActionAuthTypeNoAuth,
+		AuthJSONFieldType: AutomationActionAuthTypeNoAuth,
 	}
 	authJson, err := json.Marshal(authMap)
 	if err != nil {

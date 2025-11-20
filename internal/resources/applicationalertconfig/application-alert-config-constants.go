@@ -7,6 +7,8 @@ const ResourceInstanaApplicationAlertConfigFramework = "application_alert_config
 const ResourceInstanaGlobalApplicationAlertConfigFramework = "global_application_alert_config"
 
 const (
+	//ApplicationAlertConfigFieldID constant value for field id of resource instana_application_alert_config
+	ApplicationAlertConfigFieldID = "id"
 	//ApplicationAlertConfigFieldBoundaryScope constant value for field boundary_scope of resource instana_application_alert_config
 	ApplicationAlertConfigFieldBoundaryScope = "boundary_scope"
 	//ApplicationAlertConfigFieldDescription constant value for field description of resource instana_application_alert_config

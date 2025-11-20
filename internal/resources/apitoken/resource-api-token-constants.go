@@ -5,6 +5,9 @@ const (
 	// ResourceInstanaAPITokenFramework the name of the terraform-provider-instana resource to manage API tokens
 	ResourceInstanaAPITokenFramework = "api_token"
 
+	// Common field names
+	APITokenFieldID = "id"
+
 	APITokenDescResource                                  = "This resource manages API tokens in Instana."
 	APITokenDescID                                        = "The ID of the API token."
 	APITokenDescAccessGrantingToken                       = "The token used for the api Client used in the Authorization header to authenticate the client"
