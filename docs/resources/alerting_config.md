@@ -1,12 +1,18 @@
 # Alerting Configuration
 
+Management of alert configurations. Alert configurations define how either event types or 
+event (aka rules) are reported to integrated services (Alerting Channels).
+
+API Documentation: <https://instana.github.io/openapi/#operation/putAlert>
+
 ---
-## ⚠️ BREAKING CHANGES - Plugin Framework Migration
+## ⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)
 
-**This resource has been migrated to the Terraform Plugin Framework.** While most configurations remain compatible, there are important syntax changes for nested blocks:
+ **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block struture.
 
-### Migration Guide
+## Migration Guide (v5 to v6)
 
+### Syntax Changes Overview
 **OLD Syntax (SDK v2):**
 ```hcl
 resource "instana_alerting_config" "example" {
@@ -39,22 +45,6 @@ resource "instana_alerting_config" "example" {
 
 ---
 
-Management of alert configurations. Alert configurations define how either event types or 
-event (aka rules) are reported to integrated services (Alerting Channels).
-
-API Documentation: <https://instana.github.io/openapi/#operation/putAlert>
-
-The ID of the resource which is also used as unique identifier in Instana is auto generated!
-
----
-**Note:**
-
-Instana web UI provides the option to select for applications or a dynamic filter query. This is a UI feature only. To setup
-altering configuration for applications you need to express this by a dynamic filter query:
-
-`entity.application.id:\"my-application-perspective-id\""`
-
----
 
 ## Example Usage
 

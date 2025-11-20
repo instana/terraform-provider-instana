@@ -1,11 +1,17 @@
 # Custom Dashboard
 
+Management of custom dashboards.
+
+API Documentation: <https://instana.github.io/openapi/#tag/Custom-Dashboards>
+
 ---
-## ⚠️ BREAKING CHANGES - Plugin Framework Migration
+## ⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)
 
-**This resource has been migrated to the Terraform Plugin Framework.** The migration introduces syntax changes for nested blocks:
+ **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block struture.
 
-### Migration Guide
+## Migration Guide (v5 to v6)
+
+### Syntax Changes Overview
 
 **OLD Syntax (SDK v2):**
 ```hcl
@@ -52,10 +58,6 @@ resource "instana_custom_dashboard" "example" {
 - Better state management
 
 ---
-
-Management of custom dashboards.
-
-API Documentation: <https://instana.github.io/openapi/#tag/Custom-Dashboards>
 
 **Permissions Required:**
 - `canCreatePublicCustomDashboards` (Creation of public custom dashboards)

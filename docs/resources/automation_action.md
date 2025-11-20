@@ -1,12 +1,17 @@
 # Automation Action Resource
 
+
+Management of Automation Actions.
+
+API Documentation: <https://instana.github.io/openapi/#tag/Action-Catalog>
+
 ---
-## ⚠️ BREAKING CHANGES - Plugin Framework Migration
+## ⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)
 
-**This resource has been migrated to the Terraform Plugin Framework.** The migration introduces syntax changes for nested blocks:
-
-### Migration Guide
-
+ **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block struture.
+ 
+## Migration Guide (v5 to v6)
+### Syntax Changes Overview
 **OLD Syntax (SDK v2):**
 ```hcl
 resource "instana_automation_action" "example" {
@@ -65,10 +70,6 @@ resource "instana_automation_action" "example" {
 - Improved state management
 
 ---
-
-Management of Automation Actions.
-
-API Documentation: <https://instana.github.io/openapi/#tag/Action-Catalog>
 
 ## Example Usage
 
