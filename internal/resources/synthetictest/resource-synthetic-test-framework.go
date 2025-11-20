@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"regexp"
 
 	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"

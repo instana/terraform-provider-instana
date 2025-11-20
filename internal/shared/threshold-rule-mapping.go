@@ -2,7 +2,6 @@ package shared
 
 import (
 	"context"
-	"log"
 	"math"
 
 	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
