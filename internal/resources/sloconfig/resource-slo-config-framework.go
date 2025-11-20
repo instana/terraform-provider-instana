@@ -713,7 +713,7 @@ func (r *sloConfigResourceFramework) validateInfrastructureEntityFields(model *I
 	var diags diag.Diagnostics
 
 	if model.InfraType.IsNull() || model.InfraType.IsUnknown() {
-		diags.AddError("Infrastructure type required", "infra_type is required for infrastructure entity")
+		diags.AddError(SloConfigErrInfraTypeRequired, SloConfigErrInfraTypeRequiredMsg)
 	}
 
 	return diags
@@ -918,7 +918,7 @@ func (r *sloConfigResourceFramework) mapSaturationIndicator(model *SaturationInd
 
 	if model.Threshold.IsNull() || model.Threshold.IsUnknown() ||
 		model.Operator.IsNull() || model.Operator.IsUnknown() {
-		diags.AddError("Saturation indicator fields required", "threshold and operator are required for saturation indicator")
+		diags.AddError(SloConfigErrSaturationRequired, SloConfigErrSaturationRequiredMsg)
 		return restapi.SloIndicator{}, diags
 	}
 
