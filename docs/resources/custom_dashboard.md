@@ -7,18 +7,24 @@ API Documentation: <https://instana.github.io/openapi/#tag/Custom-Dashboards>
 ---
 ## ⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)
 
- **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block struture.
+ **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
 
 ## Migration Guide (v5 to v6)
 
 ### Syntax Changes Overview
 
-**OLD Syntax (SDK v2):**
+- `access_rule` now uses **list syntax** with `= [{ }]` instead of block syntax
+- Enhanced validation for access types and relation types
+- Improved JSON normalization for widgets
+- Better state management
+
+#### OLD (v5.x) Syntax:
+
 ```hcl
 resource "instana_custom_dashboard" "example" {
   title = "Example Dashboard"
   
-  access_rule { 
+  access_rule {
     access_type   = "READ_WRITE"
     relation_type = "USER"
     related_id    = "user-id-1"
@@ -33,7 +39,8 @@ resource "instana_custom_dashboard" "example" {
 }
 ```
 
-**NEW Syntax (Plugin Framework):**
+#### NEW (v6.x) Syntax:
+
 ```hcl
 resource "instana_custom_dashboard" "example" {
   title = "Example Dashboard"
@@ -50,12 +57,6 @@ resource "instana_custom_dashboard" "example" {
   widgets = file("${path.module}/widgets.json")
 }
 ```
-
-**Key Changes:**
-- `access_rule` now uses **list syntax** with `= [{ }]` instead of block syntax
-- Enhanced validation for access types and relation types
-- Improved JSON normalization for widgets
-- Better state management
 
 ---
 

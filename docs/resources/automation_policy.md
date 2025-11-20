@@ -7,13 +7,22 @@ API Documentation: <https://instana.github.io/openapi/#tag/Policies>
 ---
 ## ⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)
 
- **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block struture.
+ **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
 
 ## Migration Guide (v5 to v6)
 
 ### Syntax Changes Overview
 
-**OLD Syntax (SDK v2):**
+- `trigger` now uses **object syntax** with `= { }`
+- `type_configuration` now uses **list syntax** with `= [{ }]`
+- `action` within type_configuration uses **list syntax** with `= [{ }]`
+- `condition` now uses **object syntax** with `= { }`
+- Actions now require full action definition (not just action_id)
+- Enhanced validation and better error messages
+- Improved state management
+
+#### OLD (v5.x) Syntax:
+
 ```hcl
 resource "instana_automation_policy" "example" {
   name        = "Hello world"
@@ -44,7 +53,8 @@ resource "instana_automation_policy" "example" {
 }
 ```
 
-**NEW Syntax (Plugin Framework):**
+#### NEW (v6.x) Syntax:
+
 ```hcl
 resource "instana_automation_policy" "example" {
   name        = "Hello world"
@@ -80,15 +90,6 @@ resource "instana_automation_policy" "example" {
   }]
 }
 ```
-
-**Key Changes:**
-- `trigger` now uses **object syntax** with `= { }`
-- `type_configuration` now uses **list syntax** with `= [{ }]`
-- `action` within type_configuration uses **list syntax** with `= [{ }]`
-- `condition` now uses **object syntax** with `= { }`
-- Actions now require full action definition (not just action_id)
-- Enhanced validation and better error messages
-- Improved state management
 
 ---
 
