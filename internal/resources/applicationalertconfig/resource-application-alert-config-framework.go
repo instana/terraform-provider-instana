@@ -32,7 +32,7 @@ func NewApplicationAlertConfigResourceHandleFramework() resourcehandle.ResourceH
 			Schema: schema.Schema{
 				Description: "This resource manages application alert configurations in Instana.",
 				Attributes: map[string]schema.Attribute{
-					"id": schema.StringAttribute{
+					ApplicationAlertConfigFieldID: schema.StringAttribute{
 						Computed:    true,
 						Description: "The ID of the application alert configuration.",
 						PlanModifiers: []planmodifier.String{

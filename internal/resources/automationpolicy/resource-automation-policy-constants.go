@@ -43,6 +43,7 @@ const AutomationPolicyDescActionAgentID = "The identifier of the agent host."
 
 // Field names
 const (
+	AutomationPolicyFieldID            = "id"
 	AutomationPolicyFieldScheduling    = "scheduling"
 	AutomationPolicyFieldStartTime     = "start_time"
 	AutomationPolicyFieldDuration      = "duration"

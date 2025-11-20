@@ -29,7 +29,8 @@ const (
 
 // Field name constants
 const (
-
+	//ApplicationConfigFieldID field name for id
+	ApplicationConfigFieldID = "id"
 	//ApplicationConfigFieldAccessRules field name for access rules
 	ApplicationConfigFieldAccessRules = "access_rules"
 	//ApplicationConfigFieldAccessType field name for access type
