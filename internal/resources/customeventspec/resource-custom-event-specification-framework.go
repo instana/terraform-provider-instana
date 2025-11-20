@@ -346,7 +346,7 @@ func (r *customEventSpecificationResourceFramework) UpdateState(ctx context.Cont
 	model.ExpirationTime = util.SetInt64PointerToState(spec.ExpirationTime)
 
 	// Process rules if present (preserve the value from plan/model to handle the value drift)
-	if len(spec.Rules) == 0 {
+	if model.Rules == nil {
 		model.Rules = r.buildRulesModel(spec.Rules, &diags)
 	}
 

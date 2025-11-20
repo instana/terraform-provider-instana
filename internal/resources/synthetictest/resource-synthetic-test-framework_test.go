@@ -119,7 +119,7 @@ func (m *mockInstanaAPI) WebsiteAlertConfig() restapi.RestResource[*restapi.Webs
 func (m *mockInstanaAPI) InfraAlertConfig() restapi.RestResource[*restapi.InfraAlertConfig] {
 	return nil
 }
-func (m *mockInstanaAPI) Teams() restapi.RestResource[*restapi.Team] { return nil }
+func (m *mockInstanaAPI) Teams() restapi.RestResource[*restapi.Team]   { return nil }
 func (m *mockInstanaAPI) Groups() restapi.RestResource[*restapi.Group] { return nil }
 func (m *mockInstanaAPI) CustomDashboards() restapi.RestResource[*restapi.CustomDashboard] {
 	return nil
@@ -1042,6 +1042,9 @@ func TestUpdateState(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+		
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
@@ -1073,6 +1076,9 @@ func TestUpdateState(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+		
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
@@ -1105,6 +1111,9 @@ func TestUpdateState(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+		
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
@@ -1137,6 +1146,9 @@ func TestUpdateState(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+		
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
@@ -1169,6 +1181,9 @@ func TestUpdateState(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+		
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
@@ -1199,6 +1214,9 @@ func TestUpdateState(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+		
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
@@ -1229,6 +1247,9 @@ func TestUpdateState(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+		
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
@@ -1269,6 +1290,9 @@ func TestUpdateState(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+		
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
@@ -1311,6 +1335,9 @@ func TestUpdateState(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+		
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
@@ -1360,6 +1387,9 @@ func TestUpdateState(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+		
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
@@ -1398,6 +1428,9 @@ func TestUpdateState(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+		
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
@@ -1432,6 +1465,9 @@ func TestUpdateState(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+		
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
@@ -1465,6 +1501,9 @@ func TestUpdateState(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+		
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
@@ -1498,6 +1537,9 @@ func TestUpdateState(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+		
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
@@ -1543,6 +1585,9 @@ func TestUpdateState(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+		
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
@@ -1581,6 +1626,9 @@ func TestUpdateState(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+		
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
@@ -1614,6 +1662,9 @@ func TestUpdateState(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+		
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
@@ -1645,6 +1696,9 @@ func TestUpdateState(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+		
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
@@ -1677,6 +1731,9 @@ func TestUpdateState(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+		
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
@@ -1712,6 +1769,9 @@ func TestUpdateState(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+		
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
@@ -1746,6 +1806,9 @@ func TestUpdateState(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+		
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
@@ -1793,6 +1856,9 @@ func TestUpdateState(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+		
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
@@ -1916,6 +1982,9 @@ func TestUpdateStateEdgeCases(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+		
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
@@ -1954,6 +2023,9 @@ func TestUpdateStateEdgeCases(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+		
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
@@ -2002,6 +2074,9 @@ func TestUpdateStateEdgeCases(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+		
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
@@ -2047,6 +2122,9 @@ func TestUpdateStateEdgeCases(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+		
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
@@ -2082,6 +2160,9 @@ func TestUpdateStateEdgeCases(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+		
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 		assert.False(t, diags.HasError())
@@ -2427,6 +2508,34 @@ func TestInt64Validator(t *testing.T) {
 
 		assert.False(t, resp.Diagnostics.HasError())
 	})
+}
+
+// initializeEmptyState initializes the state with an empty model to ensure proper state initialization
+func initializeEmptyState(t *testing.T, ctx context.Context, state *tfsdk.State) {
+	emptyModel := SyntheticTestModel{
+		ID:               types.StringNull(),
+		Label:            types.StringNull(),
+		Description:      types.StringNull(),
+		Active:           types.BoolNull(),
+		ApplicationID:    types.StringNull(),
+		Applications:     types.SetNull(types.StringType),
+		MobileApps:       types.SetNull(types.StringType),
+		Websites:         types.SetNull(types.StringType),
+		CustomProperties: types.MapNull(types.StringType),
+		Locations:        types.SetNull(types.StringType),
+		PlaybackMode:     types.StringNull(),
+		TestFrequency:    types.Int64Null(),
+		RbacTags:         types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{"name": types.StringType, "value": types.StringType}}),
+		HttpAction:       nil,
+		HttpScript:       nil,
+		BrowserScript:    nil,
+		DNS:              nil,
+		SSLCertificate:   nil,
+		WebpageAction:    nil,
+		WebpageScript:    nil,
+	}
+	diags := state.Set(ctx, emptyModel)
+	require.False(t, diags.HasError(), "Failed to initialize empty state")
 }
 
 // Made with Bob

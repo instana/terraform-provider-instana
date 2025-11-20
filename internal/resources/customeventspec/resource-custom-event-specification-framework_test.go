@@ -55,7 +55,7 @@ func TestSetComputedFields(t *testing.T) {
 
 func TestGetRestResource(t *testing.T) {
 	resource := &customEventSpecificationResourceFramework{}
-	
+
 	// Verify the method exists and interface is properly implemented
 	var _ resourcehandle.ResourceHandleFramework[*restapi.CustomEventSpecification] = resource
 	assert.NotNil(t, resource.GetRestResource)
@@ -645,6 +645,9 @@ func TestUpdateState_BasicConfig(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
+	// Initialize state with empty model
+	initializeEmptyState(t, ctx, state)
+
 	diags := resource.UpdateState(ctx, state, nil, spec)
 	require.False(t, diags.HasError())
 
@@ -689,6 +692,9 @@ func TestUpdateState_WithEntityCountRule(t *testing.T) {
 	state := &tfsdk.State{
 		Schema: getTestSchema(),
 	}
+
+	// Initialize state with empty model
+	initializeEmptyState(t, ctx, state)
 
 	diags := resource.UpdateState(ctx, state, nil, spec)
 	require.False(t, diags.HasError())
@@ -738,6 +744,9 @@ func TestUpdateState_WithEntityCountVerificationRule(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
+	// Initialize state with empty model
+	initializeEmptyState(t, ctx, state)
+
 	diags := resource.UpdateState(ctx, state, nil, spec)
 	require.False(t, diags.HasError())
 
@@ -786,6 +795,9 @@ func TestUpdateState_WithEntityVerificationRule(t *testing.T) {
 	state := &tfsdk.State{
 		Schema: getTestSchema(),
 	}
+
+	// Initialize state with empty model
+	initializeEmptyState(t, ctx, state)
 
 	diags := resource.UpdateState(ctx, state, nil, spec)
 	require.False(t, diags.HasError())
@@ -840,6 +852,9 @@ func TestUpdateState_WithHostAvailabilityRule(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
+	// Initialize state with empty model
+	initializeEmptyState(t, ctx, state)
+
 	diags := resource.UpdateState(ctx, state, nil, spec)
 	require.False(t, diags.HasError())
 
@@ -883,6 +898,9 @@ func TestUpdateState_WithHostAvailabilityRuleNoCloseAfter(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
+	// Initialize state with empty model
+	initializeEmptyState(t, ctx, state)
+
 	diags := resource.UpdateState(ctx, state, nil, spec)
 	require.False(t, diags.HasError())
 
@@ -921,6 +939,9 @@ func TestUpdateState_WithSystemRule(t *testing.T) {
 	state := &tfsdk.State{
 		Schema: getTestSchema(),
 	}
+
+	// Initialize state with empty model
+	initializeEmptyState(t, ctx, state)
 
 	diags := resource.UpdateState(ctx, state, nil, spec)
 	require.False(t, diags.HasError())
@@ -970,6 +991,9 @@ func TestUpdateState_WithThresholdRule(t *testing.T) {
 	state := &tfsdk.State{
 		Schema: getTestSchema(),
 	}
+
+	// Initialize state with empty model
+	initializeEmptyState(t, ctx, state)
 
 	diags := resource.UpdateState(ctx, state, nil, spec)
 	require.False(t, diags.HasError())
@@ -1033,6 +1057,9 @@ func TestUpdateState_WithThresholdRuleAndMetricPattern(t *testing.T) {
 	state := &tfsdk.State{
 		Schema: getTestSchema(),
 	}
+
+	// Initialize state with empty model
+	initializeEmptyState(t, ctx, state)
 
 	diags := resource.UpdateState(ctx, state, nil, spec)
 	require.False(t, diags.HasError())
@@ -1100,6 +1127,9 @@ func TestUpdateState_WithMultipleRules(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
+	// Initialize state with empty model
+	initializeEmptyState(t, ctx, state)
+
 	diags := resource.UpdateState(ctx, state, nil, spec)
 	require.False(t, diags.HasError())
 
@@ -1131,6 +1161,9 @@ func TestUpdateState_WithNoRules(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
+	// Initialize state with empty model
+	initializeEmptyState(t, ctx, state)
+
 	diags := resource.UpdateState(ctx, state, nil, spec)
 	require.False(t, diags.HasError())
 
@@ -1138,7 +1171,14 @@ func TestUpdateState_WithNoRules(t *testing.T) {
 	diags = state.Get(ctx, &model)
 	require.False(t, diags.HasError())
 
-	assert.Nil(t, model.Rules)
+	// When there are no rules, buildRulesModel returns an empty RulesModel (not nil)
+	require.NotNil(t, model.Rules)
+	assert.Nil(t, model.Rules.EntityCount)
+	assert.Nil(t, model.Rules.EntityCountVerification)
+	assert.Nil(t, model.Rules.EntityVerification)
+	assert.Nil(t, model.Rules.HostAvailability)
+	assert.Nil(t, model.Rules.System)
+	assert.Nil(t, model.Rules.Threshold)
 }
 
 func TestUpdateState_WithNullOptionalFields(t *testing.T) {
@@ -1161,6 +1201,9 @@ func TestUpdateState_WithNullOptionalFields(t *testing.T) {
 	state := &tfsdk.State{
 		Schema: getTestSchema(),
 	}
+
+	// Initialize state with empty model
+	initializeEmptyState(t, ctx, state)
 
 	diags := resource.UpdateState(ctx, state, nil, spec)
 	require.False(t, diags.HasError())
@@ -1199,6 +1242,9 @@ func TestUpdateState_SkipsIncompleteRules(t *testing.T) {
 	state := &tfsdk.State{
 		Schema: getTestSchema(),
 	}
+
+	// Initialize state with empty model
+	initializeEmptyState(t, ctx, state)
 
 	diags := resource.UpdateState(ctx, state, nil, spec)
 	require.False(t, diags.HasError())
@@ -1281,4 +1327,23 @@ func getTestSchema() schema.Schema {
 	return resource.MetaData().Schema
 }
 
+// initializeEmptyState initializes the state with an empty CustomEventSpecificationModel
+func initializeEmptyState(t *testing.T, ctx context.Context, state *tfsdk.State) {
+	emptyModel := CustomEventSpecificationModel{
+		ID:                  types.StringNull(),
+		Name:                types.StringNull(),
+		EntityType:          types.StringNull(),
+		Query:               types.StringNull(),
+		Triggering:          types.BoolNull(),
+		Description:         types.StringNull(),
+		ExpirationTime:      types.Int64Null(),
+		Enabled:             types.BoolNull(),
+		RuleLogicalOperator: types.StringNull(),
+		Rules:               nil,
+	}
+	diags := state.Set(ctx, emptyModel)
+	require.False(t, diags.HasError(), "Failed to initialize empty state")
+}
+
+// Made with Bob
 // Made with Bob
