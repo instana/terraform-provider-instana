@@ -246,6 +246,11 @@ const (
 	AutomationActionParameterFieldValue       = "value"
 	AutomationActionParameterFieldRequired    = "required"
 	AutomationActionParameterFieldHidden      = "hidden"
+
+	// Parameter type constants
+	AutomationActionParameterTypeStatic  = "static"
+	AutomationActionParameterTypeDynamic = "dynamic"
+	AutomationActionParameterTypeVault   = "vault"
 )
 
 // Description constants for automation action fields
