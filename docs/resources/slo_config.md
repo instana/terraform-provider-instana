@@ -6,79 +6,81 @@ API Documentation: <https://instana.github.io/openapi/#operation/createSloConfig
 
  **⚠️ BREAKING CHANGES - Plugin Framework Migration**
 
- **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block struture.
+ **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
 
 
 ## Migration Guide (v5 to v6)
 
 ### Syntax Changes Overview
 
- **Major Changes:**
- - All nested configurations (`entity`, `indicator`, `time_window`) are now **single nested attributes** instead of blocks
- - Use `attribute = { ... }` syntax instead of `attribute { ... }` block syntax
- - All nested attributes within entity, indicator, and time_window follow the same pattern
- - The `id` attribute is now computed with a special prefix (`terraform-slo-config-`)
- - Tag filter expressions are validated and normalized
- - RBAC tags are now structured as list of objects with `display_name` and `id`
+- All nested configurations (`entity`, `indicator`, `time_window`) are now **single nested attributes** instead of blocks
+- Use `attribute = { ... }` syntax instead of `attribute { ... }` block syntax
+- All nested attributes within entity, indicator, and time_window follow the same pattern
+- The `id` attribute is now computed with a special prefix (`terraform-slo-config-`)
+- Tag filter expressions are validated and normalized
+- RBAC tags are now structured as list of objects with `display_name` and `id`
 
- **Migration Example:**
- ```hcl
- # OLD (SDK v2 - Block Structure)
- resource "instana_slo_config" "example" {
-   name   = "my-slo"
-   target = 0.99
-   
-   entity {
-     application {
-       application_id = "app-123"
-       boundary_scope = "ALL"
-     }
-   }
-   
-   indicator {
-     time_based_latency {
-       threshold   = 500
-       aggregation = "P95"
-     }
-   }
-   
-   time_window {
-     rolling {
-       duration      = 7
-       duration_unit = "day"
-     }
-   }
- }
+#### OLD (v5.x) Syntax:
 
- # NEW (Plugin Framework - Attribute Structure)
- resource "instana_slo_config" "example" {
-   name   = "my-slo"
-   target = 0.99
-   
-   entity = {
-     application = {
-       application_id = "app-123"
-       boundary_scope = "ALL"
-     }
-   }
-   
-   indicator = {
-     time_based_latency = {
-       threshold   = 500
-       aggregation = "P95"
-     }
-   }
-   
-   time_window = {
-     rolling = {
-       duration      = 7
-       duration_unit = "day"
-     }
-   }
- }
- ```
+```hcl
+resource "instana_slo_config" "example" {
+  name   = "my-slo"
+  target = 0.99
+  
+  entity {
+    application {
+      application_id = "app-123"
+      boundary_scope = "ALL"
+    }
+  }
+  
+  indicator {
+    time_based_latency {
+      threshold   = 500
+      aggregation = "P95"
+    }
+  }
+  
+  time_window {
+    rolling {
+      duration      = 7
+      duration_unit = "day"
+    }
+  }
+}
+```
 
- Please update your Terraform configurations to use the new attribute-based syntax with equals signs.
+#### NEW (v6.x) Syntax:
+
+```hcl
+resource "instana_slo_config" "example" {
+  name   = "my-slo"
+  target = 0.99
+  
+  entity = {
+    application = {
+      application_id = "app-123"
+      boundary_scope = "ALL"
+    }
+  }
+  
+  indicator = {
+    time_based_latency = {
+      threshold   = 500
+      aggregation = "P95"
+    }
+  }
+  
+  time_window = {
+    rolling = {
+      duration      = 7
+      duration_unit = "day"
+    }
+  }
+}
+```
+
+Please update your Terraform configurations to use the new attribute-based syntax with equals signs.
 
 ## Example Usage
 

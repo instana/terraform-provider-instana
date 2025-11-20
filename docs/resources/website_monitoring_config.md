@@ -6,31 +6,33 @@ API Documentation: <https://instana.github.io/openapi/#tag/Website-Configuration
 
  **⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)**
 
- **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block struture.
+ **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
 
- This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework. The schema has transitioned from **block structure to attribute format**.
 
 ## Migration Guide (v5 to v6)
 
 ### Syntax Changes Overview
- - All attributes remain top-level (no nested blocks in this resource)
- - The `id` attribute is now computed with a plan modifier for state management
- - The `app_name` attribute is computed and returned by the API
- - Attribute syntax remains the same, but schema validation is enhanced
 
- **Migration Example:**
- ```hcl
- # OLD (SDK v2)
- resource "instana_website_monitoring_config" "example" {
-   name = "my-website"
- }
+- All attributes remain top-level (no nested blocks in this resource)
+- The `id` attribute is now computed with a plan modifier for state management
+- The `app_name` attribute is computed and returned by the API
+- Attribute syntax remains the same, but schema validation is enhanced
 
- # NEW (Plugin Framework - Same Syntax)
- resource "instana_website_monitoring_config" "example" {
-   name = "my-website"
- }
- ```
+#### OLD (v5.x) Syntax:
 
+```hcl
+resource "instana_website_monitoring_config" "example" {
+  name = "my-website"
+}
+```
+
+#### NEW (v6.x) Syntax:
+
+```hcl
+resource "instana_website_monitoring_config" "example" {
+  name = "my-website"
+}
+```
 
  **⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)**
 

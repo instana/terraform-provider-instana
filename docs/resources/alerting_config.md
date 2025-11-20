@@ -8,12 +8,19 @@ API Documentation: <https://instana.github.io/openapi/#operation/putAlert>
 ---
 ## ⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)
 
- **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block struture.
+ **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
 
 ## Migration Guide (v5 to v6)
 
 ### Syntax Changes Overview
-**OLD Syntax (SDK v2):**
+
+- Nested blocks now use **list/set attribute syntax** with `= [{ }]` instead of block syntax `{ }`
+- All nested configurations require the equals sign
+- Enhanced validation and better error messages
+- Improved state management with computed fields
+
+#### OLD (v5.x) Syntax:
+
 ```hcl
 resource "instana_alerting_config" "example" {
   alert_name = "name"
@@ -25,7 +32,8 @@ resource "instana_alerting_config" "example" {
 }
 ```
 
-**NEW Syntax (Plugin Framework):**
+#### NEW (v6.x) Syntax:
+
 ```hcl
 resource "instana_alerting_config" "example" {
   alert_name = "name"
@@ -36,13 +44,7 @@ resource "instana_alerting_config" "example" {
   }]
 }
 ```
-
-**Key Changes:**
-- Nested blocks now use **list/set attribute syntax** with `= [{ }]` instead of block syntax `{ }`
-- All nested configurations require the equals sign
-- Enhanced validation and better error messages
-- Improved state management with computed fields
-
+Please update your Terraform configurations to use the new attribute-based syntax.
 ---
 
 

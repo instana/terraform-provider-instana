@@ -6,38 +6,38 @@ API Documentation: <https://instana.github.io/openapi/#operation/getApiToken
 
  **⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)**
 
- **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block struture.
+ **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
 
 ## Migration Guide (v5 to v6)
 
 ### Syntax Changes Overview
 
- **Major Changes:**
- - All attributes are now top-level attributes (no nested blocks)
- - Boolean attributes now use explicit `true`/`false` values with defaults
- - The `id`, `access_granting_token`, and `internal_id` attributes are computed
- - All permission and scope attributes have default values of `false`
- - Attribute syntax remains the same (key = value), but schema validation is stricter
+- All attributes are now top-level attributes (no nested blocks)
+- Boolean attributes now use explicit `true`/`false` values with defaults
+- The `id`, `access_granting_token`, and `internal_id` attributes are computed
+- All permission and scope attributes have default values of `false`
+- Attribute syntax remains the same (key = value), but schema validation is stricter
 
- **Migration Example:**
- ```hcl
- # OLD (SDK v2)
- resource "instana_api_token" "example" {
-   name                          = "my-token"
-   can_configure_service_mapping = true
-   # Omitted attributes defaulted to false
- }
+#### OLD (v5.x) Syntax:
 
- # NEW (Plugin Framework - Same Syntax, Enhanced Validation)
- resource "instana_api_token" "example" {
-   name                          = "my-token"
-   can_configure_service_mapping = true
-   # Omitted attributes explicitly default to false
-   # All boolean attributes now have computed defaults
- }
- ```
+```hcl
+resource "instana_api_token" "example" {
+  name                          = "my-token"
+  can_configure_service_mapping = true
+  # Omitted attributes defaulted to false
+}
+```
 
- The syntax remains largely compatible, but the framework provides better validation and clearer default behavior.
+#### NEW (v6.x) Syntax:
+
+```hcl
+resource "instana_api_token" "example" {
+  name                          = "my-token"
+  can_configure_service_mapping = true
+  # Omitted attributes explicitly default to false
+  # All boolean attributes now have computed defaults
+}
+```
 
  **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
 
