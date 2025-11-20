@@ -3,7 +3,6 @@ package alertingchannel
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
@@ -827,7 +826,6 @@ func (r *alertingChannelResourceFramework) mapServiceNowApplicationChannelFromSt
 		result.AutoCloseIncidents = &autoCloseValue
 	}
 
-	log.Printf(AlertingChannelLogInstanaURL, serviceNowApp.InstanaURL.ValueString())
 	if !serviceNowApp.InstanaURL.IsNull() && !serviceNowApp.InstanaURL.IsUnknown() {
 		instanaURLValue := serviceNowApp.InstanaURL.ValueString()
 		result.InstanaURL = &instanaURLValue
@@ -868,7 +866,7 @@ func (r *alertingChannelResourceFramework) mapServiceNowApplicationChannelFromSt
 		snowStatusValue := int(serviceNowApp.SnowStatusOnCloseEvent.ValueInt64())
 		result.SnowStatusOnCloseEvent = &snowStatusValue
 	}
-	
+
 	return result, nil
 }
 
