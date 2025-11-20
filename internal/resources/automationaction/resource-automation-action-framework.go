@@ -349,7 +349,11 @@ func NewAutomationActionResourceHandleFramework() resourcehandle.ResourceHandleF
 									Required:    true,
 									Description: AutomationActionDescParameterType,
 									Validators: []validator.String{
-										stringvalidator.OneOf("static", "dynamic", "vault"),
+										stringvalidator.OneOf(
+											AutomationActionParameterTypeStatic,
+											AutomationActionParameterTypeDynamic,
+											AutomationActionParameterTypeVault,
+										),
 									},
 								},
 								AutomationActionParameterFieldValue: schema.StringAttribute{
