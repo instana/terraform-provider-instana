@@ -234,7 +234,4 @@ const (
 	AlertingChannelErrInstanaURLRequiredMsg = "InstanaURL is required when creating the resource"
 	AlertingChannelErrInvalidConfig         = "Invalid Alerting Channel Configuration"
 	AlertingChannelErrInvalidConfigMsg      = "No valid alerting channel configuration found. Please configure exactly one channel type."
-
-	// Log messages
-	AlertingChannelLogInstanaURL = "Inatna url : user %v"
 )

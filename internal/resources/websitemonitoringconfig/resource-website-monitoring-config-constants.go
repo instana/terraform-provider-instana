@@ -9,8 +9,6 @@ const (
 	WebsiteMonitoringConfigFieldID = "id"
 	// WebsiteMonitoringConfigFieldName constant value for the schema field name
 	WebsiteMonitoringConfigFieldName = "name"
-	// WebsiteMonitoringConfigFieldFullName constant value for the schema field full_name
-	WebsiteMonitoringConfigFieldFullName = "full_name"
 	// WebsiteMonitoringConfigFieldAppName constant value for the schema field app_name
 	WebsiteMonitoringConfigFieldAppName = "app_name"
 )

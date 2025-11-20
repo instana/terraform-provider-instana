@@ -1010,21 +1010,6 @@ func (r *applicationAlertConfigResourceFrameworkImpl) UpdateState(ctx context.Co
 	return state.Set(ctx, model)
 }
 
-// buildBaseModel creates the base model with simple field mappings
-func (r *applicationAlertConfigResourceFrameworkImpl) buildBaseModel(data *restapi.ApplicationAlertConfig) ApplicationAlertConfigModel {
-	return ApplicationAlertConfigModel{
-		ID:               types.StringValue(data.ID),
-		Name:             types.StringValue(data.Name),
-		Description:      types.StringValue(data.Description),
-		BoundaryScope:    types.StringValue(string(data.BoundaryScope)),
-		EvaluationType:   types.StringValue(string(data.EvaluationType)),
-		Granularity:      types.Int64Value(int64(data.Granularity)),
-		IncludeInternal:  types.BoolValue(data.IncludeInternal),
-		IncludeSynthetic: types.BoolValue(data.IncludeSynthetic),
-		Triggering:       types.BoolValue(data.Triggering),
-	}
-}
-
 // updateGracePeriod handles grace period field mapping
 func (r *applicationAlertConfigResourceFrameworkImpl) updateGracePeriod(model *ApplicationAlertConfigModel, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
 	if data.GracePeriod != nil {

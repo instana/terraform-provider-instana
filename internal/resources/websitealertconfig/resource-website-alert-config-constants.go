@@ -14,8 +14,6 @@ const (
 	WebsiteAlertConfigFieldGranularity = "granularity"
 	//WebsiteAlertConfigFieldName constant value for field name of resource instana_website_alert_config
 	WebsiteAlertConfigFieldName = "name"
-	//WebsiteAlertConfigFieldFullName constant value for field full_name of resource instana_website_alert_config
-	WebsiteAlertConfigFieldFullName = "full_name"
 
 	//WebsiteAlertConfigFieldRule constant value for field rule of resource instana_website_alert_config
 	WebsiteAlertConfigFieldRule = "rule"
