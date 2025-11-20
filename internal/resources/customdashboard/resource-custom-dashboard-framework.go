@@ -47,9 +47,6 @@ func NewCustomDashboardResourceHandleFramework() resourcehandle.ResourceHandleFr
 						Required:    true,
 						Description: CustomDashboardDescWidgets,
 						CustomType:  jsontypes.NormalizedType{},
-						PlanModifiers: []planmodifier.String{
-							CanonicalizeJSONPlanModifier{},
-						},
 					},
 					CustomDashboardFieldAccessRule: schema.ListNestedAttribute{
 						Description: CustomDashboardDescAccessRule,
@@ -147,7 +144,7 @@ func (r *customDashboardResourceFramework) UpdateState(ctx context.Context, stat
 		}
 		json, _ := util.CanonicalizeJSON(string(widgetsBytes))
 		model.Widgets = jsontypes.NewNormalizedValue(json)
-	} 
+	}
 	// else we keep the existing values
 
 	// Map access rules
@@ -247,31 +244,4 @@ func (r *customDashboardResourceFramework) mapAccessRulesFromState(accessRuleMod
 	}
 
 	return accessRules
-}
-
-type CanonicalizeJSONPlanModifier struct{}
-
-func (m CanonicalizeJSONPlanModifier) Description(ctx context.Context) string {
-	return "Canonicalize JSON plan value into deterministic normalized JSON"
-}
-func (m CanonicalizeJSONPlanModifier) MarkdownDescription(ctx context.Context) string {
-	return m.Description(ctx)
-}
-
-func (m CanonicalizeJSONPlanModifier) PlanModifyString(ctx context.Context, req planmodifier.StringRequest, resp *planmodifier.StringResponse) {
-	// Nothing to do if config not set / unknown
-	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {
-		return
-	}
-
-	// Get the string value - works for both types.String and jsontypes.Normalized
-	raw := req.ConfigValue.ValueString()
-
-	canon, err := util.CanonicalizeJSON(raw)
-	if err != nil {
-		resp.Diagnostics.AddError("JSON canonicalization", fmt.Sprintf("failed to canonicalize config JSON: %s", err))
-		return
-	}
-
-	resp.PlanValue = types.StringValue(canon)
 }
