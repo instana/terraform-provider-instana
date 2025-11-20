@@ -9,8 +9,6 @@ const (
 
 	// AlertingConfigFieldAlertName constant value for the schema field alert_name
 	AlertingConfigFieldAlertName = "alert_name"
-	// AlertingConfigFieldFullAlertName constant value for the schema field full_alert_name
-	AlertingConfigFieldFullAlertName = "full_alert_name"
 	// AlertingConfigFieldIntegrationIds constant value for the schema field integration_ids
 	AlertingConfigFieldIntegrationIds = "integration_ids"
 	// AlertingConfigFieldEventFilterQuery constant value for the schema field event_filter_query
