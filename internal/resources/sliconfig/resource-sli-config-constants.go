@@ -1,7 +1,7 @@
 package sliconfig
 
-// ResourceInstanaSliConfigFramework the name of the terraform-provider-instana resource to manage SLI configurations
-const ResourceInstanaSliConfigFramework = "sli_config"
+// ResourceInstanaSliConfig the name of the terraform-provider-instana resource to manage SLI configurations
+const ResourceInstanaSliConfig = "sli_config"
 
 const (
 	//SliConfigFieldName constant value for the schema field name

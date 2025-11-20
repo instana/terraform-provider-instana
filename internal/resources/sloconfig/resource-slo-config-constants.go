@@ -1,7 +1,7 @@
 package sloconfig
 
-// ResourceInstanaSloConfigFramework the name of the terraform-provider-instana resource to manage SLO configurations
-const ResourceInstanaSloConfigFramework = "slo_config"
+// ResourceInstanaSloConfig the name of the terraform-provider-instana resource to manage SLO configurations
+const ResourceInstanaSloConfig = "slo_config"
 
 // SloConfigFieldRbacTags is the field name for RBAC tags
 const SloConfigFieldRbacTags = "rbac_tags"
@@ -176,13 +176,11 @@ const (
 	// SloConfigErrSaturationRequiredMsg is the error message for missing saturation indicator fields
 	SloConfigErrSaturationRequiredMsg = "threshold and operator are required for saturation indicator"
 
-	// ResourceInstanaSloConfig the name of the terraform-provider-instana resource to manage SLI configurations
-	ResourceInstanaSloConfig       = "instana_slo_config"
 	SloConfigFromTerraformIdPrefix = "SLOTF"
 
 	//SloConfigField names for terraform
-	SloConfigFieldName   = "name"
-	SloConfigFieldTarget = "target"
+	SloConfigFieldName                      = "name"
+	SloConfigFieldTarget                    = "target"
 	SloConfigFieldTags                      = "tags"
 	SloConfigFieldLastUpdated               = "last_updated"
 	SloConfigFieldCreatedDate               = "created_date"

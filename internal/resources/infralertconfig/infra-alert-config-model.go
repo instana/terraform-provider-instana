@@ -1,8 +1,8 @@
 package infralertconfig
 
 import (
-	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/terraform-provider-instana/internal/shared"
 )
 
 // InfraAlertConfigModel represents the data model for infrastructure alert configuration

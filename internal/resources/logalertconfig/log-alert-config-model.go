@@ -1,8 +1,8 @@
 package logalertconfig
 
 import (
-	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/terraform-provider-instana/internal/shared"
 )
 
 // LogAlertConfigModel represents the data model for the log alert configuration resource

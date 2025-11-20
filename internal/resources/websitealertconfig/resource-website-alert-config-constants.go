@@ -1,7 +1,7 @@
 package websitealertconfig
 
-// ResourceInstanaWebsiteAlertConfigFramework the name of the terraform-provider-instana resource to manage website alert configs
-const ResourceInstanaWebsiteAlertConfigFramework = "website_alert_config"
+// ResourceInstanaWebsiteAlertConfig the name of the terraform-provider-instana resource to manage website alert configs
+const ResourceInstanaWebsiteAlertConfig = "website_alert_config"
 
 const (
 	//WebsiteAlertConfigFieldAlertChannelIDs constant value for field alerting_channel_ids of resource instana_website_alert_config

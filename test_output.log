@@ -1,14 +1,14 @@
-# github.com/gessnerfl/terraform-provider-instana/internal/restapi
-mocks/Instana-api_mocks.go:10:2: no required module provides package github.com/gessnerfl/terraform-provider-instana/instana/restapi; to add it:
-	go get github.com/gessnerfl/terraform-provider-instana/instana/restapi
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/restapi [setup failed]
-# github.com/gessnerfl/terraform-provider-instana/mocks
-mocks/Instana-api_mocks.go:10:2: no required module provides package github.com/gessnerfl/terraform-provider-instana/instana/restapi; to add it:
-	go get github.com/gessnerfl/terraform-provider-instana/instana/restapi
-FAIL	github.com/gessnerfl/terraform-provider-instana/mocks [setup failed]
-# github.com/gessnerfl/terraform-provider-instana/internal/resources/sloconfig [github.com/gessnerfl/terraform-provider-instana/internal/resources/sloconfig.test]
+# github.com/instana/terraform-provider-instana/internal/restapi
+mocks/Instana-api_mocks.go:10:2: no required module provides package github.com/instana/terraform-provider-instana/instana/restapi; to add it:
+	go get github.com/instana/terraform-provider-instana/instana/restapi
+FAIL	github.com/instana/terraform-provider-instana/internal/restapi [setup failed]
+# github.com/instana/terraform-provider-instana/mocks
+mocks/Instana-api_mocks.go:10:2: no required module provides package github.com/instana/terraform-provider-instana/instana/restapi; to add it:
+	go get github.com/instana/terraform-provider-instana/instana/restapi
+FAIL	github.com/instana/terraform-provider-instana/mocks [setup failed]
+# github.com/instana/terraform-provider-instana/internal/resources/sloconfig [github.com/instana/terraform-provider-instana/internal/resources/sloconfig.test]
 internal/resources/sloconfig/resource-slo-config-framework_test.go:1307:56: result.TrafficIndicatorModel.Aggregation undefined (type *TrafficIndicatorModel has no field or method Aggregation)
-# github.com/gessnerfl/terraform-provider-instana/internal/resources/applicationalertconfig [github.com/gessnerfl/terraform-provider-instana/internal/resources/applicationalertconfig.test]
+# github.com/instana/terraform-provider-instana/internal/resources/applicationalertconfig [github.com/instana/terraform-provider-instana/internal/resources/applicationalertconfig.test]
 internal/resources/applicationalertconfig/resource-application-alert-config-framework_test.go:774:15: cannot use types.Int64Value(100) (value of struct type basetypes.Int64Value) as types.Float32 value in struct literal
 internal/resources/applicationalertconfig/resource-application-alert-config-framework_test.go:845:77: model.Rules[0].Thresholds.Warning.Static.Value.ValueInt64 undefined (type types.Float32 has no field or method ValueInt64)
 internal/resources/applicationalertconfig/resource-application-alert-config-framework_test.go:1511:15: cannot use types.Int64Value(200) (value of struct type basetypes.Int64Value) as types.Float32 value in struct literal
@@ -20,19 +20,19 @@ internal/resources/applicationalertconfig/resource-application-alert-config-fram
 internal/resources/applicationalertconfig/resource-application-alert-config-framework_test.go:1913:77: model.Rules[0].Thresholds.Warning.Static.Value.ValueInt64 undefined (type types.Float32 has no field or method ValueInt64)
 internal/resources/applicationalertconfig/resource-application-alert-config-framework_test.go:1954:8: unknown field Operator in struct literal of type shared.AdaptiveBaselineModel
 internal/resources/applicationalertconfig/resource-application-alert-config-framework_test.go:1954:8: too many errors
-# github.com/gessnerfl/terraform-provider-instana/internal/resources/infralertconfig [github.com/gessnerfl/terraform-provider-instana/internal/resources/infralertconfig.test]
+# github.com/instana/terraform-provider-instana/internal/resources/infralertconfig [github.com/instana/terraform-provider-instana/internal/resources/infralertconfig.test]
 internal/resources/infralertconfig/resource-infra-alert-config-framework_test.go:337:89: model.Rules.GenericRule.ThresholdRule.Warning.Static.Value.ValueInt64 undefined (type types.Float32 has no field or method ValueInt64)
 internal/resources/infralertconfig/resource-infra-alert-config-framework_test.go:623:15: cannot use types.Int64Value(100) (value of struct type basetypes.Int64Value) as types.Float32 value in struct literal
 internal/resources/infralertconfig/resource-infra-alert-config-framework_test.go:676:8: unknown field Operator in struct literal of type shared.AdaptiveBaselineModel
 internal/resources/infralertconfig/resource-infra-alert-config-framework_test.go:728:15: cannot use types.Int64Value(80) (value of struct type basetypes.Int64Value) as types.Float32 value in struct literal
 internal/resources/infralertconfig/resource-infra-alert-config-framework_test.go:733:15: cannot use types.Int64Value(95) (value of struct type basetypes.Int64Value) as types.Float32 value in struct literal
-# github.com/gessnerfl/terraform-provider-instana/internal/resources/slocorrectionconfig [github.com/gessnerfl/terraform-provider-instana/internal/resources/slocorrectionconfig.test]
+# github.com/instana/terraform-provider-instana/internal/resources/slocorrectionconfig [github.com/instana/terraform-provider-instana/internal/resources/slocorrectionconfig.test]
 internal/resources/slocorrectionconfig/resource-slo-correction-config-framework_test.go:61:44: cannot use mockAPI (variable of type *mockInstanaAPI) as restapi.InstanaAPI value in argument to resource.GetRestResource: *mockInstanaAPI does not implement restapi.InstanaAPI (missing method Teams)
-# github.com/gessnerfl/terraform-provider-instana/internal/resources/syntheticalertconfig [github.com/gessnerfl/terraform-provider-instana/internal/resources/syntheticalertconfig.test]
+# github.com/instana/terraform-provider-instana/internal/resources/syntheticalertconfig [github.com/instana/terraform-provider-instana/internal/resources/syntheticalertconfig.test]
 internal/resources/syntheticalertconfig/resource-synthetic-alert-config-framework_test.go:65:44: cannot use mockAPI (variable of type *mockInstanaAPI) as restapi.InstanaAPI value in argument to resource.GetRestResource: *mockInstanaAPI does not implement restapi.InstanaAPI (missing method Teams)
-# github.com/gessnerfl/terraform-provider-instana/internal/resources/synthetictest [github.com/gessnerfl/terraform-provider-instana/internal/resources/synthetictest.test]
+# github.com/instana/terraform-provider-instana/internal/resources/synthetictest [github.com/instana/terraform-provider-instana/internal/resources/synthetictest.test]
 internal/resources/synthetictest/resource-synthetic-test-framework_test.go:76:44: cannot use mockAPI (variable of type *mockInstanaAPI) as restapi.InstanaAPI value in argument to resource.GetRestResource: *mockInstanaAPI does not implement restapi.InstanaAPI (missing method Teams)
-# github.com/gessnerfl/terraform-provider-instana/internal/resources/websitealertconfig [github.com/gessnerfl/terraform-provider-instana/internal/resources/websitealertconfig.test]
+# github.com/instana/terraform-provider-instana/internal/resources/websitealertconfig [github.com/instana/terraform-provider-instana/internal/resources/websitealertconfig.test]
 internal/resources/websitealertconfig/resource-website-alert-config-framework_test.go:67:44: cannot use mockAPI (variable of type *mockInstanaAPI) as restapi.InstanaAPI value in argument to resource.GetRestResource: *mockInstanaAPI does not implement restapi.InstanaAPI (missing method Teams)
 internal/resources/websitealertconfig/resource-website-alert-config-framework_test.go:177:4: unknown field Severity in struct literal of type WebsiteAlertConfigModel
 internal/resources/websitealertconfig/resource-website-alert-config-framework_test.go:194:16: cannot use types.Int64Value(1000) (value of struct type basetypes.Int64Value) as types.Float32 value in struct literal
@@ -44,10 +44,10 @@ internal/resources/websitealertconfig/resource-website-alert-config-framework_te
 internal/resources/websitealertconfig/resource-website-alert-config-framework_test.go:625:4: unknown field Severity in struct literal of type WebsiteAlertConfigModel
 internal/resources/websitealertconfig/resource-website-alert-config-framework_test.go:660:4: unknown field Severity in struct literal of type WebsiteAlertConfigModel
 internal/resources/websitealertconfig/resource-website-alert-config-framework_test.go:660:4: too many errors
-	github.com/gessnerfl/terraform-provider-instana		coverage: 0.0% of statements
-	github.com/gessnerfl/terraform-provider-instana/internal/datasources		coverage: 0.0% of statements
-	github.com/gessnerfl/terraform-provider-instana/internal/provider		coverage: 0.0% of statements
-?   	github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle	[no test files]
+	github.com/instana/terraform-provider-instana		coverage: 0.0% of statements
+	github.com/instana/terraform-provider-instana/internal/datasources		coverage: 0.0% of statements
+	github.com/instana/terraform-provider-instana/internal/provider		coverage: 0.0% of statements
+?   	github.com/instana/terraform-provider-instana/internal/resourcehandle	[no test files]
 === RUN   TestNewAlertingChannelResourceHandleFramework
 --- PASS: TestNewAlertingChannelResourceHandleFramework (0.00s)
 === RUN   TestMetaData
@@ -203,7 +203,7 @@ internal/resources/websitealertconfig/resource-website-alert-config-framework_te
     --- PASS: TestUpdateState/Unsupported_channel_type (0.00s)
 PASS
 coverage: 85.6% of statements
-ok  	github.com/gessnerfl/terraform-provider-instana/internal/resources/alertingchannel	1.297s	coverage: 85.6% of statements
+ok  	github.com/instana/terraform-provider-instana/internal/resources/alertingchannel	1.297s	coverage: 85.6% of statements
 === RUN   TestNewAlertingConfigResourceHandleFramework
     resource-alerting-config-framework_test.go:24: 
         	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/alertingconfig/resource-alerting-config-framework_test.go:24
@@ -335,7 +335,7 @@ ok  	github.com/gessnerfl/terraform-provider-instana/internal/resources/alerting
     --- PASS: TestUpdateStateWithAllEventTypes/with_mixed_payload_fields_and_all_filters (0.00s)
 FAIL
 coverage: 42.6% of statements
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/alertingconfig	0.997s
+FAIL	github.com/instana/terraform-provider-instana/internal/resources/alertingconfig	0.997s
 === RUN   TestNewAPITokenResourceHandleFramework
 --- PASS: TestNewAPITokenResourceHandleFramework (0.00s)
 === RUN   TestMetaData
@@ -378,8 +378,8 @@ FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/alerting
     --- PASS: TestEdgeCases/all_permissions_false (0.00s)
 PASS
 coverage: 99.0% of statements
-ok  	github.com/gessnerfl/terraform-provider-instana/internal/resources/apitoken	2.078s	coverage: 99.0% of statements
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/applicationalertconfig [build failed]
+ok  	github.com/instana/terraform-provider-instana/internal/resources/apitoken	2.078s	coverage: 99.0% of statements
+FAIL	github.com/instana/terraform-provider-instana/internal/resources/applicationalertconfig [build failed]
 === RUN   TestNewApplicationConfigResourceHandleFramework
 --- PASS: TestNewApplicationConfigResourceHandleFramework (0.00s)
 === RUN   TestMetaData
@@ -518,7 +518,7 @@ FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/applicat
     --- FAIL: TestUpdateState_AllBoundaryScopes/DEFAULT (0.00s)
 FAIL
 coverage: 93.1% of statements
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/applicationconfig	0.624s
+FAIL	github.com/instana/terraform-provider-instana/internal/resources/applicationconfig	0.624s
 === RUN   TestNewAutomationActionResourceHandleFramework
 --- PASS: TestNewAutomationActionResourceHandleFramework (0.00s)
 === RUN   TestMetaData
@@ -685,7 +685,7 @@ FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/applicat
 --- PASS: TestMapActionTypeAndFields_HTTPWithNullApiKeyField (0.00s)
 PASS
 coverage: 91.6% of statements
-ok  	github.com/gessnerfl/terraform-provider-instana/internal/resources/automationaction	1.649s	coverage: 91.6% of statements
+ok  	github.com/instana/terraform-provider-instana/internal/resources/automationaction	1.649s	coverage: 91.6% of statements
 === RUN   TestNewAutomationPolicyResourceHandleFramework
 --- PASS: TestNewAutomationPolicyResourceHandleFramework (0.00s)
 === RUN   TestMetaData
@@ -902,7 +902,7 @@ ok  	github.com/gessnerfl/terraform-provider-instana/internal/resources/automati
 --- FAIL: TestUpdateState_NullTags (0.00s)
 FAIL
 coverage: 95.3% of statements
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/automationpolicy	2.371s
+FAIL	github.com/instana/terraform-provider-instana/internal/resources/automationpolicy	2.371s
 === RUN   TestNewCustomDashboardResourceHandleFramework
 --- PASS: TestNewCustomDashboardResourceHandleFramework (0.00s)
 === RUN   TestMetaData
@@ -1004,7 +1004,7 @@ FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/automati
     --- PASS: TestCustomDashboardModelValidation/minimal_dashboard_model (0.00s)
 FAIL
 coverage: 77.9% of statements
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/customdashboard	2.717s
+FAIL	github.com/instana/terraform-provider-instana/internal/resources/customdashboard	2.717s
 === RUN   TestNewCustomEventSpecificationResourceHandleFramework
 --- PASS: TestNewCustomEventSpecificationResourceHandleFramework (0.00s)
 === RUN   TestMetaData
@@ -1151,7 +1151,7 @@ FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/customda
     --- PASS: TestSchemaValidation/entity_type_is_required (0.00s)
 FAIL
 coverage: 69.9% of statements
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/customeventspec	2.965s
+FAIL	github.com/instana/terraform-provider-instana/internal/resources/customeventspec	2.965s
 === RUN   TestNewGroupResourceHandleFramework
 --- PASS: TestNewGroupResourceHandleFramework (0.00s)
 === RUN   TestMetaData
@@ -1234,8 +1234,8 @@ FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/customev
     --- PASS: TestEdgeCases/nil_infra_DFQ_filter (0.00s)
 PASS
 coverage: 98.0% of statements
-ok  	github.com/gessnerfl/terraform-provider-instana/internal/resources/group	3.883s	coverage: 98.0% of statements
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/infralertconfig [build failed]
+ok  	github.com/instana/terraform-provider-instana/internal/resources/group	3.883s	coverage: 98.0% of statements
+FAIL	github.com/instana/terraform-provider-instana/internal/resources/infralertconfig [build failed]
 === RUN   TestNewLogAlertConfigResourceHandleFramework
 --- PASS: TestNewLogAlertConfigResourceHandleFramework (0.00s)
 === RUN   TestMetaData
@@ -1484,7 +1484,7 @@ FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/infraler
 --- FAIL: TestUpdateState_WithEmptyCriticalChannelList (0.00s)
 FAIL
 coverage: 93.3% of statements
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/logalertconfig	3.561s
+FAIL	github.com/instana/terraform-provider-instana/internal/resources/logalertconfig	3.561s
 === RUN   TestNewSliConfigResourceHandleFramework
 --- PASS: TestNewSliConfigResourceHandleFramework (0.00s)
 === RUN   TestMetaData
@@ -1567,7 +1567,7 @@ FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/logalert
 --- PASS: TestMapStateToDataObject_WebsiteEventBased_WithNullBadEventFilter (0.00s)
 PASS
 coverage: 90.5% of statements
-ok  	github.com/gessnerfl/terraform-provider-instana/internal/resources/sliconfig	3.806s	coverage: 90.5% of statements
+ok  	github.com/instana/terraform-provider-instana/internal/resources/sliconfig	3.806s	coverage: 90.5% of statements
 === RUN   TestUpdateState_StatusAlertType
     resource-slo-alert-config-framework_test.go:52: 
         	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/sloalertconfig/resource-slo-alert-config-framework_test.go:52
@@ -1668,13 +1668,13 @@ ok  	github.com/gessnerfl/terraform-provider-instana/internal/resources/sliconfi
 --- PASS: TestNewSloAlertConfigResourceHandleFramework (0.00s)
 FAIL
 coverage: 87.0% of statements
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/sloalertconfig	3.744s
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/sloconfig [build failed]
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/slocorrectionconfig [build failed]
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/syntheticalertconfig [build failed]
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/synthetictest [build failed]
-	github.com/gessnerfl/terraform-provider-instana/internal/resources/team		coverage: 0.0% of statements
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/websitealertconfig [build failed]
+FAIL	github.com/instana/terraform-provider-instana/internal/resources/sloalertconfig	3.744s
+FAIL	github.com/instana/terraform-provider-instana/internal/resources/sloconfig [build failed]
+FAIL	github.com/instana/terraform-provider-instana/internal/resources/slocorrectionconfig [build failed]
+FAIL	github.com/instana/terraform-provider-instana/internal/resources/syntheticalertconfig [build failed]
+FAIL	github.com/instana/terraform-provider-instana/internal/resources/synthetictest [build failed]
+	github.com/instana/terraform-provider-instana/internal/resources/team		coverage: 0.0% of statements
+FAIL	github.com/instana/terraform-provider-instana/internal/resources/websitealertconfig [build failed]
 === RUN   TestNewWebsiteMonitoringConfigResourceHandleFramework
 === RUN   TestNewWebsiteMonitoringConfigResourceHandleFramework/should_create_resource_handle_with_correct_metadata
 === RUN   TestNewWebsiteMonitoringConfigResourceHandleFramework/should_have_correct_schema_attributes
@@ -1767,8 +1767,8 @@ FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/websitea
     --- PASS: TestMapStateToDataObject_ValidNameLengths/should_accept_name_at_maximum_length (0.00s)
 PASS
 coverage: 96.1% of statements
-ok  	github.com/gessnerfl/terraform-provider-instana/internal/resources/websitemonitoringconfig	3.570s	coverage: 96.1% of statements
-	github.com/gessnerfl/terraform-provider-instana/internal/shared		coverage: 0.0% of statements
+ok  	github.com/instana/terraform-provider-instana/internal/resources/websitemonitoringconfig	3.570s	coverage: 96.1% of statements
+	github.com/instana/terraform-provider-instana/internal/shared		coverage: 0.0% of statements
 === RUN   TestShouldMapEmptyTagFilterExpressionFromInstanaAPI
 === RUN   TestShouldMapEmptyTagFilterExpressionFromInstanaAPI/TestShouldMapEmptyANDTagFilterExpressionFromInstnaAPI
 === RUN   TestShouldMapEmptyTagFilterExpressionFromInstanaAPI/TestShouldMapEmptyORTagFilterExpressionFromInstnaAPI
@@ -2193,8 +2193,8 @@ ok  	github.com/gessnerfl/terraform-provider-instana/internal/resources/websitem
 --- PASS: TestShouldMapLogicalOrExpressionWithNestedAndInBrackets (0.00s)
 PASS
 coverage: 87.0% of statements
-ok  	github.com/gessnerfl/terraform-provider-instana/internal/shared/tagfilter	3.359s	coverage: 87.0% of statements
-	github.com/gessnerfl/terraform-provider-instana/internal/util		coverage: 0.0% of statements
+ok  	github.com/instana/terraform-provider-instana/internal/shared/tagfilter	3.359s	coverage: 87.0% of statements
+	github.com/instana/terraform-provider-instana/internal/util		coverage: 0.0% of statements
 === RUN   TestShouldStartNewInstanceWithDynamicPortAndStopTheServerOnClose
 2025/11/19 20:02:56 http: TLS handshake error from 127.0.0.1:53336: remote error: tls: bad certificate
 2025/11/19 20:02:56 http: TLS handshake error from 127.0.0.1:53338: remote error: tls: bad certificate
@@ -2204,7 +2204,7 @@ ok  	github.com/gessnerfl/terraform-provider-instana/internal/shared/tagfilter	3
 --- PASS: TestShouldStartNewInstanceWithDynamicPortAndStopTheServerOnClose (0.42s)
 PASS
 coverage: 27.2% of statements
-ok  	github.com/gessnerfl/terraform-provider-instana/testutils	3.773s	coverage: 27.2% of statements
+ok  	github.com/instana/terraform-provider-instana/testutils	3.773s	coverage: 27.2% of statements
 === RUN   TestShouldCreateBoolPointerFromBool
 --- PASS: TestShouldCreateBoolPointerFromBool (0.00s)
 === RUN   TestShouldReturn1ForIntegers
@@ -2233,5 +2233,5 @@ ok  	github.com/gessnerfl/terraform-provider-instana/testutils	3.773s	coverage: 
 --- PASS: TestShouldProperlyConvertMultilineStringToSingleLineIncludingFormatting (0.00s)
 PASS
 coverage: 100.0% of statements
-ok  	github.com/gessnerfl/terraform-provider-instana/utils	2.968s	coverage: 100.0% of statements
+ok  	github.com/instana/terraform-provider-instana/utils	2.968s	coverage: 100.0% of statements
 FAIL

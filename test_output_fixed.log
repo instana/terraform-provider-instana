@@ -1,11 +1,11 @@
-# github.com/gessnerfl/terraform-provider-instana/internal/resources/applicationalertconfig
+# github.com/instana/terraform-provider-instana/internal/resources/applicationalertconfig
 internal/resources/applicationalertconfig/resource-application-alert-config-framework_test.go:1960:2: expected operand, found '}'
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/applicationalertconfig [setup failed]
-?   	github.com/gessnerfl/terraform-provider-instana	[no test files]
-?   	github.com/gessnerfl/terraform-provider-instana/internal/datasources	[no test files]
-?   	github.com/gessnerfl/terraform-provider-instana/internal/provider	[no test files]
-?   	github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle	[no test files]
-# github.com/gessnerfl/terraform-provider-instana/internal/resources/infralertconfig [github.com/gessnerfl/terraform-provider-instana/internal/resources/infralertconfig.test]
+FAIL	github.com/instana/terraform-provider-instana/internal/resources/applicationalertconfig [setup failed]
+?   	github.com/instana/terraform-provider-instana	[no test files]
+?   	github.com/instana/terraform-provider-instana/internal/datasources	[no test files]
+?   	github.com/instana/terraform-provider-instana/internal/provider	[no test files]
+?   	github.com/instana/terraform-provider-instana/internal/resourcehandle	[no test files]
+# github.com/instana/terraform-provider-instana/internal/resources/infralertconfig [github.com/instana/terraform-provider-instana/internal/resources/infralertconfig.test]
 internal/resources/infralertconfig/resource-infra-alert-config-framework_test.go:91:51: model.Granularity.ValueFloat32 undefined (type types.Int64 has no field or method ValueFloat32)
 internal/resources/infralertconfig/resource-infra-alert-config-framework_test.go:243:85: model.TimeThreshold.ViolationsInSequence.TimeWindow.ValueFloat32 undefined (type types.Int64 has no field or method ValueFloat32)
 internal/resources/infralertconfig/resource-infra-alert-config-framework_test.go:409:23: cannot use types.Float32Value(float32(600000)) (value of struct type basetypes.Float32Value) as types.Int64 value in struct literal
@@ -171,14 +171,14 @@ internal/resources/infralertconfig/resource-infra-alert-config-framework_test.go
     --- PASS: TestUpdateState/WatsonAIOpsWebhook_channel (0.00s)
     --- PASS: TestUpdateState/Unsupported_channel_type (0.00s)
 PASS
-ok  	github.com/gessnerfl/terraform-provider-instana/internal/resources/alertingchannel	0.996s
-# github.com/gessnerfl/terraform-provider-instana/internal/resources/slocorrectionconfig [github.com/gessnerfl/terraform-provider-instana/internal/resources/slocorrectionconfig.test]
+ok  	github.com/instana/terraform-provider-instana/internal/resources/alertingchannel	0.996s
+# github.com/instana/terraform-provider-instana/internal/resources/slocorrectionconfig [github.com/instana/terraform-provider-instana/internal/resources/slocorrectionconfig.test]
 internal/resources/slocorrectionconfig/resource-slo-correction-config-framework_test.go:61:44: cannot use mockAPI (variable of type *mockInstanaAPI) as restapi.InstanaAPI value in argument to resource.GetRestResource: *mockInstanaAPI does not implement restapi.InstanaAPI (missing method Teams)
-# github.com/gessnerfl/terraform-provider-instana/internal/resources/syntheticalertconfig [github.com/gessnerfl/terraform-provider-instana/internal/resources/syntheticalertconfig.test]
+# github.com/instana/terraform-provider-instana/internal/resources/syntheticalertconfig [github.com/instana/terraform-provider-instana/internal/resources/syntheticalertconfig.test]
 internal/resources/syntheticalertconfig/resource-synthetic-alert-config-framework_test.go:65:44: cannot use mockAPI (variable of type *mockInstanaAPI) as restapi.InstanaAPI value in argument to resource.GetRestResource: *mockInstanaAPI does not implement restapi.InstanaAPI (missing method Teams)
-# github.com/gessnerfl/terraform-provider-instana/internal/resources/synthetictest [github.com/gessnerfl/terraform-provider-instana/internal/resources/synthetictest.test]
+# github.com/instana/terraform-provider-instana/internal/resources/synthetictest [github.com/instana/terraform-provider-instana/internal/resources/synthetictest.test]
 internal/resources/synthetictest/resource-synthetic-test-framework_test.go:76:44: cannot use mockAPI (variable of type *mockInstanaAPI) as restapi.InstanaAPI value in argument to resource.GetRestResource: *mockInstanaAPI does not implement restapi.InstanaAPI (missing method Teams)
-# github.com/gessnerfl/terraform-provider-instana/internal/resources/websitealertconfig [github.com/gessnerfl/terraform-provider-instana/internal/resources/websitealertconfig.test]
+# github.com/instana/terraform-provider-instana/internal/resources/websitealertconfig [github.com/instana/terraform-provider-instana/internal/resources/websitealertconfig.test]
 internal/resources/websitealertconfig/resource-website-alert-config-framework_test.go:67:44: cannot use mockAPI (variable of type *mockInstanaAPI) as restapi.InstanaAPI value in argument to resource.GetRestResource: *mockInstanaAPI does not implement restapi.InstanaAPI (missing method Teams)
 internal/resources/websitealertconfig/resource-website-alert-config-framework_test.go:180:17: cannot use types.Float32Value(float32(600000)) (value of struct type basetypes.Float32Value) as types.Int64 value in struct literal
 internal/resources/websitealertconfig/resource-website-alert-config-framework_test.go:206:18: cannot use types.Float32Value(float32(300000)) (value of struct type basetypes.Float32Value) as types.Int64 value in struct literal
@@ -320,7 +320,7 @@ internal/resources/websitealertconfig/resource-website-alert-config-framework_te
     --- PASS: TestUpdateStateWithAllEventTypes/with_all_supported_event_types (0.00s)
     --- PASS: TestUpdateStateWithAllEventTypes/with_mixed_payload_fields_and_all_filters (0.00s)
 FAIL
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/alertingconfig	3.008s
+FAIL	github.com/instana/terraform-provider-instana/internal/resources/alertingconfig	3.008s
 === RUN   TestNewAPITokenResourceHandleFramework
 --- PASS: TestNewAPITokenResourceHandleFramework (0.00s)
 === RUN   TestMetaData
@@ -362,7 +362,7 @@ FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/alerting
     --- PASS: TestEdgeCases/empty_name (0.00s)
     --- PASS: TestEdgeCases/all_permissions_false (0.00s)
 PASS
-ok  	github.com/gessnerfl/terraform-provider-instana/internal/resources/apitoken	1.367s
+ok  	github.com/instana/terraform-provider-instana/internal/resources/apitoken	1.367s
 === RUN   TestNewApplicationConfigResourceHandleFramework
 --- PASS: TestNewApplicationConfigResourceHandleFramework (0.00s)
 === RUN   TestMetaData
@@ -500,7 +500,7 @@ ok  	github.com/gessnerfl/terraform-provider-instana/internal/resources/apitoken
     --- FAIL: TestUpdateState_AllBoundaryScopes/INBOUND (0.00s)
     --- FAIL: TestUpdateState_AllBoundaryScopes/DEFAULT (0.00s)
 FAIL
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/applicationconfig	2.684s
+FAIL	github.com/instana/terraform-provider-instana/internal/resources/applicationconfig	2.684s
 === RUN   TestNewAutomationActionResourceHandleFramework
 --- PASS: TestNewAutomationActionResourceHandleFramework (0.00s)
 === RUN   TestMetaData
@@ -666,7 +666,7 @@ FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/applicat
 === RUN   TestMapActionTypeAndFields_HTTPWithNullApiKeyField
 --- PASS: TestMapActionTypeAndFields_HTTPWithNullApiKeyField (0.00s)
 PASS
-ok  	github.com/gessnerfl/terraform-provider-instana/internal/resources/automationaction	1.631s
+ok  	github.com/instana/terraform-provider-instana/internal/resources/automationaction	1.631s
 === RUN   TestNewAutomationPolicyResourceHandleFramework
 --- PASS: TestNewAutomationPolicyResourceHandleFramework (0.00s)
 === RUN   TestMetaData
@@ -882,7 +882,7 @@ ok  	github.com/gessnerfl/terraform-provider-instana/internal/resources/automati
         	Test:       	TestUpdateState_NullTags
 --- FAIL: TestUpdateState_NullTags (0.00s)
 FAIL
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/automationpolicy	4.249s
+FAIL	github.com/instana/terraform-provider-instana/internal/resources/automationpolicy	4.249s
 === RUN   TestNewCustomDashboardResourceHandleFramework
 --- PASS: TestNewCustomDashboardResourceHandleFramework (0.00s)
 === RUN   TestMetaData
@@ -983,7 +983,7 @@ FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/automati
     --- PASS: TestCustomDashboardModelValidation/complete_dashboard_model (0.00s)
     --- PASS: TestCustomDashboardModelValidation/minimal_dashboard_model (0.00s)
 FAIL
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/customdashboard	1.994s
+FAIL	github.com/instana/terraform-provider-instana/internal/resources/customdashboard	1.994s
 === RUN   TestNewCustomEventSpecificationResourceHandleFramework
 --- PASS: TestNewCustomEventSpecificationResourceHandleFramework (0.00s)
 === RUN   TestMetaData
@@ -1129,7 +1129,7 @@ FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/customda
     --- PASS: TestSchemaValidation/name_is_required (0.00s)
     --- PASS: TestSchemaValidation/entity_type_is_required (0.00s)
 FAIL
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/customeventspec	3.437s
+FAIL	github.com/instana/terraform-provider-instana/internal/resources/customeventspec	3.437s
 === RUN   TestNewGroupResourceHandleFramework
 --- PASS: TestNewGroupResourceHandleFramework (0.00s)
 === RUN   TestMetaData
@@ -1211,8 +1211,8 @@ FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/customev
     --- PASS: TestEdgeCases/empty_permission_set_arrays (0.00s)
     --- PASS: TestEdgeCases/nil_infra_DFQ_filter (0.00s)
 PASS
-ok  	github.com/gessnerfl/terraform-provider-instana/internal/resources/group	3.843s
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/infralertconfig [build failed]
+ok  	github.com/instana/terraform-provider-instana/internal/resources/group	3.843s
+FAIL	github.com/instana/terraform-provider-instana/internal/resources/infralertconfig [build failed]
 === RUN   TestNewLogAlertConfigResourceHandleFramework
 --- PASS: TestNewLogAlertConfigResourceHandleFramework (0.00s)
 === RUN   TestMetaData
@@ -1460,7 +1460,7 @@ FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/infraler
         	Test:       	TestUpdateState_WithEmptyCriticalChannelList
 --- FAIL: TestUpdateState_WithEmptyCriticalChannelList (0.00s)
 FAIL
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/logalertconfig	2.308s
+FAIL	github.com/instana/terraform-provider-instana/internal/resources/logalertconfig	2.308s
 === RUN   TestNewSliConfigResourceHandleFramework
 --- PASS: TestNewSliConfigResourceHandleFramework (0.00s)
 === RUN   TestMetaData
@@ -1542,7 +1542,7 @@ FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/logalert
 === RUN   TestMapStateToDataObject_WebsiteEventBased_WithNullBadEventFilter
 --- PASS: TestMapStateToDataObject_WebsiteEventBased_WithNullBadEventFilter (0.00s)
 PASS
-ok  	github.com/gessnerfl/terraform-provider-instana/internal/resources/sliconfig	4.443s
+ok  	github.com/instana/terraform-provider-instana/internal/resources/sliconfig	4.443s
 === RUN   TestUpdateState_StatusAlertType
     resource-slo-alert-config-framework_test.go:52: 
         	Error Trace:	/Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/terraform-provider-instana/internal/resources/sloalertconfig/resource-slo-alert-config-framework_test.go:52
@@ -1642,7 +1642,7 @@ ok  	github.com/gessnerfl/terraform-provider-instana/internal/resources/sliconfi
 === RUN   TestNewSloAlertConfigResourceHandleFramework
 --- PASS: TestNewSloAlertConfigResourceHandleFramework (0.00s)
 FAIL
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/sloalertconfig	4.643s
+FAIL	github.com/instana/terraform-provider-instana/internal/resources/sloalertconfig	4.643s
 === RUN   TestNewSloConfigResourceHandleFramework
 === RUN   TestNewSloConfigResourceHandleFramework/should_create_resource_handle_with_correct_metadata
 --- PASS: TestNewSloConfigResourceHandleFramework (0.00s)
@@ -1884,12 +1884,12 @@ FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/sloalert
     --- PASS: TestUpdateStateWithMappingErrors/should_handle_error_in_indicator_mapping (0.00s)
     --- PASS: TestUpdateStateWithMappingErrors/should_handle_error_in_time_window_mapping (0.00s)
 PASS
-ok  	github.com/gessnerfl/terraform-provider-instana/internal/resources/sloconfig	4.034s
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/slocorrectionconfig [build failed]
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/syntheticalertconfig [build failed]
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/synthetictest [build failed]
-?   	github.com/gessnerfl/terraform-provider-instana/internal/resources/team	[no test files]
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/websitealertconfig [build failed]
+ok  	github.com/instana/terraform-provider-instana/internal/resources/sloconfig	4.034s
+FAIL	github.com/instana/terraform-provider-instana/internal/resources/slocorrectionconfig [build failed]
+FAIL	github.com/instana/terraform-provider-instana/internal/resources/syntheticalertconfig [build failed]
+FAIL	github.com/instana/terraform-provider-instana/internal/resources/synthetictest [build failed]
+?   	github.com/instana/terraform-provider-instana/internal/resources/team	[no test files]
+FAIL	github.com/instana/terraform-provider-instana/internal/resources/websitealertconfig [build failed]
 === RUN   TestNewWebsiteMonitoringConfigResourceHandleFramework
 === RUN   TestNewWebsiteMonitoringConfigResourceHandleFramework/should_create_resource_handle_with_correct_metadata
 === RUN   TestNewWebsiteMonitoringConfigResourceHandleFramework/should_have_correct_schema_attributes
@@ -1981,7 +1981,7 @@ FAIL	github.com/gessnerfl/terraform-provider-instana/internal/resources/websitea
     --- PASS: TestMapStateToDataObject_ValidNameLengths/should_accept_name_at_minimum_length (0.00s)
     --- PASS: TestMapStateToDataObject_ValidNameLengths/should_accept_name_at_maximum_length (0.00s)
 PASS
-ok  	github.com/gessnerfl/terraform-provider-instana/internal/resources/websitemonitoringconfig	4.022s
+ok  	github.com/instana/terraform-provider-instana/internal/resources/websitemonitoringconfig	4.022s
 === RUN   TestShouldReturnSupportedCustomPayloadTypesAsStringSlice
 --- PASS: TestShouldReturnSupportedCustomPayloadTypesAsStringSlice (0.00s)
 === RUN   TestShouldReturnResourcesFromInstanaAPI
@@ -2095,77 +2095,77 @@ ok  	github.com/gessnerfl/terraform-provider-instana/internal/resources/websitem
 === RUN   TestShouldFailToUpdateTestObjectThroughCreatePUTUpdateNotSupportedRestResourceWhenEmptyObjectCannotBeCreated
 --- PASS: TestShouldFailToUpdateTestObjectThroughCreatePUTUpdateNotSupportedRestResourceWhenEmptyObjectCannotBeCreated (0.00s)
 === RUN   TestSuccessfulCreateOrUpdateOfTestObjectThroughCreatePUTUpdatePUTRestResource
-=== RUN   TestSuccessfulCreateOrUpdateOfTestObjectThroughCreatePUTUpdatePUTRestResource/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestSuccessfulCreateOrUpdateOfTestObjectThroughCreatePUTUpdatePUTRestResource[Create]
-=== RUN   TestSuccessfulCreateOrUpdateOfTestObjectThroughCreatePUTUpdatePUTRestResource/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestSuccessfulCreateOrUpdateOfTestObjectThroughCreatePUTUpdatePUTRestResource[Update]
+=== RUN   TestSuccessfulCreateOrUpdateOfTestObjectThroughCreatePUTUpdatePUTRestResource/github.com/instana/terraform-provider-instana/internal/restapi_test.TestSuccessfulCreateOrUpdateOfTestObjectThroughCreatePUTUpdatePUTRestResource[Create]
+=== RUN   TestSuccessfulCreateOrUpdateOfTestObjectThroughCreatePUTUpdatePUTRestResource/github.com/instana/terraform-provider-instana/internal/restapi_test.TestSuccessfulCreateOrUpdateOfTestObjectThroughCreatePUTUpdatePUTRestResource[Update]
 --- PASS: TestSuccessfulCreateOrUpdateOfTestObjectThroughCreatePUTUpdatePUTRestResource (0.00s)
-    --- PASS: TestSuccessfulCreateOrUpdateOfTestObjectThroughCreatePUTUpdatePUTRestResource/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestSuccessfulCreateOrUpdateOfTestObjectThroughCreatePUTUpdatePUTRestResource[Create] (0.00s)
-    --- PASS: TestSuccessfulCreateOrUpdateOfTestObjectThroughCreatePUTUpdatePUTRestResource/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestSuccessfulCreateOrUpdateOfTestObjectThroughCreatePUTUpdatePUTRestResource[Update] (0.00s)
+    --- PASS: TestSuccessfulCreateOrUpdateOfTestObjectThroughCreatePUTUpdatePUTRestResource/github.com/instana/terraform-provider-instana/internal/restapi_test.TestSuccessfulCreateOrUpdateOfTestObjectThroughCreatePUTUpdatePUTRestResource[Create] (0.00s)
+    --- PASS: TestSuccessfulCreateOrUpdateOfTestObjectThroughCreatePUTUpdatePUTRestResource/github.com/instana/terraform-provider-instana/internal/restapi_test.TestSuccessfulCreateOrUpdateOfTestObjectThroughCreatePUTUpdatePUTRestResource[Update] (0.00s)
 === RUN   TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenErrorIsReturnedFromRestClient
-=== RUN   TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenErrorIsReturnedFromRestClient/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenErrorIsReturnedFromRestClient[Create]
-=== RUN   TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenErrorIsReturnedFromRestClient/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenErrorIsReturnedFromRestClient[Update]
+=== RUN   TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenErrorIsReturnedFromRestClient/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenErrorIsReturnedFromRestClient[Create]
+=== RUN   TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenErrorIsReturnedFromRestClient/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenErrorIsReturnedFromRestClient[Update]
 --- PASS: TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenErrorIsReturnedFromRestClient (0.00s)
-    --- PASS: TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenErrorIsReturnedFromRestClient/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenErrorIsReturnedFromRestClient[Create] (0.00s)
-    --- PASS: TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenErrorIsReturnedFromRestClient/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenErrorIsReturnedFromRestClient[Update] (0.00s)
+    --- PASS: TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenErrorIsReturnedFromRestClient/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenErrorIsReturnedFromRestClient[Create] (0.00s)
+    --- PASS: TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenErrorIsReturnedFromRestClient/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenErrorIsReturnedFromRestClient[Update] (0.00s)
 === RUN   TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenResponseCannotBeUnmarshalled
-=== RUN   TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenResponseCannotBeUnmarshalled/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenResponseCannotBeUnmarshalled[Create]
-=== RUN   TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenResponseCannotBeUnmarshalled/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenResponseCannotBeUnmarshalled[Update]
+=== RUN   TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenResponseCannotBeUnmarshalled/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenResponseCannotBeUnmarshalled[Create]
+=== RUN   TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenResponseCannotBeUnmarshalled/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenResponseCannotBeUnmarshalled[Update]
 --- PASS: TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenResponseCannotBeUnmarshalled (0.00s)
-    --- PASS: TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenResponseCannotBeUnmarshalled/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenResponseCannotBeUnmarshalled[Create] (0.00s)
-    --- PASS: TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenResponseCannotBeUnmarshalled/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenResponseCannotBeUnmarshalled[Update] (0.00s)
+    --- PASS: TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenResponseCannotBeUnmarshalled/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenResponseCannotBeUnmarshalled[Create] (0.00s)
+    --- PASS: TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenResponseCannotBeUnmarshalled/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResourceWhenResponseCannotBeUnmarshalled[Update] (0.00s)
 === RUN   TestSuccessfulGetOneTestObjectThroughDefaultRestResource
-=== RUN   TestSuccessfulGetOneTestObjectThroughDefaultRestResource/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestSuccessfulGetOneTestObjectThroughDefaultRestResource[CREATE_PUT_UPDATE_PUT]
-=== RUN   TestSuccessfulGetOneTestObjectThroughDefaultRestResource/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestSuccessfulGetOneTestObjectThroughDefaultRestResource[CREATE_POST_UPDATE_PUT]
+=== RUN   TestSuccessfulGetOneTestObjectThroughDefaultRestResource/github.com/instana/terraform-provider-instana/internal/restapi_test.TestSuccessfulGetOneTestObjectThroughDefaultRestResource[CREATE_PUT_UPDATE_PUT]
+=== RUN   TestSuccessfulGetOneTestObjectThroughDefaultRestResource/github.com/instana/terraform-provider-instana/internal/restapi_test.TestSuccessfulGetOneTestObjectThroughDefaultRestResource[CREATE_POST_UPDATE_PUT]
 --- PASS: TestSuccessfulGetOneTestObjectThroughDefaultRestResource (0.00s)
-    --- PASS: TestSuccessfulGetOneTestObjectThroughDefaultRestResource/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestSuccessfulGetOneTestObjectThroughDefaultRestResource[CREATE_PUT_UPDATE_PUT] (0.00s)
-    --- PASS: TestSuccessfulGetOneTestObjectThroughDefaultRestResource/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestSuccessfulGetOneTestObjectThroughDefaultRestResource[CREATE_POST_UPDATE_PUT] (0.00s)
+    --- PASS: TestSuccessfulGetOneTestObjectThroughDefaultRestResource/github.com/instana/terraform-provider-instana/internal/restapi_test.TestSuccessfulGetOneTestObjectThroughDefaultRestResource[CREATE_PUT_UPDATE_PUT] (0.00s)
+    --- PASS: TestSuccessfulGetOneTestObjectThroughDefaultRestResource/github.com/instana/terraform-provider-instana/internal/restapi_test.TestSuccessfulGetOneTestObjectThroughDefaultRestResource[CREATE_POST_UPDATE_PUT] (0.00s)
 === RUN   TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenErrorIsRetrievedFromRestClient
-=== RUN   TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenErrorIsRetrievedFromRestClient/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenErrorIsRetrievedFromRestClient[CREATE_POST_UPDATE_PUT]
-=== RUN   TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenErrorIsRetrievedFromRestClient/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenErrorIsRetrievedFromRestClient[CREATE_PUT_UPDATE_PUT]
+=== RUN   TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenErrorIsRetrievedFromRestClient/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenErrorIsRetrievedFromRestClient[CREATE_POST_UPDATE_PUT]
+=== RUN   TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenErrorIsRetrievedFromRestClient/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenErrorIsRetrievedFromRestClient[CREATE_PUT_UPDATE_PUT]
 --- PASS: TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenErrorIsRetrievedFromRestClient (0.00s)
-    --- PASS: TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenErrorIsRetrievedFromRestClient/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenErrorIsRetrievedFromRestClient[CREATE_POST_UPDATE_PUT] (0.00s)
-    --- PASS: TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenErrorIsRetrievedFromRestClient/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenErrorIsRetrievedFromRestClient[CREATE_PUT_UPDATE_PUT] (0.00s)
+    --- PASS: TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenErrorIsRetrievedFromRestClient/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenErrorIsRetrievedFromRestClient[CREATE_POST_UPDATE_PUT] (0.00s)
+    --- PASS: TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenErrorIsRetrievedFromRestClient/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenErrorIsRetrievedFromRestClient[CREATE_PUT_UPDATE_PUT] (0.00s)
 === RUN   TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenResponseCannotBeUnmarshalled
-=== RUN   TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenResponseCannotBeUnmarshalled/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenResponseCannotBeUnmarshalled[CREATE_PUT_UPDATE_PUT]
-=== RUN   TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenResponseCannotBeUnmarshalled/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenResponseCannotBeUnmarshalled[CREATE_POST_UPDATE_PUT]
+=== RUN   TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenResponseCannotBeUnmarshalled/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenResponseCannotBeUnmarshalled[CREATE_PUT_UPDATE_PUT]
+=== RUN   TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenResponseCannotBeUnmarshalled/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenResponseCannotBeUnmarshalled[CREATE_POST_UPDATE_PUT]
 --- PASS: TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenResponseCannotBeUnmarshalled (0.00s)
-    --- PASS: TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenResponseCannotBeUnmarshalled/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenResponseCannotBeUnmarshalled[CREATE_PUT_UPDATE_PUT] (0.00s)
-    --- PASS: TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenResponseCannotBeUnmarshalled/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenResponseCannotBeUnmarshalled[CREATE_POST_UPDATE_PUT] (0.00s)
+    --- PASS: TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenResponseCannotBeUnmarshalled/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenResponseCannotBeUnmarshalled[CREATE_PUT_UPDATE_PUT] (0.00s)
+    --- PASS: TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenResponseCannotBeUnmarshalled/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetOneTestObjectThroughDefaultRestResourceWhenResponseCannotBeUnmarshalled[CREATE_POST_UPDATE_PUT] (0.00s)
 === RUN   TestSuccessfulDeleteOfTestObjectByObjectThroughDefaultRestResource
-=== RUN   TestSuccessfulDeleteOfTestObjectByObjectThroughDefaultRestResource/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestSuccessfulDeleteOfTestObjectByObjectThroughDefaultRestResource[CREATE_PUT_UPDATE_PUT]
-=== RUN   TestSuccessfulDeleteOfTestObjectByObjectThroughDefaultRestResource/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestSuccessfulDeleteOfTestObjectByObjectThroughDefaultRestResource[CREATE_POST_UPDATE_PUT]
+=== RUN   TestSuccessfulDeleteOfTestObjectByObjectThroughDefaultRestResource/github.com/instana/terraform-provider-instana/internal/restapi_test.TestSuccessfulDeleteOfTestObjectByObjectThroughDefaultRestResource[CREATE_PUT_UPDATE_PUT]
+=== RUN   TestSuccessfulDeleteOfTestObjectByObjectThroughDefaultRestResource/github.com/instana/terraform-provider-instana/internal/restapi_test.TestSuccessfulDeleteOfTestObjectByObjectThroughDefaultRestResource[CREATE_POST_UPDATE_PUT]
 --- PASS: TestSuccessfulDeleteOfTestObjectByObjectThroughDefaultRestResource (0.00s)
-    --- PASS: TestSuccessfulDeleteOfTestObjectByObjectThroughDefaultRestResource/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestSuccessfulDeleteOfTestObjectByObjectThroughDefaultRestResource[CREATE_PUT_UPDATE_PUT] (0.00s)
-    --- PASS: TestSuccessfulDeleteOfTestObjectByObjectThroughDefaultRestResource/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestSuccessfulDeleteOfTestObjectByObjectThroughDefaultRestResource[CREATE_POST_UPDATE_PUT] (0.00s)
+    --- PASS: TestSuccessfulDeleteOfTestObjectByObjectThroughDefaultRestResource/github.com/instana/terraform-provider-instana/internal/restapi_test.TestSuccessfulDeleteOfTestObjectByObjectThroughDefaultRestResource[CREATE_PUT_UPDATE_PUT] (0.00s)
+    --- PASS: TestSuccessfulDeleteOfTestObjectByObjectThroughDefaultRestResource/github.com/instana/terraform-provider-instana/internal/restapi_test.TestSuccessfulDeleteOfTestObjectByObjectThroughDefaultRestResource[CREATE_POST_UPDATE_PUT] (0.00s)
 === RUN   TestShouldFailToDeleteTestObjectThroughDefaultRestResourceWhenErrorIsRetrunedFromRestClient
-=== RUN   TestShouldFailToDeleteTestObjectThroughDefaultRestResourceWhenErrorIsRetrunedFromRestClient/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldFailToDeleteTestObjectThroughDefaultRestResourceWhenErrorIsRetrunedFromRestClient[CREATE_PUT_UPDATE_PUT]
-=== RUN   TestShouldFailToDeleteTestObjectThroughDefaultRestResourceWhenErrorIsRetrunedFromRestClient/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldFailToDeleteTestObjectThroughDefaultRestResourceWhenErrorIsRetrunedFromRestClient[CREATE_POST_UPDATE_PUT]
+=== RUN   TestShouldFailToDeleteTestObjectThroughDefaultRestResourceWhenErrorIsRetrunedFromRestClient/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldFailToDeleteTestObjectThroughDefaultRestResourceWhenErrorIsRetrunedFromRestClient[CREATE_PUT_UPDATE_PUT]
+=== RUN   TestShouldFailToDeleteTestObjectThroughDefaultRestResourceWhenErrorIsRetrunedFromRestClient/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldFailToDeleteTestObjectThroughDefaultRestResourceWhenErrorIsRetrunedFromRestClient[CREATE_POST_UPDATE_PUT]
 --- PASS: TestShouldFailToDeleteTestObjectThroughDefaultRestResourceWhenErrorIsRetrunedFromRestClient (0.00s)
-    --- PASS: TestShouldFailToDeleteTestObjectThroughDefaultRestResourceWhenErrorIsRetrunedFromRestClient/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldFailToDeleteTestObjectThroughDefaultRestResourceWhenErrorIsRetrunedFromRestClient[CREATE_PUT_UPDATE_PUT] (0.00s)
-    --- PASS: TestShouldFailToDeleteTestObjectThroughDefaultRestResourceWhenErrorIsRetrunedFromRestClient/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldFailToDeleteTestObjectThroughDefaultRestResourceWhenErrorIsRetrunedFromRestClient[CREATE_POST_UPDATE_PUT] (0.00s)
+    --- PASS: TestShouldFailToDeleteTestObjectThroughDefaultRestResourceWhenErrorIsRetrunedFromRestClient/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldFailToDeleteTestObjectThroughDefaultRestResourceWhenErrorIsRetrunedFromRestClient[CREATE_PUT_UPDATE_PUT] (0.00s)
+    --- PASS: TestShouldFailToDeleteTestObjectThroughDefaultRestResourceWhenErrorIsRetrunedFromRestClient/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldFailToDeleteTestObjectThroughDefaultRestResourceWhenErrorIsRetrunedFromRestClient[CREATE_POST_UPDATE_PUT] (0.00s)
 === RUN   TestShouldSuccessfullyGetAllTestObjects
-=== RUN   TestShouldSuccessfullyGetAllTestObjects/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldSuccessfullyGetAllTestObjects[CREATE_PUT_UPDATE_PUT]
-=== RUN   TestShouldSuccessfullyGetAllTestObjects/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldSuccessfullyGetAllTestObjects[CREATE_POST_UPDATE_PUT]
+=== RUN   TestShouldSuccessfullyGetAllTestObjects/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldSuccessfullyGetAllTestObjects[CREATE_PUT_UPDATE_PUT]
+=== RUN   TestShouldSuccessfullyGetAllTestObjects/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldSuccessfullyGetAllTestObjects[CREATE_POST_UPDATE_PUT]
 --- PASS: TestShouldSuccessfullyGetAllTestObjects (0.00s)
-    --- PASS: TestShouldSuccessfullyGetAllTestObjects/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldSuccessfullyGetAllTestObjects[CREATE_PUT_UPDATE_PUT] (0.00s)
-    --- PASS: TestShouldSuccessfullyGetAllTestObjects/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldSuccessfullyGetAllTestObjects[CREATE_POST_UPDATE_PUT] (0.00s)
+    --- PASS: TestShouldSuccessfullyGetAllTestObjects/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldSuccessfullyGetAllTestObjects[CREATE_PUT_UPDATE_PUT] (0.00s)
+    --- PASS: TestShouldSuccessfullyGetAllTestObjects/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldSuccessfullyGetAllTestObjects[CREATE_POST_UPDATE_PUT] (0.00s)
 === RUN   TestShouldReturnEmptySliceWhenNoTestObjectsIsReturnedForGetAll
-=== RUN   TestShouldReturnEmptySliceWhenNoTestObjectsIsReturnedForGetAll/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldReturnEmptySliceWhenNoTestObjectsIsReturnedForGetAll[CREATE_PUT_UPDATE_PUT]
-=== RUN   TestShouldReturnEmptySliceWhenNoTestObjectsIsReturnedForGetAll/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldReturnEmptySliceWhenNoTestObjectsIsReturnedForGetAll[CREATE_POST_UPDATE_PUT]
+=== RUN   TestShouldReturnEmptySliceWhenNoTestObjectsIsReturnedForGetAll/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldReturnEmptySliceWhenNoTestObjectsIsReturnedForGetAll[CREATE_PUT_UPDATE_PUT]
+=== RUN   TestShouldReturnEmptySliceWhenNoTestObjectsIsReturnedForGetAll/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldReturnEmptySliceWhenNoTestObjectsIsReturnedForGetAll[CREATE_POST_UPDATE_PUT]
 --- PASS: TestShouldReturnEmptySliceWhenNoTestObjectsIsReturnedForGetAll (0.00s)
-    --- PASS: TestShouldReturnEmptySliceWhenNoTestObjectsIsReturnedForGetAll/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldReturnEmptySliceWhenNoTestObjectsIsReturnedForGetAll[CREATE_PUT_UPDATE_PUT] (0.00s)
-    --- PASS: TestShouldReturnEmptySliceWhenNoTestObjectsIsReturnedForGetAll/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldReturnEmptySliceWhenNoTestObjectsIsReturnedForGetAll[CREATE_POST_UPDATE_PUT] (0.00s)
+    --- PASS: TestShouldReturnEmptySliceWhenNoTestObjectsIsReturnedForGetAll/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldReturnEmptySliceWhenNoTestObjectsIsReturnedForGetAll[CREATE_PUT_UPDATE_PUT] (0.00s)
+    --- PASS: TestShouldReturnEmptySliceWhenNoTestObjectsIsReturnedForGetAll/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldReturnEmptySliceWhenNoTestObjectsIsReturnedForGetAll[CREATE_POST_UPDATE_PUT] (0.00s)
 === RUN   TestShouldFailToGetAllTestObjectsWhenClientReturnsError
-=== RUN   TestShouldFailToGetAllTestObjectsWhenClientReturnsError/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetAllTestObjectsWhenClientReturnsError[CREATE_POST_UPDATE_PUT]
-=== RUN   TestShouldFailToGetAllTestObjectsWhenClientReturnsError/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetAllTestObjectsWhenClientReturnsError[CREATE_PUT_UPDATE_PUT]
+=== RUN   TestShouldFailToGetAllTestObjectsWhenClientReturnsError/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetAllTestObjectsWhenClientReturnsError[CREATE_POST_UPDATE_PUT]
+=== RUN   TestShouldFailToGetAllTestObjectsWhenClientReturnsError/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetAllTestObjectsWhenClientReturnsError[CREATE_PUT_UPDATE_PUT]
 --- PASS: TestShouldFailToGetAllTestObjectsWhenClientReturnsError (0.00s)
-    --- PASS: TestShouldFailToGetAllTestObjectsWhenClientReturnsError/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetAllTestObjectsWhenClientReturnsError[CREATE_POST_UPDATE_PUT] (0.00s)
-    --- PASS: TestShouldFailToGetAllTestObjectsWhenClientReturnsError/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetAllTestObjectsWhenClientReturnsError[CREATE_PUT_UPDATE_PUT] (0.00s)
+    --- PASS: TestShouldFailToGetAllTestObjectsWhenClientReturnsError/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetAllTestObjectsWhenClientReturnsError[CREATE_POST_UPDATE_PUT] (0.00s)
+    --- PASS: TestShouldFailToGetAllTestObjectsWhenClientReturnsError/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetAllTestObjectsWhenClientReturnsError[CREATE_PUT_UPDATE_PUT] (0.00s)
 === RUN   TestShouldFailToGetAllTestObjectsWhenRestResultCannotBeUnmarshalled
-=== RUN   TestShouldFailToGetAllTestObjectsWhenRestResultCannotBeUnmarshalled/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetAllTestObjectsWhenRestResultCannotBeUnmarshalled[CREATE_POST_UPDATE_PUT]
-=== RUN   TestShouldFailToGetAllTestObjectsWhenRestResultCannotBeUnmarshalled/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetAllTestObjectsWhenRestResultCannotBeUnmarshalled[CREATE_PUT_UPDATE_PUT]
+=== RUN   TestShouldFailToGetAllTestObjectsWhenRestResultCannotBeUnmarshalled/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetAllTestObjectsWhenRestResultCannotBeUnmarshalled[CREATE_POST_UPDATE_PUT]
+=== RUN   TestShouldFailToGetAllTestObjectsWhenRestResultCannotBeUnmarshalled/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetAllTestObjectsWhenRestResultCannotBeUnmarshalled[CREATE_PUT_UPDATE_PUT]
 --- PASS: TestShouldFailToGetAllTestObjectsWhenRestResultCannotBeUnmarshalled (0.00s)
-    --- PASS: TestShouldFailToGetAllTestObjectsWhenRestResultCannotBeUnmarshalled/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetAllTestObjectsWhenRestResultCannotBeUnmarshalled[CREATE_POST_UPDATE_PUT] (0.00s)
-    --- PASS: TestShouldFailToGetAllTestObjectsWhenRestResultCannotBeUnmarshalled/github.com/gessnerfl/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetAllTestObjectsWhenRestResultCannotBeUnmarshalled[CREATE_PUT_UPDATE_PUT] (0.00s)
+    --- PASS: TestShouldFailToGetAllTestObjectsWhenRestResultCannotBeUnmarshalled/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetAllTestObjectsWhenRestResultCannotBeUnmarshalled[CREATE_POST_UPDATE_PUT] (0.00s)
+    --- PASS: TestShouldFailToGetAllTestObjectsWhenRestResultCannotBeUnmarshalled/github.com/instana/terraform-provider-instana/internal/restapi_test.TestShouldFailToGetAllTestObjectsWhenRestResultCannotBeUnmarshalled[CREATE_PUT_UPDATE_PUT] (0.00s)
 === RUN   TestShouldReturnSupportedGranularitiesAsIntSlice
 --- PASS: TestShouldReturnSupportedGranularitiesAsIntSlice (0.00s)
 === RUN   TestShouldReturnSupportedInstanaPermissionsAsString
@@ -2579,8 +2579,8 @@ ok  	github.com/gessnerfl/terraform-provider-instana/internal/resources/websitem
 === RUN   TestShouldReturnErrorWhenExecutingDeleteByIdOperationOfWebsiteMonitoringConfigRestResourceAndDeleteRequestFails
 --- PASS: TestShouldReturnErrorWhenExecutingDeleteByIdOperationOfWebsiteMonitoringConfigRestResourceAndDeleteRequestFails (0.00s)
 FAIL
-FAIL	github.com/gessnerfl/terraform-provider-instana/internal/restapi	14.280s
-?   	github.com/gessnerfl/terraform-provider-instana/internal/shared	[no test files]
+FAIL	github.com/instana/terraform-provider-instana/internal/restapi	14.280s
+?   	github.com/instana/terraform-provider-instana/internal/shared	[no test files]
 === RUN   TestShouldMapEmptyTagFilterExpressionFromInstanaAPI
 === RUN   TestShouldMapEmptyTagFilterExpressionFromInstanaAPI/TestShouldMapEmptyANDTagFilterExpressionFromInstnaAPI
 === RUN   TestShouldMapEmptyTagFilterExpressionFromInstanaAPI/TestShouldMapEmptyORTagFilterExpressionFromInstnaAPI
@@ -3004,9 +3004,9 @@ FAIL	github.com/gessnerfl/terraform-provider-instana/internal/restapi	14.280s
 === RUN   TestShouldMapLogicalOrExpressionWithNestedAndInBrackets
 --- PASS: TestShouldMapLogicalOrExpressionWithNestedAndInBrackets (0.00s)
 PASS
-ok  	github.com/gessnerfl/terraform-provider-instana/internal/shared/tagfilter	3.955s
-?   	github.com/gessnerfl/terraform-provider-instana/internal/util	[no test files]
-?   	github.com/gessnerfl/terraform-provider-instana/mocks	[no test files]
+ok  	github.com/instana/terraform-provider-instana/internal/shared/tagfilter	3.955s
+?   	github.com/instana/terraform-provider-instana/internal/util	[no test files]
+?   	github.com/instana/terraform-provider-instana/mocks	[no test files]
 === RUN   TestShouldStartNewInstanceWithDynamicPortAndStopTheServerOnClose
 2025/11/19 20:48:42 http: TLS handshake error from 127.0.0.1:54020: remote error: tls: bad certificate
 2025/11/19 20:48:42 http: TLS handshake error from 127.0.0.1:54024: remote error: tls: bad certificate
@@ -3015,7 +3015,7 @@ ok  	github.com/gessnerfl/terraform-provider-instana/internal/shared/tagfilter	3
 2025/11/19 20:48:43 http: TLS handshake error from 127.0.0.1:54039: remote error: tls: bad certificate
 --- PASS: TestShouldStartNewInstanceWithDynamicPortAndStopTheServerOnClose (0.35s)
 PASS
-ok  	github.com/gessnerfl/terraform-provider-instana/testutils	4.488s
+ok  	github.com/instana/terraform-provider-instana/testutils	4.488s
 === RUN   TestShouldCreateBoolPointerFromBool
 --- PASS: TestShouldCreateBoolPointerFromBool (0.00s)
 === RUN   TestShouldReturn1ForIntegers
@@ -3043,5 +3043,5 @@ ok  	github.com/gessnerfl/terraform-provider-instana/testutils	4.488s
 === RUN   TestShouldProperlyConvertMultilineStringToSingleLineIncludingFormatting
 --- PASS: TestShouldProperlyConvertMultilineStringToSingleLineIncludingFormatting (0.00s)
 PASS
-ok  	github.com/gessnerfl/terraform-provider-instana/utils	4.168s
+ok  	github.com/instana/terraform-provider-instana/utils	4.168s
 FAIL

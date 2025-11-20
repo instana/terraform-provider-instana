@@ -1,9 +1,9 @@
 package logalertconfig
 
-import "github.com/gessnerfl/terraform-provider-instana/internal/restapi"
+import "github.com/instana/terraform-provider-instana/internal/restapi"
 
-// ResourceInstanaLogAlertConfigFramework the name of the terraform-provider-instana resource to manage log alert configurations
-const ResourceInstanaLogAlertConfigFramework = "log_alert_config"
+// ResourceInstanaLogAlertConfig the name of the terraform-provider-instana resource to manage log alert configurations
+const ResourceInstanaLogAlertConfig = "log_alert_config"
 
 // Schema field names
 const (

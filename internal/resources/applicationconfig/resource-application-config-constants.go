@@ -1,7 +1,7 @@
 package applicationconfig
 
-// ResourceInstanaApplicationConfigFramework the name of the terraform-provider-instana resource to manage application config
-const ResourceInstanaApplicationConfigFramework = "application_config"
+// ResourceInstanaApplicationConfig the name of the terraform-provider-instana resource to manage application config
+const ResourceInstanaApplicationConfig = "application_config"
 
 // Description constants for Application Config resource
 const (

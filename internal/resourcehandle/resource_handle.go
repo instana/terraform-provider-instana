@@ -3,14 +3,14 @@ package resourcehandle
 import (
 	"context"
 
-	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/instana/terraform-provider-instana/internal/restapi"
 )
 
-// ResourceMetaDataFramework the metadata of a terraform ResourceHandleFramework
-type ResourceMetaDataFramework struct {
+// ResourceMetaData the metadata of a terraform ResourceHandle
+type ResourceMetaData struct {
 	ResourceName       string
 	Schema             schema.Schema
 	SchemaVersion      int64
@@ -20,13 +20,13 @@ type ResourceMetaDataFramework struct {
 	DeprecationMessage string
 }
 
-// ResourceHandleFramework resource specific implementation which provides metadata and maps data from/to terraform state.
-// Together with TerraformResourceFramework terraform schema resources can be created
-type ResourceHandleFramework[T restapi.InstanaDataObject] interface {
-	// MetaData returns the metadata of this ResourceHandleFramework
-	MetaData() *ResourceMetaDataFramework
+// ResourceHandle resource specific implementation which provides metadata and maps data from/to terraform state.
+// Together with TerraformResource terraform schema resources can be created
+type ResourceHandle[T restapi.InstanaDataObject] interface {
+	// MetaData returns the metadata of this ResourceHandle
+	MetaData() *ResourceMetaData
 
-	// GetRestResource provides the restapi.RestResource used by the ResourceHandleFramework
+	// GetRestResource provides the restapi.RestResource used by the ResourceHandle
 	GetRestResource(api restapi.InstanaAPI) restapi.RestResource[T]
 
 	// UpdateState updates the state of the resource with the input data from the Instana API

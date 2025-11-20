@@ -7,7 +7,7 @@ import (
 
 	"github.com/alecthomas/participle"
 	"github.com/alecthomas/participle/lexer"
-	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
+	"github.com/instana/terraform-provider-instana/internal/restapi"
 )
 
 // ExpressionRenderer interface definition to render an expression in its normalized form
@@ -197,7 +197,7 @@ func (e *ComparisonExpression) Render() string {
 		}
 		return fmt.Sprintf("%s %s '%s'", e.Entity.Render(), e.Operator, escapeStringValue(*e.StringValue))
 	}
-	
+
 	// For regular entity filters (without tag key), preserve original type rendering
 	if e.NumberValue != nil {
 		return fmt.Sprintf("%s %s %d", e.Entity.Render(), e.Operator, *e.NumberValue)
