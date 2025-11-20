@@ -13,9 +13,3 @@ type AlertingConfigModel struct {
 	EventFilterApplicationAlertIDs types.Set    `tfsdk:"event_filter_application_alert_ids"`
 	CustomPayloadFields            types.List   `tfsdk:"custom_payload_field"`
 }
-
-// DynamicValueModel represents a dynamic value in the Terraform model
-type DynamicValueModel struct {
-	Key     types.String `tfsdk:"key"`
-	TagName types.String `tfsdk:"tag_name"`
-}
