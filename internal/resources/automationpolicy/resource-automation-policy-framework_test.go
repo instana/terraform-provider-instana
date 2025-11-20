@@ -74,7 +74,7 @@ func TestMapStateToDataObject_BasicPolicy(t *testing.T) {
 		Name:        types.StringValue("Test Policy"),
 		Description: types.StringValue("Test Description"),
 		Tags:        types.ListNull(types.StringType),
-		Trigger: TriggerModel{
+		Trigger: &TriggerModel{
 			ID:          types.StringValue("trigger-123"),
 			Type:        types.StringValue("customEvent"),
 			Name:        types.StringNull(),
@@ -134,7 +134,7 @@ func TestMapStateToDataObject_WithTags(t *testing.T) {
 		Name:        types.StringValue("Test Policy"),
 		Description: types.StringValue("Test Description"),
 		Tags:        tags,
-		Trigger: TriggerModel{
+		Trigger: &TriggerModel{
 			ID:   types.StringValue("trigger-123"),
 			Type: types.StringValue("builtinEvent"),
 		},
@@ -173,7 +173,7 @@ func TestMapStateToDataObject_WithScheduling(t *testing.T) {
 		Name:        types.StringValue("Test Policy"),
 		Description: types.StringValue("Test Description"),
 		Tags:        types.ListNull(types.StringType),
-		Trigger: TriggerModel{
+		Trigger: &TriggerModel{
 			ID:          types.StringValue("trigger-123"),
 			Type:        types.StringValue("schedule"),
 			Name:        types.StringValue("Scheduled Trigger"),
@@ -225,7 +225,7 @@ func TestMapStateToDataObject_WithCondition(t *testing.T) {
 		Name:        types.StringValue("Test Policy"),
 		Description: types.StringValue("Test Description"),
 		Tags:        types.ListNull(types.StringType),
-		Trigger: TriggerModel{
+		Trigger: &TriggerModel{
 			ID:   types.StringValue("trigger-123"),
 			Type: types.StringValue("applicationSmartAlert"),
 		},
@@ -267,7 +267,7 @@ func TestMapStateToDataObject_WithMultipleActions(t *testing.T) {
 		Name:        types.StringValue("Test Policy"),
 		Description: types.StringValue("Test Description"),
 		Tags:        types.ListNull(types.StringType),
-		Trigger: TriggerModel{
+		Trigger: &TriggerModel{
 			ID:   types.StringValue("trigger-123"),
 			Type: types.StringValue("customEvent"),
 		},
@@ -323,7 +323,7 @@ func TestMapStateToDataObject_FromPlan(t *testing.T) {
 		Name:        types.StringValue("Test Policy"),
 		Description: types.StringValue("Test Description"),
 		Tags:        types.ListNull(types.StringType),
-		Trigger: TriggerModel{
+		Trigger: &TriggerModel{
 			ID:   types.StringValue("trigger-123"),
 			Type: types.StringValue("customEvent"),
 		},
@@ -359,7 +359,7 @@ func TestMapStateToDataObject_NullID(t *testing.T) {
 		Name:        types.StringValue("Test Policy"),
 		Description: types.StringValue("Test Description"),
 		Tags:        types.ListNull(types.StringType),
-		Trigger: TriggerModel{
+		Trigger: &TriggerModel{
 			ID:   types.StringValue("trigger-123"),
 			Type: types.StringValue("customEvent"),
 		},
@@ -428,10 +428,19 @@ func TestUpdateState_BasicPolicy(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
-	// Initialize state with empty model
-	initializeEmptyState(t, ctx, state)
+	// Initialize state with a minimal model first
+	emptyModel := AutomationPolicyModel{
+		ID:                types.StringNull(),
+		Name:              types.StringNull(),
+		Description:       types.StringNull(),
+		Tags:              types.ListNull(types.StringType),
+		Trigger:           nil,
+		TypeConfiguration: []TypeConfigurationModel{},
+	}
+	diags := state.Set(ctx, emptyModel)
+	require.False(t, diags.HasError())
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	diags = resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model AutomationPolicyModel
@@ -482,10 +491,19 @@ func TestUpdateState_WithTags(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
-	// Initialize state with empty model
-	initializeEmptyState(t, ctx, state)
+	// Initialize state with a minimal model first
+	emptyModel := AutomationPolicyModel{
+		ID:                types.StringNull(),
+		Name:              types.StringNull(),
+		Description:       types.StringNull(),
+		Tags:              types.ListNull(types.StringType),
+		Trigger:           nil,
+		TypeConfiguration: []TypeConfigurationModel{},
+	}
+	diags := state.Set(ctx, emptyModel)
+	require.False(t, diags.HasError())
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	diags = resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model AutomationPolicyModel
@@ -548,10 +566,19 @@ func TestUpdateState_WithScheduling(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
-	// Initialize state with empty model
-	initializeEmptyState(t, ctx, state)
+	// Initialize state with a minimal model first
+	emptyModel := AutomationPolicyModel{
+		ID:                types.StringNull(),
+		Name:              types.StringNull(),
+		Description:       types.StringNull(),
+		Tags:              types.ListNull(types.StringType),
+		Trigger:           nil,
+		TypeConfiguration: []TypeConfigurationModel{},
+	}
+	diags := state.Set(ctx, emptyModel)
+	require.False(t, diags.HasError())
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	diags = resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model AutomationPolicyModel
@@ -681,7 +708,6 @@ func TestMapTriggerToState(t *testing.T) {
 	tests := []struct {
 		name         string
 		trigger      *restapi.Trigger
-		triggerModel TriggerModel
 		expectedID   string
 		expectedType string
 	}{
@@ -690,10 +716,6 @@ func TestMapTriggerToState(t *testing.T) {
 			trigger: &restapi.Trigger{
 				Id:   "trigger-123",
 				Type: "customEvent",
-			},
-			triggerModel: TriggerModel{
-				ID:   types.StringNull(),
-				Type: types.StringNull(),
 			},
 			expectedID:   "trigger-123",
 			expectedType: "customEvent",
@@ -705,12 +727,6 @@ func TestMapTriggerToState(t *testing.T) {
 				Type:        "builtinEvent",
 				Name:        "Test Trigger",
 				Description: "Test Description",
-			},
-			triggerModel: TriggerModel{
-				ID:          types.StringNull(),
-				Type:        types.StringNull(),
-				Name:        types.StringNull(),
-				Description: types.StringNull(),
 			},
 			expectedID:   "trigger-456",
 			expectedType: "builtinEvent",
@@ -728,11 +744,6 @@ func TestMapTriggerToState(t *testing.T) {
 					Recurrent:     true,
 				},
 			},
-			triggerModel: TriggerModel{
-				ID:         types.StringNull(),
-				Type:       types.StringNull(),
-				Scheduling: nil,
-			},
 			expectedID:   "trigger-789",
 			expectedType: "schedule",
 		},
@@ -740,7 +751,7 @@ func TestMapTriggerToState(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := resource.mapTriggerToState(tt.trigger, tt.triggerModel)
+			result := resource.mapTriggerToState(*tt.trigger)
 			assert.Equal(t, tt.expectedID, result.ID.ValueString())
 			assert.Equal(t, tt.expectedType, result.Type.ValueString())
 
@@ -765,13 +776,13 @@ func TestMapTriggerFromState(t *testing.T) {
 
 	tests := []struct {
 		name         string
-		triggerModel TriggerModel
+		triggerModel *TriggerModel
 		expectedID   string
 		expectedType string
 	}{
 		{
 			name: "basic trigger",
-			triggerModel: TriggerModel{
+			triggerModel: &TriggerModel{
 				ID:   types.StringValue("trigger-123"),
 				Type: types.StringValue("customEvent"),
 			},
@@ -780,7 +791,7 @@ func TestMapTriggerFromState(t *testing.T) {
 		},
 		{
 			name: "trigger with optional fields",
-			triggerModel: TriggerModel{
+			triggerModel: &TriggerModel{
 				ID:          types.StringValue("trigger-456"),
 				Type:        types.StringValue("builtinEvent"),
 				Name:        types.StringValue("Test Trigger"),
@@ -791,7 +802,7 @@ func TestMapTriggerFromState(t *testing.T) {
 		},
 		{
 			name: "trigger with scheduling",
-			triggerModel: TriggerModel{
+			triggerModel: &TriggerModel{
 				ID:   types.StringValue("trigger-789"),
 				Type: types.StringValue("schedule"),
 				Scheduling: &SchedulingModel{
@@ -1038,10 +1049,19 @@ func TestUpdateState_AllTriggerTypes(t *testing.T) {
 				Schema: getTestSchema(),
 			}
 
-	// Initialize state with empty model
-	initializeEmptyState(t, ctx, state)
+			// Initialize state with a minimal model first
+			emptyModel := AutomationPolicyModel{
+				ID:                types.StringNull(),
+				Name:              types.StringNull(),
+				Description:       types.StringNull(),
+				Tags:              types.ListNull(types.StringType),
+				Trigger:           nil,
+				TypeConfiguration: []TypeConfigurationModel{},
+			}
+			diags := state.Set(ctx, emptyModel)
+			require.False(t, diags.HasError())
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+			diags = resource.UpdateState(ctx, state, nil, data)
 			require.False(t, diags.HasError())
 
 			var model AutomationPolicyModel
@@ -1090,10 +1110,19 @@ func TestUpdateState_AllPolicyTypes(t *testing.T) {
 				Schema: getTestSchema(),
 			}
 
-	// Initialize state with empty model
-	initializeEmptyState(t, ctx, state)
+			// Initialize state with a minimal model first
+			emptyModel := AutomationPolicyModel{
+				ID:                types.StringNull(),
+				Name:              types.StringNull(),
+				Description:       types.StringNull(),
+				Tags:              types.ListNull(types.StringType),
+				Trigger:           nil,
+				TypeConfiguration: []TypeConfigurationModel{},
+			}
+			diags := state.Set(ctx, emptyModel)
+			require.False(t, diags.HasError())
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+			diags = resource.UpdateState(ctx, state, nil, data)
 			require.False(t, diags.HasError())
 
 			var model AutomationPolicyModel
@@ -1116,22 +1145,15 @@ func TestMapTriggerToState_EmptyOptionalFields(t *testing.T) {
 		Description: "",
 	}
 
-	triggerModel := TriggerModel{
-		ID:          types.StringNull(),
-		Type:        types.StringNull(),
-		Name:        types.StringNull(),
-		Description: types.StringNull(),
-	}
-
-	result := resource.mapTriggerToState(trigger, triggerModel)
+	result := resource.mapTriggerToState(*trigger)
 	assert.Equal(t, "trigger-123", result.ID.ValueString())
 	assert.Equal(t, "customEvent", result.Type.ValueString())
 	assert.True(t, result.Name.IsNull())
 	assert.True(t, result.Description.IsNull())
 }
 
-// TestMapTriggerToState_WithExistingModel tests trigger mapping preserving existing model values
-func TestMapTriggerToState_WithExistingModel(t *testing.T) {
+// TestMapTriggerToState_WithExistingModel tests trigger mapping with new values
+func TestMapTriggerToState_WithNewValues(t *testing.T) {
 	resource := &automationPolicyResourceFramework{}
 
 	trigger := &restapi.Trigger{
@@ -1139,15 +1161,10 @@ func TestMapTriggerToState_WithExistingModel(t *testing.T) {
 		Type: "builtinEvent",
 	}
 
-	triggerModel := TriggerModel{
-		ID:   types.StringValue("trigger-old"),
-		Type: types.StringValue("customEvent"),
-	}
-
-	result := resource.mapTriggerToState(trigger, triggerModel)
-	// Should preserve existing values
-	assert.Equal(t, "trigger-old", result.ID.ValueString())
-	assert.Equal(t, "customEvent", result.Type.ValueString())
+	result := resource.mapTriggerToState(*trigger)
+	// Should use new values from API
+	assert.Equal(t, "trigger-new", result.ID.ValueString())
+	assert.Equal(t, "builtinEvent", result.Type.ValueString())
 }
 
 // TestMapTypeConfigurationsToState_WithoutCondition tests type configuration without condition
@@ -1263,7 +1280,7 @@ func TestUpdateState_WithPlan(t *testing.T) {
 		Name:        types.StringValue("Plan Policy"),
 		Description: types.StringValue("Plan Description"),
 		Tags:        types.ListNull(types.StringType),
-		Trigger: TriggerModel{
+		Trigger: &TriggerModel{
 			ID:   types.StringValue("trigger-plan"),
 			Type: types.StringValue("customEvent"),
 			Scheduling: &SchedulingModel{
@@ -1362,9 +1379,6 @@ func TestUpdateState_ErrorInPlanGet(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
-	// Initialize state with empty model
-	initializeEmptyState(t, ctx, state)
-
 	diags := resource.UpdateState(ctx, state, plan, data)
 	assert.True(t, diags.HasError())
 }
@@ -1399,7 +1413,7 @@ func TestMapStateToDataObject_ErrorInTriggerMapping(t *testing.T) {
 		Name:        types.StringValue("Test Policy"),
 		Description: types.StringValue("Test Description"),
 		Tags:        types.ListNull(types.StringType),
-		Trigger: TriggerModel{
+		Trigger: &TriggerModel{
 			ID:   types.StringValue("trigger-123"),
 			Type: types.StringValue("customEvent"),
 		},
@@ -1583,10 +1597,19 @@ func TestUpdateState_WithSchedulingEmptyFields(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
-	// Initialize state with empty model
-	initializeEmptyState(t, ctx, state)
+	// Initialize state with a minimal model first
+	emptyModel := AutomationPolicyModel{
+		ID:                types.StringNull(),
+		Name:              types.StringNull(),
+		Description:       types.StringNull(),
+		Tags:              types.ListNull(types.StringType),
+		Trigger:           nil,
+		TypeConfiguration: []TypeConfigurationModel{},
+	}
+	diags := state.Set(ctx, emptyModel)
+	require.False(t, diags.HasError())
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	diags = resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model AutomationPolicyModel
@@ -1594,38 +1617,27 @@ func TestUpdateState_WithSchedulingEmptyFields(t *testing.T) {
 	require.False(t, diags.HasError())
 
 	require.NotNil(t, model.Trigger.Scheduling)
+	assert.Equal(t, int64(1609459200000), model.Trigger.Scheduling.StartTime.ValueInt64())
+	assert.Equal(t, int64(60), model.Trigger.Scheduling.Duration.ValueInt64())
 	assert.True(t, model.Trigger.Scheduling.DurationUnit.IsNull())
 	assert.True(t, model.Trigger.Scheduling.RecurrentRule.IsNull())
 }
 
-// TestMapTriggerToState_WithSchedulingPreserved tests that scheduling is preserved from model
-func TestMapTriggerToState_WithSchedulingPreserved(t *testing.T) {
+// TestMapTriggerToState_WithSchedulingZeroStartTime tests that scheduling with zero start time is not set
+func TestMapTriggerToState_WithSchedulingZeroStartTime(t *testing.T) {
 	resource := &automationPolicyResourceFramework{}
 
 	trigger := &restapi.Trigger{
 		Id:   "trigger-123",
 		Type: "schedule",
 		Scheduling: restapi.Scheduling{
-			StartTime: 0, // Zero start time should not override existing scheduling
+			StartTime: 0, // Zero start time should not create scheduling
 		},
 	}
 
-	triggerModel := TriggerModel{
-		ID:   types.StringNull(),
-		Type: types.StringNull(),
-		Scheduling: &SchedulingModel{
-			StartTime:     types.Int64Value(1609459200000),
-			Duration:      types.Int64Value(60),
-			DurationUnit:  types.StringValue("MINUTE"),
-			RecurrentRule: types.StringValue("FREQ=DAILY"),
-			Recurrent:     types.BoolValue(true),
-		},
-	}
-
-	result := resource.mapTriggerToState(trigger, triggerModel)
-	// Scheduling should be preserved from the model when API returns zero start time
-	require.NotNil(t, result.Scheduling)
-	assert.Equal(t, int64(1609459200000), result.Scheduling.StartTime.ValueInt64())
+	result := resource.mapTriggerToState(*trigger)
+	// Scheduling should not be set when API returns zero start time
+	assert.Nil(t, result.Scheduling)
 }
 
 // TestMapActionsToState_WithTags tests action mapping with tags
@@ -1734,10 +1746,19 @@ func TestUpdateState_NullTags(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
-	// Initialize state with empty model
-	initializeEmptyState(t, ctx, state)
+	// Initialize state with a minimal model first
+	emptyModel := AutomationPolicyModel{
+		ID:                types.StringNull(),
+		Name:              types.StringNull(),
+		Description:       types.StringNull(),
+		Tags:              types.ListNull(types.StringType),
+		Trigger:           nil,
+		TypeConfiguration: []TypeConfigurationModel{},
+	}
+	diags := state.Set(ctx, emptyModel)
+	require.False(t, diags.HasError())
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	diags = resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model AutomationPolicyModel
@@ -1748,25 +1769,4 @@ func TestUpdateState_NullTags(t *testing.T) {
 }
 
 
-// initializeEmptyState initializes the state with an empty AutomationPolicyModel
-func initializeEmptyState(t *testing.T, ctx context.Context, state *tfsdk.State) {
-	emptyModel := AutomationPolicyModel{
-		ID:                types.StringNull(),
-		Name:              types.StringNull(),
-		Description:       types.StringNull(),
-		Tags:              types.ListNull(types.StringType),
-		Trigger:           TriggerModel{
-			ID:          types.StringNull(),
-			Type:        types.StringNull(),
-			Name:        types.StringNull(),
-			Description: types.StringNull(),
-			Scheduling:  nil,
-		},
-		TypeConfiguration: []TypeConfigurationModel{},
-	}
-	diags := state.Set(ctx, emptyModel)
-	require.False(t, diags.HasError(), "Failed to initialize empty state")
-}
-
-// Made with Bob
 // Made with Bob
