@@ -773,7 +773,6 @@ func (r *alertingChannelResourceFramework) mapServiceNowChannelFromState(ctx con
 		diags.AddError(AlertingChannelErrMissingPassword, AlertingChannelErrMissingPasswordMsg)
 		return nil, diags
 	}
-	log.Printf(AlertingChannelLogPasswordValue, serviceNow.Password.ValueString())
 
 	serviceNowURLValue := serviceNow.ServiceNowURL.ValueString()
 	usernameValue := serviceNow.Username.ValueString()
@@ -804,8 +803,6 @@ func (r *alertingChannelResourceFramework) mapServiceNowApplicationChannelFromSt
 		diags.AddError(AlertingChannelErrMissingPassword, AlertingChannelErrMissingPasswordMsg)
 		return nil, diags
 	}
-
-	log.Printf(AlertingChannelLogPasswordValue, serviceNowApp.Password.ValueString())
 
 	serviceNowURLValue := serviceNowApp.ServiceNowURL.ValueString()
 	usernameValue := serviceNowApp.Username.ValueString()
