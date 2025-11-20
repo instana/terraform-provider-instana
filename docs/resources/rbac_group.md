@@ -1,28 +1,21 @@
 # RBAC Group Resource
 
-> **⚠️ BREAKING CHANGES in v3.0.0**
-> 
-> This resource has been migrated from Terraform SDK v2 to the Plugin Framework. While most configurations remain compatible, there are important syntax changes you need to be aware of.
->
-> **Key Changes:**
-> - `permission_set` block now uses attribute syntax `= { }` instead of block syntax
-> - `member` now uses set syntax `= [{ }]` instead of multiple blocks
-> - All nested attributes use attribute syntax
-> - See [Migration Guide](#migration-guide-v2-to-v3) below for detailed examples
-
 Management of Groups for role-based access control (RBAC). RBAC groups allow you to define permissions and scope access to specific resources for team members.
 
 API Documentation: <https://instana.github.io/openapi/#tag/Groups>
 
-The ID of the resource which is also used as unique identifier in Instana is auto generated!
+## ⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)
 
-## Migration Guide (v2 to v3)
+ **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block struture.
+
+
+## Migration Guide (v5 to v6)
 
 ### Syntax Changes Overview
 
-The main changes are in how `permission_set` and `member` blocks are defined. In v3, these use attribute syntax instead of block syntax.
+The main changes are in how `permission_set` and `member` blocks are defined. In v6, these use attribute syntax instead of block syntax.
 
-#### OLD (v2.x) Syntax:
+#### OLD (v5.x) Syntax:
 ```hcl
 resource "instana_rbac_group" "example" {
   name = "DevOps Team"
@@ -44,7 +37,7 @@ resource "instana_rbac_group" "example" {
 }
 ```
 
-#### NEW (v3.x) Syntax:
+#### NEW (v6.x) Syntax:
 ```hcl
 resource "instana_rbac_group" "example" {
   name = "DevOps Team"

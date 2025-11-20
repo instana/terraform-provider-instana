@@ -1,40 +1,42 @@
 # Alerting Channel Resource
 
-> **⚠️ BREAKING CHANGES - Plugin Framework Migration**
->
-> This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework. The schema has transitioned from **block structure to attribute format**.
->
-> **Major Changes:**
-> - All channel configurations (email, slack, webhook, etc.) are now **single nested attributes** instead of blocks
-> - Use `attribute = { ... }` syntax instead of `attribute { ... }` block syntax
-> - Channel configurations must use the equals sign (`=`) before the opening brace
-> - All nested configurations within channels follow the same attribute pattern
-> - The `id` attribute is now computed and uses a plan modifier for state management
->
-> **Migration Example:**
-> ```hcl
-> # OLD (SDK v2 - Block Structure)
-> resource "instana_alerting_channel" "example" {
->   name = "my-channel"
->   email {
->     emails = ["user@example.com"]
->   }
-> }
->
-> # NEW (Plugin Framework - Attribute Structure)
-> resource "instana_alerting_channel" "example" {
->   name = "my-channel"
->   email = {
->     emails = ["user@example.com"]
->   }
-> }
-> ```
->
-> Please update your Terraform configurations to use the new attribute-based syntax.
-
 Alerting channel configuration for notifications to a specified target channel.
 
-API Documentation: <https://instana.github.io/openapi/#operation/getAlertingChannels>
+API Documentation: <https://instana.github.io/openapi/#operation/getAlertingChannels
+
+## ⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)
+
+ **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block struture.
+## Migration Guide (v5 to v6)
+
+### Syntax Changes Overview
+ - All channel configurations (email, slack, webhook, etc.) are now **single nested attributes** instead of blocks
+ - Use `attribute = { ... }` syntax instead of `attribute { ... }` block syntax
+ - Channel configurations must use the equals sign (`=`) before the opening brace
+ - All nested configurations within channels follow the same attribute pattern
+ - The `id` attribute is now computed and uses a plan modifier for state management
+
+ **Migration Example:**
+ ```hcl
+ # OLD (SDK v2 - Block Structure)
+ resource "instana_alerting_channel" "example" {
+   name = "my-channel"
+   email {
+     emails = ["user@example.com"]
+   }
+ }
+
+ # NEW (Plugin Framework - Attribute Structure)
+ resource "instana_alerting_channel" "example" {
+   name = "my-channel"
+   email = {
+     emails = ["user@example.com"]
+   }
+ }
+ ```
+
+ Please update your Terraform configurations to use the new attribute-based syntax.
+
 
 ## Example Usage
 
@@ -507,6 +509,79 @@ resource "instana_alerting_channel" "watson_with_headers" {
 }
 ```
 
+### Slack App (Bidirectional) Alerting Channel
+
+#### Basic Slack App Configuration
+```hcl
+resource "instana_alerting_channel" "slack_app_basic" {
+  name = "slack-app-alerts"
+  
+  slack_app = {
+    app_id       = "A01234567"
+    team_id      = "T01234567"
+    team_name    = "My Team"
+    channel_id   = "C01234567"
+    channel_name = "#alerts"
+  }
+}
+```
+
+#### Slack App with Emoji Rendering
+```hcl
+resource "instana_alerting_channel" "slack_app_with_emoji" {
+  name = "slack-app-emoji-alerts"
+  
+  slack_app = {
+    app_id          = "A01234567"
+    team_id         = "T01234567"
+    team_name       = "My Team"
+    channel_id      = "C01234567"
+    channel_name    = "#production-alerts"
+    emoji_rendering = true
+  }
+}
+```
+
+### MS Teams App (Bidirectional) Alerting Channel
+
+#### Basic MS Teams App Configuration
+```hcl
+resource "instana_alerting_channel" "msteams_app_basic" {
+  name = "msteams-app-alerts"
+  
+  ms_teams_app = {
+    api_token_id = "token-123"
+    team_id      = "team-456"
+    team_name    = "Platform Team"
+    channel_id   = "channel-789"
+    channel_name = "Alerts"
+    instana_url  = "https://your-instana-instance.instana.io"
+    service_url  = "https://teams.microsoft.com"
+    tenant_id    = "tenant-abc"
+    tenant_name  = "My Organization"
+  }
+}
+```
+
+#### MS Teams App for Production Environment
+```hcl
+resource "instana_alerting_channel" "msteams_app_production" {
+  name = "msteams-production-alerts"
+  
+  ms_teams_app = {
+    api_token_id = var.msteams_api_token_id
+    team_id      = var.msteams_team_id
+    team_name    = "Production Team"
+    channel_id   = var.msteams_channel_id
+    channel_name = "Production Alerts"
+    instana_url  = var.instana_base_url
+    service_url  = "https://teams.microsoft.com"
+    tenant_id    = var.msteams_tenant_id
+    tenant_name  = var.organization_name
+  }
+}
+```
+
 ## Argument Reference
 
 * `id` - (Computed) The unique identifier of the alerting channel
@@ -528,6 +603,8 @@ resource "instana_alerting_channel" "watson_with_headers" {
 * `prometheus_webhook` - (Optional) Configuration of a Prometheus webhook alerting channel - [Details](#prometheus-webhook-channel-attributes)
 * `webex_teams_webhook` - (Optional) Configuration of a Webex Teams webhook alerting channel - [Details](#webex-teams-webhook-channel-attributes)
 * `watson_aiops_webhook` - (Optional) Configuration of a Watson AIOps webhook alerting channel - [Details](#watson-aiops-webhook-channel-attributes)
+* `slack_app` - (Optional) Configuration of a Slack App (bidirectional) alerting channel - [Details](#slack-app-channel-attributes)
+* `ms_teams_app` - (Optional) Configuration of a MS Teams App (bidirectional) alerting channel - [Details](#ms-teams-app-channel-attributes)
 
 ### Email Channel Attributes
 
@@ -650,6 +727,33 @@ resource "instana_alerting_channel" "watson_with_headers" {
 **Types:**
 - `webhook_url`: `string`
 - `http_headers`: `list(string)`
+
+### Slack App Channel Attributes
+
+* `app_id` - (Required) The App ID of the Slack App.
+* `team_id` - (Required) The Team ID where the Slack App is installed.
+* `team_name` - (Required) The Team Name where the Slack App is installed.
+* `channel_id` - (Required) The Channel ID where alerts will be sent.
+* `channel_name` - (Required) The Channel Name where alerts will be sent.
+* `emoji_rendering` - (Optional) Whether to enable emoji rendering in alert messages.
+
+**Types:**
+- String attributes: `string`
+- `emoji_rendering`: `bool`
+
+### MS Teams App Channel Attributes
+
+* `api_token_id` - (Required) The API Token ID for MS Teams App authentication.
+* `team_id` - (Required) The Team ID where the MS Teams App is installed.
+* `team_name` - (Required) The Team Name where the MS Teams App is installed.
+* `channel_id` - (Required) The Channel ID where alerts will be sent.
+* `channel_name` - (Required) The Channel Name where alerts will be sent.
+* `instana_url` - (Required) The Instana URL for linking back from MS Teams.
+* `service_url` - (Required) The MS Teams service URL.
+* `tenant_id` - (Required) The Tenant ID for MS Teams.
+* `tenant_name` - (Required) The Tenant Name for MS Teams.
+
+**Type:** `string` for all attributes
 
 ## Attribute Reference
 
