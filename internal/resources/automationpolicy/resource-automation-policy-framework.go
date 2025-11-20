@@ -209,8 +209,10 @@ func (r *automationPolicyResourceFramework) UpdateState(ctx context.Context, sta
 		model.Tags = types.ListNull(types.StringType)
 	}
 
-	// Map trigger
-	model.Trigger = r.mapTriggerToState(policy.Trigger)
+	// Map trigger (only update if not in plan or state to handle the drift)
+	if model.Trigger != nil {
+		model.Trigger = r.mapTriggerToState(policy.Trigger)
+	}
 
 	// Map type configurations
 	model.TypeConfiguration = r.mapTypeConfigurationsToState(ctx, policy.TypeConfigurations)
