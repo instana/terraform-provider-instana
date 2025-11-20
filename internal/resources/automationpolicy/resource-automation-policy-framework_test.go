@@ -428,6 +428,9 @@ func TestUpdateState_BasicPolicy(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
+	// Initialize state with empty model
+	initializeEmptyState(t, ctx, state)
+
 	diags := resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
 
@@ -478,6 +481,9 @@ func TestUpdateState_WithTags(t *testing.T) {
 	state := &tfsdk.State{
 		Schema: getTestSchema(),
 	}
+
+	// Initialize state with empty model
+	initializeEmptyState(t, ctx, state)
 
 	diags := resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
@@ -541,6 +547,9 @@ func TestUpdateState_WithScheduling(t *testing.T) {
 	state := &tfsdk.State{
 		Schema: getTestSchema(),
 	}
+
+	// Initialize state with empty model
+	initializeEmptyState(t, ctx, state)
 
 	diags := resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
@@ -1029,7 +1038,10 @@ func TestUpdateState_AllTriggerTypes(t *testing.T) {
 				Schema: getTestSchema(),
 			}
 
-			diags := resource.UpdateState(ctx, state, nil, data)
+	// Initialize state with empty model
+	initializeEmptyState(t, ctx, state)
+
+	diags := resource.UpdateState(ctx, state, nil, data)
 			require.False(t, diags.HasError())
 
 			var model AutomationPolicyModel
@@ -1078,7 +1090,10 @@ func TestUpdateState_AllPolicyTypes(t *testing.T) {
 				Schema: getTestSchema(),
 			}
 
-			diags := resource.UpdateState(ctx, state, nil, data)
+	// Initialize state with empty model
+	initializeEmptyState(t, ctx, state)
+
+	diags := resource.UpdateState(ctx, state, nil, data)
 			require.False(t, diags.HasError())
 
 			var model AutomationPolicyModel
@@ -1347,6 +1362,9 @@ func TestUpdateState_ErrorInPlanGet(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
+	// Initialize state with empty model
+	initializeEmptyState(t, ctx, state)
+
 	diags := resource.UpdateState(ctx, state, plan, data)
 	assert.True(t, diags.HasError())
 }
@@ -1565,6 +1583,9 @@ func TestUpdateState_WithSchedulingEmptyFields(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
+	// Initialize state with empty model
+	initializeEmptyState(t, ctx, state)
+
 	diags := resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
 
@@ -1713,6 +1734,9 @@ func TestUpdateState_NullTags(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
+	// Initialize state with empty model
+	initializeEmptyState(t, ctx, state)
+
 	diags := resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
 
@@ -1723,4 +1747,26 @@ func TestUpdateState_NullTags(t *testing.T) {
 	assert.True(t, model.Tags.IsNull())
 }
 
+
+// initializeEmptyState initializes the state with an empty AutomationPolicyModel
+func initializeEmptyState(t *testing.T, ctx context.Context, state *tfsdk.State) {
+	emptyModel := AutomationPolicyModel{
+		ID:                types.StringNull(),
+		Name:              types.StringNull(),
+		Description:       types.StringNull(),
+		Tags:              types.ListNull(types.StringType),
+		Trigger:           TriggerModel{
+			ID:          types.StringNull(),
+			Type:        types.StringNull(),
+			Name:        types.StringNull(),
+			Description: types.StringNull(),
+			Scheduling:  nil,
+		},
+		TypeConfiguration: []TypeConfigurationModel{},
+	}
+	diags := state.Set(ctx, emptyModel)
+	require.False(t, diags.HasError(), "Failed to initialize empty state")
+}
+
+// Made with Bob
 // Made with Bob

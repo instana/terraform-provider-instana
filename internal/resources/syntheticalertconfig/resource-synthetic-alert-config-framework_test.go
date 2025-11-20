@@ -60,10 +60,10 @@ func TestMetaData(t *testing.T) {
 func TestGetRestResource(t *testing.T) {
 	t.Run("should return synthetic alert config rest resource", func(t *testing.T) {
 		resource := &syntheticAlertConfigResourceFramework{}
-		
+
 		mockAPI := &mockInstanaAPI{}
 		restResource := resource.GetRestResource(mockAPI)
-		
+
 		assert.NotNil(t, restResource)
 	})
 }
@@ -71,32 +71,62 @@ func TestGetRestResource(t *testing.T) {
 // Mock API for testing
 type mockInstanaAPI struct{}
 
-func (m *mockInstanaAPI) CustomEventSpecifications() restapi.RestResource[*restapi.CustomEventSpecification] { return nil }
-func (m *mockInstanaAPI) BuiltinEventSpecifications() restapi.ReadOnlyRestResource[*restapi.BuiltinEventSpecification] { return nil }
+func (m *mockInstanaAPI) CustomEventSpecifications() restapi.RestResource[*restapi.CustomEventSpecification] {
+	return nil
+}
+func (m *mockInstanaAPI) BuiltinEventSpecifications() restapi.ReadOnlyRestResource[*restapi.BuiltinEventSpecification] {
+	return nil
+}
 func (m *mockInstanaAPI) APITokens() restapi.RestResource[*restapi.APIToken] { return nil }
-func (m *mockInstanaAPI) ApplicationConfigs() restapi.RestResource[*restapi.ApplicationConfig] { return nil }
-func (m *mockInstanaAPI) ApplicationAlertConfigs() restapi.RestResource[*restapi.ApplicationAlertConfig] { return nil }
-func (m *mockInstanaAPI) GlobalApplicationAlertConfigs() restapi.RestResource[*restapi.ApplicationAlertConfig] { return nil }
-func (m *mockInstanaAPI) AlertingChannels() restapi.RestResource[*restapi.AlertingChannel] { return nil }
-func (m *mockInstanaAPI) AlertingConfigurations() restapi.RestResource[*restapi.AlertingConfiguration] { return nil }
-func (m *mockInstanaAPI) SliConfigs() restapi.RestResource[*restapi.SliConfig] { return nil }
-func (m *mockInstanaAPI) SloConfigs() restapi.RestResource[*restapi.SloConfig] { return nil }
+func (m *mockInstanaAPI) ApplicationConfigs() restapi.RestResource[*restapi.ApplicationConfig] {
+	return nil
+}
+func (m *mockInstanaAPI) ApplicationAlertConfigs() restapi.RestResource[*restapi.ApplicationAlertConfig] {
+	return nil
+}
+func (m *mockInstanaAPI) GlobalApplicationAlertConfigs() restapi.RestResource[*restapi.ApplicationAlertConfig] {
+	return nil
+}
+func (m *mockInstanaAPI) AlertingChannels() restapi.RestResource[*restapi.AlertingChannel] {
+	return nil
+}
+func (m *mockInstanaAPI) AlertingConfigurations() restapi.RestResource[*restapi.AlertingConfiguration] {
+	return nil
+}
+func (m *mockInstanaAPI) SliConfigs() restapi.RestResource[*restapi.SliConfig]          { return nil }
+func (m *mockInstanaAPI) SloConfigs() restapi.RestResource[*restapi.SloConfig]          { return nil }
 func (m *mockInstanaAPI) SloAlertConfig() restapi.RestResource[*restapi.SloAlertConfig] { return nil }
-func (m *mockInstanaAPI) SloCorrectionConfig() restapi.RestResource[*restapi.SloCorrectionConfig] { return nil }
-func (m *mockInstanaAPI) WebsiteMonitoringConfig() restapi.RestResource[*restapi.WebsiteMonitoringConfig] { return nil }
-func (m *mockInstanaAPI) WebsiteAlertConfig() restapi.RestResource[*restapi.WebsiteAlertConfig] { return nil }
-func (m *mockInstanaAPI) InfraAlertConfig() restapi.RestResource[*restapi.InfraAlertConfig] { return nil }
-func (m *mockInstanaAPI) Teams() restapi.RestResource[*restapi.Team] { return nil }
+func (m *mockInstanaAPI) SloCorrectionConfig() restapi.RestResource[*restapi.SloCorrectionConfig] {
+	return nil
+}
+func (m *mockInstanaAPI) WebsiteMonitoringConfig() restapi.RestResource[*restapi.WebsiteMonitoringConfig] {
+	return nil
+}
+func (m *mockInstanaAPI) WebsiteAlertConfig() restapi.RestResource[*restapi.WebsiteAlertConfig] {
+	return nil
+}
+func (m *mockInstanaAPI) InfraAlertConfig() restapi.RestResource[*restapi.InfraAlertConfig] {
+	return nil
+}
+func (m *mockInstanaAPI) Teams() restapi.RestResource[*restapi.Team]   { return nil }
 func (m *mockInstanaAPI) Groups() restapi.RestResource[*restapi.Group] { return nil }
-func (m *mockInstanaAPI) CustomDashboards() restapi.RestResource[*restapi.CustomDashboard] { return nil }
+func (m *mockInstanaAPI) CustomDashboards() restapi.RestResource[*restapi.CustomDashboard] {
+	return nil
+}
 func (m *mockInstanaAPI) SyntheticTest() restapi.RestResource[*restapi.SyntheticTest] { return nil }
-func (m *mockInstanaAPI) SyntheticLocation() restapi.ReadOnlyRestResource[*restapi.SyntheticLocation] { return nil }
+func (m *mockInstanaAPI) SyntheticLocation() restapi.ReadOnlyRestResource[*restapi.SyntheticLocation] {
+	return nil
+}
 func (m *mockInstanaAPI) SyntheticAlertConfigs() restapi.RestResource[*restapi.SyntheticAlertConfig] {
 	return &mockSyntheticAlertConfigRestResource{}
 }
-func (m *mockInstanaAPI) AutomationActions() restapi.RestResource[*restapi.AutomationAction] { return nil }
-func (m *mockInstanaAPI) AutomationPolicies() restapi.RestResource[*restapi.AutomationPolicy] { return nil }
-func (m *mockInstanaAPI) HostAgents() restapi.ReadOnlyRestResource[*restapi.HostAgent] { return nil }
+func (m *mockInstanaAPI) AutomationActions() restapi.RestResource[*restapi.AutomationAction] {
+	return nil
+}
+func (m *mockInstanaAPI) AutomationPolicies() restapi.RestResource[*restapi.AutomationPolicy] {
+	return nil
+}
+func (m *mockInstanaAPI) HostAgents() restapi.ReadOnlyRestResource[*restapi.HostAgent]  { return nil }
 func (m *mockInstanaAPI) LogAlertConfig() restapi.RestResource[*restapi.LogAlertConfig] { return nil }
 
 // Mock rest resource
@@ -155,7 +185,6 @@ func TestMapStateToDataObject(t *testing.T) {
 		},
 	}
 	ctx := context.Background()
-
 
 	t.Run("should map complete model from state successfully", func(t *testing.T) {
 		model := SyntheticAlertConfigModel{
@@ -455,6 +484,9 @@ func TestUpdateState(t *testing.T) {
 			Schema: resource.metaData.Schema,
 		}
 
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
+
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 
 		assert.False(t, diags.HasError())
@@ -515,6 +547,9 @@ func TestUpdateState(t *testing.T) {
 			Schema: resource.metaData.Schema,
 		}
 
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
+
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 
 		assert.False(t, diags.HasError())
@@ -556,6 +591,9 @@ func TestUpdateState(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 
@@ -601,6 +639,9 @@ func TestUpdateState(t *testing.T) {
 					Schema: resource.metaData.Schema,
 				}
 
+				// Initialize state with empty model
+				initializeEmptyState(t, ctx, state)
+
 				diags := resource.UpdateState(ctx, state, nil, apiObject)
 
 				assert.False(t, diags.HasError())
@@ -642,6 +683,9 @@ func TestUpdateState(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 
@@ -687,6 +731,9 @@ func TestUpdateState(t *testing.T) {
 			Schema: resource.metaData.Schema,
 		}
 
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
+
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 
 		assert.False(t, diags.HasError())
@@ -703,7 +750,6 @@ func TestUpdateState(t *testing.T) {
 	})
 }
 
-
 // Made with Bob
 func TestUpdateStateWithNullTagFilter(t *testing.T) {
 	resource := &syntheticAlertConfigResourceFramework{
@@ -717,12 +763,12 @@ func TestUpdateStateWithNullTagFilter(t *testing.T) {
 
 	t.Run("should update state with null tag filter", func(t *testing.T) {
 		apiObject := &restapi.SyntheticAlertConfig{
-			ID:                    "test-id",
-			Name:                  "No Tag Filter",
-			Description:           "Desc",
-			SyntheticTestIds:      []string{"test-1"},
-			Severity:              5,
-			TagFilterExpression:   nil,
+			ID:                  "test-id",
+			Name:                "No Tag Filter",
+			Description:         "Desc",
+			SyntheticTestIds:    []string{"test-1"},
+			Severity:            5,
+			TagFilterExpression: nil,
 			Rule: restapi.SyntheticAlertRule{
 				AlertType:  "failure",
 				MetricName: "status",
@@ -738,6 +784,9 @@ func TestUpdateStateWithNullTagFilter(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
 
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 
@@ -840,6 +889,25 @@ func TestAdditionalCoverage(t *testing.T) {
 		assert.NotNil(t, result)
 		assert.Equal(t, 12, result.TimeThreshold.ViolationsCount)
 	})
+}
+
+// initializeEmptyState initializes the state with an empty model to ensure proper state initialization
+func initializeEmptyState(t *testing.T, ctx context.Context, state *tfsdk.State) {
+	emptyModel := SyntheticAlertConfigModel{
+		ID:                  types.StringNull(),
+		Name:                types.StringNull(),
+		Description:         types.StringNull(),
+		Severity:            types.Int64Null(),
+		TagFilter:           types.StringNull(),
+		GracePeriod:         types.Int64Null(),
+		SyntheticTestIds:    types.SetNull(types.StringType),
+		AlertChannelIds:     types.SetNull(types.StringType),
+		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
+		Rule:                nil,
+		TimeThreshold:       nil,
+	}
+	diags := state.Set(ctx, emptyModel)
+	require.False(t, diags.HasError(), "Failed to initialize empty state")
 }
 
 // Made with Bob
