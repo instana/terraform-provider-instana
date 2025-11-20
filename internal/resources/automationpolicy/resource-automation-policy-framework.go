@@ -255,59 +255,49 @@ func (r *automationPolicyResourceFramework) mapTagsToState(ctx context.Context, 
 
 // mapTriggerToState maps trigger data from API to state model
 func (r *automationPolicyResourceFramework) mapTriggerToState(trigger *restapi.Trigger, triggerModel TriggerModel) TriggerModel {
-	if triggerModel.ID.IsNull() || triggerModel.ID.IsUnknown() {
-		triggerModel.ID = types.StringValue(trigger.Id)
-	}
-	if triggerModel.Type.IsNull() || triggerModel.Type.IsUnknown() {
-		triggerModel.Type = types.StringValue(trigger.Type)
+
+	triggerModel.ID = types.StringValue(trigger.Id)
+
+	triggerModel.Type = types.StringValue(trigger.Type)
+
+	if trigger.Description != "" {
+		triggerModel.Description = types.StringValue(trigger.Description)
+	} else {
+		triggerModel.Description = types.StringNull()
 	}
 
-	if triggerModel.Description.IsNull() || triggerModel.Description.IsUnknown() {
-		if trigger.Description != "" {
-			triggerModel.Description = types.StringValue(trigger.Description)
-		} else {
-			triggerModel.Description = types.StringNull()
-		}
-
-	}
-	if triggerModel.Name.IsNull() || triggerModel.Name.IsUnknown() {
-		if trigger.Name != "" {
-			triggerModel.Name = types.StringValue(trigger.Name)
-		} else {
-			triggerModel.Name = types.StringNull()
-		}
-
+	if trigger.Name != "" {
+		triggerModel.Name = types.StringValue(trigger.Name)
+	} else {
+		triggerModel.Name = types.StringNull()
 	}
 
 	// Map scheduling from API response if not already set in the model
 	// The scheduling field is preserved from the plan in UpdateState function
-	if triggerModel.Scheduling == nil {
-		if trigger.Scheduling.StartTime != 0 {
-			// Handle duration_unit - set to null if empty
-			var durationUnit types.String
-			if trigger.Scheduling.DurationUnit != "" {
-				durationUnit = types.StringValue(string(trigger.Scheduling.DurationUnit))
-			} else {
-				durationUnit = types.StringNull()
-			}
-
-			// Handle recurrent_rule - set to null if empty
-			var recurrentRule types.String
-			if trigger.Scheduling.RecurrentRule != "" {
-				recurrentRule = types.StringValue(trigger.Scheduling.RecurrentRule)
-			} else {
-				recurrentRule = types.StringNull()
-			}
-
-			triggerModel.Scheduling = &SchedulingModel{
-				StartTime:     types.Int64Value(trigger.Scheduling.StartTime),
-				Duration:      types.Int64Value(int64(trigger.Scheduling.Duration)),
-				DurationUnit:  durationUnit,
-				RecurrentRule: recurrentRule,
-				Recurrent:     types.BoolValue(trigger.Scheduling.Recurrent),
-			}
+	if trigger.Scheduling.StartTime != 0 {
+		// Handle duration_unit - set to null if empty
+		var durationUnit types.String
+		if trigger.Scheduling.DurationUnit != "" {
+			durationUnit = types.StringValue(string(trigger.Scheduling.DurationUnit))
+		} else {
+			durationUnit = types.StringNull()
 		}
-		// If no scheduling data from API, leave it as nil
+
+		// Handle recurrent_rule - set to null if empty
+		var recurrentRule types.String
+		if trigger.Scheduling.RecurrentRule != "" {
+			recurrentRule = types.StringValue(trigger.Scheduling.RecurrentRule)
+		} else {
+			recurrentRule = types.StringNull()
+		}
+
+		triggerModel.Scheduling = &SchedulingModel{
+			StartTime:     types.Int64Value(trigger.Scheduling.StartTime),
+			Duration:      types.Int64Value(int64(trigger.Scheduling.Duration)),
+			DurationUnit:  durationUnit,
+			RecurrentRule: recurrentRule,
+			Recurrent:     types.BoolValue(trigger.Scheduling.Recurrent),
+		}
 	}
 
 	return triggerModel

@@ -221,6 +221,9 @@ func TestUpdateState(t *testing.T) {
 			Schema: handle.MetaData().Schema,
 		}
 
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
+
 		diags := resource.UpdateState(ctx, state, nil, dashboard)
 		require.False(t, diags.HasError())
 
@@ -252,6 +255,9 @@ func TestUpdateState(t *testing.T) {
 			Schema: handle.MetaData().Schema,
 		}
 
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
+
 		diags := resource.UpdateState(ctx, state, nil, dashboard)
 		require.False(t, diags.HasError())
 
@@ -264,7 +270,7 @@ func TestUpdateState(t *testing.T) {
 	t.Run("without plan - invalid widgets JSON", func(t *testing.T) {
 		resource := &customDashboardResourceFramework{}
 
-		// Create invalid JSON that will fail marshaling
+		// Create invalid JSON that will fail canonicalization
 		widgets := json.RawMessage(`invalid json`)
 		dashboard := &restapi.CustomDashboard{
 			ID:      "dashboard-error",
@@ -277,10 +283,12 @@ func TestUpdateState(t *testing.T) {
 			Schema: handle.MetaData().Schema,
 		}
 
+		// Initialize state with empty model
+		initializeEmptyState(t, ctx, state)
+
 		diags := resource.UpdateState(ctx, state, nil, dashboard)
-		// Note: json.RawMessage.MarshalJSON() typically doesn't fail for invalid JSON
-		// It just returns the raw bytes. So this test verifies the behavior.
-		require.False(t, diags.HasError())
+		// util.CanonicalizeJSON() will fail for invalid JSON, so we expect an error
+		require.True(t, diags.HasError())
 	})
 
 	t.Run("with plan - multiple access rules", func(t *testing.T) {
@@ -716,4 +724,17 @@ func stringPtr(s string) *string {
 	return &s
 }
 
+// initializeEmptyState initializes the state with an empty CustomDashboardModel
+func initializeEmptyState(t *testing.T, ctx context.Context, state *tfsdk.State) {
+	emptyModel := CustomDashboardModel{
+		ID:          types.StringNull(),
+		Title:       types.StringNull(),
+		AccessRules: []AccessRuleModel{},
+		Widgets:     jsontypes.NewNormalizedNull(),
+	}
+	diags := state.Set(ctx, emptyModel)
+	require.False(t, diags.HasError(), "Failed to initialize empty state")
+}
+
+// Made with Bob
 // Made with Bob
