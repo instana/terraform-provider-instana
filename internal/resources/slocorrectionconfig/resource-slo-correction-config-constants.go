@@ -5,10 +5,9 @@ const ResourceInstanaSloCorrectionConfigFramework = "slo_correction_config"
 
 const (
 	// Slo Correction Config Field names for Terraform
-	SloCorrectionConfigFieldID                      = "id"
-	SloCorrectionConfigFieldName                    = "name"
-	SloCorrectionConfigFieldFullName                = "full_name"
-	SloCorrectionConfigFieldDescription             = "description"
+	SloCorrectionConfigFieldID          = "id"
+	SloCorrectionConfigFieldName        = "name"
+	SloCorrectionConfigFieldDescription = "description"
 	SloCorrectionConfigFieldActive                  = "active"
 	SloCorrectionConfigFieldScheduling              = "scheduling"
 	SloCorrectionConfigFieldSloIds                  = "slo_ids"

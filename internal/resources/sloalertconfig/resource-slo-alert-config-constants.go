@@ -5,9 +5,8 @@ const ResourceInstanaSloAlertConfigFramework = "slo_alert_config"
 
 const (
 	//Slo Alert Config Field names for Terraform
-	SloAlertConfigFieldName                            = "name"
-	SloAlertConfigFieldFullName                        = "full_name"
-	SloAlertConfigFieldDescription                     = "description"
+	SloAlertConfigFieldName        = "name"
+	SloAlertConfigFieldDescription = "description"
 	SloAlertConfigFieldSeverity                        = "severity"
 	SloAlertConfigFieldTriggering                      = "triggering"
 	SloAlertConfigFieldAlertType                       = "alert_type"

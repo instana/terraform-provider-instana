@@ -97,10 +97,7 @@ const (
 	APITokenDescCanConfigureApdex                         = "Configures if the API token is allowed to configure Apdex"
 	APITokenDescCanConfigureServiceLevelCorrectionWindows = "Configures if the API token is allowed to configure service level Correction Windows"
 	APITokenDescCanConfigureServiceLevelSmartAlerts       = "Configures if the API token is allowed to configure service level smart alerts"
-	APITokenDescCanConfigureServiceLevels                 = "Configures if the API token is allowed to configure service levels"
-
-	// ResourceInstanaAPIToken the name of the terraform-provider-instana resource to manage API tokens
-	ResourceInstanaAPIToken = "instana_api_token"
+	APITokenDescCanConfigureServiceLevels = "Configures if the API token is allowed to configure service levels"
 
 	//APITokenFieldAccessGrantingToken constant value for the schema field access_granting_token
 	APITokenFieldAccessGrantingToken = "access_granting_token"
@@ -108,8 +105,6 @@ const (
 	APITokenFieldInternalID = "internal_id"
 	//APITokenFieldName constant value for the schema field name
 	APITokenFieldName = "name"
-	//APITokenFieldFullName constant value for the schema field full_name
-	APITokenFieldFullName = "full_name"
 	//APITokenFieldCanConfigureServiceMapping constant value for the schema field can_configure_service_mapping
 	APITokenFieldCanConfigureServiceMapping = "can_configure_service_mapping"
 	//APITokenFieldCanConfigureEumApplications constant value for the schema field can_configure_eum_applications

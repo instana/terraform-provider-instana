@@ -23,8 +23,6 @@ const (
 	ApplicationAlertConfigFieldIncludeSynthetic = "include_synthetic"
 	//ApplicationAlertConfigFieldName constant value for field name of resource instana_application_alert_config
 	ApplicationAlertConfigFieldName = "name"
-	//ApplicationAlertConfigFieldFullName constant value for field full_name of resource instana_application_alert_config
-	ApplicationAlertConfigFieldFullName = "full_name"
 	//ApplicationAlertConfigFieldRule constant value for field rule of resource instana_application_alert_config
 	ApplicationAlertConfigFieldRule = "rule"
 	//ApplicationAlertConfigFieldRuleMetricName constant value for field rule.*.metric_name of resource instana_application_alert_config
@@ -79,8 +77,6 @@ const (
 	ApplicationAlertConfigFieldThresholdOperator = "threshold_operator"
 	ApplicationAlertConfigFieldGracePeriod       = "grace_period"
 	ApplicationAlertConfigFieldAlertChannels     = "alert_channels"
-	ApplicationAlertConfigFieldRuleConfig        = "rule_config"
-	ApplicationAlertConfigFieldValue             = "value"
 
 	// Re-define constants from resource-application-alert-config.go for compatibility
 	ApplicationAlertConfigFieldApplications                            = "application"
