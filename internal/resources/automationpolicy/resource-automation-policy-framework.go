@@ -30,7 +30,7 @@ func NewAutomationPolicyResourceHandleFramework() resourcehandle.ResourceHandleF
 			Schema: schema.Schema{
 				Description: AutomationPolicyDescResource,
 				Attributes: map[string]schema.Attribute{
-					"id": schema.StringAttribute{
+					AutomationPolicyFieldID: schema.StringAttribute{
 						Computed:    true,
 						Description: AutomationPolicyDescID,
 						PlanModifiers: []planmodifier.String{

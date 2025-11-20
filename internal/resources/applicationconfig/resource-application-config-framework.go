@@ -31,7 +31,7 @@ func NewApplicationConfigResourceHandleFramework() resourcehandle.ResourceHandle
 			Schema: schema.Schema{
 				Description: ApplicationConfigDescResource,
 				Attributes: map[string]schema.Attribute{
-					"id": schema.StringAttribute{
+					ApplicationConfigFieldID: schema.StringAttribute{
 						Computed:    true,
 						Description: ApplicationConfigDescID,
 						PlanModifiers: []planmodifier.String{
