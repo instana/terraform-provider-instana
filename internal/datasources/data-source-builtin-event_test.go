@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/stretchr/testify/require"
 )
 

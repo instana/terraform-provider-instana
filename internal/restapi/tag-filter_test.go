@@ -5,7 +5,7 @@ import (
 
 	"go.uber.org/mock/gomock"
 
-	. "github.com/gessnerfl/terraform-provider-instana/internal/restapi"
+	. "github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/stretchr/testify/require"
 )
 

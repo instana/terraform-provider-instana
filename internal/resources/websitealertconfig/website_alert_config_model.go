@@ -1,8 +1,8 @@
 package websitealertconfig
 
 import (
-	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/terraform-provider-instana/internal/shared"
 )
 
 // WebsiteAlertConfigModel represents the data model for the Website Alert Config resource
