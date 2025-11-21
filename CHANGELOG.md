@@ -1,5 +1,21 @@
 # Changelog
 
+## [v5.4.0](https://github.com/instana/terraform-provider-instana/tree/v5.4.0) (2025-10-09)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v5.3.1...v5.4.0)
+
+**Implemented enhancements:**
+
+- Log smart alert resource [\#57](https://github.com/instana/terraform-provider-instana/pull/57) ([georgekutty-1](https://github.com/georgekutty-1))
+
+## [v5.3.1](https://github.com/instana/terraform-provider-instana/tree/v5.3.1) (2025-09-30)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v5.3.0...v5.3.1)
+
+**Merged pull requests:**
+
+- Update index.md to highlight Synthetic Alert Config support [\#56](https://github.com/instana/terraform-provider-instana/pull/56) ([parekh-raj](https://github.com/parekh-raj))
+
 ## [v5.3.0](https://github.com/instana/terraform-provider-instana/tree/v5.3.0) (2025-09-24)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v5.2.0...v5.3.0)
