@@ -4,12 +4,12 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/gessnerfl/terraform-provider-instana/mocks"
+	"github.com/instana/terraform-provider-instana/mocks"
 	"go.uber.org/mock/gomock"
 
 	"github.com/stretchr/testify/require"
 
-	. "github.com/gessnerfl/terraform-provider-instana/internal/restapi"
+	. "github.com/instana/terraform-provider-instana/internal/restapi"
 )
 
 const (

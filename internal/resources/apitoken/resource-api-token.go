@@ -3,9 +3,6 @@ package apitoken
 import (
 	"context"
 
-	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
-	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
-	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -14,6 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
+	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/terraform-provider-instana/internal/util"
 )
 
 // NewAPITokenResourceHandle creates the resource handle for API Tokens

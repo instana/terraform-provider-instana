@@ -1,8 +1,8 @@
 package sloalertconfig
 
 import (
-	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 )
 
 // SloAlertConfigModel represents the data model for SLO Alert configuration

@@ -5,8 +5,8 @@ import (
 	"flag"
 	"log"
 
-	"github.com/gessnerfl/terraform-provider-instana/internal/provider"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
+	"github.com/instana/terraform-provider-instana/internal/provider"
 )
 
 var (

@@ -3,10 +3,6 @@ package team
 import (
 	"context"
 
-	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
-	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
-	"github.com/gessnerfl/terraform-provider-instana/internal/shared/tagfilter"
-	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -15,6 +11,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
+	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
+	"github.com/instana/terraform-provider-instana/internal/util"
 )
 
 // NewTeamResourceHandle creates the resource handle for RBAC Teams

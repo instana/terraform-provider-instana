@@ -5,13 +5,13 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/gessnerfl/terraform-provider-instana/internal/resourcehandle"
-	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
-	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
+	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/terraform-provider-instana/internal/util"
 )
 
 // NewTerraformResource creates a new terraform resource for the given handle

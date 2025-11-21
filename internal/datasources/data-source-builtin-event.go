@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
-	"github.com/gessnerfl/terraform-provider-instana/internal/shared"
-	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/terraform-provider-instana/internal/shared"
+	"github.com/instana/terraform-provider-instana/internal/util"
 )
 
 // Constants are now defined in data-source-builtin-event-constants.go

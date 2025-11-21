@@ -1,6 +1,6 @@
 package restapi
 
-import "github.com/gessnerfl/terraform-provider-instana/utils"
+import "github.com/instana/terraform-provider-instana/utils"
 
 // NewReadOnlyRestResource creates a new instance of ReadOnlyRestResource
 func NewReadOnlyRestResource[T InstanaDataObject](resourcePath string, unmarshaller JSONUnmarshaller[T], client RestClient) ReadOnlyRestResource[T] {

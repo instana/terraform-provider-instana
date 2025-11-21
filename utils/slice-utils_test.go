@@ -3,7 +3,7 @@ package utils_test
 import (
 	"testing"
 
-	. "github.com/gessnerfl/terraform-provider-instana/utils"
+	. "github.com/instana/terraform-provider-instana/utils"
 	"github.com/stretchr/testify/assert"
 )
 

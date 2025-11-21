@@ -4,12 +4,12 @@ import (
 	"context"
 	"strings"
 
-	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
-	"github.com/gessnerfl/terraform-provider-instana/internal/util"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/terraform-provider-instana/internal/util"
 )
 
 type PagerDutyModel struct {
@@ -96,15 +96,15 @@ type SlackAppModel struct {
 }
 
 type MsTeamsAppModel struct {
-	APITokenID types.String `tfsdk:"api_token_id"`
-	TeamID     types.String `tfsdk:"team_id"`
-	TeamName   types.String `tfsdk:"team_name"`
-	ChannelID  types.String `tfsdk:"channel_id"`
+	APITokenID  types.String `tfsdk:"api_token_id"`
+	TeamID      types.String `tfsdk:"team_id"`
+	TeamName    types.String `tfsdk:"team_name"`
+	ChannelID   types.String `tfsdk:"channel_id"`
 	ChannelName types.String `tfsdk:"channel_name"`
-	InstanaURL types.String `tfsdk:"instana_url"`
-	ServiceURL types.String `tfsdk:"service_url"`
-	TenantID   types.String `tfsdk:"tenant_id"`
-	TenantName types.String `tfsdk:"tenant_name"`
+	InstanaURL  types.String `tfsdk:"instana_url"`
+	ServiceURL  types.String `tfsdk:"service_url"`
+	TenantID    types.String `tfsdk:"tenant_id"`
+	TenantName  types.String `tfsdk:"tenant_name"`
 }
 
 func MapAlertChannelsToState(ctx context.Context, alertChannels map[restapi.AlertSeverity][]string) (types.Object, diag.Diagnostics) {
@@ -507,15 +507,15 @@ func MapMsTeamsAppChannelToState(ctx context.Context, channel *restapi.AlertingC
 
 	// Create MS Teams App model
 	model := &MsTeamsAppModel{
-		APITokenID: util.SetStringPointerToState(channel.APITokenID),
-		TeamID:     util.SetStringPointerToState(channel.TeamID),
-		TeamName:   util.SetStringPointerToState(channel.TeamName),
-		ChannelID:  util.SetStringPointerToState(channel.ChannelID),
+		APITokenID:  util.SetStringPointerToState(channel.APITokenID),
+		TeamID:      util.SetStringPointerToState(channel.TeamID),
+		TeamName:    util.SetStringPointerToState(channel.TeamName),
+		ChannelID:   util.SetStringPointerToState(channel.ChannelID),
 		ChannelName: util.SetStringPointerToState(channel.ChannelName),
-		InstanaURL: util.SetStringPointerToState(channel.InstanaURL),
-		ServiceURL: util.SetStringPointerToState(channel.ServiceURL),
-		TenantID:   util.SetStringPointerToState(channel.TenantID),
-		TenantName: util.SetStringPointerToState(channel.TenantName),
+		InstanaURL:  util.SetStringPointerToState(channel.InstanaURL),
+		ServiceURL:  util.SetStringPointerToState(channel.ServiceURL),
+		TenantID:    util.SetStringPointerToState(channel.TenantID),
+		TenantName:  util.SetStringPointerToState(channel.TenantName),
 	}
 
 	return model, diags

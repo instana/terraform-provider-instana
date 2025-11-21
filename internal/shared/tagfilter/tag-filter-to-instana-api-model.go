@@ -3,7 +3,7 @@ package tagfilter
 import (
 	"fmt"
 
-	"github.com/gessnerfl/terraform-provider-instana/internal/restapi"
+	"github.com/instana/terraform-provider-instana/internal/restapi"
 )
 
 // ToAPIModel Implementation of the mapping form filter expression model to the Instana API model

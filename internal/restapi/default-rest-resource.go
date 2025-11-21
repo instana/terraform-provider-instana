@@ -3,7 +3,7 @@ package restapi
 import (
 	"fmt"
 
-	"github.com/gessnerfl/terraform-provider-instana/utils"
+	"github.com/instana/terraform-provider-instana/utils"
 )
 
 // NewCreatePUTUpdatePUTRestResource creates a new REST resource using the provided unmarshaller function to convert the response from the REST API to the corresponding InstanaDataObject. The REST resource is using PUT as operation for create and update

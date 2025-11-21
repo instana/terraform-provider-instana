@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	. "github.com/gessnerfl/terraform-provider-instana/internal/restapi"
+	. "github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/stretchr/testify/require"
 )
 
