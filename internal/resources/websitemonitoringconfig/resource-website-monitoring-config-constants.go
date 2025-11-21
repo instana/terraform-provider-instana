@@ -1,7 +1,7 @@
 package websitemonitoringconfig
 
-// ResourceInstanaWebsiteMonitoringConfigFramework the name of the terraform-provider-instana resource to manage website monitoring configurations
-const ResourceInstanaWebsiteMonitoringConfigFramework = "website_monitoring_config"
+// ResourceInstanaWebsiteMonitoringConfig the name of the terraform-provider-instana resource to manage website monitoring configurations
+const ResourceInstanaWebsiteMonitoringConfig = "website_monitoring_config"
 
 // Schema field name constants
 const (

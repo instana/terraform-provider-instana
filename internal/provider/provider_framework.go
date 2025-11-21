@@ -159,12 +159,12 @@ func (p *InstanaProvider) Configure(ctx context.Context, req provider.ConfigureR
 func (p *InstanaProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		// Add data sources here when implemented
-		datasources.NewAlertingChannelDataSourceFramework,
-		datasources.NewAutomationActionDataSourceFramework,
-		datasources.NewBuiltinEventDataSourceFramework,
-		datasources.NewCustomEventSpecificationDataSourceFramework,
-		datasources.NewHostAgentsDataSourceFramework,
-		datasources.NewSyntheticLocationDataSourceFramework,
+		datasources.NewAlertingChannelDataSource,
+		datasources.NewAutomationActionDataSource,
+		datasources.NewBuiltinEventDataSource,
+		datasources.NewCustomEventSpecificationDataSource,
+		datasources.NewHostAgentsDataSource,
+		datasources.NewSyntheticLocationDataSource,
 	}
 }
 
@@ -172,34 +172,34 @@ func (p *InstanaProvider) DataSources(_ context.Context) []func() datasource.Dat
 func (p *InstanaProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		// Add resources here -
-		addResouceHandle(alertingconfig.NewAlertingConfigResourceHandleFramework),
-		addResouceHandle(logalertconfig.NewLogAlertConfigResourceHandleFramework),
-		addResouceHandle(alertingchannel.NewAlertingChannelResourceHandleFramework),
-		addResouceHandle(apitoken.NewAPITokenResourceHandleFramework),
-		addResouceHandle(applicationalertconfig.NewApplicationAlertConfigResourceHandleFramework),
-		addResouceHandle(applicationalertconfig.NewGlobalApplicationAlertConfigResourceHandleFramework),
-		addResouceHandle(applicationconfig.NewApplicationConfigResourceHandleFramework),
-		addResouceHandle(automationaction.NewAutomationActionResourceHandleFramework),
-		addResouceHandle(automationpolicy.NewAutomationPolicyResourceHandleFramework),
-		addResouceHandle(customdashboard.NewCustomDashboardResourceHandleFramework),
-		addResouceHandle(customeventspec.NewCustomEventSpecificationResourceHandleFramework),
-		addResouceHandle(infralertconfig.NewInfraAlertConfigResourceHandleFramework),
-		addResouceHandle(group.NewGroupResourceHandleFramework),
-		addResouceHandle(team.NewTeamResourceHandleFramework),
-		addResouceHandle(sliconfig.NewSliConfigResourceHandleFramework),
-		addResouceHandle(sloalertconfig.NewSloAlertConfigResourceHandleFramework),
-		addResouceHandle(slocorrectionconfig.NewSloCorrectionConfigResourceHandleFramework),
-		addResouceHandle(syntheticalertconfig.NewSyntheticAlertConfigResourceHandleFramework),
-		addResouceHandle(synthetictest.NewSyntheticTestResourceHandleFramework),
-		addResouceHandle(websitealertconfig.NewWebsiteAlertConfigResourceHandleFramework),
-		addResouceHandle(websitemonitoringconfig.NewWebsiteMonitoringConfigResourceHandleFramework),
-		addResouceHandle(sloconfig.NewSloConfigResourceHandleFramework),
+		addResouceHandle(alertingconfig.NewAlertingConfigResourceHandle),
+		addResouceHandle(logalertconfig.NewLogAlertConfigResourceHandle),
+		addResouceHandle(alertingchannel.NewAlertingChannelResourceHandle),
+		addResouceHandle(apitoken.NewAPITokenResourceHandle),
+		addResouceHandle(applicationalertconfig.NewApplicationAlertConfigResourceHandle),
+		addResouceHandle(applicationalertconfig.NewGlobalApplicationAlertConfigResourceHandle),
+		addResouceHandle(applicationconfig.NewApplicationConfigResourceHandle),
+		addResouceHandle(automationaction.NewAutomationActionResourceHandle),
+		addResouceHandle(automationpolicy.NewAutomationPolicyResourceHandle),
+		addResouceHandle(customdashboard.NewCustomDashboardResourceHandle),
+		addResouceHandle(customeventspec.NewCustomEventSpecificationResourceHandle),
+		addResouceHandle(infralertconfig.NewInfraAlertConfigResourceHandle),
+		addResouceHandle(group.NewGroupResourceHandle),
+		addResouceHandle(team.NewTeamResourceHandle),
+		addResouceHandle(sliconfig.NewSliConfigResourceHandle),
+		addResouceHandle(sloalertconfig.NewSloAlertConfigResourceHandle),
+		addResouceHandle(slocorrectionconfig.NewSloCorrectionConfigResourceHandle),
+		addResouceHandle(syntheticalertconfig.NewSyntheticAlertConfigResourceHandle),
+		addResouceHandle(synthetictest.NewSyntheticTestResourceHandle),
+		addResouceHandle(websitealertconfig.NewWebsiteAlertConfigResourceHandle),
+		addResouceHandle(websitemonitoringconfig.NewWebsiteMonitoringConfigResourceHandle),
+		addResouceHandle(sloconfig.NewSloConfigResourceHandle),
 	}
 }
 
 // Helper function to wrap resource handles
-func addResouceHandle[T restapi.InstanaDataObject](handleFunc func() resourcehandle.ResourceHandleFramework[T]) func() resource.Resource {
+func addResouceHandle[T restapi.InstanaDataObject](handleFunc func() resourcehandle.ResourceHandle[T]) func() resource.Resource {
 	return func() resource.Resource {
-		return NewTerraformResourceFramework(handleFunc())
+		return NewTerraformResource(handleFunc())
 	}
 }

@@ -1,10 +1,10 @@
 package applicationalertconfig
 
-// ResourceInstanaApplicationAlertConfigFramework the name of the terraform-provider-instana resource to manage application alert configs
-const ResourceInstanaApplicationAlertConfigFramework = "application_alert_config"
+// ResourceInstanaApplicationAlertConfig the name of the terraform-provider-instana resource to manage application alert configs
+const ResourceInstanaApplicationAlertConfig = "application_alert_config"
 
-// ResourceInstanaGlobalApplicationAlertConfigFramework the name of the terraform-provider-instana resource to manage global application alert configs
-const ResourceInstanaGlobalApplicationAlertConfigFramework = "global_application_alert_config"
+// ResourceInstanaGlobalApplicationAlertConfig the name of the terraform-provider-instana resource to manage global application alert configs
+const ResourceInstanaGlobalApplicationAlertConfig = "global_application_alert_config"
 
 const (
 	//ApplicationAlertConfigFieldID constant value for field id of resource instana_application_alert_config

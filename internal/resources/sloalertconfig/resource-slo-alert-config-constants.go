@@ -1,12 +1,12 @@
 package sloalertconfig
 
-// ResourceInstanaSloAlertConfigFramework the name of the terraform-provider-instana resource to manage SLO Alert configurations
-const ResourceInstanaSloAlertConfigFramework = "slo_alert_config"
+// ResourceInstanaSloAlertConfig the name of the terraform-provider-instana resource to manage SLO Alert configurations
+const ResourceInstanaSloAlertConfig = "slo_alert_config"
 
 const (
 	//Slo Alert Config Field names for Terraform
-	SloAlertConfigFieldName        = "name"
-	SloAlertConfigFieldDescription = "description"
+	SloAlertConfigFieldName                            = "name"
+	SloAlertConfigFieldDescription                     = "description"
 	SloAlertConfigFieldSeverity                        = "severity"
 	SloAlertConfigFieldTriggering                      = "triggering"
 	SloAlertConfigFieldAlertType                       = "alert_type"

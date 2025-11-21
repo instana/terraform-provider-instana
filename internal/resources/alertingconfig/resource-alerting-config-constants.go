@@ -2,8 +2,8 @@ package alertingconfig
 
 // Resource name constants
 const (
-	// ResourceInstanaAlertingConfigFramework the name of the terraform-provider-instana resource to manage alerting configurations
-	ResourceInstanaAlertingConfigFramework = "alerting_config"
+	// ResourceInstanaAlertingConfig the name of the terraform-provider-instana resource to manage alerting configurations
+	ResourceInstanaAlertingConfig = "alerting_config"
 
 	// Field name constants for alerting config
 
