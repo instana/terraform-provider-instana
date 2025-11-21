@@ -1,7 +1,7 @@
 package group
 
-// ResourceInstanaGroupFramework the name of the terraform-provider-instana resource to manage groups for role based access control
-const ResourceInstanaGroupFramework = "rbac_group"
+// ResourceInstanaGroup the name of the terraform-provider-instana resource to manage groups for role based access control
+const ResourceInstanaGroup = "rbac_group"
 
 //nolint:gosec
 const (

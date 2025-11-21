@@ -65,8 +65,8 @@ type WebsiteTimeBasedModel struct {
 	BeaconType       types.String `tfsdk:"beacon_type"`
 }
 
-type sliConfigResourceFramework struct {
-	metaData resourcehandle.ResourceMetaDataFramework
+type sliConfigResource struct {
+	metaData resourcehandle.ResourceMetaData
 }
 
 var applicationTimeBasedObjectType = types.ObjectType{

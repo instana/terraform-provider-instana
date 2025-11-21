@@ -1,7 +1,7 @@
 package customeventspec
 
-// ResourceInstanaCustomEventSpecificationFramework the name of the terraform-provider-instana resource to manage custom event specifications
-const ResourceInstanaCustomEventSpecificationFramework = "custom_event_specification"
+// ResourceInstanaCustomEventSpecification the name of the terraform-provider-instana resource to manage custom event specifications
+const ResourceInstanaCustomEventSpecification = "custom_event_specification"
 
 // Resource description constants
 const (

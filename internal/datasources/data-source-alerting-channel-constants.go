@@ -67,8 +67,8 @@ const (
 	AlertingChannelErrChannelNotFound         = "Alerting channel not found"
 	AlertingChannelErrUnsupportedChannelType  = "Unsupported alerting channel type"
 
-	// ResourceInstanaAlertingChannelFramework the name of the terraform-provider-instana resource to manage alerting channels
-	ResourceInstanaAlertingChannelFramework = "alerting_channel"
+	// ResourceInstanaAlertingChannel the name of the terraform-provider-instana resource to manage alerting channels
+	ResourceInstanaAlertingChannel = "alerting_channel"
 
 	//AlertingChannelFieldName constant value for the schema field name
 	AlertingChannelFieldName = "name"

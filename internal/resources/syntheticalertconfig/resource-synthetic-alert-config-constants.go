@@ -2,8 +2,8 @@ package syntheticalertconfig
 
 // Resource name constants
 const (
-	// ResourceInstanaSyntheticAlertConfigFramework the name of the terraform-provider-instana resource to manage synthetic alert configurations
-	ResourceInstanaSyntheticAlertConfigFramework = "synthetic_alert_config"
+	// ResourceInstanaSyntheticAlertConfig the name of the terraform-provider-instana resource to manage synthetic alert configurations
+	ResourceInstanaSyntheticAlertConfig = "synthetic_alert_config"
 
 	// Field name constants for synthetic alert config
 

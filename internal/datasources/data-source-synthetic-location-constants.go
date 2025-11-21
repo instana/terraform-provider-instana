@@ -2,8 +2,8 @@ package datasources
 
 // Data source name constants
 const (
-	// DataSourceInstanaSyntheticLocationFramework the name of the terraform-provider-instana data source to read synthetic locations
-	DataSourceInstanaSyntheticLocationFramework = "synthetic_location"
+	// DataSourceInstanaSyntheticLocation the name of the terraform-provider-instana data source to read synthetic locations
+	DataSourceInstanaSyntheticLocation = "synthetic_location"
 	// DataSourceSyntheticLocation the name of the terraform-provider-instana data source for synthetic location specifications
 	DataSourceSyntheticLocation = "instana_synthetic_location"
 )

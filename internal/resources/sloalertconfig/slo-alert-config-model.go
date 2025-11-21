@@ -50,6 +50,6 @@ type SloAlertCustomPayloadFieldModel struct {
 	Type  types.String `tfsdk:"type"`
 }
 
-type sloAlertConfigResourceFramework struct {
-	metaData resourcehandle.ResourceMetaDataFramework
+type sloAlertConfigResource struct {
+	metaData resourcehandle.ResourceMetaData
 }

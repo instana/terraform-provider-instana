@@ -30,6 +30,7 @@ resource.
 * Settings
   * API Tokens - `instana_api_token`
   * Groups - `instana_rbac_group`
+  * Team - `instana_rbac_team`
 * SLI Settings
   * SLI Config - `instana_sli_config`
 * Synthetic Settings

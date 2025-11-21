@@ -1,7 +1,7 @@
 package synthetictest
 
-// ResourceInstanaSyntheticTestFramework the name of the terraform-provider-instana resource to manage synthetic tests
-const ResourceInstanaSyntheticTestFramework = "synthetic_test"
+// ResourceInstanaSyntheticTest the name of the terraform-provider-instana resource to manage synthetic tests
+const ResourceInstanaSyntheticTest = "synthetic_test"
 
 const (
 	// Field name constants
