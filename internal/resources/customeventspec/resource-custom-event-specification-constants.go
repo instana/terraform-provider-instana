@@ -95,6 +95,14 @@ const (
 	// Metric pattern operator constants
 	CustomEventSpecificationMetricPatternOperatorEquals = "EQUALS"
 
+	// Aggregation type constants
+	CustomEventSpecificationAggregationSum     = "sum"
+	CustomEventSpecificationAggregationAvg     = "avg"
+	CustomEventSpecificationAggregationMin     = "min"
+	CustomEventSpecificationAggregationMax     = "max"
+	CustomEventSpecificationAggregationAbsDiff = "absolute_diff"
+	CustomEventSpecificationAggregationRelDiff = "relative_diff"
+
 	// Default values
 	CustomEventSpecificationDefaultEmptyString = ""
 )

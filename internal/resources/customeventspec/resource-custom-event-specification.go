@@ -265,6 +265,16 @@ func createCustomEventSpecificationSchema() schema.Schema {
 							CustomEventSpecificationThresholdRuleFieldAggregation: schema.StringAttribute{
 								Description: CustomEventSpecificationResourceDescAggregation,
 								Required:    true,
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										CustomEventSpecificationAggregationSum,
+										CustomEventSpecificationAggregationAvg,
+										CustomEventSpecificationAggregationMin,
+										CustomEventSpecificationAggregationMax,
+										CustomEventSpecificationAggregationAbsDiff,
+										CustomEventSpecificationAggregationRelDiff,
+									),
+								},
 							},
 							CustomEventSpecificationRuleFieldConditionOperator: schema.StringAttribute{
 								Description: CustomEventSpecificationResourceDescConditionOperator,
