@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/terraform-provider-instana/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -72,75 +73,21 @@ func TestGetRestResource(t *testing.T) {
 	t.Run("should return synthetic test rest resource", func(t *testing.T) {
 		resource := &syntheticTestResource{}
 
-		mockAPI := &mockInstanaAPI{}
+		mockAPI := &mockSyntheticTestAPI{}
 		restResource := resource.GetRestResource(mockAPI)
 
 		assert.NotNil(t, restResource)
 	})
 }
 
-// Mock API for testing
-type mockInstanaAPI struct{}
+// mockSyntheticTestAPI extends the common mock to provide specific behavior for synthetic test tests
+type mockSyntheticTestAPI struct {
+	testutils.MockInstanaAPI
+}
 
-func (m *mockInstanaAPI) CustomEventSpecifications() restapi.RestResource[*restapi.CustomEventSpecification] {
-	return nil
-}
-func (m *mockInstanaAPI) BuiltinEventSpecifications() restapi.ReadOnlyRestResource[*restapi.BuiltinEventSpecification] {
-	return nil
-}
-func (m *mockInstanaAPI) APITokens() restapi.RestResource[*restapi.APIToken] { return nil }
-func (m *mockInstanaAPI) ApplicationConfigs() restapi.RestResource[*restapi.ApplicationConfig] {
-	return nil
-}
-func (m *mockInstanaAPI) ApplicationAlertConfigs() restapi.RestResource[*restapi.ApplicationAlertConfig] {
-	return nil
-}
-func (m *mockInstanaAPI) GlobalApplicationAlertConfigs() restapi.RestResource[*restapi.ApplicationAlertConfig] {
-	return nil
-}
-func (m *mockInstanaAPI) AlertingChannels() restapi.RestResource[*restapi.AlertingChannel] {
-	return nil
-}
-func (m *mockInstanaAPI) AlertingConfigurations() restapi.RestResource[*restapi.AlertingConfiguration] {
-	return nil
-}
-func (m *mockInstanaAPI) SliConfigs() restapi.RestResource[*restapi.SliConfig]          { return nil }
-func (m *mockInstanaAPI) SloConfigs() restapi.RestResource[*restapi.SloConfig]          { return nil }
-func (m *mockInstanaAPI) SloAlertConfig() restapi.RestResource[*restapi.SloAlertConfig] { return nil }
-func (m *mockInstanaAPI) SloCorrectionConfig() restapi.RestResource[*restapi.SloCorrectionConfig] {
-	return nil
-}
-func (m *mockInstanaAPI) WebsiteMonitoringConfig() restapi.RestResource[*restapi.WebsiteMonitoringConfig] {
-	return nil
-}
-func (m *mockInstanaAPI) WebsiteAlertConfig() restapi.RestResource[*restapi.WebsiteAlertConfig] {
-	return nil
-}
-func (m *mockInstanaAPI) InfraAlertConfig() restapi.RestResource[*restapi.InfraAlertConfig] {
-	return nil
-}
-func (m *mockInstanaAPI) Teams() restapi.RestResource[*restapi.Team]   { return nil }
-func (m *mockInstanaAPI) Groups() restapi.RestResource[*restapi.Group] { return nil }
-func (m *mockInstanaAPI) CustomDashboards() restapi.RestResource[*restapi.CustomDashboard] {
-	return nil
-}
-func (m *mockInstanaAPI) SyntheticTest() restapi.RestResource[*restapi.SyntheticTest] {
+func (m *mockSyntheticTestAPI) SyntheticTest() restapi.RestResource[*restapi.SyntheticTest] {
 	return &mockSyntheticTestRestResource{}
 }
-func (m *mockInstanaAPI) SyntheticLocation() restapi.ReadOnlyRestResource[*restapi.SyntheticLocation] {
-	return nil
-}
-func (m *mockInstanaAPI) SyntheticAlertConfigs() restapi.RestResource[*restapi.SyntheticAlertConfig] {
-	return nil
-}
-func (m *mockInstanaAPI) AutomationActions() restapi.RestResource[*restapi.AutomationAction] {
-	return nil
-}
-func (m *mockInstanaAPI) AutomationPolicies() restapi.RestResource[*restapi.AutomationPolicy] {
-	return nil
-}
-func (m *mockInstanaAPI) HostAgents() restapi.ReadOnlyRestResource[*restapi.HostAgent]  { return nil }
-func (m *mockInstanaAPI) LogAlertConfig() restapi.RestResource[*restapi.LogAlertConfig] { return nil }
 
 // Mock rest resource
 type mockSyntheticTestRestResource struct{}

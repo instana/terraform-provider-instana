@@ -45,6 +45,7 @@ type InstanaAPI interface {
 	WebsiteAlertConfig() RestResource[*WebsiteAlertConfig]
 	InfraAlertConfig() RestResource[*InfraAlertConfig]
 	Groups() RestResource[*Group]
+	Roles() RestResource[*Role]
 	Teams() RestResource[*Team]
 	CustomDashboards() RestResource[*CustomDashboard]
 	SyntheticTest() RestResource[*SyntheticTest]
@@ -136,6 +137,10 @@ func (api *baseInstanaAPI) InfraAlertConfig() RestResource[*InfraAlertConfig] {
 
 func (api *baseInstanaAPI) Groups() RestResource[*Group] {
 	return NewCreatePOSTUpdatePUTRestResource(GroupsResourcePath, NewDefaultJSONUnmarshaller(&Group{}), api.client)
+}
+
+func (api *baseInstanaAPI) Roles() RestResource[*Role] {
+	return NewCreatePOSTUpdatePUTRestResource(RolesResourcePath, NewDefaultJSONUnmarshaller(&Role{}), api.client)
 }
 
 func (api *baseInstanaAPI) Teams() RestResource[*Team] {
