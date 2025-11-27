@@ -24,6 +24,7 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/resources/group"
 	"github.com/instana/terraform-provider-instana/internal/resources/infralertconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/logalertconfig"
+	"github.com/instana/terraform-provider-instana/internal/resources/roles"
 	"github.com/instana/terraform-provider-instana/internal/resources/sliconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/sloalertconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/sloconfig"
@@ -186,6 +187,7 @@ func (p *InstanaProvider) Resources(_ context.Context) []func() resource.Resourc
 		addResouceHandle(infralertconfig.NewInfraAlertConfigResourceHandle),
 		addResouceHandle(group.NewGroupResourceHandle),
 		addResouceHandle(team.NewTeamResourceHandle),
+		addResouceHandle(roles.NewRoleResourceHandle),
 		addResouceHandle(sliconfig.NewSliConfigResourceHandle),
 		addResouceHandle(sloalertconfig.NewSloAlertConfigResourceHandle),
 		addResouceHandle(slocorrectionconfig.NewSloCorrectionConfigResourceHandle),

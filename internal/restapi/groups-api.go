@@ -120,6 +120,10 @@ const (
 	PermissionCanConfigureAutomationPolicies = InstanaPermission("CAN_CONFIGURE_AUTOMATION_POLICIES")
 	//PermissionCanConfigureAutomationActions const for Instana permission CAN_CONFIGURE_AUTOMATION_ACTIONS
 	PermissionCanConfigureAutomationActions = InstanaPermission("CAN_CONFIGURE_AUTOMATION_ACTIONS")
+	//PermissionCanConfigureIPFiltering const for Instana permission CAN_CONFIGURE_IP_FILTERING
+	PermissionCanConfigureIPFiltering = InstanaPermission("CAN_CONFIGURE_IP_FILTERING")
+	//PermissionCanConfigureWebsiteConversions const for Instana permission CAN_CONFIGURE_WEBSITE_CONVERSIONS
+	PermissionCanConfigureWebsiteConversions = InstanaPermission("CAN_CONFIGURE_WEBSITE_CONVERSIONS")
 
 	PermissionCanConfigureApdex                         = InstanaPermission("CAN_CONFIGURE_APDEX")
 	PermissionCanConfigureCustomEntities                = InstanaPermission("CAN_CONFIGURE_CUSTOM_ENTITIES")
@@ -232,6 +236,8 @@ var SupportedInstanaPermissions = InstanaPermissions{
 	PermissionCanConfigureBizOps,
 	PermissionCanConfigureAutomationPolicies,
 	PermissionCanConfigureAutomationActions,
+	PermissionCanConfigureIPFiltering,
+	PermissionCanConfigureWebsiteConversions,
 	PermissionLimitedApplicationScope,
 	PermissionLimittedLinuxKvmHypervisorScope,
 	PermissionLimitedVspherScope,
@@ -311,10 +317,11 @@ func (m *APIPermissionSetWithRoles) IsEmpty() bool {
 	return true
 }
 
-// APIMember data structure for the Instana API model for group members
+// APIMember data structure for the Instana API model for role members
 type APIMember struct {
 	UserID string  `json:"userId"`
 	Email  *string `json:"email"`
+	Name   *string `json:"name"`
 }
 
 // Group data structure for the Instana API model for groups
