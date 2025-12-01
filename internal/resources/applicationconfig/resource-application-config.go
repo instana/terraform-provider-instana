@@ -5,8 +5,10 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -69,27 +71,40 @@ func NewApplicationConfigResourceHandle() resourcehandle.ResourceHandle[*restapi
 						Description: ApplicationConfigDescTagFilter,
 					},
 					ApplicationConfigFieldAccessRules: schema.ListNestedAttribute{
-						Required:    true,
+						Optional:    true,
+						Computed:    true,
 						Description: ApplicationConfigDescAccessRules,
+						PlanModifiers: []planmodifier.List{
+							listplanmodifier.UseStateForUnknown(),
+						},
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								ApplicationConfigFieldAccessType: schema.StringAttribute{
-									Required:    true,
+									Optional:    true,
+									Computed:    true,
 									Description: ApplicationConfigDescAccessType,
+									PlanModifiers: []planmodifier.String{
+										stringplanmodifier.UseStateForUnknown(),
+									},
 									Validators: []validator.String{
 										stringvalidator.OneOf(restapi.SupportedAccessTypes.ToStringSlice()...),
 									},
 								},
 								ApplicationConfigFieldRelatedID: schema.StringAttribute{
 									Optional:    true,
+									Computed:    true,
 									Description: ApplicationConfigDescRelatedID,
 									Validators: []validator.String{
 										stringvalidator.LengthBetween(0, 64),
 									},
 								},
 								ApplicationConfigFieldRelationType: schema.StringAttribute{
-									Required:    true,
+									Optional:    true,
+									Computed:    true,
 									Description: ApplicationConfigDescRelationType,
+									PlanModifiers: []planmodifier.String{
+										stringplanmodifier.UseStateForUnknown(),
+									},
 									Validators: []validator.String{
 										stringvalidator.OneOf(restapi.SupportedRelationTypes.ToStringSlice()...),
 									},
@@ -155,7 +170,12 @@ func (r *applicationConfigResource) UpdateState(ctx context.Context, state *tfsd
 	}
 
 	// Map access rules
-	model.AccessRules = r.mapAccessRulesToState(config.AccessRules)
+	accessRulesList, accessRulesDiags := r.mapAccessRulesToState(ctx, config.AccessRules)
+	diags.Append(accessRulesDiags...)
+	if diags.HasError() {
+		return diags
+	}
+	model.AccessRules = accessRulesList
 
 	// Set the entire model to state
 	diags.Append(state.Set(ctx, model)...)
@@ -182,10 +202,20 @@ func (r *applicationConfigResource) mapTagFilterToState(config *restapi.Applicat
 }
 
 // mapAccessRulesToState converts access rules from API to state format
-func (r *applicationConfigResource) mapAccessRulesToState(accessRules []restapi.AccessRule) []AccessRuleModel {
-	// If there are no access rules, return an empty slice
+func (r *applicationConfigResource) mapAccessRulesToState(ctx context.Context, accessRules []restapi.AccessRule) (types.List, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// If there are no access rules, return an empty list
 	if len(accessRules) == 0 {
-		return []AccessRuleModel{}
+		emptyList, listDiags := types.ListValueFrom(ctx, types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"access_type":   types.StringType,
+				"related_id":    types.StringType,
+				"relation_type": types.StringType,
+			},
+		}, []AccessRuleModel{})
+		diags.Append(listDiags...)
+		return emptyList, diags
 	}
 
 	// Create slice for access rule models
@@ -198,7 +228,17 @@ func (r *applicationConfigResource) mapAccessRulesToState(accessRules []restapi.
 		}
 	}
 
-	return models
+	// Convert to types.List
+	listValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"access_type":   types.StringType,
+			"related_id":    types.StringType,
+			"relation_type": types.StringType,
+		},
+	}, models)
+	diags.Append(listDiags...)
+
+	return listValue, diags
 }
 
 // ============================================================================
@@ -231,8 +271,12 @@ func (r *applicationConfigResource) MapStateToDataObject(ctx context.Context, pl
 		return nil, diags
 	}
 
-	// Map access rules
-	accessRules := r.mapAccessRulesFromState(model.AccessRules)
+	// Map access rules with validation
+	accessRules, accessRulesDiags := r.mapAccessRulesFromState(ctx, model.AccessRules)
+	diags.Append(accessRulesDiags...)
+	if diags.HasError() {
+		return nil, diags
+	}
 
 	return &restapi.ApplicationConfig{
 		ID:                  id,
@@ -276,10 +320,44 @@ func (r *applicationConfigResource) mapTagFilterFromState(model *ApplicationConf
 }
 
 // mapAccessRulesFromState converts access rules from state to API format
-func (r *applicationConfigResource) mapAccessRulesFromState(accessRulesModels []AccessRuleModel) []restapi.AccessRule {
+func (r *applicationConfigResource) mapAccessRulesFromState(ctx context.Context, accessRulesList types.List) ([]restapi.AccessRule, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	// If the list is null or unknown, return empty slice
+	if accessRulesList.IsNull() || accessRulesList.IsUnknown() {
+		return []restapi.AccessRule{}, diags
+	}
+
+	// Convert types.List to []AccessRuleModel
+	var accessRulesModels []AccessRuleModel
+	diags.Append(accessRulesList.ElementsAs(ctx, &accessRulesModels, false)...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
 	// If there are no access rules, return an empty slice
 	if len(accessRulesModels) == 0 {
-		return []restapi.AccessRule{}
+		return []restapi.AccessRule{}, diags
+	}
+
+	// Validate required fields
+	for i, model := range accessRulesModels {
+		if model.AccessType.IsNull() || model.AccessType.ValueString() == "" {
+			diags.AddError(
+				"Missing Required Field",
+				fmt.Sprintf("access_type is required for access rule at index %d", i),
+			)
+		}
+		if model.RelationType.IsNull() || model.RelationType.ValueString() == "" {
+			diags.AddError(
+				"Missing Required Field",
+				fmt.Sprintf("relation_type is required for access rule at index %d", i),
+			)
+		}
+	}
+
+	if diags.HasError() {
+		return nil, diags
 	}
 
 	accessRules := make([]restapi.AccessRule, len(accessRulesModels))
@@ -298,5 +376,5 @@ func (r *applicationConfigResource) mapAccessRulesFromState(accessRulesModels []
 		accessRules[i] = rule
 	}
 
-	return accessRules
+	return accessRules, diags
 }
