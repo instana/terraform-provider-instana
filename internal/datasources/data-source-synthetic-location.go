@@ -6,7 +6,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/terraform-provider-instana/internal/restapi"
 )
@@ -54,9 +53,6 @@ func (d *syntheticLocationDataSource) Schema(_ context.Context, _ datasource.Sch
 			SyntheticLocationFieldLocationType: schema.StringAttribute{
 				Description: SyntheticLocationDescLocationType,
 				Optional:    true,
-				Validators:  []validator.String{
-					// We'll implement custom validators in the Configure method
-				},
 			},
 		},
 	}
