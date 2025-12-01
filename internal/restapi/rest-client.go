@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"crypto/tls"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -227,6 +228,16 @@ func (client *restClientImpl) handleThrottledAPIRequest(req *apiRequest) {
 func (client *restClientImpl) executeRequest(method string, url string, req *resty.Request) ([]byte, error) {
 	log.Printf("[DEBUG] Call %s %s\n", method, url)
 	resp, err := req.Execute(method, url)
+	// Log request body at INFO level
+	if req.Body != nil {
+		// Convert request body to JSON string for proper logging
+		jsonBytes, err := json.MarshalIndent(req.Body, "", "  ")
+		if err != nil {
+			log.Printf("[INFO] Request Body (could not marshal to JSON): %v\n", req.Body)
+		} else {
+			log.Printf("[INFO] Request Body: %s\n", string(jsonBytes))
+		}
+	}
 	if err != nil {
 		if resp == nil {
 			return emptyResponse, fmt.Errorf("failed to send HTTP %s request to Instana API; %s", method, err)
@@ -235,6 +246,22 @@ func (client *restClientImpl) executeRequest(method string, url string, req *res
 	}
 	// Log response body at INFO level
 	log.Printf("[INFO] Response Status: %d %s\n", resp.StatusCode(), resp.Status())
+
+	// Try to parse response body as JSON for better formatting
+	var responseObj interface{}
+	responseBody := resp.Body()
+	if err := json.Unmarshal(responseBody, &responseObj); err != nil {
+		// If not valid JSON, log as is
+		log.Printf("[INFO] Response Body: %s\n", string(responseBody))
+	} else {
+		// If valid JSON, pretty print it
+		prettyJSON, err := json.MarshalIndent(responseObj, "", "  ")
+		if err != nil {
+			log.Printf("[INFO] Response Body: %s\n", string(responseBody))
+		} else {
+			log.Printf("[INFO] Response Body: %s\n", string(prettyJSON))
+		}
+	}
 	statusCode := resp.StatusCode()
 	if statusCode == 404 {
 		return emptyResponse, ErrEntityNotFound

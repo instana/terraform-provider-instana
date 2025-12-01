@@ -63,7 +63,7 @@ type AdaptiveBaselineModel struct {
 
 type HistoricBaselineModel struct {
 	//Operator    types.String  `tfsdk:"operator"`
-	Baseline    [][]float64   `tfsdk:"baseline"`
+	Baseline    types.List    `tfsdk:"baseline"`
 	Deviation   types.Float32 `tfsdk:"deviation_factor"`
 	Seasonality types.String  `tfsdk:"seasonality"`
 }
@@ -375,12 +375,21 @@ func MapThresholdRuleAllPluginFromState(ctx context.Context, thresholdObj *Thres
 		//operator := util.SetStringPointerFromState(baselineVal.Operator)
 		seasonality := restapi.ThresholdSeasonality(baselineVal.Seasonality.ValueString())
 		deviationFactor := float32(baselineVal.Deviation.ValueFloat32())
-		// Baseline is already [][]float64, just take its address
+
+		// Convert types.List to [][]float64
+		var baseline *[][]float64
+		if !baselineVal.Baseline.IsNull() && !baselineVal.Baseline.IsUnknown() {
+			baseline, diags = MapBaselineFromState(ctx, baselineVal.Baseline)
+			if diags.HasError() {
+				return nil, diags
+			}
+		}
+
 		return &restapi.ThresholdRule{
 			Type:            "historicBaseline",
 			Seasonality:     &seasonality,
 			DeviationFactor: &deviationFactor,
-			Baseline:        &baselineVal.Baseline,
+			Baseline:        baseline,
 			//Operator:        operator,
 		}, diags
 	}
@@ -501,10 +510,18 @@ func MapAllThresholdPluginToState(ctx context.Context, threshold *restapi.Thresh
 		}
 		thresholdTypeModel.AdaptiveBaseline = &adaptiveBaselineModel
 	case "historicBaseline":
-		var baseline [][]float64
+		var baselineList basetypes.ListValue
+		var baselineDiags diag.Diagnostics
 		if threshold.Baseline != nil {
-			baseline = *threshold.Baseline
+			baselineList, baselineDiags = MapBaselineToState(threshold)
+			if baselineDiags.HasError() {
+				// If there's an error, set to null list
+				baselineList = types.ListNull(types.ListType{ElemType: types.Float64Type})
+			}
+		} else {
+			baselineList = types.ListNull(types.ListType{ElemType: types.Float64Type})
 		}
+
 		var seasonality types.String
 		if threshold.Seasonality != nil {
 			seasonality = types.StringValue(string(*threshold.Seasonality))
@@ -512,7 +529,7 @@ func MapAllThresholdPluginToState(ctx context.Context, threshold *restapi.Thresh
 			seasonality = types.StringNull()
 		}
 		historicBaselineModel := HistoricBaselineModel{
-			Baseline:    baseline,
+			Baseline:    baselineList,
 			Deviation:   util.SetFloat32PointerToState(threshold.DeviationFactor),
 			Seasonality: seasonality,
 		}
