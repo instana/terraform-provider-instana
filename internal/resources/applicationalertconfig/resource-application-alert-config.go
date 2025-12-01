@@ -1045,6 +1045,11 @@ func (r *applicationAlertConfigResourceImpl) updateTagFilter(model *ApplicationA
 func (r *applicationAlertConfigResourceImpl) updateAlertChannels(ctx context.Context, model *ApplicationAlertConfigModel, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
+	// If alert channels already exist in plan or state, preserve them
+	if !model.AlertChannels.IsNull() && !model.AlertChannels.IsUnknown() {
+		return diags // keep the existing value to preserve existing state
+	}
+
 	if data.AlertChannels == nil {
 		model.AlertChannels = types.MapNull(types.SetType{ElemType: types.StringType})
 		return diags
@@ -1087,11 +1092,18 @@ func (r *applicationAlertConfigResourceImpl) updateAlertChannels(ctx context.Con
 
 // updateApplications handles application scope mapping from API to state
 func (r *applicationAlertConfigResourceImpl) updateApplications(model *ApplicationAlertConfigModel, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
+	// If applications already exist in plan or state, preserve them
+	if len(model.Applications) != 0 {
+		return nil // keep the existing value to preserve existing state
+	}
+
+	// If API returns no applications, set empty slice
 	if len(data.Applications) == 0 {
 		model.Applications = []ApplicationModel{}
 		return nil
 	}
 
+	// Map applications from API response to model
 	model.Applications = make([]ApplicationModel, 0, len(data.Applications))
 	for _, app := range data.Applications {
 		appModel := ApplicationModel{
