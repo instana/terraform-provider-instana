@@ -468,13 +468,13 @@ func (r *sloConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsd
 
 	id := r.extractIDFromModel(model)
 
-	entityData, entityDiags := r.mapEntityFromState(model.Entity)
+	entityData, entityDiags := r.mapEntityFromState(*model.Entity)
 	diags.Append(entityDiags...)
 
-	indicator, indicatorDiags := r.mapIndicatorFromState(model.Indicator)
+	indicator, indicatorDiags := r.mapIndicatorFromState(*model.Indicator)
 	diags.Append(indicatorDiags...)
 
-	timeWindowData, timeWindowDiags := r.mapTimeWindowFromState(model.TimeWindow)
+	timeWindowData, timeWindowDiags := r.mapTimeWindowFromState(*model.TimeWindow)
 	diags.Append(timeWindowDiags...)
 
 	if diags.HasError() {
@@ -1064,21 +1064,24 @@ func (r *sloConfigResource) UpdateState(ctx context.Context, state *tfsdk.State,
 
 	entityData, entityDiags := r.mapEntityToState(apiObject)
 	diags.Append(entityDiags...)
-	if !diags.HasError() {
-		model.Entity = entityData
+	if diags.HasError() {
+		return diags
 	}
+	model.Entity = &entityData
 
 	indicatorData, indicatorDiags := r.mapIndicatorToState(apiObject)
 	diags.Append(indicatorDiags...)
-	if !diags.HasError() {
-		model.Indicator = indicatorData
+	if diags.HasError() {
+		return diags
 	}
+	model.Indicator = &indicatorData
 
 	timeWindowData, timeWindowDiags := r.mapTimeWindowToState(apiObject)
 	diags.Append(timeWindowDiags...)
-	if !diags.HasError() {
-		model.TimeWindow = timeWindowData
+	if diags.HasError() {
+		return diags
 	}
+	model.TimeWindow = &timeWindowData
 
 	diags.Append(state.Set(ctx, model)...)
 	return diags
@@ -1162,13 +1165,11 @@ func (r *sloConfigResource) mapApplicationEntityToState(entity restapi.SloEntity
 		ServiceID:        util.SetStringPointerToState(entity.ServiceID),
 		EndpointID:       util.SetStringPointerToState(entity.EndpointID),
 	}
-
 	filterExpr, filterDiags := r.mapFilterExpressionToState(entity.FilterExpression)
 	diags.Append(filterDiags...)
 	if !diags.HasError() {
 		model.FilterExpression = filterExpr
 	}
-
 	return model, diags
 }
 
@@ -1245,7 +1246,10 @@ func (r *sloConfigResource) mapFilterExpressionToState(filterExpression *restapi
 		return types.StringNull(), diags
 	}
 
-	return util.SetStringPointerToState(filterExprStr), diags
+	if filterExprStr != nil {
+		return util.SetStringPointerToState(filterExprStr), diags
+	}
+	return types.StringNull(), diags
 }
 
 func (r *sloConfigResource) mapIndicatorToState(apiObject *restapi.SloConfig) (IndicatorModel, diag.Diagnostics) {
