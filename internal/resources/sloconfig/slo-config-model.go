@@ -6,14 +6,14 @@ import (
 
 // SloConfigModel represents the data model for the SLO configuration resource
 type SloConfigModel struct {
-	ID         types.String    `tfsdk:"id"`
-	Name       types.String    `tfsdk:"name"`
-	Target     types.Float64   `tfsdk:"target"`
-	Tags       []types.String  `tfsdk:"tags"`
-	RbacTags   []RbacTagModel  `tfsdk:"rbac_tags"`
-	Entity     EntityModel     `tfsdk:"entity"`
-	Indicator  IndicatorModel  `tfsdk:"indicator"`
-	TimeWindow TimeWindowModel `tfsdk:"time_window"`
+	ID         types.String     `tfsdk:"id"`
+	Name       types.String     `tfsdk:"name"`
+	Target     types.Float64    `tfsdk:"target"`
+	Tags       []types.String   `tfsdk:"tags"`
+	RbacTags   []RbacTagModel   `tfsdk:"rbac_tags"`
+	Entity     *EntityModel     `tfsdk:"entity"`
+	Indicator  *IndicatorModel  `tfsdk:"indicator"`
+	TimeWindow *TimeWindowModel `tfsdk:"time_window"`
 }
 
 // RbacTagModel represents an RBAC tag in the Terraform model
@@ -26,9 +26,9 @@ type TimeWindowModel struct {
 	RollingTimeWindowModel *RollingTimeWindowModel `tfsdk:"rolling"`
 }
 type EntityModel struct {
-	ApplicationEntityModel   *ApplicationEntityModel   `tfsdk:"application"`
-	WebsiteEntityModel       *WebsiteEntityModel       `tfsdk:"website"`
-	SyntheticEntityModel     *SyntheticEntityModel     `tfsdk:"synthetic"`
+	ApplicationEntityModel    *ApplicationEntityModel    `tfsdk:"application"`
+	WebsiteEntityModel        *WebsiteEntityModel        `tfsdk:"website"`
+	SyntheticEntityModel      *SyntheticEntityModel      `tfsdk:"synthetic"`
 	InfrastructureEntityModel *InfrastructureEntityModel `tfsdk:"infrastructure"`
 }
 type IndicatorModel struct {

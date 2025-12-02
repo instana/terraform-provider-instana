@@ -99,7 +99,7 @@ func TestMapStateToDataObject_ApplicationEntity(t *testing.T) {
 			ID:     types.StringValue("test-id"),
 			Name:   types.StringValue("Test SLO"),
 			Target: types.Float64Value(99.5),
-			Entity: EntityModel{
+			Entity: &EntityModel{
 				ApplicationEntityModel: &ApplicationEntityModel{
 					ApplicationID: types.StringNull(), // Missing required field
 					BoundaryScope: types.StringNull(), // Missing required field
@@ -108,7 +108,7 @@ func TestMapStateToDataObject_ApplicationEntity(t *testing.T) {
 		}
 
 		// Test the entity mapping directly
-		_, diags := resource.mapEntityFromState(model.Entity)
+		_, diags := resource.mapEntityFromState(*model.Entity)
 
 		assert.True(t, diags.HasError())
 		assert.Contains(t, diags[0].Summary(), SloConfigErrApplicationIDRequired)
@@ -1199,7 +1199,7 @@ func TestMapStateToDataObjectWithFullModel(t *testing.T) {
 					ID:          types.StringValue("team-a-id"),
 				},
 			},
-			Entity: EntityModel{
+			Entity: &EntityModel{
 				ApplicationEntityModel: &ApplicationEntityModel{
 					ApplicationID:    types.StringValue("app-123"),
 					BoundaryScope:    types.StringValue("ALL"),
@@ -1210,13 +1210,13 @@ func TestMapStateToDataObjectWithFullModel(t *testing.T) {
 					FilterExpression: types.StringValue("entity.tag.name EQUALS 'value'"),
 				},
 			},
-			Indicator: IndicatorModel{
+			Indicator: &IndicatorModel{
 				TimeBasedLatencyIndicatorModel: &TimeBasedLatencyIndicatorModel{
 					Threshold:   types.Float64Value(100.0),
 					Aggregation: types.StringValue("MEAN"),
 				},
 			},
-			TimeWindow: TimeWindowModel{
+			TimeWindow: &TimeWindowModel{
 				RollingTimeWindowModel: &RollingTimeWindowModel{
 					Duration:     types.Int64Value(7),
 					DurationUnit: types.StringValue("day"),
@@ -1446,19 +1446,19 @@ func TestUpdateStateWithEmptyTags(t *testing.T) {
 			Name:   types.StringValue("Old Name"),
 			Target: types.Float64Value(95.0),
 			Tags:   []types.String{types.StringValue("existing-tag")},
-			Entity: EntityModel{
+			Entity: &EntityModel{
 				ApplicationEntityModel: &ApplicationEntityModel{
 					ApplicationID: types.StringValue(appID),
 					BoundaryScope: types.StringValue(boundaryScope),
 				},
 			},
-			Indicator: IndicatorModel{
+			Indicator: &IndicatorModel{
 				TimeBasedLatencyIndicatorModel: &TimeBasedLatencyIndicatorModel{
 					Threshold:   types.Float64Value(100.0),
 					Aggregation: types.StringValue(aggregation),
 				},
 			},
-			TimeWindow: TimeWindowModel{
+			TimeWindow: &TimeWindowModel{
 				RollingTimeWindowModel: &RollingTimeWindowModel{
 					Duration:     types.Int64Value(7),
 					DurationUnit: types.StringValue("day"),
