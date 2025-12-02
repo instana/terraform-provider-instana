@@ -108,11 +108,13 @@ func buildGenericRuleSchema() schema.SingleNestedAttribute {
 			},
 			InfraAlertConfigFieldCrossSeriesAggregation: schema.StringAttribute{
 				Description: InfraAlertConfigDescCrossSeriesAggregation,
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 			},
 			InfraAlertConfigFieldRegex: schema.BoolAttribute{
 				Description: InfraAlertConfigDescRegex,
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 			},
 			InfraAlertConfigFieldThresholdOperator: schema.StringAttribute{
 				Optional:    true,

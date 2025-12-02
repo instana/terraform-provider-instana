@@ -282,7 +282,8 @@ func createCustomEventSpecificationSchema() schema.Schema {
 							},
 							CustomEventSpecificationRuleFieldConditionValue: schema.Float64Attribute{
 								Description: CustomEventSpecificationResourceDescConditionValue,
-								Required:    true,
+								Optional:    true,
+								Computed:    true,
 							},
 							CustomEventSpecificationThresholdRuleFieldMetricPattern: schema.SingleNestedAttribute{
 								Description: CustomEventSpecificationResourceDescMetricPattern,

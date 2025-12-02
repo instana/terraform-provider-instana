@@ -142,7 +142,8 @@ func buildRulesSchema() schema.SingleNestedAttribute {
 		Optional:    true,
 		Attributes: map[string]schema.Attribute{
 			LogAlertConfigFieldMetricName: schema.StringAttribute{
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 				Description: LogAlertConfigDescMetricName,
 			},
 			LogAlertConfigFieldAlertType: schema.StringAttribute{
@@ -154,6 +155,7 @@ func buildRulesSchema() schema.SingleNestedAttribute {
 			},
 			LogAlertConfigFieldAggregation: schema.StringAttribute{
 				Optional:    true,
+				Computed:    true,
 				Description: LogAlertConfigDescAggregation,
 				Validators: []validator.String{
 					stringvalidator.OneOf(string(restapi.SumAggregation)),
