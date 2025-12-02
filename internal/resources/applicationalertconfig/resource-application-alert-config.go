@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -951,10 +952,13 @@ func (r *applicationAlertConfigResourceImpl) UpdateState(ctx context.Context, st
 	var diags diag.Diagnostics
 	var model ApplicationAlertConfigModel
 	if plan != nil {
+		log.Printf("plan flow")
 		diags.Append(plan.Get(ctx, &model)...)
 	} else if state != nil {
+		log.Printf("state flow")
 		diags.Append(state.Get(ctx, &model)...)
 	} else {
+		log.Printf("import flow")
 		model = ApplicationAlertConfigModel{}
 	}
 	// Build base model with simple fields
@@ -1001,9 +1005,12 @@ func (r *applicationAlertConfigResourceImpl) UpdateState(ctx context.Context, st
 		return diags
 	}
 
-	if err := r.updateTimeThreshold(&model, data); err != nil {
-		diags.Append(err...)
-		return diags
+	// Only update time threshold if not already present in plan  (import flow)
+	if plan == nil && model.TimeThreshold == nil {
+		if err := r.updateTimeThreshold(&model, data); err != nil {
+			diags.Append(err...)
+			return diags
+		}
 	}
 
 	// Set final state

@@ -251,7 +251,7 @@ func (r *logAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.S
 	diags.Append(alertChannelsDiags...)
 	model.AlertChannels = alertChannels
 
-	if model.TimeThreshold != nil && model.TimeThreshold.ViolationsInSequence != nil {
+	if plan == nil && model.TimeThreshold == nil {
 		model.TimeThreshold = r.mapTimeThresholdToModel(config.TimeThreshold)
 	}
 	rules, rulesDiags := r.mapRulesToModel(config.Rules)

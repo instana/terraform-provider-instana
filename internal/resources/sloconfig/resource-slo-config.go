@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -99,6 +100,9 @@ func buildTagsAttribute() schema.ListAttribute {
 		ElementType: types.StringType,
 		Optional:    true,
 		Description: SloConfigDescTags,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 	}
 }
 
@@ -107,6 +111,9 @@ func buildRbacTagsAttribute() schema.ListNestedAttribute {
 	return schema.ListNestedAttribute{
 		Optional:    true,
 		Description: SloConfigDescRbacTags,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: map[string]schema.Attribute{
 				SchemaFieldDisplayName: schema.StringAttribute{
@@ -460,8 +467,6 @@ func (r *sloConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsd
 	}
 
 	id := r.extractIDFromModel(model)
-	tags := r.mapTagsFromState(model.Tags)
-	rbacTags := r.mapRbacTagsFromState(model.RbacTags)
 
 	entityData, entityDiags := r.mapEntityFromState(model.Entity)
 	diags.Append(entityDiags...)
@@ -475,17 +480,21 @@ func (r *sloConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsd
 	if diags.HasError() {
 		return nil, diags
 	}
-
-	return &restapi.SloConfig{
+	sloconfig := &restapi.SloConfig{
 		ID:         id,
 		Name:       model.Name.ValueString(),
 		Target:     model.Target.ValueFloat64(),
-		Tags:       tags,
 		Entity:     entityData,
 		Indicator:  indicator,
 		TimeWindow: timeWindowData,
-		RbacTags:   rbacTags,
-	}, diags
+	}
+	if len(model.RbacTags) > 0 {
+		sloconfig.RbacTags = r.mapRbacTagsFromState(model.RbacTags)
+	}
+	if len(model.Tags) > 0 {
+		sloconfig.Tags = r.mapTagsFromState(model.Tags)
+	}
+	return sloconfig, diags
 }
 
 // extractModelFromPlanOrState retrieves the model from plan or state
