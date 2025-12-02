@@ -207,6 +207,7 @@ func (r *syntheticAlertConfigResource) buildRuleMetricNameValidators() []validat
 func (r *syntheticAlertConfigResource) buildRuleAggregationAttribute() schema.Attribute {
 	return schema.StringAttribute{
 		Optional:    true,
+		Computed:    true,
 		Description: SyntheticAlertConfigDescRuleAggregation,
 		Validators:  r.buildRuleAggregationValidators(),
 	}
