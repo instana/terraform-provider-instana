@@ -253,7 +253,8 @@ func buildServiceIDAvailabilityAttribute() schema.StringAttribute {
 // buildBoundaryScopeAttribute creates the boundary scope field schema attribute
 func buildBoundaryScopeAttribute() schema.StringAttribute {
 	return schema.StringAttribute{
-		Required:    true,
+		Optional:    true,
+		Computed:    true,
 		Description: SliConfigDescBoundaryScope,
 		Validators: []validator.String{
 			stringvalidator.OneOf(BoundaryScopeAll, BoundaryScopeInbound),
