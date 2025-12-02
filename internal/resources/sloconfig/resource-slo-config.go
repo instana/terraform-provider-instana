@@ -480,21 +480,16 @@ func (r *sloConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsd
 	if diags.HasError() {
 		return nil, diags
 	}
-	sloconfig := &restapi.SloConfig{
+	return &restapi.SloConfig{
 		ID:         id,
 		Name:       model.Name.ValueString(),
 		Target:     model.Target.ValueFloat64(),
 		Entity:     entityData,
 		Indicator:  indicator,
 		TimeWindow: timeWindowData,
-	}
-	if len(model.RbacTags) > 0 {
-		sloconfig.RbacTags = r.mapRbacTagsFromState(model.RbacTags)
-	}
-	if len(model.Tags) > 0 {
-		sloconfig.Tags = r.mapTagsFromState(model.Tags)
-	}
-	return sloconfig, diags
+		Tags:       r.mapTagsFromState(model.Tags),
+		RbacTags:   r.mapRbacTagsFromState(model.RbacTags),
+	}, diags
 }
 
 // extractModelFromPlanOrState retrieves the model from plan or state
@@ -1060,10 +1055,10 @@ func (r *sloConfigResource) UpdateState(ctx context.Context, state *tfsdk.State,
 	model.ID = types.StringValue(apiObject.ID)
 	model.Name = types.StringValue(apiObject.Name)
 	model.Target = types.Float64Value(apiObject.Target)
-	if len(model.Tags) != 0 && len(apiObject.Tags) > 0 {
+	if len(apiObject.Tags) > 0 {
 		model.Tags = r.mapTagsToState(apiObject.Tags)
 	}
-	if len(model.RbacTags) != 0 && len(apiObject.RbacTags) > 0 {
+	if len(apiObject.RbacTags) > 0 {
 		model.RbacTags = r.mapRbacTagsToState(apiObject.RbacTags)
 	}
 
