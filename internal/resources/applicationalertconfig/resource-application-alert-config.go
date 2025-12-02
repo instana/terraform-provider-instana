@@ -483,7 +483,7 @@ func (r *applicationAlertConfigResource) UpdateState(ctx context.Context, state 
 	}
 
 	// Update the state with the object
-	return resource.UpdateState(ctx, state, nil, obj)
+	return resource.UpdateState(ctx, state, plan, obj)
 }
 
 // SetComputedFields sets computed fields in the plan (none for this resource)
