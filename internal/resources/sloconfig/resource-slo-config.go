@@ -258,10 +258,12 @@ func buildTimeBasedLatencyIndicatorAttribute() schema.SingleNestedAttribute {
 		Attributes: map[string]schema.Attribute{
 			SloConfigFieldThreshold: schema.Float64Attribute{
 				Optional:    true,
+				Computed:    true,
 				Description: SloConfigDescThreshold,
 			},
 			SloConfigFieldAggregation: schema.StringAttribute{
 				Optional:    true,
+				Computed:    true,
 				Description: SloConfigDescAggregation,
 			},
 		},
@@ -794,11 +796,11 @@ func (r *sloConfigResource) mapIndicatorFromState(indicatorModel IndicatorModel)
 func (r *sloConfigResource) mapTimeBasedLatencyIndicator(model *TimeBasedLatencyIndicatorModel) (restapi.SloIndicator, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	if model.Threshold.IsNull() || model.Threshold.IsUnknown() ||
-		model.Aggregation.IsNull() || model.Aggregation.IsUnknown() {
-		diags.AddError(SloConfigErrTimeBasedLatencyRequired, SloConfigErrTimeBasedLatencyRequired)
-		return restapi.SloIndicator{}, diags
-	}
+	// if model.Threshold.IsNull() || model.Threshold.IsUnknown() ||
+	// 	model.Aggregation.IsNull() || model.Aggregation.IsUnknown() {
+	// 	diags.AddError(SloConfigErrTimeBasedLatencyRequired, SloConfigErrTimeBasedLatencyRequired)
+	// 	return restapi.SloIndicator{}, diags
+	// }
 
 	aggregation := model.Aggregation.ValueString()
 	return restapi.SloIndicator{

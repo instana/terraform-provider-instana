@@ -190,8 +190,7 @@ func (r *syntheticAlertConfigResource) buildRuleAlertTypeValidators() []validato
 // buildRuleMetricNameAttribute creates the rule metric_name attribute schema
 func (r *syntheticAlertConfigResource) buildRuleMetricNameAttribute() schema.Attribute {
 	return schema.StringAttribute{
-		Optional:    true,
-		Computed:    true,
+		Required:    true,
 		Description: SyntheticAlertConfigDescRuleMetricName,
 		Validators:  r.buildRuleMetricNameValidators(),
 	}

@@ -172,6 +172,7 @@ func buildHttpActionSchema() schema.SingleNestedAttribute {
 	}
 	attrs[SyntheticTestFieldOperation] = schema.StringAttribute{
 		Optional:    true,
+		Computed:    true,
 		Description: SyntheticTestDescOperation,
 		Validators: []validator.String{
 			stringvalidator.OneOf(

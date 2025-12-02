@@ -142,8 +142,7 @@ func buildRulesSchema() schema.SingleNestedAttribute {
 		Optional:    true,
 		Attributes: map[string]schema.Attribute{
 			LogAlertConfigFieldMetricName: schema.StringAttribute{
-				Optional:    true,
-				Computed:    true,
+				Required:    true,
 				Description: LogAlertConfigDescMetricName,
 			},
 			LogAlertConfigFieldAlertType: schema.StringAttribute{
