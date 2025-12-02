@@ -306,8 +306,6 @@ func (r *sloAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.S
 	model.Severity = types.Int64Value(int64(sloAlertConfig.Severity))
 	model.Triggering = types.BoolValue(sloAlertConfig.Triggering)
 
-	// model := r.buildBaseSloAlertConfigModel(sloAlertConfig)
-
 	terraformAlertType := r.mapAPIAlertTypeToTerraform(sloAlertConfig.Rule)
 	model.AlertType = types.StringValue(terraformAlertType)
 
@@ -325,14 +323,6 @@ func (r *sloAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.S
 		model.BurnRateConfig = burnRateConfigs
 	}
 
-	// // Map burn rate config from API response
-	// burnRateConfigs, burnRateDiags := r.mapBurnRateConfigsToState(sloAlertConfig.BurnRateConfigs)
-	// diags.Append(burnRateDiags...)
-	// if diags.HasError() {
-	// 	return diags
-	// }
-	// model.BurnRateConfig = burnRateConfigs
-
 	customPayloadFieldsList, payloadDiags := shared.CustomPayloadFieldsToTerraform(ctx, sloAlertConfig.CustomerPayloadFields)
 	diags.Append(payloadDiags...)
 	if diags.HasError() {
@@ -342,17 +332,6 @@ func (r *sloAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.S
 
 	diags.Append(state.Set(ctx, model)...)
 	return diags
-}
-
-// buildBaseSloAlertConfigModel creates the base SLO alert config model from API response
-func (r *sloAlertConfigResource) buildBaseSloAlertConfigModel(sloAlertConfig *restapi.SloAlertConfig) SloAlertConfigModel {
-	return SloAlertConfigModel{
-		ID:          types.StringValue(sloAlertConfig.ID),
-		Name:        types.StringValue(sloAlertConfig.Name),
-		Description: types.StringValue(sloAlertConfig.Description),
-		Severity:    types.Int64Value(int64(sloAlertConfig.Severity)),
-		Triggering:  types.BoolValue(sloAlertConfig.Triggering),
-	}
 }
 
 // mapAPIAlertTypeToTerraform converts API alert type and metric to Terraform alert type
