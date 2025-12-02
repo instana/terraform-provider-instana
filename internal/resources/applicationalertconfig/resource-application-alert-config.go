@@ -875,10 +875,10 @@ func (r *applicationAlertConfigResourceImpl) mapStatusCodeRule(index int, status
 
 // mapThroughputRule maps throughput rule configuration to API format
 func (r *applicationAlertConfigResourceImpl) mapThroughputRule(index int, throughput *RuleConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
-	// if throughput.MetricName.IsNull() || throughput.MetricName.IsUnknown() {
-	// 	diags.AddError(ErrorMessageValidationError, fmt.Sprintf(ErrorMessageMetricNameRequired, "throughput"))
-	// 	return errors.New(ErrorMessageMissingMetricName)
-	// }
+	if throughput.MetricName.IsNull() || throughput.MetricName.IsUnknown() {
+		diags.AddError(ErrorMessageValidationError, fmt.Sprintf(ErrorMessageMetricNameRequired, "throughput"))
+		return errors.New(ErrorMessageMissingMetricName)
+	}
 	result.Rules[index].Rule.AlertType = APIAlertTypeThroughput
 	result.Rules[index].Rule.MetricName = throughput.MetricName.ValueString()
 	result.Rules[index].Rule.Aggregation = restapi.Aggregation(throughput.Aggregation.ValueString())
