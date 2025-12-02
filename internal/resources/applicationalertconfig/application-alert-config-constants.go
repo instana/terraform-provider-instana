@@ -100,6 +100,8 @@ const (
 	ErrorMessageTagFilterNormalizationError = "Tag Filter Normalization Error"
 	ErrorMessageFailedToNormalizeTagFilter  = "Failed to normalize tag filter expression: %s"
 	ErrorMessageValidationError             = "Validation Error"
+	ErrorMessageInvalidTimeThreshold        = "time_threshold must have exactly one of: request_impact, violations_in_period, or violations_in_sequence"
+	ErrorMessageInvalidTimeThresholdTitle   = "Invalid Time Threshold Configuration - one of: request_impact, violations_in_period, or violations_in_sequence is requird"
 )
 
 // Threshold type constants
