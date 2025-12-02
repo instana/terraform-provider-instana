@@ -185,7 +185,6 @@ func buildTimeThresholdSchema() schema.SingleNestedAttribute {
 	return schema.SingleNestedAttribute{
 		Description: LogAlertConfigDescTimeThreshold,
 		Optional:    true,
-		Computed:    true,
 		Attributes: map[string]schema.Attribute{
 			LogAlertConfigFieldTimeThresholdViolationsInSequence: schema.SingleNestedAttribute{
 				Description: LogAlertConfigDescViolationsInSequence,
@@ -252,7 +251,9 @@ func (r *logAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.S
 	diags.Append(alertChannelsDiags...)
 	model.AlertChannels = alertChannels
 
-	model.TimeThreshold = r.mapTimeThresholdToModel(config.TimeThreshold)
+	if model.TimeThreshold == nil {
+		model.TimeThreshold = r.mapTimeThresholdToModel(config.TimeThreshold)
+	}
 
 	rules, rulesDiags := r.mapRulesToModel(config.Rules)
 	diags.Append(rulesDiags...)
