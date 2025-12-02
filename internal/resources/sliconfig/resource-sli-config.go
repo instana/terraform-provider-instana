@@ -339,10 +339,23 @@ func (r *sliConfigResource) SetComputedFields(_ context.Context, _ *tfsdk.Plan) 
 	return nil
 }
 
-func (r *sliConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, _ *tfsdk.Plan, sliConfig *restapi.SliConfig) diag.Diagnostics {
+func (r *sliConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, sliConfig *restapi.SliConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
+	var model SliConfigModel
+	if plan != nil {
+		diags.Append(plan.Get(ctx, &model)...)
+	} else if state != nil {
+		diags.Append(state.Get(ctx, &model)...)
+	}
+	model.ID = types.StringValue(sliConfig.ID)
+	model.Name = types.StringValue(sliConfig.Name)
+	if model.InitialEvaluationTimestamp.IsNull() || model.InitialEvaluationTimestamp.IsUnknown() {
+		model.InitialEvaluationTimestamp = types.Int64Value(int64(sliConfig.InitialEvaluationTimestamp))
+	}
 
-	model := r.buildSliConfigModel(sliConfig)
+	if sliConfig.MetricConfiguration != nil {
+		model.MetricConfiguration = r.mapMetricConfigurationToState(sliConfig.MetricConfiguration)
+	}
 
 	sliEntityModel, entityDiags := r.mapSliEntityToState(sliConfig.SliEntity)
 	diags.Append(entityDiags...)
@@ -353,21 +366,6 @@ func (r *sliConfigResource) UpdateState(ctx context.Context, state *tfsdk.State,
 	model.SliEntity = sliEntityModel
 	diags.Append(state.Set(ctx, model)...)
 	return diags
-}
-
-// buildSliConfigModel creates the base SLI config model from API response
-func (r *sliConfigResource) buildSliConfigModel(sliConfig *restapi.SliConfig) SliConfigModel {
-	model := SliConfigModel{
-		ID:                         types.StringValue(sliConfig.ID),
-		Name:                       types.StringValue(sliConfig.Name),
-		InitialEvaluationTimestamp: types.Int64Value(int64(sliConfig.InitialEvaluationTimestamp)),
-	}
-
-	if sliConfig.MetricConfiguration != nil {
-		model.MetricConfiguration = r.mapMetricConfigurationToState(sliConfig.MetricConfiguration)
-	}
-
-	return model
 }
 
 // mapMetricConfigurationToState converts API metric configuration to state model

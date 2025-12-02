@@ -74,11 +74,11 @@ func TestUpdateState_ApplicationTimeBased_Basic(t *testing.T) {
 		},
 	}
 
-	state := &tfsdk.State{
-		Schema: getTestSchema(),
-	}
+	state := createMockState(t, SliConfigModel{
+		InitialEvaluationTimestamp: types.Int64Null(),
+	})
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	diags := resource.UpdateState(ctx, &state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model SliConfigModel
@@ -116,11 +116,11 @@ func TestUpdateState_ApplicationTimeBased_WithServiceAndEndpoint(t *testing.T) {
 		},
 	}
 
-	state := &tfsdk.State{
-		Schema: getTestSchema(),
-	}
+	state := createMockState(t, SliConfigModel{
+		InitialEvaluationTimestamp: types.Int64Null(),
+	})
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	diags := resource.UpdateState(ctx, &state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model SliConfigModel
@@ -155,11 +155,11 @@ func TestUpdateState_ApplicationTimeBased_WithMetricConfiguration(t *testing.T) 
 		},
 	}
 
-	state := &tfsdk.State{
-		Schema: getTestSchema(),
-	}
+	state := createMockState(t, SliConfigModel{
+		InitialEvaluationTimestamp: types.Int64Null(),
+	})
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	diags := resource.UpdateState(ctx, &state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model SliConfigModel
@@ -202,11 +202,11 @@ func TestUpdateState_ApplicationEventBased_Basic(t *testing.T) {
 		},
 	}
 
-	state := &tfsdk.State{
-		Schema: getTestSchema(),
-	}
+	state := createMockState(t, SliConfigModel{
+		InitialEvaluationTimestamp: types.Int64Null(),
+	})
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	diags := resource.UpdateState(ctx, &state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model SliConfigModel
@@ -253,11 +253,11 @@ func TestUpdateState_ApplicationEventBased_WithIncludeFlags(t *testing.T) {
 		},
 	}
 
-	state := &tfsdk.State{
-		Schema: getTestSchema(),
-	}
+	state := createMockState(t, SliConfigModel{
+		InitialEvaluationTimestamp: types.Int64Null(),
+	})
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	diags := resource.UpdateState(ctx, &state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model SliConfigModel
@@ -299,11 +299,11 @@ func TestUpdateState_ApplicationEventBased_WithNullIncludeFlags(t *testing.T) {
 		},
 	}
 
-	state := &tfsdk.State{
-		Schema: getTestSchema(),
-	}
+	state := createMockState(t, SliConfigModel{
+		InitialEvaluationTimestamp: types.Int64Null(),
+	})
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	diags := resource.UpdateState(ctx, &state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model SliConfigModel
@@ -346,11 +346,11 @@ func TestUpdateState_WebsiteEventBased_Basic(t *testing.T) {
 		},
 	}
 
-	state := &tfsdk.State{
-		Schema: getTestSchema(),
-	}
+	state := createMockState(t, SliConfigModel{
+		InitialEvaluationTimestamp: types.Int64Null(),
+	})
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	diags := resource.UpdateState(ctx, &state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model SliConfigModel
@@ -395,11 +395,11 @@ func TestUpdateState_WebsiteTimeBased_Basic(t *testing.T) {
 		},
 	}
 
-	state := &tfsdk.State{
-		Schema: getTestSchema(),
-	}
+	state := createMockState(t, SliConfigModel{
+		InitialEvaluationTimestamp: types.Int64Null(),
+	})
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	diags := resource.UpdateState(ctx, &state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model SliConfigModel
@@ -437,11 +437,11 @@ func TestUpdateState_WebsiteTimeBased_WithoutFilterExpression(t *testing.T) {
 		},
 	}
 
-	state := &tfsdk.State{
-		Schema: getTestSchema(),
-	}
+	state := createMockState(t, SliConfigModel{
+		InitialEvaluationTimestamp: types.Int64Null(),
+	})
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	diags := resource.UpdateState(ctx, &state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model SliConfigModel
@@ -467,11 +467,11 @@ func TestUpdateState_UnsupportedEntityType(t *testing.T) {
 		},
 	}
 
-	state := &tfsdk.State{
-		Schema: getTestSchema(),
-	}
+	state := createMockState(t, SliConfigModel{
+		InitialEvaluationTimestamp: types.Int64Null(),
+	})
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	diags := resource.UpdateState(ctx, &state, nil, data)
 	assert.True(t, diags.HasError())
 }
 
@@ -494,11 +494,11 @@ func TestUpdateState_WithoutMetricConfiguration(t *testing.T) {
 		},
 	}
 
-	state := &tfsdk.State{
-		Schema: getTestSchema(),
-	}
+	state := createMockState(t, SliConfigModel{
+		InitialEvaluationTimestamp: types.Int64Null(),
+	})
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	diags := resource.UpdateState(ctx, &state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model SliConfigModel
@@ -1015,11 +1015,11 @@ func TestUpdateState_ApplicationEventBased_WithNullGoodEventFilter(t *testing.T)
 		},
 	}
 
-	state := &tfsdk.State{
-		Schema: getTestSchema(),
-	}
+	state := createMockState(t, SliConfigModel{
+		InitialEvaluationTimestamp: types.Int64Null(),
+	})
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	diags := resource.UpdateState(ctx, &state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model SliConfigModel
@@ -1055,11 +1055,11 @@ func TestUpdateState_ApplicationEventBased_WithNullBadEventFilter(t *testing.T) 
 		},
 	}
 
-	state := &tfsdk.State{
-		Schema: getTestSchema(),
-	}
+	state := createMockState(t, SliConfigModel{
+		InitialEvaluationTimestamp: types.Int64Null(),
+	})
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	diags := resource.UpdateState(ctx, &state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model SliConfigModel
@@ -1095,11 +1095,11 @@ func TestUpdateState_WebsiteEventBased_WithNullGoodEventFilter(t *testing.T) {
 		},
 	}
 
-	state := &tfsdk.State{
-		Schema: getTestSchema(),
-	}
+	state := createMockState(t, SliConfigModel{
+		InitialEvaluationTimestamp: types.Int64Null(),
+	})
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	diags := resource.UpdateState(ctx, &state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model SliConfigModel
@@ -1135,11 +1135,11 @@ func TestUpdateState_WebsiteEventBased_WithNullBadEventFilter(t *testing.T) {
 		},
 	}
 
-	state := &tfsdk.State{
-		Schema: getTestSchema(),
-	}
+	state := createMockState(t, SliConfigModel{
+		InitialEvaluationTimestamp: types.Int64Null(),
+	})
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	diags := resource.UpdateState(ctx, &state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model SliConfigModel
