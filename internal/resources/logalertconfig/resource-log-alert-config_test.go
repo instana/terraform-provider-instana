@@ -203,9 +203,18 @@ func TestUpdateState_WithGroupBy(t *testing.T) {
 	state := &tfsdk.State{
 		Schema: getTestSchema(),
 	}
-	initializeEmptyState(ctx, state)
+	// Initialize state with non-empty GroupBy so UpdateState will update it
+	initialModel := LogAlertConfigModel{
+		GroupBy:             []GroupByModel{{}}, // Non-empty slice to trigger update
+		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
+	}
+	diags := state.Set(ctx, initialModel)
+	if diags.HasError() {
+		t.Logf("state.Set errors: %v", diags)
+	}
+	require.False(t, diags.HasError())
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	diags = resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model LogAlertConfigModel
@@ -280,9 +289,20 @@ func TestUpdateState_WithTimeThreshold(t *testing.T) {
 	state := &tfsdk.State{
 		Schema: getTestSchema(),
 	}
-	initializeEmptyState(ctx, state)
+	// Initialize state with non-nil TimeThreshold so UpdateState will update it
+	initialModel := LogAlertConfigModel{
+		TimeThreshold: &TimeThresholdModel{
+			ViolationsInSequence: &ViolationsInSequenceModel{},
+		},
+		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
+	}
+	diags := state.Set(ctx, initialModel)
+	if diags.HasError() {
+		t.Logf("state.Set errors: %v", diags)
+	}
+	require.False(t, diags.HasError())
 
-	diags := resource.UpdateState(ctx, state, nil, data)
+	diags = resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model LogAlertConfigModel

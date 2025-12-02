@@ -1440,11 +1440,39 @@ func TestUpdateStateWithEmptyTags(t *testing.T) {
 			},
 		}
 
+		// Initialize state with existing tags so UpdateState will process them
+		initialModel := SloConfigModel{
+			ID:     types.StringValue("test-id"),
+			Name:   types.StringValue("Old Name"),
+			Target: types.Float64Value(95.0),
+			Tags:   []types.String{types.StringValue("existing-tag")},
+			Entity: EntityModel{
+				ApplicationEntityModel: &ApplicationEntityModel{
+					ApplicationID: types.StringValue(appID),
+					BoundaryScope: types.StringValue(boundaryScope),
+				},
+			},
+			Indicator: IndicatorModel{
+				TimeBasedLatencyIndicatorModel: &TimeBasedLatencyIndicatorModel{
+					Threshold:   types.Float64Value(100.0),
+					Aggregation: types.StringValue(aggregation),
+				},
+			},
+			TimeWindow: TimeWindowModel{
+				RollingTimeWindowModel: &RollingTimeWindowModel{
+					Duration:     types.Int64Value(7),
+					DurationUnit: types.StringValue("day"),
+				},
+			},
+		}
+
 		state := &tfsdk.State{
 			Schema: resource.metaData.Schema,
 		}
+		diags := state.Set(ctx, initialModel)
+		require.False(t, diags.HasError())
 
-		diags := resource.UpdateState(ctx, state, nil, apiObject)
+		diags = resource.UpdateState(ctx, state, nil, apiObject)
 
 		assert.False(t, diags.HasError())
 	})
