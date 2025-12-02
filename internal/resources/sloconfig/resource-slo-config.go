@@ -156,10 +156,12 @@ func buildApplicationEntityAttribute() schema.SingleNestedAttribute {
 			},
 			SloConfigFieldIncludeInternal: schema.BoolAttribute{
 				Optional:    true,
+				Computed:    true,
 				Description: SloConfigDescIncludeInternal,
 			},
 			SloConfigFieldIncludeSynthetic: schema.BoolAttribute{
 				Optional:    true,
+				Computed:    true,
 				Description: SloConfigDescIncludeSynthetic,
 			},
 			SloConfigFieldServiceID: schema.StringAttribute{
@@ -437,6 +439,7 @@ func buildFixedTimeWindowAttribute() schema.SingleNestedAttribute {
 			},
 			SloConfigFieldTimezone: schema.StringAttribute{
 				Optional:    true,
+				Computed:    true,
 				Description: SloConfigDescTimezone,
 			},
 			SloConfigFieldStartTimestamp: schema.Float64Attribute{
@@ -1037,12 +1040,23 @@ func (r *sloConfigResource) setTimezoneIfPresent(timeWindow *restapi.SloTimeWind
 	}
 }
 
-func (r *sloConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, _ *tfsdk.Plan, apiObject *restapi.SloConfig) diag.Diagnostics {
+func (r *sloConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *restapi.SloConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
-
-	model := r.buildBaseSloConfigModel(apiObject)
-	model.Tags = r.mapTagsToState(apiObject.Tags)
-	model.RbacTags = r.mapRbacTagsToState(apiObject.RbacTags)
+	var model SloConfigModel
+	if plan != nil {
+		diags.Append(plan.Get(ctx, &model)...)
+	} else if state != nil {
+		diags.Append(state.Get(ctx, &model)...)
+	}
+	model.ID = types.StringValue(apiObject.ID)
+	model.Name = types.StringValue(apiObject.Name)
+	model.Target = types.Float64Value(apiObject.Target)
+	if len(model.Tags) != 0 && len(apiObject.Tags) > 0 {
+		model.Tags = r.mapTagsToState(apiObject.Tags)
+	}
+	if len(model.RbacTags) != 0 && len(apiObject.RbacTags) > 0 {
+		model.RbacTags = r.mapRbacTagsToState(apiObject.RbacTags)
+	}
 
 	entityData, entityDiags := r.mapEntityToState(apiObject)
 	diags.Append(entityDiags...)
@@ -1064,15 +1078,6 @@ func (r *sloConfigResource) UpdateState(ctx context.Context, state *tfsdk.State,
 
 	diags.Append(state.Set(ctx, model)...)
 	return diags
-}
-
-// buildBaseSloConfigModel creates the base SLO config model from API response
-func (r *sloConfigResource) buildBaseSloConfigModel(apiObject *restapi.SloConfig) SloConfigModel {
-	return SloConfigModel{
-		ID:     types.StringValue(apiObject.ID),
-		Name:   types.StringValue(apiObject.Name),
-		Target: types.Float64Value(apiObject.Target),
-	}
 }
 
 // mapTagsToState converts tags from API to state
