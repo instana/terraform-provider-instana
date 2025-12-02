@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -165,15 +166,17 @@ func buildAlertChannelsSchema() schema.SingleNestedAttribute {
 func buildTimeThresholdSchema() schema.SingleNestedAttribute {
 	return schema.SingleNestedAttribute{
 		Description: InfraAlertConfigDescTimeThreshold,
-		Optional:    true,
+		Required:    true,
 		Attributes: map[string]schema.Attribute{
 			InfraAlertConfigFieldTimeThresholdViolationsInSequence: schema.SingleNestedAttribute{
 				Description: InfraAlertConfigDescViolationsInSequence,
-				Optional:    true,
+				Required:    true,
 				Attributes: map[string]schema.Attribute{
 					InfraAlertConfigFieldTimeThresholdTimeWindow: schema.Int64Attribute{
-						Required:    true,
+						Optional:    true,
+						Computed:    true,
 						Description: InfraAlertConfigDescTimeWindow,
+						Default:     int64default.StaticInt64(600000),
 					},
 				},
 			},

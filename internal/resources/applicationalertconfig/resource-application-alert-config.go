@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -286,7 +285,7 @@ func NewApplicationAlertConfigResourceHandle() resourcehandle.ResourceHandle[*re
 					},
 					ApplicationAlertConfigFieldTimeThreshold: schema.SingleNestedAttribute{
 						Description: "Indicates the type of violation of the defined threshold.",
-						Optional:    true,
+						Required:    true,
 						Attributes: map[string]schema.Attribute{
 							ApplicationAlertConfigFieldTimeThresholdRequestImpact: schema.SingleNestedAttribute{
 								Description: "Time threshold base on request impact",
@@ -581,7 +580,9 @@ func (r *applicationAlertConfigResourceImpl) MapStateToDataObject(ctx context.Co
 		return nil, diags
 	}
 
-	r.mapTimeThreshold(&model, result)
+	if err := r.mapTimeThreshold(&model, result, &diags); err != nil {
+		return nil, diags
+	}
 
 	return result, diags
 }
@@ -913,9 +914,9 @@ func (r *applicationAlertConfigResourceImpl) mapThresholds(index int, thresholds
 }
 
 // mapTimeThreshold converts time threshold configuration
-func (r *applicationAlertConfigResourceImpl) mapTimeThreshold(model *ApplicationAlertConfigModel, result *restapi.ApplicationAlertConfig) {
+func (r *applicationAlertConfigResourceImpl) mapTimeThreshold(model *ApplicationAlertConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
 	if model.TimeThreshold == nil {
-		return
+		return nil
 	}
 
 	result.TimeThreshold = &restapi.ApplicationAlertTimeThreshold{}
@@ -931,7 +932,14 @@ func (r *applicationAlertConfigResourceImpl) mapTimeThreshold(model *Application
 	} else if model.TimeThreshold.ViolationsInSequence != nil {
 		result.TimeThreshold.Type = TimeThresholdTypeViolationsInSequence
 		result.TimeThreshold.TimeWindow = model.TimeThreshold.ViolationsInSequence.TimeWindow.ValueInt64()
+	} else {
+		// throw error either one of the fields is required
+		err := errors.New(ErrorMessageInvalidTimeThreshold)
+		diags.AddError(ErrorMessageInvalidTimeThresholdTitle, err.Error())
+		return err
 	}
+
+	return nil
 }
 
 // extractGracePeriod converts types.Int64 to *int64 for API, handling null/unknown values
@@ -952,13 +960,10 @@ func (r *applicationAlertConfigResourceImpl) UpdateState(ctx context.Context, st
 	var diags diag.Diagnostics
 	var model ApplicationAlertConfigModel
 	if plan != nil {
-		log.Printf("plan flow")
 		diags.Append(plan.Get(ctx, &model)...)
 	} else if state != nil {
-		log.Printf("state flow")
 		diags.Append(state.Get(ctx, &model)...)
 	} else {
-		log.Printf("import flow")
 		model = ApplicationAlertConfigModel{}
 	}
 	// Build base model with simple fields

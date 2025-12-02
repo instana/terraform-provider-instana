@@ -206,7 +206,7 @@ func NewWebsiteAlertConfigResourceHandle() resourcehandle.ResourceHandle[*restap
 					WebsiteAlertConfigFieldCustomPayloadFields: shared.GetCustomPayloadFieldsSchema(),
 					WebsiteAlertConfigFieldTimeThreshold: schema.SingleNestedAttribute{
 						Description: WebsiteAlertConfigDescTimeThreshold,
-						Optional:    true,
+						Required:    true,
 						Attributes: map[string]schema.Attribute{
 							WebsiteAlertConfigFieldTimeThresholdUserImpactOfViolationsInSequence: schema.SingleNestedAttribute{
 								Description: WebsiteAlertConfigDescTimeThresholdUserImpact,
@@ -218,8 +218,7 @@ func NewWebsiteAlertConfigResourceHandle() resourcehandle.ResourceHandle[*restap
 										Description: WebsiteAlertConfigDescTimeThresholdTimeWindow,
 									},
 									WebsiteAlertConfigFieldTimeThresholdUserImpactOfViolationsInSequenceImpactMeasurementMethod: schema.StringAttribute{
-										Optional:    true,
-										Computed:    true,
+										Required:    true,
 										Description: WebsiteAlertConfigDescTimeThresholdImpactMethod,
 										Validators: []validator.String{
 											stringvalidator.OneOf(WebsiteAlertConfigImpactMethodAggregated, WebsiteAlertConfigImpactMethodPerWindow),
@@ -247,8 +246,7 @@ func NewWebsiteAlertConfigResourceHandle() resourcehandle.ResourceHandle[*restap
 										Description: WebsiteAlertConfigDescTimeThresholdTimeWindow,
 									},
 									WebsiteAlertConfigFieldTimeThresholdViolationsInPeriodViolations: schema.Int64Attribute{
-										Optional:    true,
-										Computed:    true,
+										Required:    true,
 										Description: WebsiteAlertConfigDescTimeThresholdViolations,
 									},
 								},
@@ -261,6 +259,7 @@ func NewWebsiteAlertConfigResourceHandle() resourcehandle.ResourceHandle[*restap
 										Optional:    true,
 										Computed:    true,
 										Description: WebsiteAlertConfigDescTimeThresholdTimeWindow,
+										Default:     int64default.StaticInt64(600000),
 									},
 								},
 							},
