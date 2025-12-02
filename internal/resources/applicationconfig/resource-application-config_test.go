@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -64,19 +65,21 @@ func TestMapStateToDataObject_BasicConfig(t *testing.T) {
 	ctx := context.Background()
 	resource := &applicationConfigResource{}
 
+	accessRules := []AccessRuleModel{
+		{
+			AccessType:   types.StringValue("READ"),
+			RelationType: types.StringValue("USER"),
+			RelatedID:    types.StringNull(),
+		},
+	}
+
 	state := createMockState(t, ApplicationConfigModel{
 		ID:            types.StringValue("test-id"),
 		Label:         types.StringValue("Test Application"),
 		Scope:         types.StringValue("INCLUDE_NO_DOWNSTREAM"),
 		BoundaryScope: types.StringValue("DEFAULT"),
 		TagFilter:     types.StringNull(),
-		AccessRules: []AccessRuleModel{
-			{
-				AccessType:   types.StringValue("READ"),
-				RelationType: types.StringValue("USER"),
-				RelatedID:    types.StringNull(),
-			},
-		},
+		AccessRules:   createAccessRulesList(t, ctx, accessRules),
 	})
 
 	result, diags := resource.MapStateToDataObject(ctx, nil, &state)
@@ -98,19 +101,21 @@ func TestMapStateToDataObject_WithTagFilter(t *testing.T) {
 	ctx := context.Background()
 	resource := &applicationConfigResource{}
 
+	accessRules := []AccessRuleModel{
+		{
+			AccessType:   types.StringValue("READ_WRITE"),
+			RelationType: types.StringValue("ROLE"),
+			RelatedID:    types.StringValue("user-123"),
+		},
+	}
+
 	state := createMockState(t, ApplicationConfigModel{
 		ID:            types.StringValue("test-id"),
 		Label:         types.StringValue("Test Application"),
 		Scope:         types.StringValue("INCLUDE_ALL_DOWNSTREAM"),
 		BoundaryScope: types.StringValue("ALL"),
 		TagFilter:     types.StringValue("entity.type EQUALS 'service'"),
-		AccessRules: []AccessRuleModel{
-			{
-				AccessType:   types.StringValue("READ_WRITE"),
-				RelationType: types.StringValue("ROLE"),
-				RelatedID:    types.StringValue("user-123"),
-			},
-		},
+		AccessRules:   createAccessRulesList(t, ctx, accessRules),
 	})
 
 	result, diags := resource.MapStateToDataObject(ctx, nil, &state)
@@ -133,29 +138,31 @@ func TestMapStateToDataObject_WithMultipleAccessRules(t *testing.T) {
 	ctx := context.Background()
 	resource := &applicationConfigResource{}
 
+	accessRules := []AccessRuleModel{
+		{
+			AccessType:   types.StringValue("READ"),
+			RelationType: types.StringValue("USER"),
+			RelatedID:    types.StringValue("user-1"),
+		},
+		{
+			AccessType:   types.StringValue("READ_WRITE"),
+			RelationType: types.StringValue("ROLE"),
+			RelatedID:    types.StringValue("user-2"),
+		},
+		{
+			AccessType:   types.StringValue("READ_WRITE"),
+			RelationType: types.StringValue("USER"),
+			RelatedID:    types.StringNull(),
+		},
+	}
+
 	state := createMockState(t, ApplicationConfigModel{
 		ID:            types.StringValue("test-id"),
 		Label:         types.StringValue("Test Application"),
 		Scope:         types.StringValue("INCLUDE_NO_DOWNSTREAM"),
 		BoundaryScope: types.StringValue("INBOUND"),
 		TagFilter:     types.StringNull(),
-		AccessRules: []AccessRuleModel{
-			{
-				AccessType:   types.StringValue("READ"),
-				RelationType: types.StringValue("USER"),
-				RelatedID:    types.StringValue("user-1"),
-			},
-			{
-				AccessType:   types.StringValue("READ_WRITE"),
-				RelationType: types.StringValue("ROLE"),
-				RelatedID:    types.StringValue("user-2"),
-			},
-			{
-				AccessType:   types.StringValue("READ_WRITE"),
-				RelationType: types.StringValue("USER"),
-				RelatedID:    types.StringNull(),
-			},
-		},
+		AccessRules:   createAccessRulesList(t, ctx, accessRules),
 	})
 
 	result, diags := resource.MapStateToDataObject(ctx, nil, &state)
@@ -192,7 +199,7 @@ func TestMapStateToDataObject_WithEmptyAccessRules(t *testing.T) {
 		Scope:         types.StringValue("INCLUDE_NO_DOWNSTREAM"),
 		BoundaryScope: types.StringValue("DEFAULT"),
 		TagFilter:     types.StringNull(),
-		AccessRules:   []AccessRuleModel{},
+		AccessRules:   createAccessRulesList(t, ctx, []AccessRuleModel{}),
 	})
 
 	result, diags := resource.MapStateToDataObject(ctx, nil, &state)
@@ -206,19 +213,21 @@ func TestMapStateToDataObject_WithNullID(t *testing.T) {
 	ctx := context.Background()
 	resource := &applicationConfigResource{}
 
+	accessRules := []AccessRuleModel{
+		{
+			AccessType:   types.StringValue("READ"),
+			RelationType: types.StringValue("USER"),
+			RelatedID:    types.StringNull(),
+		},
+	}
+
 	state := createMockState(t, ApplicationConfigModel{
 		ID:            types.StringNull(),
 		Label:         types.StringValue("Test Application"),
 		Scope:         types.StringValue("INCLUDE_NO_DOWNSTREAM"),
 		BoundaryScope: types.StringValue("DEFAULT"),
 		TagFilter:     types.StringNull(),
-		AccessRules: []AccessRuleModel{
-			{
-				AccessType:   types.StringValue("READ"),
-				RelationType: types.StringValue("USER"),
-				RelatedID:    types.StringNull(),
-			},
-		},
+		AccessRules:   createAccessRulesList(t, ctx, accessRules),
 	})
 
 	result, diags := resource.MapStateToDataObject(ctx, nil, &state)
@@ -232,19 +241,21 @@ func TestMapStateToDataObject_WithInvalidTagFilter(t *testing.T) {
 	ctx := context.Background()
 	resource := &applicationConfigResource{}
 
+	accessRules := []AccessRuleModel{
+		{
+			AccessType:   types.StringValue("READ"),
+			RelationType: types.StringValue("USER"),
+			RelatedID:    types.StringNull(),
+		},
+	}
+
 	state := createMockState(t, ApplicationConfigModel{
 		ID:            types.StringValue("test-id"),
 		Label:         types.StringValue("Test Application"),
 		Scope:         types.StringValue("INCLUDE_NO_DOWNSTREAM"),
 		BoundaryScope: types.StringValue("DEFAULT"),
 		TagFilter:     types.StringValue("invalid tag filter syntax"),
-		AccessRules: []AccessRuleModel{
-			{
-				AccessType:   types.StringValue("READ"),
-				RelationType: types.StringValue("USER"),
-				RelatedID:    types.StringNull(),
-			},
-		},
+		AccessRules:   createAccessRulesList(t, ctx, accessRules),
 	})
 
 	_, diags := resource.MapStateToDataObject(ctx, nil, &state)
@@ -259,19 +270,21 @@ func TestMapStateToDataObject_FromPlan(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
+	accessRules := []AccessRuleModel{
+		{
+			AccessType:   types.StringValue("READ"),
+			RelationType: types.StringValue("USER"),
+			RelatedID:    types.StringNull(),
+		},
+	}
+
 	model := ApplicationConfigModel{
 		ID:            types.StringValue("test-id"),
 		Label:         types.StringValue("Test Application"),
 		Scope:         types.StringValue("INCLUDE_NO_DOWNSTREAM"),
 		BoundaryScope: types.StringValue("DEFAULT"),
 		TagFilter:     types.StringNull(),
-		AccessRules: []AccessRuleModel{
-			{
-				AccessType:   types.StringValue("READ"),
-				RelationType: types.StringValue("USER"),
-				RelatedID:    types.StringNull(),
-			},
-		},
+		AccessRules:   createAccessRulesList(t, ctx, accessRules),
 	}
 
 	diags := plan.Set(ctx, model)
@@ -307,16 +320,23 @@ func TestUpdateState_BasicConfig(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
-	// Initialize state with a model that has TagFilter set to null
+	// Initialize state with a model that has TagFilter and AccessRules set to null
 	// This is necessary because UpdateState checks if TagFilter is null/unknown
 	initialModel := ApplicationConfigModel{
 		TagFilter: types.StringNull(),
+		AccessRules: types.ListNull(types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"access_type":   types.StringType,
+				"related_id":    types.StringType,
+				"relation_type": types.StringType,
+			},
+		}),
 	}
 	diags := state.Set(ctx, initialModel)
-	require.False(t, diags.HasError())
+	require.False(t, diags.HasError(), "Failed to set initial state: %v", diags)
 
 	diags = resource.UpdateState(ctx, state, nil, data)
-	require.False(t, diags.HasError())
+	require.False(t, diags.HasError(), "UpdateState failed: %v", diags)
 
 	var model ApplicationConfigModel
 	diags = state.Get(ctx, &model)
@@ -327,10 +347,12 @@ func TestUpdateState_BasicConfig(t *testing.T) {
 	assert.Equal(t, "INCLUDE_NO_DOWNSTREAM", model.Scope.ValueString())
 	assert.Equal(t, "DEFAULT", model.BoundaryScope.ValueString())
 	assert.True(t, model.TagFilter.IsNull())
-	require.Len(t, model.AccessRules, 1)
-	assert.Equal(t, "READ", model.AccessRules[0].AccessType.ValueString())
-	assert.Equal(t, "USER", model.AccessRules[0].RelationType.ValueString())
-	assert.True(t, model.AccessRules[0].RelatedID.IsNull())
+
+	accessRules := getAccessRulesFromList(t, ctx, model.AccessRules)
+	require.Len(t, accessRules, 1)
+	assert.Equal(t, "READ", accessRules[0].AccessType.ValueString())
+	assert.Equal(t, "USER", accessRules[0].RelationType.ValueString())
+	assert.True(t, accessRules[0].RelatedID.IsNull())
 }
 
 func TestUpdateState_WithTagFilter(t *testing.T) {
@@ -367,13 +389,20 @@ func TestUpdateState_WithTagFilter(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
-	// Initialize state with a model that has TagFilter set to null
+	// Initialize state with a model that has TagFilter and AccessRules set to null
 	// This is necessary because UpdateState checks if TagFilter is null/unknown
 	initialModel := ApplicationConfigModel{
 		TagFilter: types.StringNull(),
+		AccessRules: types.ListNull(types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"access_type":   types.StringType,
+				"related_id":    types.StringType,
+				"relation_type": types.StringType,
+			},
+		}),
 	}
 	diags := state.Set(ctx, initialModel)
-	require.False(t, diags.HasError())
+	require.False(t, diags.HasError(), "Failed to set initial state: %v", diags)
 
 	diags = resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
@@ -391,10 +420,12 @@ func TestUpdateState_WithTagFilter(t *testing.T) {
 		// If tag filter is present, verify it's not empty
 		assert.NotEmpty(t, model.TagFilter.ValueString())
 	}
-	require.Len(t, model.AccessRules, 1)
-	assert.Equal(t, "READ_WRITE", model.AccessRules[0].AccessType.ValueString())
-	assert.Equal(t, "ROLE", model.AccessRules[0].RelationType.ValueString())
-	assert.Equal(t, "user-123", model.AccessRules[0].RelatedID.ValueString())
+
+	accessRules := getAccessRulesFromList(t, ctx, model.AccessRules)
+	require.Len(t, accessRules, 1)
+	assert.Equal(t, "READ_WRITE", accessRules[0].AccessType.ValueString())
+	assert.Equal(t, "ROLE", accessRules[0].RelationType.ValueString())
+	assert.Equal(t, "user-123", accessRules[0].RelatedID.ValueString())
 }
 
 func TestUpdateState_WithMultipleAccessRules(t *testing.T) {
@@ -429,13 +460,20 @@ func TestUpdateState_WithMultipleAccessRules(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
-	// Initialize state with a model that has TagFilter set to null
+	// Initialize state with a model that has TagFilter and AccessRules set to null
 	// This is necessary because UpdateState checks if TagFilter is null/unknown
 	initialModel := ApplicationConfigModel{
 		TagFilter: types.StringNull(),
+		AccessRules: types.ListNull(types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"access_type":   types.StringType,
+				"related_id":    types.StringType,
+				"relation_type": types.StringType,
+			},
+		}),
 	}
 	diags := state.Set(ctx, initialModel)
-	require.False(t, diags.HasError())
+	require.False(t, diags.HasError(), "Failed to set initial state: %v", diags)
 
 	diags = resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
@@ -444,22 +482,23 @@ func TestUpdateState_WithMultipleAccessRules(t *testing.T) {
 	diags = state.Get(ctx, &model)
 	require.False(t, diags.HasError())
 
-	require.Len(t, model.AccessRules, 3)
+	accessRules := getAccessRulesFromList(t, ctx, model.AccessRules)
+	require.Len(t, accessRules, 3)
 
 	// Check first rule
-	assert.Equal(t, "READ", model.AccessRules[0].AccessType.ValueString())
-	assert.Equal(t, "USER", model.AccessRules[0].RelationType.ValueString())
-	assert.Equal(t, "user-1", model.AccessRules[0].RelatedID.ValueString())
+	assert.Equal(t, "READ", accessRules[0].AccessType.ValueString())
+	assert.Equal(t, "USER", accessRules[0].RelationType.ValueString())
+	assert.Equal(t, "user-1", accessRules[0].RelatedID.ValueString())
 
 	// Check second rule
-	assert.Equal(t, "READ_WRITE", model.AccessRules[1].AccessType.ValueString())
-	assert.Equal(t, "ROLE", model.AccessRules[1].RelationType.ValueString())
-	assert.Equal(t, "user-2", model.AccessRules[1].RelatedID.ValueString())
+	assert.Equal(t, "READ_WRITE", accessRules[1].AccessType.ValueString())
+	assert.Equal(t, "ROLE", accessRules[1].RelationType.ValueString())
+	assert.Equal(t, "user-2", accessRules[1].RelatedID.ValueString())
 
 	// Check third rule
-	assert.Equal(t, "READ_WRITE", model.AccessRules[2].AccessType.ValueString())
-	assert.Equal(t, "USER", model.AccessRules[2].RelationType.ValueString())
-	assert.True(t, model.AccessRules[2].RelatedID.IsNull())
+	assert.Equal(t, "READ_WRITE", accessRules[2].AccessType.ValueString())
+	assert.Equal(t, "USER", accessRules[2].RelationType.ValueString())
+	assert.True(t, accessRules[2].RelatedID.IsNull())
 }
 
 func TestUpdateState_WithEmptyAccessRules(t *testing.T) {
@@ -478,13 +517,20 @@ func TestUpdateState_WithEmptyAccessRules(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
-	// Initialize state with a model that has TagFilter set to null
+	// Initialize state with a model that has TagFilter and AccessRules set to null
 	// This is necessary because UpdateState checks if TagFilter is null/unknown
 	initialModel := ApplicationConfigModel{
 		TagFilter: types.StringNull(),
+		AccessRules: types.ListNull(types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"access_type":   types.StringType,
+				"related_id":    types.StringType,
+				"relation_type": types.StringType,
+			},
+		}),
 	}
 	diags := state.Set(ctx, initialModel)
-	require.False(t, diags.HasError())
+	require.False(t, diags.HasError(), "Failed to set initial state: %v", diags)
 
 	diags = resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
@@ -493,7 +539,8 @@ func TestUpdateState_WithEmptyAccessRules(t *testing.T) {
 	diags = state.Get(ctx, &model)
 	require.False(t, diags.HasError())
 
-	assert.Empty(t, model.AccessRules)
+	accessRules := getAccessRulesFromList(t, ctx, model.AccessRules)
+	assert.Empty(t, accessRules)
 }
 
 func TestUpdateState_WithNullTagFilter(t *testing.T) {
@@ -519,13 +566,20 @@ func TestUpdateState_WithNullTagFilter(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
-	// Initialize state with a model that has TagFilter set to null
+	// Initialize state with a model that has TagFilter and AccessRules set to null
 	// This is necessary because UpdateState checks if TagFilter is null/unknown
 	initialModel := ApplicationConfigModel{
 		TagFilter: types.StringNull(),
+		AccessRules: types.ListNull(types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"access_type":   types.StringType,
+				"related_id":    types.StringType,
+				"relation_type": types.StringType,
+			},
+		}),
 	}
 	diags := state.Set(ctx, initialModel)
-	require.False(t, diags.HasError())
+	require.False(t, diags.HasError(), "Failed to set initial state: %v", diags)
 
 	diags = resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
@@ -549,19 +603,21 @@ func TestMapStateToDataObject_AllScopes(t *testing.T) {
 			ctx := context.Background()
 			resource := &applicationConfigResource{}
 
+			accessRules := []AccessRuleModel{
+				{
+					AccessType:   types.StringValue("READ"),
+					RelationType: types.StringValue("USER"),
+					RelatedID:    types.StringNull(),
+				},
+			}
+
 			state := createMockState(t, ApplicationConfigModel{
 				ID:            types.StringValue("test-id"),
 				Label:         types.StringValue("Test Application"),
 				Scope:         types.StringValue(scope),
 				BoundaryScope: types.StringValue("DEFAULT"),
 				TagFilter:     types.StringNull(),
-				AccessRules: []AccessRuleModel{
-					{
-						AccessType:   types.StringValue("READ"),
-						RelationType: types.StringValue("USER"),
-						RelatedID:    types.StringNull(),
-					},
-				},
+				AccessRules:   createAccessRulesList(t, ctx, accessRules),
 			})
 
 			result, diags := resource.MapStateToDataObject(ctx, nil, &state)
@@ -580,19 +636,21 @@ func TestMapStateToDataObject_AllBoundaryScopes(t *testing.T) {
 			ctx := context.Background()
 			resource := &applicationConfigResource{}
 
+			accessRules := []AccessRuleModel{
+				{
+					AccessType:   types.StringValue("READ"),
+					RelationType: types.StringValue("USER"),
+					RelatedID:    types.StringNull(),
+				},
+			}
+
 			state := createMockState(t, ApplicationConfigModel{
 				ID:            types.StringValue("test-id"),
 				Label:         types.StringValue("Test Application"),
 				Scope:         types.StringValue("INCLUDE_NO_DOWNSTREAM"),
 				BoundaryScope: types.StringValue(boundaryScope),
 				TagFilter:     types.StringNull(),
-				AccessRules: []AccessRuleModel{
-					{
-						AccessType:   types.StringValue("READ"),
-						RelationType: types.StringValue("USER"),
-						RelatedID:    types.StringNull(),
-					},
-				},
+				AccessRules:   createAccessRulesList(t, ctx, accessRules),
 			})
 
 			result, diags := resource.MapStateToDataObject(ctx, nil, &state)
@@ -611,19 +669,21 @@ func TestMapStateToDataObject_AllAccessTypes(t *testing.T) {
 			ctx := context.Background()
 			resource := &applicationConfigResource{}
 
+			accessRules := []AccessRuleModel{
+				{
+					AccessType:   types.StringValue(accessType),
+					RelationType: types.StringValue("USER"),
+					RelatedID:    types.StringNull(),
+				},
+			}
+
 			state := createMockState(t, ApplicationConfigModel{
 				ID:            types.StringValue("test-id"),
 				Label:         types.StringValue("Test Application"),
 				Scope:         types.StringValue("INCLUDE_NO_DOWNSTREAM"),
 				BoundaryScope: types.StringValue("DEFAULT"),
 				TagFilter:     types.StringNull(),
-				AccessRules: []AccessRuleModel{
-					{
-						AccessType:   types.StringValue(accessType),
-						RelationType: types.StringValue("USER"),
-						RelatedID:    types.StringNull(),
-					},
-				},
+				AccessRules:   createAccessRulesList(t, ctx, accessRules),
 			})
 
 			result, diags := resource.MapStateToDataObject(ctx, nil, &state)
@@ -643,19 +703,21 @@ func TestMapStateToDataObject_AllRelationTypes(t *testing.T) {
 			ctx := context.Background()
 			resource := &applicationConfigResource{}
 
+			accessRules := []AccessRuleModel{
+				{
+					AccessType:   types.StringValue("READ"),
+					RelationType: types.StringValue(relationType),
+					RelatedID:    types.StringNull(),
+				},
+			}
+
 			state := createMockState(t, ApplicationConfigModel{
 				ID:            types.StringValue("test-id"),
 				Label:         types.StringValue("Test Application"),
 				Scope:         types.StringValue("INCLUDE_NO_DOWNSTREAM"),
 				BoundaryScope: types.StringValue("DEFAULT"),
 				TagFilter:     types.StringNull(),
-				AccessRules: []AccessRuleModel{
-					{
-						AccessType:   types.StringValue("READ"),
-						RelationType: types.StringValue(relationType),
-						RelatedID:    types.StringNull(),
-					},
-				},
+				AccessRules:   createAccessRulesList(t, ctx, accessRules),
 			})
 
 			result, diags := resource.MapStateToDataObject(ctx, nil, &state)
@@ -671,19 +733,21 @@ func TestMapStateToDataObject_WithEmptyRelatedID(t *testing.T) {
 	ctx := context.Background()
 	resource := &applicationConfigResource{}
 
+	accessRules := []AccessRuleModel{
+		{
+			AccessType:   types.StringValue("READ"),
+			RelationType: types.StringValue("USER"),
+			RelatedID:    types.StringValue(""),
+		},
+	}
+
 	state := createMockState(t, ApplicationConfigModel{
 		ID:            types.StringValue("test-id"),
 		Label:         types.StringValue("Test Application"),
 		Scope:         types.StringValue("INCLUDE_NO_DOWNSTREAM"),
 		BoundaryScope: types.StringValue("DEFAULT"),
 		TagFilter:     types.StringNull(),
-		AccessRules: []AccessRuleModel{
-			{
-				AccessType:   types.StringValue("READ"),
-				RelationType: types.StringValue("USER"),
-				RelatedID:    types.StringValue(""),
-			},
-		},
+		AccessRules:   createAccessRulesList(t, ctx, accessRules),
 	})
 
 	result, diags := resource.MapStateToDataObject(ctx, nil, &state)
@@ -695,13 +759,19 @@ func TestMapStateToDataObject_WithEmptyRelatedID(t *testing.T) {
 }
 
 func TestMapAccessRulesToState_EmptyRules(t *testing.T) {
+	ctx := context.Background()
 	resource := &applicationConfigResource{}
 
-	result := resource.mapAccessRulesToState([]restapi.AccessRule{})
-	assert.Empty(t, result)
+	result, diags := resource.mapAccessRulesToState(ctx, []restapi.AccessRule{})
+	require.False(t, diags.HasError())
+	if !result.IsNull() {
+		rules := getAccessRulesFromList(t, ctx, result)
+		assert.Empty(t, rules)
+	}
 }
 
 func TestMapAccessRulesToState_WithRules(t *testing.T) {
+	ctx := context.Background()
 	resource := &applicationConfigResource{}
 
 	accessRules := []restapi.AccessRule{
@@ -717,26 +787,33 @@ func TestMapAccessRulesToState_WithRules(t *testing.T) {
 		},
 	}
 
-	result := resource.mapAccessRulesToState(accessRules)
-	require.Len(t, result, 2)
+	result, diags := resource.mapAccessRulesToState(ctx, accessRules)
+	require.False(t, diags.HasError())
 
-	assert.Equal(t, "READ", result[0].AccessType.ValueString())
-	assert.Equal(t, "USER", result[0].RelationType.ValueString())
-	assert.Equal(t, "user-1", result[0].RelatedID.ValueString())
+	resultRules := getAccessRulesFromList(t, ctx, result)
+	require.Len(t, resultRules, 2)
 
-	assert.Equal(t, "READ_WRITE", result[1].AccessType.ValueString())
-	assert.Equal(t, "ROLE", result[1].RelationType.ValueString())
-	assert.True(t, result[1].RelatedID.IsNull())
+	assert.Equal(t, "READ", resultRules[0].AccessType.ValueString())
+	assert.Equal(t, "USER", resultRules[0].RelationType.ValueString())
+	assert.Equal(t, "user-1", resultRules[0].RelatedID.ValueString())
+
+	assert.Equal(t, "READ_WRITE", resultRules[1].AccessType.ValueString())
+	assert.Equal(t, "ROLE", resultRules[1].RelationType.ValueString())
+	assert.True(t, resultRules[1].RelatedID.IsNull())
 }
 
 func TestMapAccessRulesFromState_EmptyRules(t *testing.T) {
+	ctx := context.Background()
 	resource := &applicationConfigResource{}
 
-	result := resource.mapAccessRulesFromState([]AccessRuleModel{})
+	emptyList := createAccessRulesList(t, ctx, []AccessRuleModel{})
+	result, diags := resource.mapAccessRulesFromState(ctx, emptyList)
+	require.False(t, diags.HasError())
 	assert.Empty(t, result)
 }
 
 func TestMapAccessRulesFromState_WithRules(t *testing.T) {
+	ctx := context.Background()
 	resource := &applicationConfigResource{}
 
 	accessRuleModels := []AccessRuleModel{
@@ -752,7 +829,9 @@ func TestMapAccessRulesFromState_WithRules(t *testing.T) {
 		},
 	}
 
-	result := resource.mapAccessRulesFromState(accessRuleModels)
+	rulesList := createAccessRulesList(t, ctx, accessRuleModels)
+	result, diags := resource.mapAccessRulesFromState(ctx, rulesList)
+	require.False(t, diags.HasError())
 	require.Len(t, result, 2)
 
 	assert.Equal(t, restapi.AccessTypeRead, result[0].AccessType)
@@ -795,13 +874,20 @@ func TestUpdateState_AllScopes(t *testing.T) {
 				Schema: getTestSchema(),
 			}
 
-			// Initialize state with a model that has TagFilter set to null
+			// Initialize state with a model that has TagFilter and AccessRules set to null
 			// This is necessary because UpdateState checks if TagFilter is null/unknown
 			initialModel := ApplicationConfigModel{
 				TagFilter: types.StringNull(),
+				AccessRules: types.ListNull(types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"access_type":   types.StringType,
+						"related_id":    types.StringType,
+						"relation_type": types.StringType,
+					},
+				}),
 			}
 			diags := state.Set(ctx, initialModel)
-			require.False(t, diags.HasError())
+			require.False(t, diags.HasError(), "Failed to set initial state: %v", diags)
 
 			diags = resource.UpdateState(ctx, state, nil, data)
 			require.False(t, diags.HasError())
@@ -845,13 +931,20 @@ func TestUpdateState_AllBoundaryScopes(t *testing.T) {
 				Schema: getTestSchema(),
 			}
 
-			// Initialize state with a model that has TagFilter set to null
+			// Initialize state with a model that has TagFilter and AccessRules set to null
 			// This is necessary because UpdateState checks if TagFilter is null/unknown
 			initialModel := ApplicationConfigModel{
 				TagFilter: types.StringNull(),
+				AccessRules: types.ListNull(types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"access_type":   types.StringType,
+						"related_id":    types.StringType,
+						"relation_type": types.StringType,
+					},
+				}),
 			}
 			diags := state.Set(ctx, initialModel)
-			require.False(t, diags.HasError())
+			require.False(t, diags.HasError(), "Failed to set initial state: %v", diags)
 
 			diags = resource.UpdateState(ctx, state, nil, data)
 			require.False(t, diags.HasError())
@@ -881,6 +974,57 @@ func createMockState(t *testing.T, model ApplicationConfigModel) tfsdk.State {
 func getTestSchema() schema.Schema {
 	resource := NewApplicationConfigResourceHandle()
 	return resource.MetaData().Schema
+}
+
+// Helper function to create a types.List from AccessRuleModel slice
+func createAccessRulesList(t *testing.T, ctx context.Context, rules []AccessRuleModel) types.List {
+	if len(rules) == 0 {
+		return types.ListNull(types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"access_type":   types.StringType,
+				"related_id":    types.StringType,
+				"relation_type": types.StringType,
+			},
+		})
+	}
+
+	elements := make([]attr.Value, len(rules))
+	for i, rule := range rules {
+		elements[i] = types.ObjectValueMust(
+			map[string]attr.Type{
+				"access_type":   types.StringType,
+				"related_id":    types.StringType,
+				"relation_type": types.StringType,
+			},
+			map[string]attr.Value{
+				"access_type":   rule.AccessType,
+				"related_id":    rule.RelatedID,
+				"relation_type": rule.RelationType,
+			},
+		)
+	}
+
+	list, diags := types.ListValue(types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"access_type":   types.StringType,
+			"related_id":    types.StringType,
+			"relation_type": types.StringType,
+		},
+	}, elements)
+	require.False(t, diags.HasError(), "Failed to create list: %v", diags)
+	return list
+}
+
+// Helper function to extract AccessRuleModel slice from types.List
+func getAccessRulesFromList(t *testing.T, ctx context.Context, list types.List) []AccessRuleModel {
+	if list.IsNull() || list.IsUnknown() {
+		return []AccessRuleModel{}
+	}
+
+	var rules []AccessRuleModel
+	diags := list.ElementsAs(ctx, &rules, false)
+	require.False(t, diags.HasError(), "Failed to extract access rules: %v", diags)
+	return rules
 }
 
 // Made with Bob
