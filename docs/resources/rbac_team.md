@@ -393,5 +393,3 @@ $ terraform import instana_rbac_team.my_team 60845e4e5e6b9cf8fc2868da
 * Scope configuration allows fine-grained access control to various Instana resources
 * The `restricted_application_filter` provides advanced filtering capabilities for application access
 * Tag filter expressions use Instana's tag filter syntax
-
-## Made with Bob
