@@ -15,6 +15,7 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/util"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // NewRoleResourceHandle creates the resource handle for RBAC Roles
@@ -252,3 +253,8 @@ func (r *roleResource) mapModelMembersToAPI(modelMembers []RoleMemberModel) []re
 }
 
 // Made with Bob
+
+// GetStateUpgraders returns the state upgraders for this resource
+func (r *roleResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
+	return nil
+}

@@ -16,6 +16,7 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/shared"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // NewAlertingChannelResourceHandle creates the resource handle for Alerting Channels
@@ -1077,4 +1078,9 @@ func (r *alertingChannelResource) mapConfiguredChannelType(ctx context.Context, 
 		AlertingChannelErrInvalidConfigMsg,
 	)
 	return nil, diags
+}
+
+// GetStateUpgraders returns the state upgraders for this resource
+func (r *alertingChannelResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
+	return nil
 }

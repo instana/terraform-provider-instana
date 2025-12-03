@@ -17,6 +17,7 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
 	"github.com/instana/terraform-provider-instana/internal/util"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // NewSyntheticAlertConfigResourceHandle creates the resource handle for Synthetic Alert Configuration
@@ -667,4 +668,9 @@ func mapTagFilterExpressionFromSchema(input string) (*restapi.TagFilter, error) 
 
 	mapper := tagfilter.NewMapper()
 	return mapper.ToAPIModel(expr), nil
+}
+
+// GetStateUpgraders returns the state upgraders for this resource
+func (r *syntheticAlertConfigResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
+	return nil
 }

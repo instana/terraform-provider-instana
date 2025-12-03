@@ -22,6 +22,7 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
 	"github.com/instana/terraform-provider-instana/internal/util"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // NewApplicationAlertConfigResourceHandle creates the resource handle for Application Alert Configuration
@@ -1328,5 +1329,10 @@ func (r *applicationAlertConfigResourceImpl) updateTimeThreshold(model *Applicat
 	}
 
 	model.TimeThreshold = timeThresholdModel
+	return nil
+}
+
+// GetStateUpgraders returns the state upgraders for this resource
+func (r *applicationAlertConfigResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
 	return nil
 }

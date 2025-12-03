@@ -21,6 +21,7 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/util"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // NewSyntheticTestResourceHandle creates the resource handle for Synthetic Tests
@@ -1702,4 +1703,9 @@ func (r *syntheticTestResource) clearOtherConfigTypes(model *SyntheticTestModel,
 	if keepType != SyntheticTestTypeWebpageScript {
 		model.WebpageScript = nil
 	}
+}
+
+// GetStateUpgraders returns the state upgraders for this resource
+func (r *syntheticTestResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
+	return nil
 }

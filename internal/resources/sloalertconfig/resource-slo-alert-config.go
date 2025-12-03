@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -632,3 +633,8 @@ func (r *sloAlertConfigResource) mapCustomPayloadFieldsFromState(ctx context.Con
 }
 
 // Made with Bob
+
+// GetStateUpgraders returns the state upgraders for this resource
+func (r *sloAlertConfigResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
+	return nil
+}

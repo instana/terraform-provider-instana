@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/instana/terraform-provider-instana/internal/restapi"
@@ -37,4 +38,8 @@ type ResourceHandle[T restapi.InstanaDataObject] interface {
 
 	// SetComputedFields calculate and set the calculated value of computed fields of the given resource
 	SetComputedFields(ctx context.Context, plan *tfsdk.Plan) diag.Diagnostics
+
+	// GetStateUpgraders returns the state upgraders for migrating resource state between schema versions
+	// Return nil or empty map if no state upgrades are needed
+	GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader
 }

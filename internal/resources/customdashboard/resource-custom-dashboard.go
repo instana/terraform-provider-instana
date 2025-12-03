@@ -18,6 +18,7 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/util"
 	"github.com/instana/terraform-provider-instana/utils"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // ============================================================================
@@ -244,4 +245,9 @@ func (r *customDashboardResource) mapAccessRulesFromState(accessRuleModels []Acc
 	}
 
 	return accessRules
+}
+
+// GetStateUpgraders returns the state upgraders for this resource
+func (r *customDashboardResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
+	return nil
 }

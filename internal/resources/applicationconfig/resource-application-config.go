@@ -19,6 +19,7 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
 	"github.com/instana/terraform-provider-instana/internal/util"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // ============================================================================
@@ -377,4 +378,9 @@ func (r *applicationConfigResource) mapAccessRulesFromState(ctx context.Context,
 	}
 
 	return accessRules, diags
+}
+
+// GetStateUpgraders returns the state upgraders for this resource
+func (r *applicationConfigResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
+	return nil
 }

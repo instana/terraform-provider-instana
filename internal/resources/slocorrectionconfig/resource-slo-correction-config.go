@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // NewSloCorrectionConfigResourceHandle creates the resource handle for SLO Correction Config
@@ -393,4 +394,9 @@ func (r *sloCorrectionConfigResource) mapTagsToState(ctx context.Context, tags [
 		return types.SetNull(types.StringType), nil
 	}
 	return types.SetValueFrom(ctx, types.StringType, tags)
+}
+
+// GetStateUpgraders returns the state upgraders for this resource
+func (r *sloCorrectionConfigResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
+	return nil
 }

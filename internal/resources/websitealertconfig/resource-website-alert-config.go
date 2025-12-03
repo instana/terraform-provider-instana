@@ -20,6 +20,7 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
 	"github.com/instana/terraform-provider-instana/internal/util"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // NewWebsiteAlertConfigResourceHandle creates the resource handle for Website Alert Configs
@@ -826,4 +827,9 @@ func (r *websiteAlertConfigResource) mapRulesToState(ctx context.Context, apiObj
 	}
 	return rulesModel
 
+}
+
+// GetStateUpgraders returns the state upgraders for this resource
+func (r *websiteAlertConfigResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
+	return nil
 }

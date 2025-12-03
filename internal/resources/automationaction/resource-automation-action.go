@@ -18,6 +18,7 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/shared"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // ============================================================================
@@ -1173,3 +1174,8 @@ func (r *automationActionResource) mapTagsFromState(ctx context.Context, model s
 }
 
 // Made with Bob
+
+// GetStateUpgraders returns the state upgraders for this resource
+func (r *automationActionResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
+	return nil
+}
