@@ -151,11 +151,11 @@ cp ../terraform.tfstate ./terraform.tfstate
 
 #### Step 4: Generate Import Blocks from State
 
-Use the provided `migration-script.go` to automatically generate import blocks from your state file:
+Use the provided `migration/migration-script.go` to automatically generate import blocks from your state file:
 
 ```bash
 # Download the migration script from the provider repository
-# Or copy it from: https://github.com/instana/terraform-provider-instana/blob/main/migration-script.go
+# Or copy it from: https://github.com/instana/terraform-provider-instana/blob/main/migration/migration-script.go
 
 # Run the script to generate import blocks
 go run migration-script.go terraform.tfstate import.tf
