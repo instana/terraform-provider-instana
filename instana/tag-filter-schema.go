@@ -34,6 +34,7 @@ var tagFilterValidateFunc = func(val interface{}, key string) (warns []string, e
 
 var OptionalTagFilterExpressionSchema = &schema.Schema{
 	Type:             schema.TypeString,
+	ForceNew:         true,
 	Optional:         true,
 	Description:      "The tag filter expression",
 	DiffSuppressFunc: tagFilterDiffSuppressFunc,
@@ -43,6 +44,7 @@ var OptionalTagFilterExpressionSchema = &schema.Schema{
 
 var RequiredTagFilterExpressionSchema = &schema.Schema{
 	Type:             schema.TypeString,
+	ForceNew:         true,
 	Required:         true,
 	Description:      "The tag filter expression",
 	DiffSuppressFunc: tagFilterDiffSuppressFunc,
