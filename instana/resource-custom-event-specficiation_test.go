@@ -1967,7 +1967,7 @@ func (r *customerEventSpecificationUnitTest) shouldMapStateOfThresholdRuleWithMe
 					CustomEventSpecificationThresholdRuleFieldMetricPattern: []interface{}{},
 					CustomEventSpecificationThresholdRuleFieldRollup:        customEventSpecificationWithThresholdRuleRollup,
 					CustomEventSpecificationThresholdRuleFieldWindow:        customEventSpecificationWithThresholdRuleWindow,
-					CustomEventSpecificationThresholdRuleFieldAggregation:   customEventSpecificationWithThresholdRuleAggregation,
+					CustomEventSpecificationThresholdRuleFieldAggregation:   "relative_diff",
 					CustomEventSpecificationRuleFieldConditionOperator:      "=",
 					CustomEventSpecificationRuleFieldConditionValue:         customEventSpecificationWithThresholdRuleConditionValue,
 				},
@@ -1994,7 +1994,7 @@ func (r *customerEventSpecificationUnitTest) shouldMapStateOfThresholdRuleWithMe
 	require.Nil(t, customEventSpec.Rules[0].MetricPattern)
 	require.Equal(t, customEventSpecificationWithThresholdRuleWindow, *customEventSpec.Rules[0].Window)
 	require.Equal(t, customEventSpecificationWithThresholdRuleRollup, *customEventSpec.Rules[0].Rollup)
-	require.Equal(t, customEventSpecificationWithThresholdRuleAggregation, *customEventSpec.Rules[0].Aggregation)
+	require.Equal(t, "relative_diff", *customEventSpec.Rules[0].Aggregation)
 	require.Equal(t, "=", *customEventSpec.Rules[0].ConditionOperator)
 	require.Equal(t, customEventSpecificationWithThresholdRuleConditionValue, *customEventSpec.Rules[0].ConditionValue)
 	require.Equal(t, restapi.SeverityWarning.GetAPIRepresentation(), customEventSpec.Rules[0].Severity)
