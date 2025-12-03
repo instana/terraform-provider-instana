@@ -13,6 +13,4 @@ type RoleModel struct {
 // RoleMemberModel represents a member in the role
 type RoleMemberModel struct {
 	UserID types.String `tfsdk:"user_id"`
-	Email  types.String `tfsdk:"email"`
-	Name   types.String `tfsdk:"name"`
 }
