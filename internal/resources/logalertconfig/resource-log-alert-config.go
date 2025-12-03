@@ -28,7 +28,7 @@ func NewLogAlertConfigResourceHandle() resourcehandle.ResourceHandle[*restapi.Lo
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:  ResourceInstanaLogAlertConfig,
 			Schema:        buildLogAlertConfigSchema(),
-			SchemaVersion: 1,
+			SchemaVersion: 0,
 		},
 	}
 }

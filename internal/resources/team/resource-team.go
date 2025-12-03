@@ -23,7 +23,7 @@ func NewTeamResourceHandle() resourcehandle.ResourceHandle[*restapi.Team] {
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:  ResourceInstanaTeam,
 			Schema:        buildTeamSchema(),
-			SchemaVersion: 1,
+			SchemaVersion: 0,
 		},
 	}
 }

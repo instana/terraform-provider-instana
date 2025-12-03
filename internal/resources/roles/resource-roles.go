@@ -23,7 +23,7 @@ func NewRoleResourceHandle() resourcehandle.ResourceHandle[*restapi.Role] {
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:  ResourceInstanaRole,
 			Schema:        buildRoleSchema(),
-			SchemaVersion: 1,
+			SchemaVersion: 0,
 		},
 	}
 }
@@ -104,17 +104,17 @@ func (r *roleResource) UpdateState(ctx context.Context, state *tfsdk.State, plan
 	// Get existing state/plan to preserve optional fields
 	var existingModel RoleModel
 	var diags diag.Diagnostics
-	
+
 	if plan != nil {
 		diags.Append(plan.Get(ctx, &existingModel)...)
 	} else if state != nil {
 		diags.Append(state.Get(ctx, &existingModel)...)
 	}
-	
+
 	if diags.HasError() {
 		return diags
 	}
-	
+
 	model := r.buildRoleModelFromAPIResponse(role, existingModel.Members)
 	return state.Set(ctx, model)
 }
@@ -150,7 +150,7 @@ func (r *roleResource) mapMembersToModel(apiMembers []restapi.APIMember, existin
 		member := RoleMemberModel{
 			UserID: types.StringValue(apiMember.UserID),
 		}
-		
+
 		// Check if we have existing data for this member
 		if existingMember, exists := existingMemberMap[apiMember.UserID]; exists {
 			// Preserve email from existing state if API doesn't return it or if it was set in plan
@@ -161,7 +161,7 @@ func (r *roleResource) mapMembersToModel(apiMembers []restapi.APIMember, existin
 			} else {
 				member.Email = types.StringNull()
 			}
-			
+
 			// Preserve name from existing state if API doesn't return it or if it was set in plan
 			if apiMember.Name != nil && *apiMember.Name != "" {
 				member.Name = types.StringValue(*apiMember.Name)
@@ -175,7 +175,7 @@ func (r *roleResource) mapMembersToModel(apiMembers []restapi.APIMember, existin
 			member.Email = util.SetStringPointerToState(apiMember.Email)
 			member.Name = util.SetStringPointerToState(apiMember.Name)
 		}
-		
+
 		members[i] = member
 	}
 	return members

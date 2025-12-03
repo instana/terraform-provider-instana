@@ -28,7 +28,7 @@ func NewInfraAlertConfigResourceHandle() resourcehandle.ResourceHandle[*restapi.
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:  ResourceInstanaInfraAlertConfig,
 			Schema:        buildInfraAlertConfigSchema(),
-			SchemaVersion: 0,
+			SchemaVersion: 1,
 		},
 	}
 }
