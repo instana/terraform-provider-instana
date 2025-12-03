@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/terraform-provider-instana/internal/restapi"
-	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/instana/terraform-provider-instana/internal/util"
 )
 
@@ -36,43 +35,43 @@ type builtinEventDataSource struct {
 }
 
 func (d *builtinEventDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_" + shared.DataSourceInstanaBuiltinEvent
+	resp.TypeName = req.ProviderTypeName + "_" + DataSourceInstanaBuiltinEvent
 }
 
 func (d *builtinEventDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: shared.BuiltinEventDescDataSource,
+		Description: BuiltinEventDescDataSource,
 		Attributes: map[string]schema.Attribute{
-			shared.BuiltinEventFieldID: schema.StringAttribute{
-				Description: shared.BuiltinEventDescID,
+			BuiltinEventFieldID: schema.StringAttribute{
+				Description: BuiltinEventDescID,
 				Computed:    true,
 			},
-			shared.BuiltinEventSpecificationFieldName: schema.StringAttribute{
-				Description: shared.BuiltinEventDescName,
+			BuiltinEventSpecificationFieldName: schema.StringAttribute{
+				Description: BuiltinEventDescName,
 				Required:    true,
 			},
-			shared.BuiltinEventSpecificationFieldDescription: schema.StringAttribute{
-				Description: shared.BuiltinEventDescDescription,
+			BuiltinEventSpecificationFieldDescription: schema.StringAttribute{
+				Description: BuiltinEventDescDescription,
 				Computed:    true,
 			},
-			shared.BuiltinEventSpecificationFieldShortPluginID: schema.StringAttribute{
-				Description: shared.BuiltinEventDescShortPluginID,
+			BuiltinEventSpecificationFieldShortPluginID: schema.StringAttribute{
+				Description: BuiltinEventDescShortPluginID,
 				Required:    true,
 			},
-			shared.BuiltinEventSpecificationFieldSeverity: schema.StringAttribute{
-				Description: shared.BuiltinEventDescSeverity,
+			BuiltinEventSpecificationFieldSeverity: schema.StringAttribute{
+				Description: BuiltinEventDescSeverity,
 				Computed:    true,
 			},
-			shared.BuiltinEventSpecificationFieldSeverityCode: schema.Int64Attribute{
-				Description: shared.BuiltinEventDescSeverityCode,
+			BuiltinEventSpecificationFieldSeverityCode: schema.Int64Attribute{
+				Description: BuiltinEventDescSeverityCode,
 				Computed:    true,
 			},
-			shared.BuiltinEventSpecificationFieldTriggering: schema.BoolAttribute{
-				Description: shared.BuiltinEventDescTriggering,
+			BuiltinEventSpecificationFieldTriggering: schema.BoolAttribute{
+				Description: BuiltinEventDescTriggering,
 				Computed:    true,
 			},
-			shared.BuiltinEventSpecificationFieldEnabled: schema.BoolAttribute{
-				Description: shared.BuiltinEventDescEnabled,
+			BuiltinEventSpecificationFieldEnabled: schema.BoolAttribute{
+				Description: BuiltinEventDescEnabled,
 				Computed:    true,
 			},
 		},
@@ -87,8 +86,8 @@ func (d *builtinEventDataSource) Configure(_ context.Context, req datasource.Con
 	providerMeta, ok := req.ProviderData.(*restapi.ProviderMeta)
 	if !ok {
 		resp.Diagnostics.AddError(
-			shared.BuiltinEventErrUnexpectedConfigureType,
-			fmt.Sprintf(shared.BuiltinEventErrUnexpectedConfigureTypeDetail, req.ProviderData),
+			BuiltinEventErrUnexpectedConfigureType,
+			fmt.Sprintf(BuiltinEventErrUnexpectedConfigureTypeDetail, req.ProviderData),
 		)
 		return
 	}
@@ -111,8 +110,8 @@ func (d *builtinEventDataSource) Read(ctx context.Context, req datasource.ReadRe
 	events, err := d.instanaAPI.BuiltinEventSpecifications().GetAll()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			shared.BuiltinEventErrReadingEvents,
-			fmt.Sprintf(shared.BuiltinEventErrReadingEventsDetail, err),
+			BuiltinEventErrReadingEvents,
+			fmt.Sprintf(BuiltinEventErrReadingEventsDetail, err),
 		)
 		return
 	}
@@ -128,8 +127,8 @@ func (d *builtinEventDataSource) Read(ctx context.Context, req datasource.ReadRe
 
 	if matchingEvent == nil {
 		resp.Diagnostics.AddError(
-			shared.BuiltinEventErrNotFound,
-			fmt.Sprintf(shared.BuiltinEventErrNotFoundDetail, name, shortPluginID),
+			BuiltinEventErrNotFound,
+			fmt.Sprintf(BuiltinEventErrNotFoundDetail, name, shortPluginID),
 		)
 		return
 	}
@@ -144,8 +143,8 @@ func (d *builtinEventDataSource) Read(ctx context.Context, req datasource.ReadRe
 	severity, err := util.ConvertSeverityFromInstanaAPIToTerraformRepresentation(matchingEvent.Severity)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			shared.BuiltinEventErrConvertingSeverity,
-			fmt.Sprintf(shared.BuiltinEventErrConvertingSeverityDetail, err),
+			BuiltinEventErrConvertingSeverity,
+			fmt.Sprintf(BuiltinEventErrConvertingSeverityDetail, err),
 		)
 		return
 	}

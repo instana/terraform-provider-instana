@@ -1,4 +1,4 @@
-package shared
+package datasources
 
 // Field name constants for builtin event specification
 const (
