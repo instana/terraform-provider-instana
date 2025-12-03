@@ -329,7 +329,7 @@ func NewCustomEventSpecificationResourceHandle() ResourceHandle[*restapi.CustomE
 										CustomEventSpecificationThresholdRuleFieldAggregation: {
 											Type:         schema.TypeString,
 											Required:     true,
-											ValidateFunc: validation.StringInSlice([]string{"sum", "avg", "min", "max"}, false),
+											ValidateFunc: validation.StringInSlice([]string{"sum", "avg", "min", "max", "relative_diff", "absolute_diff"}, false),
 											Description:  "The aggregation type (e.g. sum, avg)",
 										},
 										CustomEventSpecificationRuleFieldConditionOperator: customEventSpecificationSchemaRuleConditionOperator,
