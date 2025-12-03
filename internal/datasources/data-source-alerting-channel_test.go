@@ -66,5 +66,3 @@ func TestAlertingChannelDataSourceSchema(t *testing.T) {
 	nameAttr := resp.Schema.Attributes[AlertingChannelFieldName]
 	require.True(t, nameAttr.(schema.StringAttribute).Required)
 }
-
-// Made with Bob

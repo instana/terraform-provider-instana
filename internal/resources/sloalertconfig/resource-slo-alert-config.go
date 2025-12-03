@@ -632,8 +632,6 @@ func (r *sloAlertConfigResource) mapCustomPayloadFieldsFromState(ctx context.Con
 	return customPayloadFields, diags
 }
 
-// Made with Bob
-
 // GetStateUpgraders returns the state upgraders for this resource
 func (r *sloAlertConfigResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
 	return map[int64]resource.StateUpgrader{

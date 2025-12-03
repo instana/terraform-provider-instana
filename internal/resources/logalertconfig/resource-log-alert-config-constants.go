@@ -130,5 +130,3 @@ const (
 	// LogAlertConfigErrParsingTagFilterMsg error message template for tag filter parsing failures
 	LogAlertConfigErrParsingTagFilterMsg = "Could not parse tag filter: "
 )
-
-// Made with Bob

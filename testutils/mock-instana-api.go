@@ -136,5 +136,3 @@ func (m *MockInstanaAPI) HostAgents() restapi.ReadOnlyRestResource[*restapi.Host
 func (m *MockInstanaAPI) LogAlertConfig() restapi.RestResource[*restapi.LogAlertConfig] {
 	return nil
 }
-
-// Made with Bob

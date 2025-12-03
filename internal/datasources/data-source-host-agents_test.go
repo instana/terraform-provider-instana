@@ -72,5 +72,3 @@ func TestHostAgentsDataSourceSchema(t *testing.T) {
 	require.True(t, nestedAttrs[HostAgentFieldPlugin].(schema.StringAttribute).Computed)
 	require.True(t, nestedAttrs[HostAgentFieldTags].(schema.ListAttribute).Computed)
 }
-
-// Made with Bob

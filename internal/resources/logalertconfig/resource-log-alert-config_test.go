@@ -1857,5 +1857,3 @@ func getTestSchema() schema.Schema {
 	resource := NewLogAlertConfigResourceHandle()
 	return resource.MetaData().Schema
 }
-
-// Made with Bob

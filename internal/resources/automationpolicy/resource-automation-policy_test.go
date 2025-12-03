@@ -1762,5 +1762,3 @@ func TestUpdateState_NullTags(t *testing.T) {
 
 	assert.True(t, model.Tags.IsNull())
 }
-
-// Made with Bob

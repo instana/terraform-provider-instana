@@ -77,5 +77,3 @@ func TestBuiltinEventDataSourceSchema(t *testing.T) {
 	enabledAttr := resp.Schema.Attributes[shared.BuiltinEventSpecificationFieldEnabled]
 	require.True(t, enabledAttr.(schema.BoolAttribute).Computed)
 }
-
-// Made with Bob

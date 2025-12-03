@@ -673,5 +673,3 @@ func createFullyPermissionedModel() APITokenModel {
 		CanConfigureServiceLevels:                 types.BoolValue(true),
 	}
 }
-
-// Made with Bob

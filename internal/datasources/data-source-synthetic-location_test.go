@@ -61,5 +61,3 @@ func TestSyntheticLocationDataSourceSchema(t *testing.T) {
 	locationTypeAttr := resp.Schema.Attributes[SyntheticLocationFieldLocationType]
 	require.True(t, locationTypeAttr.(schema.StringAttribute).Optional)
 }
-
-// Made with Bob

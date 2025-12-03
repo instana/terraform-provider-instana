@@ -1113,8 +1113,6 @@ func TestEdgeCases(t *testing.T) {
 	})
 }
 
-// Made with Bob
-
 // Test GetRestResource
 func TestGetRestResource(t *testing.T) {
 	t.Run("should return SLO config rest resource", func(t *testing.T) {

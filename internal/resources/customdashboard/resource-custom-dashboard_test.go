@@ -735,6 +735,3 @@ func initializeEmptyState(t *testing.T, ctx context.Context, state *tfsdk.State)
 	diags := state.Set(ctx, emptyModel)
 	require.False(t, diags.HasError(), "Failed to initialize empty state")
 }
-
-// Made with Bob
-// Made with Bob

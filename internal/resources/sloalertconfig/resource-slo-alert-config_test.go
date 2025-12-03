@@ -1050,5 +1050,3 @@ func getTestSchema() schema.Schema {
 	resource := NewSloAlertConfigResourceHandle()
 	return resource.MetaData().Schema
 }
-
-// Made with Bob

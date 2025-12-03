@@ -686,7 +686,7 @@ func TestUpdateState(t *testing.T) {
 		filter := "entity.type:host"
 		label := "test-label"
 		scope := restapi.RestrictedApplicationFilterScopeIncludeAllDownstream
-		
+
 		team := &restapi.Team{
 			ID:  "test-id",
 			Tag: "test-team",
@@ -1499,5 +1499,3 @@ func createMockTeamPlan(t *testing.T, ctx context.Context, model TeamModel) *tfs
 
 	return plan
 }
-
-// Made with Bob

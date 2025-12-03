@@ -594,5 +594,3 @@ func TestTagsHandling(t *testing.T) {
 		assert.Equal(t, "single-tag", result.Tags[0])
 	})
 }
-
-// Made with Bob

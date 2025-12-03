@@ -1084,5 +1084,3 @@ func createMockState(t *testing.T, ctx context.Context, model AlertingChannelMod
 
 	return state
 }
-
-// Made with Bob

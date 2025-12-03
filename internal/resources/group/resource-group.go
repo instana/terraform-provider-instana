@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -15,7 +16,6 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/util"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // NewGroupResourceHandle creates the resource handle for RBAC Groups
@@ -359,8 +359,6 @@ func (r *groupResource) convertStringsToPermissions(permissionStrings []string) 
 	}
 	return permissions
 }
-
-// Made with Bob
 
 // GetStateUpgraders returns the state upgraders for this resource
 func (r *groupResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
