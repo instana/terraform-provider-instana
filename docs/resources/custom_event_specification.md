@@ -10,6 +10,8 @@ API Documentation: <https://instana.github.io/openapi/#operation/putCustomEventS
 
 ## Migration Guide (v5 to v6)
 
+For detailed migration instructions and examples, see the [Plugin Framework Migration Guide](https://github.com/instana/terraform-provider-instana/blob/main/PLUGIN-FRAMEWORK-MIGRATION.md).
+
 ### Syntax Changes Overview
 
 The main change is in how the `rules` block is defined. In v6, nested rule configurations use attribute syntax instead of block syntax.
