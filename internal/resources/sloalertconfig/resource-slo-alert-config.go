@@ -27,7 +27,7 @@ func NewSloAlertConfigResourceHandle() resourcehandle.ResourceHandle[*restapi.Sl
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:  ResourceInstanaSloAlertConfig,
 			Schema:        buildSloAlertConfigSchema(),
-			SchemaVersion: 1,
+			SchemaVersion: 2,
 			CreateOnly:    false,
 		},
 	}
@@ -636,5 +636,7 @@ func (r *sloAlertConfigResource) mapCustomPayloadFieldsFromState(ctx context.Con
 
 // GetStateUpgraders returns the state upgraders for this resource
 func (r *sloAlertConfigResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
-	return nil
+	return map[int64]resource.StateUpgrader{
+		1: resourcehandle.CreateStateUpgraderForVersion(1),
+	}
 }

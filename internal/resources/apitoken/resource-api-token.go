@@ -562,7 +562,7 @@ func NewAPITokenResourceHandle() resourcehandle.ResourceHandle[*restapi.APIToken
 				},
 			},
 			SkipIDGeneration: true,
-			SchemaVersion:    2,
+			SchemaVersion: 3,
 			ResourceIDField:  &internalIDFieldName,
 		},
 	}
@@ -863,5 +863,7 @@ func (r *apiTokenResource) mapAdditionalPermissionsFromModel(model APITokenModel
 
 // GetStateUpgraders returns the state upgraders for this resource
 func (r *apiTokenResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
-	return nil
+	return map[int64]resource.StateUpgrader{
+		2: resourcehandle.CreateStateUpgraderForVersion(2),
+	}
 }

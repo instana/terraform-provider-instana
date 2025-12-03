@@ -27,7 +27,7 @@ func NewSloConfigResourceHandle() resourcehandle.ResourceHandle[*restapi.SloConf
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:     ResourceInstanaSloConfig,
 			Schema:           buildSloConfigSchema(),
-			SchemaVersion:    1,
+			SchemaVersion: 2,
 			SkipIDGeneration: true,
 		},
 	}
@@ -1410,5 +1410,7 @@ func (r *sloConfigResource) setTimezoneToState(timezone string) types.String {
 
 // GetStateUpgraders returns the state upgraders for this resource
 func (r *sloConfigResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
-	return nil
+	return map[int64]resource.StateUpgrader{
+		1: resourcehandle.CreateStateUpgraderForVersion(1),
+	}
 }

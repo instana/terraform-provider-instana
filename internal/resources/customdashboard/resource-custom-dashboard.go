@@ -80,7 +80,7 @@ func NewCustomDashboardResourceHandle() resourcehandle.ResourceHandle[*restapi.C
 					},
 				},
 			},
-			SchemaVersion: 1,
+			SchemaVersion: 2,
 		},
 	}
 }
@@ -249,5 +249,7 @@ func (r *customDashboardResource) mapAccessRulesFromState(accessRuleModels []Acc
 
 // GetStateUpgraders returns the state upgraders for this resource
 func (r *customDashboardResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
-	return nil
+	return map[int64]resource.StateUpgrader{
+		1: resourcehandle.CreateStateUpgraderForVersion(1),
+	}
 }

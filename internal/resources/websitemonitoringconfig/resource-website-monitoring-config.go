@@ -269,5 +269,7 @@ func updateTerraformState(ctx context.Context, state *tfsdk.State, model *Websit
 
 // GetStateUpgraders returns the state upgraders for this resource
 func (r *websiteMonitoringConfigResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
-	return nil
+	return map[int64]resource.StateUpgrader{
+		1: resourcehandle.CreateStateUpgraderForVersion(1),
+	}
 }

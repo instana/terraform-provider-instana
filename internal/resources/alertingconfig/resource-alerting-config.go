@@ -96,7 +96,7 @@ func NewAlertingConfigResourceHandle() resourcehandle.ResourceHandle[*restapi.Al
 					shared.DefaultCustomPayloadFieldsName: shared.GetCustomPayloadFieldsSchema(),
 				},
 			},
-			SchemaVersion: 2,
+			SchemaVersion: 3,
 		},
 	}
 }
@@ -393,5 +393,7 @@ func convertSupportedEventTypesToStringSlice() []string {
 
 // GetStateUpgraders returns the state upgraders for this resource
 func (r *alertingConfigResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
-	return nil
+	return map[int64]resource.StateUpgrader{
+		2: resourcehandle.CreateStateUpgraderForVersion(2),
+	}
 }

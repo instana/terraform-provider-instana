@@ -31,7 +31,7 @@ func (r *syntheticAlertConfigResource) initialize() *syntheticAlertConfigResourc
 	r.metaData = resourcehandle.ResourceMetaData{
 		ResourceName:  ResourceInstanaSyntheticAlertConfig,
 		Schema:        r.buildSchema(),
-		SchemaVersion: 1,
+		SchemaVersion: 2,
 	}
 	return r
 }
@@ -672,5 +672,7 @@ func mapTagFilterExpressionFromSchema(input string) (*restapi.TagFilter, error) 
 
 // GetStateUpgraders returns the state upgraders for this resource
 func (r *syntheticAlertConfigResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
-	return nil
+	return map[int64]resource.StateUpgrader{
+		1: resourcehandle.CreateStateUpgraderForVersion(1),
+	}
 }

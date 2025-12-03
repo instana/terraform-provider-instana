@@ -268,7 +268,7 @@ func NewWebsiteAlertConfigResourceHandle() resourcehandle.ResourceHandle[*restap
 					},
 				},
 			},
-			SchemaVersion: 1,
+			SchemaVersion: 2,
 		},
 	}
 }
@@ -831,5 +831,7 @@ func (r *websiteAlertConfigResource) mapRulesToState(ctx context.Context, apiObj
 
 // GetStateUpgraders returns the state upgraders for this resource
 func (r *websiteAlertConfigResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
-	return nil
+	return map[int64]resource.StateUpgrader{
+		1: resourcehandle.CreateStateUpgraderForVersion(1),
+	}
 }
