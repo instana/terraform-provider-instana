@@ -26,7 +26,7 @@ func NewSliConfigResourceHandle() resourcehandle.ResourceHandle[*restapi.SliConf
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:  ResourceInstanaSliConfig,
 			Schema:        buildSliConfigSchema(),
-			SchemaVersion: 1,
+			SchemaVersion: 2,
 			CreateOnly:    true,
 		},
 	}
@@ -748,5 +748,7 @@ func (r *sliConfigResource) parseTagFilterString(input, context string) (*restap
 
 // GetStateUpgraders returns the state upgraders for this resource
 func (r *sliConfigResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
-	return nil
+	return map[int64]resource.StateUpgrader{
+		1: resourcehandle.CreateStateUpgraderForVersion(1),
+	}
 }

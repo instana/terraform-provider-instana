@@ -365,7 +365,7 @@ func NewAlertingChannelResourceHandle() resourcehandle.ResourceHandle[*restapi.A
 					},
 				},
 			},
-			SchemaVersion: 0,
+			SchemaVersion: 1,
 		},
 	}
 }
@@ -1082,5 +1082,7 @@ func (r *alertingChannelResource) mapConfiguredChannelType(ctx context.Context, 
 
 // GetStateUpgraders returns the state upgraders for this resource
 func (r *alertingChannelResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
-	return nil
+	return map[int64]resource.StateUpgrader{
+		0: resourcehandle.CreateStateUpgraderForVersion(0),
+	}
 }

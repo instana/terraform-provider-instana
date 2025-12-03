@@ -24,7 +24,7 @@ func NewGroupResourceHandle() resourcehandle.ResourceHandle[*restapi.Group] {
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:  ResourceInstanaGroup,
 			Schema:        buildGroupSchema(),
-			SchemaVersion: 1,
+			SchemaVersion: 2,
 		},
 	}
 }
@@ -364,5 +364,7 @@ func (r *groupResource) convertStringsToPermissions(permissionStrings []string) 
 
 // GetStateUpgraders returns the state upgraders for this resource
 func (r *groupResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
-	return nil
+	return map[int64]resource.StateUpgrader{
+		1: resourcehandle.CreateStateUpgraderForVersion(1),
+	}
 }

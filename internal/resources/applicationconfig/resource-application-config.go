@@ -115,7 +115,7 @@ func NewApplicationConfigResourceHandle() resourcehandle.ResourceHandle[*restapi
 					},
 				},
 			},
-			SchemaVersion: 4,
+			SchemaVersion: 5,
 		},
 	}
 }
@@ -382,5 +382,7 @@ func (r *applicationConfigResource) mapAccessRulesFromState(ctx context.Context,
 
 // GetStateUpgraders returns the state upgraders for this resource
 func (r *applicationConfigResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
-	return nil
+	return map[int64]resource.StateUpgrader{
+		4: resourcehandle.CreateStateUpgraderForVersion(4),
+	}
 }

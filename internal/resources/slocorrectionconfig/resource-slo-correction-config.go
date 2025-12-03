@@ -28,7 +28,7 @@ func (r *sloCorrectionConfigResource) initialize() *sloCorrectionConfigResource 
 	r.metaData = resourcehandle.ResourceMetaData{
 		ResourceName:  ResourceInstanaSloCorrectionConfig,
 		Schema:        r.buildSchema(),
-		SchemaVersion: 1,
+		SchemaVersion: 2,
 	}
 	return r
 }
@@ -398,5 +398,7 @@ func (r *sloCorrectionConfigResource) mapTagsToState(ctx context.Context, tags [
 
 // GetStateUpgraders returns the state upgraders for this resource
 func (r *sloCorrectionConfigResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
-	return nil
+	return map[int64]resource.StateUpgrader{
+		1: resourcehandle.CreateStateUpgraderForVersion(1),
+	}
 }

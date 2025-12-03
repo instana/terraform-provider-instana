@@ -366,7 +366,7 @@ func NewAutomationActionResourceHandle() resourcehandle.ResourceHandle[*restapi.
 					},
 				},
 			},
-			SchemaVersion: 0,
+			SchemaVersion: 1,
 		},
 	}
 }
@@ -1177,5 +1177,7 @@ func (r *automationActionResource) mapTagsFromState(ctx context.Context, model s
 
 // GetStateUpgraders returns the state upgraders for this resource
 func (r *automationActionResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
-	return nil
+	return map[int64]resource.StateUpgrader{
+		0: resourcehandle.CreateStateUpgraderForVersion(0),
+	}
 }

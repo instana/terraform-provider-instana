@@ -24,7 +24,7 @@ func NewRoleResourceHandle() resourcehandle.ResourceHandle[*restapi.Role] {
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:  ResourceInstanaRole,
 			Schema:        buildRoleSchema(),
-			SchemaVersion: 0,
+			SchemaVersion: 1,
 		},
 	}
 }
@@ -256,5 +256,7 @@ func (r *roleResource) mapModelMembersToAPI(modelMembers []RoleMemberModel) []re
 
 // GetStateUpgraders returns the state upgraders for this resource
 func (r *roleResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
-	return nil
+	return map[int64]resource.StateUpgrader{
+		0: resourcehandle.CreateStateUpgraderForVersion(0),
+	}
 }

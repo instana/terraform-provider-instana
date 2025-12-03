@@ -29,7 +29,7 @@ func NewLogAlertConfigResourceHandle() resourcehandle.ResourceHandle[*restapi.Lo
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:  ResourceInstanaLogAlertConfig,
 			Schema:        buildLogAlertConfigSchema(),
-			SchemaVersion: 0,
+			SchemaVersion: 1,
 		},
 	}
 }
@@ -755,5 +755,7 @@ func (r *logAlertConfigResource) convertThresholdModelToAPI(threshold *shared.Th
 
 // GetStateUpgraders returns the state upgraders for this resource
 func (r *logAlertConfigResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
-	return nil
+	return map[int64]resource.StateUpgrader{
+		0: resourcehandle.CreateStateUpgraderForVersion(0),
+	}
 }

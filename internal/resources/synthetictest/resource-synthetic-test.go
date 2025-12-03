@@ -30,7 +30,7 @@ func NewSyntheticTestResourceHandle() resourcehandle.ResourceHandle[*restapi.Syn
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:  ResourceInstanaSyntheticTest,
 			Schema:        buildSchema(),
-			SchemaVersion: 0,
+			SchemaVersion: 1,
 		},
 	}
 }
@@ -1707,5 +1707,7 @@ func (r *syntheticTestResource) clearOtherConfigTypes(model *SyntheticTestModel,
 
 // GetStateUpgraders returns the state upgraders for this resource
 func (r *syntheticTestResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
-	return nil
+	return map[int64]resource.StateUpgrader{
+		0: resourcehandle.CreateStateUpgraderForVersion(0),
+	}
 }

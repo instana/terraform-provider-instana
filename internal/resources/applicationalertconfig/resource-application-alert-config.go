@@ -391,7 +391,7 @@ func NewApplicationAlertConfigResourceHandle() resourcehandle.ResourceHandle[*re
 				},
 			},
 			SkipIDGeneration: true,
-			SchemaVersion:    1,
+			SchemaVersion: 2,
 		},
 	}
 }
@@ -402,7 +402,7 @@ func NewGlobalApplicationAlertConfigResourceHandle() resourcehandle.ResourceHand
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:  ResourceInstanaGlobalApplicationAlertConfig,
 			Schema:        NewApplicationAlertConfigResourceHandle().MetaData().Schema,
-			SchemaVersion: 1,
+			SchemaVersion: 2,
 		},
 		isGlobal: true,
 	}
@@ -1334,5 +1334,7 @@ func (r *applicationAlertConfigResourceImpl) updateTimeThreshold(model *Applicat
 
 // GetStateUpgraders returns the state upgraders for this resource
 func (r *applicationAlertConfigResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
-	return nil
+	return map[int64]resource.StateUpgrader{
+		1: resourcehandle.CreateStateUpgraderForVersion(1),
+	}
 }
