@@ -20,7 +20,7 @@ func TestNewSliConfigResourceHandle(t *testing.T) {
 	metaData := resource.MetaData()
 	assert.Equal(t, ResourceInstanaSliConfig, metaData.ResourceName)
 	assert.NotNil(t, metaData.Schema)
-	assert.Equal(t, int64(1), metaData.SchemaVersion)
+	assert.Equal(t, int64(2), metaData.SchemaVersion)
 	assert.True(t, metaData.CreateOnly)
 }
 

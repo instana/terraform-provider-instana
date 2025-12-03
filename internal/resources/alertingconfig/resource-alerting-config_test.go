@@ -21,7 +21,7 @@ func TestNewAlertingConfigResourceHandle(t *testing.T) {
 	metadata := handle.MetaData()
 	require.NotNil(t, metadata)
 	assert.Equal(t, ResourceInstanaAlertingConfig, metadata.ResourceName)
-	assert.Equal(t, int64(1), metadata.SchemaVersion)
+	assert.Equal(t, int64(3), metadata.SchemaVersion)
 	assert.NotNil(t, metadata.Schema)
 }
 

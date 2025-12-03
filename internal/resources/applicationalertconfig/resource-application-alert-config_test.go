@@ -27,7 +27,7 @@ func TestNewApplicationAlertConfigResourceHandle(t *testing.T) {
 	metaData := resource.MetaData()
 	assert.Equal(t, ResourceInstanaApplicationAlertConfig, metaData.ResourceName)
 	assert.NotNil(t, metaData.Schema)
-	assert.Equal(t, int64(1), metaData.SchemaVersion)
+	assert.Equal(t, int64(2), metaData.SchemaVersion)
 	assert.True(t, metaData.SkipIDGeneration)
 }
 
@@ -38,7 +38,7 @@ func TestNewGlobalApplicationAlertConfigResourceHandle(t *testing.T) {
 	metaData := resource.MetaData()
 	assert.Equal(t, ResourceInstanaGlobalApplicationAlertConfig, metaData.ResourceName)
 	assert.NotNil(t, metaData.Schema)
-	assert.Equal(t, int64(1), metaData.SchemaVersion)
+	assert.Equal(t, int64(2), metaData.SchemaVersion)
 }
 
 func TestMetaData(t *testing.T) {

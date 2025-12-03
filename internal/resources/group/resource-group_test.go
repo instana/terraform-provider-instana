@@ -19,7 +19,7 @@ func TestNewGroupResourceHandle(t *testing.T) {
 	metadata := handle.MetaData()
 	require.NotNil(t, metadata)
 	assert.Equal(t, ResourceInstanaGroup, metadata.ResourceName)
-	assert.Equal(t, int64(1), metadata.SchemaVersion)
+	assert.Equal(t, int64(2), metadata.SchemaVersion)
 	assert.NotNil(t, metadata.Schema)
 }
 

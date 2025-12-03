@@ -24,7 +24,7 @@ func TestNewSyntheticTestResourceHandle(t *testing.T) {
 		metadata := handle.MetaData()
 		require.NotNil(t, metadata)
 		assert.Equal(t, ResourceInstanaSyntheticTest, metadata.ResourceName)
-		assert.Equal(t, int64(0), metadata.SchemaVersion)
+		assert.Equal(t, int64(1), metadata.SchemaVersion)
 	})
 
 	t.Run("should have correct schema attributes", func(t *testing.T) {
