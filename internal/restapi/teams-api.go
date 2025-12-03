@@ -75,5 +75,3 @@ type Team struct {
 func (t *Team) GetIDForResourcePath() string {
 	return t.ID
 }
-
-// Made with Bob

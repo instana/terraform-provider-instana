@@ -990,7 +990,6 @@ func getTestSchema() schema.Schema {
 	return resource.MetaData().Schema
 }
 
-// Made with Bob
 func TestUpdateState_ApplicationEventBased_WithNullGoodEventFilter(t *testing.T) {
 	ctx := context.Background()
 	resource := NewSliConfigResourceHandle()

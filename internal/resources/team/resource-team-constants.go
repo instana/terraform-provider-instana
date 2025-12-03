@@ -141,5 +141,3 @@ const (
 	// TeamDescScopeRestrictedApplicationFilterTagFilterExpression description for the tag_filter_expression field
 	TeamDescScopeRestrictedApplicationFilterTagFilterExpression = "The tag filter expression for the restricted application filter"
 )
-
-// Made with Bob

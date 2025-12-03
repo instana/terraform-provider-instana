@@ -337,8 +337,6 @@ func TestUpdateState(t *testing.T) {
 	})
 }
 
-// Made with Bob
-
 func TestMapStateToDataObject_UnknownValues(t *testing.T) {
 	resource := &websiteMonitoringConfigResource{
 		metaData: resourcehandle.ResourceMetaData{

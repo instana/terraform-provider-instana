@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -18,7 +19,6 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
 	"github.com/instana/terraform-provider-instana/internal/util"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // NewSloConfigResourceHandle creates the resource handle for SLO Config
@@ -27,7 +27,7 @@ func NewSloConfigResourceHandle() resourcehandle.ResourceHandle[*restapi.SloConf
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:     ResourceInstanaSloConfig,
 			Schema:           buildSloConfigSchema(),
-			SchemaVersion: 2,
+			SchemaVersion:    2,
 			SkipIDGeneration: true,
 		},
 	}
@@ -1405,8 +1405,6 @@ func (r *sloConfigResource) setTimezoneToState(timezone string) types.String {
 	}
 	return types.StringNull()
 }
-
-// Made with Bob
 
 // GetStateUpgraders returns the state upgraders for this resource
 func (r *sloConfigResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {

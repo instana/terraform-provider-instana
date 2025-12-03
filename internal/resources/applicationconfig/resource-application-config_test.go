@@ -1026,5 +1026,3 @@ func getAccessRulesFromList(t *testing.T, ctx context.Context, list types.List) 
 	require.False(t, diags.HasError(), "Failed to extract access rules: %v", diags)
 	return rules
 }
-
-// Made with Bob

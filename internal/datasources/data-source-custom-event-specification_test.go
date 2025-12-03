@@ -76,5 +76,3 @@ func TestCustomEventSpecificationDataSourceSchema(t *testing.T) {
 	expirationTimeAttr := resp.Schema.Attributes[CustomEventSpecificationFieldExpirationTime]
 	require.True(t, expirationTimeAttr.(schema.Int64Attribute).Computed)
 }
-
-// Made with Bob

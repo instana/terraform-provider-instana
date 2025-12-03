@@ -128,5 +128,3 @@ const (
 	// EmptyString represents an empty string value
 	EmptyString = ""
 )
-
-// Made with Bob

@@ -65,5 +65,3 @@ func TestAutomationActionDataSourceSchema(t *testing.T) {
 	tagsAttr := resp.Schema.Attributes[AutomationActionFieldTags]
 	require.True(t, tagsAttr.(schema.ListAttribute).Computed)
 }
-
-// Made with Bob

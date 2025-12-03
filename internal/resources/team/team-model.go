@@ -52,5 +52,3 @@ type TeamRestrictedApplicationFilterModel struct {
 	Scope               types.String `tfsdk:"scope"`
 	TagFilterExpression types.String `tfsdk:"tag_filter_expression"`
 }
-
-// Made with Bob

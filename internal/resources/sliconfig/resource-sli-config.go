@@ -744,8 +744,6 @@ func (r *sliConfigResource) parseTagFilterString(input, context string) (*restap
 	return mapper.ToAPIModel(expr), nil
 }
 
-// Made with Bob
-
 // GetStateUpgraders returns the state upgraders for this resource
 func (r *sliConfigResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
 	return map[int64]resource.StateUpgrader{

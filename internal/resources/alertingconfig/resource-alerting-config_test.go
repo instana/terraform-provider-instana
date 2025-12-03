@@ -645,8 +645,6 @@ func TestUpdateStateWithComplexCustomPayloadFields(t *testing.T) {
 	})
 }
 
-// Made with Bob
-
 func TestMapStateToDataObjectEdgeCases(t *testing.T) {
 	resource := &alertingConfigResource{}
 	ctx := context.Background()

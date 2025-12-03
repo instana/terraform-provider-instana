@@ -2235,5 +2235,3 @@ func getTestSchema() schema.Schema {
 	resource := NewApplicationAlertConfigResourceHandle()
 	return resource.MetaData().Schema
 }
-
-// Made with Bob

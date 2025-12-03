@@ -72,5 +72,3 @@ const (
 	// EmptyScopeID represents an empty scope ID
 	EmptyScopeID = ""
 )
-
-// Made with Bob

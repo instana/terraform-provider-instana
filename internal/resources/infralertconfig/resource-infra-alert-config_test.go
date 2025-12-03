@@ -1689,5 +1689,3 @@ func getTestSchema() schema.Schema {
 	resource := NewInfraAlertConfigResourceHandle()
 	return resource.MetaData().Schema
 }
-
-// Made with Bob

@@ -1295,8 +1295,6 @@ func findField(fields []restapi.Field, name string) *restapi.Field {
 	return nil
 }
 
-// Made with Bob
-
 // TestMapStateToDataObject_FromState tests mapping from state instead of plan
 func TestMapStateToDataObject_FromState(t *testing.T) {
 	resource := NewAutomationActionResourceHandle().(*automationActionResource)

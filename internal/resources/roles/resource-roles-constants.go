@@ -41,5 +41,3 @@ const (
 	// RoleDescPermissions description for the permissions field
 	RoleDescPermissions = "The permissions assigned to the role"
 )
-
-// Made with Bob

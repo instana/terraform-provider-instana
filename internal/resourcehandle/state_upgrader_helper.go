@@ -24,5 +24,3 @@ func CreateStateUpgraderForVersion(fromVersion int64) resource.StateUpgrader {
 		StateUpgrader: CreatePassThroughStateUpgrader(),
 	}
 }
-
-// Made with Bob

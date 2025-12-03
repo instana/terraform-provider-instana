@@ -913,5 +913,3 @@ func createMockPlan(t *testing.T, ctx context.Context, model GroupModel) *tfsdk.
 
 	return plan
 }
-
-// Made with Bob
