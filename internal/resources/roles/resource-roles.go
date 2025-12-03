@@ -15,7 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/restapi"
-	"github.com/instana/terraform-provider-instana/internal/util"
 )
 
 // NewRoleResourceHandle creates the resource handle for RBAC Roles
@@ -47,7 +46,7 @@ func buildRoleSchema() schema.Schema {
 			},
 			RoleFieldMembers: schema.SetNestedAttribute{
 				Description:  RoleDescMembers,
-				Required:     true,
+				Optional:     true,
 				NestedObject: buildMemberNestedObject(),
 			},
 			RoleFieldPermissions: schema.SetAttribute{
@@ -71,14 +70,6 @@ func buildMemberNestedObject() schema.NestedAttributeObject {
 			RoleFieldMemberUserID: schema.StringAttribute{
 				Required:    true,
 				Description: RoleDescMemberUserID,
-			},
-			RoleFieldMemberEmail: schema.StringAttribute{
-				Optional:    true,
-				Description: RoleDescMemberEmail,
-			},
-			RoleFieldMemberName: schema.StringAttribute{
-				Optional:    true,
-				Description: RoleDescMemberName,
 			},
 		},
 	}
@@ -132,52 +123,17 @@ func (r *roleResource) buildRoleModelFromAPIResponse(role *restapi.Role, existin
 	return model
 }
 
-// mapMembersToModel converts API members to model members, preserving optional fields from existing state
+// mapMembersToModel converts API members to model members
 func (r *roleResource) mapMembersToModel(apiMembers []restapi.APIMember, existingMembers []RoleMemberModel) []RoleMemberModel {
 	if len(apiMembers) == 0 {
 		return make([]RoleMemberModel, 0)
 	}
 
-	// Create a map of existing members by UserID for quick lookup
-	existingMemberMap := make(map[string]RoleMemberModel)
-	for _, existingMember := range existingMembers {
-		if !existingMember.UserID.IsNull() {
-			existingMemberMap[existingMember.UserID.ValueString()] = existingMember
-		}
-	}
-
 	members := make([]RoleMemberModel, len(apiMembers))
 	for i, apiMember := range apiMembers {
-		member := RoleMemberModel{
+		members[i] = RoleMemberModel{
 			UserID: types.StringValue(apiMember.UserID),
 		}
-
-		// Check if we have existing data for this member
-		if existingMember, exists := existingMemberMap[apiMember.UserID]; exists {
-			// Preserve email from existing state if API doesn't return it or if it was set in plan
-			if apiMember.Email != nil && *apiMember.Email != "" {
-				member.Email = types.StringValue(*apiMember.Email)
-			} else if !existingMember.Email.IsNull() {
-				member.Email = existingMember.Email
-			} else {
-				member.Email = types.StringNull()
-			}
-
-			// Preserve name from existing state if API doesn't return it or if it was set in plan
-			if apiMember.Name != nil && *apiMember.Name != "" {
-				member.Name = types.StringValue(*apiMember.Name)
-			} else if !existingMember.Name.IsNull() {
-				member.Name = existingMember.Name
-			} else {
-				member.Name = types.StringNull()
-			}
-		} else {
-			// New member, use API values
-			member.Email = util.SetStringPointerToState(apiMember.Email)
-			member.Name = util.SetStringPointerToState(apiMember.Name)
-		}
-
-		members[i] = member
 	}
 	return members
 }
@@ -232,21 +188,9 @@ func (r *roleResource) mapModelMembersToAPI(modelMembers []RoleMemberModel) []re
 
 	apiMembers := make([]restapi.APIMember, 0, len(modelMembers))
 	for _, memberModel := range modelMembers {
-		apiMember := restapi.APIMember{
+		apiMembers = append(apiMembers, restapi.APIMember{
 			UserID: memberModel.UserID.ValueString(),
-		}
-
-		if !memberModel.Email.IsNull() && !memberModel.Email.IsUnknown() {
-			email := memberModel.Email.ValueString()
-			apiMember.Email = &email
-		}
-
-		if !memberModel.Name.IsNull() && !memberModel.Name.IsUnknown() {
-			name := memberModel.Name.ValueString()
-			apiMember.Name = &name
-		}
-
-		apiMembers = append(apiMembers, apiMember)
+		})
 	}
 
 	return apiMembers

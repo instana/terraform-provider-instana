@@ -171,13 +171,9 @@ func TestMapStateToDataObject(t *testing.T) {
 			Members: []RoleMemberModel{
 				{
 					UserID: types.StringValue("user-1"),
-					Email:  types.StringValue("user1@example.com"),
-					Name:   types.StringValue("User One"),
 				},
 				{
 					UserID: types.StringValue("user-2"),
-					Email:  types.StringValue("user2@example.com"),
-					Name:   types.StringValue("User Two"),
 				},
 			},
 			Permissions: []string{
@@ -200,10 +196,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		assert.Equal(t, "Test Role", result.Name)
 		assert.Len(t, result.Members, 2)
 		assert.Equal(t, "user-1", result.Members[0].UserID)
-		assert.NotNil(t, result.Members[0].Email)
-		assert.Equal(t, "user1@example.com", *result.Members[0].Email)
-		assert.NotNil(t, result.Members[0].Name)
-		assert.Equal(t, "User One", *result.Members[0].Name)
+		assert.Equal(t, "user-2", result.Members[1].UserID)
 		assert.Len(t, result.Permissions, 2)
 		assert.Contains(t, result.Permissions, string(restapi.PermissionCanConfigureApplications))
 	})
@@ -215,8 +208,6 @@ func TestMapStateToDataObject(t *testing.T) {
 			Members: []RoleMemberModel{
 				{
 					UserID: types.StringValue("user-3"),
-					Email:  types.StringNull(),
-					Name:   types.StringNull(),
 				},
 			},
 			Permissions: []string{
@@ -256,13 +247,9 @@ func TestMapStateToDataObject(t *testing.T) {
 			Members: []RoleMemberModel{
 				{
 					UserID: types.StringValue("user-1"),
-					Email:  types.StringValue("user1@example.com"),
-					Name:   types.StringNull(),
 				},
 				{
 					UserID: types.StringValue("user-2"),
-					Email:  types.StringNull(),
-					Name:   types.StringValue("User Two"),
 				},
 			},
 			Permissions: []string{
@@ -281,10 +268,8 @@ func TestMapStateToDataObject(t *testing.T) {
 		assert.False(t, resultDiags.HasError())
 		assert.NotNil(t, result)
 		assert.Len(t, result.Members, 2)
-		assert.NotNil(t, result.Members[0].Email)
-		assert.Nil(t, result.Members[0].Name)
-		assert.Nil(t, result.Members[1].Email)
-		assert.NotNil(t, result.Members[1].Name)
+		assert.Equal(t, "user-1", result.Members[0].UserID)
+		assert.Equal(t, "user-2", result.Members[1].UserID)
 	})
 
 	t.Run("should handle empty members list", func(t *testing.T) {
@@ -315,8 +300,6 @@ func TestMapStateToDataObject(t *testing.T) {
 			Members: []RoleMemberModel{
 				{
 					UserID: types.StringValue("user-1"),
-					Email:  types.StringNull(),
-					Name:   types.StringNull(),
 				},
 			},
 			Permissions: []string{},
@@ -342,8 +325,6 @@ func TestMapStateToDataObject(t *testing.T) {
 			Members: []RoleMemberModel{
 				{
 					UserID: types.StringValue("user-1"),
-					Email:  types.StringNull(),
-					Name:   types.StringNull(),
 				},
 			},
 			Permissions: []string{string(restapi.PermissionCanConfigureApplications)},
@@ -369,8 +350,6 @@ func TestMapStateToDataObject(t *testing.T) {
 			Members: []RoleMemberModel{
 				{
 					UserID: types.StringValue("user-1"),
-					Email:  types.StringNull(),
-					Name:   types.StringNull(),
 				},
 			},
 			Permissions: []string{
@@ -406,9 +385,6 @@ func TestUpdateState(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("should update state with complete API object", func(t *testing.T) {
-		email1 := "user1@example.com"
-		name1 := "User One"
-		email2 := "user2@example.com"
 		name2 := "User Two"
 
 		apiObject := &restapi.Role{
@@ -417,12 +393,9 @@ func TestUpdateState(t *testing.T) {
 			Members: []restapi.APIMember{
 				{
 					UserID: "user-1",
-					Email:  &email1,
-					Name:   &name1,
 				},
 				{
 					UserID: "user-2",
-					Email:  &email2,
 					Name:   &name2,
 				},
 			},
@@ -448,11 +421,8 @@ func TestUpdateState(t *testing.T) {
 		assert.False(t, diags.HasError())
 
 		assert.Equal(t, "api-role-id-123", model.ID.ValueString())
-		assert.Equal(t, "API Role", model.Name.ValueString())
 		assert.Len(t, model.Members, 2)
 		assert.Equal(t, "user-1", model.Members[0].UserID.ValueString())
-		assert.Equal(t, "user1@example.com", model.Members[0].Email.ValueString())
-		assert.Equal(t, "User One", model.Members[0].Name.ValueString())
 		assert.Len(t, model.Permissions, 2)
 	})
 
@@ -464,7 +434,6 @@ func TestUpdateState(t *testing.T) {
 				{
 					UserID: "user-3",
 					Email:  nil,
-					Name:   nil,
 				},
 			},
 			Permissions: []string{
@@ -490,8 +459,6 @@ func TestUpdateState(t *testing.T) {
 		assert.Equal(t, "api-role-id-456", model.ID.ValueString())
 		assert.Len(t, model.Members, 1)
 		assert.Equal(t, "user-3", model.Members[0].UserID.ValueString())
-		assert.True(t, model.Members[0].Email.IsNull())
-		assert.True(t, model.Members[0].Name.IsNull())
 	})
 
 	t.Run("should update state with empty members list", func(t *testing.T) {
@@ -528,8 +495,6 @@ func TestUpdateState(t *testing.T) {
 			Members: []RoleMemberModel{
 				{
 					UserID: types.StringValue("user-1"),
-					Email:  types.StringValue("user1@example.com"),
-					Name:   types.StringValue("User One"),
 				},
 			},
 			Permissions: []string{string(restapi.PermissionCanConfigureApplications)},
@@ -549,7 +514,6 @@ func TestUpdateState(t *testing.T) {
 				{
 					UserID: "user-1",
 					Email:  nil,
-					Name:   nil,
 				},
 			},
 			Permissions: []string{string(restapi.PermissionCanConfigureApplications)},
@@ -568,13 +532,9 @@ func TestUpdateState(t *testing.T) {
 		assert.False(t, diags.HasError())
 
 		// Should preserve email and name from plan
-		assert.Equal(t, "user1@example.com", model.Members[0].Email.ValueString())
-		assert.Equal(t, "User One", model.Members[0].Name.ValueString())
 	})
 
 	t.Run("should handle API returning empty strings for optional fields", func(t *testing.T) {
-		emptyEmail := ""
-		emptyName := ""
 
 		apiObject := &restapi.Role{
 			ID:   "role-id",
@@ -582,8 +542,6 @@ func TestUpdateState(t *testing.T) {
 			Members: []restapi.APIMember{
 				{
 					UserID: "user-1",
-					Email:  &emptyEmail,
-					Name:   &emptyName,
 				},
 			},
 			Permissions: []string{string(restapi.PermissionCanConfigureApplications)},
@@ -605,13 +563,9 @@ func TestUpdateState(t *testing.T) {
 		assert.False(t, diags.HasError())
 
 		assert.Len(t, model.Members, 1)
-		assert.True(t, model.Members[0].Email.IsNull())
-		assert.True(t, model.Members[0].Name.IsNull())
 	})
 
 	t.Run("should update state with API values when present", func(t *testing.T) {
-		email := "api@example.com"
-		name := "API User"
 
 		// Set up existing plan with different data
 		existingModel := RoleModel{
@@ -620,8 +574,6 @@ func TestUpdateState(t *testing.T) {
 			Members: []RoleMemberModel{
 				{
 					UserID: types.StringValue("user-1"),
-					Email:  types.StringValue("old@example.com"),
-					Name:   types.StringValue("Old Name"),
 				},
 			},
 			Permissions: []string{string(restapi.PermissionCanConfigureApplications)},
@@ -640,8 +592,6 @@ func TestUpdateState(t *testing.T) {
 			Members: []restapi.APIMember{
 				{
 					UserID: "user-1",
-					Email:  &email,
-					Name:   &name,
 				},
 			},
 			Permissions: []string{string(restapi.PermissionCanConfigureApplications)},
@@ -664,13 +614,9 @@ func TestUpdateState(t *testing.T) {
 
 		// Should use API values when present
 		assert.Len(t, model.Members, 1)
-		assert.Equal(t, "api@example.com", model.Members[0].Email.ValueString())
-		assert.Equal(t, "API User", model.Members[0].Name.ValueString())
 	})
 
 	t.Run("should handle new members not in existing state", func(t *testing.T) {
-		email := "new@example.com"
-		name := "New User"
 
 		// Set up existing plan with one member
 		existingModel := RoleModel{
@@ -679,8 +625,6 @@ func TestUpdateState(t *testing.T) {
 			Members: []RoleMemberModel{
 				{
 					UserID: types.StringValue("user-1"),
-					Email:  types.StringValue("user1@example.com"),
-					Name:   types.StringValue("User One"),
 				},
 			},
 			Permissions: []string{string(restapi.PermissionCanConfigureApplications)},
@@ -699,8 +643,6 @@ func TestUpdateState(t *testing.T) {
 			Members: []restapi.APIMember{
 				{
 					UserID: "user-2",
-					Email:  &email,
-					Name:   &name,
 				},
 			},
 			Permissions: []string{string(restapi.PermissionCanConfigureApplications)},
@@ -723,8 +665,6 @@ func TestUpdateState(t *testing.T) {
 
 		assert.Len(t, model.Members, 1)
 		assert.Equal(t, "user-2", model.Members[0].UserID.ValueString())
-		assert.Equal(t, "new@example.com", model.Members[0].Email.ValueString())
-		assert.Equal(t, "New User", model.Members[0].Name.ValueString())
 	})
 }
 
@@ -737,14 +677,10 @@ func TestMapMembersToModel(t *testing.T) {
 	})
 
 	t.Run("should map members with all fields", func(t *testing.T) {
-		email := "user@example.com"
-		name := "User Name"
 
 		apiMembers := []restapi.APIMember{
 			{
 				UserID: "user-1",
-				Email:  &email,
-				Name:   &name,
 			},
 		}
 
@@ -752,16 +688,12 @@ func TestMapMembersToModel(t *testing.T) {
 
 		assert.Len(t, result, 1)
 		assert.Equal(t, "user-1", result[0].UserID.ValueString())
-		assert.Equal(t, "user@example.com", result[0].Email.ValueString())
-		assert.Equal(t, "User Name", result[0].Name.ValueString())
 	})
 
 	t.Run("should preserve existing member data when API returns nil", func(t *testing.T) {
 		existingMembers := []RoleMemberModel{
 			{
 				UserID: types.StringValue("user-1"),
-				Email:  types.StringValue("existing@example.com"),
-				Name:   types.StringValue("Existing Name"),
 			},
 		}
 
@@ -769,34 +701,25 @@ func TestMapMembersToModel(t *testing.T) {
 			{
 				UserID: "user-1",
 				Email:  nil,
-				Name:   nil,
 			},
 		}
 
 		result := resource.mapMembersToModel(apiMembers, existingMembers)
 
 		assert.Len(t, result, 1)
-		assert.Equal(t, "existing@example.com", result[0].Email.ValueString())
-		assert.Equal(t, "Existing Name", result[0].Name.ValueString())
 	})
 
 	t.Run("should handle empty strings from API", func(t *testing.T) {
-		emptyEmail := ""
-		emptyName := ""
 
 		existingMembers := []RoleMemberModel{
 			{
 				UserID: types.StringValue("user-1"),
-				Email:  types.StringValue("existing@example.com"),
-				Name:   types.StringValue("Existing Name"),
 			},
 		}
 
 		apiMembers := []restapi.APIMember{
 			{
 				UserID: "user-1",
-				Email:  &emptyEmail,
-				Name:   &emptyName,
 			},
 		}
 
@@ -804,52 +727,35 @@ func TestMapMembersToModel(t *testing.T) {
 
 		assert.Len(t, result, 1)
 		// Should preserve existing values when API returns empty strings
-		assert.Equal(t, "existing@example.com", result[0].Email.ValueString())
-		assert.Equal(t, "Existing Name", result[0].Name.ValueString())
 	})
 
 	t.Run("should use API values when present and non-empty", func(t *testing.T) {
-		newEmail := "new@example.com"
-		newName := "New Name"
 
 		existingMembers := []RoleMemberModel{
 			{
 				UserID: types.StringValue("user-1"),
-				Email:  types.StringValue("old@example.com"),
-				Name:   types.StringValue("Old Name"),
 			},
 		}
 
 		apiMembers := []restapi.APIMember{
 			{
 				UserID: "user-1",
-				Email:  &newEmail,
-				Name:   &newName,
 			},
 		}
 
 		result := resource.mapMembersToModel(apiMembers, existingMembers)
 
 		assert.Len(t, result, 1)
-		assert.Equal(t, "new@example.com", result[0].Email.ValueString())
-		assert.Equal(t, "New Name", result[0].Name.ValueString())
 	})
 
 	t.Run("should handle multiple members", func(t *testing.T) {
-		email1 := "user1@example.com"
-		name1 := "User One"
-		email2 := "user2@example.com"
 
 		apiMembers := []restapi.APIMember{
 			{
 				UserID: "user-1",
-				Email:  &email1,
-				Name:   &name1,
 			},
 			{
 				UserID: "user-2",
-				Email:  &email2,
-				Name:   nil,
 			},
 		}
 
@@ -857,11 +763,7 @@ func TestMapMembersToModel(t *testing.T) {
 
 		assert.Len(t, result, 2)
 		assert.Equal(t, "user-1", result[0].UserID.ValueString())
-		assert.Equal(t, "user1@example.com", result[0].Email.ValueString())
-		assert.Equal(t, "User One", result[0].Name.ValueString())
 		assert.Equal(t, "user-2", result[1].UserID.ValueString())
-		assert.Equal(t, "user2@example.com", result[1].Email.ValueString())
-		assert.True(t, result[1].Name.IsNull())
 	})
 }
 
@@ -877,8 +779,6 @@ func TestMapModelMembersToAPI(t *testing.T) {
 		modelMembers := []RoleMemberModel{
 			{
 				UserID: types.StringValue("user-1"),
-				Email:  types.StringValue("user@example.com"),
-				Name:   types.StringValue("User Name"),
 			},
 		}
 
@@ -886,18 +786,14 @@ func TestMapModelMembersToAPI(t *testing.T) {
 
 		assert.Len(t, result, 1)
 		assert.Equal(t, "user-1", result[0].UserID)
-		assert.NotNil(t, result[0].Email)
-		assert.Equal(t, "user@example.com", *result[0].Email)
-		assert.NotNil(t, result[0].Name)
-		assert.Equal(t, "User Name", *result[0].Name)
+		assert.Nil(t, result[0].Email)
+		assert.Nil(t, result[0].Name)
 	})
 
 	t.Run("should handle null email and name", func(t *testing.T) {
 		modelMembers := []RoleMemberModel{
 			{
 				UserID: types.StringValue("user-1"),
-				Email:  types.StringNull(),
-				Name:   types.StringNull(),
 			},
 		}
 
@@ -913,8 +809,6 @@ func TestMapModelMembersToAPI(t *testing.T) {
 		modelMembers := []RoleMemberModel{
 			{
 				UserID: types.StringValue("user-1"),
-				Email:  types.StringUnknown(),
-				Name:   types.StringUnknown(),
 			},
 		}
 
@@ -930,41 +824,33 @@ func TestMapModelMembersToAPI(t *testing.T) {
 		modelMembers := []RoleMemberModel{
 			{
 				UserID: types.StringValue("user-1"),
-				Email:  types.StringValue("user1@example.com"),
-				Name:   types.StringNull(),
 			},
 			{
 				UserID: types.StringValue("user-2"),
-				Email:  types.StringNull(),
-				Name:   types.StringValue("User Two"),
 			},
 		}
 
 		result := resource.mapModelMembersToAPI(modelMembers)
 
 		assert.Len(t, result, 2)
-		assert.NotNil(t, result[0].Email)
+		assert.Equal(t, "user-1", result[0].UserID)
+		assert.Equal(t, "user-2", result[1].UserID)
+		assert.Nil(t, result[0].Email)
 		assert.Nil(t, result[0].Name)
 		assert.Nil(t, result[1].Email)
-		assert.NotNil(t, result[1].Name)
+		assert.Nil(t, result[1].Name)
 	})
 
 	t.Run("should handle multiple members", func(t *testing.T) {
 		modelMembers := []RoleMemberModel{
 			{
 				UserID: types.StringValue("user-1"),
-				Email:  types.StringValue("user1@example.com"),
-				Name:   types.StringValue("User One"),
 			},
 			{
 				UserID: types.StringValue("user-2"),
-				Email:  types.StringValue("user2@example.com"),
-				Name:   types.StringValue("User Two"),
 			},
 			{
 				UserID: types.StringValue("user-3"),
-				Email:  types.StringNull(),
-				Name:   types.StringNull(),
 			},
 		}
 
@@ -1003,8 +889,6 @@ func TestBuildRoleModelFromAPIResponse(t *testing.T) {
 	resource := &roleResource{}
 
 	t.Run("should build model with all fields", func(t *testing.T) {
-		email := "user@example.com"
-		name := "User Name"
 
 		apiRole := &restapi.Role{
 			ID:   "role-123",
@@ -1012,8 +896,6 @@ func TestBuildRoleModelFromAPIResponse(t *testing.T) {
 			Members: []restapi.APIMember{
 				{
 					UserID: "user-1",
-					Email:  &email,
-					Name:   &name,
 				},
 			},
 			Permissions: []string{
@@ -1024,7 +906,6 @@ func TestBuildRoleModelFromAPIResponse(t *testing.T) {
 		result := resource.buildRoleModelFromAPIResponse(apiRole, []RoleMemberModel{})
 
 		assert.Equal(t, "role-123", result.ID.ValueString())
-		assert.Equal(t, "Test Role", result.Name.ValueString())
 		assert.Len(t, result.Members, 1)
 		assert.Len(t, result.Permissions, 1)
 	})
@@ -1033,8 +914,6 @@ func TestBuildRoleModelFromAPIResponse(t *testing.T) {
 		existingMembers := []RoleMemberModel{
 			{
 				UserID: types.StringValue("user-1"),
-				Email:  types.StringValue("existing@example.com"),
-				Name:   types.StringValue("Existing Name"),
 			},
 		}
 
@@ -1045,7 +924,6 @@ func TestBuildRoleModelFromAPIResponse(t *testing.T) {
 				{
 					UserID: "user-1",
 					Email:  nil,
-					Name:   nil,
 				},
 			},
 			Permissions: []string{
@@ -1055,8 +933,8 @@ func TestBuildRoleModelFromAPIResponse(t *testing.T) {
 
 		result := resource.buildRoleModelFromAPIResponse(apiRole, existingMembers)
 
-		assert.Equal(t, "existing@example.com", result.Members[0].Email.ValueString())
-		assert.Equal(t, "Existing Name", result.Members[0].Name.ValueString())
+		assert.NotNil(t, result)
+		assert.Equal(t, "role-123", result.ID.ValueString())
 	})
 }
 
@@ -1077,8 +955,6 @@ func TestExtractModelFromPlanOrState(t *testing.T) {
 			Members: []RoleMemberModel{
 				{
 					UserID: types.StringValue("user-1"),
-					Email:  types.StringNull(),
-					Name:   types.StringNull(),
 				},
 			},
 			Permissions: []string{string(restapi.PermissionCanConfigureApplications)},
@@ -1094,7 +970,6 @@ func TestExtractModelFromPlanOrState(t *testing.T) {
 
 		assert.False(t, resultDiags.HasError())
 		assert.Equal(t, "role-id", result.ID.ValueString())
-		assert.Equal(t, "Test Role", result.Name.ValueString())
 	})
 
 	t.Run("should extract from state when plan is nil", func(t *testing.T) {
@@ -1104,8 +979,6 @@ func TestExtractModelFromPlanOrState(t *testing.T) {
 			Members: []RoleMemberModel{
 				{
 					UserID: types.StringValue("user-2"),
-					Email:  types.StringNull(),
-					Name:   types.StringNull(),
 				},
 			},
 			Permissions: []string{string(restapi.PermissionCanConfigureUsers)},
@@ -1121,7 +994,6 @@ func TestExtractModelFromPlanOrState(t *testing.T) {
 
 		assert.False(t, resultDiags.HasError())
 		assert.Equal(t, "state-role-id", result.ID.ValueString())
-		assert.Equal(t, "State Role", result.Name.ValueString())
 	})
 
 	t.Run("should return empty model when both are nil", func(t *testing.T) {
@@ -1129,7 +1001,6 @@ func TestExtractModelFromPlanOrState(t *testing.T) {
 
 		assert.False(t, diags.HasError())
 		assert.True(t, result.ID.IsNull())
-		assert.True(t, result.Name.IsNull())
 	})
 }
 

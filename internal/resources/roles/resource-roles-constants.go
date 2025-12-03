@@ -13,10 +13,6 @@ const (
 	RoleFieldName = "name"
 	// RoleFieldMembers constant value for the schema field members
 	RoleFieldMembers = "member"
-	// RoleFieldMemberEmail constant value for the schema field email
-	RoleFieldMemberEmail = "email"
-	// RoleFieldMemberName constant value for the schema field name
-	RoleFieldMemberName = "name"
 	// RoleFieldMemberUserID constant value for the schema field user_id
 	RoleFieldMemberUserID = "user_id"
 	// RoleFieldPermissions constant value for the schema field permissions
@@ -34,10 +30,6 @@ const (
 	RoleDescMembers = "The members of the role"
 	// RoleDescMemberUserID description for the member user_id field
 	RoleDescMemberUserID = "The user id of the role member"
-	// RoleDescMemberEmail description for the member email field
-	RoleDescMemberEmail = "The email address of the role member"
-	// RoleDescMemberName description for the member name field
-	RoleDescMemberName = "The name of the role member"
 	// RoleDescPermissions description for the permissions field
 	RoleDescPermissions = "The permissions assigned to the role"
 )

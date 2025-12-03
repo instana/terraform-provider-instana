@@ -21,12 +21,9 @@ resource "instana_rbac_role" "developer_role" {
   member = [
     {
       user_id = "user-id-1"
-      email   = "developer1@example.com"
     },
     {
       user_id = "user-id-2"
-      email   = "developer2@example.com"
-      name    = "Jane Developer"
     }
   ]
 }
@@ -47,7 +44,6 @@ resource "instana_rbac_role" "readonly_role" {
   member = [
     {
       user_id = "viewer-1"
-      email   = "viewer1@example.com"
     }
   ]
 }
@@ -97,8 +93,6 @@ resource "instana_rbac_role" "admin_role" {
   member = [
     {
       user_id = "admin-1"
-      email   = "admin1@example.com"
-      name    = "Admin User"
     }
   ]
 }
@@ -128,11 +122,9 @@ resource "instana_rbac_role" "sre_role" {
   member = [
     {
       user_id = "sre-1"
-      email   = "sre1@example.com"
     },
     {
       user_id = "sre-2"
-      email   = "sre2@example.com"
     }
   ]
 }
@@ -157,8 +149,6 @@ resource "instana_rbac_role" "security_role" {
   member = [
     {
       user_id = "security-lead"
-      email   = "security.lead@example.com"
-      name    = "Security Lead"
     }
   ]
 }
@@ -183,7 +173,6 @@ resource "instana_rbac_role" "monitoring_role" {
   member = [
     {
       user_id = "monitor-1"
-      email   = "monitor1@example.com"
     }
   ]
 }
@@ -209,7 +198,6 @@ resource "instana_rbac_role" "synthetic_role" {
   member = [
     {
       user_id = "synthetic-user"
-      email   = "synthetic@example.com"
     }
   ]
 }
@@ -233,7 +221,6 @@ resource "instana_rbac_role" "log_management_role" {
   member = [
     {
       user_id = "log-admin"
-      email   = "log.admin@example.com"
     }
   ]
 }
@@ -255,7 +242,6 @@ resource "instana_rbac_role" "automation_role" {
   member = [
     {
       user_id = "automation-user"
-      email   = "automation@example.com"
     }
   ]
 }
@@ -280,7 +266,6 @@ resource "instana_rbac_role" "bizops_role" {
   member = [
     {
       user_id = "bizops-user"
-      email   = "bizops@example.com"
     }
   ]
 }
@@ -299,8 +284,8 @@ locals {
         "CAN_VIEW_LOGS"
       ]
       members = [
-        { user_id = "dev-1", email = "dev1@example.com" },
-        { user_id = "dev-2", email = "dev2@example.com" }
+        { user_id = "dev-1" },
+        { user_id = "dev-2" }
       ]
     }
     staging = {
@@ -311,7 +296,7 @@ locals {
         "CAN_CONFIGURE_EVENTS_AND_ALERTS"
       ]
       members = [
-        { user_id = "stage-1", email = "stage1@example.com" }
+        { user_id = "stage-1" }
       ]
     }
     production = {
@@ -322,7 +307,7 @@ locals {
         "CAN_MANUALLY_CLOSE_ISSUE"
       ]
       members = [
-        { user_id = "prod-1", email = "prod1@example.com" }
+        { user_id = "prod-1" }
       ]
     }
   }
@@ -354,7 +339,6 @@ resource "instana_rbac_role" "scoped_role" {
   member = [
     {
       user_id = "scoped-user"
-      email   = "scoped@example.com"
     }
   ]
 }
@@ -364,13 +348,11 @@ resource "instana_rbac_role" "scoped_role" {
 
 * `name` - Required - The name of the RBAC role
 * `permissions` - Required - List of permissions assigned to the role. See [Permissions Reference](#permissions-reference) for allowed values
-* `member` - Required - List of role members [Details](#member-reference)
+* `member` - Optional - List of role members [Details](#member-reference)
 
 ### Member Reference
 
 * `user_id` - Required - The user ID of the role member
-* `email` - Optional - The email address of the role member
-* `name` - Optional - The display name of the role member
 
 ## Attributes Reference
 
