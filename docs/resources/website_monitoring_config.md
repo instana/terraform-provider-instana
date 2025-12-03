@@ -11,6 +11,8 @@ API Documentation: <https://instana.github.io/openapi/#tag/Website-Configuration
 
 ## Migration Guide (v5 to v6)
 
+For detailed migration instructions and examples, see the [Plugin Framework Migration Guide](https://github.com/instana/terraform-provider-instana/blob/main/PLUGIN-FRAMEWORK-MIGRATION.md).
+
 ### Syntax Changes Overview
 
 - All attributes remain top-level (no nested blocks in this resource)

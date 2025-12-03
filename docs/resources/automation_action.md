@@ -11,6 +11,9 @@ API Documentation: <https://instana.github.io/openapi/#tag/Action-Catalog>
  **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
  
 ## Migration Guide (v5 to v6)
+
+For detailed migration instructions and examples, see the [Plugin Framework Migration Guide](https://github.com/instana/terraform-provider-instana/blob/main/PLUGIN-FRAMEWORK-MIGRATION.md).
+
 ### Syntax Changes Overview
 
 - Action type blocks (`script`, `http`, `manual`, etc.) now use **object syntax** with `= { }`
