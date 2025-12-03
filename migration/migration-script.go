@@ -99,6 +99,12 @@ func generateImportBlocks(stateFilePath, outputFilePath string) error {
 			continue
 		}
 
+		// Only process Instana resources (resources with type starting with "instana_")
+		if len(resource.Type) < 8 || resource.Type[:8] != "instana_" {
+			fmt.Printf("Skipping non-Instana resource: %s.%s\n", resource.Type, resource.Name)
+			continue
+		}
+
 		// Process each instance
 		for _, instance := range resource.Instances {
 			// Get the resource ID
