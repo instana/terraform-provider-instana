@@ -19,7 +19,7 @@ func TestNewAPITokenResourceHandle(t *testing.T) {
 	metadata := handle.MetaData()
 	require.NotNil(t, metadata)
 	assert.Equal(t, ResourceInstanaAPIToken, metadata.ResourceName)
-	assert.Equal(t, int64(2), metadata.SchemaVersion)
+	assert.Equal(t, int64(3), metadata.SchemaVersion)
 	assert.NotNil(t, metadata.Schema)
 }
 

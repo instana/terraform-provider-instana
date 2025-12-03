@@ -22,7 +22,7 @@ func TestNewSyntheticAlertConfigResourceHandle(t *testing.T) {
 		metadata := handle.MetaData()
 		require.NotNil(t, metadata)
 		assert.Equal(t, ResourceInstanaSyntheticAlertConfig, metadata.ResourceName)
-		assert.Equal(t, int64(1), metadata.SchemaVersion)
+		assert.Equal(t, int64(2), metadata.SchemaVersion)
 	})
 
 	t.Run("should have correct schema attributes", func(t *testing.T) {

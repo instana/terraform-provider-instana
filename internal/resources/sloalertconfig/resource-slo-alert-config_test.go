@@ -1002,7 +1002,7 @@ func TestMetaData(t *testing.T) {
 	metaData := resource.MetaData()
 	require.NotNil(t, metaData)
 	assert.Equal(t, ResourceInstanaSloAlertConfig, metaData.ResourceName)
-	assert.Equal(t, int64(1), metaData.SchemaVersion)
+	assert.Equal(t, int64(2), metaData.SchemaVersion)
 	assert.False(t, metaData.CreateOnly)
 }
 

@@ -23,7 +23,7 @@ func TestNewAutomationPolicyResourceHandle(t *testing.T) {
 	metaData := resource.MetaData()
 	assert.Equal(t, ResourceInstanaAutomationPolicy, metaData.ResourceName)
 	assert.NotNil(t, metaData.Schema)
-	assert.Equal(t, int64(0), metaData.SchemaVersion)
+	assert.Equal(t, int64(1), metaData.SchemaVersion)
 }
 
 // TestMetaData tests the MetaData method

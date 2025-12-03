@@ -6,7 +6,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/stretchr/testify/require"
 )
 
@@ -37,43 +36,43 @@ func TestBuiltinEventDataSourceSchema(t *testing.T) {
 	ds.Schema(context.Background(), req, resp)
 
 	require.NotNil(t, resp.Schema)
-	require.Equal(t, shared.BuiltinEventDescDataSource, resp.Schema.Description)
+	require.Equal(t, BuiltinEventDescDataSource, resp.Schema.Description)
 
 	// Verify required fields exist
-	require.Contains(t, resp.Schema.Attributes, shared.BuiltinEventFieldID)
-	require.Contains(t, resp.Schema.Attributes, shared.BuiltinEventSpecificationFieldName)
-	require.Contains(t, resp.Schema.Attributes, shared.BuiltinEventSpecificationFieldDescription)
-	require.Contains(t, resp.Schema.Attributes, shared.BuiltinEventSpecificationFieldShortPluginID)
-	require.Contains(t, resp.Schema.Attributes, shared.BuiltinEventSpecificationFieldSeverity)
-	require.Contains(t, resp.Schema.Attributes, shared.BuiltinEventSpecificationFieldSeverityCode)
-	require.Contains(t, resp.Schema.Attributes, shared.BuiltinEventSpecificationFieldTriggering)
-	require.Contains(t, resp.Schema.Attributes, shared.BuiltinEventSpecificationFieldEnabled)
+	require.Contains(t, resp.Schema.Attributes, BuiltinEventFieldID)
+	require.Contains(t, resp.Schema.Attributes, BuiltinEventSpecificationFieldName)
+	require.Contains(t, resp.Schema.Attributes, BuiltinEventSpecificationFieldDescription)
+	require.Contains(t, resp.Schema.Attributes, BuiltinEventSpecificationFieldShortPluginID)
+	require.Contains(t, resp.Schema.Attributes, BuiltinEventSpecificationFieldSeverity)
+	require.Contains(t, resp.Schema.Attributes, BuiltinEventSpecificationFieldSeverityCode)
+	require.Contains(t, resp.Schema.Attributes, BuiltinEventSpecificationFieldTriggering)
+	require.Contains(t, resp.Schema.Attributes, BuiltinEventSpecificationFieldEnabled)
 
 	// Verify ID field is computed
-	idAttr := resp.Schema.Attributes[shared.BuiltinEventFieldID]
+	idAttr := resp.Schema.Attributes[BuiltinEventFieldID]
 	require.True(t, idAttr.(schema.StringAttribute).Computed)
 
 	// Verify name field is required
-	nameAttr := resp.Schema.Attributes[shared.BuiltinEventSpecificationFieldName]
+	nameAttr := resp.Schema.Attributes[BuiltinEventSpecificationFieldName]
 	require.True(t, nameAttr.(schema.StringAttribute).Required)
 
 	// Verify short_plugin_id field is required
-	shortPluginIDAttr := resp.Schema.Attributes[shared.BuiltinEventSpecificationFieldShortPluginID]
+	shortPluginIDAttr := resp.Schema.Attributes[BuiltinEventSpecificationFieldShortPluginID]
 	require.True(t, shortPluginIDAttr.(schema.StringAttribute).Required)
 
 	// Verify computed fields
-	descAttr := resp.Schema.Attributes[shared.BuiltinEventSpecificationFieldDescription]
+	descAttr := resp.Schema.Attributes[BuiltinEventSpecificationFieldDescription]
 	require.True(t, descAttr.(schema.StringAttribute).Computed)
 
-	severityAttr := resp.Schema.Attributes[shared.BuiltinEventSpecificationFieldSeverity]
+	severityAttr := resp.Schema.Attributes[BuiltinEventSpecificationFieldSeverity]
 	require.True(t, severityAttr.(schema.StringAttribute).Computed)
 
-	severityCodeAttr := resp.Schema.Attributes[shared.BuiltinEventSpecificationFieldSeverityCode]
+	severityCodeAttr := resp.Schema.Attributes[BuiltinEventSpecificationFieldSeverityCode]
 	require.True(t, severityCodeAttr.(schema.Int64Attribute).Computed)
 
-	triggeringAttr := resp.Schema.Attributes[shared.BuiltinEventSpecificationFieldTriggering]
+	triggeringAttr := resp.Schema.Attributes[BuiltinEventSpecificationFieldTriggering]
 	require.True(t, triggeringAttr.(schema.BoolAttribute).Computed)
 
-	enabledAttr := resp.Schema.Attributes[shared.BuiltinEventSpecificationFieldEnabled]
+	enabledAttr := resp.Schema.Attributes[BuiltinEventSpecificationFieldEnabled]
 	require.True(t, enabledAttr.(schema.BoolAttribute).Computed)
 }

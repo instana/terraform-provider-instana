@@ -26,20 +26,20 @@ func TestNewApplicationConfigResourceHandle(t *testing.T) {
 	metaData := resource.MetaData()
 	assert.Equal(t, ResourceInstanaApplicationConfig, metaData.ResourceName)
 	assert.NotNil(t, metaData.Schema)
-	assert.Equal(t, int64(4), metaData.SchemaVersion)
+	assert.Equal(t, int64(5), metaData.SchemaVersion)
 }
 
 func TestMetaData(t *testing.T) {
 	resource := &applicationConfigResource{
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:  "test_resource",
-			SchemaVersion: 4,
+			SchemaVersion: 5,
 		},
 	}
 
 	metaData := resource.MetaData()
 	assert.Equal(t, "test_resource", metaData.ResourceName)
-	assert.Equal(t, int64(4), metaData.SchemaVersion)
+	assert.Equal(t, int64(5), metaData.SchemaVersion)
 }
 
 func TestSetComputedFields(t *testing.T) {

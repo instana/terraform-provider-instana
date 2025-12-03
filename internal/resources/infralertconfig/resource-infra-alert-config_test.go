@@ -22,7 +22,7 @@ func TestNewInfraAlertConfigResourceHandle(t *testing.T) {
 	metaData := resource.MetaData()
 	assert.Equal(t, ResourceInstanaInfraAlertConfig, metaData.ResourceName)
 	assert.NotNil(t, metaData.Schema)
-	assert.Equal(t, int64(0), metaData.SchemaVersion)
+	assert.Equal(t, int64(2), metaData.SchemaVersion)
 }
 
 func TestMetaData(t *testing.T) {
