@@ -95,7 +95,7 @@ func NewAlertingConfigResourceHandle() resourcehandle.ResourceHandle[*restapi.Al
 					shared.DefaultCustomPayloadFieldsName: shared.GetCustomPayloadFieldsSchema(),
 				},
 			},
-			SchemaVersion: 1,
+			SchemaVersion: 2,
 		},
 	}
 }

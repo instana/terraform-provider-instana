@@ -30,7 +30,7 @@ func NewCustomEventSpecificationResourceHandle() resourcehandle.ResourceHandle[*
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:  ResourceInstanaCustomEventSpecification,
 			Schema:        createCustomEventSpecificationSchema(),
-			SchemaVersion: 1,
+			SchemaVersion: 0,
 		},
 	}
 }

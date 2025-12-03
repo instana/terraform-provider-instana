@@ -364,7 +364,7 @@ func NewAlertingChannelResourceHandle() resourcehandle.ResourceHandle[*restapi.A
 					},
 				},
 			},
-			SchemaVersion: 1,
+			SchemaVersion: 0,
 		},
 	}
 }
