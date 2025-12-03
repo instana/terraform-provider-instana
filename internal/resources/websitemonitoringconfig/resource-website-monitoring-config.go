@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // NewWebsiteMonitoringConfigResourceHandle creates the resource handle for Website Monitoring Configurations
@@ -264,4 +265,9 @@ func updateTerraformState(ctx context.Context, state *tfsdk.State, model *Websit
 		diags.AddError(WebsiteMonitoringConfigErrUpdatingState, "Failed to update Terraform state")
 	}
 	return diags
+}
+
+// GetStateUpgraders returns the state upgraders for this resource
+func (r *websiteMonitoringConfigResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
+	return nil
 }

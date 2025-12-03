@@ -20,6 +20,7 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
 	"github.com/instana/terraform-provider-instana/internal/util"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // NewInfraAlertConfigResourceHandle creates a new instance of the infrastructure alert configuration resource
@@ -625,3 +626,8 @@ func (r *infraAlertConfigResource) mapModelThresholdsToAPI(ctx context.Context, 
 }
 
 // Made with Bob
+
+// GetStateUpgraders returns the state upgraders for this resource
+func (r *infraAlertConfigResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
+	return nil
+}

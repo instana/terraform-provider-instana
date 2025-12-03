@@ -26,6 +26,7 @@ type TerraformResource interface {
 	resource.Resource
 	resource.ResourceWithConfigure
 	resource.ResourceWithImportState
+	resource.ResourceWithUpgradeState
 }
 
 type terraformResourceImpl[T restapi.InstanaDataObject] struct {
@@ -246,4 +247,9 @@ func (r *terraformResourceImpl[T]) ImportState(ctx context.Context, req resource
 	} else {
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), types.StringValue(req.ID))...)
 	}
+}
+
+// UpgradeState handles state upgrades for resources that need schema migration
+func (r *terraformResourceImpl[T]) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return r.resourceHandle.GetStateUpgraders(ctx)
 }

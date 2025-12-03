@@ -15,6 +15,7 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/util"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // NewGroupResourceHandle creates the resource handle for RBAC Groups
@@ -360,3 +361,8 @@ func (r *groupResource) convertStringsToPermissions(permissionStrings []string) 
 }
 
 // Made with Bob
+
+// GetStateUpgraders returns the state upgraders for this resource
+func (r *groupResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
+	return nil
+}
