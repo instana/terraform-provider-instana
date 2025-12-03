@@ -1,7 +1,7 @@
 package infralertconfig
 
 // ResourceInstanaInfraAlertConfig the name of the terraform-provider-instana resource to manage infrastructure alert configurations
-const ResourceInstanaInfraAlertConfig = "infrastructure_alert_config"
+const ResourceInstanaInfraAlertConfig = "infra_alert_config"
 
 // Schema field names
 const (
