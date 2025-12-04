@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/util"
@@ -62,13 +61,6 @@ func (r *terraformResourceImpl[T]) Configure(_ context.Context, req resource.Con
 	}
 
 	r.providerMeta = providerMeta
-}
-
-func (r *terraformResourceImpl[T]) getResourceID(d *schema.ResourceData) string {
-	if r.resourceHandle.MetaData().ResourceIDField != nil {
-		return d.Get(*r.resourceHandle.MetaData().ResourceIDField).(string)
-	}
-	return d.Id()
 }
 
 // Create defines the create operation for the terraform resource

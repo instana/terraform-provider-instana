@@ -337,7 +337,6 @@ func buildTrafficIndicatorAttribute() schema.SingleNestedAttribute {
 			},
 			SchemaFieldOperator: schema.StringAttribute{
 				Optional:    true,
-				Computed:    true,
 				Description: SloConfigDescOperator,
 				Validators: []validator.String{
 					stringvalidator.OneOf(OperatorGreaterThan, OperatorGreaterThanOrEqual, OperatorLessThan, OperatorLessThanOrEqual),
@@ -1070,7 +1069,7 @@ func (r *sloConfigResource) UpdateState(ctx context.Context, state *tfsdk.State,
 	}
 	model.Entity = &entityData
 
-	indicatorData, indicatorDiags := r.mapIndicatorToState(apiObject)
+	indicatorData, indicatorDiags := r.mapIndicatorToState(apiObject, &model)
 	diags.Append(indicatorDiags...)
 	if diags.HasError() {
 		return diags
@@ -1253,11 +1252,12 @@ func (r *sloConfigResource) mapFilterExpressionToState(filterExpression *restapi
 	return types.StringNull(), diags
 }
 
-func (r *sloConfigResource) mapIndicatorToState(apiObject *restapi.SloConfig) (IndicatorModel, diag.Diagnostics) {
+func (r *sloConfigResource) mapIndicatorToState(apiObject *restapi.SloConfig, sloConfigModel *SloConfigModel) (IndicatorModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	indicator := apiObject.Indicator
 
 	indicatorModel := IndicatorModel{}
+	existingVal := sloConfigModel.Indicator
 
 	switch {
 	case indicator.Type == SloConfigAPIIndicatorMeasurementTypeTimeBased && indicator.Blueprint == SloConfigAPIIndicatorBlueprintLatency:
@@ -1273,7 +1273,7 @@ func (r *sloConfigResource) mapIndicatorToState(apiObject *restapi.SloConfig) (I
 		indicatorModel.EventBasedAvailabilityIndicatorModel = r.createEventBasedAvailabilityModel()
 
 	case indicator.Blueprint == SloConfigAPIIndicatorBlueprintTraffic:
-		indicatorModel.TrafficIndicatorModel = r.createTrafficModel(indicator)
+		indicatorModel.TrafficIndicatorModel = r.createTrafficModel(indicator, existingVal)
 
 	case indicator.Type == SloConfigAPIIndicatorMeasurementTypeEventBased && indicator.Blueprint == SloConfigAPIIndicatorBlueprintCustom:
 		customModel, customDiags := r.createCustomModel(indicator)
@@ -1321,12 +1321,15 @@ func (r *sloConfigResource) createEventBasedAvailabilityModel() *EventBasedAvail
 }
 
 // createTrafficModel creates traffic indicator model
-func (r *sloConfigResource) createTrafficModel(indicator restapi.SloIndicator) *TrafficIndicatorModel {
-	return &TrafficIndicatorModel{
+func (r *sloConfigResource) createTrafficModel(indicator restapi.SloIndicator, existingVal *IndicatorModel) *TrafficIndicatorModel {
+	trafficIndicatorModel := &TrafficIndicatorModel{
 		TrafficType: util.SetStringPointerToState(indicator.TrafficType),
 		Threshold:   types.Float64Value(indicator.Threshold),
-		Operator:    util.SetStringPointerToState(indicator.Operator),
 	}
+	if existingVal == nil {
+		trafficIndicatorModel.Operator = util.SetStringPointerToState(indicator.Operator)
+	}
+	return trafficIndicatorModel
 }
 
 // createCustomModel creates custom indicator model

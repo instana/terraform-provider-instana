@@ -2,7 +2,6 @@ package sloconfig
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"testing"
 
@@ -769,7 +768,7 @@ func TestMapIndicatorToState(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapIndicatorToState(apiObject)
+		result, diags := resource.mapIndicatorToState(apiObject, &SloConfigModel{})
 
 		assert.False(t, diags.HasError())
 		assert.NotNil(t, result.TimeBasedLatencyIndicatorModel)
@@ -785,7 +784,7 @@ func TestMapIndicatorToState(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapIndicatorToState(apiObject)
+		result, diags := resource.mapIndicatorToState(apiObject, &SloConfigModel{})
 
 		assert.False(t, diags.HasError())
 		assert.Nil(t, result.TimeBasedLatencyIndicatorModel)
@@ -803,7 +802,7 @@ func TestMapIndicatorToState(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapIndicatorToState(apiObject)
+		result, diags := resource.mapIndicatorToState(apiObject, &SloConfigModel{})
 
 		assert.False(t, diags.HasError())
 		assert.NotNil(t, result.TimeBasedAvailabilityIndicatorModel)
@@ -817,7 +816,7 @@ func TestMapIndicatorToState(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapIndicatorToState(apiObject)
+		result, diags := resource.mapIndicatorToState(apiObject, &SloConfigModel{})
 
 		assert.False(t, diags.HasError())
 		assert.NotNil(t, result.EventBasedAvailabilityIndicatorModel)
@@ -836,7 +835,7 @@ func TestMapIndicatorToState(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapIndicatorToState(apiObject)
+		result, diags := resource.mapIndicatorToState(apiObject, &SloConfigModel{})
 
 		assert.False(t, diags.HasError())
 		assert.NotNil(t, result.TrafficIndicatorModel)
@@ -855,7 +854,7 @@ func TestMapIndicatorToState(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapIndicatorToState(apiObject)
+		result, diags := resource.mapIndicatorToState(apiObject, &SloConfigModel{})
 
 		assert.False(t, diags.HasError())
 		assert.NotNil(t, result.CustomIndicatorModel)
@@ -869,7 +868,7 @@ func TestMapIndicatorToState(t *testing.T) {
 			},
 		}
 
-		_, diags := resource.mapIndicatorToState(apiObject)
+		_, diags := resource.mapIndicatorToState(apiObject, &SloConfigModel{})
 
 		assert.True(t, diags.HasError())
 	})
@@ -1057,18 +1056,6 @@ func TestMapSyntheticEntityToState(t *testing.T) {
 		// Only string values should be converted
 		assert.Len(t, result.SyntheticTestIDs, 2)
 	})
-}
-
-// Mock types for testing
-type mockTagFilterParser struct {
-	parseFunc func(string) (interface{}, error)
-}
-
-func (m *mockTagFilterParser) Parse(expression string) (interface{}, error) {
-	if m.parseFunc != nil {
-		return m.parseFunc(expression)
-	}
-	return nil, errors.New("mock parse error")
 }
 
 // Additional edge case tests
@@ -1295,7 +1282,7 @@ func TestMapIndicatorToStateWithTrafficOperator(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapIndicatorToState(apiObject)
+		result, diags := resource.mapIndicatorToState(apiObject, &SloConfigModel{})
 
 		assert.False(t, diags.HasError())
 		assert.NotNil(t, result.TrafficIndicatorModel)

@@ -1,7 +1,6 @@
 package sliconfig
 
 import (
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 )
@@ -67,40 +66,4 @@ type WebsiteTimeBasedModel struct {
 
 type sliConfigResource struct {
 	metaData resourcehandle.ResourceMetaData
-}
-
-var applicationTimeBasedObjectType = types.ObjectType{
-	AttrTypes: map[string]attr.Type{
-		"application_id": types.StringType,
-		"service_id":     types.StringType,
-		"endpoint_id":    types.StringType,
-		"boundary_scope": types.StringType,
-	},
-}
-var websiteTimeBasedObjectType = types.ObjectType{
-	AttrTypes: map[string]attr.Type{
-		"website_id":        types.StringType,
-		"filter_expression": types.StringType,
-		"beacon_type":       types.StringType,
-	},
-}
-var applicationEventBasedObjectType = types.ObjectType{
-	AttrTypes: map[string]attr.Type{
-		"application_id":               types.StringType,
-		"boundary_scope":               types.StringType,
-		"bad_event_filter_expression":  types.StringType,
-		"good_event_filter_expression": types.StringType,
-		"include_internal":             types.BoolType,
-		"include_synthetic":            types.BoolType,
-		"service_id":                   types.StringType,
-		"endpoint_id":                  types.StringType,
-	},
-}
-var websiteEventBasedObjectType = types.ObjectType{
-	AttrTypes: map[string]attr.Type{
-		"website_id":                   types.StringType,
-		"bad_event_filter_expression":  types.StringType,
-		"good_event_filter_expression": types.StringType,
-		"beacon_type":                  types.StringType,
-	},
 }
