@@ -1,5 +1,22 @@
 # Changelog
 
+## [v6.0.0](https://github.com/instana/terraform-provider-instana/tree/v6.0.0) (2025-12-04)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v5.4.1...v6.0.0)
+
+**Merged pull requests:**
+
+- Provider migration [\#63](https://github.com/instana/terraform-provider-instana/pull/63) ([georgekutty-1](https://github.com/georgekutty-1))
+
+
+## [v5.4.1](https://github.com/instana/terraform-provider-instana/tree/v5.4.1) (2025-12-03)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v5.4.0...v5.4.1)
+
+**Merged pull requests:**
+
+- Add support for relative_diff & absolute_diff aggregation in custom event specification [\#62](https://github.com/instana/terraform-provider-instana/pull/62) ([parekh-raj](https://github.com/parekh-raj))
+
 ## [v5.4.0](https://github.com/instana/terraform-provider-instana/tree/v5.4.0) (2025-10-09)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v5.3.1...v5.4.0)
