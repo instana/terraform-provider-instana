@@ -384,7 +384,7 @@ func TestUpdateState_WithRulesAndStaticThreshold(t *testing.T) {
 	require.NotNil(t, model.Rules.GenericRule.ThresholdRule)
 	require.NotNil(t, model.Rules.GenericRule.ThresholdRule.Warning)
 	require.NotNil(t, model.Rules.GenericRule.ThresholdRule.Warning.Static)
-	assert.Equal(t, float32(100), model.Rules.GenericRule.ThresholdRule.Warning.Static.Value.ValueFloat32())
+	assert.Equal(t, float64(100), model.Rules.GenericRule.ThresholdRule.Warning.Static.Value.ValueFloat64())
 }
 
 func TestUpdateState_WithRulesAndAdaptiveBaselineThreshold(t *testing.T) {
@@ -672,7 +672,7 @@ func TestMapStateToDataObject_WithRulesAndStaticThreshold(t *testing.T) {
 				ThresholdRule: &shared.ThresholdPluginModel{
 					Warning: &shared.ThresholdTypeModel{
 						Static: &shared.StaticTypeModel{
-							Value: types.Float32Value(float32(100)),
+							Value: types.Float64Value(100),
 						},
 					},
 				},
@@ -776,12 +776,12 @@ func TestMapStateToDataObject_WithBothThresholds(t *testing.T) {
 				ThresholdRule: &shared.ThresholdPluginModel{
 					Warning: &shared.ThresholdTypeModel{
 						Static: &shared.StaticTypeModel{
-							Value: types.Float32Value(float32(80)),
+							Value: types.Float64Value(80),
 						},
 					},
 					Critical: &shared.ThresholdTypeModel{
 						Static: &shared.StaticTypeModel{
-							Value: types.Float32Value(float32(95)),
+							Value: types.Float64Value(95),
 						},
 					},
 				},

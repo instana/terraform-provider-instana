@@ -157,12 +157,12 @@ func TestMapStateToDataObject_WithRules(t *testing.T) {
 					Thresholds: &shared.ThresholdAllPluginModel{
 						Warning: &shared.ThresholdAllTypeModel{
 							Static: &shared.StaticTypeModel{
-								Value: types.Float32Value(float32(1000)),
+								Value: types.Float64Value(1000),
 							},
 						},
 						Critical: &shared.ThresholdAllTypeModel{
 							Static: &shared.StaticTypeModel{
-								Value: types.Float32Value(float32(2000)),
+								Value: types.Float64Value(2000),
 							},
 						},
 					},
@@ -685,7 +685,7 @@ func TestMapStateToDataObject_AllRuleTypes(t *testing.T) {
 					Thresholds: &shared.ThresholdAllPluginModel{
 						Warning: &shared.ThresholdAllTypeModel{
 							Static: &shared.StaticTypeModel{
-								Value: types.Float32Value(float32(100)),
+								Value: types.Float64Value(100),
 							},
 						},
 					},
@@ -739,7 +739,7 @@ func TestMapStateToDataObject_AllRuleTypes(t *testing.T) {
 					Thresholds: &shared.ThresholdAllPluginModel{
 						Critical: &shared.ThresholdAllTypeModel{
 							Static: &shared.StaticTypeModel{
-								Value: types.Float32Value(float32(10)),
+								Value: types.Float64Value(10),
 							},
 						},
 					},
@@ -795,7 +795,7 @@ func TestMapStateToDataObject_AllRuleTypes(t *testing.T) {
 					Thresholds: &shared.ThresholdAllPluginModel{
 						Warning: &shared.ThresholdAllTypeModel{
 							Static: &shared.StaticTypeModel{
-								Value: types.Float32Value(float32(1)),
+								Value: types.Float64Value(1),
 							},
 						},
 					},

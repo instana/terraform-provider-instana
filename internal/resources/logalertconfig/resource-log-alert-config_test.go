@@ -370,11 +370,11 @@ func TestUpdateState_WithRulesAndThresholds(t *testing.T) {
 	require.NotNil(t, model.Rules.Threshold)
 	require.NotNil(t, model.Rules.Threshold.Warning)
 	require.NotNil(t, model.Rules.Threshold.Warning.Static)
-	assert.Equal(t, float32(100), model.Rules.Threshold.Warning.Static.Value.ValueFloat32())
+	assert.Equal(t, float64(100), model.Rules.Threshold.Warning.Static.Value.ValueFloat64())
 
 	require.NotNil(t, model.Rules.Threshold.Critical)
 	require.NotNil(t, model.Rules.Threshold.Critical.Static)
-	assert.Equal(t, float32(200), model.Rules.Threshold.Critical.Static.Value.ValueFloat32())
+	assert.Equal(t, float64(200), model.Rules.Threshold.Critical.Static.Value.ValueFloat64())
 }
 
 func TestUpdateState_WithCustomPayloadFields(t *testing.T) {
@@ -620,12 +620,12 @@ func TestMapStateToDataObject_WithRules(t *testing.T) {
 			Threshold: &ThresholdModel{
 				Warning: &shared.ThresholdTypeModel{
 					Static: &shared.StaticTypeModel{
-						Value: types.Float32Value(100),
+						Value: types.Float64Value(100),
 					},
 				},
 				Critical: &shared.ThresholdTypeModel{
 					Static: &shared.StaticTypeModel{
-						Value: types.Float32Value(200),
+						Value: types.Float64Value(200),
 					},
 				},
 			},
@@ -1278,7 +1278,7 @@ func TestMapStateToDataObject_WithRulesWithOnlyWarningThreshold(t *testing.T) {
 			Threshold: &ThresholdModel{
 				Warning: &shared.ThresholdTypeModel{
 					Static: &shared.StaticTypeModel{
-						Value: types.Float32Value(100),
+						Value: types.Float64Value(100),
 					},
 				},
 				Critical: nil,
@@ -1315,7 +1315,7 @@ func TestMapStateToDataObject_WithRulesWithOnlyCriticalThreshold(t *testing.T) {
 				Warning: nil,
 				Critical: &shared.ThresholdTypeModel{
 					Static: &shared.StaticTypeModel{
-						Value: types.Float32Value(200),
+						Value: types.Float64Value(200),
 					},
 				},
 			},
@@ -1350,12 +1350,12 @@ func TestMapStateToDataObject_WithRulesWithNullThresholdValues(t *testing.T) {
 			Threshold: &ThresholdModel{
 				Warning: &shared.ThresholdTypeModel{
 					Static: &shared.StaticTypeModel{
-						Value: types.Float32Null(),
+						Value: types.Float64Null(),
 					},
 				},
 				Critical: &shared.ThresholdTypeModel{
 					Static: &shared.StaticTypeModel{
-						Value: types.Float32Null(),
+						Value: types.Float64Null(),
 					},
 				},
 			},
@@ -1484,7 +1484,7 @@ func TestMapStateToDataObject_WithNullAggregation(t *testing.T) {
 			Threshold: &ThresholdModel{
 				Warning: &shared.ThresholdTypeModel{
 					Static: &shared.StaticTypeModel{
-						Value: types.Float32Value(100),
+						Value: types.Float64Value(100),
 					},
 				},
 			},

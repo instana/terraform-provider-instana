@@ -3,6 +3,7 @@ package shared
 import (
 	"context"
 	"math"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -70,7 +71,7 @@ type HistoricBaselineModel struct {
 
 type StaticTypeModel struct {
 	//Operator types.String  `tfsdk:"operator"`
-	Value types.Float32 `tfsdk:"value"`
+	Value types.Float64 `tfsdk:"value"`
 }
 type ThresholdPluginModel struct {
 	Warning  *ThresholdTypeModel `tfsdk:"warning"`
@@ -107,7 +108,7 @@ func StaticAttributeSchema() schema.SingleNestedAttribute {
 		Optional:    true,
 		Description: "Static threshold configuration",
 		Attributes: map[string]schema.Attribute{
-			LogAlertConfigFieldValue: schema.Float32Attribute{
+			LogAlertConfigFieldValue: schema.Float64Attribute{
 				Optional:    true,
 				Description: "The value of the threshold",
 			},
@@ -265,7 +266,7 @@ func MapThresholdRulePluginFromState(ctx context.Context, thresholdObj *Threshol
 	// Check for static threshold
 	if thresholdObj.Static != nil {
 		staticVal := thresholdObj.Static
-		valueFloat := float64(staticVal.Value.ValueFloat32())
+		valueFloat := staticVal.Value.ValueFloat64()
 		rounded := math.Round(valueFloat*100) / 100
 		return &restapi.ThresholdRule{
 			Type:  "staticThreshold",
@@ -342,7 +343,7 @@ func MapThresholdRuleAllPluginFromState(ctx context.Context, thresholdObj *Thres
 		staticVal := thresholdObj.Static
 		//operator := util.SetStringPointerFromState(staticVal.Operator)
 
-		valueFloat := float64(staticVal.Value.ValueFloat32())
+		valueFloat := staticVal.Value.ValueFloat64()
 		rounded := math.Round(valueFloat*100) / 100
 		return &restapi.ThresholdRule{
 			Type:  "staticThreshold",
@@ -478,9 +479,19 @@ func MapThresholdPluginToState(ctx context.Context, threshold *restapi.Threshold
 		thresholdTypeModel.AdaptiveBaseline = &adaptiveBaselineModel
 	default:
 		// Default to static threshold for all other types
+		// Round to 2 decimal places to avoid floating-point precision issues
+		var roundedValue types.Float64
+		if threshold.Value != nil {
+			// Format to 2 decimal places and parse back to ensure exact precision
+			formatted := strconv.FormatFloat(*threshold.Value, 'f', 2, 64)
+			parsed, _ := strconv.ParseFloat(formatted, 64)
+			roundedValue = types.Float64Value(parsed)
+		} else {
+			roundedValue = types.Float64Null()
+		}
 		static := StaticTypeModel{
 			//Operator: util.SetStringPointerToState(threshold.Operator),
-			Value: util.SetFloat32PointerToState(threshold.Value),
+			Value: roundedValue,
 		}
 		thresholdTypeModel.Static = &static
 	}
@@ -536,9 +547,19 @@ func MapAllThresholdPluginToState(ctx context.Context, threshold *restapi.Thresh
 		thresholdTypeModel.HistoricBaseline = &historicBaselineModel
 	default:
 		// Default to static threshold for all other types
+		// Round to 2 decimal places to avoid floating-point precision issues
+		var roundedValue types.Float64
+		if threshold.Value != nil {
+			// Format to 2 decimal places and parse back to ensure exact precision
+			formatted := strconv.FormatFloat(*threshold.Value, 'f', 2, 64)
+			parsed, _ := strconv.ParseFloat(formatted, 64)
+			roundedValue = types.Float64Value(parsed)
+		} else {
+			roundedValue = types.Float64Null()
+		}
 		static := StaticTypeModel{
 			//Operator: util.SetStringPointerToState(threshold.Operator),
-			Value: util.SetFloat32PointerToState(threshold.Value),
+			Value: roundedValue,
 		}
 		thresholdTypeModel.Static = &static
 	}
