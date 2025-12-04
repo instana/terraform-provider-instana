@@ -606,7 +606,49 @@ terraform plan
 # Should show: "No changes. Your infrastructure matches the configuration."
 ```
 
-#### Step 13: Replace Original Folder (After Successful Verification)
+#### Step 13: Configure Remote Backend (If Previously Used)
+
+If you were using a remote backend before migration, reconfigure it and push the verified state:
+
+```bash
+# Uncomment your backend configuration in your terraform files
+# Edit main.tf or backend.tf and uncomment the backend block
+
+# Example: Uncomment remote backend
+# terraform {
+#   backend "s3" {
+#     bucket = "my-terraform-state"
+#     key    = "prod/terraform.tfstate"
+#     region = "us-east-1"
+#   }
+# }
+```
+
+After uncommenting the backend configuration:
+
+```bash
+# Re-initialize to configure the remote backend
+terraform init
+
+# Push the verified local state to the remote backend
+terraform state push terraform.tfstate
+```
+
+**Expected Output:**
+```
+Initializing the backend...
+Successfully configured the backend "s3"!
+
+Terraform has been successfully initialized!
+```
+
+**Important:**
+- Only push the state after thorough verification
+- Ensure the remote backend is accessible and properly configured
+- The local `terraform.tfstate` file will be uploaded to the remote backend
+- Keep a backup of the local state file before pushing
+
+#### Step 14: Replace Original Folder (After Successful Verification)
 
 **Only after thorough verification and testing**, replace your original folder with the migration folder:
 
@@ -627,12 +669,7 @@ mv migration/ original-folder/
 - **Do NOT replace your production folder until you have thoroughly tested and verified the migration**
 - Test the migration in a non-production environment first
 - Keep the original folder backup for rollback purposes
-- If using remote backend, migrate the local state back to remote after verification:
-  ```bash
-  # Uncomment your backend configuration
-  # Re-initialize to migrate state to remote backend
-  terraform init -migrate-state
-  ```
+- If using remote backend, ensure Step 13 is completed successfully before replacing the folder
 - Update all CI/CD pipelines and documentation to reference the updated configuration
 - The migrated folder becomes your main working directory after successful verification
 
