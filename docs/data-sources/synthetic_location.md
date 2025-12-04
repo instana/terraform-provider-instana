@@ -13,5 +13,12 @@ data "instana_synthetic_location" "locations" {}
 
 ## Argument Reference
 
-* `label` - Required - the label of the synthetic location
-* `location_type` - Required - indicates if the location is public or private
+* `label` - Optional - the label of the synthetic location
+* `location_type` - Optional - indicates if the location is public or private
+
+## Attribute Reference
+
+This data source exports the following attributes in addition to the arguments above:
+
+* `id` - The synthetic location identifier
+* `description` - The description of the synthetic location

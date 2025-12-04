@@ -3,11 +3,12 @@ package testutils_test
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/gessnerfl/terraform-provider-instana/testutils"
 	"io"
 	"net/http"
 	"strings"
 	"testing"
+
+	"github.com/instana/terraform-provider-instana/testutils"
 
 	"github.com/stretchr/testify/assert"
 )

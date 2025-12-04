@@ -7,7 +7,7 @@ package mocks
 import (
 	reflect "reflect"
 
-	restapi "github.com/gessnerfl/terraform-provider-instana/instana/restapi"
+	restapi "github.com/instana/terraform-provider-instana/internal/restapi"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -347,4 +347,32 @@ func (m *MockInstanaAPI) LogAlertConfig() restapi.RestResource[*restapi.LogAlert
 func (mr *MockInstanaAPIMockRecorder) LogAlertConfig() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LogAlertConfig", reflect.TypeOf((*MockInstanaAPI)(nil).LogAlertConfig))
+}
+
+// Teams mocks base method.
+func (m *MockInstanaAPI) Teams() restapi.RestResource[*restapi.Team] {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Teams")
+	ret0, _ := ret[0].(restapi.RestResource[*restapi.Team])
+	return ret0
+}
+
+// Teams indicates an expected call of Teams.
+func (mr *MockInstanaAPIMockRecorder) Teams() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Teams", reflect.TypeOf((*MockInstanaAPI)(nil).Teams))
+}
+
+// SyntheticAlertConfigs mocks base method.
+func (m *MockInstanaAPI) SyntheticAlertConfigs() restapi.RestResource[*restapi.SyntheticAlertConfig] {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SyntheticAlertConfigs")
+	ret0, _ := ret[0].(restapi.RestResource[*restapi.SyntheticAlertConfig])
+	return ret0
+}
+
+// SyntheticAlertConfigs indicates an expected call of SyntheticAlertConfigs.
+func (mr *MockInstanaAPIMockRecorder) SyntheticAlertConfigs() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SyntheticAlertConfigs", reflect.TypeOf((*MockInstanaAPI)(nil).SyntheticAlertConfigs))
 }

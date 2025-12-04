@@ -1,16 +1,34 @@
 package main
 
 import (
-	"github.com/gessnerfl/terraform-provider-instana/instana"
+	"context"
+	"flag"
+	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
+	"github.com/hashicorp/terraform-plugin-framework/providerserver"
+	"github.com/instana/terraform-provider-instana/internal/provider"
+)
+
+var (
+	// these will be set by the goreleaser configuration
+	// to appropriate values for the compiled binary.
+	version string = "dev"
 )
 
 func main() {
-	plugin.Serve(&plugin.ServeOpts{
-		ProviderFunc: func() *schema.Provider {
-			return instana.Provider()
-		},
-	})
+	var debug bool
+
+	flag.BoolVar(&debug, "debug", false, "set to true to run the provider with support for debuggers like delve")
+	flag.Parse()
+
+	opts := providerserver.ServeOpts{
+		Address: "registry.terraform.io/instana/instana",
+		Debug:   debug,
+	}
+
+	err := providerserver.Serve(context.Background(), provider.New(version), opts)
+
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 }
