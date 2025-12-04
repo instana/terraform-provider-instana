@@ -339,14 +339,40 @@ cp -r . migration/
 # Navigate to the migration directory
 cd migration/
 
-# Ensure the state file is present
-ls -la terraform.tfstate  # or check your backend configuration
+# Rename the backup state file to terraform.tfstate for local work
+mv backup-state.tfstate terraform.tfstate
+
+# Comment out remote backend configuration if you're using one
+# Edit your terraform configuration file (e.g., main.tf or backend.tf)
+# Comment out the backend block to use local state during migration
+```
+
+**Example: Comment out remote backend**
+```hcl
+terraform {
+  required_providers {
+    instana = {
+      source  = "instana/instana"
+      version = "~> 5.0"  # Old version, will be updated in Step 5
+    }
+  }
+  
+  # Comment out remote backend to use local state during migration
+  # backend "s3" {
+  #   bucket = "my-terraform-state"
+  #   key    = "prod/terraform.tfstate"
+  #   region = "us-east-1"
+  # }
+}
 ```
 
 **Important:**
 - This preserves your entire configuration structure including modules, variables, and all files
-- The state file should be copied as well (either local file or pulled from remote backend)
-- Keep the original folder untouched as a backup
+- The backup state file from Step 1 is renamed to `terraform.tfstate` for local work
+- The original backup (`backup-state.tfstate`) remains in the parent directory untouched
+- Comment out remote backend to work with local state during migration
+- This ensures we don't accidentally modify the original remote state file
+- Keep the original folder completely untouched as a backup
 
 #### Step 3: Generate Import Commands
 
@@ -451,27 +477,7 @@ provider "instana" {
 - Keep all other provider configurations unchanged
 - Keep all module definitions and resource configurations as-is for now
 
-#### Step 6: Configure Local State (For Verification)
-
-Ensure you're using a local state file during migration for easy verification:
-
-```bash
-# If using remote backend, comment it out temporarily in your backend configuration
-# Edit your terraform block to remove or comment out the backend configuration
-
-# Example: Comment out remote backend
-# terraform {
-#   backend "s3" {
-#     bucket = "my-terraform-state"
-#     key    = "prod/terraform.tfstate"
-#     region = "us-east-1"
-#   }
-# }
-```
-
-**Important:** Work with local state during migration for easier verification and rollback.
-
-#### Step 7: Initialize with New Provider
+#### Step 6: Initialize with New Provider
 
 ```bash
 # Remove old provider plugins
