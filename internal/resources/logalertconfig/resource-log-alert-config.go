@@ -122,6 +122,9 @@ func buildGroupBySchema() schema.ListNestedAttribute {
 	return schema.ListNestedAttribute{
 		Description: LogAlertConfigDescGroupBy,
 		Optional:    true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: map[string]schema.Attribute{
 				LogAlertConfigFieldGroupByTagName: schema.StringAttribute{
@@ -452,7 +455,7 @@ func (r *logAlertConfigResource) createThresholdModel(threshold restapi.Threshol
 	}
 	return &shared.ThresholdTypeModel{
 		Static: &shared.StaticTypeModel{
-			Value: types.Float32Value(float32(*threshold.Value)),
+			Value: types.Float64Value(*threshold.Value),
 		},
 	}
 }
@@ -727,7 +730,7 @@ func (r *logAlertConfigResource) convertThresholdModelToAPI(threshold *shared.Th
 
 	// Handle static threshold
 	if threshold.Static != nil && !threshold.Static.Value.IsNull() {
-		valueFloat := float64(threshold.Static.Value.ValueFloat32())
+		valueFloat := threshold.Static.Value.ValueFloat64()
 		rounded := math.Round(valueFloat*100) / 100
 		return &restapi.ThresholdRule{
 			Type:  ThresholdTypeStatic,

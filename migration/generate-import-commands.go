@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // TerraformState represents the structure of a terraform.tfstate file
@@ -34,8 +35,8 @@ type Instance struct {
 	Attributes    map[string]interface{} `json:"attributes"`
 }
 
-// ImportBlock represents a Terraform import block
-type ImportBlock struct {
+// ImportCommand represents a Terraform import CLI command
+type ImportCommand struct {
 	Module       string
 	ResourceType string
 	ResourceName string
@@ -46,7 +47,7 @@ type ImportBlock struct {
 func main() {
 	// Default values
 	stateFilePath := "terraform.tfstate"
-	outputFilePath := "import.tf"
+	outputFilePath := "import-commands.sh"
 
 	// Parse command line arguments
 	args := os.Args[1:]
@@ -60,22 +61,22 @@ func main() {
 	// Check if state file exists
 	if _, err := os.Stat(stateFilePath); os.IsNotExist(err) {
 		fmt.Printf("Error: State file '%s' not found.\n", stateFilePath)
-		fmt.Printf("\nUsage: go run generate_import_blocks.go [state_file_path] [output_file_path]\n")
-		fmt.Printf("Example: go run generate_import_blocks.go terraform.tfstate import.tf\n")
+		fmt.Printf("\nUsage: go run generate-import-commands.go [state_file_path] [output_file_path]\n")
+		fmt.Printf("Example: go run generate-import-commands.go terraform.tfstate import-commands.sh\n")
 		os.Exit(1)
 	}
 
 	fmt.Printf("Reading state file: %s\n", stateFilePath)
 	fmt.Printf("Output file: %s\n\n", outputFilePath)
 
-	// Generate import blocks
-	if err := generateImportBlocks(stateFilePath, outputFilePath); err != nil {
+	// Generate import commands
+	if err := generateImportCommands(stateFilePath, outputFilePath); err != nil {
 		fmt.Printf("Error: %v\n", err)
 		os.Exit(1)
 	}
 }
 
-func generateImportBlocks(stateFilePath, outputFilePath string) error {
+func generateImportCommands(stateFilePath, outputFilePath string) error {
 	// Read the state file
 	data, err := os.ReadFile(stateFilePath)
 	if err != nil {
@@ -94,8 +95,8 @@ func generateImportBlocks(stateFilePath, outputFilePath string) error {
 		return nil
 	}
 
-	// Collect import blocks
-	var importBlocks []ImportBlock
+	// Collect import commands
+	var importCommands []ImportCommand
 
 	for _, resource := range state.Resources {
 		// Only process managed resources
@@ -137,24 +138,24 @@ func generateImportBlocks(stateFilePath, outputFilePath string) error {
 				}
 			}
 
-			importBlock := ImportBlock{
+			importCommand := ImportCommand{
 				Module:       resource.Module,
 				ResourceType: resource.Type,
 				ResourceName: resource.Name,
 				IndexKey:     indexKey,
 				ID:           idStr,
 			}
-			importBlocks = append(importBlocks, importBlock)
+			importCommands = append(importCommands, importCommand)
 
 			// Build resource address for logging
 			resourceAddr := buildResourceAddress(resource.Module, resource.Type, resource.Name, indexKey)
-			fmt.Printf("Generated import block for: %s (ID: %s)\n", resourceAddr, idStr)
+			fmt.Printf("Generated import command for: %s (ID: %s)\n", resourceAddr, idStr)
 		}
 	}
 
-	// Write import blocks to file
-	if len(importBlocks) == 0 {
-		fmt.Println("No import blocks generated.")
+	// Write import commands to file
+	if len(importCommands) == 0 {
+		fmt.Println("No import commands generated.")
 		return nil
 	}
 
@@ -165,37 +166,99 @@ func generateImportBlocks(stateFilePath, outputFilePath string) error {
 	}
 	defer file.Close()
 
-	// Write import blocks
-	for i, block := range importBlocks {
-		// Build the resource address
-		resourceAddr := buildResourceAddress(block.Module, block.ResourceType, block.ResourceName, block.IndexKey)
+	// Write shell script header
+	header := `#!/bin/bash
+# Terraform Import Commands
+# Generated from terraform.tfstate
+# 
+# Usage:
+#   chmod +x import-commands.sh
+#   ./import-commands.sh
+#
+# Or run commands individually as needed
+#
+# Note: For module resources, you may need to be in the correct directory
+# or use the -chdir flag if your modules are in subdirectories
 
-		importBlockStr := fmt.Sprintf(`import {
-	 to = %s
-	 id = "%s"
-}
-`, resourceAddr, block.ID)
+set -e  # Exit on error
 
-		if _, err := file.WriteString(importBlockStr); err != nil {
-			return fmt.Errorf("failed to write import block: %w", err)
+echo "Starting Terraform import process..."
+echo ""
+
+`
+	if _, err := file.WriteString(header); err != nil {
+		return fmt.Errorf("failed to write header: %w", err)
+	}
+
+	// Group commands by module for better organization
+	moduleGroups := make(map[string][]ImportCommand)
+	for _, cmd := range importCommands {
+		moduleKey := cmd.Module
+		if moduleKey == "" {
+			moduleKey = "root"
+		}
+		moduleGroups[moduleKey] = append(moduleGroups[moduleKey], cmd)
+	}
+
+	// Write import commands grouped by module
+	for modulePath, commands := range moduleGroups {
+		// Write module header
+		if modulePath == "root" {
+			if _, err := file.WriteString("# Root module resources\n"); err != nil {
+				return fmt.Errorf("failed to write module header: %w", err)
+			}
+		} else {
+			moduleHeader := fmt.Sprintf("# Module: %s\n", modulePath)
+			if _, err := file.WriteString(moduleHeader); err != nil {
+				return fmt.Errorf("failed to write module header: %w", err)
+			}
 		}
 
-		// Add newline between blocks (except for the last one)
-		if i < len(importBlocks)-1 {
-			if _, err := file.WriteString("\n"); err != nil {
-				return fmt.Errorf("failed to write newline: %w", err)
+		// Write commands for this module
+		for _, cmd := range commands {
+			// Build the resource address
+			resourceAddr := buildResourceAddress(cmd.Module, cmd.ResourceType, cmd.ResourceName, cmd.IndexKey)
+
+			// Escape any special characters in the ID if needed
+			escapedID := escapeShellString(cmd.ID)
+
+			// Generate the terraform import command
+			importCmd := fmt.Sprintf("terraform import %s %s\n", resourceAddr, escapedID)
+
+			if _, err := file.WriteString(importCmd); err != nil {
+				return fmt.Errorf("failed to write import command: %w", err)
 			}
+		}
+
+		// Add blank line between module groups
+		if _, err := file.WriteString("\n"); err != nil {
+			return fmt.Errorf("failed to write newline: %w", err)
 		}
 	}
 
-	fmt.Printf("\n✓ Successfully generated %d import block(s)\n", len(importBlocks))
-	fmt.Printf("✓ Import blocks written to: %s\n", outputFilePath)
+	// Write footer
+	footer := `
+echo ""
+echo "✓ Import process completed successfully!"
+echo "✓ Total resources imported: ` + fmt.Sprintf("%d", len(importCommands)) + `"
+`
+	if _, err := file.WriteString(footer); err != nil {
+		return fmt.Errorf("failed to write footer: %w", err)
+	}
+
+	fmt.Printf("\n✓ Successfully generated %d import command(s)\n", len(importCommands))
+	fmt.Printf("✓ Import commands written to: %s\n", outputFilePath)
 
 	// Get absolute path for better user experience
 	absPath, err := filepath.Abs(outputFilePath)
 	if err == nil {
 		fmt.Printf("✓ Full path: %s\n", absPath)
 	}
+
+	fmt.Printf("\nTo execute the import commands:\n")
+	fmt.Printf("  chmod +x %s\n", outputFilePath)
+	fmt.Printf("  ./%s\n", outputFilePath)
+	fmt.Printf("\nOr run individual commands from the file as needed.\n")
 
 	return nil
 }
@@ -213,8 +276,9 @@ func buildResourceAddress(module, resourceType, resourceName, indexKey string) s
 			// Numeric index (count)
 			addr = fmt.Sprintf("%s[%s]", addr, indexKey)
 		} else {
-			// String index (for_each)
-			addr = fmt.Sprintf("%s[\"%s\"]", addr, indexKey)
+			// String index (for_each) - escape quotes in the key
+			escapedKey := strings.ReplaceAll(indexKey, `"`, `\"`)
+			addr = fmt.Sprintf(`%s["%s"]`, addr, escapedKey)
 		}
 	}
 
@@ -225,3 +289,17 @@ func buildResourceAddress(module, resourceType, resourceName, indexKey string) s
 
 	return addr
 }
+
+// escapeShellString escapes special characters in strings for shell scripts
+func escapeShellString(s string) string {
+	// If the string contains spaces or special characters, quote it
+	if strings.ContainsAny(s, " \t\n\"'$`\\!*?[](){};<>|&") {
+		// Escape backslashes and double quotes
+		s = strings.ReplaceAll(s, `\`, `\\`)
+		s = strings.ReplaceAll(s, `"`, `\"`)
+		return fmt.Sprintf(`"%s"`, s)
+	}
+	return s
+}
+
+// Made with Bob

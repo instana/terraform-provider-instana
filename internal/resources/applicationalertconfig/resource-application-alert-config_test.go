@@ -730,7 +730,7 @@ func TestMapStateToDataObject_WithRules(t *testing.T) {
 						Thresholds: &ApplicationThresholdModel{
 							Warning: &ThresholdLevelModel{
 								Static: &shared.StaticTypeModel{
-									Value: types.Float32Value(float32(100)),
+									Value: types.Float64Value(100),
 								},
 							},
 						},
@@ -778,7 +778,7 @@ func TestMapStateToDataObject_WithStaticThreshold(t *testing.T) {
 				Thresholds: &ApplicationThresholdModel{
 					Warning: &ThresholdLevelModel{
 						Static: &shared.StaticTypeModel{
-							Value: types.Float32Value(float32(100)),
+							Value: types.Float64Value(100),
 						},
 					},
 				},
@@ -849,7 +849,7 @@ func TestUpdateState_WithRulesAndThresholds(t *testing.T) {
 	require.NotNil(t, model.Rules[0].Thresholds)
 	require.NotNil(t, model.Rules[0].Thresholds.Warning)
 	require.NotNil(t, model.Rules[0].Thresholds.Warning.Static)
-	assert.Equal(t, float32(100), model.Rules[0].Thresholds.Warning.Static.Value.ValueFloat32())
+	assert.Equal(t, float64(100), model.Rules[0].Thresholds.Warning.Static.Value.ValueFloat64())
 }
 
 // Test UpdateState with custom payload fields
@@ -1514,7 +1514,7 @@ func TestMapStateToDataObject_WithCriticalThreshold(t *testing.T) {
 				Thresholds: &ApplicationThresholdModel{
 					Critical: &ThresholdLevelModel{
 						Static: &shared.StaticTypeModel{
-							Value: types.Float32Value(float32(200)),
+							Value: types.Float64Value(200),
 						},
 					},
 				},
@@ -1563,12 +1563,12 @@ func TestMapStateToDataObject_WithBothThresholds(t *testing.T) {
 				Thresholds: &ApplicationThresholdModel{
 					Warning: &ThresholdLevelModel{
 						Static: &shared.StaticTypeModel{
-							Value: types.Float32Value(float32(100)),
+							Value: types.Float64Value(100),
 						},
 					},
 					Critical: &ThresholdLevelModel{
 						Static: &shared.StaticTypeModel{
-							Value: types.Float32Value(float32(200)),
+							Value: types.Float64Value(200),
 						},
 					},
 				},
@@ -1914,7 +1914,7 @@ func TestUpdateState_WithMixedThresholds(t *testing.T) {
 	// Check warning static threshold
 	require.NotNil(t, model.Rules[0].Thresholds.Warning)
 	require.NotNil(t, model.Rules[0].Thresholds.Warning.Static)
-	assert.Equal(t, float32(100), model.Rules[0].Thresholds.Warning.Static.Value.ValueFloat32())
+	assert.Equal(t, float64(100), model.Rules[0].Thresholds.Warning.Static.Value.ValueFloat64())
 
 	// Check critical adaptive baseline threshold
 	require.NotNil(t, model.Rules[0].Thresholds.Critical)

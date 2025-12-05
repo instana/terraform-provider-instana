@@ -125,6 +125,8 @@ resource "instana_automation_action" "http_action" {
 
 ### Recommended Approach: Using Import Blocks (Zero Downtime)
 
+> **Note**: This approach is **not recommended if you are using Terraform modules**. For module-based configurations, use the [Alternative Approach: Using Import CLI Commands](#alternative-approach-using-import-cli-commands-for-module-based-configurations) instead.
+
 This approach uses Terraform's import blocks to migrate resources without destroying and recreating them, ensuring **zero downtime**.
 
 > **Important**: After successful migration verification, the `migration/` directory becomes your **main working directory**. Keep this folder for ongoing Terraform operations and treat it as your primary workspace going forward.
@@ -133,7 +135,7 @@ This approach uses Terraform's import blocks to migrate resources without destro
 
 ```bash
 # Pull and backup your current state file from the old provider
-terraform state pull > backup-$(date +%Y%m%d-%H%M%S).tfstate
+terraform state pull > backup-state.tfstate
 ```
 
 #### Step 2: Create Migration Directory
@@ -148,7 +150,7 @@ cd migration
 
 ```bash
 # Copy the existing state file to the migration directory
-cp ../terraform.tfstate ./terraform.tfstate
+cp ../backup-state.tfstate ./terraform.tfstate
 ```
 
 #### Step 4: Generate Import Blocks from State
@@ -270,6 +272,13 @@ Terraform will perform the following actions:
 Plan: 2 to import, 0 to add, 0 to change, 0 to destroy.
 ```
 
+> **Important Note:** After importing, review the values in the generated configuration file carefully. Some values may have been replaced during the import process, and you might need to update references in the generated file manually. For example, if a generated resource uses an ID value that needs to be referenced in subsequent resource configurations, ensure you update those references with the correct values before proceeding.
+
+```
+Example : instana_alerting_channel.channel.id
+
+The above value might have been replaced with the actaul id in the generated file. You might need to update it manually in the genrated file.
+```
 #### Step 9: Apply the Migration
 
 ```bash
@@ -308,6 +317,375 @@ terraform plan
 - Continue all future Terraform operations from the `migration/` folder
 - Update your CI/CD pipelines and documentation to reference the new directory path
 
+---
+
+### Alternative Approach: Using Import CLI Commands (For Module-Based Configurations)
+
+If you are using **Terraform modules** in your configuration, the import blocks approach may not work correctly. In this case, use the CLI-based import command approach instead.
+
+> **Note**: This approach is recommended when your Terraform configuration uses modules (e.g., `module.alerts`, `module.monitoring`) or when you prefer more control over the import process.
+
+> **Important**: During migration, work with a **local state file** in the migration directory for verification. Only after successful verification should you replace the original folder and state file.
+
+#### Step 1: Backup Your Existing State
+
+```bash
+# Pull and backup your current state file from the old provider
+terraform state pull > backup-state.tfstate
+```
+
+#### Step 2: Copy Entire Folder to Migration Directory
+
+Create a complete copy of your existing Terraform configuration folder:
+
+```bash
+# From your project root directory
+# Copy the entire folder to a new migration directory
+cp -r <Original folder> migration
+
+# Navigate to the migration directory
+cd migration/
+
+# Rename the backup state file to terraform.tfstate for local work
+mv backup-state.tfstate terraform.tfstate
+
+# Comment out remote backend configuration if you're using one
+# Edit your terraform configuration file (e.g., main.tf or backend.tf)
+# Comment out the backend block to use local state during migration
+```
+
+**Example: Comment out remote backend**
+```hcl
+terraform {
+  required_providers {
+    instana = {
+      source  = "instana/instana"
+      version = "~> 5.0"  # Old version, will be updated in Step 5
+    }
+  }
+  
+  # Comment out remote backend to use local state during migration
+  # backend "s3" {
+  #   bucket = "my-terraform-state"
+  #   key    = "prod/terraform.tfstate"
+  #   region = "us-east-1"
+  # }
+}
+```
+
+**Important:**
+- This preserves your entire configuration structure including modules, variables, and all files
+- The backup state file from Step 1 is renamed to `terraform.tfstate` for local work
+- The original backup (`backup-state.tfstate`) remains in the parent directory untouched
+- Comment out remote backend to work with local state during migration
+- This ensures we don't accidentally modify the original remote state file
+- Keep the original folder completely untouched as a backup
+
+#### Step 3: Generate Import Commands
+
+Use the provided script to generate CLI import commands from your state file:
+
+```bash
+# Download the script from the provider repository
+# Or copy it from: https://github.com/instana/terraform-provider-instana/blob/main/migration/generate-import-commands.go
+
+# Run the script to generate import commands (from migration directory)
+go run ../migration/generate-import-commands.go terraform.tfstate import-commands.sh
+```
+
+**Output:**
+```
+Reading state file: terraform.tfstate
+Output file: import-commands.sh
+
+Generated import command for: instana_alerting_channel.team_email (ID: pTFqA1Uw6ErD0Un5)
+Generated import command for: module.alerts.instana_synthetic_alert_config.latency_alert (ID: alert-789)
+Generated import command for: module.app.instana_application_config.backend (ID: app-456)
+
+✓ Successfully generated 3 import command(s)
+✓ Import commands written to: import-commands.sh
+```
+
+The generated script will look like:
+```bash
+#!/bin/bash
+# Terraform Import Commands
+# Generated from terraform.tfstate
+
+set -e  # Exit on error
+
+echo "Starting Terraform import process..."
+
+# Root module resources
+terraform import instana_alerting_channel.team_email pTFqA1Uw6ErD0Un5
+
+# Module: module.alerts
+terraform import module.alerts.instana_synthetic_alert_config.latency_alert alert-789
+
+# Module: module.app
+terraform import module.app.instana_application_config.backend app-456
+
+echo ""
+echo "✓ Import process completed successfully!"
+echo "✓ Total resources imported: 3"
+```
+
+#### Step 4: Remove Instana Resources from State
+
+Remove all Instana resources from the state file to prepare for re-import with the new provider:
+
+```bash
+# List all Instana resources in the state
+terraform state list | grep "instana_"
+
+# Remove all Instana resources at once
+terraform state list | grep "instana_" | xargs -I {} terraform state rm {}
+```
+
+**Expected Output:**
+```
+Removed instana_alerting_channel.team_email
+Removed module.alerts.instana_synthetic_alert_config.latency_alert
+Removed module.app.instana_application_config.backend
+```
+
+**Important:**
+- This preserves non-Instana resources (e.g., AWS, Azure resources) in your state
+- Only Instana resources will be re-imported with the new provider
+- The state file now contains only non-Instana resources
+
+#### Step 5: Update Provider Configuration
+
+Update your `main.tf` (or provider configuration file) to use the new Plugin Framework provider version:
+
+```hcl
+terraform {
+  required_providers {
+    instana = {
+      source  = "instana/instana"
+      version = ">= 6.0.0"  # Plugin Framework version
+    }
+    # Keep other provider configurations (AWS, Azure, etc.)
+  }
+}
+
+provider "instana" {
+  api_token = var.instana_api_token
+  endpoint  = var.instana_endpoint
+}
+
+# Keep all other provider configurations
+# provider "aws" { ... }
+# provider "azurerm" { ... }
+```
+
+**Important:**
+- Only update the Instana provider version
+- Keep all other provider configurations unchanged
+- Keep all module definitions and resource configurations as-is for now
+
+#### Step 6: Initialize with New Provider
+
+```bash
+# Remove old provider plugins
+rm -rf .terraform/
+
+# Initialize with the new Plugin Framework provider
+terraform init
+```
+
+**Expected Output:**
+```
+Initializing provider plugins...
+- Finding instana/instana versions matching ">= 6.0.0"...
+- Installing instana/instana v6.0.0...
+- Installed instana/instana v6.0.0
+
+Terraform has been successfully initialized!
+```
+
+This will download the new provider version (>= 6.0.0).
+
+#### Step 8: Run Import Commands
+
+Execute the generated import script to re-import all Instana resources with the new provider:
+
+```bash
+# Make the script executable
+chmod +x import-commands.sh
+
+# Run all import commands
+./import-commands.sh
+```
+
+**Expected Output:**
+```
+Starting Terraform import process...
+instana_alerting_channel.team_email: Importing from ID "pTFqA1Uw6ErD0Un5"...
+instana_alerting_channel.team_email: Import prepared!
+  Prepared instana_alerting_channel for import
+instana_alerting_channel.team_email: Import complete!
+
+module.alerts.instana_synthetic_alert_config.latency_alert: Importing from ID "alert-789"...
+module.alerts.instana_synthetic_alert_config.latency_alert: Import prepared!
+  Prepared instana_synthetic_alert_config for import
+module.alerts.instana_synthetic_alert_config.latency_alert: Import complete!
+
+✓ Import process completed successfully!
+✓ Total resources imported: 3
+```
+
+#### Step 9: Verify State File
+
+```bash
+# Check that all resources are properly imported
+terraform state list
+
+# Expected output should include all your resources:
+# instana_alerting_channel.team_email
+# module.alerts.instana_synthetic_alert_config.latency_alert
+# module.app.instana_application_config.backend
+# aws_instance.example  (if you have non-Instana resources)
+```
+
+#### Step 10: Update Resource Configurations Manually
+
+After importing, you need to manually update your resource configurations to match the new provider syntax. Refer to the [Breaking Changes](#-breaking-changes) section and the provider documentation for each resource type.
+
+**Example Updates:**
+
+Old syntax (SDKv2):
+```hcl
+resource "instana_alerting_channel" "team_email" {
+  name = "Team Email"
+  email {
+    emails = ["team@example.com"]
+  }
+}
+```
+
+New syntax (Plugin Framework):
+```hcl
+resource "instana_alerting_channel" "team_email" {
+  name = "Team Email"
+  email = {
+    emails = ["team@example.com"]
+  }
+}
+```
+
+**Key Changes to Look For:**
+- Nested blocks changed to object syntax (use `=` instead of block syntax)
+- Check each resource type in the documentation for specific changes
+- Update all Instana resources in your configuration files and modules
+
+#### Step 11: Verify Configuration
+
+```bash
+# Run plan to check for any drift or required changes
+terraform plan
+```
+
+**Expected Output:**
+- Should show "No changes. Your infrastructure matches the configuration." if all configurations are correctly updated
+- If changes are shown, review and update your configuration accordingly
+- Ensure no resources show as "must be replaced"
+
+**If you see changes:**
+```bash
+# Review the changes carefully
+terraform plan
+
+# Update your configuration files to match the expected state
+# Re-run plan until you see "No changes"
+```
+
+#### Step 12: Final Verification and Backup
+
+Once everything is verified:
+
+```bash
+# Create a verified backup of the migrated state
+cp terraform.tfstate verified-migration-state.tfstate
+
+# Verify one more time
+terraform plan
+# Should show: "No changes. Your infrastructure matches the configuration."
+```
+
+#### Step 13: Configure Remote Backend (If Previously Used)
+
+If you were using a remote backend before migration, reconfigure it and push the verified state:
+
+```bash
+# Uncomment your backend configuration in your terraform files
+# Edit main.tf or backend.tf and uncomment the backend block
+
+# Example: Uncomment remote backend
+# terraform {
+#   backend "s3" {
+#     bucket = "my-terraform-state"
+#     key    = "prod/terraform.tfstate"
+#     region = "us-east-1"
+#   }
+# }
+```
+
+After uncommenting the backend configuration:
+
+```bash
+# Re-initialize to configure the remote backend
+terraform init
+
+# Push the verified local state to the remote backend
+terraform state push terraform.tfstate
+```
+
+**Expected Output:**
+```
+Initializing the backend...
+Successfully configured the backend "s3"!
+
+Terraform has been successfully initialized!
+```
+
+**Important:**
+- Only push the state after thorough verification
+- Ensure the remote backend is accessible and properly configured
+- The local `terraform.tfstate` file will be uploaded to the remote backend
+- Keep a backup of the local state file before pushing
+
+#### Step 14: Replace Original Folder (After Successful Verification)
+
+**Only after thorough verification and testing**, replace your original folder with the migration folder:
+
+
+**Important Notes:**
+- **Do NOT replace your production folder until you have thoroughly tested and verified the migration**
+- Test the migration in a non-production environment first
+- Keep the original folder backup for rollback purposes
+- If using remote backend, ensure Step 13 is completed successfully before replacing the folder
+- Update all CI/CD pipelines and documentation to reference the updated configuration
+- The migrated folder becomes your main working directory after successful verification
+
+#### Troubleshooting
+
+**Module Not Found Error:**
+```bash
+Error: Module not found: module.alerts
+```
+**Solution:** Ensure your module definitions exist in `main.tf` and module directories are copied correctly.
+
+**Resource Already Exists:**
+```bash
+Error: Resource already managed by Terraform
+```
+**Solution:** The resource is already in state. Skip that import command or use `terraform state rm` first.
+
+**ID Format Issues:**
+Some resources require specific ID formats. Check the provider documentation for the correct format. The generated script uses IDs from your existing state, which should be correct.
+
+---
 
 ## 🎯 Best Practices
 
