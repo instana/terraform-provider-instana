@@ -272,6 +272,8 @@ Terraform will perform the following actions:
 Plan: 2 to import, 0 to add, 0 to change, 0 to destroy.
 ```
 
+> **Important Note:** After importing, review the values in the generated configuration file carefully. Some values may have been replaced during the import process, and you might need to update references in the generated file manually. For example, if a generated resource uses an ID value that needs to be referenced in subsequent imports or configurations, ensure you update those references with the correct values before proceeding.
+
 #### Step 9: Apply the Migration
 
 ```bash

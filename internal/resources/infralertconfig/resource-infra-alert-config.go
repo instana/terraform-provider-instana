@@ -62,6 +62,9 @@ func buildInfraAlertConfigSchema() schema.Schema {
 				Description: InfraAlertConfigDescGroupBy,
 				Optional:    true,
 				ElementType: types.StringType,
+				Validators: []validator.List{
+					listvalidator.SizeAtLeast(1),
+				},
 			},
 			InfraAlertConfigFieldGranularity: schema.Int64Attribute{
 				Description: InfraAlertConfigDescGranularity,

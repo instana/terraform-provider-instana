@@ -122,6 +122,9 @@ func buildGroupBySchema() schema.ListNestedAttribute {
 	return schema.ListNestedAttribute{
 		Description: LogAlertConfigDescGroupBy,
 		Optional:    true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: map[string]schema.Attribute{
 				LogAlertConfigFieldGroupByTagName: schema.StringAttribute{
