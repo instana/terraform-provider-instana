@@ -272,8 +272,13 @@ Terraform will perform the following actions:
 Plan: 2 to import, 0 to add, 0 to change, 0 to destroy.
 ```
 
-> **Important Note:** After importing, review the values in the generated configuration file carefully. Some values may have been replaced during the import process, and you might need to update references in the generated file manually. For example, if a generated resource uses an ID value that needs to be referenced in subsequent imports or configurations, ensure you update those references with the correct values before proceeding.
+> **Important Note:** After importing, review the values in the generated configuration file carefully. Some values may have been replaced during the import process, and you might need to update references in the generated file manually. For example, if a generated resource uses an ID value that needs to be referenced in subsequent resource configurations, ensure you update those references with the correct values before proceeding.
 
+```
+Example : instana_alerting_channel.channel.id
+
+The above value might have been replaced with the actaul id in the generated file. You might need to update it manually in the genrated file.
+```
 #### Step 9: Apply the Migration
 
 ```bash
@@ -336,7 +341,7 @@ Create a complete copy of your existing Terraform configuration folder:
 ```bash
 # From your project root directory
 # Copy the entire folder to a new migration directory
-cp -r . migration/
+cp -r <Original folder> migration
 
 # Navigate to the migration directory
 cd migration/
@@ -654,18 +659,6 @@ Terraform has been successfully initialized!
 
 **Only after thorough verification and testing**, replace your original folder with the migration folder:
 
-```bash
-# From the parent directory (not from migration/)
-cd ..
-
-# Backup the original folder
-mv original-folder original-folder-backup-$(date +%Y%m%d)
-
-# Replace with the migration folder
-mv migration/ original-folder/
-
-# Update your CI/CD pipelines to use the updated configuration
-```
 
 **Important Notes:**
 - **Do NOT replace your production folder until you have thoroughly tested and verified the migration**
