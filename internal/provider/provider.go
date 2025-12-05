@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"os"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -87,13 +88,13 @@ func (p *InstanaProvider) Schema(_ context.Context, _ provider.SchemaRequest, re
 		Description: "The Instana provider is used to interact with the Instana monitoring platform.",
 		Attributes: map[string]schema.Attribute{
 			SchemaFieldAPIToken: schema.StringAttribute{
-				Description: "API token used to authenticate with the Instana Backend",
-				Required:    true,
+				Description: "API token used to authenticate with the Instana Backend. Can also be set via INSTANA_API_TOKEN environment variable.",
+				Optional:    true,
 				Sensitive:   true,
 			},
 			SchemaFieldEndpoint: schema.StringAttribute{
-				Description: "The DNS Name of the Instana Endpoint (eg. saas-eu-west-1.instana.io)",
-				Required:    true,
+				Description: "The DNS Name of the Instana Endpoint (eg. saas-eu-west-1.instana.io). Can also be set via INSTANA_ENDPOINT environment variable.",
+				Optional:    true,
 			},
 			SchemaFieldTlsSkipVerify: schema.BoolAttribute{
 				Description: "If set to true, TLS verification will be skipped when calling Instana API",
@@ -113,32 +114,41 @@ func (p *InstanaProvider) Configure(ctx context.Context, req provider.ConfigureR
 		return
 	}
 
-	// If values are not provided, retrieve from environment variables
-	if config.APIToken.IsUnknown() {
+	// Default values to environment variables, but override with Terraform configuration value if set
+	apiToken := strings.TrimSpace(config.APIToken.ValueString())
+	if apiToken == "" {
+		apiToken = os.Getenv("INSTANA_API_TOKEN")
+	}
+
+	endpoint := strings.TrimSpace(config.Endpoint.ValueString())
+	if endpoint == "" {
+		endpoint = os.Getenv("INSTANA_ENDPOINT")
+	}
+
+	// Validate that required values are present
+	if apiToken == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("api_token"),
-			"Unknown Instana API Token",
-			"The provider cannot create the Instana API client as there is an unknown configuration value for the Instana API token. "+
-				"Either target apply the source of the value first, set the value statically in the configuration, or use the INSTANA_API_TOKEN environment variable.",
+			"Missing Instana API Token",
+			"The provider cannot create the Instana API client as there is a missing or empty value for the Instana API token. "+
+				"Set the api_token value in the configuration or use the INSTANA_API_TOKEN environment variable. "+
+				"If either is already set, ensure the value is not empty.",
 		)
 	}
 
-	if config.Endpoint.IsUnknown() {
+	if endpoint == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("endpoint"),
-			"Unknown Instana Endpoint",
-			"The provider cannot create the Instana API client as there is an unknown configuration value for the Instana endpoint. "+
-				"Either target apply the source of the value first, set the value statically in the configuration, or use the INSTANA_ENDPOINT environment variable.",
+			"Missing Instana Endpoint",
+			"The provider cannot create the Instana API client as there is a missing or empty value for the Instana endpoint. "+
+				"Set the endpoint value in the configuration or use the INSTANA_ENDPOINT environment variable. "+
+				"If either is already set, ensure the value is not empty.",
 		)
 	}
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	// Default values to environment variables, but override with Terraform configuration value if set
-	apiToken := strings.TrimSpace(config.APIToken.ValueString())
-	endpoint := strings.TrimSpace(config.Endpoint.ValueString())
 	skipTlsVerify := false
 	if !config.TLSSkipVerify.IsNull() {
 		skipTlsVerify = config.TLSSkipVerify.ValueBool()
