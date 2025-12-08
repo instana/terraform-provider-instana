@@ -177,6 +177,7 @@ func (p *InstanaProvider) DataSources(_ context.Context) []func() datasource.Dat
 		datasources.NewHostAgentsDataSource,
 		datasources.NewSyntheticLocationDataSource,
 		datasources.NewUserDataSource,
+		datasources.NewUsersDataSource,
 	}
 }
 
