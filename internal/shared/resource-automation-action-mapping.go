@@ -711,9 +711,13 @@ func MapHttpFieldsToState(action *restapi.AutomationAction) HttpModel {
 		httpModel.Body = types.StringNull()
 	}
 
-	httpModel.IgnoreCertErrors = types.BoolValue(
-		GetBoolFieldValueOrDefault(action, restapi.HttpIgnoreCertErrorsFieldName, false),
-	)
+	// Only set IgnoreCertErrors if the field is present in the API response
+	ignoreCertErrorsValue := GetFieldValue(action, restapi.HttpIgnoreCertErrorsFieldName)
+	if ignoreCertErrorsValue != "" {
+		httpModel.IgnoreCertErrors = types.BoolValue(ignoreCertErrorsValue == "true")
+	} else {
+		httpModel.IgnoreCertErrors = types.BoolNull()
+	}
 
 	timeout := GetFieldValue(action, restapi.TimeoutFieldName)
 	if timeout != "" {
