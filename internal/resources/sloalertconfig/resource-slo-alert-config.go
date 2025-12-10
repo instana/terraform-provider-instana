@@ -147,6 +147,7 @@ func buildThresholdAttribute() schema.SingleNestedAttribute {
 func buildThresholdTypeAttribute() schema.StringAttribute {
 	return schema.StringAttribute{
 		Optional:    true,
+		Computed:    true,
 		Default:     stringdefault.StaticString(ThresholdTypeStaticThreshold),
 		Description: SloAlertConfigDescThresholdType,
 		Validators: []validator.String{
