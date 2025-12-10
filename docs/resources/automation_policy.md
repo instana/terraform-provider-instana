@@ -62,22 +62,17 @@ resource "instana_automation_policy" "example" {
   name        = "Hello world"
   description = "Sample policy"
   tags        = ["test", "hello"]
-  
   trigger = {
     id   = "r6mpl4BPRhm_77Vn"
     type = "customEvent"
   }
-  
   type_configuration = [{
     name = "manual"
-    
     action = [{
       action = {
         id          = "action-id"
         name        = "Action Name"
         description = "Action description"
-        
-        # Action type configuration (script, http, etc.)
         script = {
           content     = filebase64("script.sh")
           interpreter = "bash"
@@ -101,569 +96,205 @@ resource "instana_automation_policy" "example" {
 ### Manual Policy with Script Action
 
 ```hcl
-resource "instana_automation_policy" "manual_restart" {
-  name        = "Manual Service Restart"
-  description = "Manual policy to restart services"
-  tags        = ["manual", "restart", "operations"]
-  
+resource "instana_automation_policy" "automation_policy" {
+  description = "Stop the KLO Log File Agent on Linux"
+  name        = "Policy_Stop"
+  tags        = []
   trigger = {
-    id   = instana_custom_event_specification.service_down.id
-    type = "customEvent"
+    description = "Stop ping-springboot-app.sh to trigger event."
+    id          = "trigger_id"
+    name        = "Legacy Event - Spring Boot App - Requests <= 0"
+    type        = "customEvent"
   }
-  
-  type_configuration = [{
-    name = "manual"
-    
-    action = [{
-      action = {
-        id          = instana_automation_action.restart_service.id
-        name        = "Restart Service"
-        description = "Restart the affected service"
-        
-        script = {
-          content     = filebase64("${path.module}/scripts/restart.sh")
-          interpreter = "bash"
-          timeout     = "30"
-        }
-        
-        input_parameter = [{
-          name        = "service_name"
-          label       = "Service Name"
-          description = "Name of service to restart"
-          type        = "dynamic"
-          required    = true
-          hidden      = false
-          value       = ""
-        }]
-      }
-      agent_id = "00:00:0a:ff:fe:0b:21:cc"
-    }]
-  }]
+  type_configuration = [
+    {
+      action = [
+        {
+          action = {
+            description = "Stop the KLO Log File Agent on Linux"
+            id          = "action_id"
+            input_parameter = [
+              {
+                description = "Description"
+                hidden      = false
+                label       = "Instance Name"
+                name        = "instance"
+                required    = true
+                type        = "static"
+                value       = ""
+              },
+            ]
+            name   = "Name"
+            script = {
+              content     = "content"
+            }
+            tags = ["tag1", "tag2"]
+          }
+        },
+      ]
+      name      = "manual"
+    },
+  ]
 }
+
 ```
 
 ### Automatic Policy with Condition
 
 ```hcl
-resource "instana_automation_policy" "auto_remediation" {
-  name        = "Automatic Service Remediation"
-  description = "Automatically restart services on failure"
-  tags        = ["automatic", "remediation", "production"]
-  
+resource "instana_automation_policy" "automation_policy_2" {
+  description = "Update ad-service configMap"
+  name        = "Update adService config map flagt"
+  tags        = []
   trigger = {
-    id   = instana_custom_event_specification.service_error.id
-    type = "customEvent"
+    description = "The erroneous call rate is higher or equal to 40%."
+    id          = "trigger-id"
+    name        = "Erroneous call rate is higher than normal"
+    type        = "applicationSmartAlert"
   }
-  
-  type_configuration = [{
-    name = "automatic"
-    
-    condition = {
-      query = "entity.agent.capability:action-script AND entity.zone:production"
-    }
-    
-    action = [{
-      action = {
-        id          = instana_automation_action.restart_service.id
-        name        = "Restart Service"
-        description = "Automatically restart failed service"
-        
-        script = {
-          content     = filebase64("${path.module}/scripts/auto_restart.sh")
-          interpreter = "bash"
-          timeout     = "30"
-        }
-      }
-      agent_id = "00:00:0a:ff:fe:0b:21:cc"
-    }]
-  }]
-}
-```
-
-### Policy with HTTP Action
-
-```hcl
-resource "instana_automation_policy" "webhook_notification" {
-  name        = "Webhook Notification Policy"
-  description = "Send webhook notification on alert"
-  tags        = ["notification", "webhook"]
-  
-  trigger = {
-    id   = instana_application_alert_config.critical_alert.id
-    type = "applicationAlert"
-  }
-  
-  type_configuration = [{
-    name = "automatic"
-    
-    condition = {
-      query = "entity.type:service"
-    }
-    
-    action = [{
-      action = {
-        id          = instana_automation_action.webhook_call.id
-        name        = "Send Webhook"
-        description = "Send notification via webhook"
-        
-        http = {
-          host   = "https://hooks.example.com/instana"
-          method = "POST"
-          
-          headers = {
-            "Content-Type" = "application/json"
-          }
-          
-          body = jsonencode({
-            alert_name = "@@alert_name@@"
-            severity   = "@@severity@@"
-            timestamp  = "@@timestamp@@"
-          })
-          
-          auth = {
-            token = {
-              bearer_token = "@@webhook_token@@"
+  type_configuration = [
+    {
+      action = [
+        {
+          action = {
+            ansible = {
+              host_id            = "hostid"
+              playbook_file_name = "filename"
+              playbook_id        = "79"
+              url                = "url"
             }
+            description = "Update ad-service configMap"
+            id          = "action-id"
+            input_parameter = [
+              {
+                description = ""
+                hidden      = false
+                label       = "label"
+                name        = "name"
+                required    = false
+                type        = "static"
+                value       = "value"
+              },
+              {
+                description = ""
+                hidden      = false
+                label       = "namespace"
+                name        = "namespace"
+                required    = false
+                type        = "static"
+                value       = "robot-shop"
+              },
+              {
+                description = ""
+                hidden      = true
+                label       = "k8s_api_server"
+                name        = "k8s_api_server"
+                required    = true
+                type        = "static"
+                value       = "value"
+              },
+              {
+                description = ""
+                hidden      = true
+                label       = "k8s_user"
+                name        = "k8s_user"
+                required    = true
+                type        = "static"
+                value       = "value"
+              },
+              {
+                description = ""
+                hidden      = true
+                label       = "k8s_password"
+                name        = "k8s_password"
+                required    = true
+                type        = "static"
+                value       = "value"
+              },
+            ]
+            name   = "Update ad-service configMap"
           }
-          
-          timeout = "15"
-        }
-        
-        input_parameter = [{
-          name        = "webhook_token"
-          label       = "Webhook Token"
-          description = "Authentication token"
-          type        = "vault"
-          required    = true
-          hidden      = true
-          value       = ""
-        }]
+          agent_id = "agent-id"
+        },
+      ]
+      condition = {
+        query = "entity.aws.elb.type:application"
       }
-    }]
-  }]
-}
-```
-
-### Policy with Multiple Actions
-
-```hcl
-resource "instana_automation_policy" "multi_action_policy" {
-  name        = "Multi-Step Remediation"
-  description = "Execute multiple remediation steps"
-  tags        = ["multi-step", "remediation"]
-  
-  trigger = {
-    id   = instana_custom_event_specification.critical_issue.id
-    type = "customEvent"
-  }
-  
-  type_configuration = [{
-    name = "automatic"
-    
-    condition = {
-      query = "entity.zone:production AND entity.type:service"
-    }
-    
-    action = [
-      {
-        action = {
-          id          = instana_automation_action.collect_logs.id
-          name        = "Collect Logs"
-          description = "Collect diagnostic logs"
-          
-          script = {
-            content     = filebase64("${path.module}/scripts/collect_logs.sh")
-            interpreter = "bash"
-            timeout     = "60"
-          }
-        }
-        agent_id = "00:00:0a:ff:fe:0b:21:cc"
-      },
-      {
-        action = {
-          id          = instana_automation_action.restart_service.id
-          name        = "Restart Service"
-          description = "Restart the affected service"
-          
-          script = {
-            content     = filebase64("${path.module}/scripts/restart.sh")
-            interpreter = "bash"
-            timeout     = "30"
-          }
-        }
-        agent_id = "00:00:0a:ff:fe:0b:21:cc"
-      },
-      {
-        action = {
-          id          = instana_automation_action.notify_team.id
-          name        = "Notify Team"
-          description = "Send notification to team"
-          
-          http = {
-            host   = "https://api.example.com/notify"
-            method = "POST"
-            
-            body = jsonencode({
-              message = "Service restarted automatically"
-            })
-            
-            timeout = "10"
-          }
-        }
-      }
-    ]
-  }]
-}
-```
-
-### Policy with JIRA Integration
-
-```hcl
-resource "instana_automation_policy" "create_jira_ticket" {
-  name        = "Create JIRA Ticket on Alert"
-  description = "Automatically create JIRA ticket for incidents"
-  tags        = ["jira", "ticketing", "automatic"]
-  
-  trigger = {
-    id   = instana_application_alert_config.production_alert.id
-    type = "applicationAlert"
-  }
-  
-  type_configuration = [{
-    name = "automatic"
-    
-    condition = {
-      query = "entity.zone:production"
-    }
-    
-    action = [{
-      action = {
-        id          = instana_automation_action.jira_ticket.id
-        name        = "Create JIRA Ticket"
-        description = "Create incident ticket in JIRA"
-        
-        jira = {
-          project     = "OPS"
-          operation   = "create"
-          issue_type  = "Incident"
-          title       = "Instana Alert: @@alert_name@@"
-          description = "Alert Details: @@alert_details@@"
-          assignee    = "ops-team"
-          labels      = "instana,automated,production"
-        }
-        
-        input_parameter = [{
-          name        = "alert_name"
-          label       = "Alert Name"
-          description = "Name of the triggered alert"
-          type        = "dynamic"
-          required    = true
-          hidden      = false
-          value       = ""
-        }, {
-          name        = "alert_details"
-          label       = "Alert Details"
-          description = "Detailed alert information"
-          type        = "dynamic"
-          required    = true
-          hidden      = false
-          value       = ""
-        }]
-      }
-    }]
-  }]
-}
-```
-
-### Policy with Scheduled Trigger
-
-```hcl
-resource "instana_automation_policy" "scheduled_maintenance" {
-  name        = "Scheduled Maintenance"
-  description = "Run scheduled maintenance tasks"
-  tags        = ["scheduled", "maintenance"]
-  
-  trigger = {
-    id          = "scheduled-trigger-id"
-    type        = "scheduled"
-    name        = "Weekly Maintenance"
-    description = "Weekly maintenance window"
-    
-    scheduling = {
-      start_time     = 1640995200000  # Unix timestamp in milliseconds
-      duration       = 2
-      duration_unit  = "HOUR"
-      recurrent      = true
-      recurrent_rule = "FREQ=WEEKLY;BYDAY=SU;BYHOUR=2"
-    }
-  }
-  
-  type_configuration = [{
-    name = "automatic"
-    
-    action = [{
-      action = {
-        id          = instana_automation_action.maintenance_script.id
-        name        = "Run Maintenance"
-        description = "Execute maintenance tasks"
-        
-        script = {
-          content     = filebase64("${path.module}/scripts/maintenance.sh")
-          interpreter = "bash"
-          timeout     = "300"
-        }
-      }
-      agent_id = "00:00:0a:ff:fe:0b:21:cc"
-    }]
-  }]
-}
-```
-
-### Policy with Manual Action
-
-```hcl
-resource "instana_automation_policy" "manual_intervention" {
-  name        = "Manual Intervention Required"
-  description = "Provide runbook for manual intervention"
-  tags        = ["manual", "runbook"]
-  
-  trigger = {
-    id   = instana_custom_event_specification.complex_issue.id
-    type = "customEvent"
-  }
-  
-  type_configuration = [{
-    name = "manual"
-    
-    action = [{
-      action = {
-        id          = instana_automation_action.runbook.id
-        name        = "Intervention Runbook"
-        description = "Manual intervention instructions"
-        
-        manual = {
-          content = <<-EOT
-            # Manual Intervention Required
-            
-            ## Issue Details
-            - Alert: @@alert_name@@
-            - Severity: @@severity@@
-            - Timestamp: @@timestamp@@
-            
-            ## Investigation Steps
-            1. Check service logs: `kubectl logs -n production service-name`
-            2. Verify database connectivity
-            3. Check external dependencies
-            4. Review recent deployments
-            
-            ## Remediation Steps
-            1. If database issue: Restart database connection pool
-            2. If external dependency: Check API status
-            3. If deployment issue: Consider rollback
-            
-            ## Escalation
-            If issue persists after 30 minutes, escalate to on-call engineer.
-          EOT
-        }
-        
-        input_parameter = [{
-          name        = "alert_name"
-          label       = "Alert Name"
-          description = "Name of the alert"
-          type        = "dynamic"
-          required    = true
-          hidden      = false
-          value       = ""
-        }, {
-          name        = "severity"
-          label       = "Severity"
-          description = "Alert severity"
-          type        = "dynamic"
-          required    = true
-          hidden      = false
-          value       = ""
-        }, {
-          name        = "timestamp"
-          label       = "Timestamp"
-          description = "Alert timestamp"
-          type        = "dynamic"
-          required    = true
-          hidden      = false
-          value       = ""
-        }]
-      }
-      agent_id = "00:00:0a:ff:fe:0b:21:cc"
-    }]
-  }]
-}
-```
-
-### Comprehensive Policy Example
-
-```hcl
-resource "instana_automation_policy" "comprehensive_policy" {
-  name        = "Production Incident Response"
-  description = "Comprehensive incident response automation"
-  tags        = ["production", "incident-response", "critical"]
-  
-  trigger = {
-    id   = instana_application_alert_config.critical_production_alert.id
-    type = "applicationAlert"
-  }
-  
-  type_configuration = [{
-    name = "automatic"
-    
-    condition = {
-      query = join(" AND ", [
-        "entity.zone:production",
-        "entity.type:service",
-        "entity.agent.capability:action-script"
-      ])
-    }
-    
-    action = [
-      {
-        action = {
-          id          = instana_automation_action.collect_diagnostics.id
-          name        = "Collect Diagnostics"
-          description = "Collect system diagnostics"
-          
-          script = {
-            content     = filebase64("${path.module}/scripts/diagnostics.sh")
-            interpreter = "bash"
-            timeout     = "60"
-          }
-          
-          input_parameter = [{
-            name        = "service_name"
-            label       = "Service Name"
-            description = "Name of the affected service"
-            type        = "dynamic"
-            required    = true
-            hidden      = false
-            value       = ""
-          }]
-        }
-        agent_id = "00:00:0a:ff:fe:0b:21:cc"
-      },
-      {
-        action = {
-          id          = instana_automation_action.create_incident.id
-          name        = "Create Incident"
-          description = "Create incident in ticketing system"
-          
-          http = {
-            host   = "https://api.example.com/incidents"
-            method = "POST"
-            
-            headers = {
-              "Content-Type" = "application/json"
+      name = "manual"
+    },
+    {
+      action = [
+        {
+          action = {
+            ansible = {
+              host_id            = "host-id"
+              playbook_file_name = "file-name"
+              playbook_id        = "79"
+              url                = "url"
+              workflow_id        = null
             }
-            
-            body = jsonencode({
-              title       = "@@alert_name@@"
-              description = "@@alert_details@@"
-              severity    = "@@severity@@"
-              source      = "instana"
-            })
-            
-            auth = {
-              token = {
-                bearer_token = "@@api_token@@"
-              }
-            }
-            
-            timeout = "30"
+            description = "Update ad-service configMap"
+            id          = "action-id"
+            input_parameter = [
+              {
+                description = ""
+                hidden      = false
+                label       = "label"
+                name        = "name"
+                required    = false
+                type        = "static"
+                value       = "ad-service"
+              },
+              {
+                description = ""
+                hidden      = false
+                label       = "namespace"
+                name        = "namespace"
+                required    = false
+                type        = "static"
+                value       = "robot-shop"
+              },
+              {
+                description = ""
+                hidden      = true
+                label       = "k8s_api_server"
+                name        = "k8s_api_server"
+                required    = true
+                type        = "static"
+                value       = "value"
+              },
+              {
+                description = ""
+                hidden      = true
+                label       = "k8s_user"
+                name        = "k8s_user"
+                required    = true
+                type        = "static"
+                value       = "value"
+              },
+              {
+                description = ""
+                hidden      = true
+                label       = "k8s_password"
+                name        = "k8s_password"
+                required    = true
+                type        = "static"
+                value       = "vallue"
+              },
+            ]
+            name   = "Update ad-service configMap"
           }
-          
-          input_parameter = [{
-            name        = "api_token"
-            label       = "API Token"
-            description = "API authentication token"
-            type        = "vault"
-            required    = true
-            hidden      = true
-            value       = ""
-          }, {
-            name        = "alert_name"
-            label       = "Alert Name"
-            description = "Name of the alert"
-            type        = "dynamic"
-            required    = true
-            hidden      = false
-            value       = ""
-          }, {
-            name        = "alert_details"
-            label       = "Alert Details"
-            description = "Detailed alert information"
-            type        = "dynamic"
-            required    = true
-            hidden      = false
-            value       = ""
-          }, {
-            name        = "severity"
-            label       = "Severity"
-            description = "Alert severity level"
-            type        = "dynamic"
-            required    = true
-            hidden      = false
-            value       = ""
-          }]
-        }
-      },
-      {
-        action = {
-          id          = instana_automation_action.notify_oncall.id
-          name        = "Notify On-Call"
-          description = "Notify on-call engineer"
-          
-          http = {
-            host   = "https://api.pagerduty.com/incidents"
-            method = "POST"
-            
-            headers = {
-              "Content-Type"  = "application/json"
-              "Authorization" = "Token token=@@pagerduty_token@@"
-            }
-            
-            body = jsonencode({
-              incident = {
-                type    = "incident"
-                title   = "@@alert_name@@"
-                service = {
-                  id   = "@@service_id@@"
-                  type = "service_reference"
-                }
-                urgency = "high"
-              }
-            })
-            
-            timeout = "15"
-          }
-          
-          input_parameter = [{
-            name        = "pagerduty_token"
-            label       = "PagerDuty Token"
-            description = "PagerDuty API token"
-            type        = "vault"
-            required    = true
-            hidden      = true
-            value       = ""
-          }, {
-            name        = "service_id"
-            label       = "Service ID"
-            description = "PagerDuty service ID"
-            type        = "static"
-            required    = true
-            hidden      = false
-            value       = ""
-          }]
-        }
+          agent_id = "agent-id"
+        },
+      ]
+      condition = {
+        query = "entity.aws.elb.type:application"
       }
-    ]
-  }]
+      name = "automatic"
+    },
+  ]
 }
+
 ```
 
 ## Argument Reference
