@@ -441,8 +441,9 @@ resource "instana_alerting_channel" "ms_teams_bidirect" {
 }
 ```
 
+## Generating Configuration from Existing Resources
 
-If you have already created a alerting channel in Instana and want to generate the Terraform configuration for it, you can use Terraform's import block feature with the `-generate-config-out` flag.
+If you have already created an alerting channel in Instana and want to generate the Terraform configuration for it, you can use Terraform's import block feature with the `-generate-config-out` flag.
 
 This approach is also helpful when you're unsure about the correct Terraform structure for a specific resource configuration. Simply create the resource in Instana first, then use this functionality to automatically generate the corresponding Terraform configuration.
 
