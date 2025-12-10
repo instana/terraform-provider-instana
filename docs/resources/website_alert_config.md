@@ -56,20 +56,24 @@ resource "instana_website_alert_config" "example" {
 ```hcl
 resource "instana_website_alert_config" "example" {
   name = "Website Alert"
-  
-  rule = {
-    slowness = {
-      metric_name = "onLoadTime"
-      aggregation = "p90"
-    }
-  }
-  
-  threshold = {
-    static = {
+  rules = [
+    {
       operator = ">="
-      value = 5
-    }
-  }
+      rule = {
+        slowness = {
+          aggregation = "P90"
+          metric_name = "onLoadTime"
+        }
+      }
+      threshold = {
+        warning = {
+          static = {
+            value = 5
+          }
+        }
+      }
+    },
+  ]
   
   time_threshold = {
     violations_in_sequence = {
@@ -109,31 +113,34 @@ Monitor page load time:
 resource "instana_website_alert_config" "slowness_basic" {
   name        = "Page Load Time Alert"
   description = "Alert when page load time exceeds threshold"
-  severity    = "warning"
   triggering  = false
   website_id  = instana_website_monitoring_config.example.id
   
   alert_channel_ids = [instana_alerting_channel_email.example.id]
   granularity       = 600000
-  
-  rule = {
-    slowness = {
-      metric_name = "onLoadTime"
-      aggregation = "p90"
-    }
-  }
-  
-  threshold = {
-    static = {
+  rules = [
+    {
       operator = ">="
-      value    = 3000
-    }
-  }
-  
+      rule = {
+        slowness = {
+          aggregation = "P90"
+          metric_name = "onLoadTime"
+        }
+      }
+      threshold = {
+        warning = {
+          static = {
+            value = 5
+          }
+        }
+      }
+    },
+  ]
+
   time_threshold = {
     violations_in_sequence = {
       time_window = 600000
-    }
+    } 
   }
 }
 ```
@@ -146,24 +153,26 @@ Monitor specific pages or user segments:
 resource "instana_website_alert_config" "slowness_filtered" {
   name        = "Checkout Page Slowness"
   description = "Monitor checkout page performance"
-  severity    = "critical"
   website_id  = instana_website_monitoring_config.example.id
-  
-  tag_filter = "beacon.page.name@na EQUALS '/checkout'"
-  
-  rule = {
-    slowness = {
-      metric_name = "domContentLoadedTime"
-      aggregation = "p95"
-    }
-  }
-  
-  threshold = {
-    static = {
+  tag_filter = "endpoint.name@dest NOT_EQUAL 'x'"  
+   rules = [
+    {
       operator = ">="
-      value    = 2000
-    }
-  }
+      rule = {
+        slowness = {
+          aggregation = "P90"
+          metric_name = "onLoadTime"
+        }
+      }
+      threshold = {
+        warning = {
+          static = {
+            value = 5
+          }
+        }
+      }
+    },
+  ]
   
   time_threshold = {
     violations_in_period = {
@@ -178,44 +187,6 @@ resource "instana_website_alert_config" "slowness_filtered" {
   ]
 }
 ```
-
-### JavaScript Error Alert
-
-Monitor specific JavaScript errors:
-
-```hcl
-resource "instana_website_alert_config" "js_error" {
-  name        = "Critical JS Error Alert"
-  description = "Alert on specific JavaScript errors"
-  severity    = "critical"
-  website_id  = instana_website_monitoring_config.example.id
-  
-  rule = {
-    specific_js_error = {
-      metric_name = "jsErrors"
-      aggregation = "sum"
-      operator    = "CONTAINS"
-      value       = "TypeError"
-    }
-  }
-  
-  threshold = {
-    static = {
-      operator = ">="
-      value    = 10
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 300000
-    }
-  }
-  
-  alert_channel_ids = [instana_alerting_channel_email.dev_team.id]
-}
-```
-
 ### Status Code Alert
 
 Monitor HTTP status codes:
@@ -224,24 +195,27 @@ Monitor HTTP status codes:
 resource "instana_website_alert_config" "status_code" {
   name        = "4xx Error Alert"
   description = "Alert on client errors"
-  severity    = "warning"
   website_id  = instana_website_monitoring_config.example.id
-  
-  rule = {
-    status_code = {
-      metric_name = "httpStatusCode"
-      aggregation = "sum"
-      operator    = "GREATER_OR_EQUAL_THAN"
-      value       = "400"
-    }
-  }
-  
-  threshold = {
-    static = {
+  rules = [
+    {
       operator = ">="
-      value    = 50
-    }
-  }
+      rule = {
+        status_code = {
+          aggregation = "SUM"
+          metric_name = "httpxxx"
+          operator    = "EQUALS"
+          value       = "404"
+        }
+      }
+      threshold = {
+        warning = {
+          static = {
+            value = 10
+          }
+        }
+      }
+    },
+  ]
   
   time_threshold = {
     violations_in_period = {
@@ -254,163 +228,46 @@ resource "instana_website_alert_config" "status_code" {
 }
 ```
 
-### Throughput Alert
-
-Monitor page view throughput:
-
-```hcl
-resource "instana_website_alert_config" "throughput" {
-  name        = "Low Traffic Alert"
-  description = "Alert when traffic drops significantly"
-  severity    = "warning"
-  website_id  = instana_website_monitoring_config.example.id
-  
-  rule = {
-    throughput = {
-      metric_name = "pageViews"
-      aggregation = "sum"
-    }
-  }
-  
-  threshold = {
-    static = {
-      operator = "<="
-      value    = 100
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-  
-  alert_channel_ids = [instana_alerting_channel_email.ops.id]
-}
-```
-
 ### Alert with Adaptive Baseline
 
 Use adaptive baseline for dynamic thresholds:
 
 ```hcl
 resource "instana_website_alert_config" "adaptive_slowness" {
-  name        = "Adaptive Page Load Alert"
-  description = "Alert on abnormal page load times"
-  severity    = "warning"
+  name        = "4xx Error Alert"
+  description = "Alert on client errors"
   website_id  = instana_website_monitoring_config.example.id
-  
-  rule = {
-    slowness = {
-      metric_name = "onLoadTime"
-      aggregation = "mean"
-    }
-  }
-  
-  threshold = {
-    adaptive_baseline = {
-      operator         = ">="
-      deviation_factor = 2.0
-      adaptability     = 0.5
-      seasonality      = "WEEKLY"
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-  
-  alert_channel_ids = [instana_alerting_channel_email.example.id]
-}
-```
-
-### Alert with Historic Baseline
-
-Use historic baseline for comparison:
-
-```hcl
-resource "instana_website_alert_config" "historic_baseline" {
-  name        = "Historic Baseline Alert"
-  description = "Compare against historical performance"
-  severity    = "warning"
-  website_id  = instana_website_monitoring_config.example.id
-  
-  rule = {
-    slowness = {
-      metric_name = "onLoadTime"
-      aggregation = "p90"
-    }
-  }
-  
-  threshold = {
-    historic_baseline = {
-      deviation   = 1.5
-      seasonality = "DAILY"
-      baseline = [
-        {
-          day_of_week = "MONDAY"
-          start       = "09:00"
-          end         = "17:00"
-          baseline    = 2000
-        },
-        {
-          day_of_week = "TUESDAY"
-          start       = "09:00"
-          end         = "17:00"
-          baseline    = 1800
-        }
-      ]
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-  
-  alert_channel_ids = [instana_alerting_channel_email.example.id]
-}
-```
-
-### User Impact Alert
-
-Alert based on user impact:
-
-```hcl
-resource "instana_website_alert_config" "user_impact" {
-  name        = "High User Impact Alert"
-  description = "Alert when many users are affected"
-  severity    = "critical"
-  website_id  = instana_website_monitoring_config.example.id
-  
-  rule = {
-    slowness = {
-      metric_name = "onLoadTime"
-      aggregation = "p90"
-    }
-  }
-  
-  threshold = {
-    static = {
+  rules = [
+    {
       operator = ">="
-      value    = 5000
-    }
-  }
+      rule = {
+        status_code = {
+          aggregation = "SUM"
+          metric_name = "httpxxx"
+          operator    = "EQUALS"
+          value       = "404"
+        }
+      }
+      threshold = {
+        warning = {
+          adaptive_baseline = {
+            adaptability     = 1
+            deviation_factor = 3
+            seasonality      = "AUTO"
+          }
+        }
+      }
+    },
+  ]
   
   time_threshold = {
-    user_impact_of_violations_in_sequence = {
-      time_window              = 600000
-      impact_measurement_method = "AGGREGATED"
-      user_percentage          = 0.1  # 10% of users
+    violations_in_period = {
+      time_window = 600000
+      violations  = 2
     }
   }
   
-  alert_channel_ids = [
-    instana_alerting_channel_pagerduty.oncall.id
-  ]
+  alert_channel_ids = [instana_alerting_channel_slack.ops.id]
 }
 ```
 
@@ -420,31 +277,41 @@ Add custom fields to alert notifications:
 
 ```hcl
 resource "instana_website_alert_config" "with_custom_payload" {
-  name        = "Alert with Custom Payload"
-  description = "Alert with additional context"
-  severity    = "warning"
+  name        = "4xx Error Alert"
+  description = "Alert on client errors"
   website_id  = instana_website_monitoring_config.example.id
-  
-  rule = {
-    slowness = {
-      metric_name = "onLoadTime"
-      aggregation = "p90"
-    }
-  }
-  
-  threshold = {
-    static = {
+  rules = [
+    {
       operator = ">="
-      value    = 3000
-    }
-  }
+      rule = {
+        status_code = {
+          aggregation = "SUM"
+          metric_name = "httpxxx"
+          operator    = "EQUALS"
+          value       = "404"
+        }
+      }
+      threshold = {
+        warning = {
+          adaptive_baseline = {
+            adaptability     = 1
+            deviation_factor = 3
+            seasonality      = "AUTO"
+          }
+        }
+      }
+    },
+  ]
   
   time_threshold = {
-    violations_in_sequence = {
+    violations_in_period = {
       time_window = 600000
+      violations  = 2
     }
   }
   
+  alert_channel_ids = [instana_alerting_channel_slack.ops.id]
+
   custom_payload_fields = [
     {
       key   = "environment"
@@ -455,10 +322,6 @@ resource "instana_website_alert_config" "with_custom_payload" {
       value = "frontend"
     },
     {
-      key   = "runbook"
-      value = "https://wiki.example.com/runbooks/website-slowness"
-    },
-    {
       key = "user_segment"
       dynamic_value = {
         key      = "segment"
@@ -466,379 +329,13 @@ resource "instana_website_alert_config" "with_custom_payload" {
       }
     }
   ]
-  
-  alert_channel_ids = [instana_alerting_channel_slack.frontend.id]
-}
-```
-
-### Complex Tag Filter Alert
-
-Use complex tag filters for precise monitoring:
-
-```hcl
-resource "instana_website_alert_config" "complex_filter" {
-  name        = "Premium User Slowness"
-  description = "Monitor premium users on critical pages"
-  severity    = "critical"
-  website_id  = instana_website_monitoring_config.example.id
-  
-  tag_filter = "(beacon.user.tier@na EQUALS 'premium' OR beacon.user.tier@na EQUALS 'enterprise') AND (beacon.page.name@na EQUALS '/dashboard' OR beacon.page.name@na EQUALS '/reports')"
-  
-  rule = {
-    slowness = {
-      metric_name = "onLoadTime"
-      aggregation = "p95"
-    }
   }
-  
-  threshold = {
-    static = {
-      operator = ">="
-      value    = 2000
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 300000
-    }
-  }
-  
-  alert_channel_ids = [
-    instana_alerting_channel_pagerduty.oncall.id,
-    instana_alerting_channel_slack.vip_support.id
-  ]
-}
-```
-
-### Multiple Metrics Alert
-
-Monitor multiple metrics with different thresholds:
-
-```hcl
-resource "instana_website_alert_config" "multi_metric" {
-  name        = "Comprehensive Performance Alert"
-  description = "Monitor multiple performance metrics"
-  severity    = "warning"
-  website_id  = instana_website_monitoring_config.example.id
-  
-  granularity = 300000
-  
-  rules = [
-    {
-      rule = {
-        slowness = {
-          metric_name = "onLoadTime"
-          aggregation = "p90"
-        }
-      }
-      threshold_operator = ">="
-      thresholds = {
-        warning = {
-          static = {
-            operator = ">="
-            value    = 3000
-          }
-        }
-        critical = {
-          static = {
-            operator = ">="
-            value    = 5000
-          }
-        }
-      }
-    },
-    {
-      rule = {
-        slowness = {
-          metric_name = "domContentLoadedTime"
-          aggregation = "p90"
-        }
-      }
-      threshold_operator = ">="
-      thresholds = {
-        warning = {
-          static = {
-            operator = ">="
-            value    = 2000
-          }
-        }
-      }
-    }
-  ]
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-  
-  alert_channel_ids = [instana_alerting_channel_email.example.id]
-}
-```
-
-### Mobile Website Alert
-
-Monitor mobile website performance:
-
-```hcl
-resource "instana_website_alert_config" "mobile_performance" {
-  name        = "Mobile Performance Alert"
-  description = "Monitor mobile user experience"
-  severity    = "warning"
-  website_id  = instana_website_monitoring_config.example.id
-  
-  tag_filter = "beacon.device.type@na EQUALS 'mobile'"
-  
-  rule = {
-    slowness = {
-      metric_name = "onLoadTime"
-      aggregation = "p90"
-    }
-  }
-  
-  threshold = {
-    static = {
-      operator = ">="
-      value    = 4000  # Higher threshold for mobile
-    }
-  }
-  
-  time_threshold = {
-    violations_in_period = {
-      time_window = 600000
-      violations  = 3
-    }
-  }
-  
-  alert_channel_ids = [instana_alerting_channel_slack.mobile_team.id]
-}
-```
-
-### Geographic-Specific Alert
-
-Monitor performance in specific regions:
-
-```hcl
-resource "instana_website_alert_config" "geo_specific" {
-  name        = "APAC Region Performance"
-  description = "Monitor performance for APAC users"
-  severity    = "warning"
-  website_id  = instana_website_monitoring_config.example.id
-  
-  tag_filter = "beacon.geo.region@na EQUALS 'APAC'"
-  
-  rule = {
-    slowness = {
-      metric_name = "onLoadTime"
-      aggregation = "p90"
-    }
-  }
-  
-  threshold = {
-    static = {
-      operator = ">="
-      value    = 3500
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-  
-  alert_channel_ids = [instana_alerting_channel_email.apac_team.id]
-}
-```
-
-### Browser-Specific Alert
-
-Monitor specific browser performance:
-
-```hcl
-resource "instana_website_alert_config" "browser_specific" {
-  name        = "IE11 Performance Alert"
-  description = "Monitor legacy browser performance"
-  severity    = "warning"
-  website_id  = instana_website_monitoring_config.example.id
-  
-  tag_filter = "beacon.browser.name@na EQUALS 'Internet Explorer' AND beacon.browser.version@na STARTS_WITH '11'"
-  
-  rule = {
-    slowness = {
-      metric_name = "onLoadTime"
-      aggregation = "p90"
-    }
-  }
-  
-  threshold = {
-    static = {
-      operator = ">="
-      value    = 6000  # Higher threshold for legacy browsers
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-  
-  alert_channel_ids = [instana_alerting_channel_email.legacy_support.id]
-}
-```
-
-### Error Rate Alert
-
-Monitor JavaScript error rate:
-
-```hcl
-resource "instana_website_alert_config" "error_rate" {
-  name        = "High Error Rate Alert"
-  description = "Alert on elevated error rates"
-  severity    = "critical"
-  website_id  = instana_website_monitoring_config.example.id
-  
-  rule = {
-    specific_js_error = {
-      metric_name = "jsErrors"
-      aggregation = "sum"
-      operator    = "IS_NOT_EMPTY"
-    }
-  }
-  
-  threshold = {
-    static = {
-      operator = ">="
-      value    = 100
-    }
-  }
-  
-  time_threshold = {
-    violations_in_period = {
-      time_window = 300000
-      violations  = 2
-    }
-  }
-  
-  alert_channel_ids = [
-    instana_alerting_channel_pagerduty.oncall.id,
-    instana_alerting_channel_slack.dev_team.id
-  ]
-}
-```
-
-### Environment-Specific Alerts
-
-Create alerts for different environments:
-
-```hcl
-locals {
-  environments = {
-    production = {
-      severity    = "critical"
-      threshold   = 3000
-      time_window = 300000
-      channels    = [
-        instana_alerting_channel_pagerduty.prod_oncall.id,
-        instana_alerting_channel_slack.prod_alerts.id
-      ]
-    }
-    staging = {
-      severity    = "warning"
-      threshold   = 5000
-      time_window = 600000
-      channels    = [
-        instana_alerting_channel_email.staging_team.id
-      ]
-    }
-  }
-}
-
-resource "instana_website_alert_config" "env_alerts" {
-  for_each = local.environments
-
-  name        = "${title(each.key)} Website Performance"
-  description = "Monitor ${each.key} website performance"
-  severity    = each.value.severity
-  website_id  = instana_website_monitoring_config.example.id
-  
-  tag_filter = "beacon.environment@na EQUALS '${each.key}'"
-  
-  rule = {
-    slowness = {
-      metric_name = "onLoadTime"
-      aggregation = "p90"
-    }
-  }
-  
-  threshold = {
-    static = {
-      operator = ">="
-      value    = each.value.threshold
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = each.value.time_window
-    }
-  }
-  
-  custom_payload_fields = [
-    {
-      key   = "environment"
-      value = each.key
-    }
-  ]
-  
-  alert_channel_ids = each.value.channels
-}
-```
-
-### SPA Performance Alert
-
-Monitor Single Page Application metrics:
-
-```hcl
-resource "instana_website_alert_config" "spa_performance" {
-  name        = "SPA Route Change Performance"
-  description = "Monitor SPA route transitions"
-  severity    = "warning"
-  website_id  = instana_website_monitoring_config.example.id
-  
-  tag_filter = "beacon.page.type@na EQUALS 'spa'"
-  
-  rule = {
-    slowness = {
-      metric_name = "routeChangeTime"
-      aggregation = "p90"
-    }
-  }
-  
-  threshold = {
-    static = {
-      operator = ">="
-      value    = 1000
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-  
-  alert_channel_ids = [instana_alerting_channel_slack.spa_team.id]
-}
 ```
 
 ## Argument Reference
 
 * `name` - Required - Name of the website alert configuration (max 256 characters)
 * `description` - Required - Description of the alert configuration (max 65536 characters)
-* `severity` - Optional - Severity of the alert. Values: `warning`, `critical`. Default: `warning`
 * `triggering` - Optional - Boolean flag to trigger incidents. Default: `false`
 * `website_id` - Required - Unique ID of the website to monitor (max 64 characters)
 * `tag_filter` - Optional - Tag filter expression to limit monitoring scope [Details](#tag-filter-reference)
@@ -1022,7 +519,6 @@ $ terraform import instana_website_alert_config.example 60845e4e5e6b9cf8fc2868da
 ## Notes
 
 * The ID is auto-generated by Instana
-* Severity `critical` triggers incidents when `triggering = true`
 * Use tag filters to monitor specific pages, users, or segments
 * Granularity defines the evaluation window size
 * Adaptive baselines automatically adjust to traffic patterns

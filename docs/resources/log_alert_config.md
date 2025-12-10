@@ -33,6 +33,8 @@ resource "instana_log_alert_config" "example" {
   
   rules {
     metric_name = "log.count"
+    alert_type  = "log.count"
+    aggregation = "SUM"
     threshold {
       critical {
         static {
@@ -40,6 +42,7 @@ resource "instana_log_alert_config" "example" {
         }
       }
     }
+    threshold_operator = ">="
   }
   
   time_threshold {
@@ -73,6 +76,8 @@ resource "instana_log_alert_config" "example" {
   
   rules = {
     metric_name = "log.count"
+    alert_type  = "log.count"
+    aggregation = "SUM"
     threshold = {
       critical = {
         static = {
@@ -80,6 +85,7 @@ resource "instana_log_alert_config" "example" {
         }
       }
     }
+    threshold_operator = ">="
   }
   
   time_threshold = {
@@ -94,6 +100,8 @@ resource "instana_log_alert_config" "example" {
       value = "prod"
     }
   ]
+
+  # rest of the configuration...
 }
 ```
 
@@ -108,7 +116,7 @@ resource "instana_log_alert_config" "example" {
 
 ## Example Usage
 
-### Basic Log Count Alert
+### Log Count Alert
 
 ```hcl
 resource "instana_log_alert_config" "error_logs" {
@@ -119,621 +127,44 @@ resource "instana_log_alert_config" "error_logs" {
   
   alert_channels = {
     critical = ["ops-team-channel"]
-  }
-  
-  rules = {
-    metric_name = "log.count"
-    alert_type = "log.count"
-    aggregation = "SUM"
-    threshold_operator = ">"
-    
-    threshold = {
-      critical = {
-        static = {
-          value = 100
-        }
-      }
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-}
-```
-
-### Log Alert with Warning and Critical Thresholds
-
-```hcl
-resource "instana_log_alert_config" "application_errors" {
-  name = "Application Error Logs"
-  description = "Monitor application error log volume"
-  tag_filter = "log.message@na CONTAINS 'error' AND application.name@na EQUALS 'my-app'"
-  granularity = 300000
-  
-  alert_channels = {
     warning = ["dev-team-channel"]
-    critical = ["ops-team-channel", "pagerduty-channel"]
   }
-  
   rules = {
-    metric_name = "log.count"
-    alert_type = "log.count"
     aggregation = "SUM"
-    threshold_operator = ">"
-    
+    alert_type  = "log.count"
+    metric_name = "logCount"
     threshold = {
-      warning = {
-        static = {
-          value = 50
-        }
-      }
       critical = {
         static = {
-          value = 200
+          value = 2
+        }
+      }
+      warning = {
+        static = {
+          value = 1
         }
       }
     }
+    threshold_operator = ">="
   }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 300000
-    }
-  }
-}
-```
-
-### Log Alert with Group By
-
-```hcl
-resource "instana_log_alert_config" "grouped_by_namespace" {
-  name = "Errors by Namespace"
-  description = "Monitor error logs grouped by Kubernetes namespace"
-  tag_filter = "log.level@na EQUALS 'ERROR'"
-  granularity = 600000
-  
-  alert_channels = {
-    critical = ["k8s-ops-channel"]
-  }
-  
+  tag_filter = "log.exception.type@na EQUALS 'error'"
   group_by = [
     {
       tag_name = "kubernetes.namespace.name"
     }
   ]
-  
-  rules = {
-    metric_name = "log.count"
-    alert_type = "log.count"
-    aggregation = "SUM"
-    threshold_operator = ">"
-    
-    threshold = {
-      critical = {
-        static = {
-          value = 100
-        }
-      }
-    }
-  }
-  
   time_threshold = {
     violations_in_sequence = {
       time_window = 600000
     }
   }
-}
-```
-
-### Multiple Group By Tags
-
-```hcl
-resource "instana_log_alert_config" "multi_group" {
-  name = "Errors by Service and Environment"
-  description = "Group errors by service and environment"
-  tag_filter = "log.level@na EQUALS 'ERROR'"
-  granularity = 600000
-  
-  alert_channels = {
-    critical = ["ops-channel"]
-  }
-  
-  group_by = [
+    custom_payload_field = [
     {
-      tag_name = "service.name"
-    },
-    {
-      tag_name = "environment"
-    }
-  ]
-  
-  rules = {
-    metric_name = "log.count"
-    alert_type = "log.count"
-    aggregation = "SUM"
-    threshold_operator = ">"
-    
-    threshold = {
-      critical = {
-        static = {
-          value = 50
-        }
-      }
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-}
-```
-
-### Log Alert with Custom Payload
-
-```hcl
-resource "instana_log_alert_config" "with_context" {
-  name = "Errors with Context"
-  description = "Error logs with additional context"
-  tag_filter = "log.level@na EQUALS 'ERROR'"
-  granularity = 600000
-  
-  alert_channels = {
-    critical = ["enriched-channel"]
-  }
-  
-  rules = {
-    metric_name = "log.count"
-    alert_type = "log.count"
-    aggregation = "SUM"
-    threshold_operator = ">"
-    
-    threshold = {
-      critical = {
-        static = {
-          value = 100
-        }
-      }
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-  
-  custom_payload_field = [
-    {
-      key = "environment"
-      value = "production"
-    },
-    {
-      key = "team"
-      value = "platform-ops"
-    },
-    {
-      key = "runbook"
-      value = "https://wiki.example.com/runbooks/error-logs"
-    }
-  ]
-}
-```
-
-### Log Alert with Dynamic Payload
-
-```hcl
-resource "instana_log_alert_config" "dynamic_context" {
-  name = "Errors with Dynamic Tags"
-  description = "Include dynamic tag values in alerts"
-  tag_filter = "log.level@na EQUALS 'ERROR'"
-  granularity = 600000
-  
-  alert_channels = {
-    critical = ["ops-channel"]
-  }
-  
-  rules = {
-    metric_name = "log.count"
-    alert_type = "log.count"
-    aggregation = "SUM"
-    threshold_operator = ">"
-    
-    threshold = {
-      critical = {
-        static = {
-          value = 100
-        }
-      }
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-  
-  custom_payload_field = [
-    {
-      key = "static_env"
-      value = "production"
-    },
-    {
-      key = "host_fqdn"
       dynamic_value = {
-        tag_name = "host.fqdn"
+        tag_name = "tagName"
       }
+      key   = "dev"
     },
-    {
-      key = "service_name"
-      dynamic_value = {
-        key = "name"
-        tag_name = "service.name"
-      }
-    }
-  ]
-}
-```
-
-### Complex Tag Filter
-
-```hcl
-resource "instana_log_alert_config" "complex_filter" {
-  name = "Production Critical Errors"
-  description = "Monitor critical errors in production"
-  granularity = 300000
-  
-  # Complex tag filter with multiple conditions
-  tag_filter = "(log.level@na EQUALS 'ERROR' OR log.level@na EQUALS 'FATAL') AND environment@na EQUALS 'production' AND service.tier@na EQUALS 'critical'"
-  
-  alert_channels = {
-    critical = ["critical-ops-channel", "pagerduty-channel"]
-  }
-  
-  rules = {
-    metric_name = "log.count"
-    alert_type = "log.count"
-    aggregation = "SUM"
-    threshold_operator = ">"
-    
-    threshold = {
-      critical = {
-        static = {
-          value = 10
-        }
-      }
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 300000
-    }
-  }
-}
-```
-
-### Kubernetes Pod Errors
-
-```hcl
-resource "instana_log_alert_config" "k8s_pod_errors" {
-  name = "Kubernetes Pod Errors"
-  description = "Monitor pod error logs"
-  tag_filter = "log.level@na EQUALS 'ERROR' AND kubernetes.pod.name@na NOT_EMPTY"
-  granularity = 600000
-  
-  alert_channels = {
-    warning = ["k8s-team-channel"]
-    critical = ["k8s-ops-channel"]
-  }
-  
-  group_by = [
-    {
-      tag_name = "kubernetes.namespace.name"
-    },
-    {
-      tag_name = "kubernetes.pod.name"
-    }
-  ]
-  
-  rules = {
-    metric_name = "log.count"
-    alert_type = "log.count"
-    aggregation = "SUM"
-    threshold_operator = ">"
-    
-    threshold = {
-      warning = {
-        static = {
-          value = 20
-        }
-      }
-      critical = {
-        static = {
-          value = 100
-        }
-      }
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-  
-  custom_payload_field = [
-    {
-      key = "cluster"
-      dynamic_value = {
-        tag_name = "kubernetes.cluster.name"
-      }
-    }
-  ]
-}
-```
-
-### Application-Specific Log Monitoring
-
-```hcl
-resource "instana_log_alert_config" "app_exceptions" {
-  name = "Application Exceptions"
-  description = "Monitor application exception logs"
-  tag_filter = "log.message@na CONTAINS 'Exception' AND application.name@na EQUALS 'payment-service'"
-  granularity = 300000
-  grace_period = 600000
-  
-  alert_channels = {
-    critical = ["payment-team-channel"]
-  }
-  
-  rules = {
-    metric_name = "log.count"
-    alert_type = "log.count"
-    aggregation = "SUM"
-    threshold_operator = ">"
-    
-    threshold = {
-      critical = {
-        static = {
-          value = 5
-        }
-      }
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 300000
-    }
-  }
-  
-  custom_payload_field = [
-    {
-      key = "application"
-      value = "payment-service"
-    },
-    {
-      key = "severity"
-      value = "high"
-    }
-  ]
-}
-```
-
-### Security Log Monitoring
-
-```hcl
-resource "instana_log_alert_config" "security_events" {
-  name = "Security Events"
-  description = "Monitor security-related log events"
-  tag_filter = "log.message@na CONTAINS 'authentication failed' OR log.message@na CONTAINS 'unauthorized access'"
-  granularity = 300000
-  
-  alert_channels = {
-    critical = ["security-team-channel", "soc-channel"]
-  }
-  
-  rules = {
-    metric_name = "log.count"
-    alert_type = "log.count"
-    aggregation = "SUM"
-    threshold_operator = ">"
-    
-    threshold = {
-      critical = {
-        static = {
-          value = 3
-        }
-      }
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 300000
-    }
-  }
-  
-  custom_payload_field = [
-    {
-      key = "alert_type"
-      value = "security"
-    },
-    {
-      key = "priority"
-      value = "immediate"
-    }
-  ]
-}
-```
-
-### Multi-Environment Setup
-
-```hcl
-locals {
-  environments = {
-    production = {
-      threshold = 50
-      granularity = 300000
-      channels = ["prod-ops", "pagerduty"]
-    }
-    staging = {
-      threshold = 200
-      granularity = 600000
-      channels = ["staging-ops"]
-    }
-    development = {
-      threshold = 500
-      granularity = 900000
-      channels = ["dev-team"]
-    }
-  }
-}
-
-resource "instana_log_alert_config" "env_errors" {
-  for_each = local.environments
-
-  name = "${each.key} Error Logs"
-  description = "Error log monitoring for ${each.key}"
-  tag_filter = "log.level@na EQUALS 'ERROR' AND environment@na EQUALS '${each.key}'"
-  granularity = each.value.granularity
-  
-  alert_channels = {
-    critical = each.value.channels
-  }
-  
-  rules = {
-    metric_name = "log.count"
-    alert_type = "log.count"
-    aggregation = "SUM"
-    threshold_operator = ">"
-    
-    threshold = {
-      critical = {
-        static = {
-          value = each.value.threshold
-        }
-      }
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = each.value.granularity
-    }
-  }
-  
-  custom_payload_field = [
-    {
-      key = "environment"
-      value = each.key
-    }
-  ]
-}
-```
-
-### Database Error Logs
-
-```hcl
-resource "instana_log_alert_config" "db_errors" {
-  name = "Database Error Logs"
-  description = "Monitor database connection and query errors"
-  tag_filter = "log.message@na CONTAINS 'database' AND (log.message@na CONTAINS 'error' OR log.message@na CONTAINS 'timeout')"
-  granularity = 600000
-  
-  alert_channels = {
-    warning = ["dba-team-channel"]
-    critical = ["dba-team-channel", "ops-channel"]
-  }
-  
-  group_by = [
-    {
-      tag_name = "database.name"
-    }
-  ]
-  
-  rules = {
-    metric_name = "log.count"
-    alert_type = "log.count"
-    aggregation = "SUM"
-    threshold_operator = ">"
-    
-    threshold = {
-      warning = {
-        static = {
-          value = 10
-        }
-      }
-      critical = {
-        static = {
-          value = 50
-        }
-      }
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-}
-```
-
-### API Rate Limit Logs
-
-```hcl
-resource "instana_log_alert_config" "rate_limit" {
-  name = "API Rate Limit Exceeded"
-  description = "Alert on rate limit violations"
-  tag_filter = "log.message@na CONTAINS 'rate limit exceeded'"
-  granularity = 300000
-  
-  alert_channels = {
-    warning = ["api-team-channel"]
-  }
-  
-  group_by = [
-    {
-      tag_name = "api.endpoint"
-    },
-    {
-      tag_name = "client.id"
-    }
-  ]
-  
-  rules = {
-    metric_name = "log.count"
-    alert_type = "log.count"
-    aggregation = "SUM"
-    threshold_operator = ">"
-    
-    threshold = {
-      warning = {
-        static = {
-          value = 100
-        }
-      }
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 300000
-    }
-  }
-  
-  custom_payload_field = [
-    {
-      key = "action"
-      value = "review_rate_limits"
-    }
   ]
 }
 ```

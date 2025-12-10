@@ -26,18 +26,33 @@ resource "instana_synthetic_test" "example" {
     url = "https://example.com"
     operation = "GET"
   }
+  # rest of the configuration
 }
 ```
 
 #### NEW (v6.x) Syntax:
 ```hcl
 resource "instana_synthetic_test" "example" {
-  label = "HTTP Test"
-  
+  active            = true
   http_action = {
-    url = "https://example.com"
-    operation = "GET"
+    allow_insecure   = true
+    expect_status    = 200
+    follow_redirect  = true
+    headers = {
+      test = "test"
+    }
+    mark_synthetic_call = true
+    operation           = "GET"
+    retries             = 0
+    retry_interval      = 1
+    timeout             = "0m"
+    url                 = "var.url"
+    validation_string   = "test"
   }
+  label           = "test label"
+  locations       = ["var.location"]
+  playback_mode   = "Simultaneous"
+  test_frequency  = 15
 }
 ```
 
@@ -107,7 +122,6 @@ resource "instana_synthetic_test" "http_action_advanced" {
       email = "test@example.com"
     })
     expect_status     = 201
-    expect_match      = "\"id\":\\s*\"[a-zA-Z0-9]+\""
     validation_string = "success"
   }
 }
@@ -127,155 +141,43 @@ resource "instana_synthetic_test" "http_json_validation" {
     url           = "https://api.example.com/status"
     operation     = "GET"
     expect_status = 200
-    expect_exists = [
-      "$.status",
-      "$.data.version",
-      "$.data.uptime"
-    ]
-    expect_not_empty = [
-      "$.data.services"
-    ]
     expect_json = {
       "status" = "ok"
     }
   }
 }
 ```
-
-### HTTP Script Test (Basic)
-
-Simple HTTP script test:
-
-```hcl
-resource "instana_synthetic_test" "http_script_basic" {
-  label       = "HTTP Script Test"
-  description = "Custom HTTP script"
-  active      = true
-  locations   = [data.instana_synthetic_location.loc1.id]
-  
-  http_script = {
-    mark_synthetic_call = true
-    retries             = 1
-    retry_interval      = 2
-    timeout             = "1m"
-    script_type         = "Basic"
-    script              = <<-EOF
-      const assert = require('assert');
-      
-      $http.get('https://example.com', function(err, response, body) {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        assert.equal(response.statusCode, 200, 'Expected 200 OK');
-        assert(body.includes('Example'), 'Expected body to contain Example');
-      });
-    EOF
-  }
-}
-```
-
-### HTTP Script Test (Jest)
-
-Advanced Jest-based HTTP script:
-
-```hcl
-resource "instana_synthetic_test" "http_script_jest" {
-  label     = "Jest HTTP Script"
-  active    = true
-  locations = [data.instana_synthetic_location.loc1.id]
-  
-  http_script = {
-    script_type = "Jest"
-    file_name   = "test.js"
-    scripts = {
-      bundle      = "// Bundle content here"
-      script_file = <<-EOF
-        const axios = require('axios');
-        
-        test('API returns valid response', async () => {
-          const response = await axios.get('https://api.example.com/health');
-          expect(response.status).toBe(200);
-          expect(response.data).toHaveProperty('status', 'healthy');
-        });
-      EOF
-    }
-  }
-}
-```
-
-### Browser Script Test
-
-Browser automation test:
-
-```hcl
-resource "instana_synthetic_test" "browser_script" {
-  label       = "Browser Script Test"
-  description = "Test user login flow"
-  active      = true
-  locations   = [data.instana_synthetic_location.loc1.id]
-  
-  browser_script = {
-    mark_synthetic_call = true
-    retries             = 1
-    retry_interval      = 2
-    timeout             = "2m"
-    browser             = "chrome"
-    record_video        = true
-    script_type         = "Basic"
-    script              = <<-EOF
-      const { Builder, By, until } = require('selenium-webdriver');
-      
-      (async function() {
-        let driver = await new Builder().forBrowser('chrome').build();
-        try {
-          await driver.get('https://example.com/login');
-          await driver.findElement(By.id('username')).sendKeys('testuser');
-          await driver.findElement(By.id('password')).sendKeys('password123');
-          await driver.findElement(By.id('submit')).click();
-          await driver.wait(until.urlContains('/dashboard'), 5000);
-        } finally {
-          await driver.quit();
-        }
-      })();
-    EOF
-  }
-}
-```
-
 ### DNS Test
 
 DNS resolution test:
 
 ```hcl
 resource "instana_synthetic_test" "dns_test" {
-  label       = "DNS Resolution Test"
-  description = "Verify DNS records"
-  active      = true
-  locations   = [data.instana_synthetic_location.loc1.id]
-  
+  label           = "dns_test"
+  active            = true
   dns = {
-    lookup              = "example.com"
-    server              = "8.8.8.8"
-    query_type          = "A"
-    port                = 53
-    transport           = "UDP"
-    accept_cname        = true
-    recursive_lookups   = true
-    server_retries      = 2
+    accept_cname        = false
+    lookup              = "var.url"
+    lookup_server_name  = false
+    mark_synthetic_call = true
     query_time = {
-      key      = "queryTime"
+      key      = "responseTime"
       operator = "LESS_THAN"
-      value    = 100
+      value    = 120
     }
-    target_values = [
-      {
-        key      = "A"
-        operator = "EQUALS"
-        value    = "93.184.216.34"
-      }
-    ]
+    query_type        = "A"
+    recursive_lookups = true
+    retries           = 0
+    retry_interval    = 1
+    server            = "8.8.8.8"
+    server_retries    = 1
+    timeout           = "0m"
+    transport         = "UDP"
   }
+  locations       = ["b8dsyQt4fDukWzR9RMXW"]
+  playback_mode   = "Simultaneous"
+  test_frequency  = 15
+
 }
 ```
 
@@ -289,324 +191,18 @@ resource "instana_synthetic_test" "ssl_cert_test" {
   description = "Monitor SSL certificate expiration"
   active      = true
   locations   = [data.instana_synthetic_location.loc1.id]
-  
   ssl_certificate = {
-    hostname                      = "example.com"
-    port                          = 443
-    days_remaining_check          = 30
     accept_self_signed_certificate = false
-    validation_rules = [
-      {
-        key      = "issuer"
-        operator = "CONTAINS"
-        value    = "DigiCert"
-      },
-      {
-        key      = "subject"
-        operator = "EQUALS"
-        value    = "CN=example.com"
-      }
-    ]
+    days_remaining_check           = 11
+    hostname                       = "var.url"
+    mark_synthetic_call            = true
+    port                           = null
+    retries                        = 0
+    retry_interval                 = 1
+    timeout                        = "0m"
   }
 }
 ```
-
-### Webpage Action Test
-
-Simple webpage load test:
-
-```hcl
-resource "instana_synthetic_test" "webpage_action" {
-  label       = "Webpage Load Test"
-  description = "Monitor page load time"
-  active      = true
-  locations   = [data.instana_synthetic_location.loc1.id]
-  
-  webpage_action = {
-    url          = "https://example.com"
-    browser      = "chrome"
-    record_video = false
-    timeout      = "30s"
-  }
-}
-```
-
-### Webpage Script Test
-
-Custom webpage interaction script:
-
-```hcl
-resource "instana_synthetic_test" "webpage_script" {
-  label       = "Webpage Script Test"
-  description = "Test complex user interactions"
-  active      = true
-  locations   = [data.instana_synthetic_location.loc1.id]
-  
-  webpage_script = {
-    browser      = "firefox"
-    record_video = true
-    timeout      = "1m"
-    file_name    = "interaction.js"
-    script       = <<-EOF
-      const { Builder, By } = require('selenium-webdriver');
-      
-      (async function() {
-        let driver = await new Builder().forBrowser('firefox').build();
-        try {
-          await driver.get('https://example.com');
-          await driver.findElement(By.css('.search-box')).sendKeys('test query');
-          await driver.findElement(By.css('.search-button')).click();
-        } finally {
-          await driver.quit();
-        }
-      })();
-    EOF
-  }
-}
-```
-
-### Test with Multiple Locations
-
-Run test from multiple geographic locations:
-
-```hcl
-resource "instana_synthetic_test" "multi_location" {
-  label          = "Multi-Location Test"
-  description    = "Test from multiple regions"
-  active         = true
-  locations      = [
-    data.instana_synthetic_location.us_east.id,
-    data.instana_synthetic_location.eu_west.id,
-    data.instana_synthetic_location.ap_south.id
-  ]
-  test_frequency = 10
-  playback_mode  = "Staggered"
-  
-  http_action = {
-    url           = "https://example.com"
-    operation     = "GET"
-    expect_status = 200
-  }
-}
-```
-
-### Test with RBAC Tags
-
-Add RBAC tags for access control:
-
-```hcl
-resource "instana_synthetic_test" "with_rbac" {
-  label     = "RBAC Tagged Test"
-  active    = true
-  locations = [data.instana_synthetic_location.loc1.id]
-  
-  rbac_tags = [
-    {
-      name  = "team"
-      value = "platform"
-    },
-    {
-      name  = "environment"
-      value = "production"
-    }
-  ]
-  
-  http_action = {
-    url       = "https://example.com"
-    operation = "GET"
-  }
-}
-```
-
-### Test with Multiple Applications
-
-Associate test with multiple applications:
-
-```hcl
-resource "instana_synthetic_test" "multi_app" {
-  label        = "Multi-Application Test"
-  active       = true
-  locations    = [data.instana_synthetic_location.loc1.id]
-  applications = [
-    instana_application_config.app1.id,
-    instana_application_config.app2.id
-  ]
-  
-  http_action = {
-    url       = "https://example.com"
-    operation = "GET"
-  }
-}
-```
-
-### Test with Mobile Apps
-
-Associate test with mobile applications:
-
-```hcl
-resource "instana_synthetic_test" "mobile_app" {
-  label       = "Mobile App Backend Test"
-  active      = true
-  locations   = [data.instana_synthetic_location.loc1.id]
-  mobile_apps = [
-    "mobile-app-id-1",
-    "mobile-app-id-2"
-  ]
-  
-  http_action = {
-    url       = "https://api.example.com/mobile/v1/status"
-    operation = "GET"
-  }
-}
-```
-
-### Test with Websites
-
-Associate test with website monitoring:
-
-```hcl
-resource "instana_synthetic_test" "website_test" {
-  label    = "Website Monitoring Test"
-  active   = true
-  locations = [data.instana_synthetic_location.loc1.id]
-  websites = [
-    instana_website_monitoring_config.site1.id
-  ]
-  
-  http_action = {
-    url       = "https://example.com"
-    operation = "GET"
-  }
-}
-```
-
-### Complex DNS Test
-
-Advanced DNS test with multiple validations:
-
-```hcl
-resource "instana_synthetic_test" "dns_advanced" {
-  label     = "Advanced DNS Test"
-  active    = true
-  locations = [data.instana_synthetic_location.loc1.id]
-  
-  dns = {
-    lookup            = "example.com"
-    server            = "1.1.1.1"
-    query_type        = "ALL"
-    port              = 53
-    transport         = "TCP"
-    accept_cname      = true
-    lookup_server_name = true
-    recursive_lookups = true
-    server_retries    = 3
-    query_time = {
-      key      = "queryTime"
-      operator = "LESS_THAN"
-      value    = 50
-    }
-    target_values = [
-      {
-        key      = "A"
-        operator = "EQUALS"
-        value    = "93.184.216.34"
-      },
-      {
-        key      = "AAAA"
-        operator = "EQUALS"
-        value    = "2606:2800:220:1:248:1893:25c8:1946"
-      },
-      {
-        key      = "NS"
-        operator = "CONTAINS"
-        value    = "example.com"
-      }
-    ]
-  }
-}
-```
-
-### SSL Certificate with Multiple Validations
-
-Comprehensive SSL certificate test:
-
-```hcl
-resource "instana_synthetic_test" "ssl_comprehensive" {
-  label     = "Comprehensive SSL Test"
-  active    = true
-  locations = [data.instana_synthetic_location.loc1.id]
-  
-  ssl_certificate = {
-    hostname             = "secure.example.com"
-    port                 = 443
-    days_remaining_check = 60
-    validation_rules = [
-      {
-        key      = "issuer"
-        operator = "CONTAINS"
-        value    = "Let's Encrypt"
-      },
-      {
-        key      = "subject"
-        operator = "EQUALS"
-        value    = "CN=secure.example.com"
-      },
-      {
-        key      = "keySize"
-        operator = "GREATER_OR_EQUAL_THAN"
-        value    = "2048"
-      },
-      {
-        key      = "signatureAlgorithm"
-        operator = "EQUALS"
-        value    = "SHA256withRSA"
-      }
-    ]
-  }
-}
-```
-
-### Environment-Specific Tests
-
-Create tests for different environments:
-
-```hcl
-locals {
-  environments = {
-    production = {
-      url       = "https://prod.example.com"
-      frequency = 5
-      locations = [data.instana_synthetic_location.us_east.id]
-    }
-    staging = {
-      url       = "https://staging.example.com"
-      frequency = 15
-      locations = [data.instana_synthetic_location.us_west.id]
-    }
-  }
-}
-
-resource "instana_synthetic_test" "env_tests" {
-  for_each = local.environments
-
-  label          = "${title(each.key)} Environment Test"
-  description    = "Monitor ${each.key} environment"
-  active         = true
-  locations      = each.value.locations
-  test_frequency = each.value.frequency
-  
-  http_action = {
-    url           = each.value.url
-    operation     = "GET"
-    expect_status = 200
-  }
-  
-  custom_properties = {
-    "environment" = each.key
-  }
-}
-```
-
 ## Argument Reference
 
 * `label` - Required - Name of the synthetic test (max 128 characters)
@@ -770,11 +366,8 @@ $ terraform import instana_synthetic_test.example cl1g4qrmo26x930s17i2
 * The ID is auto-generated by Instana
 * Only one test configuration type can be specified per resource
 * Tests run from specified locations at the configured frequency
-* Use `playback_mode = "Staggered"` to distribute test execution across time
 * RBAC tags control who can view and modify the test
 * Custom properties help organize and filter tests
-* Video recording is available for browser-based tests
 * SSL certificate tests alert before certificates expire
 * DNS tests validate DNS resolution and records
 * HTTP scripts support both Basic and Jest frameworks
-* Browser scripts use Selenium WebDriver

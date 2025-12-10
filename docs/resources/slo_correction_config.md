@@ -36,6 +36,7 @@ resource "instana_slo_correction_config" "example" {
     duration_unit = "MINUTE"
     recurrent_rule = "FREQ=WEEKLY;BYDAY=SU"
   }
+  # rest of the configuration
 }
 ```
 
@@ -50,6 +51,8 @@ resource "instana_slo_correction_config" "example" {
     duration_unit = "minute"
     recurrent_rule = "FREQ=WEEKLY;BYDAY=SU"
   }
+
+  # rest of the configuration
 }
 ```
 
@@ -70,15 +73,14 @@ resource "instana_slo_correction_config" "one_time_maintenance" {
   name = "Planned Maintenance - June 2024"
   description = "Database upgrade maintenance window"
   active = true
-  
   scheduling = {
-    start_time = 1718000880000
-    duration = 120
-    duration_unit = "minute"
-    recurrent_rule = ""
+    duration       = 13
+    duration_unit  = "hour"
+    recurrent      = true
+    recurrent_rule = "FREQ=DAILY;INTERVAL=1;UNTIL=20250614T000000"
+    start_time     = 1749709800000
   }
-  
-  slo_ids = ["api-latency-slo", "api-availability-slo"]
+  slo_ids = [var.slo_id]
   tags = ["maintenance", "database-upgrade"]
 }
 ```
@@ -100,7 +102,7 @@ resource "instana_slo_correction_config" "nightly_maintenance" {
     recurrent_rule = "FREQ=DAILY"
   }
   
-  slo_ids = ["prod-slo-1", "prod-slo-2"]
+  slo_ids = [var.slo_id]
   tags = ["nightly-maintenance", "automated"]
 }
 ```
@@ -122,7 +124,7 @@ resource "instana_slo_correction_config" "weekend_exclusion" {
     recurrent_rule = "FREQ=WEEKLY;BYDAY=SA,SU"
   }
   
-  slo_ids = ["business-hours-slo"]
+  slo_ids = [var.slo_id]
   tags = ["weekend", "non-business-hours"]
 }
 ```
@@ -144,7 +146,7 @@ resource "instana_slo_correction_config" "business_hours" {
     recurrent_rule = "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR"
   }
   
-  slo_ids = ["customer-facing-slo"]
+  slo_ids = [var.slo_id]
   tags = ["business-hours", "weekday"]
 }
 ```
@@ -166,201 +168,8 @@ resource "instana_slo_correction_config" "monthly_maintenance" {
     recurrent_rule = "FREQ=MONTHLY;BYMONTHDAY=1"
   }
   
-  slo_ids = ["system-slo"]
+  slo_ids = [var.slo_id]
   tags = ["monthly-maintenance", "scheduled"]
-}
-```
-
-### Bi-Weekly Correction
-
-Every other week maintenance:
-
-```hcl
-resource "instana_slo_correction_config" "biweekly_maintenance" {
-  name = "Bi-Weekly Maintenance"
-  description = "Maintenance every other Sunday"
-  active = true
-  
-  scheduling = {
-    start_time = 1720000000000
-    duration = 6
-    duration_unit = "hour"
-    recurrent_rule = "FREQ=WEEKLY;INTERVAL=2;BYDAY=SU"
-  }
-  
-  slo_ids = ["infrastructure-slo"]
-  tags = ["biweekly", "maintenance"]
-}
-```
-
-### Limited Occurrence Correction
-
-Correction that runs only a specific number of times:
-
-```hcl
-resource "instana_slo_correction_config" "limited_correction" {
-  name = "Limited Correction Window"
-  description = "Runs only 5 times"
-  active = true
-  
-  scheduling = {
-    start_time = 1720000000000
-    duration = 2
-    duration_unit = "hour"
-    recurrent_rule = "FREQ=WEEKLY;BYDAY=WE;COUNT=5"
-  }
-  
-  slo_ids = ["migration-slo"]
-  tags = ["temporary", "migration"]
-}
-```
-
-### Time-Bounded Recurring Correction
-
-Correction with an end date:
-
-```hcl
-resource "instana_slo_correction_config" "time_bounded" {
-  name = "Q4 Maintenance Windows"
-  description = "Weekly maintenance until end of Q4"
-  active = true
-  
-  scheduling = {
-    start_time = 1720000000000
-    duration = 3
-    duration_unit = "hour"
-    recurrent_rule = "FREQ=WEEKLY;BYDAY=SA;UNTIL=20241231T235959Z"
-  }
-  
-  slo_ids = ["quarterly-slo"]
-  tags = ["q4-2024", "maintenance"]
-}
-```
-
-### Holiday Exclusions
-
-Exclude specific holidays:
-
-```hcl
-resource "instana_slo_correction_config" "holidays" {
-  name = "Holiday Exclusions"
-  description = "Exclude major holidays from SLO"
-  active = true
-  
-  scheduling = {
-    start_time = 1735689600000  # Christmas Day 2024
-    duration = 24
-    duration_unit = "hour"
-    recurrent_rule = "FREQ=YEARLY;BYMONTH=12;BYMONTHDAY=25"
-  }
-  
-  slo_ids = ["customer-service-slo"]
-  tags = ["holiday", "christmas"]
-}
-```
-
-### Multi-Day Correction Window
-
-Correction spanning multiple days:
-
-```hcl
-resource "instana_slo_correction_config" "multi_day" {
-  name = "Extended Maintenance"
-  description = "3-day maintenance window"
-  active = true
-  
-  scheduling = {
-    start_time = 1720000000000
-    duration = 3
-    duration_unit = "day"
-    recurrent_rule = ""
-  }
-  
-  slo_ids = ["system-migration-slo"]
-  tags = ["extended-maintenance", "migration"]
-}
-```
-
-### Disabled Correction for Testing
-
-Create a disabled correction for testing:
-
-```hcl
-resource "instana_slo_correction_config" "test_correction" {
-  name = "Test Correction (Disabled)"
-  description = "Test correction configuration - not active"
-  active = false
-  
-  scheduling = {
-    start_time = 1720000000000
-    duration = 60
-    duration_unit = "minute"
-    recurrent_rule = ""
-  }
-  
-  slo_ids = ["test-slo"]
-  tags = ["test"]
-}
-```
-
-### Multi-Environment Setup
-
-Create corrections for different environments:
-
-```hcl
-locals {
-  environments = {
-    production = {
-      slo_ids = ["prod-slo-1", "prod-slo-2"]
-      duration = 2
-      recurrence = "FREQ=WEEKLY;BYDAY=SU"
-    }
-    staging = {
-      slo_ids = ["staging-slo-1"]
-      duration = 4
-      recurrence = "FREQ=DAILY"
-    }
-  }
-}
-
-resource "instana_slo_correction_config" "env_maintenance" {
-  for_each = local.environments
-
-  name = "${each.key} Maintenance Window"
-  description = "Maintenance window for ${each.key}"
-  active = true
-  
-  scheduling = {
-    start_time = 1720000000000
-    duration = each.value.duration
-    duration_unit = "hour"
-    recurrent_rule = each.value.recurrence
-  }
-  
-  slo_ids = each.value.slo_ids
-  tags = ["${each.key}", "maintenance"]
-}
-```
-
-### Complex Recurrence Pattern
-
-Advanced recurrence with multiple conditions:
-
-```hcl
-resource "instana_slo_correction_config" "complex_recurrence" {
-  name = "Complex Maintenance Schedule"
-  description = "First and third Monday of each month"
-  active = true
-  
-  scheduling = {
-    start_time = 1720000000000
-    duration = 4
-    duration_unit = "hour"
-    recurrent_rule = "FREQ=MONTHLY;BYDAY=1MO,3MO"
-  }
-  
-  slo_ids = ["monthly-maintenance-slo"]
-  tags = ["complex-schedule", "monthly"]
 }
 ```
 

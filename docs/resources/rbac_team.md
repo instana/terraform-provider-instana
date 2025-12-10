@@ -238,69 +238,6 @@ resource "instana_rbac_team" "restricted_team" {
 }
 ```
 
-### Complete Team Configuration
-
-```hcl
-resource "instana_rbac_team" "complete_team" {
-  tag = "Complete Team Example"
-  
-  info = {
-    description = "A comprehensive team configuration example"
-  }
-  
-  member = [
-    {
-      user_id = "user-1"
-      roles = [
-        {
-          role_id   = "role-1"
-        }
-      ]
-    },
-    {
-      user_id = "user-2"
-      roles = [
-        {
-          role_id   = "role-2"
-        },
-        {
-          role_id   = "role-3"
-        }
-      ]
-    }
-  ]
-  
-  scope = {
-    applications = ["app-1", "app-2"]
-    kubernetes_clusters = ["k8s-1"]
-    kubernetes_namespaces = ["ns-1", "ns-2"]
-    websites = ["website-1"]
-    mobile_apps = ["mobile-1"]
-    infra_dfq_filter = "entity.zone:us-east-1"
-    log_filter = "service.name:my-service"
-    action_filter = "action.type:deployment"
-    business_perspectives = ["bp-1"]
-    slo_ids = ["slo-1", "slo-2"]
-    synthetic_tests = ["test-1"]
-    synthetic_credentials = ["cred-1"]
-    tag_ids = ["tag-1", "tag-2"]
-    
-    access_permissions = [
-      "LIMITED_APPLICATIONS_SCOPE",
-      "LIMITED_KUBERNETES_SCOPE",
-      "LIMITED_WEBSITES_SCOPE",
-      "LIMITED_MOBILE_APPS_SCOPE",
-      "LIMITED_INFRASTRUCTURE_SCOPE",
-      "LIMITED_LOGS_SCOPE",
-      "LIMITED_AUTOMATION_SCOPE",
-      "LIMITED_BIZOPS_SCOPE",
-      "LIMITED_SERVICE_LEVEL_SCOPE",
-      "LIMITED_SYNTHETICS_SCOPE"
-    ]
-  }
-}
-```
-
 ## Argument Reference
 
 * `tag` - Required - The name/tag of the RBAC team

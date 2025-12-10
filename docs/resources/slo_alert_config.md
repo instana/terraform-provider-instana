@@ -49,8 +49,10 @@ resource "instana_slo_alert_config" "example" {
 resource "instana_slo_alert_config" "example" {
   name = "SLO Alert"
   alert_type = "status"
-  
+  severity              = 5
+  slo_ids               = [var.slo_id]
   threshold = {
+    type     = "staticThreshold"
     operator = ">"
     value = 0.7
   }
@@ -92,9 +94,7 @@ resource "instana_slo_alert_config" "status_alert" {
   name = "SLO Status Alert"
   description = "Alert when SLO status drops below 70%"
   severity = 10
-  triggering = true
-  enabled = true
-  
+  triggering = true  
   alert_type = "status"
   slo_ids = ["slo-id-1", "slo-id-2"]
   alert_channel_ids = ["channel-id-1"]
@@ -120,9 +120,7 @@ resource "instana_slo_alert_config" "error_budget_alert" {
   name = "Error Budget Alert"
   description = "Alert when 50% of error budget is consumed"
   severity = 5
-  triggering = true
-  enabled = true
-  
+  triggering = true  
   alert_type = "error_budget"
   slo_ids = ["slo-id-1"]
   alert_channel_ids = ["channel-id-1", "channel-id-2"]
@@ -148,389 +146,20 @@ resource "instana_slo_alert_config" "burn_rate_single" {
   name = "Burn Rate Alert - Single Window"
   description = "Alert when burn rate exceeds threshold"
   severity = 10
-  triggering = true
-  enabled = true
-  
+  triggering = true  
   alert_type = "burn_rate_v2"
   slo_ids = ["slo-id-1"]
   alert_channel_ids = ["pagerduty-channel"]
   
   burn_rate_config = [
     {
-      alert_window_type = "SINGLE"
-      duration = "6"
-      duration_unit_type = "hour"
-      threshold_operator = ">="
-      threshold_value = "1"
-    }
-  ]
-  
-  time_threshold = {
-    warm_up = 60000
-    cool_down = 60000
-  }
-}
-```
-
-### Burn Rate Alert with Multiple Windows
-
-Monitor burn rate with both short and long alerting windows:
-
-```hcl
-resource "instana_slo_alert_config" "burn_rate_multi" {
-  name = "Burn Rate Alert - Multi Window"
-  description = "Alert when burn rate exceeds thresholds in both windows"
-  severity = 10
-  triggering = true
-  enabled = true
-  
-  alert_type = "burn_rate_v2"
-  slo_ids = ["slo-id-1", "slo-id-2"]
-  alert_channel_ids = ["ops-channel", "pagerduty-channel"]
-  
-  burn_rate_config = [
-    {
-      alert_window_type = "LONG"
-      duration = "6"
-      duration_unit_type = "hour"
-      threshold_operator = ">="
-      threshold_value = "1"
-    },
-    {
-      alert_window_type = "SHORT"
-      duration = "1"
-      duration_unit_type = "hour"
-      threshold_operator = ">="
-      threshold_value = "4"
-    }
-  ]
-  
-  time_threshold = {
-    warm_up = 60000
-    cool_down = 60000
-  }
-}
-```
-
-### Alert with Custom Payload
-
-Add custom context to alert notifications:
-
-```hcl
-resource "instana_slo_alert_config" "with_payload" {
-  name = "SLO Alert with Context"
-  description = "Alert with additional context"
-  severity = 10
-  triggering = true
-  enabled = true
-  
-  alert_type = "status"
-  slo_ids = ["slo-id-1"]
-  alert_channel_ids = ["enriched-channel"]
-  
-  threshold = {
-    operator = ">"
-    value = 0.8
-  }
-  
-  time_threshold = {
-    warm_up = 60000
-    cool_down = 60000
-  }
-  
-  custom_payload_fields = [
-    {
-      key = "environment"
-      value = "production"
-    },
-    {
-      key = "team"
-      value = "platform-ops"
-    },
-    {
-      key = "runbook"
-      value = "https://wiki.example.com/slo-runbook"
-    }
-  ]
-}
-```
-
-### Alert with Dynamic Payload
-
-Include dynamic tag values in alerts:
-
-```hcl
-resource "instana_slo_alert_config" "dynamic_payload" {
-  name = "SLO Alert with Dynamic Tags"
-  description = "Alert with dynamic context from tags"
-  severity = 10
-  triggering = true
-  enabled = true
-  
-  alert_type = "error_budget"
-  slo_ids = ["slo-id-1"]
-  alert_channel_ids = ["ops-channel"]
-  
-  threshold = {
-    operator = ">="
-    value = 0.75
-  }
-  
-  time_threshold = {
-    warm_up = 120000
-    cool_down = 120000
-  }
-  
-  custom_payload_fields = [
-    {
-      key = "static_env"
-      value = "production"
-    },
-    {
-      key = "service_name"
-      dynamic_value = {
-        tag_name = "service.name"
-      }
-    },
-    {
-      key = "application"
-      dynamic_value = {
-        key = "name"
-        tag_name = "application.name"
-      }
-    }
-  ]
-}
-```
-
-### Warning Level Alert
-
-Create a warning-level alert:
-
-```hcl
-resource "instana_slo_alert_config" "warning_alert" {
-  name = "SLO Warning Alert"
-  description = "Warning when SLO approaches threshold"
-  severity = 5  # Warning level
-  triggering = true
-  enabled = true
-  
-  alert_type = "status"
-  slo_ids = ["slo-id-1"]
-  alert_channel_ids = ["warning-channel"]
-  
-  threshold = {
-    operator = ">"
-    value = 0.85
-  }
-  
-  time_threshold = {
-    warm_up = 180000
-    cool_down = 180000
-  }
-}
-```
-
-### Critical Level Alert
-
-Create a critical-level alert:
-
-```hcl
-resource "instana_slo_alert_config" "critical_alert" {
-  name = "SLO Critical Alert"
-  description = "Critical alert for severe SLO violations"
-  severity = 10  # Critical level
-  triggering = true
-  enabled = true
-  
-  alert_type = "status"
-  slo_ids = ["slo-id-1"]
-  alert_channel_ids = ["critical-channel", "pagerduty-channel"]
-  
-  threshold = {
-    operator = ">"
-    value = 0.95
-  }
-  
-  time_threshold = {
-    warm_up = 30000
-    cool_down = 30000
-  }
-}
-```
-
-### Multi-SLO Alert
-
-Monitor multiple SLOs with a single alert:
-
-```hcl
-resource "instana_slo_alert_config" "multi_slo" {
-  name = "Multi-SLO Alert"
-  description = "Alert for multiple related SLOs"
-  severity = 10
-  triggering = true
-  enabled = true
-  
-  alert_type = "error_budget"
-  slo_ids = [
-    "api-latency-slo",
-    "api-availability-slo",
-    "api-throughput-slo"
-  ]
-  alert_channel_ids = ["api-team-channel"]
-  
-  threshold = {
-    operator = ">="
-    value = 0.6
-  }
-  
-  time_threshold = {
-    warm_up = 120000
-    cool_down = 120000
-  }
-}
-```
-
-### Burn Rate with Day-Long Window
-
-Monitor burn rate over a longer period:
-
-```hcl
-resource "instana_slo_alert_config" "burn_rate_daily" {
-  name = "Daily Burn Rate Alert"
-  description = "Alert on sustained high burn rate"
-  severity = 10
-  triggering = true
-  enabled = true
-  
-  alert_type = "burn_rate_v2"
-  slo_ids = ["slo-id-1"]
-  alert_channel_ids = ["ops-channel"]
-  
-  burn_rate_config = [
-    {
-      alert_window_type = "SINGLE"
-      duration = "1"
-      duration_unit_type = "day"
-      threshold_operator = ">="
-      threshold_value = "2"
-    }
-  ]
-  
-  time_threshold = {
-    warm_up = 300000
-    cool_down = 300000
-  }
-}
-```
-
-### Burn Rate with Minute-Level Window
-
-Fast-response burn rate alert:
-
-```hcl
-resource "instana_slo_alert_config" "burn_rate_fast" {
-  name = "Fast Burn Rate Alert"
-  description = "Quick response to rapid error budget consumption"
-  severity = 10
-  triggering = true
-  enabled = true
-  
-  alert_type = "burn_rate_v2"
-  slo_ids = ["critical-slo"]
-  alert_channel_ids = ["immediate-response-channel"]
-  
-  burn_rate_config = [
-    {
-      alert_window_type = "SINGLE"
-      duration = "30"
+      alert_window_type  = "SINGLE"
+      duration           = "1"
       duration_unit_type = "minute"
-      threshold_operator = ">="
-      threshold_value = "10"
+      threshold_operator = ">"
+      threshold_value    = "3.00"
     }
   ]
-  
-  time_threshold = {
-    warm_up = 30000
-    cool_down = 30000
-  }
-}
-```
-
-### Multi-Environment Setup
-
-Create alerts for different environments:
-
-```hcl
-locals {
-  environments = {
-    production = {
-      slo_ids = ["prod-slo-1", "prod-slo-2"]
-      threshold = 0.95
-      severity = 10
-      channels = ["prod-ops", "pagerduty"]
-    }
-    staging = {
-      slo_ids = ["staging-slo-1"]
-      threshold = 0.85
-      severity = 5
-      channels = ["staging-ops"]
-    }
-  }
-}
-
-resource "instana_slo_alert_config" "env_alerts" {
-  for_each = local.environments
-
-  name = "${each.key} SLO Alert"
-  description = "SLO alert for ${each.key} environment"
-  severity = each.value.severity
-  triggering = true
-  enabled = true
-  
-  alert_type = "status"
-  slo_ids = each.value.slo_ids
-  alert_channel_ids = each.value.channels
-  
-  threshold = {
-    operator = ">"
-    value = each.value.threshold
-  }
-  
-  time_threshold = {
-    warm_up = 60000
-    cool_down = 60000
-  }
-  
-  custom_payload_fields = [
-    {
-      key = "environment"
-      value = each.key
-    }
-  ]
-}
-```
-
-### Disabled Alert for Testing
-
-Create a disabled alert for testing:
-
-```hcl
-resource "instana_slo_alert_config" "test_alert" {
-  name = "Test SLO Alert (Disabled)"
-  description = "Test alert configuration - not active"
-  severity = 5
-  triggering = false
-  enabled = false
-  
-  alert_type = "status"
-  slo_ids = ["test-slo"]
-  alert_channel_ids = ["test-channel"]
-  
-  threshold = {
-    operator = ">"
-    value = 0.5
-  }
   
   time_threshold = {
     warm_up = 60000
@@ -538,58 +167,6 @@ resource "instana_slo_alert_config" "test_alert" {
   }
 }
 ```
-
-### Complex Burn Rate Configuration
-
-Advanced burn rate monitoring with multiple thresholds:
-
-```hcl
-resource "instana_slo_alert_config" "complex_burn_rate" {
-  name = "Complex Burn Rate Alert"
-  description = "Multi-window burn rate with different thresholds"
-  severity = 10
-  triggering = true
-  enabled = true
-  
-  alert_type = "burn_rate_v2"
-  slo_ids = ["critical-service-slo"]
-  alert_channel_ids = ["ops-team", "pagerduty", "slack"]
-  
-  burn_rate_config = [
-    {
-      alert_window_type = "LONG"
-      duration = "12"
-      duration_unit_type = "hour"
-      threshold_operator = ">="
-      threshold_value = "1.5"
-    },
-    {
-      alert_window_type = "SHORT"
-      duration = "30"
-      duration_unit_type = "minute"
-      threshold_operator = ">="
-      threshold_value = "5"
-    }
-  ]
-  
-  time_threshold = {
-    warm_up = 60000
-    cool_down = 120000
-  }
-  
-  custom_payload_fields = [
-    {
-      key = "severity"
-      value = "critical"
-    },
-    {
-      key = "escalation_policy"
-      value = "immediate"
-    }
-  ]
-}
-```
-
 ## Argument Reference
 
 * `name` - Required - The name of the SLO Alert configuration (max 256 characters)
@@ -599,7 +176,6 @@ resource "instana_slo_alert_config" "complex_burn_rate" {
 * `slo_ids` - Required - A set of SLO IDs to monitor. Must contain at least one ID
 * `alert_channel_ids` - Required - A set of alert channel IDs to send notifications to
 * `triggering` - Optional - Flag to indicate whether to trigger an incident. Default: `false`
-* `enabled` - Optional - Flag to indicate whether the alert is enabled. Default: `false`
 * `threshold` - Optional - Configuration block defining the threshold for the alert condition. Required for `status` and `error_budget` alert types [Details](#threshold-reference)
 * `time_threshold` - Required - Configuration block defining the time threshold for triggering and suppressing alerts [Details](#time-threshold-reference)
 * `burn_rate_config` - Optional - List of burn rate configurations and alerting windows. Required for `alert_type` set to `burn_rate_v2` [Details](#burn-rate-config-reference)

@@ -1,5 +1,8 @@
 # RBAC Group Resource
 
+> **⚠️ DEPRECATION NOTICE**: RBAC Group is deprecated. Please use [RBAC Roles](rbac_role.md) and [RBAC Teams](rbac_team.md) instead.
+
+
 Management of Groups for role-based access control (RBAC). RBAC groups allow you to define permissions and scope access to specific resources for team members.
 
 API Documentation: <https://instana.github.io/openapi/#tag/Groups>

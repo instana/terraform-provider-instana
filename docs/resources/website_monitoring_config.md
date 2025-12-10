@@ -50,28 +50,13 @@ resource "instana_website_monitoring_config" "example" {
 - The `app_name` attribute is computed and returned by the API
 - Attribute syntax remains the same, but schema validation is enhanced
 
-#### OLD (v5.x) Syntax:
 
 ### Basic Website Monitoring Configuration
 
-#### Simple Website Configuration
+####  Website Configuration
 ```hcl
 resource "instana_website_monitoring_config" "basic" {
   name = "my-website"
-}
-```
-
-#### Production Website Configuration
-```hcl
-resource "instana_website_monitoring_config" "production" {
-  name = "production-website"
-}
-```
-
-#### Staging Website Configuration
-```hcl
-resource "instana_website_monitoring_config" "staging" {
-  name = "staging-website"
 }
 ```
 
@@ -89,65 +74,6 @@ resource "instana_website_monitoring_config" "staging" {
   name = "staging-ecommerce-site"
 }
 
-# Development environment
-resource "instana_website_monitoring_config" "dev" {
-  name = "development-ecommerce-site"
-}
-```
-
-#### Multi-Region Website Monitoring
-```hcl
-# US region
-resource "instana_website_monitoring_config" "us" {
-  name = "website-us-region"
-}
-
-# EU region
-resource "instana_website_monitoring_config" "eu" {
-  name = "website-eu-region"
-}
-
-# APAC region
-resource "instana_website_monitoring_config" "apac" {
-  name = "website-apac-region"
-}
-```
-
-### Application-Specific Configurations
-
-#### E-commerce Website
-```hcl
-resource "instana_website_monitoring_config" "ecommerce" {
-  name = "ecommerce-platform"
-}
-```
-
-#### Corporate Website
-```hcl
-resource "instana_website_monitoring_config" "corporate" {
-  name = "corporate-website"
-}
-```
-
-#### Customer Portal
-```hcl
-resource "instana_website_monitoring_config" "customer_portal" {
-  name = "customer-portal"
-}
-```
-
-#### Admin Dashboard
-```hcl
-resource "instana_website_monitoring_config" "admin_dashboard" {
-  name = "admin-dashboard"
-}
-```
-
-#### Mobile Web Application
-```hcl
-resource "instana_website_monitoring_config" "mobile_web" {
-  name = "mobile-web-app"
-}
 ```
 
 ### Using with Variables
@@ -181,30 +107,6 @@ resource "instana_website_monitoring_config" "env_based" {
 }
 ```
 
-### Using with Outputs
-
-#### Exporting Website Configuration Details
-```hcl
-resource "instana_website_monitoring_config" "main" {
-  name = "main-website"
-}
-
-output "website_id" {
-  description = "The ID of the website monitoring configuration"
-  value       = instana_website_monitoring_config.main.id
-}
-
-output "website_name" {
-  description = "The name of the website monitoring configuration"
-  value       = instana_website_monitoring_config.main.name
-}
-
-output "website_app_name" {
-  description = "The application name assigned by Instana"
-  value       = instana_website_monitoring_config.main.app_name
-}
-```
-
 ### Integration with Other Resources
 
 #### Website with SLO Configuration
@@ -217,28 +119,13 @@ resource "instana_website_monitoring_config" "website" {
 # Create SLO for the website
 resource "instana_slo_config" "website_slo" {
   name   = "website-availability-slo"
-  target = 0.99
-  
   entity = {
     website = {
       website_id  = instana_website_monitoring_config.website.id
       beacon_type = "httpRequest"
     }
   }
-  
-  indicator = {
-    time_based_availability = {
-      threshold   = 0.0
-      aggregation = "MEAN"
-    }
-  }
-  
-  time_window = {
-    rolling = {
-      duration      = 7
-      duration_unit = "day"
-    }
-  }
+  # slo configuration details ....
 }
 ```
 
@@ -253,198 +140,8 @@ resource "instana_website_monitoring_config" "website" {
 resource "instana_website_alert_config" "website_alert" {
   name                 = "website-performance-alert"
   website_id           = instana_website_monitoring_config.website.id
-  severity             = "warning"
-  triggering_enabled   = true
   
   # Alert configuration details...
-}
-```
-
-### Naming Conventions
-
-#### Descriptive Naming
-```hcl
-# Good: Clear, descriptive names
-resource "instana_website_monitoring_config" "customer_facing_portal" {
-  name = "customer-facing-portal"
-}
-
-resource "instana_website_monitoring_config" "internal_admin_panel" {
-  name = "internal-admin-panel"
-}
-
-resource "instana_website_monitoring_config" "public_marketing_site" {
-  name = "public-marketing-site"
-}
-```
-
-#### Hierarchical Naming
-```hcl
-# Organization-based naming
-resource "instana_website_monitoring_config" "acme_prod_main" {
-  name = "acme-prod-main-website"
-}
-
-resource "instana_website_monitoring_config" "acme_prod_api_docs" {
-  name = "acme-prod-api-docs"
-}
-
-resource "instana_website_monitoring_config" "acme_staging_main" {
-  name = "acme-staging-main-website"
-}
-```
-
-### Dynamic Configuration with For-Each
-
-#### Multiple Websites from List
-```hcl
-variable "websites" {
-  description = "List of websites to monitor"
-  type        = list(string)
-  default     = ["main-site", "blog", "docs", "api-portal"]
-}
-
-resource "instana_website_monitoring_config" "websites" {
-  for_each = toset(var.websites)
-  
-  name = each.value
-}
-
-output "website_ids" {
-  description = "Map of website names to their IDs"
-  value = {
-    for name, config in instana_website_monitoring_config.websites :
-    name = config.id
-  }
-}
-```
-
-#### Multiple Environments with For-Each
-```hcl
-variable "environments" {
-  description = "Map of environments to website configurations"
-  type = map(object({
-    website_name = string
-  }))
-  default = {
-    production = {
-      website_name = "prod-website"
-    }
-    staging = {
-      website_name = "staging-website"
-    }
-    development = {
-      website_name = "dev-website"
-    }
-  }
-}
-
-resource "instana_website_monitoring_config" "environments" {
-  for_each = var.environments
-  
-  name = each.value.website_name
-}
-```
-
-### Complete Production Example
-
-#### Full Production Setup
-```hcl
-# Variables
-variable "environment" {
-  description = "Environment name"
-  type        = string
-  default     = "production"
-}
-
-variable "application_name" {
-  description = "Application name"
-  type        = string
-  default     = "ecommerce-platform"
-}
-
-# Website monitoring configuration
-resource "instana_website_monitoring_config" "production" {
-  name = "${var.application_name}-${var.environment}"
-}
-
-# SLO for website availability
-resource "instana_slo_config" "website_availability" {
-  name   = "${var.application_name}-availability-slo"
-  target = 0.995
-  tags   = [var.environment, "website", "availability"]
-  
-  entity = {
-    website = {
-      website_id  = instana_website_monitoring_config.production.id
-      beacon_type = "httpRequest"
-    }
-  }
-  
-  indicator = {
-    time_based_availability = {
-      threshold   = 0.0
-      aggregation = "MEAN"
-    }
-  }
-  
-  time_window = {
-    rolling = {
-      duration      = 30
-      duration_unit = "day"
-      timezone      = "UTC"
-    }
-  }
-}
-
-# SLO for website latency
-resource "instana_slo_config" "website_latency" {
-  name   = "${var.application_name}-latency-slo"
-  target = 0.95
-  tags   = [var.environment, "website", "latency"]
-  
-  entity = {
-    website = {
-      website_id  = instana_website_monitoring_config.production.id
-      beacon_type = "httpRequest"
-    }
-  }
-  
-  indicator = {
-    time_based_latency = {
-      threshold   = 2000.0
-      aggregation = "P95"
-    }
-  }
-  
-  time_window = {
-    rolling = {
-      duration      = 7
-      duration_unit = "day"
-      timezone      = "UTC"
-    }
-  }
-}
-
-# Outputs
-output "website_id" {
-  description = "Website monitoring configuration ID"
-  value       = instana_website_monitoring_config.production.id
-}
-
-output "website_app_name" {
-  description = "Website application name in Instana"
-  value       = instana_website_monitoring_config.production.app_name
-}
-
-output "availability_slo_id" {
-  description = "Availability SLO ID"
-  value       = instana_slo_config.website_availability.id
-}
-
-output "latency_slo_id" {
-  description = "Latency SLO ID"
-  value       = instana_slo_config.website_latency.id
 }
 ```
 
@@ -507,36 +204,6 @@ The `id` of the website monitoring configuration is used when:
 4. **Avoid Special Characters**: Stick to alphanumeric characters and hyphens
 5. **Keep It Concise**: While being descriptive, avoid overly long names
 
-### Common Use Cases
-
-**Single Page Applications (SPAs):**
-```hcl
-resource "instana_website_monitoring_config" "spa" {
-  name = "react-spa-application"
-}
-```
-
-**Multi-Page Applications:**
-```hcl
-resource "instana_website_monitoring_config" "mpa" {
-  name = "traditional-web-application"
-}
-```
-
-**Progressive Web Apps (PWAs):**
-```hcl
-resource "instana_website_monitoring_config" "pwa" {
-  name = "progressive-web-app"
-}
-```
-
-**Mobile Web Applications:**
-```hcl
-resource "instana_website_monitoring_config" "mobile" {
-  name = "mobile-web-application"
-}
-```
-
 ### Integration Patterns
 
 **With Terraform Modules:**
@@ -549,28 +216,6 @@ module "website_monitoring" {
 }
 ```
 
-**With Data Sources:**
-```hcl
-# Reference existing website configuration
-data "instana_website_monitoring_config" "existing" {
-  name = "existing-website"
-}
-
-# Use in SLO configuration
-resource "instana_slo_config" "website_slo" {
-  name   = "website-slo"
-  target = 0.99
-  
-  entity = {
-    website = {
-      website_id  = data.instana_website_monitoring_config.existing.id
-      beacon_type = "httpRequest"
-    }
-  }
-  
-  # ... rest of configuration
-}
-```
 
 ### Lifecycle Management
 
@@ -593,27 +238,6 @@ resource "instana_website_monitoring_config" "managed_externally" {
   lifecycle {
     ignore_changes = [name]
   }
-}
-```
-
-### Monitoring Multiple Domains
-
-When monitoring multiple domains or subdomains of the same application:
-
-```hcl
-# Main domain
-resource "instana_website_monitoring_config" "main_domain" {
-  name = "example-com"
-}
-
-# Subdomain - API
-resource "instana_website_monitoring_config" "api_subdomain" {
-  name = "api-example-com"
-}
-
-# Subdomain - Blog
-resource "instana_website_monitoring_config" "blog_subdomain" {
-  name = "blog-example-com"
 }
 ```
 

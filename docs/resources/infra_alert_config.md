@@ -30,7 +30,10 @@ resource "instana_infra_alert_config" "example" {
   
   rules {
     generic_rule {
-      metric_name = "cpu.usage"
+      aggregation              = "MIN"
+      cross_series_aggregation = "MIN"
+      entity_type              = "kubernetesPod"
+      metric_name              = "cpuUsageToLimitRatio"
       threshold {
         critical {
           static {
@@ -46,7 +49,8 @@ resource "instana_infra_alert_config" "example" {
       time_window = 600000
     }
   }
-  
+  tag_filter = "kubernetes.namespace.name@na EQUALS 'otel'"
+
   custom_payload_field {
     key = "env"
     value = "prod"
@@ -63,15 +67,20 @@ resource "instana_infra_alert_config" "example" {
 ```hcl
 resource "instana_infra_alert_config" "example" {
   name = "test-alert"
-  
+  evaluation_type      = "PER_ENTITY"
+  granularity          = 600000
   alert_channels = {
     warning = ["channel-1"]
     critical = ["channel-2"]
   }
-  
+  tag_filter = "kubernetes.namespace.name@na EQUALS 'otel'"
+
   rules = {
     generic_rule = {
-      metric_name = "cpu.usage"
+      aggregation              = "MEAN"
+      cross_series_aggregation = "MEAN"
+      entity_type              = "kubernetesHorizontalPodAutoscaler"
+      metric_name              = "maxReplicas"
       threshold = {
         critical = {
           static = {
@@ -79,6 +88,7 @@ resource "instana_infra_alert_config" "example" {
           }
         }
       }
+      threshold_operator = ">="
     }
   }
   
@@ -111,584 +121,44 @@ resource "instana_infra_alert_config" "example" {
 
 ## Example Usage
 
-### Basic CPU Alert with Static Thresholds
+### CPU Alert with Static Thresholds
 
 ```hcl
 resource "instana_infra_alert_config" "cpu_alert" {
   name = "High CPU Usage Alert"
   description = "Alert when CPU usage exceeds thresholds"
-  granularity = 600000
-  evaluation_type = "CUSTOM"
-  
   alert_channels = {
-    warning = ["warning-channel-id"]
-    critical = ["critical-channel-id"]
+    critical = ["channel-id-1"]
+    warning  = ["channel-id-1"]
   }
-  
+  evaluation_type      = "CUSTOM"
+  granularity          = 60000
   rules = {
     generic_rule = {
-      metric_name = "cpu.usage"
-      entity_type = "host"
-      aggregation = "MEAN"
-      cross_series_aggregation = "SUM"
-      regex = false
+      aggregation              = "MIN"
+      cross_series_aggregation = "MIN"
+      entity_type              = "kubernetesPod"
+      metric_name              = "cpuUsageToLimitRatio"
+      regex                    = false
+      threshold = {
+        warning = {
+          static = {
+            value = 1
+          }
+        }
+      }
       threshold_operator = ">="
-      
-      threshold = {
-        critical = {
-          static = {
-            value = 90.0
-          }
-        }
-        warning = {
-          static = {
-            value = 75.0
-          }
-        }
-      }
     }
   }
-  
+  tag_filter = "kubernetes.namespace.name@na EQUALS 'otel-demo'"
   time_threshold = {
     violations_in_sequence = {
-      time_window = 600000
+      time_window = 60000
     }
   }
 }
 ```
 
-### Memory Alert with Tag Filter
-
-```hcl
-resource "instana_infra_alert_config" "memory_alert" {
-  name = "High Memory Usage"
-  description = "Alert on high memory usage for production hosts"
-  granularity = 600000
-  evaluation_type = "CUSTOM"
-  tag_filter = "host.environment@na EQUALS 'production'"
-  
-  alert_channels = {
-    critical = ["ops-team-channel"]
-  }
-  
-  rules = {
-    generic_rule = {
-      metric_name = "memory.used"
-      entity_type = "host"
-      aggregation = "MEAN"
-      cross_series_aggregation = "MAX"
-      regex = false
-      threshold_operator = ">"
-      
-      threshold = {
-        critical = {
-          static = {
-            value = 8589934592  # 8GB in bytes
-          }
-        }
-      }
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 300000
-    }
-  }
-}
-```
-
-### Regex Pattern Matching for Multiple Metrics
-
-```hcl
-resource "instana_infra_alert_config" "cpu_components" {
-  name = "CPU Component Alert"
-  description = "Monitor multiple CPU metrics using regex"
-  granularity = 600000
-  evaluation_type = "CUSTOM"
-  
-  alert_channels = {
-    warning = ["monitoring-channel"]
-  }
-  
-  rules = {
-    generic_rule = {
-      metric_name = "cpu\\.(nice|user|sys|wait)"
-      entity_type = "host"
-      aggregation = "MEAN"
-      cross_series_aggregation = "SUM"
-      regex = true
-      threshold_operator = ">="
-      
-      threshold = {
-        warning = {
-          static = {
-            value = 80.0
-          }
-        }
-      }
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-}
-```
-
-### Per-Entity Evaluation
-
-```hcl
-resource "instana_infra_alert_config" "per_entity_disk" {
-  name = "Disk Usage Per Host"
-  description = "Monitor disk usage for each host individually"
-  granularity = 600000
-  evaluation_type = "PER_ENTITY"
-  
-  alert_channels = {
-    critical = ["storage-team-channel"]
-  }
-  
-  rules = {
-    generic_rule = {
-      metric_name = "disk.used.percent"
-      entity_type = "host"
-      aggregation = "MEAN"
-      cross_series_aggregation = "MEAN"
-      regex = false
-      threshold_operator = ">"
-      
-      threshold = {
-        critical = {
-          static = {
-            value = 90.0
-          }
-        }
-        warning = {
-          static = {
-            value = 80.0
-          }
-        }
-      }
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-}
-```
-
-### Alert with Group By
-
-```hcl
-resource "instana_infra_alert_config" "grouped_alert" {
-  name = "CPU Alert Grouped by Region"
-  description = "Monitor CPU grouped by region tag"
-  granularity = 600000
-  evaluation_type = "CUSTOM"
-  group_by = ["host.region", "host.environment"]
-  
-  alert_channels = {
-    critical = ["regional-ops-channel"]
-  }
-  
-  rules = {
-    generic_rule = {
-      metric_name = "cpu.usage"
-      entity_type = "host"
-      aggregation = "MEAN"
-      cross_series_aggregation = "MAX"
-      regex = false
-      threshold_operator = ">"
-      
-      threshold = {
-        critical = {
-          static = {
-            value = 85.0
-          }
-        }
-      }
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-}
-```
-
-### Alert with Custom Payload Fields
-
-```hcl
-resource "instana_infra_alert_config" "with_custom_payload" {
-  name = "Alert with Custom Context"
-  description = "Alert with additional context in notifications"
-  granularity = 600000
-  evaluation_type = "CUSTOM"
-  
-  alert_channels = {
-    critical = ["enriched-channel"]
-  }
-  
-  rules = {
-    generic_rule = {
-      metric_name = "cpu.usage"
-      entity_type = "host"
-      aggregation = "MEAN"
-      cross_series_aggregation = "SUM"
-      regex = false
-      threshold_operator = ">"
-      
-      threshold = {
-        critical = {
-          static = {
-            value = 90.0
-          }
-        }
-      }
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-  
-  custom_payload_field = [
-    {
-      key = "environment"
-      value = "production"
-    },
-    {
-      key = "team"
-      value = "platform-ops"
-    },
-    {
-      key = "runbook"
-      value = "https://wiki.example.com/runbooks/high-cpu"
-    }
-  ]
-}
-```
-
-### Alert with Dynamic Custom Payload
-
-```hcl
-resource "instana_infra_alert_config" "dynamic_payload" {
-  name = "Alert with Dynamic Tags"
-  description = "Include dynamic tag values in alert payload"
-  granularity = 600000
-  evaluation_type = "CUSTOM"
-  
-  alert_channels = {
-    critical = ["ops-channel"]
-  }
-  
-  rules = {
-    generic_rule = {
-      metric_name = "memory.used.percent"
-      entity_type = "host"
-      aggregation = "MEAN"
-      cross_series_aggregation = "MAX"
-      regex = false
-      threshold_operator = ">"
-      
-      threshold = {
-        critical = {
-          static = {
-            value = 90.0
-          }
-        }
-      }
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-  
-  custom_payload_field = [
-    {
-      key = "static_field"
-      value = "static_value"
-    },
-    {
-      key = "host_name"
-      dynamic_value = {
-        key = "name"
-        tag_name = "host.name"
-      }
-    },
-    {
-      key = "region"
-      dynamic_value = {
-        tag_name = "host.region"
-      }
-    }
-  ]
-}
-```
-
-### Complex Tag Filter with Multiple Conditions
-
-```hcl
-resource "instana_infra_alert_config" "complex_filter" {
-  name = "Production Critical Services"
-  description = "Monitor critical services in production"
-  granularity = 600000
-  evaluation_type = "CUSTOM"
-  
-  # Complex tag filter with AND/OR logic
-  tag_filter = "(host.environment@na EQUALS 'production' AND host.tier@na EQUALS 'critical') OR host.name@na STARTS_WITH 'prod-critical-'"
-  
-  alert_channels = {
-    critical = ["critical-ops-channel", "pagerduty-channel"]
-  }
-  
-  rules = {
-    generic_rule = {
-      metric_name = "cpu.usage"
-      entity_type = "host"
-      aggregation = "MEAN"
-      cross_series_aggregation = "MAX"
-      regex = false
-      threshold_operator = ">"
-      
-      threshold = {
-        critical = {
-          static = {
-            value = 80.0
-          }
-        }
-      }
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 300000
-    }
-  }
-}
-```
-
-### Network Metrics Alert
-
-```hcl
-resource "instana_infra_alert_config" "network_traffic" {
-  name = "High Network Traffic"
-  description = "Alert on high network throughput"
-  granularity = 600000
-  evaluation_type = "CUSTOM"
-  
-  alert_channels = {
-    warning = ["network-team-channel"]
-  }
-  
-  rules = {
-    generic_rule = {
-      metric_name = "network.tx.bytes"
-      entity_type = "host"
-      aggregation = "SUM"
-      cross_series_aggregation = "SUM"
-      regex = false
-      threshold_operator = ">"
-      
-      threshold = {
-        warning = {
-          static = {
-            value = 1073741824  # 1GB
-          }
-        }
-      }
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-}
-```
-
-### Different Aggregation Methods
-
-```hcl
-resource "instana_infra_alert_config" "p95_latency" {
-  name = "P95 Latency Alert"
-  description = "Monitor 95th percentile latency"
-  granularity = 600000
-  evaluation_type = "CUSTOM"
-  
-  alert_channels = {
-    critical = ["performance-team"]
-  }
-  
-  rules = {
-    generic_rule = {
-      metric_name = "response.time"
-      entity_type = "service"
-      aggregation = "P95"
-      cross_series_aggregation = "MAX"
-      regex = false
-      threshold_operator = ">"
-      
-      threshold = {
-        critical = {
-          static = {
-            value = 1000.0  # 1 second
-          }
-        }
-        warning = {
-          static = {
-            value = 500.0  # 500ms
-          }
-        }
-      }
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-}
-```
-
-### Multi-Environment Setup
-
-```hcl
-locals {
-  environments = {
-    production = {
-      cpu_threshold = 80
-      memory_threshold = 85
-      granularity = 300000
-      channels = ["prod-ops", "pagerduty"]
-    }
-    staging = {
-      cpu_threshold = 90
-      memory_threshold = 90
-      granularity = 600000
-      channels = ["staging-ops"]
-    }
-  }
-}
-
-resource "instana_infra_alert_config" "env_cpu_alert" {
-  for_each = local.environments
-
-  name = "${each.key} CPU Alert"
-  description = "CPU monitoring for ${each.key} environment"
-  granularity = each.value.granularity
-  evaluation_type = "CUSTOM"
-  tag_filter = "host.environment@na EQUALS '${each.key}'"
-  
-  alert_channels = {
-    critical = each.value.channels
-  }
-  
-  rules = {
-    generic_rule = {
-      metric_name = "cpu.usage"
-      entity_type = "host"
-      aggregation = "MEAN"
-      cross_series_aggregation = "MAX"
-      regex = false
-      threshold_operator = ">"
-      
-      threshold = {
-        critical = {
-          static = {
-            value = each.value.cpu_threshold
-          }
-        }
-      }
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = each.value.granularity
-    }
-  }
-  
-  custom_payload_field = [
-    {
-      key = "environment"
-      value = each.key
-    }
-  ]
-}
-```
-
-### Kubernetes Node Monitoring
-
-```hcl
-resource "instana_infra_alert_config" "k8s_node_pressure" {
-  name = "Kubernetes Node Pressure"
-  description = "Alert on node resource pressure"
-  granularity = 300000
-  evaluation_type = "PER_ENTITY"
-  tag_filter = "kubernetes.node.name@na NOT_EMPTY"
-  
-  alert_channels = {
-    critical = ["k8s-ops-channel"]
-  }
-  
-  rules = {
-    generic_rule = {
-      metric_name = "kubernetes.node.memory.pressure"
-      entity_type = "kubernetesNode"
-      aggregation = "MAX"
-      cross_series_aggregation = "MAX"
-      regex = false
-      threshold_operator = ">"
-      
-      threshold = {
-        critical = {
-          static = {
-            value = 1.0
-          }
-        }
-      }
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 300000
-    }
-  }
-  
-  custom_payload_field = [
-    {
-      key = "cluster"
-      dynamic_value = {
-        tag_name = "kubernetes.cluster.name"
-      }
-    },
-    {
-      key = "node"
-      dynamic_value = {
-        tag_name = "kubernetes.node.name"
-      }
-    }
-  ]
-}
-```
 
 ## Argument Reference
 

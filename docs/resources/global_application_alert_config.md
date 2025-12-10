@@ -59,24 +59,29 @@ resource "instana_global_application_alert_config" "example" {
 resource "instana_global_application_alert_config" "example" {
   name = "Global Alert"
   
-  application = {
+  application = [ {
     application_id = "app-id"
     inclusive = true
-  }
+  }]
   
-  rule = {
-    slowness = {
-      metric_name = "latency"
-      aggregation = "p90"
+  rules = [
+    {
+      rule = {
+        slowness = {
+          aggregation = "P90"
+          metric_name = "latency"
+        }
+      }
+      threshold = {
+        warning = {
+          static = {
+            value = 5
+          }
+        }
+      }
+      threshold_operator = ">="
     }
-  }
-  
-  threshold = {
-    static = {
-      operator = ">="
-      value = 5
-    }
-  }
+  ]
   
   time_threshold = {
     violations_in_sequence = {
@@ -112,681 +117,57 @@ Monitor application latency globally:
 
 ```hcl
 resource "instana_global_application_alert_config" "slowness_basic" {
-  name            = "Global Latency Alert"
-  description     = "Alert on high latency across all applications"
-  boundary_scope  = "ALL"
-  severity        = "warning"
-  triggering      = false
-  evaluation_type = "PER_AP"
-  
-  alert_channel_ids = [instana_alerting_channel_email.example.id]
-  granularity       = 600000
-  
-  application = {
-    application_id = instana_application_config.example.id
-    inclusive      = true
+  alert_channels = {
+    CRITICAL = ["critical_email_channel"]
+    WARNING  = ["warning_email_channel"]
   }
-  
-  rule = {
-    slowness = {
-      metric_name = "latency"
-      aggregation = "p90"
-    }
-  }
-  
-  threshold = {
-    static = {
-      operator = ">="
-      value    = 1000
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-}
-```
-
-### Error Rate Alert
-
-Monitor error rates across applications:
-
-```hcl
-resource "instana_global_application_alert_config" "error_rate" {
-  name            = "Global Error Rate Alert"
-  description     = "Alert on elevated error rates"
-  boundary_scope  = "INBOUND"
-  severity        = "critical"
-  triggering      = true
-  evaluation_type = "PER_AP"
-  
-  include_internal  = false
-  include_synthetic = false
-  
-  application = {
-    application_id = instana_application_config.example.id
-    inclusive      = true
-  }
-  
-  rule = {
-    error_rate = {
-      metric_name = "errors"
-      aggregation = "sum"
-    }
-  }
-  
-  threshold = {
-    static = {
-      operator = ">="
-      value    = 5
-    }
-  }
-  
-  time_threshold = {
-    violations_in_period = {
-      time_window = 600000
-      violations  = 3
-    }
-  }
-  
-  alert_channel_ids = [
-    instana_alerting_channel_pagerduty.oncall.id,
-    instana_alerting_channel_slack.ops.id
-  ]
-}
-```
-
-### Service-Level Alert
-
-Monitor specific services within an application:
-
-```hcl
-resource "instana_global_application_alert_config" "service_level" {
-  name            = "Payment Service Alert"
-  description     = "Monitor payment service performance"
-  boundary_scope  = "ALL"
-  severity        = "critical"
-  evaluation_type = "PER_AP_SERVICE"
-  
-  application = {
-    application_id = instana_application_config.ecommerce.id
-    inclusive      = true
-    service = {
+  application = [
+    {
+      application_id = "-1E6OCrFTZazfuwo34wUzw"
+      inclusive      = true
+      service = [
+        {
       service_id = "payment-service-id"
       inclusive  = true
-    }
-  }
-  
-  rule = {
-    slowness = {
-      metric_name = "latency"
-      aggregation = "p95"
-    }
-  }
-  
-  threshold = {
-    static = {
-      operator = ">="
-      value    = 500
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 300000
-    }
-  }
-  
-  alert_channel_ids = [instana_alerting_channel_pagerduty.payment_team.id]
-}
-```
-
-### Endpoint-Level Alert
-
-Monitor specific endpoints:
-
-```hcl
-resource "instana_global_application_alert_config" "endpoint_level" {
-  name            = "Checkout Endpoint Alert"
-  description     = "Monitor checkout endpoint performance"
-  boundary_scope  = "ALL"
-  severity        = "critical"
-  evaluation_type = "PER_AP_ENDPOINT"
-  
-  application = {
-    application_id = instana_application_config.ecommerce.id
-    inclusive      = true
-    service = {
-      service_id = "api-service-id"
-      inclusive  = true
-      endpoint = {
+      endpoint = [{
         endpoint_id = "checkout-endpoint-id"
         inclusive   = true
-      }
-    }
-  }
-  
-  rule = {
-    slowness = {
-      metric_name = "latency"
-      aggregation = "p99"
-    }
-  }
-  
-  threshold = {
-    static = {
-      operator = ">="
-      value    = 2000
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-  
-  alert_channel_ids = [instana_alerting_channel_slack.checkout_team.id]
-}
-```
-
-### Alert with Tag Filter
-
-Use tag filters to scope monitoring:
-
-```hcl
-resource "instana_global_application_alert_config" "with_tag_filter" {
-  name            = "Production API Alert"
-  description     = "Monitor production API calls"
-  boundary_scope  = "INBOUND"
-  severity        = "warning"
-  evaluation_type = "PER_AP"
-  
-  tag_filter = "call.type@na EQUALS 'HTTP' AND call.http.status@na GREATER_OR_EQUAL_THAN 500"
-  
-  application = {
-    application_id = instana_application_config.api.id
-    inclusive      = true
-  }
-  
-  rule = {
-    errors = {
-      metric_name = "errors"
-      aggregation = "sum"
-    }
-  }
-  
-  threshold = {
-    static = {
-      operator = ">="
-      value    = 10
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-  
-  alert_channel_ids = [instana_alerting_channel_email.api_team.id]
-}
-```
-
-### Status Code Alert
-
-Monitor specific HTTP status codes:
-
-```hcl
-resource "instana_global_application_alert_config" "status_code" {
-  name            = "5xx Error Alert"
-  description     = "Alert on server errors"
-  boundary_scope  = "ALL"
-  severity        = "critical"
-  evaluation_type = "PER_AP"
-  
-  application = {
-    application_id = instana_application_config.example.id
-    inclusive      = true
-  }
-  
-  rule = {
-    status_code = {
-      metric_name      = "calls"
-      aggregation      = "sum"
-      status_code_start = 500
-      status_code_end   = 599
-    }
-  }
-  
-  threshold = {
-    static = {
-      operator = ">="
-      value    = 20
-    }
-  }
-  
-  time_threshold = {
-    violations_in_period = {
-      time_window = 300000
-      violations  = 2
-    }
-  }
-  
-  alert_channel_ids = [instana_alerting_channel_pagerduty.oncall.id]
-}
-```
-
-### Throughput Alert
-
-Monitor call throughput:
-
-```hcl
-resource "instana_global_application_alert_config" "throughput" {
-  name            = "Low Throughput Alert"
-  description     = "Alert when traffic drops"
-  boundary_scope  = "INBOUND"
-  severity        = "warning"
-  evaluation_type = "PER_AP"
-  
-  application = {
-    application_id = instana_application_config.example.id
-    inclusive      = true
-  }
-  
-  rule = {
-    throughput = {
-      metric_name = "calls"
-      aggregation = "sum"
-    }
-  }
-  
-  threshold = {
-    static = {
-      operator = "<="
-      value    = 100
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-  
-  alert_channel_ids = [instana_alerting_channel_email.ops.id]
-}
-```
-
-### Log-Based Alert
-
-Monitor application logs:
-
-```hcl
-resource "instana_global_application_alert_config" "log_alert" {
-  name            = "Error Log Alert"
-  description     = "Alert on error logs"
-  boundary_scope  = "ALL"
-  severity        = "warning"
-  evaluation_type = "PER_AP"
-  
-  application = {
-    application_id = instana_application_config.example.id
-    inclusive      = true
-  }
-  
-  rule = {
-    logs = {
-      metric_name = "logs"
-      aggregation = "sum"
-      level       = "ERROR"
-      message     = "OutOfMemoryError"
-      operator    = "CONTAINS"
-    }
-  }
-  
-  threshold = {
-    static = {
-      operator = ">="
-      value    = 5
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-  
-  alert_channel_ids = [instana_alerting_channel_slack.dev_team.id]
-}
-```
-
-### Alert with Historic Baseline
-
-Use historic baseline for comparison:
-
-```hcl
-resource "instana_global_application_alert_config" "historic_baseline" {
-  name            = "Historic Baseline Alert"
-  description     = "Compare against historical performance"
-  boundary_scope  = "ALL"
-  severity        = "warning"
-  evaluation_type = "PER_AP"
-  
-  application = {
-    application_id = instana_application_config.example.id
-    inclusive      = true
-  }
-  
-  rule = {
-    slowness = {
-      metric_name = "latency"
-      aggregation = "p90"
-    }
-  }
-  
-  threshold = {
-    historic_baseline = {
-      operator        = ">="
-      deviation_factor = 2.0
-      seasonality     = "WEEKLY"
-      baseline = [
-        {
-          day_of_week = "MONDAY"
-          start       = "09:00"
-          end         = "17:00"
-          baseline    = 500
-        },
-        {
-          day_of_week = "FRIDAY"
-          start       = "09:00"
-          end         = "17:00"
-          baseline    = 600
-        }
+      }]
+       }
       ]
     }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-  
-  alert_channel_ids = [instana_alerting_channel_email.example.id]
-}
-```
-
-### Request Impact Alert
-
-Alert based on request impact:
-
-```hcl
-resource "instana_global_application_alert_config" "request_impact" {
-  name            = "High Request Impact Alert"
-  description     = "Alert when many requests are affected"
-  boundary_scope  = "ALL"
-  severity        = "critical"
-  evaluation_type = "PER_AP"
-  
-  application = {
-    application_id = instana_application_config.example.id
-    inclusive      = true
-  }
-  
-  rule = {
-    slowness = {
-      metric_name = "latency"
-      aggregation = "p90"
-    }
-  }
-  
-  threshold = {
-    static = {
-      operator = ">="
-      value    = 2000
-    }
-  }
-  
-  time_threshold = {
-    request_impact = {
-      time_window = 600000
-      request     = 1000
-    }
-  }
-  
-  alert_channel_ids = [instana_alerting_channel_pagerduty.oncall.id]
-}
-```
-
-### Alert with Custom Payload
-
-Add custom fields to alert notifications:
-
-```hcl
-resource "instana_global_application_alert_config" "with_custom_payload" {
-  name            = "Alert with Custom Payload"
-  description     = "Alert with additional context"
-  boundary_scope  = "ALL"
-  severity        = "warning"
-  evaluation_type = "PER_AP"
-  
-  application = {
-    application_id = instana_application_config.example.id
-    inclusive      = true
-  }
-  
-  rule = {
-    slowness = {
-      metric_name = "latency"
-      aggregation = "p90"
-    }
-  }
-  
-  threshold = {
-    static = {
-      operator = ">="
-      value    = 1000
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-  
-  custom_payload_fields = [
-    {
-      key   = "environment"
-      value = "production"
-    },
-    {
-      key   = "team"
-      value = "backend"
-    },
-    {
-      key   = "runbook"
-      value = "https://wiki.example.com/runbooks/latency"
-    },
-    {
-      key = "region"
-      dynamic_value = {
-        key      = "region"
-        tag_name = "aws.region"
-      }
-    }
   ]
-  
-  alert_channel_ids = [instana_alerting_channel_slack.backend.id]
-}
-```
-
-### Multi-Application Alert
-
-Monitor multiple applications:
-
-```hcl
-locals {
-  critical_apps = {
-    payment = {
-      app_id    = instana_application_config.payment.id
-      threshold = 500
-      channels  = [instana_alerting_channel_pagerduty.payment.id]
-    }
-    auth = {
-      app_id    = instana_application_config.auth.id
-      threshold = 300
-      channels  = [instana_alerting_channel_pagerduty.auth.id]
-    }
-  }
-}
-
-resource "instana_global_application_alert_config" "critical_apps" {
-  for_each = local.critical_apps
-
-  name            = "${title(each.key)} Service Alert"
-  description     = "Monitor ${each.key} service performance"
-  boundary_scope  = "ALL"
-  severity        = "critical"
-  triggering      = true
-  evaluation_type = "PER_AP"
-  
-  application = {
-    application_id = each.value.app_id
-    inclusive      = true
-  }
-  
-  rule = {
-    slowness = {
-      metric_name = "latency"
-      aggregation = "p95"
-    }
-  }
-  
-  threshold = {
-    static = {
-      operator = ">="
-      value    = each.value.threshold
-    }
-  }
-  
+  boundary_scope       = "INBOUND"
+  description          = "slowness_basic"
+  evaluation_type      = "PER_AP"
+  grace_period         = 300000
+  granularity          = 300000
+  name                 = "slowness_basic"
+  rules = [
+    {
+      rule = {
+        slowness = {
+          aggregation = "P90"
+          metric_name = "latency"
+        }
+      }
+      threshold = {
+        warning = {
+          static = {
+            value = 1
+          }
+        }
+      }
+      threshold_operator = ">="
+    },
+  ]
   time_threshold = {
     violations_in_sequence = {
       time_window = 300000
     }
   }
-  
-  custom_payload_fields = [
-    {
-      key   = "service"
-      value = each.key
-    }
-  ]
-  
-  alert_channel_ids = each.value.channels
-}
-```
-
-### Exclude Specific Services
-
-Exclude services from monitoring:
-
-```hcl
-resource "instana_global_application_alert_config" "exclude_services" {
-  name            = "Application Alert (Excluding Test Services)"
-  description     = "Monitor all services except test services"
-  boundary_scope  = "ALL"
-  severity        = "warning"
-  evaluation_type = "PER_AP_SERVICE"
-  
-  application = {
-    application_id = instana_application_config.example.id
-    inclusive      = true
-    service = {
-      service_id = "test-service-id"
-      inclusive  = false  # Exclude this service
-    }
-  }
-  
-  rule = {
-    slowness = {
-      metric_name = "latency"
-      aggregation = "p90"
-    }
-  }
-  
-  threshold = {
-    static = {
-      operator = ">="
-      value    = 1000
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-  
-  alert_channel_ids = [instana_alerting_channel_email.example.id]
-}
-```
-
-### Complex Scope Configuration
-
-Monitor with complex application/service/endpoint scope:
-
-```hcl
-resource "instana_global_application_alert_config" "complex_scope" {
-  name            = "Complex Scope Alert"
-  description     = "Monitor specific endpoints in specific services"
-  boundary_scope  = "ALL"
-  severity        = "critical"
-  evaluation_type = "PER_AP_ENDPOINT"
-  
-  application = {
-    application_id = instana_application_config.ecommerce.id
-    inclusive      = true
-    service = {
-      service_id = "api-gateway-id"
-      inclusive  = true
-      endpoint = {
-        endpoint_id = "critical-endpoint-id"
-        inclusive   = true
-      }
-    }
-  }
-  
-  tag_filter = "call.http.method@na EQUALS 'POST'"
-  
-  rule = {
-    slowness = {
-      metric_name = "latency"
-      aggregation = "p99"
-    }
-  }
-  
-  threshold = {
-    static = {
-      operator = ">="
-      value    = 3000
-    }
-  }
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 300000
-    }
-  }
-  
-  alert_channel_ids = [
-    instana_alerting_channel_pagerduty.oncall.id,
-    instana_alerting_channel_slack.critical.id
-  ]
+  tag_filter = "(service.name@dest EQUALS 'robotshop-eum-service-2' OR service.name@dest EQUALS 'robotshop-eum-service-1')"
+  triggering = false
 }
 ```
 
@@ -982,7 +363,6 @@ $ terraform import instana_global_application_alert_config.example 60845e4e5e6b9
 * Set `triggering = true` to create incidents for critical alerts
 * Use `include_internal` and `include_synthetic` to control call scope
 * Tag filters provide fine-grained control over monitored calls
-* Historic baselines compare against past performance patterns
 * Request impact thresholds focus on affected request count
 * Custom payload fields enhance alert notifications with context
 * Use `inclusive = false` to exclude specific applications, services, or endpoints
