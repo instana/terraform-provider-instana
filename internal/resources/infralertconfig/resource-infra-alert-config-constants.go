@@ -19,6 +19,8 @@ const (
 	InfraAlertConfigFieldGranularity = "granularity"
 	// InfraAlertConfigFieldEvaluationType constant value for the schema field evaluation_type
 	InfraAlertConfigFieldEvaluationType = "evaluation_type"
+	// InfraAlertConfigFieldTriggering constant value for the schema field triggering
+	InfraAlertConfigFieldTriggering = "triggering"
 	// InfraAlertConfigFieldCustomPayloadField constant value for the schema field custom_payload_field
 	InfraAlertConfigFieldCustomPayloadField = "custom_payload_field"
 	// InfraAlertConfigFieldAlertChannels constant value for the schema field alert_channels
@@ -77,6 +79,8 @@ const (
 	InfraAlertConfigDescGranularity = "The granularity of the infrastructure alert configuration"
 	// InfraAlertConfigDescEvaluationType description for the evaluation_type field
 	InfraAlertConfigDescEvaluationType = "The evaluation type of the infrastructure alert configuration"
+	// InfraAlertConfigDescTriggering description for the triggering field
+	InfraAlertConfigDescTriggering = "Indicates whether the alert should be triggered"
 	// InfraAlertConfigDescRules description for the rules field
 	InfraAlertConfigDescRules = "The rules configuration"
 	// InfraAlertConfigDescGenericRule description for the generic_rule field

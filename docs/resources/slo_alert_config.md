@@ -61,7 +61,7 @@ resource "instana_slo_alert_config" "example" {
     warm_up = 60000
     cool_down = 60000
   }
-  
+  alert_channel_ids = ["channel-id-1"]
   custom_payload_fields = [
     {
       key = "env"

@@ -14,6 +14,7 @@ type InfraAlertConfig struct {
 	Rules                 []RuleWithThreshold[InfraAlertRule] `json:"rules"`
 	AlertChannels         map[AlertSeverity][]string          `json:"alertChannels"`
 	EvaluationType        InfraAlertEvaluationType            `json:"evaluationType"`
+	Triggering            bool                                `json:"triggering"`
 }
 
 func (config *InfraAlertConfig) GetIDForResourcePath() string {

@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -73,6 +74,12 @@ func buildInfraAlertConfigSchema() schema.Schema {
 			InfraAlertConfigFieldEvaluationType: schema.StringAttribute{
 				Description: InfraAlertConfigDescEvaluationType,
 				Required:    true,
+			},
+			InfraAlertConfigFieldTriggering: schema.BoolAttribute{
+				Description: InfraAlertConfigDescTriggering,
+				Optional:    true,
+				Computed:    true,
+				Default:     booldefault.StaticBool(false),
 			},
 			InfraAlertConfigFieldCustomPayloadField: shared.GetCustomPayloadFieldsSchema(),
 			InfraAlertConfigFieldRules:              buildRulesSchema(),
@@ -219,6 +226,7 @@ func (r *infraAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk
 	model.Description = types.StringValue(resource.Description)
 	model.Granularity = types.Int64Value(int64(resource.Granularity))
 	model.EvaluationType = types.StringValue(string(resource.EvaluationType))
+	model.Triggering = types.BoolValue(resource.Triggering)
 
 	// to preserve the existing value in plan/state to handle the value drift
 	if model.TagFilter.IsNull() || model.TagFilter.IsUnknown() {
@@ -402,6 +410,7 @@ func (r *infraAlertConfigResource) MapStateToDataObject(ctx context.Context, pla
 		Description:    model.Description.ValueString(),
 		Granularity:    restapi.Granularity(model.Granularity.ValueInt64()),
 		EvaluationType: restapi.InfraAlertEvaluationType(model.EvaluationType.ValueString()),
+		Triggering:     model.Triggering.ValueBool(),
 	}
 
 	tagFilter, tagFilterDiags := r.mapModelTagFilterToAPI(model.TagFilter)

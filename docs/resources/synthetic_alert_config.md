@@ -97,7 +97,7 @@ resource "instana_synthetic_alert_config" "basic_failure" {
   rule = {
     alert_type = "failure"
     metric_name = "status"
-    aggregation = "sum"
+    aggregation = "SUM"
   }
   
   time_threshold = {

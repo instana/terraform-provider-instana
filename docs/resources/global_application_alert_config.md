@@ -63,7 +63,7 @@ resource "instana_global_application_alert_config" "example" {
     application_id = "app-id"
     inclusive = true
   }]
-  
+  boundary_scope       = "INBOUND"
   rules = [
     {
       rule = {
@@ -89,12 +89,13 @@ resource "instana_global_application_alert_config" "example" {
     }
   }
   
-  custom_payload_fields = [
+  custom_payload_field = [
     {
       key = "environment"
       value = "production"
     }
   ]
+  # rest of the configuration
 }
 ```
 

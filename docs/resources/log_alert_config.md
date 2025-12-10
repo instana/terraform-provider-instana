@@ -122,7 +122,6 @@ resource "instana_log_alert_config" "example" {
 resource "instana_log_alert_config" "error_logs" {
   name = "High Error Log Count"
   description = "Alert when error logs exceed threshold"
-  tag_filter = "log.level@na EQUALS 'ERROR'"
   granularity = 600000
   
   alert_channels = {

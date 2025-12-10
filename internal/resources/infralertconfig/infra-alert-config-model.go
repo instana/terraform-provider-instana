@@ -18,6 +18,7 @@ type InfraAlertConfigModel struct {
 	CustomPayloadField types.List               `tfsdk:"custom_payload_field"`
 	Rules              *InfraRulesModel         `tfsdk:"rules"`
 	EvaluationType     types.String             `tfsdk:"evaluation_type"`
+	Triggering         types.Bool               `tfsdk:"triggering"`
 }
 
 // InfraAlertChannelsModel represents the alert channels model

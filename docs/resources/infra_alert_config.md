@@ -133,6 +133,7 @@ resource "instana_infra_alert_config" "cpu_alert" {
   }
   evaluation_type      = "CUSTOM"
   granularity          = 60000
+  triggering           = true
   rules = {
     generic_rule = {
       aggregation              = "MIN"
@@ -168,6 +169,7 @@ resource "instana_infra_alert_config" "cpu_alert" {
 * `evaluation_type` - Required - The evaluation type of the infrastructure alert config. Allowed values:
   * `CUSTOM` - Combine all metrics in scope into a single metric per group (default)
   * `PER_ENTITY` - Monitor each metric individually and trigger alerts for each individual entity
+* `triggering` - Optional - Indicates whether the alert should be triggered. Default: `false`
 * `alert_channels` - Optional - Set of alert channel IDs associated with the severity [Details](#alert-channels-reference)
 * `group_by` - Optional - List of grouping tags used to group the metric results
 * `tag_filter` - Optional - The tag filter of the infrastructure alert config [Details](#tag-filter-argument-reference)
