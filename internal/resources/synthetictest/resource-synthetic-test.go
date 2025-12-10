@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
@@ -21,7 +22,6 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/util"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // NewSyntheticTestResourceHandle creates the resource handle for Synthetic Tests
@@ -114,6 +114,7 @@ func buildScriptAttributes() map[string]schema.Attribute {
 		},
 		SyntheticTestFieldScriptType: schema.StringAttribute{
 			Optional:    true,
+			Computed:    true,
 			Description: SyntheticTestDescScriptType,
 			Validators: []validator.String{
 				stringvalidator.OneOf(SyntheticTestScriptTypeBasic, SyntheticTestScriptTypeJest),

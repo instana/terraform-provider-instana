@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -17,7 +18,6 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
 	"github.com/instana/terraform-provider-instana/internal/util"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // NewSyntheticAlertConfigResourceHandle creates the resource handle for Synthetic Alert Configuration
@@ -542,8 +542,10 @@ func (r *syntheticAlertConfigResource) UpdateState(ctx context.Context, state *t
 	model.Description = types.StringValue(apiObject.Description)
 	model.Severity = types.Int64Value(int64(apiObject.Severity))
 
-	gracePeriodValue := r.mapGracePeriodToState(apiObject.GracePeriod)
-	model.GracePeriod = gracePeriodValue
+	if model.GracePeriod.IsNull() || model.GracePeriod.IsUnknown() {
+		gracePeriodValue := r.mapGracePeriodToState(apiObject.GracePeriod)
+		model.GracePeriod = gracePeriodValue
+	}
 
 	// to preserve the existing value in plan/state to handle the value drift
 	if model.TagFilter.IsNull() || model.TagFilter.IsUnknown() {
