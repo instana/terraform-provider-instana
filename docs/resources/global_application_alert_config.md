@@ -124,7 +124,7 @@ resource "instana_global_application_alert_config" "slowness_basic" {
   }
   application = [
     {
-      application_id = "-1E6OCrFTZazfuwo34wUzw"
+      application_id = "application-id"
       inclusive      = true
       service = [
         {

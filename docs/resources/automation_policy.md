@@ -160,7 +160,7 @@ resource "instana_automation_policy" "automation_policy_2" {
             ansible = {
               host_id            = "hostid"
               playbook_file_name = "filename"
-              playbook_id        = "79"
+              playbook_id        = "id"
               url                = "url"
             }
             description = "Update ad-service configMap"
@@ -229,7 +229,7 @@ resource "instana_automation_policy" "automation_policy_2" {
             ansible = {
               host_id            = "host-id"
               playbook_file_name = "file-name"
-              playbook_id        = "79"
+              playbook_id        = "id"
               url                = "url"
               workflow_id        = null
             }

@@ -220,7 +220,7 @@ resource "instana_application_alert_config" "application_alert_config" {
 ```hcl
 resource "instana_application_alert_config" "application_alert_config" {
   alert_channels = {
-    WARNING = ["d35rlokgvalloa2fnps0"]
+    WARNING = ["alert-channel-id"]
   }
   application = [
     {
