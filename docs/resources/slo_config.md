@@ -57,26 +57,27 @@ resource "instana_slo_config" "example" {
 ```hcl
 resource "instana_slo_config" "example" {
   name   = "my-slo"
-  target = 0.99
-  
   entity = {
     application = {
-      application_id = "app-123"
-      boundary_scope = "ALL"
+      application_id    = var.application_id
+      boundary_scope    = "ALL"
+      include_internal  = false
+      include_synthetic = false
     }
   }
-  
   indicator = {
-    time_based_latency = {
-      threshold   = 500
-      aggregation = "P95"
+    time_based_availability = {
+      aggregation = "MEAN"
+      threshold   = 1
     }
   }
-  
+  tags      = ["test", "timeBased", "availability", "rolling", "andre"]
+  target    = 0.99
   time_window = {
     rolling = {
-      duration      = 7
-      duration_unit = "day"
+      duration      = 1
+      duration_unit = "week"
+      timezone      = "UTC"
     }
   }
 }
@@ -92,66 +93,32 @@ Please update your Terraform configurations to use the new attribute-based synta
 ```hcl
 resource "instana_slo_config" "app_latency_basic" {
   name   = "app-latency-basic"
-  target = 0.95
-  
   entity = {
     application = {
-      application_id = var.application_id
-      boundary_scope = "ALL"
-    }
-  }
-  
-  indicator = {
-    time_based_latency = {
-      threshold   = 500.0
-      aggregation = "P95"
-    }
-  }
-  
-  time_window = {
-    rolling = {
-      duration      = 7
-      duration_unit = "day"
-    }
-  }
-}
-```
-
-#### Application SLO with Service and Endpoint Filtering
-```hcl
-resource "instana_slo_config" "app_service_endpoint" {
-  name   = "app-service-endpoint-slo"
-  target = 0.99
-  tags   = ["production", "critical", "api"]
-  
-  entity = {
-    application = {
-      application_id    = var.application_id
-      service_id        = var.service_id
+      application_id    = "W-C-smw9REm76gOH_NqICg"
+      boundary_scope    = "ALL"
       endpoint_id       = var.endpoint_id
-      boundary_scope    = "INBOUND"
       include_internal  = false
       include_synthetic = false
     }
   }
-  
   indicator = {
     time_based_latency = {
-      threshold   = 200.0
-      aggregation = "P99"
+      aggregation = "MEAN"
+      threshold   = 100
     }
   }
-  
+  target    = 0.99
   time_window = {
-    rolling = {
-      duration      = 30
-      duration_unit = "day"
-      timezone      = "UTC"
+    fixed = {
+      duration        = 1
+      duration_unit   = "week"
+      start_timestamp = 1757961000000
+      timezone        = "UTC"
     }
   }
 }
 ```
-
 #### Application SLO with Tag Filter Expression
 ```hcl
 resource "instana_slo_config" "app_with_filter" {
@@ -170,8 +137,8 @@ resource "instana_slo_config" "app_with_filter" {
   
   indicator = {
     time_based_latency = {
-      threshold   = 1000.0
       aggregation = "MEAN"
+      threshold   = 100
     }
   }
   
@@ -179,6 +146,8 @@ resource "instana_slo_config" "app_with_filter" {
     rolling = {
       duration      = 7
       duration_unit = "day"
+      timezone      = "UTC"
+
     }
   }
 }
@@ -199,7 +168,7 @@ resource "instana_slo_config" "app_event_latency" {
   
   indicator = {
     event_based_latency = {
-      threshold = 500.0
+      threshold = 500
     }
   }
   
@@ -227,7 +196,7 @@ resource "instana_slo_config" "app_availability" {
   
   indicator = {
     time_based_availability = {
-      threshold   = 0.0
+      threshold   = 1
       aggregation = "MEAN"
     }
   }
@@ -235,32 +204,6 @@ resource "instana_slo_config" "app_availability" {
   time_window = {
     rolling = {
       duration      = 30
-      duration_unit = "day"
-    }
-  }
-}
-```
-
-#### Application SLO with Event-Based Availability
-```hcl
-resource "instana_slo_config" "app_event_availability" {
-  name   = "app-event-availability"
-  target = 0.995
-  
-  entity = {
-    application = {
-      application_id = var.application_id
-      boundary_scope = "ALL"
-    }
-  }
-  
-  indicator = {
-    event_based_availability = {}
-  }
-  
-  time_window = {
-    rolling = {
-      duration      = 7
       duration_unit = "day"
     }
   }
@@ -315,7 +258,7 @@ resource "instana_slo_config" "website_filtered" {
   
   indicator = {
     time_based_availability = {
-      threshold   = 0.0
+      threshold   = 1
       aggregation = "MEAN"
     }
   }
@@ -346,9 +289,8 @@ resource "instana_slo_config" "website_traffic" {
   
   indicator = {
     traffic = {
-      traffic_type = "all"
-      threshold    = 1000.0
-      operator     = "="
+      threshold    = 185
+      traffic_type = "erroneous"
     }
   }
   
@@ -382,70 +324,6 @@ resource "instana_slo_config" "synthetic_basic" {
     time_based_availability = {
       threshold   = 0.0
       aggregation = "MEAN"
-    }
-  }
-  
-  time_window = {
-    rolling = {
-      duration      = 7
-      duration_unit = "day"
-    }
-  }
-}
-```
-
-#### Synthetic SLO with Filter Expression
-```hcl
-resource "instana_slo_config" "synthetic_filtered" {
-  name   = "synthetic-filtered-slo"
-  target = 0.95
-  tags   = ["synthetic", "api-tests"]
-  
-  entity = {
-    synthetic = {
-      synthetic_test_ids = [
-        var.synthetic_test_id_1,
-        var.synthetic_test_id_2,
-        var.synthetic_test_id_3
-      ]
-      filter_expression = "synthetic.location EQUALS 'us-east-1'"
-    }
-  }
-  
-  indicator = {
-    time_based_latency = {
-      threshold   = 1000.0
-      aggregation = "P95"
-    }
-  }
-  
-  time_window = {
-    rolling = {
-      duration      = 30
-      duration_unit = "day"
-      timezone      = "America/New_York"
-    }
-  }
-}
-```
-
-#### Synthetic SLO with Traffic Indicator
-```hcl
-resource "instana_slo_config" "synthetic_traffic" {
-  name   = "synthetic-traffic-slo"
-  target = 0.98
-  
-  entity = {
-    synthetic = {
-      synthetic_test_ids = [var.synthetic_test_id]
-    }
-  }
-  
-  indicator = {
-    traffic = {
-      traffic_type = "erroneous"
-      threshold    = 10.0
-      operator     = "<="
     }
   }
   
@@ -518,100 +396,6 @@ resource "instana_slo_config" "custom_good_bad_events" {
 }
 ```
 
-#### Complex Custom SLO with Multiple Conditions
-```hcl
-resource "instana_slo_config" "custom_complex" {
-  name   = "custom-complex-slo"
-  target = 0.98
-  
-  entity = {
-    application = {
-      application_id = var.application_id
-      boundary_scope = "INBOUND"
-    }
-  }
-  
-  indicator = {
-    custom = {
-      good_event_filter_expression = "(call.http.status EQUALS 200 OR call.http.status EQUALS 201) AND call.duration LESS_THAN 1000"
-      bad_event_filter_expression  = "call.http.status GREATER_OR_EQUAL_THAN 500 OR call.duration GREATER_THAN 5000"
-    }
-  }
-  
-  time_window = {
-    rolling = {
-      duration      = 7
-      duration_unit = "day"
-    }
-  }
-}
-```
-
-### Fixed Time Window SLOs
-
-#### Fixed Time Window with Specific Start Date
-```hcl
-resource "instana_slo_config" "fixed_timewindow" {
-  name   = "fixed-timewindow-slo"
-  target = 0.99
-  
-  entity = {
-    application = {
-      application_id = var.application_id
-      boundary_scope = "ALL"
-    }
-  }
-  
-  indicator = {
-    time_based_latency = {
-      threshold   = 500.0
-      aggregation = "P95"
-    }
-  }
-  
-  time_window = {
-    fixed = {
-      duration        = 30
-      duration_unit   = "day"
-      timezone        = "UTC"
-      start_timestamp = 1704067200.0  # January 1, 2024 00:00:00 UTC
-    }
-  }
-}
-```
-
-#### Quarterly Fixed Time Window
-```hcl
-resource "instana_slo_config" "quarterly_slo" {
-  name   = "quarterly-slo-q1-2024"
-  target = 0.995
-  tags   = ["quarterly", "2024-q1"]
-  
-  entity = {
-    application = {
-      application_id = var.application_id
-      boundary_scope = "ALL"
-    }
-  }
-  
-  indicator = {
-    time_based_availability = {
-      threshold   = 0.0
-      aggregation = "MEAN"
-    }
-  }
-  
-  time_window = {
-    fixed = {
-      duration        = 90
-      duration_unit   = "day"
-      timezone        = "America/New_York"
-      start_timestamp = var.q1_start_timestamp
-    }
-  }
-}
-```
-
 ### SLOs with RBAC Tags
 
 #### SLO with RBAC Tags
@@ -655,289 +439,48 @@ resource "instana_slo_config" "with_rbac_tags" {
 }
 ```
 
-### Advanced Aggregation Examples
+## Generating Configuration from Existing Resources
 
-#### P25 Latency SLO
+If you have already created a SLO configuration in Instana and want to generate the Terraform configuration for it, you can use Terraform's import block feature with the `-generate-config-out` flag.
+
+This approach is also helpful when you're unsure about the correct Terraform structure for a specific resource configuration. Simply create the resource in Instana first, then use this functionality to automatically generate the corresponding Terraform configuration.
+
+### Steps to Generate Configuration:
+
+1. **Get the Resource ID**: First, locate the ID of your SLO configuration in Instana. You can find this in the Instana UI or via the API.
+
+2. **Create an Import Block**: Create a new `.tf` file (e.g., `import.tf`) with an import block:
+
 ```hcl
-resource "instana_slo_config" "p25_latency" {
-  name   = "p25-latency-slo"
-  target = 0.95
-  
-  entity = {
-    application = {
-      application_id = var.application_id
-      boundary_scope = "ALL"
-    }
-  }
-  
-  indicator = {
-    time_based_latency = {
-      threshold   = 100.0
-      aggregation = "P25"
-    }
-  }
-  
-  time_window = {
-    rolling = {
-      duration      = 7
-      duration_unit = "day"
-    }
-  }
+import {
+  to = instana_slo_config.example
+  id = "resource_id"
 }
 ```
 
-#### P50 (Median) Latency SLO
-```hcl
-resource "instana_slo_config" "p50_latency" {
-  name   = "p50-median-latency-slo"
-  target = 0.95
-  
-  entity = {
-    application = {
-      application_id = var.application_id
-      boundary_scope = "ALL"
-    }
-  }
-  
-  indicator = {
-    time_based_latency = {
-      threshold   = 200.0
-      aggregation = "P50"
-    }
-  }
-  
-  time_window = {
-    rolling = {
-      duration      = 7
-      duration_unit = "day"
-    }
-  }
-}
+Replace:
+- `example` with your desired terraform block name
+- `resource_id` with your actual SLO configuration ID from Instana
+
+3. **Generate the Configuration**: Run the following Terraform command:
+
+```bash
+terraform plan -generate-config-out=generated.tf
 ```
 
-#### P75 Latency SLO
-```hcl
-resource "instana_slo_config" "p75_latency" {
-  name   = "p75-latency-slo"
-  target = 0.95
-  
-  entity = {
-    application = {
-      application_id = var.application_id
-      boundary_scope = "ALL"
-    }
-  }
-  
-  indicator = {
-    time_based_latency = {
-      threshold   = 300.0
-      aggregation = "P75"
-    }
-  }
-  
-  time_window = {
-    rolling = {
-      duration      = 7
-      duration_unit = "day"
-    }
-  }
-}
-```
+This will:
+- Import the existing resource state
+- Generate the complete Terraform configuration in `generated.tf`
+- Show you what will be imported
 
-#### P90 Latency SLO
-```hcl
-resource "instana_slo_config" "p90_latency" {
-  name   = "p90-latency-slo"
-  target = 0.95
-  
-  entity = {
-    application = {
-      application_id = var.application_id
-      boundary_scope = "ALL"
-    }
-  }
-  
-  indicator = {
-    time_based_latency = {
-      threshold   = 500.0
-      aggregation = "P90"
-    }
-  }
-  
-  time_window = {
-    rolling = {
-      duration      = 7
-      duration_unit = "day"
-    }
-  }
-}
-```
+4. **Review and Apply**: Review the generated configuration in `generated.tf` and make any necessary adjustments.
 
-#### P98 Latency SLO
-```hcl
-resource "instana_slo_config" "p98_latency" {
-  name   = "p98-latency-slo"
-  target = 0.95
-  
-  entity = {
-    application = {
-      application_id = var.application_id
-      boundary_scope = "ALL"
-    }
-  }
-  
-  indicator = {
-    time_based_latency = {
-      threshold   = 800.0
-      aggregation = "P98"
-    }
-  }
-  
-  time_window = {
-    rolling = {
-      duration      = 7
-      duration_unit = "day"
-    }
-  }
-}
-```
+   - **To import the existing resource**: Keep the import block and run `terraform apply`. This will import the resource into your Terraform state and link it to the existing Instana resource.
+   
+   - **To create a new resource**: If you only need the configuration structure as a template, remove the import block from your configuration. Modify the generated configuration as needed, and when you run `terraform apply`, it will create a new resource in Instana instead of importing the existing one.
 
-#### MAX Latency SLO
-```hcl
-resource "instana_slo_config" "max_latency" {
-  name   = "max-latency-slo"
-  target = 0.95
-  
-  entity = {
-    application = {
-      application_id = var.application_id
-      boundary_scope = "ALL"
-    }
-  }
-  
-  indicator = {
-    time_based_latency = {
-      threshold   = 5000.0
-      aggregation = "MAX"
-    }
-  }
-  
-  time_window = {
-    rolling = {
-      duration      = 7
-      duration_unit = "day"
-    }
-  }
-}
-```
-
-#### MIN Latency SLO
-```hcl
-resource "instana_slo_config" "min_latency" {
-  name   = "min-latency-slo"
-  target = 0.95
-  
-  entity = {
-    application = {
-      application_id = var.application_id
-      boundary_scope = "ALL"
-    }
-  }
-  
-  indicator = {
-    time_based_latency = {
-      threshold   = 50.0
-      aggregation = "MIN"
-    }
-  }
-  
-  time_window = {
-    rolling = {
-      duration      = 7
-      duration_unit = "day"
-    }
-  }
-}
-```
-
-### Production-Ready Complete Examples
-
-#### Critical Production Service SLO
-```hcl
-resource "instana_slo_config" "production_critical" {
-  name   = "production-critical-service-slo"
-  target = 0.999
-  tags   = ["production", "critical", "tier-1"]
-  
-  rbac_tags = [
-    {
-      display_name = "Production Environment"
-      id           = var.production_env_tag_id
-    },
-    {
-      display_name = "Platform Team"
-      id           = var.platform_team_tag_id
-    }
-  ]
-  
-  entity = {
-    application = {
-      application_id    = var.critical_app_id
-      service_id        = var.critical_service_id
-      boundary_scope    = "INBOUND"
-      include_internal  = false
-      include_synthetic = false
-      filter_expression = "call.http.status LESS_THAN 500"
-    }
-  }
-  
-  indicator = {
-    time_based_latency = {
-      threshold   = 200.0
-      aggregation = "P99"
-    }
-  }
-  
-  time_window = {
-    rolling = {
-      duration      = 30
-      duration_unit = "day"
-      timezone      = "UTC"
-    }
-  }
-}
-```
-
-#### Multi-Region Website SLO
-```hcl
-resource "instana_slo_config" "multi_region_website" {
-  name   = "multi-region-website-slo"
-  target = 0.995
-  tags   = ["website", "multi-region", "global"]
-  
-  entity = {
-    website = {
-      website_id        = var.website_id
-      beacon_type       = "httpRequest"
-      filter_expression = "beacon.page.name NOT_CONTAINS 'admin'"
-    }
-  }
-  
-  indicator = {
-    time_based_availability = {
-      threshold   = 0.0
-      aggregation = "MEAN"
-    }
-  }
-  
-  time_window = {
-    rolling = {
-      duration      = 7
-      duration_unit = "day"
-      timezone      = "UTC"
-    }
-  }
-}
+```bash
+terraform apply
 ```
 
 ## Argument Reference
@@ -1113,21 +656,6 @@ $ terraform import instana_slo_config.example terraform-slo-config-60845e4e5e6fb
 
 ## Notes
 
-### Target Values
-
-The `target` attribute represents the desired SLO percentage as a decimal:
-- `0.99` = 99% SLO
-- `0.995` = 99.5% SLO
-- `0.999` = 99.9% SLO
-- `0.9999` = 99.99% SLO
-
-### Filter Expression Normalization
-
-Filter expressions are automatically normalized by the provider. This means:
-- Whitespace is standardized
-- Expressions are validated for syntax correctness
-- The normalized form is stored in state
-
 ### Time Window Selection
 
 Choose between rolling and fixed time windows based on your needs:
@@ -1152,30 +680,3 @@ Different aggregation types serve different purposes:
 - **P99**: 99% of requests are faster than this (strict SLO)
 - **MAX**: Maximum latency observed
 - **MIN**: Minimum latency observed
-
-### Best Practices
-
-1. **Start Conservative**: Begin with achievable targets (e.g., 95%) and increase gradually
-2. **Use Appropriate Aggregations**: P95 or P99 for latency, MEAN for availability
-3. **Filter Appropriately**: Exclude health checks and internal traffic when relevant
-4. **Tag Consistently**: Use tags for organization and RBAC tags for access control
-5. **Monitor Multiple SLOs**: Create separate SLOs for different aspects (latency, availability, traffic)
-6. **Document Thresholds**: Comment your threshold choices in Terraform code
-7. **Review Regularly**: Adjust targets based on actual performance data
-
-### Common Patterns
-
-**Tiered SLOs:**
-Create multiple SLOs with different targets for different service tiers:
-- Critical services: 99.9% or higher
-- Standard services: 99.5%
-- Non-critical services: 99%
-
-**Multi-Indicator SLOs:**
-Create separate SLO resources for different indicators on the same entity:
-- One for latency
-- One for availability
-- One for error rate
-
-**Regional SLOs:**
-Use filter expressions to create region-specific SLOs for global services.

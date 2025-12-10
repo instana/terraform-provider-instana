@@ -70,267 +70,98 @@ The ID of the resource which is also used as unique identifier in Instana is aut
 
 ## Example Usage
 
-### Basic Dashboard
+### Custom Dashboard
 
 ```hcl
-resource "instana_custom_dashboard" "example" {
-  title = "Production Monitoring Dashboard"
-  
-  access_rule = [{
-    access_type   = "READ_WRITE"
-    relation_type = "GLOBAL"
-  }]
-  
-  widgets = file("${path.module}/dashboards/production.json")
-}
-```
-
-### Dashboard with User-Specific Access
-
-```hcl
-resource "instana_custom_dashboard" "team_dashboard" {
-  title = "Team Dashboard"
-  
-  access_rule = [{
-    access_type   = "READ_WRITE"
-    relation_type = "USER"
-    related_id    = "user-123"
-  }, {
-    access_type   = "READ_WRITE"
-    relation_type = "USER"
-    related_id    = "user-456"
-  }, {
-    access_type   = "READ"
-    relation_type = "GLOBAL"
-  }]
-  
-  widgets = file("${path.module}/dashboards/team.json")
-}
-```
-
-### Dashboard with Role-Based Access
-
-```hcl
-resource "instana_custom_dashboard" "ops_dashboard" {
-  title = "Operations Dashboard"
-  
-  access_rule = [{
-    access_type   = "READ_WRITE"
-    relation_type = "ROLE"
-    related_id    = instana_rbac_role.ops_admin.id
-  }, {
-    access_type   = "READ"
-    relation_type = "ROLE"
-    related_id    = instana_rbac_role.ops_viewer.id
-  }]
-  
-  widgets = file("${path.module}/dashboards/operations.json")
-}
-```
-
-### Dashboard with Team Access
-
-```hcl
-resource "instana_custom_dashboard" "platform_dashboard" {
-  title = "Platform Engineering Dashboard"
-  
-  access_rule = [{
-    access_type   = "READ_WRITE"
-    relation_type = "TEAM"
-    related_id    = "team-platform-engineering"
-  }]
-  
-  widgets = file("${path.module}/dashboards/platform.json")
-}
-```
-
-### Dashboard with API Token Access
-
-```hcl
-resource "instana_custom_dashboard" "api_dashboard" {
-  title = "API Metrics Dashboard"
-  
-  access_rule = [{
-    access_type   = "READ"
-    relation_type = "API_TOKEN"
-    related_id    = instana_api_token.dashboard_viewer.id
-  }]
-  
-  widgets = file("${path.module}/dashboards/api_metrics.json")
-}
-```
-
-### Dashboard with Mixed Access Levels
-
-```hcl
-resource "instana_custom_dashboard" "comprehensive_dashboard" {
-  title = "Comprehensive Monitoring Dashboard"
-  
+resource "instana_custom_dashboard" "custom_dashboard" {
   access_rule = [
     {
       access_type   = "READ_WRITE"
+      related_id    = "5ee8a3e8cd70020001ecb007"
       relation_type = "USER"
-      related_id    = "admin-user-id"
     },
-    {
-      access_type   = "READ_WRITE"
-      relation_type = "TEAM"
-      related_id    = "platform-team-id"
-    },
-    {
-      access_type   = "READ"
-      relation_type = "ROLE"
-      related_id    = "viewer-role-id"
-    },
-    {
-      access_type   = "READ"
-      relation_type = "GLOBAL"
-    }
   ]
-  
-  widgets = file("${path.module}/dashboards/comprehensive.json")
-}
-```
-
-### Dashboard with Templated Widgets
-
-```hcl
-resource "instana_custom_dashboard" "dynamic_dashboard" {
-  title = "Dynamic Environment Dashboard - ${var.environment}"
-  
-  access_rule = [{
-    access_type   = "READ_WRITE"
-    relation_type = "GLOBAL"
-  }]
-  
-  widgets = templatefile("${path.module}/dashboards/template.json", {
-    environment = var.environment
-    region      = var.region
-    app_name    = var.application_name
-  })
-}
-```
-
-### Infrastructure Monitoring Dashboard
-
-```hcl
-resource "instana_custom_dashboard" "infrastructure" {
-  title = "Infrastructure Health Dashboard"
-  
-  access_rule = [{
-    access_type   = "READ_WRITE"
-    relation_type = "TEAM"
-    related_id    = "infrastructure-team"
-  }, {
-    access_type   = "READ"
-    relation_type = "GLOBAL"
-  }]
-  
-  widgets = jsonencode([
-    {
-      type = "metric"
-      title = "CPU Usage"
-      metric = {
-        plugin = "host"
-        metric = "cpu.usage"
-        aggregation = "mean"
-      }
-      timeframe = {
-        to = 0
-        windowSize = 3600000
-      }
-    },
-    {
-      type = "metric"
-      title = "Memory Usage"
-      metric = {
-        plugin = "host"
-        metric = "memory.used"
-        aggregation = "mean"
-      }
-      timeframe = {
-        to = 0
-        windowSize = 3600000
+  title = "custom_dashboard"
+  widgets = jsonencode([{
+    config = {
+      comparisonDecreaseColor = "greenish"
+      comparisonIncreaseColor = "redish"
+      formatter               = "number.detailed"
+      metricConfiguration = {
+        aggregation      = "SUM"
+        includeInternal  = false
+        includeSynthetic = false
+        metric           = "calls"
+        source           = "APPLICATION"
+        tagFilterExpression = {
+          elements        = []
+          logicalOperator = "AND"
+          type            = "EXPRESSION"
+        }
+        threshold = {
+          critical         = ""
+          operator         = ">="
+          thresholdEnabled = false
+          warning          = ""
+        }
+        timeShift = 0
       }
     }
-  ])
+    height = 1
+    id     = "id"
+    title  = "Widget"
+    type   = "bigNumber"
+    width  = 1
+    x      = 0
+    y      = 0
+  }])
 }
 ```
 
-### Application Performance Dashboard
+
+
+## Generating Configuration from Existing Resources
+
+If you have already created a custom dashboard in Instana and want to generate the Terraform configuration for it, you can use Terraform's import block feature with the `-generate-config-out` flag.
+
+This approach is also helpful when you're unsure about the correct Terraform structure for a specific resource configuration. Simply create the resource in Instana first, then use this functionality to automatically generate the corresponding Terraform configuration.
+
+### Steps to Generate Configuration:
+
+1. **Get the Resource ID**: First, locate the ID of your custom dashboard in Instana. You can find this in the Instana UI or via the API.
+
+2. **Create an Import Block**: Create a new `.tf` file (e.g., `import.tf`) with an import block:
 
 ```hcl
-resource "instana_custom_dashboard" "application_performance" {
-  title = "Application Performance Metrics"
-  
-  access_rule = [{
-    access_type   = "READ_WRITE"
-    relation_type = "TEAM"
-    related_id    = "development-team"
-  }]
-  
-  widgets = jsonencode([
-    {
-      type = "application"
-      title = "Application Calls"
-      applicationId = instana_application_config.my_app.id
-      metric = "calls"
-      timeframe = {
-        to = 0
-        windowSize = 7200000
-      }
-    },
-    {
-      type = "application"
-      title = "Error Rate"
-      applicationId = instana_application_config.my_app.id
-      metric = "errors"
-      timeframe = {
-        to = 0
-        windowSize = 7200000
-      }
-    },
-    {
-      type = "application"
-      title = "Latency P95"
-      applicationId = instana_application_config.my_app.id
-      metric = "latency"
-      aggregation = "p95"
-      timeframe = {
-        to = 0
-        windowSize = 7200000
-      }
-    }
-  ])
+import {
+  to = instana_custom_dashboard.example
+  id = "resource_id"
 }
 ```
 
-### Multi-Environment Dashboard
+Replace:
+- `example` with your desired terraform block name
+- `resource_id` with your actual custom dashboard ID from Instana
 
-```hcl
-locals {
-  environments = ["dev", "staging", "production"]
-}
+3. **Generate the Configuration**: Run the following Terraform command:
 
-resource "instana_custom_dashboard" "multi_env" {
-  for_each = toset(local.environments)
-  
-  title = "${title(each.value)} Environment Dashboard"
-  
-  access_rule = [{
-    access_type   = "READ_WRITE"
-    relation_type = "TEAM"
-    related_id    = "${each.value}-team"
-  }, {
-    access_type   = "READ"
-    relation_type = "GLOBAL"
-  }]
-  
-  widgets = templatefile("${path.module}/dashboards/environment.json", {
-    environment = each.value
-    zone        = "${each.value}-zone"
-  })
-}
+```bash
+terraform plan -generate-config-out=generated.tf
+```
+
+This will:
+- Import the existing resource state
+- Generate the complete Terraform configuration in `generated.tf`
+- Show you what will be imported
+
+4. **Review and Apply**: Review the generated configuration in `generated.tf` and make any necessary adjustments.
+
+   - **To import the existing resource**: Keep the import block and run `terraform apply`. This will import the resource into your Terraform state and link it to the existing Instana resource.
+   
+   - **To create a new resource**: If you only need the configuration structure as a template, remove the import block from your configuration. Modify the generated configuration as needed, and when you run `terraform apply`, it will create a new resource in Instana instead of importing the existing one.
+
+```bash
+terraform apply
 ```
 
 ## Argument Reference
@@ -365,55 +196,6 @@ All widgets support these common properties:
   * `to` - End time (0 for current time)
   * `windowSize` - Time window in milliseconds
 
-### Widget Types
-
-#### Metric Widget
-
-```json
-{
-  "type": "metric",
-  "title": "CPU Usage",
-  "metric": {
-    "plugin": "host",
-    "metric": "cpu.usage",
-    "aggregation": "mean"
-  },
-  "timeframe": {
-    "to": 0,
-    "windowSize": 3600000
-  }
-}
-```
-
-#### Application Widget
-
-```json
-{
-  "type": "application",
-  "title": "Application Calls",
-  "applicationId": "app-id",
-  "metric": "calls",
-  "timeframe": {
-    "to": 0,
-    "windowSize": 3600000
-  }
-}
-```
-
-#### Website Widget
-
-```json
-{
-  "type": "website",
-  "title": "Page Load Time",
-  "websiteId": "website-id",
-  "metric": "pageLoadTime",
-  "timeframe": {
-    "to": 0,
-    "windowSize": 3600000
-  }
-}
-```
 
 ### Using Terraform Functions
 

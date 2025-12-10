@@ -88,17 +88,6 @@ resource "instana_alerting_channel" "google_chat_basic" {
 }
 ```
 
-#### Google Chat for Production Alerts
-```hcl
-resource "instana_alerting_channel" "google_chat_production" {
-  name = "production-google-chat"
-  
-  google_chat = {
-    webhook_url = var.google_chat_production_webhook
-  }
-}
-```
-
 ### Office 365 Alerting Channel
 
 #### Basic Office 365 Configuration
@@ -112,20 +101,9 @@ resource "instana_alerting_channel" "office365_basic" {
 }
 ```
 
-#### Office 365 for Critical Alerts
-```hcl
-resource "instana_alerting_channel" "office365_critical" {
-  name = "critical-office365-alerts"
-  
-  office_365 = {
-    webhook_url = var.office365_critical_webhook
-  }
-}
-```
-
 ### OpsGenie Alerting Channel
 
-#### Basic OpsGenie Configuration (EU Region)
+#### Basic OpsGenie Configuration
 ```hcl
 resource "instana_alerting_channel" "opsgenie_eu" {
   name = "opsgenie-eu-alerts"
@@ -134,19 +112,6 @@ resource "instana_alerting_channel" "opsgenie_eu" {
     api_key = var.opsgenie_api_key
     tags    = ["instana", "production"]
     region  = "EU"
-  }
-}
-```
-
-#### OpsGenie Configuration (US Region)
-```hcl
-resource "instana_alerting_channel" "opsgenie_us" {
-  name = "opsgenie-us-alerts"
-  
-  ops_genie = {
-    api_key = var.opsgenie_us_api_key
-    tags    = ["instana", "staging", "us-region"]
-    region  = "US"
   }
 }
 ```
@@ -182,36 +147,15 @@ resource "instana_alerting_channel" "pagerduty_basic" {
 }
 ```
 
-#### PagerDuty for Different Services
-```hcl
-# Production service
-resource "instana_alerting_channel" "pagerduty_production" {
-  name = "pagerduty-production"
-  
-  pager_duty = {
-    service_integration_key = var.pagerduty_production_key
-  }
-}
-
-# Staging service
-resource "instana_alerting_channel" "pagerduty_staging" {
-  name = "pagerduty-staging"
-  
-  pager_duty = {
-    service_integration_key = var.pagerduty_staging_key
-  }
-}
-```
 
 ### Slack Alerting Channel
 
 #### Basic Slack Configuration
 ```hcl
-resource "instana_alerting_channel" "slack_basic" {
-  name = "slack-alerts"
-  
+resource "instana_alerting_channel" "slack_channel" {
+  name                    = "slack alert"
   slack = {
-    webhook_url = var.slack_webhook_url
+    webhook_url = "https://hooks.slack.com/services/XXXX"
   }
 }
 ```
@@ -222,7 +166,7 @@ resource "instana_alerting_channel" "slack_custom_icon" {
   name = "slack-custom-alerts"
   
   slack = {
-    webhook_url = var.slack_webhook_url
+    webhook_url = "https://hooks.slack.com/services/XXX"
     icon_url    = "https://example.com/instana-icon.png"
   }
 }
@@ -234,22 +178,9 @@ resource "instana_alerting_channel" "slack_specific_channel" {
   name = "slack-production-alerts"
   
   slack = {
-    webhook_url = var.slack_webhook_url
+    webhook_url = "https://hooks.slack.com/services/XXX"
     icon_url    = "https://example.com/alert-icon.png"
     channel     = "#production-alerts"
-  }
-}
-```
-
-#### Complete Slack Configuration
-```hcl
-resource "instana_alerting_channel" "slack_complete" {
-  name = "slack-complete-alerts"
-  
-  slack = {
-    webhook_url = var.slack_webhook_url
-    icon_url    = "https://cdn.example.com/icons/instana-alert.png"
-    channel     = "#devops-alerts"
   }
 }
 ```
@@ -264,18 +195,6 @@ resource "instana_alerting_channel" "splunk_basic" {
   splunk = {
     url   = "https://splunk.example.com:8088/services/collector"
     token = var.splunk_hec_token
-  }
-}
-```
-
-#### Splunk for Production Environment
-```hcl
-resource "instana_alerting_channel" "splunk_production" {
-  name = "splunk-production-alerts"
-  
-  splunk = {
-    url   = var.splunk_production_url
-    token = var.splunk_production_token
   }
 }
 ```
@@ -319,10 +238,10 @@ resource "instana_alerting_channel" "victorops_database_team" {
 
 #### Basic Webhook Configuration
 ```hcl
-resource "instana_alerting_channel" "webhook_basic" {
-  name = "webhook-alerts"
-  
+resource "instana_alerting_channel" "webhook_channel" {
+  name                    = "webhook-channel"
   webhook = {
+    http_headers = {}
     webhook_urls = ["https://api.example.com/instana/alerts"]
   }
 }
@@ -334,6 +253,7 @@ resource "instana_alerting_channel" "webhook_multiple" {
   name = "webhook-multiple-endpoints"
   
   webhook = {
+    http_headers = {}
     webhook_urls = [
       "https://api.example.com/instana/alerts",
       "https://backup-api.example.com/alerts",
@@ -359,37 +279,17 @@ resource "instana_alerting_channel" "webhook_with_headers" {
 }
 ```
 
-#### Complete Webhook Configuration
-```hcl
-resource "instana_alerting_channel" "webhook_complete" {
-  name = "webhook-complete-setup"
-  
-  webhook = {
-    webhook_urls = [
-      "https://primary-api.example.com/alerts",
-      "https://secondary-api.example.com/alerts"
-    ]
-    http_headers = {
-      "Authorization"  = "Bearer ${var.api_token}"
-      "X-Environment"  = "production"
-      "X-Source"       = "instana"
-      "X-Team"         = "platform"
-    }
-  }
-}
-```
-
 ### ServiceNow Alerting Channel
 
 #### Basic ServiceNow Configuration
 ```hcl
-resource "instana_alerting_channel" "servicenow_basic" {
-  name = "servicenow-alerts"
-  
+resource "instana_alerting_channel" "servicenow_alerts" {
+  name               = "servicenow-alerts"
   service_now = {
-    service_now_url = "https://your-instance.service-now.com"
-    username        = var.servicenow_username
-    password        = var.servicenow_password
+    service_now_url      = "https://your-instance.service-now.com"
+    username             = var.servicenow_username
+    password             = var.servicenow_password
+    auto_close_incidents = false
   }
 }
 ```
@@ -412,64 +312,36 @@ resource "instana_alerting_channel" "servicenow_autoclose" {
 
 #### Basic ServiceNow Enhanced Configuration
 ```hcl
-resource "instana_alerting_channel" "servicenow_enhanced_basic" {
-  name = "servicenow-enhanced-alerts"
-  
+resource "instana_alerting_channel" "service_now_channel" {
+  name               = "Service-now-App"
   service_now_application = {
-    service_now_url = "https://your-instance.service-now.com"
-    username        = var.servicenow_username
-    password        = var.servicenow_password
-    tenant          = "your-tenant-id"
-    unit            = "your-unit-id"
-    instana_url     = "https://your-instana-instance.instana.io"
+    auto_close_incidents               = true
+    enable_send_instana_notes          = true
+    enable_send_service_now_activities = true
+    enable_send_service_now_work_notes = true
+    instana_url                        = null
+    manually_closed_incidents          = true
+    username                           = var.servicenow_username
+    password                           = var.servicenow_password
+    resolution_of_incident             = true
+    service_now_url                    = "https://service-now.com"
+    snow_status_on_close_event         = -1
+    tenant                             = "instana"
+    unit                               = "test"
   }
 }
-```
 
-#### Complete ServiceNow Enhanced Configuration
-```hcl
-resource "instana_alerting_channel" "servicenow_enhanced_complete" {
-  name = "servicenow-enhanced-complete"
-  
-  service_now_application = {
-    service_now_url                      = "https://your-instance.service-now.com"
-    username                             = var.servicenow_username
-    password                             = var.servicenow_password
-    tenant                               = var.servicenow_tenant
-    unit                                 = var.servicenow_unit
-    instana_url                          = var.instana_base_url
-    auto_close_incidents                 = true
-    enable_send_instana_notes            = true
-    enable_send_service_now_activities   = true
-    enable_send_service_now_work_notes   = true
-    manually_closed_incidents            = false
-    resolution_of_incident               = true
-    snow_status_on_close_event           = 6
-  }
-}
 ```
 
 ### Prometheus Webhook Alerting Channel
 
-#### Basic Prometheus Webhook Configuration
+#### Prometheus Webhook Configuration
 ```hcl
-resource "instana_alerting_channel" "prometheus_basic" {
-  name = "prometheus-webhook-alerts"
-  
+resource "instana_alerting_channel" "prometheus_channel" {
+  name         = "prometheus-webhook-receiver"
   prometheus_webhook = {
-    webhook_url = "https://prometheus.example.com/api/v1/alerts"
-  }
-}
-```
-
-#### Prometheus Webhook with Receiver
-```hcl
-resource "instana_alerting_channel" "prometheus_with_receiver" {
-  name = "prometheus-webhook-receiver"
-  
-  prometheus_webhook = {
-    webhook_url = "https://prometheus.example.com/api/v1/alerts"
     receiver    = "instana-alerts"
+    webhook_url = "https://prometheus.example.com/api/v1/alerts"
   }
 }
 ```
@@ -553,40 +425,64 @@ resource "instana_alerting_channel" "slack_app_with_emoji" {
 
 #### Basic MS Teams App Configuration
 ```hcl
-resource "instana_alerting_channel" "msteams_app_basic" {
-  name = "msteams-app-alerts"
-  
+resource "instana_alerting_channel" "ms_teams_bidirect" {
+  name           = "MS Teams App Alert Channel"
   ms_teams_app = {
-    api_token_id = "token-123"
-    team_id      = "team-456"
-    team_name    = "Platform Team"
-    channel_id   = "channel-789"
-    channel_name = "Alerts"
-    instana_url  = "https://your-instana-instance.instana.io"
-    service_url  = "https://teams.microsoft.com"
-    tenant_id    = "tenant-abc"
-    tenant_name  = "My Organization"
-  }
-}
-```
-
-#### MS Teams App for Production Environment
-```hcl
-resource "instana_alerting_channel" "msteams_app_production" {
-  name = "msteams-production-alerts"
-  
-  ms_teams_app = {
-    api_token_id = var.msteams_api_token_id
-    team_id      = var.msteams_team_id
-    team_name    = "Production Team"
+    api_token_id = var.msteams_api_token
     channel_id   = var.msteams_channel_id
-    channel_name = "Production Alerts"
+    channel_name = var.msteams_channel_name
     instana_url  = var.instana_base_url
-    service_url  = "https://teams.microsoft.com"
+    service_url  = var.msteams_service_url
+    team_id      = var.msteams_team_id
+    team_name    = var.msteams_name
     tenant_id    = var.msteams_tenant_id
     tenant_name  = var.organization_name
   }
 }
+```
+
+## Generating Configuration from Existing Resources
+
+If you have already created an alerting channel in Instana and want to generate the Terraform configuration for it, you can use Terraform's import block feature with the `-generate-config-out` flag.
+
+This approach is also helpful when you're unsure about the correct Terraform structure for a specific resource configuration. Simply create the resource in Instana first, then use this functionality to automatically generate the corresponding Terraform configuration.
+
+### Steps to Generate Configuration:
+
+1. **Get the Resource ID**: First, locate the ID of your alerting channel in Instana. You can find this in the Instana UI or via the API.
+
+2. **Create an Import Block**: Create a new `.tf` file (e.g., `import.tf`) with an import block:
+
+```hcl
+import {
+  to = instana_alerting_channel.example
+  id = "resource_id"
+}
+```
+
+Replace:
+- `example` with your desired terraform block name
+- `resource_id` with your actual alerting channel ID from Instana
+
+3. **Generate the Configuration**: Run the following Terraform command:
+
+```bash
+terraform plan -generate-config-out=generated.tf
+```
+
+This will:
+- Import the existing resource state
+- Generate the complete Terraform configuration in `generated.tf`
+- Show you what will be imported
+
+4. **Review and Apply**: Review the generated configuration in `generated.tf` and make any necessary adjustments.
+
+   - **To import the existing resource**: Keep the import block and run `terraform apply`. This will import the resource into your Terraform state and link it to the existing Instana resource.
+   
+   - **To create a new resource**: If you only need the configuration structure as a template, remove the import block from your configuration. Modify the generated configuration as needed, and when you run `terraform apply`, it will create a new resource in Instana instead of importing the existing one.
+
+```bash
+terraform apply
 ```
 
 ## Argument Reference

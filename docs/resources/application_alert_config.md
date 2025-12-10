@@ -95,6 +95,7 @@ resource "instana_application_alert_config" "example" {
       time_window = 600000
     }
   }
+  # Rest of the configuration
 }
 ```
 
@@ -117,605 +118,208 @@ resource "instana_application_alert_config" "example" {
 - Enhanced support for both static and adaptive baseline thresholds
 - `alert_channels` now supports severity-based routing (map of severity to channel IDs)
 
-#### OLD (v5.x) Syntax:
 
-### Basic Slowness Alert
-
-```hcl
-resource "instana_application_alert_config" "slowness_alert" {
-  name              = "API Latency Alert"
-  description       = "Alert on high API latency"
-  boundary_scope    = "ALL"
-  triggering        = false
-  include_internal  = false
-  include_synthetic = false
-  granularity       = 600000
-  evaluation_type   = "PER_AP"
-  
-  applications = [{
-    application_id = instana_application_config.my_app.id
-    inclusive      = true
-  }]
-  
-  rules = [{
-    rule = {
-      slowness = {
-        metric_name = "latency"
-        aggregation = "P90"
-      }
-    }
-    thresholds = {
-      warning = {
-        static = {
-          value = 1000
-        }
-      }
-      critical = {
-        static = {
-          value = 2000
-        }
-      }
-    }
-    threshold_operator = ">="
-  }]
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-  
-  alert_channels = {
-    warning  = [instana_alerting_channel_email.ops.id]
-    critical = [
-      instana_alerting_channel_pagerduty.oncall.id,
-      instana_alerting_channel_slack.incidents.id
-    ]
-  }
-}
-```
-
-### Error Rate Alert with Tag Filter
+### Basic Alert
 
 ```hcl
-resource "instana_application_alert_config" "error_rate" {
-  name            = "High Error Rate"
-  description     = "Alert on elevated error rates"
-  boundary_scope  = "INBOUND"
-  evaluation_type = "PER_AP_SERVICE"
-  triggering      = true
-  
-  tag_filter = "call.type@na EQUALS 'HTTP' AND call.http.status@na GREATER_THAN 499"
-  
-  applications = [{
-    application_id = instana_application_config.my_app.id
-    inclusive      = true
-  }]
-  
-  rules = [{
-    rule = {
-      error_rate = {
-        metric_name = "errors"
-        aggregation = "MEAN"
-      }
-    }
-    thresholds = {
-      critical = {
-        static = {
-          value = 5
-        }
-      }
-    }
-    threshold_operator = ">="
-  }]
-  
-  time_threshold = {
-    violations_in_period = {
-      time_window = 600000
-      violations  = 3
-    }
-  }
-}
-```
-
-### Service-Level Alert
-
-```hcl
-resource "instana_application_alert_config" "service_alert" {
-  name            = "Payment Service Alert"
-  description     = "Monitor payment service performance"
-  boundary_scope  = "ALL"
-  evaluation_type = "PER_AP_SERVICE"
-  
-  applications = [{
-    application_id = instana_application_config.ecommerce.id
-    inclusive      = true
-    
-    services = [{
-      service_id = "payment-service-id"
-      inclusive  = true
-    }]
-  }]
-  
-  rules = [{
-    rule = {
-      throughput = {
-        metric_name = "calls"
-        aggregation = "SUM"
-      }
-    }
-    thresholds = {
-      warning = {
-        static = {
-          value = 100
-        }
-      }
-    }
-    threshold_operator = "<"
-  }]
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 300000
-    }
-  }
-}
-```
-
-### Endpoint-Specific Alert
-
-```hcl
-resource "instana_application_alert_config" "endpoint_alert" {
-  name            = "Checkout Endpoint Alert"
-  description     = "Monitor checkout endpoint"
-  boundary_scope  = "ALL"
-  evaluation_type = "PER_AP_ENDPOINT"
-  
-  applications = [{
-    application_id = instana_application_config.ecommerce.id
-    inclusive      = true
-    
-    services = [{
-      service_id = "api-service-id"
-      inclusive  = true
-      
-      endpoints = [{
-        endpoint_id = "checkout-endpoint-id"
-        inclusive   = true
-      }]
-    }]
-  }]
-  
-  rules = [{
-    rule = {
-      errors = {
-        metric_name = "errors"
-        aggregation = "SUM"
-      }
-    }
-    thresholds = {
-      critical = {
-        static = {
-          value = 10
-        }
-      }
-    }
-    threshold_operator = ">="
-  }]
-  
-  time_threshold = {
-    request_impact = {
-      time_window = 600000
-      requests    = 100
-    }
-  }
-}
-```
-
-### Log-Based Alert
-
-```hcl
-resource "instana_application_alert_config" "log_alert" {
-  name            = "Application Error Logs"
-  description     = "Alert on ERROR level logs"
-  boundary_scope  = "ALL"
-  evaluation_type = "PER_AP"
-  
-  applications = [{
-    application_id = instana_application_config.my_app.id
-    inclusive      = true
-  }]
-  
-  rules = [{
-    rule = {
-      logs = {
-        metric_name = "logs"
-        aggregation = "SUM"
-        level       = "ERROR"
-        message     = "OutOfMemoryError"
-        operator    = "CONTAINS"
-      }
-    }
-    thresholds = {
-      critical = {
-        static = {
-          value = 5
-        }
-      }
-    }
-    threshold_operator = ">="
-  }]
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-}
-```
-
-### Status Code Alert
-
-```hcl
-resource "instana_application_alert_config" "status_code_alert" {
-  name            = "5xx Status Codes"
-  description     = "Alert on server errors"
-  boundary_scope  = "INBOUND"
-  evaluation_type = "PER_AP"
-  
-  applications = [{
-    application_id = instana_application_config.api.id
-    inclusive      = true
-  }]
-  
-  rules = [{
-    rule = {
-      status_code = {
-        metric_name      = "errors"
-        aggregation      = "SUM"
-        status_code_start = 500
-        status_code_end   = 599
-      }
-    }
-    thresholds = {
-      warning = {
-        static = {
-          value = 10
-        }
-      }
-      critical = {
-        static = {
-          value = 50
-        }
-      }
-    }
-    threshold_operator = ">="
-  }]
-  
-  time_threshold = {
-    violations_in_period = {
-      time_window = 600000
-      violations  = 2
-    }
-  }
-}
-```
-
-### Adaptive Baseline Alert
-
-```hcl
-resource "instana_application_alert_config" "adaptive_alert" {
-  name            = "Adaptive Latency Alert"
-  description     = "Alert on latency deviations from baseline"
-  boundary_scope  = "ALL"
-  evaluation_type = "PER_AP"
-  
-  applications = [{
-    application_id = instana_application_config.my_app.id
-    inclusive      = true
-  }]
-  
-  rules = [{
-    rule = {
-      slowness = {
-        metric_name = "latency"
-        aggregation = "P95"
-      }
-    }
-    thresholds = {
-      warning = {
-        adaptive_baseline = {
-          deviation_factor = 2.0
-          adaptability     = 0.5
-          seasonality      = "WEEKLY"
-        }
-      }
-      critical = {
-        adaptive_baseline = {
-          deviation_factor = 3.0
-          adaptability     = 0.5
-          seasonality      = "WEEKLY"
-        }
-      }
-    }
-    threshold_operator = ">="
-  }]
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-}
-```
-
-### Multi-Service Alert with Exclusions
-
-```hcl
-resource "instana_application_alert_config" "multi_service" {
-  name            = "Critical Services Alert"
-  description     = "Monitor critical services, exclude test service"
-  boundary_scope  = "ALL"
-  evaluation_type = "PER_AP_SERVICE"
-  
-  applications = [{
-    application_id = instana_application_config.platform.id
-    inclusive      = true
-    
-    services = [
-      {
-        service_id = "auth-service-id"
-        inclusive  = true
-      },
-      {
-        service_id = "payment-service-id"
-        inclusive  = true
-      },
-      {
-        service_id = "test-service-id"
-        inclusive  = false  # Exclude test service
-      }
-    ]
-  }]
-  
-  rules = [{
-    rule = {
-      error_rate = {
-        metric_name = "errors"
-        aggregation = "MEAN"
-      }
-    }
-    thresholds = {
-      critical = {
-        static = {
-          value = 1
-        }
-      }
-    }
-    threshold_operator = ">="
-  }]
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 300000
-    }
-  }
-}
-```
-
-### Alert with Custom Payload
-
-```hcl
-resource "instana_application_alert_config" "with_payload" {
-  name            = "Production API Alert"
-  description     = "Alert with custom context"
-  boundary_scope  = "ALL"
-  evaluation_type = "PER_AP"
-  
-  applications = [{
-    application_id = instana_application_config.api.id
-    inclusive      = true
-  }]
-  
-  rules = [{
-    rule = {
-      slowness = {
-        metric_name = "latency"
-        aggregation = "P90"
-      }
-    }
-    thresholds = {
-      critical = {
-        static = {
-          value = 2000
-        }
-      }
-    }
-    threshold_operator = ">="
-  }]
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-  
-  custom_payload_field = [{
-    key   = "environment"
-    value = "production"
-  }, {
-    key   = "team"
-    value = "platform-engineering"
-  }, {
-    key   = "runbook"
-    value = "https://wiki.example.com/runbooks/api-latency"
-  }, {
-    key = "region"
-    dynamic_value = {
-      key      = "region"
-      tag_name = "aws.tag"
-    }
-  }]
-}
-```
-
-### Grace Period Configuration
-
-```hcl
-resource "instana_application_alert_config" "with_grace_period" {
-  name            = "Alert with Grace Period"
-  description     = "Alert that auto-closes after grace period"
-  boundary_scope  = "ALL"
-  evaluation_type = "PER_AP"
-  grace_period    = 300000  # 5 minutes
-  
-  applications = [{
-    application_id = instana_application_config.my_app.id
-    inclusive      = true
-  }]
-  
-  rules = [{
-    rule = {
-      error_rate = {
-        metric_name = "errors"
-        aggregation = "MEAN"
-      }
-    }
-    thresholds = {
-      warning = {
-        static = {
-          value = 2
-        }
-      }
-    }
-    threshold_operator = ">="
-  }]
-  
-  time_threshold = {
-    violations_in_sequence = {
-      time_window = 600000
-    }
-  }
-}
-```
-
-### Comprehensive Production Alert
-
-```hcl
-resource "instana_application_alert_config" "comprehensive" {
-  name              = "Production Application Monitoring"
-  description       = "Comprehensive monitoring for production application"
-  boundary_scope    = "ALL"
-  evaluation_type   = "PER_AP_SERVICE"
-  triggering        = true
-  include_internal  = false
-  include_synthetic = false
-  granularity       = 600000
-  grace_period      = 180000
-  
-  tag_filter = join(" AND ", [
-    "call.type@na EQUALS 'HTTP'",
-    "call.http.status@na GREATER_THAN 0"
-  ])
-  
-  applications = [{
-    application_id = instana_application_config.production_app.id
-    inclusive      = true
-    
-    services = [
-      {
-        service_id = "api-gateway-id"
-        inclusive  = true
-        
-        endpoints = [
-          {
-            endpoint_id = "health-check-id"
-            inclusive   = false  # Exclude health checks
-          }
-        ]
-      },
-      {
-        service_id = "business-logic-id"
-        inclusive  = true
-      }
-    ]
-  }]
-  
+resource "instana_application_alert_config" "application_alert_config" {
+  alert_channels = {}
+  application = [
+    {
+      application_id = var.application_id
+      inclusive      = true
+      service = [
+      ]
+    },
+  ]
+  boundary_scope       = "INBOUND"
+  description          = "Calls are slower or equal to 5 ms based on latency (90th)."
+  evaluation_type      = "PER_AP"
+  granularity          = 600000
+  name                 = "Calls are slower than usual"
   rules = [
     {
       rule = {
         slowness = {
+          aggregation = "P90"
           metric_name = "latency"
-          aggregation = "P95"
         }
       }
-      thresholds = {
+      threshold = {
         warning = {
-          static = {
-            value = 1000
-          }
-        }
-        critical = {
-          static = {
-            value = 3000
-          }
-        }
-      }
-      threshold_operator = ">="
-    },
-    {
-      rule = {
-        error_rate = {
-          metric_name = "errors"
-          aggregation = "MEAN"
-        }
-      }
-      thresholds = {
-        warning = {
-          static = {
-            value = 1
-          }
-        }
-        critical = {
           static = {
             value = 5
           }
         }
       }
       threshold_operator = ">="
-    }
+    },
   ]
-  
   time_threshold = {
-    violations_in_period = {
+    violations_in_sequence = {
       time_window = 600000
-      violations  = 3
     }
   }
-  
-  alert_channels = {
-    warning = [
-      instana_alerting_channel_email.ops.id,
-      instana_alerting_channel_slack.alerts.id
-    ]
-    critical = [
-      instana_alerting_channel_pagerduty.oncall.id,
-      instana_alerting_channel_slack.incidents.id,
-      instana_alerting_channel_webhook.monitoring.id
-    ]
-  }
-  
-  custom_payload_field = [{
-    key   = "environment"
-    value = "production"
-  }, {
-    key   = "severity_level"
-    value = "high"
-  }, {
-    key   = "sla_impact"
-    value = "yes"
-  }]
 }
+```
+
+### Status code Alert with Tag Filter
+
+```hcl
+resource "instana_application_alert_config" "application_alert_config" {
+  alert_channels = {
+    CRITICAL = ["alert_channel_1"]
+    WARNING  = ["alert_channel_2"]
+  }
+  application = [
+    {
+      application_id = var.application_id
+      inclusive      = true
+      service = [
+      ]
+    },
+  ]
+  boundary_scope       = "ALL"
+  description          = "Occurrences of HTTP Status Code 5XX (Server Error) is higher or equal to ."
+  evaluation_type      = "PER_AP"
+  granularity          = 600000
+  name                 = "AN Smart alert"
+  rules = [
+    {
+      rule = {
+        status_code = {
+          aggregation       = "SUM"
+          metric_name       = "calls"
+          status_code_end   = 599
+          status_code_start = 500
+        }
+      }
+      threshold = {
+        warning = {
+          static = {
+            value = 5
+          }
+        }
+      }
+      threshold_operator = ">="
+    },
+  ]
+  tag_filter = "(call.tag:'accessType'@na EQUALS 'test' AND call.metric:'codeAmount'@na EQUALS '1')"
+  time_threshold = {
+    violations_in_sequence = {
+      time_window = 600000
+    }
+  }
+  triggering = false
+}
+```
+
+
+### Alert with Custom Payload
+
+```hcl
+resource "instana_application_alert_config" "application_alert_config" {
+  alert_channels = {
+    WARNING = ["alert-channel-id"]
+  }
+  application = [
+    {
+      application_id = var.application_id
+      inclusive      = true
+      service = [
+      ]
+    },
+  ]
+  boundary_scope = "ALL"
+  custom_payload_field = [
+    {
+      key           = "key"
+      value         = "value"
+    },
+    {
+      dynamic_value = {
+        key      = "stage"
+        tag_name = "aws.tag"
+      }
+      key   = "key"
+      value = "value"
+    },
+  ]
+  description       = "test-alert-description"
+  evaluation_type   = "PER_AP"
+  granularity       = 600000
+  name              = "tf test-alert"
+  rules = [
+    {
+      rule = {
+        slowness = {
+          aggregation = "P90"
+          metric_name = "latency"
+        }
+      }
+      threshold = {
+        warning = {
+          static = {
+            value = 100
+          }
+        }
+      }
+      threshold_operator = ">"
+    },
+  ]
+  tag_filter = "call.type@na EQUALS 'HTTP'"
+  time_threshold = {
+    violations_in_sequence = {
+      time_window = 600000
+    }
+  }
+  triggering = false
+}
+
+```
+
+## Generating Configuration from Existing Resources
+
+If you have already created a application alert configuration in Instana and want to generate the Terraform configuration for it, you can use Terraform's import block feature with the `-generate-config-out` flag.
+
+This approach is also helpful when you're unsure about the correct Terraform structure for a specific resource configuration. Simply create the resource in Instana first, then use this functionality to automatically generate the corresponding Terraform configuration.
+
+### Steps to Generate Configuration:
+
+1. **Get the Resource ID**: First, locate the ID of your application alert configuration in Instana. You can find this in the Instana UI or via the API.
+
+2. **Create an Import Block**: Create a new `.tf` file (e.g., `import.tf`) with an import block:
+
+```hcl
+import {
+  to = instana_application_alert_config.example
+  id = "resource_id"
+}
+```
+
+Replace:
+- `example` with your desired terraform block name
+- `resource_id` with your actual application alert configuration ID from Instana
+
+3. **Generate the Configuration**: Run the following Terraform command:
+
+```bash
+terraform plan -generate-config-out=generated.tf
+```
+
+This will:
+- Import the existing resource state
+- Generate the complete Terraform configuration in `generated.tf`
+- Show you what will be imported
+
+4. **Review and Apply**: Review the generated configuration in `generated.tf` and make any necessary adjustments.
+
+   - **To import the existing resource**: Keep the import block and run `terraform apply`. This will import the resource into your Terraform state and link it to the existing Instana resource.
+   
+   - **To create a new resource**: If you only need the configuration structure as a template, remove the import block from your configuration. Modify the generated configuration as needed, and when you run `terraform apply`, it will create a new resource in Instana instead of importing the existing one.
+
+```bash
+terraform apply
 ```
 
 ## Argument Reference
@@ -860,7 +464,7 @@ Exactly one of the elements below must be configured:
 
 * `deviation_factor` - Optional - The deviation factor for the adaptive baseline (float)
 * `adaptability` - Optional - The adaptability factor (float, 0.0 to 1.0)
-* `seasonality` - Optional - The seasonality of the adaptive baseline. Supported values: `WEEKLY`, `DAILY`
+* `seasonality` - Optional - The seasonality of the adaptive baseline.
 
 ### Custom Payload Field Argument Reference
 

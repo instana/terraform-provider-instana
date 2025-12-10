@@ -46,89 +46,6 @@ resource "instana_custom_event_specification" "example" {
 }
 ```
 
-
-### Complete Migration Examples
-
-#### Entity Count Rule Migration
-
-**OLD (v5.x):**
-```hcl
-rules {  
-  entity_count {
-    severity = "warning"
-    condition_operator = "="
-    condition_value = 100
-  }
-}
-```
-
-**NEW (v6.x):**
-```hcl
-rules = {
-  entity_count = {
-    severity = "warning"
-    condition_operator = "="
-    condition_value = 100
-  }
-}
-```
-
-#### Threshold Rule Migration
-
-**OLD (v5.x):**
-```hcl
-rules { 
-  threshold {
-    severity = "critical"
-    metric_name = "nomad.client.allocations.pending"
-    window = 60000
-    aggregation = "avg"
-    condition_operator = ">"
-    condition_value = 0
-  }
-}
-```
-
-**NEW (v6.x):**
-```hcl
-rules = {
-  threshold = {
-    severity = "critical"
-    metric_name = "nomad.client.allocations.pending"
-    window = 60000
-    aggregation = "avg"
-    condition_operator = ">"
-    condition_value = 0
-  }
-}
-```
-
-#### Host Availability Rule Migration
-
-**OLD (v5.x):**
-```hcl
-rules {  
-  host_availability {
-    severity = "warning"
-    offline_duration = 60000
-    close_after = 120000
-    tag_filter = "tag@na EQUALS 'foo_bar'"
-  }
-}
-```
-
-**NEW (v6.x):**
-```hcl
-rules = {
-  host_availability = {
-    severity = "warning"
-    offline_duration = 60000
-    close_after = 120000
-    tag_filter = "tag@na EQUALS 'foo_bar'"
-  }
-}
-```
-
 ## Example Usage
 
 ### Basic Entity Count Rule
@@ -190,363 +107,67 @@ Check for missing entities on hosts:
 resource "instana_custom_event_specification" "entity_verification" {
   name = "Missing Process Alert"
   description = "Alert when required process is missing"
-  query = "entity.host.environment:production"
-  enabled = true
-  triggering = true
-  expiration_time = 60000
-  entity_type = "host"
-
+  enabled               = true
+  entity_type           = "host"
+  expiration_time       = 600000
+  query                 = "entity.application.id:\"application-id\""
+  rule_logical_operator = "AND"
   rules = {
     entity_verification = {
-      severity = "critical"
-      matching_entity_type = "process"
-      matching_operator = "contains"
-      matching_entity_label = "critical-service"
-      offline_duration = 300000
+      matching_entity_label = "CustomQueMg"
+      matching_entity_type  = "ibmMqQueueManager"
+      matching_operator     = "contains"
+      offline_duration      = 60000
+      severity              = "warning"
     }
   }
 }
 ```
 
-### Host Availability Rule - Scoped by Tag
+## Generating Configuration from Existing Resources
 
-Monitor host availability for specific tagged hosts:
+If you have already created a custom event specification in Instana and want to generate the Terraform configuration for it, you can use Terraform's import block feature with the `-generate-config-out` flag.
+
+This approach is also helpful when you're unsure about the correct Terraform structure for a specific resource configuration. Simply create the resource in Instana first, then use this functionality to automatically generate the corresponding Terraform configuration.
+
+### Steps to Generate Configuration:
+
+1. **Get the Resource ID**: First, locate the ID of your custom event specification in Instana. You can find this in the Instana UI or via the API.
+
+2. **Create an Import Block**: Create a new `.tf` file (e.g., `import.tf`) with an import block:
 
 ```hcl
-resource "instana_custom_event_specification" "host_availability_tagged" {
-  name = "Production Host Offline"
-  description = "Alert when production hosts go offline"
-  enabled = true
-  triggering = true
-  expiration_time = 60000
-  entity_type = "host"
-
-  rules = {
-    host_availability = {
-      severity = "critical"
-      offline_duration = 60000
-      close_after = 120000
-      tag_filter = "host.environment@na EQUALS 'production'"
-    }
-  }
+import {
+  to = instana_custom_event_specification.custom_event_type
+  id = "resource_id"
 }
 ```
 
-### Host Availability Rule - All Hosts
+Replace:
+- `custom_event_type` with your desired terraform block name
+- `resource_id` with your actual custom event specification ID from Instana
 
-Monitor all hosts without tag filtering:
+3. **Generate the Configuration**: Run the following Terraform command:
 
-```hcl
-resource "instana_custom_event_specification" "host_availability_all" {
-  name = "Any Host Offline"
-  description = "Alert when any host goes offline"
-  enabled = true
-  triggering = true
-  expiration_time = 60000
-  entity_type = "host"
-
-  rules = {
-    host_availability = {
-      severity = "warning"
-      offline_duration = 120000
-      close_after = 300000
-    }
-  }
-}
+```bash
+terraform plan -generate-config-out=generated.tf
 ```
 
-### System Rule
+This will:
+- Import the existing resource state
+- Generate the complete Terraform configuration in `generated.tf`
+- Show you what will be imported
 
-Use built-in Instana system rules:
+4. **Review and Apply**: Review the generated configuration in `generated.tf` and make any necessary adjustments.
 
-```hcl
-resource "instana_custom_event_specification" "system_rule" {
-  name = "System Rule Alert"
-  description = "Alert based on Instana system rule"
-  query = "entity.type:any"
-  enabled = true
-  triggering = true
-  expiration_time = 60000
-  entity_type = "any"
+   - **To import the existing resource**: Keep the import block and run `terraform apply`. This will import the resource into your Terraform state and link it to the existing Instana resource.
+   
+   - **To create a new resource**: If you only need the configuration structure as a template, remove the import block from your configuration. Modify the generated configuration as needed, and when you run `terraform apply`, it will create a new resource in Instana instead of importing the existing one.
 
-  rules = {
-    system = {
-      severity = "critical"
-      system_rule_id = "builtin-system-rule-id"
-    }
-  }
-}
+```bash
+terraform apply
 ```
 
-### Single Threshold Rule
-
-Monitor a single metric threshold:
-
-```hcl
-resource "instana_custom_event_specification" "single_threshold" {
-  name = "High CPU Usage"
-  description = "Alert on high CPU usage"
-  query = "entity.host.name:prod-*"
-  enabled = true
-  triggering = true
-  expiration_time = 60000
-  entity_type = "host"
-
-  rules = {
-    threshold = {
-      severity = "critical"
-      metric_name = "cpu.usage"
-      rollup = 60000
-      window = 300000
-      aggregation = "avg"
-      condition_operator = ">"
-      condition_value = 80
-    }
-  }
-}
-```
-
-### Multiple Threshold Rules with OR Logic
-
-Combine multiple threshold rules:
-
-```hcl
-resource "instana_custom_event_specification" "multiple_thresholds" {
-  name = "Nomad Scheduler Issues"
-  description = "Alert on blocked or pending allocations"
-  query = "entity.type:nomadScheduler"
-  enabled = true
-  triggering = true
-  expiration_time = 60000
-  entity_type = "nomadScheduler"
-  rule_logical_operator = "OR"
-  
-  rules = {
-    threshold = {
-      severity = "critical"
-      metric_name = "nomad.client.allocations.blocked"
-      rollup = 60000
-      window = 300000
-      aggregation = "avg"
-      condition_operator = ">"
-      condition_value = 0
-    }
-  }
-}
-
-# Note: For multiple threshold rules, you need to create separate resources
-# and combine them using alert configurations
-resource "instana_custom_event_specification" "multiple_thresholds_2" {
-  name = "Nomad Pending Allocations"
-  description = "Alert on pending allocations"
-  query = "entity.type:nomadScheduler"
-  enabled = true
-  triggering = true
-  expiration_time = 60000
-  entity_type = "nomadScheduler"
-  
-  rules = {
-    threshold = {
-      severity = "critical"
-      metric_name = "nomad.client.allocations.pending"
-      rollup = 60000
-      window = 300000
-      aggregation = "avg"
-      condition_operator = ">"
-      condition_value = 0
-    }
-  }
-}
-```
-
-### Threshold Rule with Metric Pattern
-
-Use dynamic metric patterns for flexible matching:
-
-```hcl
-resource "instana_custom_event_specification" "metric_pattern" {
-  name = "Dynamic Metric Alert"
-  description = "Alert on metrics matching pattern"
-  query = "entity.type:custom"
-  enabled = true
-  triggering = true
-  expiration_time = 60000
-  entity_type = "custom"
-
-  rules = {
-    threshold = {
-      severity = "warning"
-      rollup = 60000
-      window = 300000
-      aggregation = "sum"
-      condition_operator = ">"
-      condition_value = 1000
-      
-      metric_pattern = {
-        prefix = "custom.metric"
-        postfix = ".count"
-        placeholder = "*"
-        operator = "contains"
-      }
-    }
-  }
-}
-```
-
-### Complex Tag Filter Example
-
-Use advanced tag filtering with multiple conditions:
-
-```hcl
-resource "instana_custom_event_specification" "complex_filter" {
-  name = "Complex Tag Filter Alert"
-  description = "Alert with complex tag filtering"
-  enabled = true
-  triggering = true
-  entity_type = "host"
-  
-  # Complex tag filter with AND/OR logic
-  query = "(host.environment@na EQUALS 'production' OR host.environment@na EQUALS 'staging') AND host.region@na STARTS_WITH 'us-'"
-
-  rules = {
-    threshold = {
-      severity = "critical"
-      metric_name = "memory.usage"
-      rollup = 60000
-      window = 300000
-      aggregation = "avg"
-      condition_operator = ">"
-      condition_value = 90
-    }
-  }
-}
-```
-
-### Kubernetes-Specific Monitoring
-
-Monitor Kubernetes resources:
-
-```hcl
-resource "instana_custom_event_specification" "k8s_pod_restarts" {
-  name = "High Pod Restart Rate"
-  description = "Alert on frequent pod restarts"
-  enabled = true
-  triggering = true
-  expiration_time = 300000
-  entity_type = "kubernetesDeployment"
-  query = "kubernetes.namespace.name:production"
-
-  rules = {
-    threshold = {
-      severity = "warning"
-      metric_name = "kubernetes.pod.restarts"
-      rollup = 300000
-      window = 600000
-      aggregation = "sum"
-      condition_operator = ">"
-      condition_value = 5
-    }
-  }
-}
-```
-
-### Database Performance Monitoring
-
-Monitor database metrics:
-
-```hcl
-resource "instana_custom_event_specification" "db_slow_queries" {
-  name = "Slow Database Queries"
-  description = "Alert on slow query execution"
-  enabled = true
-  triggering = true
-  expiration_time = 60000
-  entity_type = "postgresql"
-  query = "postgresql.database.name:production_db"
-
-  rules = {
-    threshold = {
-      severity = "critical"
-      metric_name = "postgresql.query.duration"
-      rollup = 60000
-      window = 300000
-      aggregation = "p95"
-      condition_operator = ">"
-      condition_value = 5000
-    }
-  }
-}
-```
-
-### Multi-Environment Setup
-
-Create alerts for different environments:
-
-```hcl
-locals {
-  environments = {
-    production = {
-      cpu_threshold = 80
-      memory_threshold = 85
-      severity = "critical"
-    }
-    staging = {
-      cpu_threshold = 90
-      memory_threshold = 90
-      severity = "warning"
-    }
-  }
-}
-
-resource "instana_custom_event_specification" "env_cpu_alert" {
-  for_each = local.environments
-
-  name = "${each.key} High CPU"
-  description = "CPU alert for ${each.key} environment"
-  enabled = true
-  triggering = true
-  entity_type = "host"
-  query = "host.environment@na EQUALS '${each.key}'"
-
-  rules = {
-    threshold = {
-      severity = each.value.severity
-      metric_name = "cpu.usage"
-      rollup = 60000
-      window = 300000
-      aggregation = "avg"
-      condition_operator = ">"
-      condition_value = each.value.cpu_threshold
-    }
-  }
-}
-```
-
-### Disabled Event for Testing
-
-Create a disabled event specification for testing:
-
-```hcl
-resource "instana_custom_event_specification" "test_event" {
-  name = "Test Event (Disabled)"
-  description = "Test event specification - not triggering"
-  enabled = false
-  triggering = false
-  entity_type = "host"
-
-  rules = {
-    threshold = {
-      severity = "warning"
-      metric_name = "cpu.usage"
-      rollup = 60000
-      window = 300000
-      aggregation = "avg"
-      condition_operator = ">"
-      condition_value = 95
-    }
-  }
-}
-```
 
 ## Argument Reference
 

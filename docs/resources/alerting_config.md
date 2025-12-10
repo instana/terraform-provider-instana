@@ -44,6 +44,7 @@ resource "instana_alerting_config" "example" {
     key   = "test"
     value = "test123"
   }]
+  #rest of the configuration
 }
 ```
 Please update your Terraform configurations to use the new attribute-based syntax.
@@ -58,90 +59,27 @@ Please update your Terraform configurations to use the new attribute-based synta
 ### Basic Configuration with Rule IDs
 
 ```hcl
-resource "instana_alerting_config" "example" {
-  alert_name            = "Critical Infrastructure Alerts"
-  integration_ids       = [
-    instana_alerting_channel_email.ops_team.id,
-    instana_alerting_channel_slack.incidents.id
-  ]
-  event_filter_query    = "entity.type:host AND entity.zone:production"
-  event_filter_rule_ids = ["rule-1", "rule-2"]
-}
-```
-
-### Configuration with Event Types
-
-```hcl
-resource "instana_alerting_config" "example" {
-  alert_name               = "Application Monitoring"
-  integration_ids          = [instana_alerting_channel_pagerduty.oncall.id]
-  event_filter_query       = "entity.application.id:'my-app-id'"
-  event_filter_event_types = ["incident", "critical"]
-
-  custom_payload_field = [{
-    key   = "environment"
-    value = "production"
-  }, {
-    key   = "team"
-    value = "platform"
-  }]
-}
-```
-
-### Application-Specific Alerts
-
-```hcl
-resource "instana_alerting_config" "app_alerts" {
-  alert_name         = "My Application Alerts"
-  integration_ids    = [instana_alerting_channel_webhook.custom.id]
-  event_filter_query = "entity.application.id:'${instana_application_config.my_app.id}'"
-  
-  event_filter_event_types = ["incident", "critical", "warning"]
+resource "instana_alerting_config" "alert_config {
+  alert_name                         = "New Alert Configuration AN test"
+  event_filter_query                 = "event.type:issue AND event.severity:critical entity.zone:\"helmrefactoring\""
+  event_filter_rule_ids              = ["rule-id1", "rule-id2"]
+  integration_ids                    = []
 }
 ```
 
 ### Multi-Channel Configuration
 
 ```hcl
-resource "instana_alerting_config" "multi_channel" {
+resource "instana_alerting_config" "alert_config_multi_channel" {
   alert_name = "Critical System Alerts"
-  
-  integration_ids = [
-    instana_alerting_channel_email.ops.id,
-    instana_alerting_channel_slack.alerts.id,
-    instana_alerting_channel_pagerduty.oncall.id,
-    instana_alerting_channel_webhook.monitoring.id
+  custom_payload_field = [
+    {
+      key           = var.alert_config_key
+      value         = var.alert_config_value
+    },
   ]
-  
-  event_filter_query       = "entity.zone:production AND entity.type:host"
-  event_filter_event_types = ["incident", "critical"]
-  
-  custom_payload_field = [{
-    key   = "severity"
-    value = "high"
-  }, {
-    key   = "escalation_policy"
-    value = "immediate"
-  }]
-}
-```
-
-### Database Monitoring Alerts
-
-```hcl
-resource "instana_alerting_config" "database_alerts" {
-  alert_name               = "Database Performance Alerts"
-  integration_ids          = [instana_alerting_channel_email.dba_team.id]
-  event_filter_query       = "entity.type:database AND entity.database.type:postgresql"
-  event_filter_event_types = ["critical", "warning"]
-  
-  custom_payload_field = [{
-    key   = "database_type"
-    value = "postgresql"
-  }, {
-    key   = "alert_category"
-    value = "performance"
-  }]
+  event_filter_event_types           = ["critical", "incident", "warning"]
+  integration_ids                    = [instana_alerting_channel_email.ops.id, instana_alerting_channel_slack.alerts.id]
 }
 ```
 
@@ -168,110 +106,60 @@ resource "instana_alerting_config" "infra_monitoring" {
 }
 ```
 
-### Service-Specific Alerts
+
+### Event Monitoring with Different Event Types
 
 ```hcl
-resource "instana_alerting_config" "service_alerts" {
-  alert_name         = "Payment Service Alerts"
-  integration_ids    = [instana_alerting_channel_slack.payments.id]
-  event_filter_query = "entity.service.name:'payment-service' AND entity.zone:production"
-  
-  event_filter_rule_ids = [
-    instana_custom_event_specification.payment_latency.id,
-    instana_custom_event_specification.payment_errors.id
-  ]
-  
-  custom_payload_field = [{
-    key   = "service"
-    value = "payment-service"
-  }, {
-    key   = "business_impact"
-    value = "high"
-  }]
+resource "instana_alerting_config" "alert_config_change_event_monitoring" {
+  alert_name                         = "K8s-Pod-Alert"
+  event_filter_event_types           = ["agent_monitoring_issue", "change", "critical", "incident", "offline", "online", "warning"]
+  event_filter_query                 = "entity.kubernetes.cluster.label:demo-test"
+  integration_ids                    = ["id1"]
 }
 ```
 
-### Kubernetes Cluster Monitoring
+## Generating Configuration from Existing Resources
+
+If you have already created an alerting configuration in Instana and want to generate the Terraform configuration for it, you can use Terraform's import block feature with the `-generate-config-out` flag.
+
+This approach is also helpful when you're unsure about the correct Terraform structure for a specific resource configuration. Simply create the resource in Instana first, then use this functionality to automatically generate the corresponding Terraform configuration.
+
+### Steps to Generate Configuration:
+
+1. **Get the Resource ID**: First, locate the ID of your alerting configuration in Instana. You can find this in the Instana UI or via the API.
+
+2. **Create an Import Block**: Create a new `.tf` file (e.g., `import.tf`) with an import block:
 
 ```hcl
-resource "instana_alerting_config" "k8s_alerts" {
-  alert_name      = "Kubernetes Cluster Alerts"
-  integration_ids = [instana_alerting_channel_webhook.k8s_monitor.id]
-  
-  event_filter_query = "entity.kubernetes.cluster.name:'prod-cluster' AND entity.type:kubernetesNode"
-  event_filter_event_types = [
-    "incident",
-    "critical",
-    "offline",
-    "agent_monitoring_issue"
-  ]
-  
-  custom_payload_field = [{
-    key   = "cluster"
-    value = "prod-cluster"
-  }, {
-    key   = "platform"
-    value = "kubernetes"
-  }]
+import {
+  to = instana_alerting_config.example
+  id = "resource_id"
 }
 ```
 
-### Change Event Monitoring
+Replace:
+- `example` with your desired terraform block name
+- `resource_id` with your actual alerting configuration ID from Instana
 
-```hcl
-resource "instana_alerting_config" "change_tracking" {
-  alert_name               = "Deployment Change Tracking"
-  integration_ids          = [instana_alerting_channel_email.devops.id]
-  event_filter_query       = "entity.application.id:'${instana_application_config.my_app.id}'"
-  event_filter_event_types = ["change"]
-  
-  custom_payload_field = [{
-    key   = "notification_type"
-    value = "deployment"
-  }]
-}
+3. **Generate the Configuration**: Run the following Terraform command:
+
+```bash
+terraform plan -generate-config-out=generated.tf
 ```
 
-### Comprehensive Monitoring Setup
+This will:
+- Import the existing resource state
+- Generate the complete Terraform configuration in `generated.tf`
+- Show you what will be imported
 
-```hcl
-resource "instana_alerting_config" "comprehensive" {
-  alert_name = "Production Environment Monitoring"
-  
-  integration_ids = [
-    instana_alerting_channel_email.ops.id,
-    instana_alerting_channel_slack.prod_alerts.id,
-    instana_alerting_channel_pagerduty.oncall.id
-  ]
-  
-  event_filter_query = join(" AND ", [
-    "entity.zone:production",
-    "(entity.type:host OR entity.type:container OR entity.type:service)",
-    "NOT entity.tag:monitoring-excluded"
-  ])
-  
-  event_filter_event_types = [
-    "incident",
-    "critical",
-    "warning",
-    "offline",
-    "agent_monitoring_issue"
-  ]
-  
-  custom_payload_field = [{
-    key   = "environment"
-    value = "production"
-  }, {
-    key   = "severity_level"
-    value = "high"
-  }, {
-    key   = "escalation_required"
-    value = "true"
-  }, {
-    key   = "sla_impact"
-    value = "yes"
-  }]
-}
+4. **Review and Apply**: Review the generated configuration in `generated.tf` and make any necessary adjustments.
+
+   - **To import the existing resource**: Keep the import block and run `terraform apply`. This will import the resource into your Terraform state and link it to the existing Instana resource.
+   
+   - **To create a new resource**: If you only need the configuration structure as a template, remove the import block from your configuration. Modify the generated configuration as needed, and when you run `terraform apply`, it will create a new resource in Instana instead of importing the existing one.
+
+```bash
+terraform apply
 ```
 
 ## Argument Reference
@@ -280,7 +168,7 @@ resource "instana_alerting_config" "comprehensive" {
 * `integration_ids` - Required - the list of target alerting channel ids (set of strings)
 * `event_filter_query` - Optional - a dynamic focus query to restrict the alert configuration to a sub set of entities
 * `event_filter_rule_ids` - Optional - list of rule IDs which are included by the alerting config (set of strings)
-* `event_filter_event_types` - Optional - list of event types which are included by the alerting config (set of strings). Allowed values: `incident`, `critical`, `warning`, `change`, `online`, `offline`, `agent_monitoring_issue`, `none`
+* `event_filter_event_types` - Optional - list of event types which are included by the alerting config (set of strings).
 * `custom_payload_field` - Optional - An optional list of custom payload fields (static key/value pairs added to the event). [Details](#custom-payload-field-argument-reference)
 
 ### Custom Payload Field Argument Reference

@@ -154,194 +154,48 @@ resource "instana_rbac_role" "security_role" {
 }
 ```
 
-### Monitoring Team Role
+## Generating Configuration from Existing Resources
+
+If you have already created a RBAC role in Instana and want to generate the Terraform configuration for it, you can use Terraform's import block feature with the `-generate-config-out` flag.
+
+This approach is also helpful when you're unsure about the correct Terraform structure for a specific resource configuration. Simply create the resource in Instana first, then use this functionality to automatically generate the corresponding Terraform configuration.
+
+### Steps to Generate Configuration:
+
+1. **Get the Resource ID**: First, locate the ID of your RBAC role in Instana. You can find this in the Instana UI or via the API.
+
+2. **Create an Import Block**: Create a new `.tf` file (e.g., `import.tf`) with an import block:
 
 ```hcl
-resource "instana_rbac_role" "monitoring_role" {
-  name = "Monitoring Team"
-
-  permissions = [
-    "CAN_VIEW_TRACE_DETAILS",
-    "CAN_VIEW_LOGS",
-    "CAN_EDIT_ALL_ACCESSIBLE_CUSTOM_DASHBOARDS",
-    "CAN_CREATE_PUBLIC_CUSTOM_DASHBOARDS",
-    "CAN_CONFIGURE_EVENTS_AND_ALERTS",
-    "CAN_VIEW_SYNTHETIC_TESTS",
-    "CAN_VIEW_SYNTHETIC_TEST_RESULTS"
-  ]
-
-  member = [
-    {
-      user_id = "monitor-1"
-    }
-  ]
+import {
+  to = instana_rbac_role.example
+  id = "resource_id"
 }
 ```
 
-### Synthetic Monitoring Role
+Replace:
+- `example` with your desired terraform block name
+- `resource_id` with your actual RBAC role ID from Instana
 
-```hcl
-resource "instana_rbac_role" "synthetic_role" {
-  name = "Synthetic Monitoring Team"
+3. **Generate the Configuration**: Run the following Terraform command:
 
-  permissions = [
-    "CAN_VIEW_SYNTHETIC_TESTS",
-    "CAN_CONFIGURE_SYNTHETIC_TESTS",
-    "CAN_VIEW_SYNTHETIC_LOCATIONS",
-    "CAN_CONFIGURE_SYNTHETIC_LOCATIONS",
-    "CAN_USE_SYNTHETIC_CREDENTIALS",
-    "CAN_CONFIGURE_SYNTHETIC_CREDENTIALS",
-    "CAN_VIEW_SYNTHETIC_TEST_RESULTS",
-    "CAN_CONFIGURE_GLOBAL_SYNTHETIC_SMART_ALERTS"
-  ]
-
-  member = [
-    {
-      user_id = "synthetic-user"
-    }
-  ]
-}
+```bash
+terraform plan -generate-config-out=generated.tf
 ```
 
-### Log Management Role
+This will:
+- Import the existing resource state
+- Generate the complete Terraform configuration in `generated.tf`
+- Show you what will be imported
 
-```hcl
-resource "instana_rbac_role" "log_management_role" {
-  name = "Log Management Team"
+4. **Review and Apply**: Review the generated configuration in `generated.tf` and make any necessary adjustments.
 
-  permissions = [
-    "CAN_VIEW_LOGS",
-    "CAN_CONFIGURE_LOG_MANAGEMENT",
-    "CAN_CONFIGURE_LOG_RETENTION_PERIOD",
-    "CAN_VIEW_LOG_VOLUME",
-    "CAN_DELETE_LOGS",
-    "CAN_CONFIGURE_GLOBAL_LOG_SMART_ALERTS"
-  ]
+   - **To import the existing resource**: Keep the import block and run `terraform apply`. This will import the resource into your Terraform state and link it to the existing Instana resource.
+   
+   - **To create a new resource**: If you only need the configuration structure as a template, remove the import block from your configuration. Modify the generated configuration as needed, and when you run `terraform apply`, it will create a new resource in Instana instead of importing the existing one.
 
-  member = [
-    {
-      user_id = "log-admin"
-    }
-  ]
-}
-```
-
-### Automation Team Role
-
-```hcl
-resource "instana_rbac_role" "automation_role" {
-  name = "Automation Team"
-
-  permissions = [
-    "CAN_RUN_AUTOMATION_ACTIONS",
-    "CAN_CONFIGURE_AUTOMATION_ACTIONS",
-    "CAN_CONFIGURE_AUTOMATION_POLICIES",
-    "CAN_DELETE_AUTOMATION_ACTION_HISTORY"
-  ]
-
-  member = [
-    {
-      user_id = "automation-user"
-    }
-  ]
-}
-```
-
-### Business Operations Role
-
-```hcl
-resource "instana_rbac_role" "bizops_role" {
-  name = "Business Operations"
-
-  permissions = [
-    "CAN_VIEW_BUSINESS_PROCESS_DETAILS",
-    "CAN_VIEW_BIZOPS_ALERTS",
-    "CAN_CONFIGURE_BIZOPS",
-    "CAN_CONFIGURE_SERVICE_LEVEL_INDICATORS",
-    "CAN_CONFIGURE_SERVICE_LEVELS",
-    "CAN_CONFIGURE_SERVICE_LEVEL_CORRECTION_WINDOWS",
-    "CAN_CONFIGURE_SERVICE_LEVEL_SMART_ALERTS"
-  ]
-
-  member = [
-    {
-      user_id = "bizops-user"
-    }
-  ]
-}
-```
-
-### Multi-Environment Setup with for_each
-
-```hcl
-locals {
-  team_roles = {
-    development = {
-      permissions = [
-        "CAN_CONFIGURE_APPLICATIONS",
-        "CAN_CONFIGURE_AGENTS",
-        "CAN_VIEW_TRACE_DETAILS",
-        "CAN_VIEW_LOGS"
-      ]
-      members = [
-        { user_id = "dev-1" },
-        { user_id = "dev-2" }
-      ]
-    }
-    staging = {
-      permissions = [
-        "CAN_CONFIGURE_APPLICATIONS",
-        "CAN_VIEW_TRACE_DETAILS",
-        "CAN_VIEW_LOGS",
-        "CAN_CONFIGURE_EVENTS_AND_ALERTS"
-      ]
-      members = [
-        { user_id = "stage-1" }
-      ]
-    }
-    production = {
-      permissions = [
-        "CAN_VIEW_TRACE_DETAILS",
-        "CAN_VIEW_LOGS",
-        "CAN_CONFIGURE_EVENTS_AND_ALERTS",
-        "CAN_MANUALLY_CLOSE_ISSUE"
-      ]
-      members = [
-        { user_id = "prod-1" }
-      ]
-    }
-  }
-}
-
-resource "instana_rbac_role" "team_roles" {
-  for_each = local.team_roles
-
-  name        = "${title(each.key)} Team Role"
-  permissions = each.value.permissions
-  member      = each.value.members
-}
-```
-
-### Role with Scope-Based Permissions
-
-```hcl
-resource "instana_rbac_role" "scoped_role" {
-  name = "Scoped Access Role"
-
-  permissions = [
-    "CAN_CONFIGURE_APPLICATIONS",
-    "CAN_VIEW_TRACE_DETAILS",
-    "LIMITED_APPLICATIONS_SCOPE",
-    "LIMITED_KUBERNETES_SCOPE",
-    "ACCESS_APPLICATIONS"
-  ]
-
-  member = [
-    {
-      user_id = "scoped-user"
-    }
-  ]
-}
+```bash
+terraform apply
 ```
 
 ## Argument Reference

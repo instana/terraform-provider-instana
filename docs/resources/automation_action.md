@@ -32,7 +32,7 @@ resource "instana_automation_action" "example" {
   
   script {
     interpreter = "bash"
-    content     = filebase64("test.sh")
+    content     = "test"
     timeout     = "10"
   }
   
@@ -58,7 +58,7 @@ resource "instana_automation_action" "example" {
   
   script = {
     interpreter = "bash"
-    content     = filebase64("test.sh")
+    content     = "test"
     timeout     = "10"
   }
   
@@ -88,7 +88,7 @@ resource "instana_automation_action" "hello_world" {
   
   script = {
     interpreter = "bash"
-    content     = filebase64("${path.module}/scripts/hello.sh")
+    content     = "test-content"
     timeout     = "10"
   }
 }
@@ -104,7 +104,7 @@ resource "instana_automation_action" "restart_service" {
   
   script = {
     interpreter = "bash"
-    content     = filebase64("${path.module}/scripts/restart_service.sh")
+    content     = "test-content"
     timeout     = "30"
   }
   
@@ -142,57 +142,6 @@ resource "instana_automation_action" "health_check" {
     ignore_certificate_errors = false
     timeout                   = "10"
   }
-}
-```
-
-### HTTP Action with Authentication
-
-```hcl
-resource "instana_automation_action" "api_call_with_auth" {
-  name        = "API Call with Bearer Token"
-  description = "Make authenticated API call"
-  tags        = ["api", "integration"]
-  
-  http = {
-    host   = "https://api.example.com/v1/resource"
-    method = "POST"
-    
-    headers = {
-      "Content-Type" = "application/json"
-      "Accept"       = "application/json"
-    }
-    
-    body = jsonencode({
-      action = "process"
-      data   = "@@input_data@@"
-    })
-    
-    auth = {
-      token = {
-        bearer_token = "@@api_token@@"
-      }
-    }
-    
-    timeout = "30"
-  }
-  
-  input_parameter = [{
-    name        = "api_token"
-    label       = "API Token"
-    description = "Bearer token for authentication"
-    type        = "vault"
-    required    = true
-    hidden      = true
-    value       = ""
-  }, {
-    name        = "input_data"
-    label       = "Input Data"
-    description = "Data to process"
-    type        = "dynamic"
-    required    = true
-    hidden      = false
-    value       = ""
-  }]
 }
 ```
 
@@ -238,157 +187,33 @@ resource "instana_automation_action" "basic_auth_call" {
 }
 ```
 
-### HTTP Action with API Key
-
-```hcl
-resource "instana_automation_action" "api_key_call" {
-  name        = "API with API Key"
-  description = "Call API with API key authentication"
-  tags        = ["api", "integration"]
-  
-  http = {
-    host   = "https://api.example.com/v2/data"
-    method = "POST"
-    
-    headers = {
-      "Content-Type" = "application/json"
-    }
-    
-    body = jsonencode({
-      query = "@@query@@"
-    })
-    
-    auth = {
-      api_key = {
-        key          = "X-API-Key"
-        value        = "@@api_key@@"
-        key_location = "header"
-      }
-    }
-    
-    timeout = "20"
-  }
-  
-  input_parameter = [{
-    name        = "api_key"
-    label       = "API Key"
-    description = "API key for authentication"
-    type        = "vault"
-    required    = true
-    hidden      = true
-    value       = ""
-  }, {
-    name        = "query"
-    label       = "Query"
-    description = "Query to execute"
-    type        = "dynamic"
-    required    = true
-    hidden      = false
-    value       = ""
-  }]
-}
-```
-
 ### Manual Action
 
 ```hcl
-resource "instana_automation_action" "manual_intervention" {
-  name        = "Manual Intervention Required"
-  description = "Notify team for manual intervention"
-  tags        = ["manual", "escalation"]
-  
+resource "instana_automation_action" "automation_action_manual" {
+  description     = " Detects a rapid increase in the values of the erroneous call rate metric"
   manual = {
-    content = <<-EOT
-      # Manual Intervention Required
-      
-      ## Issue Details
-      - Alert: @@alert_name@@
-      - Severity: @@severity@@
-      - Time: @@timestamp@@
-      
-      ## Required Actions
-      1. Review the alert details
-      2. Check system logs
-      3. Verify service health
-      4. Take corrective action
-      5. Document resolution
-      
-      ## Escalation
-      If issue persists, escalate to on-call engineer.
-    EOT
+    content = "content"
   }
-  
-  input_parameter = [{
-    name        = "alert_name"
-    label       = "Alert Name"
-    description = "Name of the triggered alert"
-    type        = "dynamic"
-    required    = true
-    hidden      = false
-    value       = ""
-  }, {
-    name        = "severity"
-    label       = "Severity"
-    description = "Alert severity level"
-    type        = "dynamic"
-    required    = true
-    hidden      = false
-    value       = ""
-  }]
+  name   = "erroneous call rate"
+  tags   = ["tag"]
 }
 ```
 
 ### JIRA Integration
 
 ```hcl
-resource "instana_automation_action" "create_jira_ticket" {
-  name        = "Create JIRA Ticket"
-  description = "Create JIRA ticket for incident"
-  tags        = ["jira", "ticketing"]
-  
+resource "instana_automation_action" "Jira_task" {
+  description     = "Description"
   jira = {
-    project     = "OPS"
-    operation   = "create"
-    issue_type  = "Incident"
-    title       = "Instana Alert: @@alert_name@@"
-    description = "Alert triggered at @@timestamp@@\n\nDetails: @@alert_details@@"
-    assignee    = "@@assignee@@"
-    labels      = "instana,automated,@@severity@@"
+    description = "This is a task in Jira"
+    issue_type  = "Bug"
+    operation   = "open"
+    project     = "Project"
+    title       = "Title"
   }
-  
-  input_parameter = [{
-    name        = "alert_name"
-    label       = "Alert Name"
-    description = "Name of the alert"
-    type        = "dynamic"
-    required    = true
-    hidden      = false
-    value       = ""
-  }, {
-    name        = "alert_details"
-    label       = "Alert Details"
-    description = "Detailed alert information"
-    type        = "dynamic"
-    required    = true
-    hidden      = false
-    value       = ""
-  }, {
-    name        = "assignee"
-    label       = "Assignee"
-    description = "JIRA user to assign ticket to"
-    type        = "static"
-    required    = false
-    hidden      = false
-    value       = "unassigned"
-  }, {
-    name        = "severity"
-    label       = "Severity"
-    description = "Alert severity"
-    type        = "dynamic"
-    required    = true
-    hidden      = false
-    value       = ""
-  }]
+  manual = null
+  name   = "Jira-test"
 }
 ```
 
@@ -399,7 +224,6 @@ resource "instana_automation_action" "create_github_issue" {
   name        = "Create GitHub Issue"
   description = "Create GitHub issue for tracking"
   tags        = ["github", "issue-tracking"]
-  
   github = {
     owner      = "myorg"
     repo       = "infrastructure"
@@ -409,35 +233,10 @@ resource "instana_automation_action" "create_github_issue" {
     assignees  = "@@assignees@@"
     labels     = "instana,automated,@@severity@@"
   }
-  
   input_parameter = [{
     name        = "alert_name"
     label       = "Alert Name"
     description = "Name of the alert"
-    type        = "dynamic"
-    required    = true
-    hidden      = false
-    value       = ""
-  }, {
-    name        = "alert_details"
-    label       = "Alert Details"
-    description = "Detailed alert information"
-    type        = "dynamic"
-    required    = true
-    hidden      = false
-    value       = ""
-  }, {
-    name        = "assignees"
-    label       = "Assignees"
-    description = "GitHub users to assign (comma-separated)"
-    type        = "static"
-    required    = false
-    hidden      = false
-    value       = ""
-  }, {
-    name        = "severity"
-    label       = "Severity"
-    description = "Alert severity"
     type        = "dynamic"
     required    = true
     hidden      = false
@@ -449,7 +248,7 @@ resource "instana_automation_action" "create_github_issue" {
 ### GitLab Integration
 
 ```hcl
-resource "instana_automation_action" "create_gitlab_issue" {
+esource "instana_automation_action" "create_gitlab_issue" {
   name        = "Create GitLab Issue"
   description = "Create GitLab issue for incident tracking"
   tags        = ["gitlab", "issue-tracking"]
@@ -457,9 +256,9 @@ resource "instana_automation_action" "create_gitlab_issue" {
   gitlab = {
     project_id  = "12345"
     operation   = "create"
-    title       = "[Instana Alert] @@alert_name@@"
-    description = "Alert triggered: @@alert_details@@"
-    labels      = "instana,automated,@@severity@@"
+    title       = "[Instana Alert]"
+    description = "Alert triggered"
+    labels      = "instana,automated"
     issue_type  = "incident"
   }
   
@@ -467,22 +266,6 @@ resource "instana_automation_action" "create_gitlab_issue" {
     name        = "alert_name"
     label       = "Alert Name"
     description = "Name of the alert"
-    type        = "dynamic"
-    required    = true
-    hidden      = false
-    value       = ""
-  }, {
-    name        = "alert_details"
-    label       = "Alert Details"
-    description = "Detailed alert information"
-    type        = "dynamic"
-    required    = true
-    hidden      = false
-    value       = ""
-  }, {
-    name        = "severity"
-    label       = "Severity"
-    description = "Alert severity"
     type        = "dynamic"
     required    = true
     hidden      = false
@@ -518,176 +301,81 @@ resource "instana_automation_action" "runbook_link" {
 ### Ansible Integration
 
 ```hcl
-resource "instana_automation_action" "ansible_playbook" {
-  name        = "Run Ansible Playbook"
-  description = "Execute Ansible playbook for remediation"
-  tags        = ["ansible", "automation"]
-  
+esource "instana_automation_action" "tf_b_ansible_1" {
   ansible = {
-    workflow_id        = "@@workflow_id@@"
-    playbook_id        = "@@playbook_id@@"
-    playbook_file_name = "remediation.yml"
-    url                = "https://ansible.example.com"
-    host_id            = "@@target_host@@"
+    host_id            = "<host_id>"
+    playbook_file_name = "<file_name>"
+    playbook_id        = "<id>"
+    url                = "<url>"
   }
-  
-  input_parameter = [{
-    name        = "workflow_id"
-    label       = "Workflow ID"
-    description = "Ansible workflow identifier"
-    type        = "static"
-    required    = true
-    hidden      = false
-    value       = ""
-  }, {
-    name        = "playbook_id"
-    label       = "Playbook ID"
-    description = "Ansible playbook identifier"
-    type        = "static"
-    required    = true
-    hidden      = false
-    value       = ""
-  }, {
-    name        = "target_host"
-    label       = "Target Host"
-    description = "Host to run playbook on"
-    type        = "dynamic"
-    required    = true
-    hidden      = false
-    value       = ""
-  }]
+  description = "Test"
+  input_parameter = [
+    {
+      description = "test"
+      hidden      = false
+      label       = "Label"
+      name        = "Name"
+      required    = false
+      type        = "static"
+      value       = ""
+    },
+    {
+      description = ""
+      hidden      = false
+      label       = "Label"
+      name        = "Name"
+      required    = false
+      type        = "static"
+      value       = ""
+    },
+  ]
+  name   = "Ansible Test"
+}
+
+```
+
+## Generating Configuration from Existing Resources
+
+If you have already created a automation action in Instana and want to generate the Terraform configuration for it, you can use Terraform's import block feature with the `-generate-config-out` flag.
+
+This approach is also helpful when you're unsure about the correct Terraform structure for a specific resource configuration. Simply create the resource in Instana first, then use this functionality to automatically generate the corresponding Terraform configuration.
+
+### Steps to Generate Configuration:
+
+1. **Get the Resource ID**: First, locate the ID of your automation action in Instana. You can find this in the Instana UI or via the API.
+
+2. **Create an Import Block**: Create a new `.tf` file (e.g., `import.tf`) with an import block:
+
+```hcl
+import {
+  to = instana_automation_action.example
+  id = "resource_id"
 }
 ```
 
-### Complex HTTP Action with Multiple Parameters
+Replace:
+- `example` with your desired terraform block name
+- `resource_id` with your actual automation action ID from Instana
 
-```hcl
-resource "instana_automation_action" "complex_api_call" {
-  name        = "Complex API Integration"
-  description = "Advanced API call with multiple parameters"
-  tags        = ["api", "integration", "advanced"]
-  
-  http = {
-    host   = "https://api.example.com/v1/incidents"
-    method = "POST"
-    
-    headers = {
-      "Content-Type"  = "application/json"
-      "Accept"        = "application/json"
-      "X-Request-ID"  = "@@request_id@@"
-      "X-Correlation" = "@@correlation_id@@"
-    }
-    
-    body = jsonencode({
-      incident = {
-        title       = "@@incident_title@@"
-        description = "@@incident_description@@"
-        severity    = "@@severity@@"
-        source      = "instana"
-        metadata = {
-          alert_id    = "@@alert_id@@"
-          timestamp   = "@@timestamp@@"
-          environment = "@@environment@@"
-        }
-      }
-    })
-    
-    auth = {
-      token = {
-        bearer_token = "@@api_token@@"
-      }
-    }
-    
-    ignore_certificate_errors = false
-    timeout                   = "30"
-    language                  = "json"
-    content_type              = "application/json"
-  }
-  
-  input_parameter = [
-    {
-      name        = "api_token"
-      label       = "API Token"
-      description = "Bearer token for API authentication"
-      type        = "vault"
-      required    = true
-      hidden      = true
-      value       = ""
-    },
-    {
-      name        = "incident_title"
-      label       = "Incident Title"
-      description = "Title of the incident"
-      type        = "dynamic"
-      required    = true
-      hidden      = false
-      value       = ""
-    },
-    {
-      name        = "incident_description"
-      label       = "Incident Description"
-      description = "Detailed description of the incident"
-      type        = "dynamic"
-      required    = true
-      hidden      = false
-      value       = ""
-    },
-    {
-      name        = "severity"
-      label       = "Severity"
-      description = "Incident severity level"
-      type        = "dynamic"
-      required    = true
-      hidden      = false
-      value       = ""
-    },
-    {
-      name        = "alert_id"
-      label       = "Alert ID"
-      description = "Instana alert identifier"
-      type        = "dynamic"
-      required    = true
-      hidden      = false
-      value       = ""
-    },
-    {
-      name        = "timestamp"
-      label       = "Timestamp"
-      description = "Alert timestamp"
-      type        = "dynamic"
-      required    = true
-      hidden      = false
-      value       = ""
-    },
-    {
-      name        = "environment"
-      label       = "Environment"
-      description = "Environment name"
-      type        = "static"
-      required    = true
-      hidden      = false
-      value       = "production"
-    },
-    {
-      name        = "request_id"
-      label       = "Request ID"
-      description = "Unique request identifier"
-      type        = "dynamic"
-      required    = false
-      hidden      = false
-      value       = ""
-    },
-    {
-      name        = "correlation_id"
-      label       = "Correlation ID"
-      description = "Correlation identifier for tracking"
-      type        = "dynamic"
-      required    = false
-      hidden      = false
-      value       = ""
-    }
-  ]
-}
+3. **Generate the Configuration**: Run the following Terraform command:
+
+```bash
+terraform plan -generate-config-out=generated.tf
+```
+
+This will:
+- Import the existing resource state
+- Generate the complete Terraform configuration in `generated.tf`
+- Show you what will be imported
+
+4. **Review and Apply**: Review the generated configuration in `generated.tf` and make any necessary adjustments.
+
+   - **To import the existing resource**: Keep the import block and run `terraform apply`. This will import the resource into your Terraform state and link it to the existing Instana resource.
+   
+   - **To create a new resource**: If you only need the configuration structure as a template, remove the import block from your configuration. Modify the generated configuration as needed, and when you run `terraform apply`, it will create a new resource in Instana instead of importing the existing one.
+
+```bash
+terraform apply
 ```
 
 ## Argument Reference

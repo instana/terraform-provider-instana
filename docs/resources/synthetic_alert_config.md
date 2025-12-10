@@ -47,29 +47,28 @@ resource "instana_synthetic_alert_config" "example" {
 #### NEW (v6.x) Syntax:
 ```hcl
 resource "instana_synthetic_alert_config" "example" {
-  name = "Synthetic Test Alert"
-  
-  rule = {
-    alert_type = "failure"
-    metric_name = "status"
-    aggregation = "sum"
-  }
-  
-  time_threshold = {
-    type = "violationsInSequence"
-    violations_count = 2
-  }
-  
-  custom_payload_fields = [
+  alert_channel_ids = ["var.alert_channel_id"]
+  custom_payload_field = [
     {
-      key = "environment"
-      value = "production"
+      key           = "e2e_test"
+      value         = "40"
     },
-    {
-      key = "team"
-      value = "platform"
-    }
   ]
+  description  = "test example"
+  grace_period = 604800000
+  name         = "test example"
+  rule = {
+    aggregation = "SUM"
+    alert_type  = "failure"
+    metric_name = "status"
+  }
+  severity           = 5
+  synthetic_test_ids = ["var.test_id"]
+  tag_filter         = "synthetic.locationLabel@na EQUALS 'testlocation' "
+  time_threshold = {
+    type             = "violationsInSequence"
+    violations_count = 1
+  }
 }
 ```
 
@@ -93,554 +92,80 @@ resource "instana_synthetic_alert_config" "basic_failure" {
   
   synthetic_test_ids = ["test-id-1", "test-id-2"]
   severity = 5  # Critical
-  
+  grace_period = 604800000
+
   rule = {
     alert_type = "failure"
     metric_name = "status"
-    aggregation = "sum"
+    aggregation = "SUM"
   }
   
   time_threshold = {
     type = "violationsInSequence"
     violations_count = 2
   }
-  
+  tag_filter         = "synthetic.locationLabel@na EQUALS 'testlocation' "
+
   alert_channel_ids = ["channel-id-1"]
-}
-```
-
-### Alert with Tag Filter
-
-Use tag filters to monitor specific synthetic tests:
-
-```hcl
-resource "instana_synthetic_alert_config" "location_based" {
-  name = "US Region Synthetic Alerts"
-  description = "Monitor synthetic tests in US locations"
   
-  tag_filter = "synthetic.locationLabel@na EQUALS 'us-east-1'"
-  severity = 5
-  
-  rule = {
-    alert_type = "failure"
-    metric_name = "status"
-    aggregation = "sum"
-  }
-  
-  time_threshold = {
-    type = "violationsInSequence"
-    violations_count = 1
-  }
-  
-  alert_channel_ids = ["us-team-channel"]
-}
-```
-
-### Alert with Grace Period
-
-Add a grace period before auto-closing alerts:
-
-```hcl
-resource "instana_synthetic_alert_config" "with_grace_period" {
-  name = "Synthetic Alert with Grace Period"
-  description = "Alert with 5-minute grace period"
-  
-  synthetic_test_ids = ["critical-test-1"]
-  severity = 5
-  
-  rule = {
-    alert_type = "failure"
-    metric_name = "status"
-  }
-  
-  time_threshold = {
-    type = "violationsInSequence"
-    violations_count = 2
-  }
-  
-  grace_period = 300000  # 5 minutes in milliseconds
-  alert_channel_ids = ["ops-channel"]
-}
-```
-
-### Alert with Static Custom Payload
-
-Add static custom fields to alert notifications:
-
-```hcl
-resource "instana_synthetic_alert_config" "with_static_payload" {
-  name = "Synthetic Alert with Custom Payload"
-  description = "Alert with custom static fields"
-  
-  synthetic_test_ids = ["api-test-1"]
-  severity = 10  # Warning
-  
-  rule = {
-    alert_type = "failure"
-    metric_name = "status"
-  }
-  
-  time_threshold = {
-    type = "violationsInSequence"
-    violations_count = 1
-  }
-  
-  custom_payload_fields = [
+   custom_payload_field = [
     {
-      key = "environment"
-      value = "production"
+      key           = "e2e_test"
+      value         = "40"
     },
-    {
-      key = "team"
-      value = "platform"
-    },
-    {
-      key = "runbook"
-      value = "https://wiki.example.com/runbooks/synthetic-failures"
-    }
-  ]
-  
-  alert_channel_ids = ["platform-team-channel"]
-}
-```
-
-### Alert with Dynamic Custom Payload
-
-Add dynamic fields from tags to alert notifications:
-
-```hcl
-resource "instana_synthetic_alert_config" "with_dynamic_payload" {
-  name = "Synthetic Alert with Dynamic Payload"
-  description = "Alert with dynamic tag-based fields"
-  
-  synthetic_test_ids = ["test-1", "test-2"]
-  severity = 5
-  
-  rule = {
-    alert_type = "failure"
-    metric_name = "status"
-  }
-  
-  time_threshold = {
-    type = "violationsInSequence"
-    violations_count = 2
-  }
-  
-  custom_payload_fields = [
     {
       key = "test_location"
       dynamic_value = {
         key = "location"
         tag_name = "synthetic.locationLabel"
       }
-    },
-    {
-      key = "test_type"
-      dynamic_value = {
-        tag_name = "synthetic.testType"
-      }
     }
   ]
-  
-  alert_channel_ids = ["monitoring-channel"]
 }
 ```
 
-### Alert with Mixed Custom Payload
+## Generating Configuration from Existing Resources
 
-Combine static and dynamic custom fields:
+If you have already created a synthetic alert configuration in Instana and want to generate the Terraform configuration for it, you can use Terraform's import block feature with the `-generate-config-out` flag.
+
+This approach is also helpful when you're unsure about the correct Terraform structure for a specific resource configuration. Simply create the resource in Instana first, then use this functionality to automatically generate the corresponding Terraform configuration.
+
+### Steps to Generate Configuration:
+
+1. **Get the Resource ID**: First, locate the ID of your synthetic alert configuration in Instana. You can find this in the Instana UI or via the API.
+
+2. **Create an Import Block**: Create a new `.tf` file (e.g., `import.tf`) with an import block:
 
 ```hcl
-resource "instana_synthetic_alert_config" "mixed_payload" {
-  name = "Synthetic Alert with Mixed Payload"
-  description = "Alert with both static and dynamic fields"
-  
-  synthetic_test_ids = ["critical-test"]
-  severity = 5
-  
-  rule = {
-    alert_type = "failure"
-    metric_name = "status"
-  }
-  
-  time_threshold = {
-    type = "violationsInSequence"
-    violations_count = 1
-  }
-  
-  custom_payload_fields = [
-    {
-      key = "severity_level"
-      value = "critical"
-    },
-    {
-      key = "alert_source"
-      value = "synthetic_monitoring"
-    },
-    {
-      key = "test_location"
-      dynamic_value = {
-        tag_name = "synthetic.locationLabel"
-      }
-    },
-    {
-      key = "test_name"
-      dynamic_value = {
-        key = "name"
-        tag_name = "synthetic.testName"
-      }
-    }
-  ]
-  
-  alert_channel_ids = ["ops-channel", "slack-channel"]
+import {
+  to = instana_synthetic_alert_config.example
+  id = "resource_id"
 }
 ```
 
-### Violations in Period Alert
+Replace:
+- `example` with your desired terraform block name
+- `resource_id` with your actual synthetic alert configuration ID from Instana
 
-Alert based on violations within a time period:
+3. **Generate the Configuration**: Run the following Terraform command:
 
-```hcl
-resource "instana_synthetic_alert_config" "violations_in_period" {
-  name = "Multiple Failures in Period"
-  description = "Alert when multiple failures occur in a time window"
-  
-  synthetic_test_ids = ["test-1", "test-2", "test-3"]
-  severity = 10
-  
-  rule = {
-    alert_type = "failure"
-    metric_name = "status"
-  }
-  
-  time_threshold = {
-    type = "violationsInPeriod"
-    violations_count = 3
-  }
-  
-  alert_channel_ids = ["team-channel"]
-}
+```bash
+terraform plan -generate-config-out=generated.tf
 ```
 
-### Multi-Location Monitoring
+This will:
+- Import the existing resource state
+- Generate the complete Terraform configuration in `generated.tf`
+- Show you what will be imported
 
-Monitor synthetic tests across multiple locations:
+4. **Review and Apply**: Review the generated configuration in `generated.tf` and make any necessary adjustments.
 
-```hcl
-resource "instana_synthetic_alert_config" "multi_location" {
-  name = "Multi-Location Synthetic Monitoring"
-  description = "Monitor tests across all regions"
-  
-  tag_filter = "synthetic.locationLabel@na CONTAINS 'region'"
-  severity = 5
-  
-  rule = {
-    alert_type = "failure"
-    metric_name = "status"
-    aggregation = "sum"
-  }
-  
-  time_threshold = {
-    type = "violationsInSequence"
-    violations_count = 2
-  }
-  
-  custom_payload_fields = [
-    {
-      key = "alert_type"
-      value = "multi_location_failure"
-    },
-    {
-      key = "location"
-      dynamic_value = {
-        tag_name = "synthetic.locationLabel"
-      }
-    }
-  ]
-  
-  alert_channel_ids = ["global-ops-channel"]
-}
-```
+   - **To import the existing resource**: Keep the import block and run `terraform apply`. This will import the resource into your Terraform state and link it to the existing Instana resource.
+   
+   - **To create a new resource**: If you only need the configuration structure as a template, remove the import block from your configuration. Modify the generated configuration as needed, and when you run `terraform apply`, it will create a new resource in Instana instead of importing the existing one.
 
-### API Endpoint Monitoring
-
-Monitor specific API endpoints via synthetic tests:
-
-```hcl
-resource "instana_synthetic_alert_config" "api_monitoring" {
-  name = "API Endpoint Monitoring"
-  description = "Monitor critical API endpoints"
-  
-  tag_filter = "synthetic.testType@na EQUALS 'api'"
-  severity = 5
-  
-  rule = {
-    alert_type = "failure"
-    metric_name = "status"
-  }
-  
-  time_threshold = {
-    type = "violationsInSequence"
-    violations_count = 1
-  }
-  
-  grace_period = 60000  # 1 minute
-  
-  custom_payload_fields = [
-    {
-      key = "endpoint_type"
-      value = "api"
-    },
-    {
-      key = "priority"
-      value = "high"
-    }
-  ]
-  
-  alert_channel_ids = ["api-team-channel", "pagerduty-channel"]
-}
-```
-
-### Browser Test Monitoring
-
-Monitor browser-based synthetic tests:
-
-```hcl
-resource "instana_synthetic_alert_config" "browser_monitoring" {
-  name = "Browser Test Monitoring"
-  description = "Monitor browser synthetic tests"
-  
-  tag_filter = "synthetic.testType@na EQUALS 'browser'"
-  severity = 10
-  
-  rule = {
-    alert_type = "failure"
-    metric_name = "status"
-  }
-  
-  time_threshold = {
-    type = "violationsInSequence"
-    violations_count = 2
-  }
-  
-  custom_payload_fields = [
-    {
-      key = "test_type"
-      value = "browser"
-    },
-    {
-      key = "browser"
-      dynamic_value = {
-        tag_name = "synthetic.browser"
-      }
-    }
-  ]
-  
-  alert_channel_ids = ["frontend-team-channel"]
-}
-```
-
-### Critical Service Monitoring
-
-High-priority monitoring for critical services:
-
-```hcl
-resource "instana_synthetic_alert_config" "critical_service" {
-  name = "Critical Service Monitoring"
-  description = "Immediate alerts for critical service failures"
-  
-  synthetic_test_ids = ["payment-api-test", "auth-api-test"]
-  severity = 5
-  
-  rule = {
-    alert_type = "failure"
-    metric_name = "status"
-  }
-  
-  time_threshold = {
-    type = "violationsInSequence"
-    violations_count = 1  # Alert immediately
-  }
-  
-  grace_period = 0  # No grace period
-  
-  custom_payload_fields = [
-    {
-      key = "priority"
-      value = "P1"
-    },
-    {
-      key = "service_tier"
-      value = "critical"
-    },
-    {
-      key = "escalation_policy"
-      value = "immediate"
-    }
-  ]
-  
-  alert_channel_ids = ["pagerduty-critical", "slack-critical", "email-oncall"]
-}
-```
-
-### Environment-Specific Monitoring
-
-Monitor tests in specific environments:
-
-```hcl
-locals {
-  environments = {
-    production = {
-      tag_filter = "synthetic.environment@na EQUALS 'production'"
-      severity = 5
-      violations = 1
-      channels = ["prod-ops-channel", "pagerduty"]
-    }
-    staging = {
-      tag_filter = "synthetic.environment@na EQUALS 'staging'"
-      severity = 10
-      violations = 2
-      channels = ["staging-team-channel"]
-    }
-  }
-}
-
-resource "instana_synthetic_alert_config" "env_monitoring" {
-  for_each = local.environments
-
-  name = "${title(each.key)} Synthetic Monitoring"
-  description = "Monitor synthetic tests in ${each.key}"
-  
-  tag_filter = each.value.tag_filter
-  severity = each.value.severity
-  
-  rule = {
-    alert_type = "failure"
-    metric_name = "status"
-  }
-  
-  time_threshold = {
-    type = "violationsInSequence"
-    violations_count = each.value.violations
-  }
-  
-  custom_payload_fields = [
-    {
-      key = "environment"
-      value = each.key
-    }
-  ]
-  
-  alert_channel_ids = each.value.channels
-}
-```
-
-### Performance Degradation Alert
-
-Monitor for performance issues:
-
-```hcl
-resource "instana_synthetic_alert_config" "performance_degradation" {
-  name = "Synthetic Performance Degradation"
-  description = "Alert on slow response times"
-  
-  synthetic_test_ids = ["perf-test-1", "perf-test-2"]
-  severity = 10
-  
-  rule = {
-    alert_type = "failure"
-    metric_name = "responseTime"
-    aggregation = "mean"
-  }
-  
-  time_threshold = {
-    type = "violationsInPeriod"
-    violations_count = 3
-  }
-  
-  custom_payload_fields = [
-    {
-      key = "alert_category"
-      value = "performance"
-    },
-    {
-      key = "response_time"
-      dynamic_value = {
-        tag_name = "synthetic.responseTime"
-      }
-    }
-  ]
-  
-  alert_channel_ids = ["performance-team-channel"]
-}
-```
-
-### Complex Tag Filter Alert
-
-Use complex tag filters for precise monitoring:
-
-```hcl
-resource "instana_synthetic_alert_config" "complex_filter" {
-  name = "Complex Filter Synthetic Alert"
-  description = "Monitor with complex tag filter conditions"
-  
-  tag_filter = "(synthetic.locationLabel@na EQUALS 'us-east-1' OR synthetic.locationLabel@na EQUALS 'us-west-2') AND synthetic.testType@na EQUALS 'api'"
-  severity = 5
-  
-  rule = {
-    alert_type = "failure"
-    metric_name = "status"
-  }
-  
-  time_threshold = {
-    type = "violationsInSequence"
-    violations_count = 2
-  }
-  
-  custom_payload_fields = [
-    {
-      key = "region"
-      dynamic_value = {
-        tag_name = "synthetic.locationLabel"
-      }
-    },
-    {
-      key = "test_type"
-      dynamic_value = {
-        tag_name = "synthetic.testType"
-      }
-    }
-  ]
-  
-  alert_channel_ids = ["us-ops-channel"]
-}
-```
-
-### Aggregation-Based Alert
-
-Use different aggregation methods:
-
-```hcl
-resource "instana_synthetic_alert_config" "aggregation_alert" {
-  name = "Aggregated Synthetic Alert"
-  description = "Alert using max aggregation"
-  
-  synthetic_test_ids = ["test-1"]
-  severity = 10
-  
-  rule = {
-    alert_type = "failure"
-    metric_name = "status"
-    aggregation = "max"
-  }
-  
-  time_threshold = {
-    type = "violationsInSequence"
-    violations_count = 1
-  }
-  
-  alert_channel_ids = ["monitoring-channel"]
-}
+```bash
+terraform apply
 ```
 
 ## Argument Reference
@@ -664,7 +189,7 @@ resource "instana_synthetic_alert_config" "aggregation_alert" {
 
 ### Time Threshold Reference
 
-* `type` - Required - Type of the time threshold. Must be either `violationsInSequence` or `violationsInPeriod`
+* `type` - Required - Type of the time threshold. Must be either `violationsInSequence`
 * `violations_count` - Optional - Number of violations required to trigger the alert
 
 ### Custom Payload Fields Reference

@@ -111,29 +111,6 @@ resource "instana_sli_config" "service_latency" {
 }
 ```
 
-### Application Time-Based SLI with Endpoint Scope
-
-```hcl
-resource "instana_sli_config" "endpoint_latency" {
-  name = "Checkout Endpoint Latency"
-  
-  metric_configuration = {
-    metric_name = "latency"
-    aggregation = "P95"
-    threshold = 300
-  }
-  
-  sli_entity = {
-    application_time_based = {
-      application_id = "ecommerce-app"
-      service_id = "checkout-service"
-      endpoint_id = "POST-/api/checkout"
-      boundary_scope = "INBOUND"
-    }
-  }
-}
-```
-
 ### Application Event-Based SLI (Availability)
 
 ```hcl
@@ -146,62 +123,6 @@ resource "instana_sli_config" "app_availability" {
       boundary_scope = "INBOUND"
       good_event_filter_expression = "call.http.status@na LESS_THAN 500"
       bad_event_filter_expression = "call.http.status@na GREATER_OR_EQUAL_THAN 500"
-    }
-  }
-}
-```
-
-### Application Event-Based with Internal and Synthetic Calls
-
-```hcl
-resource "instana_sli_config" "comprehensive_availability" {
-  name = "Comprehensive Availability SLI"
-  
-  sli_entity = {
-    application_event_based = {
-      application_id = "main-app"
-      boundary_scope = "ALL"
-      include_internal = true
-      include_synthetic = true
-      good_event_filter_expression = "call.http.status@na EQUALS 200"
-      bad_event_filter_expression = "call.http.status@na NOT_EQUAL 200"
-    }
-  }
-}
-```
-
-### Application Event-Based with Service Scope
-
-```hcl
-resource "instana_sli_config" "service_availability" {
-  name = "User Service Availability"
-  
-  sli_entity = {
-    application_event_based = {
-      application_id = "user-management"
-      service_id = "user-service-id"
-      boundary_scope = "INBOUND"
-      good_event_filter_expression = "call.http.status@na LESS_THAN 400"
-      bad_event_filter_expression = "call.http.status@na GREATER_OR_EQUAL_THAN 400"
-    }
-  }
-}
-```
-
-### Application Event-Based with Endpoint Scope
-
-```hcl
-resource "instana_sli_config" "endpoint_availability" {
-  name = "Login Endpoint Availability"
-  
-  sli_entity = {
-    application_event_based = {
-      application_id = "auth-app"
-      service_id = "auth-service"
-      endpoint_id = "POST-/api/login"
-      boundary_scope = "INBOUND"
-      good_event_filter_expression = "call.http.status@na EQUALS 200"
-      bad_event_filter_expression = "call.http.status@na NOT_EQUAL 200"
     }
   }
 }
@@ -223,28 +144,6 @@ resource "instana_sli_config" "website_page_load" {
     website_time_based = {
       website_id = "website-prod"
       beacon_type = "pageLoad"
-    }
-  }
-}
-```
-
-### Website Time-Based with Filter
-
-```hcl
-resource "instana_sli_config" "filtered_page_load" {
-  name = "Product Pages Load Time"
-  
-  metric_configuration = {
-    metric_name = "page.load.time"
-    aggregation = "P90"
-    threshold = 3000
-  }
-  
-  sli_entity = {
-    website_time_based = {
-      website_id = "ecommerce-website"
-      beacon_type = "pageLoad"
-      filter_expression = "page.url@na CONTAINS '/products/'"
     }
   }
 }
@@ -284,223 +183,49 @@ resource "instana_sli_config" "website_api_calls" {
 }
 ```
 
-### Website Resource Load SLI
+
+## Generating Configuration from Existing Resources
+
+If you have already created a SLI configuration in Instana and want to generate the Terraform configuration for it, you can use Terraform's import block feature with the `-generate-config-out` flag.
+
+This approach is also helpful when you're unsure about the correct Terraform structure for a specific resource configuration. Simply create the resource in Instana first, then use this functionality to automatically generate the corresponding Terraform configuration.
+
+### Steps to Generate Configuration:
+
+1. **Get the Resource ID**: First, locate the ID of your SLI configuration in Instana. You can find this in the Instana UI or via the API.
+
+2. **Create an Import Block**: Create a new `.tf` file (e.g., `import.tf`) with an import block:
 
 ```hcl
-resource "instana_sli_config" "resource_load_time" {
-  name = "Resource Load Performance"
-  
-  metric_configuration = {
-    metric_name = "resource.load.time"
-    aggregation = "P95"
-    threshold = 1000
-  }
-  
-  sli_entity = {
-    website_time_based = {
-      website_id = "website-prod"
-      beacon_type = "resourceLoad"
-      filter_expression = "resource.type@na EQUALS 'script'"
-    }
-  }
+import {
+  to = instana_sli_config.example
+  id = "resource_id"
 }
 ```
 
-### Custom Beacon SLI
+Replace:
+- `example` with your desired terraform block name
+- `resource_id` with your actual SLI configuration ID from Instana
 
-```hcl
-resource "instana_sli_config" "custom_metric" {
-  name = "Custom Business Metric"
-  
-  metric_configuration = {
-    metric_name = "custom.transaction.time"
-    aggregation = "MEAN"
-    threshold = 500
-  }
-  
-  sli_entity = {
-    website_time_based = {
-      website_id = "business-app"
-      beacon_type = "custom"
-    }
-  }
-}
+3. **Generate the Configuration**: Run the following Terraform command:
+
+```bash
+terraform plan -generate-config-out=generated.tf
 ```
 
-### Page Change SLI (SPA)
+This will:
+- Import the existing resource state
+- Generate the complete Terraform configuration in `generated.tf`
+- Show you what will be imported
 
-```hcl
-resource "instana_sli_config" "spa_navigation" {
-  name = "SPA Navigation Performance"
-  
-  metric_configuration = {
-    metric_name = "page.change.time"
-    aggregation = "P90"
-    threshold = 500
-  }
-  
-  sli_entity = {
-    website_time_based = {
-      website_id = "spa-website"
-      beacon_type = "pageChange"
-    }
-  }
-}
-```
+4. **Review and Apply**: Review the generated configuration in `generated.tf` and make any necessary adjustments.
 
-### Multi-Environment SLI Setup
+   - **To import the existing resource**: Keep the import block and run `terraform apply`. This will import the resource into your Terraform state and link it to the existing Instana resource.
+   
+   - **To create a new resource**: If you only need the configuration structure as a template, remove the import block from your configuration. Modify the generated configuration as needed, and when you run `terraform apply`, it will create a new resource in Instana instead of importing the existing one.
 
-```hcl
-locals {
-  environments = {
-    production = {
-      app_id = "prod-app-id"
-      threshold = 500
-      aggregation = "P95"
-    }
-    staging = {
-      app_id = "staging-app-id"
-      threshold = 1000
-      aggregation = "P90"
-    }
-  }
-}
-
-resource "instana_sli_config" "env_latency" {
-  for_each = local.environments
-
-  name = "${each.key} API Latency"
-  
-  metric_configuration = {
-    metric_name = "latency"
-    aggregation = each.value.aggregation
-    threshold = each.value.threshold
-  }
-  
-  sli_entity = {
-    application_time_based = {
-      application_id = each.value.app_id
-      boundary_scope = "INBOUND"
-    }
-  }
-}
-```
-
-### Complex Event Filter Example
-
-```hcl
-resource "instana_sli_config" "complex_availability" {
-  name = "Complex Availability SLI"
-  
-  sli_entity = {
-    application_event_based = {
-      application_id = "complex-app"
-      boundary_scope = "INBOUND"
-      good_event_filter_expression = "(call.http.status@na EQUALS 200 OR call.http.status@na EQUALS 201) AND call.error.count@na EQUALS 0"
-      bad_event_filter_expression = "call.http.status@na GREATER_OR_EQUAL_THAN 400 OR call.error.count@na GREATER_THAN 0"
-    }
-  }
-}
-```
-
-### Different Aggregation Types
-
-```hcl
-# P99 Latency
-resource "instana_sli_config" "p99_latency" {
-  name = "P99 Latency SLI"
-  
-  metric_configuration = {
-    metric_name = "latency"
-    aggregation = "P99"
-    threshold = 2000
-  }
-  
-  sli_entity = {
-    application_time_based = {
-      application_id = "critical-app"
-      boundary_scope = "INBOUND"
-    }
-  }
-}
-
-# Mean Latency
-resource "instana_sli_config" "mean_latency" {
-  name = "Mean Latency SLI"
-  
-  metric_configuration = {
-    metric_name = "latency"
-    aggregation = "MEAN"
-    threshold = 300
-  }
-  
-  sli_entity = {
-    application_time_based = {
-      application_id = "standard-app"
-      boundary_scope = "ALL"
-    }
-  }
-}
-
-# Max Latency
-resource "instana_sli_config" "max_latency" {
-  name = "Max Latency SLI"
-  
-  metric_configuration = {
-    metric_name = "latency"
-    aggregation = "MAX"
-    threshold = 5000
-  }
-  
-  sli_entity = {
-    application_time_based = {
-      application_id = "batch-app"
-      boundary_scope = "ALL"
-    }
-  }
-}
-```
-
-### Error Rate SLI
-
-```hcl
-resource "instana_sli_config" "error_rate" {
-  name = "Application Error Rate"
-  
-  metric_configuration = {
-    metric_name = "errors"
-    aggregation = "SUM"
-    threshold = 10
-  }
-  
-  sli_entity = {
-    application_time_based = {
-      application_id = "monitored-app"
-      boundary_scope = "INBOUND"
-    }
-  }
-}
-```
-
-### Throughput SLI
-
-```hcl
-resource "instana_sli_config" "throughput" {
-  name = "API Throughput"
-  
-  metric_configuration = {
-    metric_name = "calls"
-    aggregation = "PER_SECOND"
-    threshold = 100
-  }
-  
-  sli_entity = {
-    application_time_based = {
-      application_id = "high-traffic-app"
-      boundary_scope = "INBOUND"
-    }
-  }
-}
+```bash
+terraform apply
 ```
 
 ## Argument Reference

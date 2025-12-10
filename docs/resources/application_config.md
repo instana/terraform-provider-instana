@@ -29,7 +29,7 @@ resource "instana_application_config" "example" {
   label          = "My Application"
   scope          = "INCLUDE_ALL_DOWNSTREAM"
   boundary_scope = "INBOUND"
-  tag_filter     = "agent.tag:stage EQUALS 'test'"
+  tag_filter     = "service.name@dest EQUALS 'DC11'"
   
   match_specification {
     # ... match specification blocks
@@ -44,11 +44,11 @@ resource "instana_application_config" "example" {
   label          = "My Application"
   scope          = "INCLUDE_ALL_DOWNSTREAM"
   boundary_scope = "INBOUND"
-  tag_filter     = "agent.tag:stage EQUALS 'test'"
+  tag_filter     = "service.name@dest EQUALS 'DC11'"
   
   access_rules = [{
     access_type   = "READ_WRITE"
-    relation_type = "SOURCE"
+    relation_type = "GLOBAL"
     related_id    = "group-id"
   }]
 }
@@ -75,316 +75,80 @@ resource "instana_application_config" "example" {
 ### Basic Application Configuration
 
 ```hcl
-resource "instana_application_config" "example" {
-  label          = "Production API"
-  scope          = "INCLUDE_NO_DOWNSTREAM"
-  boundary_scope = "DEFAULT"
-  tag_filter     = "service.name EQUALS 'api-service' AND entity.zone EQUALS 'production'"
-  
-  access_rules = [{
-    access_type   = "READ_WRITE"
-    relation_type = "SOURCE"
-  }]
-}
-```
-
-### Application with Downstream Services
-
-```hcl
-resource "instana_application_config" "with_downstream" {
-  label          = "E-commerce Platform"
-  scope          = "INCLUDE_ALL_DOWNSTREAM"
+resource "instana_application_config" "application_perspective_config" {
+  access_rules = [ 
+    {
+      access_type   = "READ_WRITE"
+      relation_type = "GLOBAL"
+    },
+  ]
   boundary_scope = "INBOUND"
-  tag_filter     = "service.name EQUALS 'frontend' OR service.name EQUALS 'api-gateway'"
-  
-  access_rules = [{
-    access_type   = "READ_WRITE"
-    relation_type = "SOURCE"
-  }]
-}
-```
-
-### Application with Tag-Based Filtering
-
-```hcl
-resource "instana_application_config" "tag_based" {
-  label          = "Staging Environment"
+  label          = "Label"
   scope          = "INCLUDE_NO_DOWNSTREAM"
-  boundary_scope = "ALL"
-  tag_filter     = join(" AND ", [
-    "agent.tag:stage EQUALS 'staging'",
-    "aws.ec2.tag:environment EQUALS 'staging'",
-    "call.tag:version@na STARTS_WITH 'v2'"
-  ])
-  
-  access_rules = [{
-    access_type   = "READ_WRITE"
-    relation_type = "SOURCE"
-  }]
+  tag_filter     = "((call.type@na EQUALS 'HTTP' AND service.name@dest EQUALS 'cart' AND kubernetes.namespace@dest EQUALS 'robot-shop') OR service.name@dest EQUALS 'catalogue')"
 }
 ```
 
-### Multi-Service Application
+### Application with Tag Filtering
 
 ```hcl
-resource "instana_application_config" "microservices" {
-  label          = "Payment Platform"
-  scope          = "INCLUDE_IMMEDIATE_DOWNSTREAM_DATABASE_AND_MESSAGING"
-  boundary_scope = "INBOUND"
-  tag_filter     = join(" OR ", [
-    "service.name EQUALS 'payment-service'",
-    "service.name EQUALS 'billing-service'",
-    "service.name EQUALS 'invoice-service'"
-  ])
-  
-  access_rules = [{
-    access_type   = "READ_WRITE"
-    relation_type = "SOURCE"
-  }]
-}
-```
-
-### Application with AWS Tags
-
-```hcl
-resource "instana_application_config" "aws_app" {
-  label          = "AWS Production Services"
-  scope          = "INCLUDE_ALL_DOWNSTREAM"
-  boundary_scope = "INBOUND"
-  tag_filter     = join(" AND ", [
-    "aws.ec2.tag:Environment EQUALS 'production'",
-    "aws.ec2.tag:Team EQUALS 'platform'",
-    "entity.type EQUALS 'service'"
-  ])
-  
-  access_rules = [{
-    access_type   = "READ_WRITE"
-    relation_type = "SOURCE"
-  }]
-}
-```
-
-### Application with Kubernetes Labels
-
-```hcl
-resource "instana_application_config" "k8s_app" {
-  label          = "Kubernetes Production App"
-  scope          = "INCLUDE_NO_DOWNSTREAM"
-  boundary_scope = "ALL"
-  tag_filter     = join(" AND ", [
-    "kubernetes.pod.label:app EQUALS 'my-app'",
-    "kubernetes.namespace EQUALS 'production'",
-    "kubernetes.cluster.name EQUALS 'prod-cluster'"
-  ])
-  
-  access_rules = [{
-    access_type   = "READ_WRITE"
-    relation_type = "SOURCE"
-  }]
-}
-```
-
-### Application with Call Tag Filtering
-
-```hcl
-resource "instana_application_config" "call_filtered" {
-  label          = "API v2 Endpoints"
-  scope          = "INCLUDE_NO_DOWNSTREAM"
-  boundary_scope = "INBOUND"
-  tag_filter     = join(" AND ", [
-    "call.tag:api-version@na EQUALS 'v2'",
-    "call.http.status@na GREATER_THAN 0",
-    "service.name STARTS_WITH 'api-'"
-  ])
-  
-  access_rules = [{
-    access_type   = "READ_WRITE"
-    relation_type = "SOURCE"
-  }]
-}
-```
-
-### Application with Source-Based Filtering
-
-```hcl
-resource "instana_application_config" "source_filtered" {
-  label          = "External API Calls"
-  scope          = "INCLUDE_NO_DOWNSTREAM"
-  boundary_scope = "INBOUND"
-  tag_filter     = join(" AND ", [
-    "service.name@src EQUALS 'external-gateway'",
-    "agent.tag:zone@src EQUALS 'dmz'"
-  ])
-  
-  access_rules = [{
-    access_type   = "READ_WRITE"
-    relation_type = "SOURCE"
-  }]
-}
-```
-
-### Application with Complex Tag Logic
-
-```hcl
-resource "instana_application_config" "complex" {
-  label          = "Production Services (Excluding Test)"
-  scope          = "INCLUDE_ALL_DOWNSTREAM"
-  boundary_scope = "ALL"
-  tag_filter     = join(" AND ", [
-    "entity.zone EQUALS 'production'",
-    "(service.name STARTS_WITH 'prod-' OR service.name STARTS_WITH 'api-')",
-    "NOT service.name CONTAINS 'test'",
-    "entity.type EQUALS 'service'"
-  ])
-  
-  access_rules = [{
-    access_type   = "READ_WRITE"
-    relation_type = "SOURCE"
-  }]
-}
-```
-
-### Application with Database Scope
-
-```hcl
-resource "instana_application_config" "with_databases" {
-  label          = "Application with Data Layer"
-  scope          = "INCLUDE_IMMEDIATE_DOWNSTREAM_DATABASE_AND_MESSAGING"
-  boundary_scope = "INBOUND"
-  tag_filter     = "service.name EQUALS 'api-service'"
-  
-  access_rules = [{
-    access_type   = "READ_WRITE"
-    relation_type = "SOURCE"
-  }]
-}
-```
-
-### Application with RBAC Access Rules
-
-```hcl
-resource "instana_application_config" "with_rbac" {
-  label          = "Restricted Application"
-  scope          = "INCLUDE_NO_DOWNSTREAM"
-  boundary_scope = "DEFAULT"
-  tag_filter     = "service.name EQUALS 'sensitive-service'"
-  
+resource "instana_application_config" "tf_b_application_perspective_config_8" {
   access_rules = [
     {
       access_type   = "READ_WRITE"
-      relation_type = "SOURCE"
-      related_id    = instana_rbac_group.admins.id
+      related_id    = null
+      relation_type = "GLOBAL"
     },
-    {
-      access_type   = "READ_ONLY"
-      relation_type = "SOURCE"
-      related_id    = instana_rbac_group.viewers.id
-    }
   ]
-}
-```
-
-### Multi-Region Application
-
-```hcl
-resource "instana_application_config" "multi_region" {
-  label          = "Global Application"
-  scope          = "INCLUDE_ALL_DOWNSTREAM"
   boundary_scope = "ALL"
-  tag_filter     = join(" OR ", [
-    "(entity.zone EQUALS 'us-east-1' AND service.name EQUALS 'api-service')",
-    "(entity.zone EQUALS 'eu-west-1' AND service.name EQUALS 'api-service')",
-    "(entity.zone EQUALS 'ap-southeast-1' AND service.name EQUALS 'api-service')"
-  ])
-  
-  access_rules = [{
-    access_type   = "READ_WRITE"
-    relation_type = "SOURCE"
-  }]
+  label          = "Label"
+  scope          = "INCLUDE_IMMEDIATE_DOWNSTREAM_DATABASE_AND_MESSAGING"
+  tag_filter     = "(kubernetes.deployment.namespace@dest EQUALS 'release-pink' AND container.image.name@dest EQUALS 'containers.instana.io/synthetic/synthetic-playback-browserscript:1.296.0')"
 }
 ```
 
-### Application with HTTP Status Filtering
+## Generating Configuration from Existing Resources
+
+If you have already created a application configuration in Instana and want to generate the Terraform configuration for it, you can use Terraform's import block feature with the `-generate-config-out` flag.
+
+This approach is also helpful when you're unsure about the correct Terraform structure for a specific resource configuration. Simply create the resource in Instana first, then use this functionality to automatically generate the corresponding Terraform configuration.
+
+### Steps to Generate Configuration:
+
+1. **Get the Resource ID**: First, locate the ID of your application configuration in Instana. You can find this in the Instana UI or via the API.
+
+2. **Create an Import Block**: Create a new `.tf` file (e.g., `import.tf`) with an import block:
 
 ```hcl
-resource "instana_application_config" "error_tracking" {
-  label          = "Error Tracking Application"
-  scope          = "INCLUDE_NO_DOWNSTREAM"
-  boundary_scope = "INBOUND"
-  tag_filter     = join(" AND ", [
-    "service.name EQUALS 'api-service'",
-    "call.http.status@na GREATER_OR_EQUAL_THAN 400"
-  ])
-  
-  access_rules = [{
-    access_type   = "READ_WRITE"
-    relation_type = "SOURCE"
-  }]
+import {
+  to = instana_application_config.example
+  id = "resource_id"
 }
 ```
 
-### Application with Unary Operators
+Replace:
+- `example` with your desired terraform block name
+- `resource_id` with your actual application configuration ID from Instana
 
-```hcl
-resource "instana_application_config" "with_unary" {
-  label          = "Services with Tags"
-  scope          = "INCLUDE_NO_DOWNSTREAM"
-  boundary_scope = "DEFAULT"
-  tag_filter     = join(" AND ", [
-    "service.name STARTS_WITH 'prod-'",
-    "agent.tag:team NOT_EMPTY",
-    "agent.tag:version NOT_BLANK"
-  ])
-  
-  access_rules = [{
-    access_type   = "READ_WRITE"
-    relation_type = "SOURCE"
-  }]
-}
+3. **Generate the Configuration**: Run the following Terraform command:
+
+```bash
+terraform plan -generate-config-out=generated.tf
 ```
 
-### Comprehensive Application Configuration
+This will:
+- Import the existing resource state
+- Generate the complete Terraform configuration in `generated.tf`
+- Show you what will be imported
 
-```hcl
-resource "instana_application_config" "comprehensive" {
-  label          = "Production E-commerce Platform"
-  scope          = "INCLUDE_ALL_DOWNSTREAM"
-  boundary_scope = "INBOUND"
-  
-  tag_filter = join(" AND ", [
-    # Service identification
-    "(service.name EQUALS 'frontend' OR service.name EQUALS 'api-gateway' OR service.name EQUALS 'checkout-service')",
-    
-    # Environment filtering
-    "entity.zone EQUALS 'production'",
-    "agent.tag:environment EQUALS 'prod'",
-    
-    # Exclude test traffic
-    "NOT call.tag:test-traffic@na EQUALS 'true'",
-    
-    # Include only successful or client error calls
-    "(call.http.status@na LESS_THAN 500 OR call.http.status@na IS_EMPTY)",
-    
-    # Kubernetes filtering
-    "kubernetes.namespace EQUALS 'production'",
-    
-    # AWS filtering
-    "aws.ec2.tag:CostCenter EQUALS 'ecommerce'"
-  ])
-  
-  access_rules = [
-    {
-      access_type   = "READ_WRITE"
-      relation_type = "SOURCE"
-      related_id    = instana_rbac_group.platform_team.id
-    },
-    {
-      access_type   = "READ_ONLY"
-      relation_type = "SOURCE"
-      related_id    = instana_rbac_group.developers.id
-    }
-  ]
-}
+4. **Review and Apply**: Review the generated configuration in `generated.tf` and make any necessary adjustments.
+
+   - **To import the existing resource**: Keep the import block and run `terraform apply`. This will import the resource into your Terraform state and link it to the existing Instana resource.
+   
+   - **To create a new resource**: If you only need the configuration structure as a template, remove the import block from your configuration. Modify the generated configuration as needed, and when you run `terraform apply`, it will create a new resource in Instana instead of importing the existing one.
+
+```bash
+terraform apply
 ```
 
 ## Argument Reference
@@ -406,9 +170,7 @@ resource "instana_application_config" "comprehensive" {
 * `access_type` - Required - The type of access granted. Allowed values:
   - `READ_WRITE` - Full read and write access
   - `READ_ONLY` - Read-only access
-* `relation_type` - Required - The type of relation. Allowed values:
-  - `SOURCE` - Source-based relation
-  - `DESTINATION` - Destination-based relation
+* `relation_type` - Required - The type of relation. 
 * `related_id` - Optional - The ID of the related entity (e.g., RBAC group ID). If not specified, the rule applies to all users
 
 ### Tag Filter
@@ -442,35 +204,16 @@ identifier                := [a-zA-Z_][\.a-zA-Z0-9_\-/]*
 
 #### Tag Filter Examples
 
-**Basic Service Filtering:**
 ```hcl
-tag_filter = "service.name EQUALS 'my-service' AND agent.tag:stage EQUALS 'PROD' AND call.http.status@na EQUALS 404"
+tag_filter     = "(kubernetes.deployment.namespace@dest EQUALS 'release-pink' AND container.image.name@dest EQUALS 'containers.instana.io/synthetic/synthetic-playback-browserscript:1.296.0')"
+
 ```
 
-**Calls Filtered on Source:**
 ```hcl
-tag_filter = "service.name@src EQUALS 'my-service' AND agent.tag:stage@src EQUALS 'PROD'"
+tag_filter     = "(service.name@dest EQUALS 'payment' AND service.name@dest EQUALS 'user' AND service.name@dest EQUALS 'cart')"
+
 ```
 
-**Multiple Services with OR:**
-```hcl
-tag_filter = "service.name EQUALS 'service-a' OR service.name EQUALS 'service-b' OR service.name EQUALS 'service-c'"
-```
-
-**Complex Logic with Parentheses:**
-```hcl
-tag_filter = "(service.name STARTS_WITH 'api-' OR service.name STARTS_WITH 'web-') AND entity.zone EQUALS 'production'"
-```
-
-**Using Unary Operators:**
-```hcl
-tag_filter = "service.name NOT_EMPTY AND agent.tag:version NOT_BLANK"
-```
-
-**Numeric Comparisons:**
-```hcl
-tag_filter = "call.http.status@na GREATER_OR_EQUAL_THAN 400 AND call.http.status@na LESS_THAN 500"
-```
 
 ## Attributes Reference
 
@@ -546,12 +289,12 @@ Configure appropriate access levels:
 access_rules = [
   {
     access_type   = "READ_WRITE"
-    relation_type = "SOURCE"
+    relation_type = "GLOBAL"
     related_id    = instana_rbac_group.admins.id
   },
   {
     access_type   = "READ_ONLY"
-    relation_type = "SOURCE"
+    relation_type = "GLOBAL"
     related_id    = instana_rbac_group.viewers.id
   }
 ]

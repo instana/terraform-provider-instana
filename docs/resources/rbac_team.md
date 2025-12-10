@@ -238,67 +238,48 @@ resource "instana_rbac_team" "restricted_team" {
 }
 ```
 
-### Complete Team Configuration
+## Generating Configuration from Existing Resources
+
+If you have already created a RBAC team in Instana and want to generate the Terraform configuration for it, you can use Terraform's import block feature with the `-generate-config-out` flag.
+
+This approach is also helpful when you're unsure about the correct Terraform structure for a specific resource configuration. Simply create the resource in Instana first, then use this functionality to automatically generate the corresponding Terraform configuration.
+
+### Steps to Generate Configuration:
+
+1. **Get the Resource ID**: First, locate the ID of your RBAC team in Instana. You can find this in the Instana UI or via the API.
+
+2. **Create an Import Block**: Create a new `.tf` file (e.g., `import.tf`) with an import block:
 
 ```hcl
-resource "instana_rbac_team" "complete_team" {
-  tag = "Complete Team Example"
-  
-  info = {
-    description = "A comprehensive team configuration example"
-  }
-  
-  member = [
-    {
-      user_id = "user-1"
-      roles = [
-        {
-          role_id   = "role-1"
-        }
-      ]
-    },
-    {
-      user_id = "user-2"
-      roles = [
-        {
-          role_id   = "role-2"
-        },
-        {
-          role_id   = "role-3"
-        }
-      ]
-    }
-  ]
-  
-  scope = {
-    applications = ["app-1", "app-2"]
-    kubernetes_clusters = ["k8s-1"]
-    kubernetes_namespaces = ["ns-1", "ns-2"]
-    websites = ["website-1"]
-    mobile_apps = ["mobile-1"]
-    infra_dfq_filter = "entity.zone:us-east-1"
-    log_filter = "service.name:my-service"
-    action_filter = "action.type:deployment"
-    business_perspectives = ["bp-1"]
-    slo_ids = ["slo-1", "slo-2"]
-    synthetic_tests = ["test-1"]
-    synthetic_credentials = ["cred-1"]
-    tag_ids = ["tag-1", "tag-2"]
-    
-    access_permissions = [
-      "LIMITED_APPLICATIONS_SCOPE",
-      "LIMITED_KUBERNETES_SCOPE",
-      "LIMITED_WEBSITES_SCOPE",
-      "LIMITED_MOBILE_APPS_SCOPE",
-      "LIMITED_INFRASTRUCTURE_SCOPE",
-      "LIMITED_LOGS_SCOPE",
-      "LIMITED_AUTOMATION_SCOPE",
-      "LIMITED_BIZOPS_SCOPE",
-      "LIMITED_SERVICE_LEVEL_SCOPE",
-      "LIMITED_SYNTHETICS_SCOPE"
-    ]
-  }
+import {
+  to = instana_rbac_team.example
+  id = "resource_id"
 }
+```
+
+Replace:
+- `example` with your desired terraform block name
+- `resource_id` with your actual RBAC team ID from Instana
+
+3. **Generate the Configuration**: Run the following Terraform command:
+
+```bash
+terraform plan -generate-config-out=generated.tf
+```
+
+This will:
+- Import the existing resource state
+- Generate the complete Terraform configuration in `generated.tf`
+- Show you what will be imported
+
+4. **Review and Apply**: Review the generated configuration in `generated.tf` and make any necessary adjustments.
+
+   - **To import the existing resource**: Keep the import block and run `terraform apply`. This will import the resource into your Terraform state and link it to the existing Instana resource.
+   
+   - **To create a new resource**: If you only need the configuration structure as a template, remove the import block from your configuration. Modify the generated configuration as needed, and when you run `terraform apply`, it will create a new resource in Instana instead of importing the existing one.
+
+```bash
+terraform apply
 ```
 
 ## Argument Reference

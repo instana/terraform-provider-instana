@@ -73,396 +73,7 @@ resource "instana_api_token" "readonly" {
 }
 ```
 
-### Service Mapping and EUM Configuration
-
-#### Service Mapping Token
-```hcl
-resource "instana_api_token" "service_mapping" {
-  name                          = "service-mapping-token"
-  can_configure_service_mapping = true
-  can_configure_applications    = true
-}
-```
-
-#### EUM Applications Token
-```hcl
-resource "instana_api_token" "eum_config" {
-  name                           = "eum-configuration-token"
-  can_configure_eum_applications = true
-  can_configure_applications     = true
-}
-```
-
-#### Mobile App Monitoring Token
-```hcl
-resource "instana_api_token" "mobile_monitoring" {
-  name                               = "mobile-monitoring-token"
-  can_configure_mobile_app_monitoring = true
-  can_configure_applications          = true
-}
-```
-
-### Agent Management Tokens
-
-#### Agent Installation Token
-```hcl
-resource "instana_api_token" "agent_install" {
-  name                   = "agent-installation-token"
-  can_install_new_agents = true
-  can_configure_agents   = true
-}
-```
-
-#### Agent Configuration Token
-```hcl
-resource "instana_api_token" "agent_config" {
-  name                      = "agent-configuration-token"
-  can_configure_agents      = true
-  can_configure_agent_run_mode = true
-}
-```
-
-### Alert and Event Management Tokens
-
-#### Events and Alerts Token
-```hcl
-resource "instana_api_token" "events_alerts" {
-  name                            = "events-alerts-token"
-  can_configure_events_and_alerts = true
-  can_invoke_alert_channel        = true
-}
-```
-
-#### Smart Alerts Configuration Token
-```hcl
-resource "instana_api_token" "smart_alerts" {
-  name                                   = "smart-alerts-token"
-  can_configure_application_smart_alerts = true
-  can_configure_website_smart_alerts     = true
-  can_configure_mobile_app_smart_alerts  = true
-}
-```
-
-#### Global Smart Alerts Token
-```hcl
-resource "instana_api_token" "global_smart_alerts" {
-  name                                           = "global-smart-alerts-token"
-  can_configure_global_application_smart_alerts  = true
-  can_configure_global_synthetic_smart_alerts    = true
-  can_configure_global_infra_smart_alerts        = true
-  can_configure_global_log_smart_alerts          = true
-  can_configure_global_alert_payload             = true
-}
-```
-
-#### Maintenance Windows Token
-```hcl
-resource "instana_api_token" "maintenance" {
-  name                                = "maintenance-windows-token"
-  can_configure_maintenance_windows   = true
-  can_configure_events_and_alerts     = true
-}
-```
-
-### Integration and User Management Tokens
-
-#### Integrations Token
-```hcl
-resource "instana_api_token" "integrations" {
-  name                       = "integrations-token"
-  can_configure_integrations = true
-}
-```
-
-#### User Management Token
-```hcl
-resource "instana_api_token" "user_management" {
-  name                                 = "user-management-token"
-  can_configure_users                  = true
-  can_configure_teams                  = true
-  can_configure_authentication_methods = true
-}
-```
-
-### Synthetic Monitoring Tokens
-
-#### Synthetic Tests Configuration
-```hcl
-resource "instana_api_token" "synthetic_config" {
-  name                            = "synthetic-config-token"
-  can_configure_synthetic_tests   = true
-  can_configure_synthetic_locations = true
-  can_configure_synthetic_credentials = true
-}
-```
-
-#### Synthetic Tests Read-Only
-```hcl
-resource "instana_api_token" "synthetic_readonly" {
-  name                           = "synthetic-readonly-token"
-  can_view_synthetic_tests       = true
-  can_view_synthetic_locations   = true
-  can_view_synthetic_test_results = true
-}
-```
-
-#### Synthetic Tests Full Access
-```hcl
-resource "instana_api_token" "synthetic_full" {
-  name                                = "synthetic-full-access-token"
-  can_configure_synthetic_tests       = true
-  can_configure_synthetic_locations   = true
-  can_configure_synthetic_credentials = true
-  can_view_synthetic_tests            = true
-  can_view_synthetic_locations        = true
-  can_view_synthetic_test_results     = true
-  can_use_synthetic_credentials       = true
-}
-```
-
-### Automation Tokens
-
-#### Automation Actions Token
-```hcl
-resource "instana_api_token" "automation_actions" {
-  name                               = "automation-actions-token"
-  can_configure_automation_actions   = true
-  can_run_automation_actions         = true
-  can_delete_automation_action_history = true
-}
-```
-
-#### Automation Policies Token
-```hcl
-resource "instana_api_token" "automation_policies" {
-  name                              = "automation-policies-token"
-  can_configure_automation_policies = true
-  can_configure_automation_actions  = true
-}
-```
-
-### Log Management Tokens
-
-#### Log Configuration Token
-```hcl
-resource "instana_api_token" "log_config" {
-  name                            = "log-configuration-token"
-  can_configure_log_management    = true
-  can_configure_log_retention_period = true
-  can_view_logs                   = true
-}
-```
-
-#### Log Operations Token
-```hcl
-resource "instana_api_token" "log_operations" {
-  name                = "log-operations-token"
-  can_view_logs       = true
-  can_delete_logs     = true
-  can_view_log_volume = true
-}
-```
-
-### Business Operations (BizOps) Tokens
-
-#### BizOps Configuration Token
-```hcl
-resource "instana_api_token" "bizops_config" {
-  name                 = "bizops-config-token"
-  can_configure_bizops = true
-}
-```
-
-#### BizOps Read-Only Token
-```hcl
-resource "instana_api_token" "bizops_readonly" {
-  name                          = "bizops-readonly-token"
-  can_view_business_processes   = true
-  can_view_business_process_details = true
-  can_view_business_activities  = true
-  can_view_biz_alerts           = true
-}
-```
-
-### Service Level Management Tokens
-
-#### SLO Configuration Token
-```hcl
-resource "instana_api_token" "slo_config" {
-  name                                           = "slo-configuration-token"
-  can_configure_service_levels                   = true
-  can_configure_service_level_smart_alerts       = true
-  can_configure_service_level_correction_windows = true
-}
-```
-
-### Debugging and Diagnostics Tokens
-
-#### Diagnostics Token
-```hcl
-resource "instana_api_token" "diagnostics" {
-  name                   = "diagnostics-token"
-  can_create_heap_dump   = true
-  can_create_thread_dump = true
-  can_view_trace_details = true
-  can_configure_subtraces = true
-}
-```
-
-### Dashboard Management Tokens
-
-#### Dashboard Creation Token
-```hcl
-resource "instana_api_token" "dashboard_create" {
-  name                            = "dashboard-creation-token"
-  can_create_public_custom_dashboards = true
-}
-```
-
-#### Dashboard Edit Token
-```hcl
-resource "instana_api_token" "dashboard_edit" {
-  name                                  = "dashboard-edit-token"
-  can_edit_all_accessible_custom_dashboards = true
-  can_create_public_custom_dashboards       = true
-}
-```
-
-### Scope-Limited Tokens
-
-#### Application-Scoped Token
-```hcl
-resource "instana_api_token" "app_scoped" {
-  name                       = "application-scoped-token"
-  can_configure_applications = true
-  limited_applications_scope = true
-}
-```
-
-#### Infrastructure-Scoped Token
-```hcl
-resource "instana_api_token" "infra_scoped" {
-  name                        = "infrastructure-scoped-token"
-  can_configure_agents        = true
-  limited_infrastructure_scope = true
-}
-```
-
-#### Kubernetes-Scoped Token
-```hcl
-resource "instana_api_token" "k8s_scoped" {
-  name                   = "kubernetes-scoped-token"
-  can_configure_agents   = true
-  limited_kubernetes_scope = true
-}
-```
-
-#### Multi-Scope Token
-```hcl
-resource "instana_api_token" "multi_scope" {
-  name                        = "multi-scope-token"
-  can_configure_applications  = true
-  can_configure_agents        = true
-  limited_applications_scope  = true
-  limited_infrastructure_scope = true
-  limited_kubernetes_scope    = true
-  limited_websites_scope      = true
-}
-```
-
-### AI and LLM Tokens
-
-#### AI Configuration Token
-```hcl
-resource "instana_api_token" "ai_config" {
-  name                  = "ai-configuration-token"
-  can_configure_llm     = true
-  can_configure_ai_agents = true
-  limited_ai_gateway_scope = true
-}
-```
-
-### Administrative Tokens
-
-#### Full Admin Token
-```hcl
-resource "instana_api_token" "admin" {
-  name                                           = "admin-token"
-  can_configure_service_mapping                  = true
-  can_configure_eum_applications                 = true
-  can_configure_mobile_app_monitoring            = true
-  can_configure_users                            = true
-  can_install_new_agents                         = true
-  can_configure_integrations                     = true
-  can_configure_events_and_alerts                = true
-  can_configure_maintenance_windows              = true
-  can_configure_application_smart_alerts         = true
-  can_configure_website_smart_alerts             = true
-  can_configure_mobile_app_smart_alerts          = true
-  can_configure_api_tokens                       = true
-  can_configure_agent_run_mode                   = true
-  can_view_audit_log                             = true
-  can_configure_agents                           = true
-  can_configure_authentication_methods           = true
-  can_configure_applications                     = true
-  can_configure_teams                            = true
-  can_configure_releases                         = true
-  can_configure_log_management                   = true
-  can_create_public_custom_dashboards            = true
-  can_view_logs                                  = true
-  can_view_trace_details                         = true
-  can_configure_session_settings                 = true
-  can_configure_global_alert_payload             = true
-  can_configure_global_application_smart_alerts  = true
-  can_configure_global_synthetic_smart_alerts    = true
-  can_configure_global_infra_smart_alerts        = true
-  can_configure_global_log_smart_alerts          = true
-  can_view_account_and_billing_information       = true
-  can_edit_all_accessible_custom_dashboards      = true
-}
-```
-
-#### Security Auditor Token
-```hcl
-resource "instana_api_token" "security_auditor" {
-  name                                     = "security-auditor-token"
-  can_view_audit_log                       = true
-  can_view_account_and_billing_information = true
-  can_view_logs                            = true
-  can_view_trace_details                   = true
-}
-```
-
-### Platform-Specific Tokens
-
-#### VMware vSphere Token
-```hcl
-resource "instana_api_token" "vsphere" {
-  name                 = "vsphere-token"
-  can_configure_agents = true
-  limited_vsphere_scope = true
-}
-```
-
-#### OpenStack Token
-```hcl
-resource "instana_api_token" "openstack" {
-  name                   = "openstack-token"
-  can_configure_agents   = true
-  limited_openstack_scope = true
-}
-```
-
-#### Nutanix Token
-```hcl
-resource "instana_api_token" "nutanix" {
-  name                  = "nutanix-token"
-  can_configure_agents  = true
-  limited_nutanix_scope = true
-}
-```
-
-### Complete Production Token Example
+####  Access Token with More Permissions
 
 ```hcl
 resource "instana_api_token" "production_full" {
@@ -521,6 +132,50 @@ resource "instana_api_token" "production_full" {
   limited_infrastructure_scope = false
   limited_kubernetes_scope     = false
 }
+```
+
+## Generating Configuration from Existing Resources
+
+If you have already created a API token in Instana and want to generate the Terraform configuration for it, you can use Terraform's import block feature with the `-generate-config-out` flag.
+
+This approach is also helpful when you're unsure about the correct Terraform structure for a specific resource configuration. Simply create the resource in Instana first, then use this functionality to automatically generate the corresponding Terraform configuration.
+
+### Steps to Generate Configuration:
+
+1. **Get the Resource ID**: First, locate the ID of your API token in Instana. You can find this in the Instana UI or via the API.
+
+2. **Create an Import Block**: Create a new `.tf` file (e.g., `import.tf`) with an import block:
+
+```hcl
+import {
+  to = instana_api_token.example
+  id = "resource_id"
+}
+```
+
+Replace:
+- `example` with your desired terraform block name
+- `resource_id` with your actual API token ID from Instana
+
+3. **Generate the Configuration**: Run the following Terraform command:
+
+```bash
+terraform plan -generate-config-out=generated.tf
+```
+
+This will:
+- Import the existing resource state
+- Generate the complete Terraform configuration in `generated.tf`
+- Show you what will be imported
+
+4. **Review and Apply**: Review the generated configuration in `generated.tf` and make any necessary adjustments.
+
+   - **To import the existing resource**: Keep the import block and run `terraform apply`. This will import the resource into your Terraform state and link it to the existing Instana resource.
+   
+   - **To create a new resource**: If you only need the configuration structure as a template, remove the import block from your configuration. Modify the generated configuration as needed, and when you run `terraform apply`, it will create a new resource in Instana instead of importing the existing one.
+
+```bash
+terraform apply
 ```
 
 ## Argument Reference
