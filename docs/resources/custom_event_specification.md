@@ -158,8 +158,12 @@ This will:
 - Generate the complete Terraform configuration in `generated.tf`
 - Show you what will be imported
 
-4. **Review and Apply**: Review the generated configuration in `generated.tf`, make any necessary adjustments, and then apply: 
-Apply will import the resource into your Terraform state and create the corresponding Terraform resource. If you just need the struture you can remove the import block and modify the imported configuration based on your needs. Then it will be created as a new resource.
+4. **Review and Apply**: Review the generated configuration in `generated.tf` and make any necessary adjustments.
+
+   - **To import the existing resource**: Keep the import block and run `terraform apply`. This will import the resource into your Terraform state and link it to the existing Instana resource.
+   
+   - **To create a new resource**: If you only need the configuration structure as a template, remove the import block from your configuration. Modify the generated configuration as needed, and when you run `terraform apply`, it will create a new resource in Instana instead of importing the existing one.
+
 ```bash
 terraform apply
 ```
