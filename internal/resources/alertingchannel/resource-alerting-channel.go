@@ -327,7 +327,8 @@ func NewAlertingChannelResourceHandle() resourcehandle.ResourceHandle[*restapi.A
 						Description: AlertingChannelDescMsTeamsApp,
 						Attributes: map[string]schema.Attribute{
 							AlertingChannelMsTeamsAppFieldAPITokenID: schema.StringAttribute{
-								Required:    true,
+								Optional:    true,
+								Computed:    true,
 								Description: AlertingChannelDescMsTeamsAppAPITokenID,
 							},
 							AlertingChannelMsTeamsAppFieldTeamID: schema.StringAttribute{
