@@ -48,10 +48,11 @@ resource "instana_slo_alert_config" "example" {
 ```hcl
 resource "instana_slo_alert_config" "example" {
   name = "SLO Alert"
+  description = "Alert description"
   alert_type = "status"
   severity              = 5
-  slo_ids               = [var.slo_id]
-  threshold = {
+  slo_ids               = ["SLOOqR36epoSuO0WYNQ8G3jLQ"] # replace with valid slo ids
+   threshold = {
     type     = "staticThreshold"
     operator = ">"
     value = 0.7
@@ -61,7 +62,7 @@ resource "instana_slo_alert_config" "example" {
     warm_up = 60000
     cool_down = 60000
   }
-  alert_channel_ids = ["channel-id-1"]
+  alert_channel_ids = ["channel-id-1"] # replace with valid channel ids
   custom_payload_fields = [
     {
       key = "env"
@@ -94,10 +95,9 @@ resource "instana_slo_alert_config" "status_alert" {
   name = "SLO Status Alert"
   description = "Alert when SLO status drops below 70%"
   severity = 10
-  triggering = true  
   alert_type = "status"
-  slo_ids = ["slo-id-1", "slo-id-2"]
-  alert_channel_ids = ["channel-id-1"]
+  slo_ids = ["SLOOqR36epoSuO0WYNQ8G3jLQ"] # replace with valid slo ids
+  alert_channel_ids = ["channel-id-1"] # replace with valid channel ids
   
   threshold = {
     operator = ">"
@@ -120,10 +120,9 @@ resource "instana_slo_alert_config" "error_budget_alert" {
   name = "Error Budget Alert"
   description = "Alert when 50% of error budget is consumed"
   severity = 5
-  triggering = true  
   alert_type = "error_budget"
-  slo_ids = ["slo-id-1"]
-  alert_channel_ids = ["channel-id-1", "channel-id-2"]
+  slo_ids = ["SLOOqR36epoSuO0WYNQ8G3jLQ"] # replace with valid slo ids
+  alert_channel_ids = ["channel-id-1", "channel-id-2"] # replace with valid channel ids
   
   threshold = {
     operator = ">="
@@ -146,10 +145,9 @@ resource "instana_slo_alert_config" "burn_rate_single" {
   name = "Burn Rate Alert - Single Window"
   description = "Alert when burn rate exceeds threshold"
   severity = 10
-  triggering = true  
   alert_type = "burn_rate_v2"
-  slo_ids = ["slo-id-1"]
-  alert_channel_ids = ["pagerduty-channel"]
+  slo_ids = ["SLOOqR36epoSuO0WYNQ8G3jLQ"] # replace with valid slo ids
+  alert_channel_ids = ["pagerduty-channel"] # replace with valid channel ids
   
   burn_rate_config = [
     {

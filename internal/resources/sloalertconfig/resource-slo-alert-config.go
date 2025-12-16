@@ -97,6 +97,7 @@ func buildSeverityAttribute() schema.Int64Attribute {
 func buildTriggeringAttribute() schema.BoolAttribute {
 	return schema.BoolAttribute{
 		Optional:    true,
+		Computed:    true,
 		Description: SloAlertConfigDescTriggering,
 	}
 }

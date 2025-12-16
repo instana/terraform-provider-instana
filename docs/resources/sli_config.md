@@ -121,8 +121,8 @@ resource "instana_sli_config" "app_availability" {
     application_event_based = {
       application_id = "api-app"
       boundary_scope = "INBOUND"
-      good_event_filter_expression = "call.http.status@na LESS_THAN 500"
-      bad_event_filter_expression = "call.http.status@na GREATER_OR_EQUAL_THAN 500"
+     good_event_filter_expression = "call.erroneous@na EQUALS true"
+     bad_event_filter_expression = "call.erroneous@na EQUALS false"
     }
   }
 }
@@ -176,8 +176,8 @@ resource "instana_sli_config" "website_api_calls" {
     website_event_based = {
       website_id = "spa-website"
       beacon_type = "httpRequest"
-      good_event_filter_expression = "http.status@na LESS_THAN 400"
-      bad_event_filter_expression = "http.status@na GREATER_OR_EQUAL_THAN 400"
+      good_event_filter_expression = "call.erroneous@na EQUALS true"
+      bad_event_filter_expression = "call.erroneous@na EQUALS false"
     }
   }
 }

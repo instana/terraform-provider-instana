@@ -59,7 +59,7 @@ resource "instana_slo_config" "example" {
   name   = "my-slo"
   entity = {
     application = {
-      application_id    = var.application_id
+      application_id    = "Fwx93plkTtKv09MHqT5d6Q" # replace with actual application Id
       boundary_scope    = "ALL"
       include_internal  = false
       include_synthetic = false
@@ -95,9 +95,9 @@ resource "instana_slo_config" "app_latency_basic" {
   name   = "app-latency-basic"
   entity = {
     application = {
-      application_id    = "W-C-smw9REm76gOH_NqICg"
+      application_id    = "Fwx93plkTtKv09MHqT5d6Q" # replace with actual application Id
       boundary_scope    = "ALL"
-      endpoint_id       = var.endpoint_id
+      endpoint_id       = "XKvV8V1KuxP2F1YDxYs_eVmhz4g" # replace with actual end point Id
       include_internal  = false
       include_synthetic = false
     }
@@ -127,9 +127,9 @@ resource "instana_slo_config" "app_with_filter" {
   
   entity = {
     application = {
-      application_id     = var.application_id
+      application_id     = "Fwx93plkTtKv09MHqT5d6Q" # replace with actual application Id
       boundary_scope     = "ALL"
-      filter_expression  = "call.http.status EQUALS 200 AND call.http.method EQUALS 'GET'"
+      filter_expression  = "call.http.status@na EQUALS 200 AND call.http.method@na EQUALS 'GET'"
       include_internal   = true
       include_synthetic  = true
     }
@@ -161,7 +161,7 @@ resource "instana_slo_config" "app_event_latency" {
   
   entity = {
     application = {
-      application_id = var.application_id
+      application_id = "Fwx93plkTtKv09MHqT5d6Q" # replace with actual application Id
       boundary_scope = "ALL"
     }
   }
@@ -189,7 +189,7 @@ resource "instana_slo_config" "app_availability" {
   
   entity = {
     application = {
-      application_id = var.application_id
+      application_id = "Fwx93plkTtKv09MHqT5d6Q" # replace with actual application Id
       boundary_scope = "ALL"
     }
   }
@@ -220,7 +220,7 @@ resource "instana_slo_config" "website_latency" {
   
   entity = {
     website = {
-      website_id  = var.website_id
+      website_id  = "NSQQfMicRkyl5lDAprqNSA" # replace with actual website Id
       beacon_type = "httpRequest"
     }
   }
@@ -250,9 +250,9 @@ resource "instana_slo_config" "website_filtered" {
   
   entity = {
     website = {
-      website_id        = var.website_id
+      website_id        = "NSQQfMicRkyl5lDAprqNSA" # replace with actual website Id
       beacon_type       = "httpRequest"
-      filter_expression = "beacon.page.name CONTAINS 'checkout'"
+      filter_expression = "beacon.page.name@na CONTAINS 'checkout'"
     }
   }
   
@@ -282,7 +282,7 @@ resource "instana_slo_config" "website_traffic" {
   
   entity = {
     website = {
-      website_id  = var.website_id
+      website_id  = "NSQQfMicRkyl5lDAprqNSA" # replace with actual website Id
       beacon_type = "httpRequest"
     }
   }
@@ -314,8 +314,8 @@ resource "instana_slo_config" "synthetic_basic" {
   entity = {
     synthetic = {
       synthetic_test_ids = [
-        "test-id-1",
-        "test-id-2"
+        "Ob5Aa1F9DagsiNzBaCXX",  # replace with actual synthetic test Ids
+        "rXFgndZUj5kDJ2cFbhu1"
       ]
     }
   }
@@ -346,14 +346,14 @@ resource "instana_slo_config" "custom_good_events" {
   
   entity = {
     application = {
-      application_id = var.application_id
+      application_id = "Fwx93plkTtKv09MHqT5d6Q" # replace with actual application Id
       boundary_scope = "ALL"
     }
   }
   
   indicator = {
     custom = {
-      good_event_filter_expression = "call.http.status EQUALS 200"
+      good_event_filter_expression = "call.http.status@na EQUALS 200"
     }
   }
   
@@ -375,15 +375,16 @@ resource "instana_slo_config" "custom_good_bad_events" {
   
   entity = {
     application = {
-      application_id = var.application_id
+      application_id = "Fwx93plkTtKv09MHqT5d6Q" # replace with actual application Id
       boundary_scope = "ALL"
+      filter_expression = "call.http.status@na GREATER_OR_EQUAL_THAN 200 AND call.http.status@na LESS_THAN 400"
     }
   }
   
   indicator = {
     custom = {
-      good_event_filter_expression = "call.http.status GREATER_OR_EQUAL_THAN 200 AND call.http.status LESS_THAN 400"
-      bad_event_filter_expression  = "call.http.status GREATER_OR_EQUAL_THAN 500"
+      good_event_filter_expression = "call.http.status@na GREATER_OR_EQUAL_THAN 200 AND call.http.status@na LESS_THAN 400"
+      bad_event_filter_expression  = "call.http.status@na GREATER_OR_EQUAL_THAN 500"
     }
   }
   
@@ -418,7 +419,7 @@ resource "instana_slo_config" "with_rbac_tags" {
   
   entity = {
     application = {
-      application_id = var.application_id
+      application_id = "Fwx93plkTtKv09MHqT5d6Q" # replace with actual application Id
       boundary_scope = "ALL"
     }
   }
@@ -524,7 +525,7 @@ The `entity` attribute must contain exactly one of the following:
 
 #### Synthetic Entity Attributes
 
-* `synthetic_test_ids` - (Required) A list of synthetic test IDs. Must contain at least one ID
+* `synthetic_test_ids` - (Required) A set of synthetic test IDs. Must contain at least one ID.
 * `filter_expression` - (Optional) Tag filter expression to match events/calls - [Details](#tag-filter-expression-syntax)
 
 ### Indicator Attribute

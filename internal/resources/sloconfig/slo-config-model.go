@@ -61,8 +61,8 @@ type WebsiteEntityModel struct {
 
 // SyntheticEntityModel represents a synthetic entity in the Terraform model
 type SyntheticEntityModel struct {
-	SyntheticTestIDs []types.String `tfsdk:"synthetic_test_ids"`
-	FilterExpression types.String   `tfsdk:"filter_expression"`
+	SyntheticTestIDs types.Set    `tfsdk:"synthetic_test_ids"`
+	FilterExpression types.String `tfsdk:"filter_expression"`
 }
 
 // InfrastructureEntityModel represents an infrastructure entity in the Terraform model

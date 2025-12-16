@@ -282,6 +282,7 @@ func buildGoodEventFilterExpressionAttribute() schema.StringAttribute {
 func buildIncludeInternalAttribute() schema.BoolAttribute {
 	return schema.BoolAttribute{
 		Optional:    true,
+		Computed:    true,
 		Description: SliConfigDescIncludeInternal,
 	}
 }
@@ -290,6 +291,7 @@ func buildIncludeInternalAttribute() schema.BoolAttribute {
 func buildIncludeSyntheticAttribute() schema.BoolAttribute {
 	return schema.BoolAttribute{
 		Optional:    true,
+		Computed:    true,
 		Description: SliConfigDescIncludeSynthetic,
 	}
 }
