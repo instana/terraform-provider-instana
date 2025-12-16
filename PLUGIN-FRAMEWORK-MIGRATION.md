@@ -123,7 +123,7 @@ resource "instana_automation_action" "http_action" {
 
 ## 🔧 Migration Steps
 
-### Recommended Approach: Using Import Blocks (Zero Downtime)
+### Using Import Blocks 
 
 > **Note**: This approach is **not recommended if you are using Terraform modules**. For module-based configurations, use the [Alternative Approach: Using Import CLI Commands](#alternative-approach-using-import-cli-commands-for-module-based-configurations) instead.
 
@@ -152,6 +152,34 @@ cd migration
 # Copy the existing state file to the migration directory
 cp ../backup-state.tfstate ./terraform.tfstate
 ```
+#### Step 3.5: Comment Out Remote Backend (If Used)
+
+If your Terraform configuration uses a remote backend (e.g., S3, Terraform Cloud, etc.), you need to temporarily comment it out to work with the local state file during migration.
+
+```hcl
+# In your main Terraform configuration file (e.g., main.tf or backend.tf)
+# Comment out the backend configuration:
+
+# terraform {
+#   backend "s3" {
+#     bucket = "my-terraform-state"
+#     key    = "instana/terraform.tfstate"
+#     region = "us-east-1"
+#   }
+# }
+```
+
+After commenting out the backend, reinitialize Terraform to use local state:
+
+```bash
+# Reinitialize Terraform to switch to local backend
+terraform init -migrate-state
+
+# Confirm the migration when prompted
+```
+
+**Important:** After the migration is complete and verified, you can uncomment the remote backend configuration and migrate the state back to the remote backend.
+
 
 #### Step 4: Generate Import Blocks from State
 
@@ -241,7 +269,7 @@ provider "instana" {
 
 ```bash
 # Initialize with the new Plugin Framework provider
-terraform init
+terraform init -upgrade
 ```
 
 This will download the new provider version (>= 6.0.0) and create a fresh state.
@@ -380,6 +408,7 @@ terraform {
 - Comment out remote backend to work with local state during migration
 - This ensures we don't accidentally modify the original remote state file
 - Keep the original folder completely untouched as a backup
+- You may need to run the command 'terraform init -migrate-state` to migrate the state to local state
 
 #### Step 3: Generate Import Commands
 
@@ -491,7 +520,7 @@ provider "instana" {
 rm -rf .terraform/
 
 # Initialize with the new Plugin Framework provider
-terraform init
+terraform init -upgrade
 ```
 
 **Expected Output:**
