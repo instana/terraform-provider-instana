@@ -43,17 +43,7 @@ resource "instana_api_token" "example" {
 
  **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
 
-## Migration Guide (v5 to v6)
-
-### Syntax Changes Overview
-
-- All attributes are now top-level attributes (no nested blocks)
-- Boolean attributes now use explicit `true`/`false` values with defaults
-- The `id`, `access_granting_token`, and `internal_id` attributes are computed
-- All permission and scope attributes have default values of `false`
-- Attribute syntax remains the same (key = value), but schema validation is stricter
-
-#### OLD (v5.x) Syntax:
+## Example Usage
 
 ### Basic API Token
 

@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -16,7 +17,6 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/shared"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // NewAlertingChannelResourceHandle creates the resource handle for Alerting Channels
@@ -326,7 +326,8 @@ func NewAlertingChannelResourceHandle() resourcehandle.ResourceHandle[*restapi.A
 						Description: AlertingChannelDescMsTeamsApp,
 						Attributes: map[string]schema.Attribute{
 							AlertingChannelMsTeamsAppFieldAPITokenID: schema.StringAttribute{
-								Required:    true,
+								Optional:    true,
+								Computed:    true,
 								Description: AlertingChannelDescMsTeamsAppAPITokenID,
 							},
 							AlertingChannelMsTeamsAppFieldTeamID: schema.StringAttribute{
