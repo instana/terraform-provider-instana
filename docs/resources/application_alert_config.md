@@ -63,11 +63,11 @@ resource "instana_application_alert_config" "example" {
 resource "instana_application_alert_config" "example" {
   name = "test-alert"
   
-  applications = [{
+  application = [{
     application_id = "app-123"
     inclusive      = true
     
-    services = [{
+    service = [{
       service_id = "svc-456"
       inclusive  = true
     }]
@@ -80,7 +80,7 @@ resource "instana_application_alert_config" "example" {
         aggregation = "P90"
       }
     }
-    thresholds = {
+    threshold = {
       warning = {
         static = {
           value = 5
@@ -126,7 +126,7 @@ resource "instana_application_alert_config" "application_alert_config" {
   alert_channels = {}
   application = [
     {
-      application_id = var.application_id
+      application_id = "eQjat8RMR3-5lb376rV5kA" # Replace with your own value
       inclusive      = true
       service = [
       ]
@@ -136,7 +136,7 @@ resource "instana_application_alert_config" "application_alert_config" {
   description          = "Calls are slower or equal to 5 ms based on latency (90th)."
   evaluation_type      = "PER_AP"
   granularity          = 600000
-  name                 = "Calls are slower than usual"
+  name                 = "Calls are slower than usual" # Replace with your own value
   rules = [
     {
       rule = {
@@ -168,22 +168,22 @@ resource "instana_application_alert_config" "application_alert_config" {
 ```hcl
 resource "instana_application_alert_config" "application_alert_config" {
   alert_channels = {
-    CRITICAL = ["alert_channel_1"]
-    WARNING  = ["alert_channel_2"]
+    CRITICAL = ["alert_channel_1"] # Replace with your own value
+    WARNING  = ["alert_channel_2"] # Replace with your own value
   }
   application = [
     {
-      application_id = var.application_id
+      application_id = "eQjat8RMR3-5lb376rV5kA" # Replace with your own value
       inclusive      = true
       service = [
       ]
     },
   ]
   boundary_scope       = "ALL"
-  description          = "Occurrences of HTTP Status Code 5XX (Server Error) is higher or equal to ."
+  description          = "Occurrences of HTTP Status Code 5XX (Server Error) is higher or equal to ." # Replace with your own value
   evaluation_type      = "PER_AP"
   granularity          = 600000
-  name                 = "AN Smart alert"
+  name                 = "AN Smart alert" # Replace with your own value
   rules = [
     {
       rule = {
@@ -204,7 +204,7 @@ resource "instana_application_alert_config" "application_alert_config" {
       threshold_operator = ">="
     },
   ]
-  tag_filter = "(call.tag:'accessType'@na EQUALS 'test' AND call.metric:'codeAmount'@na EQUALS '1')"
+  tag_filter = "(call.tag:'accessType'@na EQUALS 'test' AND call.metric:'codeAmount'@na EQUALS '1')" # Replace with your own value
   time_threshold = {
     violations_in_sequence = {
       time_window = 600000
@@ -218,13 +218,13 @@ resource "instana_application_alert_config" "application_alert_config" {
 ### Alert with Custom Payload
 
 ```hcl
-resource "instana_application_alert_config" "application_alert_config" {
+resource "instana_application_alert_config" "alert_config_3" {
   alert_channels = {
-    WARNING = ["alert-channel-id"]
+    WARNING = ["d35rlokgvalloa2fnps0"] # Replace with your own value
   }
   application = [
     {
-      application_id = var.application_id
+      application_id = "eQjat8RMR3-5lb376rV5kA" # Replace with your own value
       inclusive      = true
       service = [
       ]
@@ -233,22 +233,21 @@ resource "instana_application_alert_config" "application_alert_config" {
   boundary_scope = "ALL"
   custom_payload_field = [
     {
-      key           = "key"
-      value         = "value"
+      key           = "test" # Replace with your own value
+      value         = "test123" # Replace with your own value
     },
     {
       dynamic_value = {
-        key      = "stage"
-        tag_name = "aws.tag"
+        key      = "stage" # Replace with your own value
+        tag_name = "aws.tag" # Replace with your own value
       }
-      key   = "key"
-      value = "value"
+      key   = "stage" # Replace with your own value
     },
   ]
-  description       = "test-alert-description"
+  description       = "test-alert-description" # Replace with your own value
   evaluation_type   = "PER_AP"
   granularity       = 600000
-  name              = "tf test-alert"
+  name              = "test-alert" # Replace with your own value
   rules = [
     {
       rule = {
@@ -267,7 +266,7 @@ resource "instana_application_alert_config" "application_alert_config" {
       threshold_operator = ">"
     },
   ]
-  tag_filter = "call.type@na EQUALS 'HTTP'"
+  tag_filter = "call.type@na EQUALS 'HTTP'" # Replace with your own value
   time_threshold = {
     violations_in_sequence = {
       time_window = 600000
