@@ -82,13 +82,13 @@ resource "instana_automation_action" "example" {
 
 ```hcl
 resource "instana_automation_action" "hello_world" {
-  name        = "Hello World Script"
-  description = "Simple hello world script"
-  tags        = ["test", "demo"]
+  name        = "Hello World Script" # Replace with your own value
+  description = "Simple hello world script" # Replace with your own value
+  tags        = ["test", "demo"] # Replace with your own value
   
   script = {
     interpreter = "bash"
-    content     = "test-content"
+    content     = "test-content" # Replace with your own value
     timeout     = "10"
   }
 }
@@ -98,32 +98,32 @@ resource "instana_automation_action" "hello_world" {
 
 ```hcl
 resource "instana_automation_action" "restart_service" {
-  name        = "Restart Service"
-  description = "Restart a specified service"
-  tags        = ["operations", "service-management"]
+  name        = "Restart Service" # Replace with your own value
+  description = "Restart a specified service" # Replace with your own value
+  tags        = ["operations", "service-management"] # Replace with your own value
   
   script = {
     interpreter = "bash"
-    content     = "test-content"
+    content     = "test-content" # Replace with your own value
     timeout     = "30"
   }
   
   input_parameter = [{
-    name        = "service_name"
-    label       = "Service Name"
-    description = "Name of the service to restart"
+    name        = "service_name" # Replace with your own value
+    label       = "Service Name" # Replace with your own value
+    description = "Name of the service to restart" # Replace with your own value
     type        = "static"
     required    = true
     hidden      = false
     value       = ""
   }, {
-    name        = "wait_time"
-    label       = "Wait Time (seconds)"
-    description = "Time to wait after restart"
+    name        = "wait_time" # Replace with your own value
+    label       = "Wait Time (seconds)" # Replace with your own value
+    description = "Time to wait after restart" # Replace with your own value
     type        = "static"
     required    = false
     hidden      = false
-    value       = "5"
+    value       = "5" # Replace with your own value
   }]
 }
 ```
@@ -137,7 +137,7 @@ resource "instana_automation_action" "health_check" {
   tags        = ["monitoring", "health"]
   
   http = {
-    host                      = "https://api.example.com/health"
+    host                      = "https://api.example.com/health" # Replace with your own value
     method                    = "GET"
     ignore_certificate_errors = false
     timeout                   = "10"
@@ -149,18 +149,18 @@ resource "instana_automation_action" "health_check" {
 
 ```hcl
 resource "instana_automation_action" "basic_auth_call" {
-  name        = "API with Basic Auth"
-  description = "Call API with basic authentication"
-  tags        = ["api", "legacy"]
+  name        = "API with Basic Auth" # Replace with your own value
+  description = "Call API with basic authentication" # Replace with your own value
+  tags        = ["api", "legacy"] # Replace with your own value
   
   http = {
-    host   = "https://legacy-api.example.com/endpoint"
+    host   = "https://legacy-api.example.com/endpoint" # Replace with your own value
     method = "GET"
     
     auth = {
       basic_auth = {
-        username = "@@username@@"
-        password = "@@password@@"
+        username = "@@username@@" # Replace with your own value
+        password = "@@password@@" # Replace with your own value
       }
     }
     
@@ -168,17 +168,17 @@ resource "instana_automation_action" "basic_auth_call" {
   }
   
   input_parameter = [{
-    name        = "username"
-    label       = "Username"
-    description = "API username"
+    name        = "username" # Replace with your own value
+    label       = "Username" # Replace with your own value
+    description = "API username" # Replace with your own value
     type        = "static"
     required    = true
     hidden      = false
     value       = ""
   }, {
-    name        = "password"
-    label       = "Password"
-    description = "API password"
+    name        = "password" # Replace with your own value
+    label       = "Password" # Replace with your own value
+    description = "API password" # Replace with your own value
     type        = "vault"
     required    = true
     hidden      = true
@@ -191,11 +191,11 @@ resource "instana_automation_action" "basic_auth_call" {
 
 ```hcl
 resource "instana_automation_action" "automation_action_manual" {
-  description     = " Detects a rapid increase in the values of the erroneous call rate metric"
+  description     = " Detects a rapid increase in the values of the erroneous call rate metric" # Replace with your own value
   manual = {
-    content = "content"
+    content = "content" # Replace with your own value
   }
-  name   = "erroneous call rate"
+  name   = "erroneous call rate" # Replace with your own value
   tags   = ["tag"]
 }
 ```
@@ -204,16 +204,16 @@ resource "instana_automation_action" "automation_action_manual" {
 
 ```hcl
 resource "instana_automation_action" "Jira_task" {
-  description     = "Description"
+  description     = "Description"               # Replace with your own value
   jira = {
-    description = "This is a task in Jira"
-    issue_type  = "Bug"
+    description = "This is a task in Jira"      # Replace with your own value
+    issue_type  = "Bug"                         # Replace with your own value
     operation   = "open"
-    project     = "Project"
-    title       = "Title"
+    project     = "Project"                     # Replace with your own value
+    title       = "Title"                       # Replace with your own value
   }
   manual = null
-  name   = "Jira-test"
+  name   = "Jira-test" # Replace with your own value
 }
 ```
 
@@ -221,26 +221,26 @@ resource "instana_automation_action" "Jira_task" {
 
 ```hcl
 resource "instana_automation_action" "create_github_issue" {
-  name        = "Create GitHub Issue"
-  description = "Create GitHub issue for tracking"
+  name        = "Create GitHub Issue" # Replace with your own value
+  description = "Create GitHub issue for tracking" # Replace with your own value
   tags        = ["github", "issue-tracking"]
   github = {
-    owner      = "myorg"
-    repo       = "infrastructure"
+    owner      = "myorg"                        # Replace with your own value
+    repo       = "infrastructure"               # Replace with your own value
     operation  = "create"
     title      = "[Instana] @@alert_name@@"
     body       = "## Alert Details\n\n@@alert_details@@\n\n## Timestamp\n@@timestamp@@"
     assignees  = "@@assignees@@"
-    labels     = "instana,automated,@@severity@@"
+    labels     = "instana,automated,@@severity@@" # Replace with your own value
   }
   input_parameter = [{
-    name        = "alert_name"
-    label       = "Alert Name"
-    description = "Name of the alert"
+    name        = "alert_name" # Replace with your own value
+    label       = "Alert Name" # Replace with your own value
+    description = "Name of the alert" # Replace with your own value
     type        = "dynamic"
     required    = true
     hidden      = false
-    value       = ""
+    value       = "" # Replace with your own value
   }]
 }
 ```
@@ -248,24 +248,24 @@ resource "instana_automation_action" "create_github_issue" {
 ### GitLab Integration
 
 ```hcl
-esource "instana_automation_action" "create_gitlab_issue" {
-  name        = "Create GitLab Issue"
-  description = "Create GitLab issue for incident tracking"
+resource "instana_automation_action" "create_gitlab_issue" {
+  name        = "Create GitLab Issue" # Replace with your own value
+  description = "Create GitLab issue for incident tracking" # Replace with your own value
   tags        = ["gitlab", "issue-tracking"]
   
   gitlab = {
-    project_id  = "12345"
+    project_id  = "12345"                       # Replace with your own value
     operation   = "create"
-    title       = "[Instana Alert]"
-    description = "Alert triggered"
+    title       = "[Instana Alert]"             # Replace with your own value
+    description = "Alert triggered"             # Replace with your own value
     labels      = "instana,automated"
     issue_type  = "incident"
   }
   
   input_parameter = [{
-    name        = "alert_name"
-    label       = "Alert Name"
-    description = "Name of the alert"
+    name        = "alert_name" # Replace with your own value
+    label       = "Alert Name" # Replace with your own value
+    description = "Name of the alert" # Replace with your own value
     type        = "dynamic"
     required    = true
     hidden      = false
@@ -278,18 +278,18 @@ esource "instana_automation_action" "create_gitlab_issue" {
 
 ```hcl
 resource "instana_automation_action" "runbook_link" {
-  name        = "Runbook Reference"
-  description = "Link to relevant runbook"
+  name        = "Runbook Reference" # Replace with your own value
+  description = "Link to relevant runbook" # Replace with your own value
   tags        = ["documentation", "runbook"]
   
   doc_link = {
-    url = "https://wiki.example.com/runbooks/@@runbook_id@@"
+    url = "https://wiki.example.com/runbooks/@@runbook_id@@" # Replace with your own value
   }
   
   input_parameter = [{
-    name        = "runbook_id"
-    label       = "Runbook ID"
-    description = "ID of the relevant runbook"
+    name        = "runbook_id" # Replace with your own value
+    label       = "Runbook ID" # Replace with your own value
+    description = "ID of the relevant runbook" # Replace with your own value
     type        = "dynamic"
     required    = true
     hidden      = false
@@ -301,29 +301,29 @@ resource "instana_automation_action" "runbook_link" {
 ### Ansible Integration
 
 ```hcl
-esource "instana_automation_action" "tf_b_ansible_1" {
+resource "instana_automation_action" "tf_b_ansible_1" {
   ansible = {
-    host_id            = "<host_id>"
-    playbook_file_name = "<file_name>"
-    playbook_id        = "<id>"
-    url                = "<url>"
+    host_id            = "<host_id>"            # Replace with your own value
+    playbook_file_name = "<file_name>"          # Replace with your own value
+    playbook_id        = "<id>"                 # Replace with your own value
+    url                = "<url>"                # Replace with your own value
   }
   description = "Test"
   input_parameter = [
     {
-      description = "test"
+      description = "test" # Replace with your own value
       hidden      = false
       label       = "Label"
-      name        = "Name"
+      name        = "Name" # Replace with your own value
       required    = false
       type        = "static"
       value       = ""
     },
     {
-      description = ""
+      description = "" # Replace with your own value
       hidden      = false
-      label       = "Label"
-      name        = "Name"
+      label       = "Label" # Replace with your own value
+      name        = "Name" # Replace with your own value
       required    = false
       type        = "static"
       value       = ""

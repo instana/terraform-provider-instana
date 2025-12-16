@@ -83,9 +83,9 @@ resource "instana_application_config" "application_perspective_config" {
     },
   ]
   boundary_scope = "INBOUND"
-  label          = "Label"
-  scope          = "INCLUDE_NO_DOWNSTREAM"
-  tag_filter     = "((call.type@na EQUALS 'HTTP' AND service.name@dest EQUALS 'cart' AND kubernetes.namespace@dest EQUALS 'robot-shop') OR service.name@dest EQUALS 'catalogue')"
+  label          = "Label" # Replace with your own value
+  scope          = "INCLUDE_NO_DOWNSTREAM" # Replace with your own value
+  tag_filter     = "((call.type@na EQUALS 'HTTP' AND service.name@dest EQUALS 'cart' AND kubernetes.namespace@dest EQUALS 'robot-shop') OR service.name@dest EQUALS 'catalogue')" # Replace with your own value
 }
 ```
 
@@ -101,9 +101,9 @@ resource "instana_application_config" "tf_b_application_perspective_config_8" {
     },
   ]
   boundary_scope = "ALL"
-  label          = "Label"
-  scope          = "INCLUDE_IMMEDIATE_DOWNSTREAM_DATABASE_AND_MESSAGING"
-  tag_filter     = "(kubernetes.deployment.namespace@dest EQUALS 'release-pink' AND container.image.name@dest EQUALS 'containers.instana.io/synthetic/synthetic-playback-browserscript:1.296.0')"
+  label          = "Label" # Replace with your own value
+  scope          = "INCLUDE_IMMEDIATE_DOWNSTREAM_DATABASE_AND_MESSAGING" # Replace with your own value
+  tag_filter     = "(kubernetes.deployment.namespace@dest EQUALS 'release-pink' AND container.image.name@dest EQUALS 'containers.instana.io/synthetic/synthetic-playback-browserscript:1.296.0')" # Replace with your own value
 }
 ```
 
