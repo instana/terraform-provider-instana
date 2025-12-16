@@ -58,9 +58,10 @@ resource "instana_global_application_alert_config" "example" {
 ```hcl
 resource "instana_global_application_alert_config" "example" {
   name = "Global Alert"
-  
+  description          = "slowness_basic"
+  evaluation_type      = "PER_AP"
   application = [ {
-    application_id = "app-id"
+    application_id = "mS5QiJWxRneixWGYN9DGEA" # replace with valid ids
     inclusive = true
   }]
   boundary_scope       = "INBOUND"
@@ -95,7 +96,6 @@ resource "instana_global_application_alert_config" "example" {
       value = "production"
     }
   ]
-  # rest of the configuration
 }
 ```
 
@@ -119,24 +119,26 @@ Monitor application latency globally:
 ```hcl
 resource "instana_global_application_alert_config" "slowness_basic" {
   alert_channels = {
-    CRITICAL = ["critical_email_channel"]
-    WARNING  = ["warning_email_channel"]
+    CRITICAL = ["critical_email_channel"] # replace with valid ids
+    WARNING  = ["warning_email_channel"] # replace with valid ids
   }
   application = [
     {
-      application_id = "application-id"
-      inclusive      = true
+      application_id = "Lj1iTqk9SMK6RdCdUzr_Og" # replace with valid ids
+      inclusive      = false
       service = [
         {
-      service_id = "payment-service-id"
-      inclusive  = true
-      endpoint = [{
-        endpoint_id = "checkout-endpoint-id"
-        inclusive   = true
-      }]
-       }
+          endpoint = [
+            {
+              endpoint_id = "Jb9MEqUl-8KC6M8BoFe0qVH0Gds" # replace with valid ids
+              inclusive   = true
+            },
+          ]
+          inclusive  = false
+          service_id = "44969c8d0ddcbad8b1c4aa4efbeab963f9485429" # replace with valid ids
+        },
       ]
-    }
+    },
   ]
   boundary_scope       = "INBOUND"
   description          = "slowness_basic"

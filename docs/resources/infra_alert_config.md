@@ -67,6 +67,8 @@ resource "instana_infra_alert_config" "example" {
 ```hcl
 resource "instana_infra_alert_config" "example" {
   name = "test-alert"
+  description = "Description"
+
   evaluation_type      = "PER_ENTITY"
   granularity          = 600000
   alert_channels = {
@@ -124,6 +126,7 @@ resource "instana_infra_alert_config" "example" {
 ### CPU Alert with Static Thresholds
 
 ```hcl
+
 resource "instana_infra_alert_config" "cpu_alert" {
   name = "High CPU Usage Alert"
   description = "Alert when CPU usage exceeds thresholds"
