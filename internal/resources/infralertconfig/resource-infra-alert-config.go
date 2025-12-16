@@ -556,27 +556,7 @@ func (r *infraAlertConfigResource) mapModelTimeThresholdToAPI(timeThresholdModel
 
 // mapModelCustomPayloadFieldsToAPI converts model custom payload fields to API representation
 func (r *infraAlertConfigResource) mapModelCustomPayloadFieldsToAPI(ctx context.Context, customPayloadField types.List) ([]restapi.CustomPayloadField[any], diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	if customPayloadField.IsNull() || customPayloadField.IsUnknown() {
-		return nil, diags
-	}
-
-	var customPayloadFieldModels []InfraCustomPayloadFieldModel
-	diags.Append(customPayloadField.ElementsAs(ctx, &customPayloadFieldModels, false)...)
-	if diags.HasError() {
-		return nil, diags
-	}
-
-	customerPayloadFields := make([]restapi.CustomPayloadField[any], 0, len(customPayloadFieldModels))
-	for _, field := range customPayloadFieldModels {
-		customerPayloadFields = append(customerPayloadFields, restapi.CustomPayloadField[any]{
-			Key:   field.Key.ValueString(),
-			Value: field.Value.ValueString(),
-		})
-	}
-
-	return customerPayloadFields, diags
+	return shared.MapCustomPayloadFieldsToAPIObject(ctx, customPayloadField)
 }
 
 // mapModelRulesToAPI converts model rules to API representation
