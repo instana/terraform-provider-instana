@@ -44,22 +44,21 @@ resource "instana_rbac_group" "example" {
 
 #### NEW (v6.x) Syntax:
 ```hcl
-resource "instana_rbac_group" "example" {
-  name = "DevOps Team"
+resource "instana_rbac_group" "dev_team" {
+  name = "Development Team"
 
   permission_set = {
-    application_ids = ["app1", "app2"]
-    permissions = ["CAN_CONFIGURE_APPLICATIONS"]
+    permissions = [
+      "CAN_CONFIGURE_APPLICATIONS",
+      "CAN_VIEW_TRACE_DETAILS",
+      "CAN_VIEW_LOGS"
+    ]
   }
-  
+
   member = [
     {
-      user_id = "user1"
-      email = "user1@example.com"
-    },
-    {
-      user_id = "user2"
-      email = "user2@example.com"
+      user_id = "68ca71ee952dd200010ecc04" # replace with valid user_id
+      email = "abhishek.kumar144@ibm.com" # replace with valid user email
     }
   ]
 }
@@ -73,69 +72,11 @@ resource "instana_rbac_group" "example" {
 
 ## Example Usage
 
-### Basic Group with Application Permissions
-
-```hcl
-resource "instana_rbac_group" "app_team" {
-  name = "Application Team"
-
-  permission_set = {
-    application_ids = ["app-id-1", "app-id-2"]
-    permissions = [
-      "CAN_CONFIGURE_APPLICATIONS",
-      "CAN_VIEW_TRACE_DETAILS"
-    ]
-  }
-}
-```
-
-### Group with Multiple Scope Types
-
-```hcl
-resource "instana_rbac_group" "platform_team" {
-  name = "Platform Engineering"
-
-  permission_set = {
-    application_ids = ["app-id-1", "app-id-2"]
-    kubernetes_cluster_uuids = ["k8s-cluster-1", "k8s-cluster-2"]
-    kubernetes_namespaces_uuids = ["ns-uuid-1", "ns-uuid-2"]
-    mobile_app_ids = ["mobile-app-1"]
-    website_ids = ["website-1", "website-2"]
-    
-    permissions = [
-      "CAN_CONFIGURE_APPLICATIONS",
-      "CAN_CONFIGURE_AGENTS",
-      "CAN_CONFIGURE_INTEGRATIONS"
-    ]
-  }
-}
-```
-
-### Group with Infrastructure DFQ Filter
-
-```hcl
-resource "instana_rbac_group" "infra_team" {
-  name = "Infrastructure Team"
-
-  permission_set = {
-    infra_dfq_filter = "entity.zone:us-east-1"
-    permissions = [
-      "CAN_CONFIGURE_AGENTS",
-      "CAN_INSTALL_NEW_AGENTS",
-      "ACCESS_INFRASTRUCTURE_ANALYZE"
-    ]
-  }
-}
-```
-
-### Group with Members
-
 ```hcl
 resource "instana_rbac_group" "dev_team" {
   name = "Development Team"
 
   permission_set = {
-    application_ids = ["app-prod-1", "app-prod-2"]
     permissions = [
       "CAN_CONFIGURE_APPLICATIONS",
       "CAN_VIEW_TRACE_DETAILS",
@@ -145,344 +86,10 @@ resource "instana_rbac_group" "dev_team" {
 
   member = [
     {
-      user_id = "user-id-1"
-      email = "developer1@example.com"
-    },
-    {
-      user_id = "user-id-2"
-      email = "developer2@example.com"
-    },
-    {
-      user_id = "user-id-3"
-      email = "developer3@example.com"
+      user_id = "68ca71ee952dd200010ecc04" # replace with valid user_id
+      email = "abhishek.kumar144@ibm.com" # replace with valid user email
     }
   ]
-}
-```
-
-### Read-Only Group
-
-```hcl
-resource "instana_rbac_group" "readonly_team" {
-  name = "Read-Only Users"
-
-  permission_set = {
-    application_ids = ["app-1", "app-2", "app-3"]
-    permissions = [
-      "CAN_VIEW_TRACE_DETAILS",
-      "CAN_VIEW_LOGS",
-      "CAN_VIEW_AUDIT_LOG"
-    ]
-  }
-}
-```
-
-### Security Team with Comprehensive Permissions
-
-```hcl
-resource "instana_rbac_group" "security_team" {
-  name = "Security Team"
-
-  permission_set = {
-    permissions = [
-      "CAN_VIEW_AUDIT_LOG",
-      "CAN_CONFIGURE_AUTHENTICATION_METHODS",
-      "CAN_CONFIGURE_API_TOKENS",
-      "CAN_CONFIGURE_USERS",
-      "CAN_CONFIGURE_TEAMS",
-      "CAN_VIEW_ACCOUNT_AND_BILLING_INFORMATION"
-    ]
-  }
-
-  member = [
-    {
-      user_id = "security-lead-id"
-      email = "security.lead@example.com"
-    },
-    {
-      user_id = "security-analyst-id"
-      email = "security.analyst@example.com"
-    }
-  ]
-}
-```
-
-### SRE Team with Alert Configuration
-
-```hcl
-resource "instana_rbac_group" "sre_team" {
-  name = "Site Reliability Engineering"
-
-  permission_set = {
-    application_ids = ["critical-app-1", "critical-app-2"]
-    kubernetes_cluster_uuids = ["prod-k8s-cluster"]
-    
-    permissions = [
-      "CAN_CONFIGURE_APPLICATIONS",
-      "CAN_CONFIGURE_EVENTS_AND_ALERTS",
-      "CAN_CONFIGURE_APPLICATION_SMART_ALERTS",
-      "CAN_CONFIGURE_GLOBAL_APPLICATION_SMART_ALERTS",
-      "CAN_CONFIGURE_MAINTENANCE_WINDOWS",
-      "CAN_INVOKE_ALERT_CHANNEL",
-      "CAN_MANUALLY_CLOSE_ISSUE"
-    ]
-  }
-}
-```
-
-### Monitoring Team with Dashboard Access
-
-```hcl
-resource "instana_rbac_group" "monitoring_team" {
-  name = "Monitoring Team"
-
-  permission_set = {
-    application_ids = ["app-1", "app-2"]
-    website_ids = ["website-1"]
-    
-    permissions = [
-      "CAN_VIEW_TRACE_DETAILS",
-      "CAN_VIEW_LOGS",
-      "CAN_EDIT_ALL_ACCESSIBLE_CUSTOM_DASHBOARDS",
-      "CAN_CREATE_PUBLIC_CUSTOM_DASHBOARDS"
-    ]
-  }
-}
-```
-
-### Kubernetes Operations Team
-
-```hcl
-resource "instana_rbac_group" "k8s_ops" {
-  name = "Kubernetes Operations"
-
-  permission_set = {
-    kubernetes_cluster_uuids = [
-      "prod-cluster-uuid",
-      "staging-cluster-uuid"
-    ]
-    kubernetes_namespaces_uuids = [
-      "prod-ns-1-uuid",
-      "prod-ns-2-uuid",
-      "staging-ns-1-uuid"
-    ]
-    
-    permissions = [
-      "CAN_CONFIGURE_AGENTS",
-      "CAN_INSTALL_NEW_AGENTS",
-      "ACCESS_INFRASTRUCTURE_ANALYZE"
-    ]
-  }
-}
-```
-
-### Synthetic Monitoring Team
-
-```hcl
-resource "instana_rbac_group" "synthetic_team" {
-  name = "Synthetic Monitoring Team"
-
-  permission_set = {
-    permissions = [
-      "CAN_VIEW_SYNTHETIC_TESTS",
-      "CAN_CONFIGURE_SYNTHETIC_TESTS",
-      "CAN_VIEW_SYNTHETIC_LOCATIONS",
-      "CAN_CONFIGURE_SYNTHETIC_LOCATIONS",
-      "CAN_USE_SYNTHETIC_CREDENTIALS",
-      "CAN_CONFIGURE_SYNTHETIC_CREDENTIALS",
-      "CAN_VIEW_SYNTHETIC_TEST_RESULTS",
-      "CAN_CONFIGURE_GLOBAL_SYNTHETIC_SMART_ALERTS"
-    ]
-  }
-}
-```
-
-### Mobile App Monitoring Team
-
-```hcl
-resource "instana_rbac_group" "mobile_team" {
-  name = "Mobile App Team"
-
-  permission_set = {
-    mobile_app_ids = ["ios-app-1", "android-app-1"]
-    
-    permissions = [
-      "CAN_CONFIGURE_MOBILE_APP_MONITORING",
-      "CAN_CONFIGURE_MOBILE_APP_SMART_ALERTS",
-      "CAN_CONFIGURE_EUM_APPLICATIONS"
-    ]
-  }
-}
-```
-
-### Automation Team
-
-```hcl
-resource "instana_rbac_group" "automation_team" {
-  name = "Automation Team"
-
-  permission_set = {
-    permissions = [
-      "CAN_RUN_AUTOMATION_ACTIONS",
-      "CAN_CONFIGURE_AUTOMATION_ACTIONS",
-      "CAN_CONFIGURE_AUTOMATION_POLICIES",
-      "CAN_DELETE_AUTOMATION_ACTION_HISTORY"
-    ]
-  }
-}
-```
-
-### Log Management Team
-
-```hcl
-resource "instana_rbac_group" "log_team" {
-  name = "Log Management Team"
-
-  permission_set = {
-    permissions = [
-      "CAN_VIEW_LOGS",
-      "CAN_CONFIGURE_LOG_MANAGEMENT",
-      "CAN_CONFIGURE_LOG_RETENTION_PERIOD",
-      "CAN_VIEW_LOG_VOLUME",
-      "CAN_DELETE_LOGS",
-      "CAN_CONFIGURE_GLOBAL_LOG_SMART_ALERTS"
-    ]
-  }
-}
-```
-
-### Multi-Environment Setup
-
-```hcl
-locals {
-  environments = {
-    production = {
-      app_ids = ["prod-app-1", "prod-app-2"]
-      permissions = [
-        "CAN_VIEW_TRACE_DETAILS",
-        "CAN_VIEW_LOGS",
-        "CAN_CONFIGURE_EVENTS_AND_ALERTS"
-      ]
-    }
-    staging = {
-      app_ids = ["staging-app-1", "staging-app-2"]
-      permissions = [
-        "CAN_CONFIGURE_APPLICATIONS",
-        "CAN_VIEW_TRACE_DETAILS",
-        "CAN_VIEW_LOGS"
-      ]
-    }
-    development = {
-      app_ids = ["dev-app-1", "dev-app-2"]
-      permissions = [
-        "CAN_CONFIGURE_APPLICATIONS",
-        "CAN_CONFIGURE_AGENTS",
-        "CAN_VIEW_TRACE_DETAILS"
-      ]
-    }
-  }
-}
-
-resource "instana_rbac_group" "env_teams" {
-  for_each = local.environments
-
-  name = "${each.key} Team"
-
-  permission_set = {
-    application_ids = each.value.app_ids
-    permissions = each.value.permissions
-  }
-}
-```
-
-### Admin Group with Full Permissions
-
-```hcl
-resource "instana_rbac_group" "admins" {
-  name = "Administrators"
-
-  permission_set = {
-    permissions = [
-      "CAN_CONFIGURE_APPLICATIONS",
-      "CAN_CONFIGURE_EUM_APPLICATIONS",
-      "CAN_CONFIGURE_AGENTS",
-      "CAN_VIEW_TRACE_DETAILS",
-      "CAN_VIEW_LOGS",
-      "CAN_CONFIGURE_SESSION_SETTINGS",
-      "CAN_CONFIGURE_INTEGRATIONS",
-      "CAN_CONFIGURE_GLOBAL_APPLICATION_SMART_ALERTS",
-      "CAN_CONFIGURE_GLOBAL_SYNTHETIC_SMART_ALERTS",
-      "CAN_CONFIGURE_GLOBAL_INFRA_SMART_ALERTS",
-      "CAN_CONFIGURE_GLOBAL_LOG_SMART_ALERTS",
-      "CAN_CONFIGURE_GLOBAL_ALERT_PAYLOAD",
-      "CAN_CONFIGURE_MOBILE_APP_MONITORING",
-      "CAN_CONFIGURE_API_TOKENS",
-      "CAN_CONFIGURE_SERVICE_LEVEL_INDICATORS",
-      "CAN_CONFIGURE_AUTHENTICATION_METHODS",
-      "CAN_CONFIGURE_RELEASES",
-      "CAN_VIEW_AUDIT_LOG",
-      "CAN_CONFIGURE_EVENTS_AND_ALERTS",
-      "CAN_CONFIGURE_MAINTENANCE_WINDOWS",
-      "CAN_CONFIGURE_APPLICATION_SMART_ALERTS",
-      "CAN_CONFIGURE_WEBSITE_SMART_ALERTS",
-      "CAN_CONFIGURE_MOBILE_APP_SMART_ALERTS",
-      "CAN_CONFIGURE_AGENT_RUN_MODE",
-      "CAN_CONFIGURE_SERVICE_MAPPING",
-      "CAN_EDIT_ALL_ACCESSIBLE_CUSTOM_DASHBOARDS",
-      "CAN_CONFIGURE_USERS",
-      "CAN_INSTALL_NEW_AGENTS",
-      "CAN_CONFIGURE_TEAMS",
-      "CAN_CREATE_PUBLIC_CUSTOM_DASHBOARDS",
-      "CAN_CONFIGURE_LOG_MANAGEMENT",
-      "CAN_VIEW_ACCOUNT_AND_BILLING_INFORMATION"
-    ]
-  }
-
-  member = [
-    {
-      user_id = "admin-1-id"
-      email = "admin1@example.com"
-    },
-    {
-      user_id = "admin-2-id"
-      email = "admin2@example.com"
-    }
-  ]
-}
-```
-
-### Group with Complex Infrastructure Filter
-
-```hcl
-resource "instana_rbac_group" "regional_infra" {
-  name = "US East Infrastructure Team"
-
-  permission_set = {
-    infra_dfq_filter = "entity.zone:us-east-1 AND entity.type:host"
-    permissions = [
-      "CAN_CONFIGURE_AGENTS",
-      "CAN_INSTALL_NEW_AGENTS",
-      "ACCESS_INFRASTRUCTURE_ANALYZE",
-      "CAN_CONFIGURE_AGENT_RUN_MODE"
-    ]
-  }
-}
-```
-
-### Business Operations Team
-
-```hcl
-resource "instana_rbac_group" "bizops_team" {
-  name = "Business Operations"
-
-  permission_set = {
-    permissions = [
-      "CAN_VIEW_BUSINESS_PROCESS_DETAILS",
-      "CAN_VIEW_BIZOPS_ALERTS",
-      "CAN_CONFIGURE_BIZOPS",
-      "CAN_CONFIGURE_SERVICE_LEVEL_INDICATORS"
-    ]
-  }
 }
 ```
 
