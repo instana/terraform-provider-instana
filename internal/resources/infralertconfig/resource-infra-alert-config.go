@@ -53,7 +53,7 @@ func buildInfraAlertConfigSchema() schema.Schema {
 			},
 			InfraAlertConfigFieldDescription: schema.StringAttribute{
 				Description: InfraAlertConfigDescDescription,
-				Optional:    true,
+				Required:    true,
 			},
 			InfraAlertConfigFieldTagFilter: schema.StringAttribute{
 				Description: InfraAlertConfigDescTagFilter,
