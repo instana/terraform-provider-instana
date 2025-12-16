@@ -20,10 +20,10 @@ resource "instana_rbac_role" "developer_role" {
 
   member = [
     {
-      user_id = "user-id-1"
+      user_id = "user-id-1" # replace with actual user-id
     },
     {
-      user_id = "user-id-2"
+      user_id = "user-id-2" # replace with actual user-id
     }
   ]
 }
@@ -43,7 +43,7 @@ resource "instana_rbac_role" "readonly_role" {
 
   member = [
     {
-      user_id = "viewer-1"
+      user_id = "viewer-1" # replace with actual user-id
     }
   ]
 }
@@ -70,7 +70,7 @@ resource "instana_rbac_role" "admin_role" {
     "CAN_CONFIGURE_GLOBAL_ALERT_PAYLOAD",
     "CAN_CONFIGURE_MOBILE_APP_MONITORING",
     "CAN_CONFIGURE_API_TOKENS",
-    "CAN_CONFIGURE_SERVICE_LEVEL_INDICATORS",
+    "CAN_CONFIGURE_SERVICE_LEVELS",
     "CAN_CONFIGURE_AUTHENTICATION_METHODS",
     "CAN_CONFIGURE_RELEASES",
     "CAN_VIEW_AUDIT_LOG",
@@ -92,7 +92,7 @@ resource "instana_rbac_role" "admin_role" {
 
   member = [
     {
-      user_id = "admin-1"
+      user_id = "admin-1" # replace with actual user-id
     }
   ]
 }
@@ -121,10 +121,10 @@ resource "instana_rbac_role" "sre_role" {
 
   member = [
     {
-      user_id = "sre-1"
+      user_id = "sre-1" # replace with actual user-id
     },
     {
-      user_id = "sre-2"
+      user_id = "sre-2" # replace with actual user-id
     }
   ]
 }
@@ -148,7 +148,7 @@ resource "instana_rbac_role" "security_role" {
 
   member = [
     {
-      user_id = "security-lead"
+      user_id = "security-lead" # replace with actual user-id
     }
   ]
 }
