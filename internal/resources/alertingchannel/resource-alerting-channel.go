@@ -348,7 +348,8 @@ func NewAlertingChannelResourceHandle() resourcehandle.ResourceHandle[*restapi.A
 								Description: AlertingChannelDescMsTeamsAppChannelName,
 							},
 							AlertingChannelMsTeamsAppFieldInstanaURL: schema.StringAttribute{
-								Required:    true,
+								Optional:    true,
+								Computed: true,
 								Description: AlertingChannelDescMsTeamsAppInstanaURL,
 							},
 							AlertingChannelMsTeamsAppFieldServiceURL: schema.StringAttribute{

@@ -83,7 +83,7 @@ resource "instana_alerting_channel" "google_chat_basic" {
   name = "google-chat-alerts"
   
   google_chat = {
-    webhook_url = "https://chat.googleapis.com/v1/spaces/AAAA/messages?key=YOUR_KEY&token=YOUR_TOKEN"
+    webhook_url = "https://chat.googleapis.com/v1/spaces/AAAA/messages?key=YOUR_KEY&token=YOUR_TOKEN" # Replace with your own value
   }
 }
 ```
@@ -96,7 +96,7 @@ resource "instana_alerting_channel" "office365_basic" {
   name = "office365-alerts"
   
   office_365 = {
-    webhook_url = "https://outlook.office.com/webhook/YOUR_WEBHOOK_ID"
+    webhook_url = "https://outlook.office.com/webhook/a1b2c3d4-e5f6-7890-abcd-ef1234567890@tenant.onmicrosoft.com/IncomingWebhook/xyz123abc456/def789ghi012" # Replace with your own value
   }
 }
 ```
@@ -109,7 +109,7 @@ resource "instana_alerting_channel" "opsgenie_eu" {
   name = "opsgenie-eu-alerts"
   
   ops_genie = {
-    api_key = var.opsgenie_api_key
+    api_key = "a1b2c3d4-e5f6-7890-abcd" # Replace with your own value
     tags    = ["instana", "production"]
     region  = "EU"
   }
@@ -122,7 +122,7 @@ resource "instana_alerting_channel" "opsgenie_detailed" {
   name = "opsgenie-detailed-alerts"
   
   ops_genie = {
-    api_key = var.opsgenie_api_key
+    api_key = "f9e8d7c6-b5a4-3210-9876" # Replace with your own value
     tags = [
       "environment:production",
       "team:platform",
@@ -142,7 +142,7 @@ resource "instana_alerting_channel" "pagerduty_basic" {
   name = "pagerduty-alerts"
   
   pager_duty = {
-    service_integration_key = var.pagerduty_integration_key
+    service_integration_key = "a1b2c3d4e5f67890abcde" # Replace with your own value
   }
 }
 ```
@@ -155,7 +155,7 @@ resource "instana_alerting_channel" "pagerduty_basic" {
 resource "instana_alerting_channel" "slack_channel" {
   name                    = "slack alert"
   slack = {
-    webhook_url = "https://hooks.slack.com/services/XXXX"
+    webhook_url = "https://hooks.slack.com/services/T01234567/B01234567/abcdefghijklmnopqrstuvwx" # Replace with your own value
   }
 }
 ```
@@ -166,8 +166,8 @@ resource "instana_alerting_channel" "slack_custom_icon" {
   name = "slack-custom-alerts"
   
   slack = {
-    webhook_url = "https://hooks.slack.com/services/XXX"
-    icon_url    = "https://example.com/instana-icon.png"
+    webhook_url = "https://hooks.slack.com/services/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" # Replace with your own value
+    icon_url    = "https://example.com/instana-icon.png" # Replace with your own value
   }
 }
 ```
@@ -178,8 +178,8 @@ resource "instana_alerting_channel" "slack_specific_channel" {
   name = "slack-production-alerts"
   
   slack = {
-    webhook_url = "https://hooks.slack.com/services/XXX"
-    icon_url    = "https://example.com/alert-icon.png"
+    webhook_url = "https://hooks.slack.com/services/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" # Replace with your own value
+    icon_url    = "https://example.com/alert-icon.png" # Replace with your own value
     channel     = "#production-alerts"
   }
 }
@@ -193,8 +193,8 @@ resource "instana_alerting_channel" "splunk_basic" {
   name = "splunk-alerts"
   
   splunk = {
-    url   = "https://splunk.example.com:8088/services/collector"
-    token = var.splunk_hec_token
+    url   = "https://splunk.example.com:8088/services/collector" # Replace with your own value
+    token = "a1b2c3d4-e5f6-7890-abcd" # Replace with your own value
   }
 }
 ```
@@ -207,8 +207,8 @@ resource "instana_alerting_channel" "victorops_basic" {
   name = "victorops-alerts"
   
   victor_ops = {
-    api_key     = var.victorops_api_key
-    routing_key = "instana-alerts"
+    api_key     = "f9e8d7c6-b5a4-3210-9876-543210fedcba" # Replace with your own value
+    routing_key = "instana-alerts" # Replace with your own value
   }
 }
 ```
@@ -219,7 +219,7 @@ resource "instana_alerting_channel" "victorops_platform_team" {
   name = "victorops-platform-team"
   
   victor_ops = {
-    api_key     = var.victorops_api_key
+    api_key     = "12345678-90ab-cdef-1234-567890abcdef" # Replace with your own value
     routing_key = "platform-team"
   }
 }
@@ -228,7 +228,7 @@ resource "instana_alerting_channel" "victorops_database_team" {
   name = "victorops-database-team"
   
   victor_ops = {
-    api_key     = var.victorops_api_key
+    api_key     = "abcdef12-3456-7890-abcd-ef1234567890" # Replace with your own value
     routing_key = "database-team"
   }
 }
@@ -242,7 +242,7 @@ resource "instana_alerting_channel" "webhook_channel" {
   name                    = "webhook-channel"
   webhook = {
     http_headers = {}
-    webhook_urls = ["https://api.example.com/instana/alerts"]
+    webhook_urls = ["https://api.example.com/instana/alerts"] # Replace with your own value
   }
 }
 ```
@@ -254,7 +254,7 @@ resource "instana_alerting_channel" "webhook_multiple" {
   
   webhook = {
     http_headers = {}
-    webhook_urls = [
+    webhook_urls = [ # Replace with your own value
       "https://api.example.com/instana/alerts",
       "https://backup-api.example.com/alerts",
       "https://monitoring.example.com/webhooks/instana"
@@ -269,10 +269,10 @@ resource "instana_alerting_channel" "webhook_with_headers" {
   name = "webhook-authenticated"
   
   webhook = {
-    webhook_urls = ["https://api.example.com/instana/alerts"]
+    webhook_urls = ["https://api.example.com/instana/alerts"] # Replace with your own value
     http_headers = {
-      "Authorization" = "Bearer ${var.webhook_api_token}"
-      "X-API-Key"     = var.webhook_api_key
+      "Authorization" = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6Ik" # Replace with your own value
+      "X-API-Key"     = "sk_live_51A1B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6Q7R8S9T0" # Replace with your own value
       "Content-Type"  = "application/json"
     }
   }
@@ -286,9 +286,9 @@ resource "instana_alerting_channel" "webhook_with_headers" {
 resource "instana_alerting_channel" "servicenow_alerts" {
   name               = "servicenow-alerts"
   service_now = {
-    service_now_url      = "https://your-instance.service-now.com"
-    username             = var.servicenow_username
-    password             = var.servicenow_password
+    service_now_url      = "https://your-instance.service-now.com" # Replace with your own value
+    username             = "instana_integration_user" # Replace with your own value
+    password             = "P@ssw0rd!2024#SecurePass" # Replace with your own value
     auto_close_incidents = false
   }
 }
@@ -300,9 +300,9 @@ resource "instana_alerting_channel" "servicenow_autoclose" {
   name = "servicenow-autoclose-alerts"
   
   service_now = {
-    service_now_url      = "https://your-instance.service-now.com"
-    username             = var.servicenow_username
-    password             = var.servicenow_password
+    service_now_url      = "https://your-instance.service-now.com" # Replace with your own value
+    username             = "snow_admin_user" # Replace with your own value
+    password             = "SecureP@ss123!Winter2024" # Replace with your own value
     auto_close_incidents = true
   }
 }
@@ -319,12 +319,12 @@ resource "instana_alerting_channel" "service_now_channel" {
     enable_send_instana_notes          = true
     enable_send_service_now_activities = true
     enable_send_service_now_work_notes = true
-    instana_url                        = null
+    instana_url                        = "https://test-instana.pink.instana.rocks/" # Replace with your own value
     manually_closed_incidents          = true
-    username                           = var.servicenow_username
-    password                           = var.servicenow_password
+    username                           = "servicenow_itsm_user" # Replace with your own value
+    password                           = "ITSM@Pass2024!Secure" # Replace with your own value
     resolution_of_incident             = true
-    service_now_url                    = "https://service-now.com"
+    service_now_url                    = "https://service-now.com" # Replace with your own value
     snow_status_on_close_event         = -1
     tenant                             = "instana"
     unit                               = "test"
@@ -341,7 +341,7 @@ resource "instana_alerting_channel" "prometheus_channel" {
   name         = "prometheus-webhook-receiver"
   prometheus_webhook = {
     receiver    = "instana-alerts"
-    webhook_url = "https://prometheus.example.com/api/v1/alerts"
+    webhook_url = "https://prometheus.example.com/api/v1/alerts" # Replace with your own value
   }
 }
 ```
@@ -354,7 +354,7 @@ resource "instana_alerting_channel" "webex_basic" {
   name = "webex-teams-alerts"
   
   webex_teams_webhook = {
-    webhook_url = "https://webexapis.com/v1/webhooks/incoming/YOUR_WEBHOOK_ID"
+    webhook_url = "https://webexapis.com/v1/webhooks/incoming/Y2lzY29zcGF" # Replace with your own value
   }
 }
 ```
@@ -367,7 +367,7 @@ resource "instana_alerting_channel" "watson_basic" {
   name = "watson-aiops-alerts"
   
   watson_aiops_webhook = {
-    webhook_url = "https://watson-aiops.example.com/webhook"
+    webhook_url = "https://watson-aiops.example.com/webhook" # Replace with your own value
   }
 }
 ```
@@ -378,10 +378,10 @@ resource "instana_alerting_channel" "watson_with_headers" {
   name = "watson-aiops-authenticated"
   
   watson_aiops_webhook = {
-    webhook_url = "https://watson-aiops.example.com/webhook"
+    webhook_url = "https://watson-aiops.example.com/webhook" # Replace with your own value
     http_headers = [
-      "Authorization: Bearer ${var.watson_api_token}",
-      "X-API-Key: ${var.watson_api_key}",
+      "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9", # Replace with your own value
+      "X-API-Key: wsk_prod_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6", # Replace with your own value
       "X-Environment: production"
     ]
   }
@@ -396,11 +396,11 @@ resource "instana_alerting_channel" "slack_app_basic" {
   name = "slack-app-alerts"
   
   slack_app = {
-    app_id       = "A01234567"
-    team_id      = "T01234567"
-    team_name    = "My Team"
-    channel_id   = "C01234567"
-    channel_name = "#alerts"
+    app_id       = "A01234567" # Replace with your own value
+    team_id      = "T01234567" # Replace with your own value
+    team_name    = "My Team" # Replace with your own value
+    channel_id   = "C01234567" # Replace with your own value
+    channel_name = "#alerts" # Replace with your own value
   }
 }
 ```
@@ -411,11 +411,11 @@ resource "instana_alerting_channel" "slack_app_with_emoji" {
   name = "slack-app-emoji-alerts"
   
   slack_app = {
-    app_id          = "A01234567"
-    team_id         = "T01234567"
-    team_name       = "My Team"
-    channel_id      = "C01234567"
-    channel_name    = "#production-alerts"
+    app_id          = "A01234567" # Replace with your own value
+    team_id         = "T01234567" # Replace with your own value
+    team_name       = "My Team" # Replace with your own value
+    channel_id      = "C01234567" # Replace with your own value
+    channel_name    = "#production-alerts" # Replace with your own value
     emoji_rendering = true
   }
 }
@@ -428,15 +428,13 @@ resource "instana_alerting_channel" "slack_app_with_emoji" {
 resource "instana_alerting_channel" "ms_teams_bidirect" {
   name           = "MS Teams App Alert Channel"
   ms_teams_app = {
-    api_token_id = var.msteams_api_token
-    channel_id   = var.msteams_channel_id
-    channel_name = var.msteams_channel_name
-    instana_url  = var.instana_base_url
-    service_url  = var.msteams_service_url
-    team_id      = var.msteams_team_id
-    team_name    = var.msteams_name
-    tenant_id    = var.msteams_tenant_id
-    tenant_name  = var.organization_name
+    channel_id   = "19:a1b2c3d4e5f6g7h8i9j0@thread.tacv2" # Replace with your own value
+    channel_name = "Instana Alerts" # Replace with your own value
+    service_url  = "https://smba.trafficmanager.net/amer/" # Replace with your own value
+    team_id      = "a1b2c3d4-e5f6-7890-abcd-ef1234567890" # Replace with your own value
+    team_name    = "Platform Engineering" # Replace with your own value
+    tenant_id    = "f9e8d7c6-b5a4-3210-9876-543210fedcba" # Replace with your own value
+    tenant_name  = "Acme Corporation" # Replace with your own value
   }
 }
 ```
