@@ -30,28 +30,29 @@ resource "instana_automation_policy" "example" {
   name        = "Hello world"
   description = "Sample policy"
   tags        = ["test", "hello"]
-  
-  trigger {
+  trigger = {
     id   = "r6mpl4BPRhm_77Vn"
     type = "customEvent"
   }
-  
-  type_configuration {
+  type_configuration = [{
     name = "manual"
-    
-    action {
-      action_id = "action-id"
-      agent_id  = "agent-id"
-      
-      input_parameters = {
-        test1 = "value1"
+    action = [{
+      action = {   # provide valid action details
+        id          = "94b7ea38-514a-4bb2-931f-81a8dc059269"
+        name        = "Action Name"
+        description = "Action description"
+        script = {
+          content     = filebase64("script.sh")
+          interpreter = "bash"
+        }
       }
-    }
+      agent_id = "agent-id"
+    }]
     
-    condition {
+    condition = {
       query = "entity.agent.capability:action-script"
     }
-  }
+  }]
 }
 ```
 
@@ -102,7 +103,7 @@ resource "instana_automation_policy" "automation_policy" {
   tags        = []
   trigger = {
     description = "Stop ping-springboot-app.sh to trigger event."
-    id          = "trigger_id"
+    id          = "HNgvGZRl4cxfifOS"
     name        = "Legacy Event - Spring Boot App - Requests <= 0"
     type        = "customEvent"
   }
@@ -110,9 +111,9 @@ resource "instana_automation_policy" "automation_policy" {
     {
       action = [
         {
-          action = {
+          action = {  # provide valid action details
             description = "Stop the KLO Log File Agent on Linux"
-            id          = "action_id"
+            id          = "94b7ea38-514a-4bb2-931f-81a8dc059269"
             input_parameter = [
               {
                 description = "Description"
@@ -133,164 +134,6 @@ resource "instana_automation_policy" "automation_policy" {
         },
       ]
       name      = "manual"
-    },
-  ]
-}
-
-```
-
-### Automatic Policy with Condition
-
-```hcl
-resource "instana_automation_policy" "automation_policy_2" {
-  description = "Update ad-service configMap"
-  name        = "Update adService config map flagt"
-  tags        = []
-  trigger = {
-    description = "The erroneous call rate is higher or equal to 40%."
-    id          = "trigger-id"
-    name        = "Erroneous call rate is higher than normal"
-    type        = "applicationSmartAlert"
-  }
-  type_configuration = [
-    {
-      action = [
-        {
-          action = {
-            ansible = {
-              host_id            = "hostid"
-              playbook_file_name = "filename"
-              playbook_id        = "id"
-              url                = "url"
-            }
-            description = "Update ad-service configMap"
-            id          = "action-id"
-            input_parameter = [
-              {
-                description = ""
-                hidden      = false
-                label       = "label"
-                name        = "name"
-                required    = false
-                type        = "static"
-                value       = "value"
-              },
-              {
-                description = ""
-                hidden      = false
-                label       = "namespace"
-                name        = "namespace"
-                required    = false
-                type        = "static"
-                value       = "robot-shop"
-              },
-              {
-                description = ""
-                hidden      = true
-                label       = "k8s_api_server"
-                name        = "k8s_api_server"
-                required    = true
-                type        = "static"
-                value       = "value"
-              },
-              {
-                description = ""
-                hidden      = true
-                label       = "k8s_user"
-                name        = "k8s_user"
-                required    = true
-                type        = "static"
-                value       = "value"
-              },
-              {
-                description = ""
-                hidden      = true
-                label       = "k8s_password"
-                name        = "k8s_password"
-                required    = true
-                type        = "static"
-                value       = "value"
-              },
-            ]
-            name   = "Update ad-service configMap"
-          }
-          agent_id = "agent-id"
-        },
-      ]
-      condition = {
-        query = "entity.aws.elb.type:application"
-      }
-      name = "manual"
-    },
-    {
-      action = [
-        {
-          action = {
-            ansible = {
-              host_id            = "host-id"
-              playbook_file_name = "file-name"
-              playbook_id        = "id"
-              url                = "url"
-              workflow_id        = null
-            }
-            description = "Update ad-service configMap"
-            id          = "action-id"
-            input_parameter = [
-              {
-                description = ""
-                hidden      = false
-                label       = "label"
-                name        = "name"
-                required    = false
-                type        = "static"
-                value       = "ad-service"
-              },
-              {
-                description = ""
-                hidden      = false
-                label       = "namespace"
-                name        = "namespace"
-                required    = false
-                type        = "static"
-                value       = "robot-shop"
-              },
-              {
-                description = ""
-                hidden      = true
-                label       = "k8s_api_server"
-                name        = "k8s_api_server"
-                required    = true
-                type        = "static"
-                value       = "value"
-              },
-              {
-                description = ""
-                hidden      = true
-                label       = "k8s_user"
-                name        = "k8s_user"
-                required    = true
-                type        = "static"
-                value       = "value"
-              },
-              {
-                description = ""
-                hidden      = true
-                label       = "k8s_password"
-                name        = "k8s_password"
-                required    = true
-                type        = "static"
-                value       = "vallue"
-              },
-            ]
-            name   = "Update ad-service configMap"
-          }
-          agent_id = "agent-id"
-        },
-      ]
-      condition = {
-        query = "entity.aws.elb.type:application"
-      }
-      name = "automatic"
     },
   ]
 }
