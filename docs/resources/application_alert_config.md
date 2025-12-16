@@ -15,11 +15,11 @@ For detailed migration instructions and examples, see the [Plugin Framework Migr
 
 ### Syntax Changes Overview
 
-- `application` → `applications` (now a list with `= [{ }]`)
-- `service` → `services` (nested list)
-- `endpoint` → `endpoints` (nested list)
+- `application` → `application` (now a list with `= [{ }]`)
+- `service` → `service` (nested list)
+- `endpoint` → `endpoint` (nested list)
 - `rule` → `rules` (list with new structure)
-- `threshold` → `thresholds` (nested in rules, supports multiple severity levels)
+- `threshold` → `threshold` (nested in rules, supports multiple severity levels)
 - New `threshold_operator` field in rules
 - `time_threshold` now uses attribute syntax with `= { }`
 - Enhanced support for both static and adaptive baseline thresholds
