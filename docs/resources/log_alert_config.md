@@ -62,9 +62,10 @@ resource "instana_log_alert_config" "example" {
 ```hcl
 resource "instana_log_alert_config" "example" {
   name = "Log Alert"
-  
+  description = "Log Alert description"
+
   alert_channels = {
-    warning = ["channel-1"]
+    warning = ["channel-1"] # replace with actual channel Ids
     critical = ["channel-2"]
   }
   
@@ -100,8 +101,6 @@ resource "instana_log_alert_config" "example" {
       value = "prod"
     }
   ]
-
-  # rest of the configuration...
 }
 ```
 
@@ -125,7 +124,7 @@ resource "instana_log_alert_config" "error_logs" {
   granularity = 600000
   
   alert_channels = {
-    critical = ["ops-team-channel"]
+    critical = ["ops-team-channel"] # replace with actual channel Ids
     warning = ["dev-team-channel"]
   }
   rules = {
@@ -160,9 +159,9 @@ resource "instana_log_alert_config" "error_logs" {
     custom_payload_field = [
     {
       dynamic_value = {
-        tag_name = "tagName"
+        tag_name = "log.level"
       }
-      key   = "dev"
+      key   = "log"
     },
   ]
 }

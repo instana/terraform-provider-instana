@@ -66,6 +66,8 @@ func buildLogAlertConfigSchema() schema.Schema {
 			},
 			LogAlertConfigFieldGranularity: schema.Int64Attribute{
 				Optional:    true,
+				Computed:    true,
+				Default:     int64default.StaticInt64(int64(restapi.Granularity60000)),
 				Description: LogAlertConfigDescGranularity,
 				Validators: []validator.Int64{
 					int64validator.OneOf(
