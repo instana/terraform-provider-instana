@@ -66,8 +66,8 @@ resource "instana_api_token" "readonly" {
 ####  Access Token with More Permissions
 
 ```hcl
-resource "instana_api_token" "production_full" {
-  name = "production-full-access-token"
+resource "instana_api_token" "production_example" {
+  name = "production-access-token"
   
   # Application and Service Configuration
   can_configure_service_mapping       = true
@@ -96,6 +96,7 @@ resource "instana_api_token" "production_full" {
   # Synthetic Monitoring
   can_configure_synthetic_tests       = true
   can_configure_synthetic_locations   = true
+  can_view_synthetic_locations        = true
   can_view_synthetic_tests            = true
   can_view_synthetic_test_results     = true
   

@@ -5,8 +5,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
@@ -14,7 +14,6 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/util"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // NewAPITokenResourceHandle creates the resource handle for API Tokens
@@ -48,187 +47,156 @@ func NewAPITokenResourceHandle() resourcehandle.ResourceHandle[*restapi.APIToken
 					APITokenFieldCanConfigureServiceMapping: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureServiceMapping,
 					},
 					APITokenFieldCanConfigureEumApplications: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureEumApplications,
 					},
 					APITokenFieldCanConfigureMobileAppMonitoring: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureMobileAppMonitoring,
 					},
 					APITokenFieldCanConfigureUsers: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureUsers,
 					},
 					APITokenFieldCanInstallNewAgents: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanInstallNewAgents,
 					},
 					APITokenFieldCanConfigureIntegrations: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureIntegrations,
 					},
 					APITokenFieldCanConfigureEventsAndAlerts: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureEventsAndAlerts,
 					},
 					APITokenFieldCanConfigureMaintenanceWindows: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureMaintenanceWindows,
 					},
 					APITokenFieldCanConfigureApplicationSmartAlerts: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureApplicationSmartAlerts,
 					},
 					APITokenFieldCanConfigureWebsiteSmartAlerts: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureWebsiteSmartAlerts,
 					},
 					APITokenFieldCanConfigureMobileAppSmartAlerts: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureMobileAppSmartAlerts,
 					},
 					APITokenFieldCanConfigureAPITokens: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureAPITokens,
 					},
 					APITokenFieldCanConfigureAgentRunMode: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureAgentRunMode,
 					},
 					APITokenFieldCanViewAuditLog: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanViewAuditLog,
 					},
 					APITokenFieldCanConfigureAgents: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureAgents,
 					},
 					APITokenFieldCanConfigureAuthenticationMethods: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureAuthenticationMethods,
 					},
 					APITokenFieldCanConfigureApplications: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureApplications,
 					},
 					APITokenFieldCanConfigureTeams: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureTeams,
 					},
 					APITokenFieldCanConfigureReleases: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureReleases,
 					},
 					APITokenFieldCanConfigureLogManagement: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureLogManagement,
 					},
 					APITokenFieldCanCreatePublicCustomDashboards: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanCreatePublicCustomDashboards,
 					},
 					APITokenFieldCanViewLogs: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanViewLogs,
 					},
 					APITokenFieldCanViewTraceDetails: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanViewTraceDetails,
 					},
 					APITokenFieldCanConfigureSessionSettings: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureSessionSettings,
 					},
 					APITokenFieldCanConfigureGlobalAlertPayload: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureGlobalAlertPayload,
 					},
 					APITokenFieldCanConfigureGlobalApplicationSmartAlerts: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureGlobalApplicationSmartAlerts,
 					},
 					APITokenFieldCanConfigureGlobalSyntheticSmartAlerts: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureGlobalSyntheticSmartAlerts,
 					},
 					APITokenFieldCanConfigureGlobalInfraSmartAlerts: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureGlobalInfraSmartAlerts,
 					},
 					APITokenFieldCanConfigureGlobalLogSmartAlerts: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureGlobalLogSmartAlerts,
 					},
 					APITokenFieldCanViewAccountAndBillingInformation: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanViewAccountAndBillingInformation,
 					},
 					APITokenFieldCanEditAllAccessibleCustomDashboards: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanEditAllAccessibleCustomDashboards,
 					},
 
@@ -236,133 +204,111 @@ func NewAPITokenResourceHandle() resourcehandle.ResourceHandle[*restapi.APIToken
 					APITokenFieldLimitedApplicationsScope: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescLimitedApplicationsScope,
 					},
 					APITokenFieldLimitedBizOpsScope: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescLimitedBizOpsScope,
 					},
 					APITokenFieldLimitedWebsitesScope: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescLimitedWebsitesScope,
 					},
 					APITokenFieldLimitedKubernetesScope: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescLimitedKubernetesScope,
 					},
 					APITokenFieldLimitedMobileAppsScope: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescLimitedMobileAppsScope,
 					},
 					APITokenFieldLimitedInfrastructureScope: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescLimitedInfrastructureScope,
 					},
 					APITokenFieldLimitedSyntheticsScope: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescLimitedSyntheticsScope,
 					},
 					APITokenFieldLimitedVsphereScope: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescLimitedVsphereScope,
 					},
 					APITokenFieldLimitedPhmcScope: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescLimitedPhmcScope,
 					},
 					APITokenFieldLimitedPvcScope: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescLimitedPvcScope,
 					},
 					APITokenFieldLimitedZhmcScope: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescLimitedZhmcScope,
 					},
 					APITokenFieldLimitedPcfScope: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescLimitedPcfScope,
 					},
 					APITokenFieldLimitedOpenstackScope: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescLimitedOpenstackScope,
 					},
 					APITokenFieldLimitedAutomationScope: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescLimitedAutomationScope,
 					},
 					APITokenFieldLimitedLogsScope: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescLimitedLogsScope,
 					},
 					APITokenFieldLimitedNutanixScope: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescLimitedNutanixScope,
 					},
 					APITokenFieldLimitedXenServerScope: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescLimitedXenServerScope,
 					},
 					APITokenFieldLimitedWindowsHypervisorScope: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescLimitedWindowsHypervisorScope,
 					},
 					APITokenFieldLimitedAlertChannelsScope: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescLimitedAlertChannelsScope,
 					},
 					APITokenFieldLimitedLinuxKvmHypervisorScope: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescLimitedLinuxKvmHypervisorScope,
 					},
 					APITokenFieldLimitedServiceLevelScope: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescLimitedServiceLevelScope,
 					},
 					APITokenFieldLimitedAiGatewayScope: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescLimitedAiGatewayScope,
 					},
 
@@ -370,199 +316,167 @@ func NewAPITokenResourceHandle() resourcehandle.ResourceHandle[*restapi.APIToken
 					APITokenFieldCanConfigurePersonalAPITokens: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigurePersonalAPITokens,
 					},
 					APITokenFieldCanConfigureDatabaseManagement: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureDatabaseManagement,
 					},
 					APITokenFieldCanConfigureAutomationActions: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureAutomationActions,
 					},
 					APITokenFieldCanConfigureAutomationPolicies: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureAutomationPolicies,
 					},
 					APITokenFieldCanRunAutomationActions: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanRunAutomationActions,
 					},
 					APITokenFieldCanDeleteAutomationActionHistory: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanDeleteAutomationActionHistory,
 					},
 					APITokenFieldCanConfigureSyntheticTests: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureSyntheticTests,
 					},
 					APITokenFieldCanConfigureSyntheticLocations: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureSyntheticLocations,
 					},
 					APITokenFieldCanConfigureSyntheticCredentials: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureSyntheticCredentials,
 					},
 					APITokenFieldCanViewSyntheticTests: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanViewSyntheticTests,
 					},
 					APITokenFieldCanViewSyntheticLocations: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanViewSyntheticLocations,
 					},
 					APITokenFieldCanViewSyntheticTestResults: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanViewSyntheticTestResults,
 					},
 					APITokenFieldCanUseSyntheticCredentials: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanUseSyntheticCredentials,
 					},
 					APITokenFieldCanConfigureBizops: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureBizops,
 					},
 					APITokenFieldCanViewBusinessProcesses: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanViewBusinessProcesses,
 					},
 					APITokenFieldCanViewBusinessProcessDetails: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanViewBusinessProcessDetails,
 					},
 					APITokenFieldCanViewBusinessActivities: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanViewBusinessActivities,
 					},
 					APITokenFieldCanViewBizAlerts: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanViewBizAlerts,
 					},
 					APITokenFieldCanDeleteLogs: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanDeleteLogs,
 					},
 					APITokenFieldCanCreateHeapDump: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanCreateHeapDump,
 					},
 					APITokenFieldCanCreateThreadDump: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanCreateThreadDump,
 					},
 					APITokenFieldCanManuallyCloseIssue: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanManuallyCloseIssue,
 					},
 					APITokenFieldCanViewLogVolume: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanViewLogVolume,
 					},
 					APITokenFieldCanConfigureLogRetentionPeriod: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureLogRetentionPeriod,
 					},
 					APITokenFieldCanConfigureSubtraces: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureSubtraces,
 					},
 					APITokenFieldCanInvokeAlertChannel: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanInvokeAlertChannel,
 					},
 					APITokenFieldCanConfigureLlm: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureLlm,
 					},
 					APITokenFieldCanConfigureAiAgents: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureAiAgents,
 					},
 					APITokenFieldCanConfigureApdex: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureApdex,
 					},
 					APITokenFieldCanConfigureServiceLevelCorrectionWindows: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureServiceLevelCorrectionWindows,
 					},
 					APITokenFieldCanConfigureServiceLevelSmartAlerts: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureServiceLevelSmartAlerts,
 					},
 					APITokenFieldCanConfigureServiceLevels: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     booldefault.StaticBool(false),
 						Description: APITokenDescCanConfigureServiceLevels,
 					},
 				},
 			},
 			SkipIDGeneration: true,
-			SchemaVersion: 3,
+			SchemaVersion:    3,
 			ResourceIDField:  &internalIDFieldName,
 		},
 	}
