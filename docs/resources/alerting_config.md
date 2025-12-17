@@ -63,7 +63,7 @@ resource "instana_alerting_config" "alert_config" {
   alert_name                         = "New Alert Configuration AN test" # Replace with your own value
   event_filter_query                 = "event.type:issue AND event.severity:critical entity.zone:\"helmrefactoring\"" # Replace with your own value
   event_filter_rule_ids              = ["rule-id1", "rule-id2"] # Replace with your own value
-  integration_ids                    = [] # Replace with your own value
+  integration_ids                    = ["integration-id"] # Replace with your own value
 }
 ```
 

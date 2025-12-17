@@ -123,20 +123,17 @@ resource "instana_application_alert_config" "example" {
 
 ```hcl
 resource "instana_application_alert_config" "application_alert_config" {
-  alert_channels = {}
+  name                 = "Calls are slower than usual - $${severity}" # Use double $$ to define placeholders
   application = [
     {
       application_id = "eQjat8RMR3-5lb376rV5kA" # Replace with your own value
       inclusive      = true
-      service = [
-      ]
     },
   ]
   boundary_scope       = "INBOUND"
   description          = "Calls are slower or equal to 5 ms based on latency (90th)."
   evaluation_type      = "PER_AP"
   granularity          = 600000
-  name                 = "Calls are slower than usual" # Replace with your own value
   rules = [
     {
       rule = {
@@ -226,8 +223,6 @@ resource "instana_application_alert_config" "alert_config_3" {
     {
       application_id = "eQjat8RMR3-5lb376rV5kA" # Replace with your own value
       inclusive      = true
-      service = [
-      ]
     },
   ]
   boundary_scope = "ALL"
@@ -333,7 +328,7 @@ terraform apply
 * `granularity` - Optional - default `600000` - The evaluation granularity used for detection of violations of the defined threshold. In other words, it defines the size of the tumbling window used. Allowed values: `300000`, `600000`, `900000`, `1200000`, `1800000`
 * `grace_period` - Optional - The duration (in milliseconds) for which an alert remains open after conditions are no longer violated, with the alert auto-closing once the grace period expires
 * `tag_filter` - Optional - The tag filter of the application alert config. [Details](#tag-filter-argument-reference)
-* `applications` - Required - Selection/Set of applications in scope (list). [Details](#applications-argument-reference)
+* `application` - Required - Selection/Set of applications in scope (list). [Details](#applications-argument-reference)
 * `rules` - Required - List of rules where each rule is associated with multiple thresholds and their corresponding severity levels (list). [Details](#rules-argument-reference)
 * `time_threshold` - Required - Indicates the type of violation of the defined threshold (object). [Details](#time-threshold-argument-reference)
 * `alert_channels` - Optional - Map of alert channel IDs associated with severity levels (map of sets). Keys: `warning`, `critical`
@@ -372,13 +367,13 @@ identifier                := [a-zA-Z_][\.a-zA-Z0-9_\-/]*
 
 * `application_id` - Required - ID of the included application
 * `inclusive` - Required - Defines whether this node and his child nodes are included (true) or excluded (false)
-* `services` - Optional - Selection of services in scope (list). [Details](#services-argument-reference)
+* `service` - Optional - Selection of services in scope (list). [Details](#services-argument-reference)
 
 #### Services Argument Reference
 
 * `service_id` - Required - ID of the included service
 * `inclusive` - Required - Defines whether this node and his child nodes are included (true) or excluded (false)
-* `endpoints` - Optional - Selection of endpoints in scope (list). [Details](#endpoints-argument-reference)
+* `endpoint` - Optional - Selection of endpoints in scope (list). [Details](#endpoints-argument-reference)
 
 ##### Endpoints Argument Reference
 
@@ -390,7 +385,7 @@ identifier                := [a-zA-Z_][\.a-zA-Z0-9_\-/]*
 Each rule object contains:
 
 * `rule` - Required - The rule configuration (object). Exactly one of the rule types below must be configured
-* `thresholds` - Required - Threshold configuration for different severity levels (object). [Details](#thresholds-argument-reference)
+* `threshold` - Required - Threshold configuration for different severity levels (object). [Details](#thresholds-argument-reference)
 * `threshold_operator` - Optional - The operator to apply for threshold comparison. Allowed values: `>`, `>=`, `<`, `<=`
 
 #### Rule Types

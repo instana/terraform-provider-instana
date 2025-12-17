@@ -119,7 +119,7 @@ resource "instana_log_alert_config" "example" {
 
 ```hcl
 resource "instana_log_alert_config" "error_logs" {
-  name = "High Error Log Count"
+  name = "High Error Log Count - $${severity}" # Use double $$ to define placeholders
   description = "Alert when error logs exceed threshold"
   granularity = 600000
   

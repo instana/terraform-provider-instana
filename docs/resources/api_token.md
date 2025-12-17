@@ -36,7 +36,6 @@ resource "instana_api_token" "example" {
 resource "instana_api_token" "example" {
   name                          = "my-token"
   can_configure_service_mapping = true
-  # Omitted attributes explicitly default to false
   # All boolean attributes now have computed defaults
 }
 ```

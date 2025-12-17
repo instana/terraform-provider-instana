@@ -118,6 +118,7 @@ Monitor application latency globally:
 
 ```hcl
 resource "instana_global_application_alert_config" "slowness_basic" {
+  name                 = "slowness_basic - $${severity}" # Use double $$ to define placeholders
   alert_channels = {
     CRITICAL = ["critical_email_channel"] # replace with valid ids
     WARNING  = ["warning_email_channel"] # replace with valid ids
@@ -145,7 +146,6 @@ resource "instana_global_application_alert_config" "slowness_basic" {
   evaluation_type      = "PER_AP"
   grace_period         = 300000
   granularity          = 300000
-  name                 = "slowness_basic"
   rules = [
     {
       rule = {

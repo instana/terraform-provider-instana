@@ -672,14 +672,6 @@ $ terraform import instana_alerting_channel.my_channel 60845e4e5e6b9cf8fc2868da
 
 ## Notes
 
-### Password Handling for ServiceNow Channels
-
-For ServiceNow and ServiceNow Enhanced channels, the `password` attribute uses a plan modifier that preserves the state value when the password is not included in the plan. This means:
-
-- The password **must** be provided when creating the resource
-- The password can be omitted in subsequent updates, and the existing value will be preserved
-- If you need to update the password, explicitly include it in your configuration
-
 ### Channel Type Exclusivity
 
 Only one channel type can be configured per alerting channel resource. If you need to send alerts to multiple destinations, create separate alerting channel resources for each destination.

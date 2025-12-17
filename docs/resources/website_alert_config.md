@@ -116,7 +116,7 @@ Monitor page load time:
 ```hcl
 
 resource "instana_website_alert_config" "slowness_basic" {
-  name        = "Page Load Time Alert"
+  name        = "Page Load Time Alert - $${severity}" # Use double $$ to define placeholders
   description = "Alert when page load time exceeds threshold"
   triggering  = false
   website_id  = "KExRPJGcSvOjBPD_JrwAIA" # replace with your actual website Id

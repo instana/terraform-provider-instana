@@ -128,7 +128,7 @@ resource "instana_infra_alert_config" "example" {
 ```hcl
 
 resource "instana_infra_alert_config" "cpu_alert" {
-  name = "High CPU Usage Alert"
+  name = "High CPU Usage Alert - $${severity}" # Use double $$ to define placeholders
   description = "Alert when CPU usage exceeds thresholds"
   alert_channels = {
     critical = ["channel-id-1"]

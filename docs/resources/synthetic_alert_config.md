@@ -87,7 +87,7 @@ Monitor synthetic tests and alert on failures:
 
 ```hcl
 resource "instana_synthetic_alert_config" "basic_failure" {
-  name = "Synthetic Test Failure Alert"
+  name = "Synthetic Test Failure Alert - $${severity}" # Use double $$ to define placeholders
   description = "Alert when synthetic tests fail"
   
   synthetic_test_ids = ["test-id-1", "test-id-2"] # replace with actual test Ids
