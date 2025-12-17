@@ -262,7 +262,7 @@ identifier                := [a-zA-Z_][\.a-zA-Z0-9_\-/]*
 
 #### Generic Rule Argument Reference 
 
-* `metric_name` - Required - The metric name of the infrastructure alert rule (refer this [link](https://developer.ibm.com/apis/catalog/instana--instana-rest-api/api/API--instana--instana-rest-api-documentation#getInfrastructureCatalogMetrics) to get the valid metrics names for a plugin . eg host,instanaAgent etc)
+* `metric_name` - Required - The metric name of the infrastructure alert rule (refer this [/api/infrastructure-monitoring/catalog/metrics/{plugin}](https://developer.ibm.com/apis/catalog/instana--instana-rest-api/api/API--instana--instana-rest-api-documentation#getInfrastructureCatalogMetrics) to get the valid metrics names for a plugin . eg host,instanaAgent etc)
 * `entity_type` - Required - The entity type of the infrastructure alert rule
 * `aggregation` - Required - The aggregation function of the infra alert rule. Supported values: `MEAN`, `MAX`, `MIN`, `P25`, `P50`, `P75`, `P90`, `P95`, `P98`, `P99`, `SUM`, `PER_SECOND`
 * `cross_series_aggregation` - Required - Cross-series aggregation function of the infra alert rule. Supported values: `MEAN`, `MAX`, `MIN`, `P25`, `P50`, `P75`, `P90`, `P95`, `P98`, `P99`, `SUM`
