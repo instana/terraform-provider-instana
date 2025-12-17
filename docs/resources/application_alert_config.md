@@ -253,6 +253,106 @@ resource "instana_application_alert_config" "alert_config_3" {
 
 ```
 
+### Alert with throughput rule
+
+```hcl
+resource "instana_application_alert_config" "throughput_application_alert_config" {
+  application = [
+    {
+      application_id = "hpY3YjbxSm6jlrUqIEcl8w" # replace with valid application Id
+      inclusive      = false
+      service = [
+        {
+          endpoint = [
+            {
+              endpoint_id = "8ZZ5e1ZMRNPqvzQOaFkh-InyULM" # replace with valid endpoint Id
+              inclusive   = true
+            },
+          ]
+          inclusive  = false
+          service_id = "0cbc4b430e327759f5fc2b02781c13940d0b439e" # replace with valid service Id
+        },
+      ]
+    },
+  ]
+  boundary_scope       = "ALL"
+  description          = "The number of calls is lower or equal to  calls."
+  evaluation_type      = "PER_AP"
+  granularity          = 600000
+  include_internal     = false
+  include_synthetic    = false
+  name                 = "throughput based alert"
+  rules = [
+    {
+      rule = {
+        throughput = {
+          aggregation = "SUM"
+          metric_name = "calls"
+        }
+      }
+      threshold = {
+        warning = {
+          static = {
+            value = 100
+          }
+        }
+      }
+      threshold_operator = "<="
+    },
+  ]
+  time_threshold = {
+    violations_in_sequence = {
+      time_window = 600000
+    }
+  }
+  triggering = false
+}
+```
+
+### Alert with errors rule
+
+```hcl
+resource "instana_application_alert_config" "errors_application_alert_config" {
+  application = [
+    {
+      application_id = "A2wMMcEyQ36O-KUsDk4eYg" # replace with valid application Id
+      inclusive      = true
+    },
+  ]
+  boundary_scope       = "ALL"
+  description          = "errors based alert"
+  evaluation_type      = "PER_AP_SERVICE"
+  granularity          = 60000
+  include_internal     = false
+  include_synthetic    = false
+  name                 = "errors based alert"
+  rules = [
+    {
+      rule = {
+        errors = {
+          aggregation = "MEAN"
+          metric_name = "errors"
+        }
+      }
+      threshold = {
+        warning = {
+          static = {
+            value = 0.01
+          }
+        }
+      }
+      threshold_operator = ">="
+    },
+  ]
+  time_threshold = {
+    violations_in_sequence = {
+      time_window = 60000
+    }
+  }
+  triggering = true
+}
+```
+
 ## Generating Configuration from Existing Resources
 
 If you have already created a application alert configuration in Instana and want to generate the Terraform configuration for it, you can use Terraform's import block feature with the `-generate-config-out` flag.
