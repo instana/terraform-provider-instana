@@ -392,7 +392,7 @@ Each rule object contains:
 
 Exactly one of the elements below must be configured within the `rule` object:
 
-* `error_rate` - Optional - Rule based on the error rate. [Details](#error-rate-rule-argument-reference)
+* `error_rate` - (Deprecated - please use errors instead)Optional - Rule based on the error rate. [Details](#error-rate-rule-argument-reference)
 * `errors` - Optional - Rule based on the number of errors. [Details](#errors-rule-argument-reference)
 * `logs` - Optional - Rule based on logs. [Details](#logs-rule-argument-reference)
 * `slowness` - Optional - Rule based on the slowness. [Details](#slowness-rule-argument-reference)
