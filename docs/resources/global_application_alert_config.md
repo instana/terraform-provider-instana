@@ -58,9 +58,10 @@ resource "instana_global_application_alert_config" "example" {
 ```hcl
 resource "instana_global_application_alert_config" "example" {
   name = "Global Alert"
-  
+  description          = "slowness_basic"
+  evaluation_type      = "PER_AP"
   application = [ {
-    application_id = "app-id"
+    application_id = "mS5QiJWxRneixWGYN9DGEA" # replace with valid ids
     inclusive = true
   }]
   boundary_scope       = "INBOUND"
@@ -95,7 +96,6 @@ resource "instana_global_application_alert_config" "example" {
       value = "production"
     }
   ]
-  # rest of the configuration
 }
 ```
 
@@ -107,7 +107,7 @@ resource "instana_global_application_alert_config" "example" {
 4. **Rule**: `rule { }` → `rule = { }`
 5. **Threshold**: `threshold { }` → `threshold = { }`
 6. **Time Threshold**: `time_threshold { }` → `time_threshold = { }`
-7. **Custom Payload Fields**: `custom_payload_field { }` (multiple) → `custom_payload_fields = [{ }]` (list)
+7. **Custom Payload Fields**: `custom_payload_field { }` (multiple) → `custom_payload_field = [{ }]` (list)
 8. **Aggregation**: Case-insensitive but lowercase recommended: `P90` → `p90`
 
 ## Example Usage
@@ -118,32 +118,34 @@ Monitor application latency globally:
 
 ```hcl
 resource "instana_global_application_alert_config" "slowness_basic" {
+  name                 = "slowness_basic - $${severity}" # Use double $$ to define placeholders
   alert_channels = {
-    CRITICAL = ["critical_email_channel"]
-    WARNING  = ["warning_email_channel"]
+    CRITICAL = ["critical_email_channel"] # replace with valid ids
+    WARNING  = ["warning_email_channel"] # replace with valid ids
   }
   application = [
     {
-      application_id = "application-id"
-      inclusive      = true
+      application_id = "Lj1iTqk9SMK6RdCdUzr_Og" # replace with valid ids
+      inclusive      = false
       service = [
         {
-      service_id = "payment-service-id"
-      inclusive  = true
-      endpoint = [{
-        endpoint_id = "checkout-endpoint-id"
-        inclusive   = true
-      }]
-       }
+          endpoint = [
+            {
+              endpoint_id = "Jb9MEqUl-8KC6M8BoFe0qVH0Gds" # replace with valid ids
+              inclusive   = true
+            },
+          ]
+          inclusive  = false
+          service_id = "44969c8d0ddcbad8b1c4aa4efbeab963f9485429" # replace with valid ids
+        },
       ]
-    }
+    },
   ]
   boundary_scope       = "INBOUND"
   description          = "slowness_basic"
   evaluation_type      = "PER_AP"
   grace_period         = 300000
   granularity          = 300000
-  name                 = "slowness_basic"
   rules = [
     {
       rule = {
@@ -233,7 +235,7 @@ terraform apply
 * `rule` - Required - Alert rule configuration [Details](#rule-reference)
 * `threshold` - Required - Threshold configuration [Details](#threshold-reference)
 * `time_threshold` - Required - Time threshold configuration [Details](#time-threshold-reference)
-* `custom_payload_fields` - Optional - List of custom payload fields for alert notifications [Details](#custom-payload-fields-reference)
+* `custom_payload_field` - Optional - List of custom payload fields for alert notifications [Details](#custom-payload-fields-reference)
 
 ### Application Reference
 

@@ -1,4 +1,12 @@
 # Changelog
+## [v6.0.3](https://github.com/instana/terraform-provider-instana/tree/v6.0.3) (2025-12-17)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v6.0.2...v6.0.3)
+
+**Merged pull requests:**
+
+- Resource documentation update and bug fixes [\#68](https://github.com/instana/terraform-provider-instana/pull/68) ([georgekutty-1](https://github.com/georgekutty-1))
+
 
 ## [v6.0.2](https://github.com/instana/terraform-provider-instana/tree/v6.0.2) (2025-12-10)
 

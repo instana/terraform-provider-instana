@@ -23,7 +23,7 @@ resource "instana_rbac_team" "example" {
 
 ```hcl
 resource "instana_rbac_team" "dev_team" {
-  tag = "Development Team"
+  tag = "Development Team Tf"
   
   info = {
     description = "Development team with application access"
@@ -31,22 +31,29 @@ resource "instana_rbac_team" "dev_team" {
   
   member = [
     {
-      user_id = "user-id-1"
+      user_id = "64c17435ad9cd800014d0973" # replace with valid user_id
       roles = [
         {
-          role_id = "role-id-1"
+          role_id = "vCrV7DEdSHS9McI6cU3quA" # replace with valid role_id
         }
       ]
     },
     {
-      user_id = "user-id-2"
+      user_id = "68e8daa9155aab0001bd6144"
       roles = [
         {
-          role_id = "role-id-2"
+          role_id = "-3"
         }
       ]
     }
   ]
+
+    scope = {
+    applications = ["app-id-1", "app-id-2", "app-id-3"]
+    access_permissions = [
+      "LIMITED_APPLICATIONS_SCOPE"
+    ]
+  }
 }
 ```
 
@@ -80,8 +87,8 @@ resource "instana_rbac_team" "k8s_team" {
   }
   
   scope = {
-    kubernetes_clusters = ["cluster-uuid-1", "cluster-uuid-2"]
-    kubernetes_namespaces = ["namespace-uuid-1", "namespace-uuid-2"]
+    kubernetes_clusters = ["cluster-uuid-1", "cluster-uuid-2"] # provide valid cluster names
+    kubernetes_namespaces = ["namespace-uuid-1", "namespace-uuid-2"] # provide valid namespace names
     access_permissions = [
       "LIMITED_KUBERNETES_SCOPE"
     ]
@@ -119,8 +126,8 @@ resource "instana_rbac_team" "platform_team" {
   }
   
   scope = {
-    applications = ["app-1", "app-2"]
-    kubernetes_clusters = ["k8s-cluster-1"]
+    applications = ["app-1", "app-2"] # replace with valid application Ids
+    kubernetes_clusters = ["k8s-cluster-1"] # replace with valid cluster Ids
     websites = ["website-1"]
     mobile_apps = ["mobile-app-1"]
     synthetic_tests = ["test-1", "test-2"]
@@ -168,7 +175,7 @@ resource "instana_rbac_team" "slo_team" {
   }
   
   scope = {
-    slo_ids = ["slo-id-1", "slo-id-2", "slo-id-3"]
+    slo_ids = ["slo-id-1", "slo-id-2", "slo-id-3"]    # replace with valid slo Ids
     access_permissions = [
       "LIMITED_SERVICE_LEVEL_SCOPE"
     ]
@@ -187,7 +194,7 @@ resource "instana_rbac_team" "synthetic_team" {
   }
   
   scope = {
-    synthetic_tests = ["test-1", "test-2"]
+    synthetic_tests = ["test-1", "test-2"]  # replace with valid synthetic Ids
     synthetic_credentials = ["cred-1", "cred-2"]
     access_permissions = [
       "LIMITED_SYNTHETICS_SCOPE"
@@ -229,7 +236,7 @@ resource "instana_rbac_team" "restricted_team" {
     restricted_application_filter = {
       label = "Production Services"
       scope = "INCLUDE_IMMEDIATE_DOWNSTREAM_DATABASE_AND_MESSAGING"
-      tag_filter_expression = "entity.tag.environment:production"
+      tag_filter_expression = "service.name@dest EQUALS 'butler'"
     }
     access_permissions = [
       "LIMITED_APPLICATIONS_SCOPE"

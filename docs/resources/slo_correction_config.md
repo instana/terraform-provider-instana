@@ -80,7 +80,7 @@ resource "instana_slo_correction_config" "one_time_maintenance" {
     recurrent_rule = "FREQ=DAILY;INTERVAL=1;UNTIL=20250614T000000"
     start_time     = 1749709800000
   }
-  slo_ids = [var.slo_id]
+  slo_ids = ["SLOjGzVJJj0TluePOuI-laDNw"] # replace with actual slo Ids
   tags = ["maintenance", "database-upgrade"]
 }
 ```
@@ -102,7 +102,7 @@ resource "instana_slo_correction_config" "nightly_maintenance" {
     recurrent_rule = "FREQ=DAILY"
   }
   
-  slo_ids = [var.slo_id]
+  slo_ids = ["SLOjGzVJJj0TluePOuI-laDNw"] # replace with actual slo Ids
   tags = ["nightly-maintenance", "automated"]
 }
 ```
@@ -124,7 +124,7 @@ resource "instana_slo_correction_config" "weekend_exclusion" {
     recurrent_rule = "FREQ=WEEKLY;BYDAY=SA,SU"
   }
   
-  slo_ids = [var.slo_id]
+  slo_ids = ["SLOjGzVJJj0TluePOuI-laDNw"] # replace with actual slo Ids
   tags = ["weekend", "non-business-hours"]
 }
 ```
@@ -146,7 +146,7 @@ resource "instana_slo_correction_config" "business_hours" {
     recurrent_rule = "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR"
   }
   
-  slo_ids = [var.slo_id]
+  slo_ids = ["SLOjGzVJJj0TluePOuI-laDNw"] # replace with actual slo Ids
   tags = ["business-hours", "weekday"]
 }
 ```
@@ -168,7 +168,7 @@ resource "instana_slo_correction_config" "monthly_maintenance" {
     recurrent_rule = "FREQ=MONTHLY;BYMONTHDAY=1"
   }
   
-  slo_ids = [var.slo_id]
+  slo_ids = ["SLOjGzVJJj0TluePOuI-laDNw"] # replace with actual slo Ids
   tags = ["monthly-maintenance", "scheduled"]
 }
 ```

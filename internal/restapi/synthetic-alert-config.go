@@ -16,6 +16,7 @@ type SyntheticAlertConfig struct {
 	TimeThreshold         SyntheticAlertTimeThreshold `json:"timeThreshold"`
 	CustomerPayloadFields []CustomPayloadField[any]   `json:"customPayloadFields,omitempty"`
 	GracePeriod           int64                       `json:"gracePeriod,omitempty"`
+	Enabled               bool                        `json:"enabled"`
 }
 
 // SyntheticAlertRule represents the rule configuration for synthetic alerts

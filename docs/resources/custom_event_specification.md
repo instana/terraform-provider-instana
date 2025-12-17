@@ -34,15 +34,21 @@ resource "instana_custom_event_specification" "example" {
 #### NEW (v6.x) Syntax:
 ```hcl
 resource "instana_custom_event_specification" "example" {
-  name = "threshold-alert"
-  
+  name        = "threshold-alert"
+  entity_type = "host"
   rules = {
     threshold = {
-      severity = "critical"
-      metric_name = "cpu.usage"
-      # ... other fields
+      severity             = "critical"
+      metric_name          = "cpu.usage"
+      "rollup"             = 0
+      "window"             = 60000
+      "aggregation"        = "avg"
+      "condition_operator" = ">"
+      "condition_value"    = 1.0,
+      "severity"           = "critical"
     }
   }
+  expiration_time = 600000
 }
 ```
 
@@ -54,18 +60,18 @@ Monitor the count of entities matching specific criteria:
 
 ```hcl
 resource "instana_custom_event_specification" "entity_count" {
-  name = "High Agent Count Alert"
-  description = "Alert when agent count exceeds threshold"
-  enabled = true
-  triggering = true
-  expiration_time = 60000
-  entity_type = "instanaAgent"
+  name            = "High Agent Count Alert"
+  description     = "Alert when agent count exceeds threshold"
+  enabled         = true
+  triggering      = true
+  expiration_time = 600000
+  entity_type     = "instanaAgent"
 
   rules = {
     entity_count = {
-      severity = "warning"
+      severity           = "warning"
       condition_operator = ">"
-      condition_value = 100
+      condition_value    = 100
     }
   }
 }
@@ -77,23 +83,23 @@ Verify entity counts with matching criteria:
 
 ```hcl
 resource "instana_custom_event_specification" "entity_count_verification" {
-  name = "Process Count Verification"
-  description = "Verify process count on hosts"
-  query = "entity.host.name:prod-*"
-  enabled = true
-  triggering = true
-  expiration_time = 60000
-  entity_type = "host"
+  name            = "Process Count Verification"
+  description     = "Verify process count on hosts"
+  query           = "entity.host.name:prod-*"
+  enabled         = true
+  triggering      = true
+  expiration_time = 600000
+  entity_type     = "host"
 
   rules = {
     entity_count_verification = {
-      severity = "critical"
-      matching_entity_type = "process"
-      matching_operator = "is"
+      severity              = "critical"
+      matching_entity_type  = "process"
+      matching_operator     = "is"
       matching_entity_label = "nginx"
-      offline_duration = 60000
-      condition_operator = "<"
-      condition_value = 2
+      offline_duration      = 600000
+      condition_operator    = "<"
+      condition_value       = 2
     }
   }
 }
@@ -105,8 +111,8 @@ Check for missing entities on hosts:
 
 ```hcl
 resource "instana_custom_event_specification" "entity_verification" {
-  name = "Missing Process Alert"
-  description = "Alert when required process is missing"
+  name                  = "Missing Process Alert"
+  description           = "Alert when required process is missing"
   enabled               = true
   entity_type           = "host"
   expiration_time       = 600000
@@ -117,7 +123,7 @@ resource "instana_custom_event_specification" "entity_verification" {
       matching_entity_label = "CustomQueMg"
       matching_entity_type  = "ibmMqQueueManager"
       matching_operator     = "contains"
-      offline_duration      = 60000
+      offline_duration      = 600000
       severity              = "warning"
     }
   }

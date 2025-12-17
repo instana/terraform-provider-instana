@@ -59,11 +59,11 @@ Please update your Terraform configurations to use the new attribute-based synta
 ### Basic Configuration with Rule IDs
 
 ```hcl
-resource "instana_alerting_config" "alert_config {
-  alert_name                         = "New Alert Configuration AN test"
-  event_filter_query                 = "event.type:issue AND event.severity:critical entity.zone:\"helmrefactoring\""
-  event_filter_rule_ids              = ["rule-id1", "rule-id2"]
-  integration_ids                    = []
+resource "instana_alerting_config" "alert_config" {
+  alert_name                         = "New Alert Configuration AN test" # Replace with your own value
+  event_filter_query                 = "event.type:issue AND event.severity:critical entity.zone:\"helmrefactoring\"" # Replace with your own value
+  event_filter_rule_ids              = ["rule-id1", "rule-id2"] # Replace with your own value
+  integration_ids                    = ["integration-id"] # Replace with your own value
 }
 ```
 
@@ -71,15 +71,15 @@ resource "instana_alerting_config" "alert_config {
 
 ```hcl
 resource "instana_alerting_config" "alert_config_multi_channel" {
-  alert_name = "Critical System Alerts"
-  custom_payload_field = [
+  alert_name = "Critical System Alerts" # Replace with your own value
+  custom_payload_field = [ # Replace with your own values
     {
-      key           = var.alert_config_key
-      value         = var.alert_config_value
-    },
+      key           = "key" 
+      value         = "value" 
+    }
   ]
-  event_filter_event_types           = ["critical", "incident", "warning"]
-  integration_ids                    = [instana_alerting_channel_email.ops.id, instana_alerting_channel_slack.alerts.id]
+  event_filter_event_types           = ["critical", "incident", "warning"] 
+  integration_ids                    = ["id1","id2"] 
 }
 ```
 
@@ -87,21 +87,20 @@ resource "instana_alerting_config" "alert_config_multi_channel" {
 
 ```hcl
 resource "instana_alerting_config" "infra_monitoring" {
-  alert_name      = "Infrastructure Health"
-  integration_ids = [instana_alerting_channel_opsgenie.infra.id]
+  alert_name      = "Infrastructure Health" # Replace with your own value
+  integration_ids = [int-id] # Replace with your own value
+  event_filter_query       = "entity.zone:us-east-1 AND (entity.type:host OR entity.type:container)" # Replace with your own value
+  event_filter_event_types = ["incident", "critical", "agent_monitoring_issue"] # Replace with your own values
   
-  event_filter_query       = "entity.zone:us-east-1 AND (entity.type:host OR entity.type:container)"
-  event_filter_event_types = ["incident", "critical", "agent_monitoring_issue"]
-  
-  custom_payload_field = [{
-    key   = "region"
-    value = "us-east-1"
+  custom_payload_field = [{ # Replace with your own values
+    key   = "region" 
+    value = "us-east-1" 
   }, {
-    key   = "priority"
-    value = "P1"
+    key   = "priority" 
+    value = "P1" 
   }, {
-    key   = "runbook"
-    value = "https://wiki.example.com/runbooks/infrastructure"
+    key   = "runbook" 
+    value = "https://wiki.example.com/runbooks/infrastructure" 
   }]
 }
 ```
@@ -111,10 +110,10 @@ resource "instana_alerting_config" "infra_monitoring" {
 
 ```hcl
 resource "instana_alerting_config" "alert_config_change_event_monitoring" {
-  alert_name                         = "K8s-Pod-Alert"
-  event_filter_event_types           = ["agent_monitoring_issue", "change", "critical", "incident", "offline", "online", "warning"]
-  event_filter_query                 = "entity.kubernetes.cluster.label:demo-test"
-  integration_ids                    = ["id1"]
+  alert_name                         = "K8s-Pod-Alert" # Replace with your own value
+  event_filter_event_types           = ["agent_monitoring_issue", "change", "critical", "incident", "offline", "online", "warning"] # Replace with your own value
+  event_filter_query                 = "entity.kubernetes.cluster.label:demo-test" # Replace with your own value
+  integration_ids                    = ["id1"] # Replace with your own value
 }
 ```
 

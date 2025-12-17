@@ -15,11 +15,11 @@ For detailed migration instructions and examples, see the [Plugin Framework Migr
 
 ### Syntax Changes Overview
 
-- `application` → `applications` (now a list with `= [{ }]`)
-- `service` → `services` (nested list)
-- `endpoint` → `endpoints` (nested list)
+- `application` → `application` (now a list with `= [{ }]`)
+- `service` → `service` (nested list)
+- `endpoint` → `endpoint` (nested list)
 - `rule` → `rules` (list with new structure)
-- `threshold` → `thresholds` (nested in rules, supports multiple severity levels)
+- `threshold` → `threshold` (nested in rules, supports multiple severity levels)
 - New `threshold_operator` field in rules
 - `time_threshold` now uses attribute syntax with `= { }`
 - Enhanced support for both static and adaptive baseline thresholds
@@ -63,11 +63,11 @@ resource "instana_application_alert_config" "example" {
 resource "instana_application_alert_config" "example" {
   name = "test-alert"
   
-  applications = [{
+  application = [{
     application_id = "app-123"
     inclusive      = true
     
-    services = [{
+    service = [{
       service_id = "svc-456"
       inclusive  = true
     }]
@@ -80,7 +80,7 @@ resource "instana_application_alert_config" "example" {
         aggregation = "P90"
       }
     }
-    thresholds = {
+    threshold = {
       warning = {
         static = {
           value = 5
@@ -99,44 +99,22 @@ resource "instana_application_alert_config" "example" {
 }
 ```
 
----
-
-
- **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
-
-## Migration Guide (v5 to v6)
-
-### Syntax Changes Overview
-
-- `application` → `applications` (now a list with `= [{ }]`)
-- `service` → `services` (nested list)
-- `endpoint` → `endpoints` (nested list)
-- `rule` → `rules` (list with new structure)
-- `threshold` → `thresholds` (nested in rules, supports multiple severity levels)
-- New `threshold_operator` field in rules
-- `time_threshold` now uses attribute syntax with `= { }`
-- Enhanced support for both static and adaptive baseline thresholds
-- `alert_channels` now supports severity-based routing (map of severity to channel IDs)
-
 
 ### Basic Alert
 
 ```hcl
 resource "instana_application_alert_config" "application_alert_config" {
-  alert_channels = {}
+  name                 = "Calls are slower than usual - $${severity}" # Use double $$ to define placeholders
   application = [
     {
-      application_id = var.application_id
+      application_id = "eQjat8RMR3-5lb376rV5kA" # Replace with your own value
       inclusive      = true
-      service = [
-      ]
     },
   ]
   boundary_scope       = "INBOUND"
   description          = "Calls are slower or equal to 5 ms based on latency (90th)."
   evaluation_type      = "PER_AP"
   granularity          = 600000
-  name                 = "Calls are slower than usual"
   rules = [
     {
       rule = {
@@ -168,22 +146,22 @@ resource "instana_application_alert_config" "application_alert_config" {
 ```hcl
 resource "instana_application_alert_config" "application_alert_config" {
   alert_channels = {
-    CRITICAL = ["alert_channel_1"]
-    WARNING  = ["alert_channel_2"]
+    CRITICAL = ["alert_channel_1"] # Replace with your own value
+    WARNING  = ["alert_channel_2"] # Replace with your own value
   }
   application = [
     {
-      application_id = var.application_id
+      application_id = "eQjat8RMR3-5lb376rV5kA" # Replace with your own value
       inclusive      = true
       service = [
       ]
     },
   ]
   boundary_scope       = "ALL"
-  description          = "Occurrences of HTTP Status Code 5XX (Server Error) is higher or equal to ."
+  description          = "Occurrences of HTTP Status Code 5XX (Server Error) is higher or equal to ." # Replace with your own value
   evaluation_type      = "PER_AP"
   granularity          = 600000
-  name                 = "AN Smart alert"
+  name                 = "AN Smart alert" # Replace with your own value
   rules = [
     {
       rule = {
@@ -204,7 +182,7 @@ resource "instana_application_alert_config" "application_alert_config" {
       threshold_operator = ">="
     },
   ]
-  tag_filter = "(call.tag:'accessType'@na EQUALS 'test' AND call.metric:'codeAmount'@na EQUALS '1')"
+  tag_filter = "(call.tag:'accessType'@na EQUALS 'test' AND call.metric:'codeAmount'@na EQUALS '1')" # Replace with your own value
   time_threshold = {
     violations_in_sequence = {
       time_window = 600000
@@ -218,37 +196,34 @@ resource "instana_application_alert_config" "application_alert_config" {
 ### Alert with Custom Payload
 
 ```hcl
-resource "instana_application_alert_config" "application_alert_config" {
+resource "instana_application_alert_config" "alert_config_3" {
   alert_channels = {
-    WARNING = ["alert-channel-id"]
+    WARNING = ["d35rlokgvalloa2fnps0"] # Replace with your own value
   }
   application = [
     {
-      application_id = var.application_id
+      application_id = "eQjat8RMR3-5lb376rV5kA" # Replace with your own value
       inclusive      = true
-      service = [
-      ]
     },
   ]
   boundary_scope = "ALL"
   custom_payload_field = [
     {
-      key           = "key"
-      value         = "value"
+      key           = "test" # Replace with your own value
+      value         = "test123" # Replace with your own value
     },
     {
       dynamic_value = {
-        key      = "stage"
-        tag_name = "aws.tag"
+        key      = "stage" # Replace with your own value
+        tag_name = "aws.tag" # Replace with your own value
       }
-      key   = "key"
-      value = "value"
+      key   = "stage" # Replace with your own value
     },
   ]
-  description       = "test-alert-description"
+  description       = "test-alert-description" # Replace with your own value
   evaluation_type   = "PER_AP"
   granularity       = 600000
-  name              = "tf test-alert"
+  name              = "test-alert" # Replace with your own value
   rules = [
     {
       rule = {
@@ -267,7 +242,7 @@ resource "instana_application_alert_config" "application_alert_config" {
       threshold_operator = ">"
     },
   ]
-  tag_filter = "call.type@na EQUALS 'HTTP'"
+  tag_filter = "call.type@na EQUALS 'HTTP'" # Replace with your own value
   time_threshold = {
     violations_in_sequence = {
       time_window = 600000
@@ -276,6 +251,106 @@ resource "instana_application_alert_config" "application_alert_config" {
   triggering = false
 }
 
+```
+
+### Alert with throughput rule
+
+```hcl
+resource "instana_application_alert_config" "throughput_application_alert_config" {
+  application = [
+    {
+      application_id = "hpY3YjbxSm6jlrUqIEcl8w" # replace with valid application Id
+      inclusive      = false
+      service = [
+        {
+          endpoint = [
+            {
+              endpoint_id = "8ZZ5e1ZMRNPqvzQOaFkh-InyULM" # replace with valid endpoint Id
+              inclusive   = true
+            },
+          ]
+          inclusive  = false
+          service_id = "0cbc4b430e327759f5fc2b02781c13940d0b439e" # replace with valid service Id
+        },
+      ]
+    },
+  ]
+  boundary_scope       = "ALL"
+  description          = "The number of calls is lower or equal to  calls."
+  evaluation_type      = "PER_AP"
+  granularity          = 600000
+  include_internal     = false
+  include_synthetic    = false
+  name                 = "throughput based alert"
+  rules = [
+    {
+      rule = {
+        throughput = {
+          aggregation = "SUM"
+          metric_name = "calls"
+        }
+      }
+      threshold = {
+        warning = {
+          static = {
+            value = 100
+          }
+        }
+      }
+      threshold_operator = "<="
+    },
+  ]
+  time_threshold = {
+    violations_in_sequence = {
+      time_window = 600000
+    }
+  }
+  triggering = false
+}
+```
+
+### Alert with errors rule
+
+```hcl
+resource "instana_application_alert_config" "errors_application_alert_config" {
+  application = [
+    {
+      application_id = "A2wMMcEyQ36O-KUsDk4eYg" # replace with valid application Id
+      inclusive      = true
+    },
+  ]
+  boundary_scope       = "ALL"
+  description          = "errors based alert"
+  evaluation_type      = "PER_AP_SERVICE"
+  granularity          = 60000
+  include_internal     = false
+  include_synthetic    = false
+  name                 = "errors based alert"
+  rules = [
+    {
+      rule = {
+        errors = {
+          aggregation = "MEAN"
+          metric_name = "errors"
+        }
+      }
+      threshold = {
+        warning = {
+          static = {
+            value = 0.01
+          }
+        }
+      }
+      threshold_operator = ">="
+    },
+  ]
+  time_threshold = {
+    violations_in_sequence = {
+      time_window = 60000
+    }
+  }
+  triggering = true
+}
 ```
 
 ## Generating Configuration from Existing Resources
@@ -334,7 +409,7 @@ terraform apply
 * `granularity` - Optional - default `600000` - The evaluation granularity used for detection of violations of the defined threshold. In other words, it defines the size of the tumbling window used. Allowed values: `300000`, `600000`, `900000`, `1200000`, `1800000`
 * `grace_period` - Optional - The duration (in milliseconds) for which an alert remains open after conditions are no longer violated, with the alert auto-closing once the grace period expires
 * `tag_filter` - Optional - The tag filter of the application alert config. [Details](#tag-filter-argument-reference)
-* `applications` - Required - Selection/Set of applications in scope (list). [Details](#applications-argument-reference)
+* `application` - Required - Selection/Set of applications in scope (list). [Details](#applications-argument-reference)
 * `rules` - Required - List of rules where each rule is associated with multiple thresholds and their corresponding severity levels (list). [Details](#rules-argument-reference)
 * `time_threshold` - Required - Indicates the type of violation of the defined threshold (object). [Details](#time-threshold-argument-reference)
 * `alert_channels` - Optional - Map of alert channel IDs associated with severity levels (map of sets). Keys: `warning`, `critical`
@@ -373,13 +448,13 @@ identifier                := [a-zA-Z_][\.a-zA-Z0-9_\-/]*
 
 * `application_id` - Required - ID of the included application
 * `inclusive` - Required - Defines whether this node and his child nodes are included (true) or excluded (false)
-* `services` - Optional - Selection of services in scope (list). [Details](#services-argument-reference)
+* `service` - Optional - Selection of services in scope (list). [Details](#services-argument-reference)
 
 #### Services Argument Reference
 
 * `service_id` - Required - ID of the included service
 * `inclusive` - Required - Defines whether this node and his child nodes are included (true) or excluded (false)
-* `endpoints` - Optional - Selection of endpoints in scope (list). [Details](#endpoints-argument-reference)
+* `endpoint` - Optional - Selection of endpoints in scope (list). [Details](#endpoints-argument-reference)
 
 ##### Endpoints Argument Reference
 
@@ -391,14 +466,14 @@ identifier                := [a-zA-Z_][\.a-zA-Z0-9_\-/]*
 Each rule object contains:
 
 * `rule` - Required - The rule configuration (object). Exactly one of the rule types below must be configured
-* `thresholds` - Required - Threshold configuration for different severity levels (object). [Details](#thresholds-argument-reference)
+* `threshold` - Required - Threshold configuration for different severity levels (object). [Details](#thresholds-argument-reference)
 * `threshold_operator` - Optional - The operator to apply for threshold comparison. Allowed values: `>`, `>=`, `<`, `<=`
 
 #### Rule Types
 
 Exactly one of the elements below must be configured within the `rule` object:
 
-* `error_rate` - Optional - Rule based on the error rate. [Details](#error-rate-rule-argument-reference)
+* `error_rate` - (Deprecated - please use errors instead)Optional - Rule based on the error rate. [Details](#error-rate-rule-argument-reference)
 * `errors` - Optional - Rule based on the number of errors. [Details](#errors-rule-argument-reference)
 * `logs` - Optional - Rule based on logs. [Details](#logs-rule-argument-reference)
 * `slowness` - Optional - Rule based on the slowness. [Details](#slowness-rule-argument-reference)

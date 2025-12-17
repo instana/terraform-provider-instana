@@ -155,12 +155,10 @@ func TestMapStateToDataObject_SyntheticEntity(t *testing.T) {
 	resource := &sloConfigResource{}
 
 	t.Run("should map synthetic entity successfully", func(t *testing.T) {
+		testIDs, _ := types.SetValueFrom(context.Background(), types.StringType, []string{"test-1", "test-2"})
 		model := EntityModel{
 			SyntheticEntityModel: &SyntheticEntityModel{
-				SyntheticTestIDs: []types.String{
-					types.StringValue("test-1"),
-					types.StringValue("test-2"),
-				},
+				SyntheticTestIDs: testIDs,
 				FilterExpression: types.StringValue("entity.tag.name EQUALS 'value'"),
 			},
 		}
@@ -174,9 +172,10 @@ func TestMapStateToDataObject_SyntheticEntity(t *testing.T) {
 	})
 
 	t.Run("should return error when synthetic entity has no test IDs", func(t *testing.T) {
+		emptySet, _ := types.SetValueFrom(context.Background(), types.StringType, []string{})
 		model := EntityModel{
 			SyntheticEntityModel: &SyntheticEntityModel{
-				SyntheticTestIDs: []types.String{},
+				SyntheticTestIDs: emptySet,
 			},
 		}
 
@@ -697,7 +696,7 @@ func TestMapEntityToState(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapEntityToState(apiObject)
+		result, diags := resource.mapEntityToState(apiObject, nil)
 
 		assert.False(t, diags.HasError())
 		assert.NotNil(t, result.ApplicationEntityModel)
@@ -717,7 +716,7 @@ func TestMapEntityToState(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapEntityToState(apiObject)
+		result, diags := resource.mapEntityToState(apiObject, nil)
 
 		assert.False(t, diags.HasError())
 		assert.Nil(t, result.ApplicationEntityModel)
@@ -733,7 +732,7 @@ func TestMapEntityToState(t *testing.T) {
 			},
 		}
 
-		result, diags := resource.mapEntityToState(apiObject)
+		result, diags := resource.mapEntityToState(apiObject, nil)
 
 		assert.False(t, diags.HasError())
 		assert.Nil(t, result.ApplicationEntityModel)
@@ -748,7 +747,7 @@ func TestMapEntityToState(t *testing.T) {
 			},
 		}
 
-		_, diags := resource.mapEntityToState(apiObject)
+		_, diags := resource.mapEntityToState(apiObject, nil)
 
 		assert.True(t, diags.HasError())
 	})
@@ -1028,10 +1027,9 @@ func TestMapSyntheticEntityToState(t *testing.T) {
 		result, diags := resource.mapSyntheticEntityToState(entity)
 
 		assert.False(t, diags.HasError())
-		assert.Len(t, result.SyntheticTestIDs, 3)
-		assert.Equal(t, "test-1", result.SyntheticTestIDs[0].ValueString())
-		assert.Equal(t, "test-2", result.SyntheticTestIDs[1].ValueString())
-		assert.Equal(t, "test-3", result.SyntheticTestIDs[2].ValueString())
+		assert.False(t, result.SyntheticTestIDs.IsNull())
+		elements := result.SyntheticTestIDs.Elements()
+		assert.Len(t, elements, 3)
 	})
 
 	t.Run("should handle empty test IDs", func(t *testing.T) {
@@ -1042,7 +1040,9 @@ func TestMapSyntheticEntityToState(t *testing.T) {
 		result, diags := resource.mapSyntheticEntityToState(entity)
 
 		assert.False(t, diags.HasError())
-		assert.Empty(t, result.SyntheticTestIDs)
+		assert.False(t, result.SyntheticTestIDs.IsNull())
+		elements := result.SyntheticTestIDs.Elements()
+		assert.Empty(t, elements)
 	})
 
 	t.Run("should handle non-string test IDs gracefully", func(t *testing.T) {
@@ -1054,7 +1054,8 @@ func TestMapSyntheticEntityToState(t *testing.T) {
 
 		assert.False(t, diags.HasError())
 		// Only string values should be converted
-		assert.Len(t, result.SyntheticTestIDs, 2)
+		elements := result.SyntheticTestIDs.Elements()
+		assert.Len(t, elements, 2)
 	})
 }
 
@@ -1144,9 +1145,10 @@ func TestFilterExpressionErrorHandling(t *testing.T) {
 	})
 
 	t.Run("should handle filter expression parsing error in synthetic entity", func(t *testing.T) {
+		testIDs, _ := types.SetValueFrom(context.Background(), types.StringType, []string{"test-1"})
 		model := EntityModel{
 			SyntheticEntityModel: &SyntheticEntityModel{
-				SyntheticTestIDs: []types.String{types.StringValue("test-1")},
+				SyntheticTestIDs: testIDs,
 				FilterExpression: types.StringValue("invalid((expression"),
 			},
 		}
@@ -1367,15 +1369,16 @@ func TestSyntheticEntityWithMultipleTestIDs(t *testing.T) {
 	resource := &sloConfigResource{}
 
 	t.Run("should map synthetic entity with multiple test IDs", func(t *testing.T) {
+		testIDs, _ := types.SetValueFrom(context.Background(), types.StringType, []string{
+			"test-1",
+			"test-2",
+			"test-3",
+			"test-4",
+			"test-5",
+		})
 		model := EntityModel{
 			SyntheticEntityModel: &SyntheticEntityModel{
-				SyntheticTestIDs: []types.String{
-					types.StringValue("test-1"),
-					types.StringValue("test-2"),
-					types.StringValue("test-3"),
-					types.StringValue("test-4"),
-					types.StringValue("test-5"),
-				},
+				SyntheticTestIDs: testIDs,
 			},
 		}
 

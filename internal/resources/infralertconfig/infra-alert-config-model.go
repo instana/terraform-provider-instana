@@ -39,8 +39,9 @@ type InfraViolationsInSequenceModel struct {
 
 // InfraCustomPayloadFieldModel represents the custom payload field model
 type InfraCustomPayloadFieldModel struct {
-	Key   types.String `tfsdk:"key"`
-	Value types.String `tfsdk:"value"`
+	Key          types.String `tfsdk:"key"`
+	Value        types.String `tfsdk:"value"`
+	DynamicValue types.Object `tfsdk:"dynamic_value"`
 }
 
 // InfraRulesModel represents the rules model

@@ -566,10 +566,12 @@ func buildBaseSchema() map[string]schema.Attribute {
 		},
 		SyntheticTestFieldApplicationID: schema.StringAttribute{
 			Optional:    true,
+			Computed:    true,
 			Description: SyntheticTestDescApplicationID,
 		},
 		SyntheticTestFieldApplications: schema.SetAttribute{
 			Optional:    true,
+			Computed:    true,
 			Description: SyntheticTestDescApplications,
 			ElementType: types.StringType,
 		},

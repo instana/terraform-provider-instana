@@ -47,7 +47,7 @@ resource "instana_synthetic_alert_config" "example" {
 #### NEW (v6.x) Syntax:
 ```hcl
 resource "instana_synthetic_alert_config" "example" {
-  alert_channel_ids = ["var.alert_channel_id"]
+  alert_channel_ids = ["alert_channel_id"] # replace with actual alert channel Ids
   custom_payload_field = [
     {
       key           = "e2e_test"
@@ -63,7 +63,7 @@ resource "instana_synthetic_alert_config" "example" {
     metric_name = "status"
   }
   severity           = 5
-  synthetic_test_ids = ["var.test_id"]
+  synthetic_test_ids = ["test_id"] # replace with actual test Ids
   tag_filter         = "synthetic.locationLabel@na EQUALS 'testlocation' "
   time_threshold = {
     type             = "violationsInSequence"
@@ -87,10 +87,10 @@ Monitor synthetic tests and alert on failures:
 
 ```hcl
 resource "instana_synthetic_alert_config" "basic_failure" {
-  name = "Synthetic Test Failure Alert"
+  name = "Synthetic Test Failure Alert - $${severity}" # Use double $$ to define placeholders
   description = "Alert when synthetic tests fail"
   
-  synthetic_test_ids = ["test-id-1", "test-id-2"]
+  synthetic_test_ids = ["test-id-1", "test-id-2"] # replace with actual test Ids
   severity = 5  # Critical
   grace_period = 604800000
 
@@ -106,7 +106,7 @@ resource "instana_synthetic_alert_config" "basic_failure" {
   }
   tag_filter         = "synthetic.locationLabel@na EQUALS 'testlocation' "
 
-  alert_channel_ids = ["channel-id-1"]
+  alert_channel_ids = ["channel-id-1"] # replace with actual alert channel Ids
   
    custom_payload_field = [
     {
@@ -117,7 +117,7 @@ resource "instana_synthetic_alert_config" "basic_failure" {
       key = "test_location"
       dynamic_value = {
         key = "location"
-        tag_name = "synthetic.locationLabel"
+        tag_name = "synthetic.typeLabel"
       }
     }
   ]
@@ -233,11 +233,6 @@ boolean_value             := TRUE | FALSE
 identifier                := [a-zA-Z_][\.a-zA-Z0-9_\-/]*
 ```
 
-**Common Tag Filter Examples:**
-* `synthetic.locationLabel@na EQUALS 'us-east-1'` - Tests in US East region
-* `synthetic.testType@na EQUALS 'api'` - API tests only
-* `synthetic.environment@na EQUALS 'production'` - Production tests
-* `(synthetic.locationLabel@na EQUALS 'us-east-1' OR synthetic.locationLabel@na EQUALS 'us-west-2') AND synthetic.testType@na EQUALS 'api'` - API tests in US regions
 
 ## Attributes Reference
 

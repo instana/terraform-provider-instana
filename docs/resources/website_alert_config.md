@@ -54,8 +54,12 @@ resource "instana_website_alert_config" "example" {
 
 #### NEW (v6.x) Syntax:
 ```hcl
+
 resource "instana_website_alert_config" "example" {
   name = "Website Alert"
+  website_id  = "KExRPJGcSvOjBPD_JrwAIA" # replace with your actual website Id
+  description = "Alert when page load time exceeds threshold"
+
   rules = [
     {
       operator = ">="
@@ -110,13 +114,14 @@ resource "instana_website_alert_config" "example" {
 Monitor page load time:
 
 ```hcl
+
 resource "instana_website_alert_config" "slowness_basic" {
-  name        = "Page Load Time Alert"
+  name        = "Page Load Time Alert - $${severity}" # Use double $$ to define placeholders
   description = "Alert when page load time exceeds threshold"
   triggering  = false
-  website_id  = instana_website_monitoring_config.example.id
+  website_id  = "KExRPJGcSvOjBPD_JrwAIA" # replace with your actual website Id
   
-  alert_channel_ids = [instana_alerting_channel_email.example.id]
+  alert_channel_ids = ["alert-channel-id"] # replace with your actual alert channel id
   granularity       = 600000
   rules = [
     {
@@ -153,8 +158,8 @@ Monitor specific pages or user segments:
 resource "instana_website_alert_config" "slowness_filtered" {
   name        = "Checkout Page Slowness"
   description = "Monitor checkout page performance"
-  website_id  = instana_website_monitoring_config.example.id
-  tag_filter = "endpoint.name@dest NOT_EQUAL 'x'"  
+  website_id  = "KExRPJGcSvOjBPD_JrwAIA" # replace with your actual website Id
+  tag_filter = "beacon.error.count@na GREATER_THAN 1"  
    rules = [
     {
       operator = ">="
@@ -176,15 +181,12 @@ resource "instana_website_alert_config" "slowness_filtered" {
   
   time_threshold = {
     violations_in_period = {
-      time_window = 600000
-      violations  = 3
+      time_window = 1800000
+      violations  = 1
     }
   }
   
-  alert_channel_ids = [
-    instana_alerting_channel_pagerduty.oncall.id,
-    instana_alerting_channel_slack.frontend.id
-  ]
+  alert_channel_ids = ["alert-channel-id"] # replace with your actual alert channel id
 }
 ```
 ### Status Code Alert
@@ -195,7 +197,7 @@ Monitor HTTP status codes:
 resource "instana_website_alert_config" "status_code" {
   name        = "4xx Error Alert"
   description = "Alert on client errors"
-  website_id  = instana_website_monitoring_config.example.id
+  website_id  = "KExRPJGcSvOjBPD_JrwAIA" # replace with your actual website Id
   rules = [
     {
       operator = ">="
@@ -219,12 +221,12 @@ resource "instana_website_alert_config" "status_code" {
   
   time_threshold = {
     violations_in_period = {
-      time_window = 600000
-      violations  = 2
+      time_window = 1800000
+      violations  = 1
     }
   }
   
-  alert_channel_ids = [instana_alerting_channel_slack.ops.id]
+  alert_channel_ids = ["alert-channel-id"] # replace with your actual alert channel id
 }
 ```
 
@@ -236,7 +238,7 @@ Use adaptive baseline for dynamic thresholds:
 resource "instana_website_alert_config" "adaptive_slowness" {
   name        = "4xx Error Alert"
   description = "Alert on client errors"
-  website_id  = instana_website_monitoring_config.example.id
+  website_id  = "KExRPJGcSvOjBPD_JrwAIA" # replace with your actual website Id
   rules = [
     {
       operator = ">="
@@ -262,12 +264,12 @@ resource "instana_website_alert_config" "adaptive_slowness" {
   
   time_threshold = {
     violations_in_period = {
-      time_window = 600000
-      violations  = 2
+      time_window = 1800000
+      violations  = 1
     }
   }
   
-  alert_channel_ids = [instana_alerting_channel_slack.ops.id]
+  alert_channel_ids = ["alert-channel-id"] # replace with your actual alert channel id
 }
 ```
 
@@ -279,7 +281,7 @@ Add custom fields to alert notifications:
 resource "instana_website_alert_config" "with_custom_payload" {
   name        = "4xx Error Alert"
   description = "Alert on client errors"
-  website_id  = instana_website_monitoring_config.example.id
+  website_id  = "KExRPJGcSvOjBPD_JrwAIA" # replace with your actual website Id
   rules = [
     {
       operator = ">="
@@ -305,12 +307,12 @@ resource "instana_website_alert_config" "with_custom_payload" {
   
   time_threshold = {
     violations_in_period = {
-      time_window = 600000
-      violations  = 2
+      time_window = 1800000
+      violations  = 1
     }
   }
   
-  alert_channel_ids = [instana_alerting_channel_slack.ops.id]
+  alert_channel_ids = ["alert-channel-id"] # replace with your actual alert channel id
 
   custom_payload_fields = [
     {
@@ -325,7 +327,7 @@ resource "instana_website_alert_config" "with_custom_payload" {
       key = "user_segment"
       dynamic_value = {
         key      = "segment"
-        tag_name = "beacon.user.segment"
+        tag_name = "beacon.website.name"
       }
     }
   ]

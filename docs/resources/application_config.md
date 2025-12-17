@@ -54,23 +54,6 @@ resource "instana_application_config" "example" {
 }
 ```
 
----
-
-
- **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
-
-
-## Migration Guide (v5 to v6)
-
-### Syntax Changes Overview
-
-- `match_specification` has been replaced with `access_rules` (list attribute with `= [{ }]`)
-- Enhanced validation for scope and boundary_scope values
-- Improved tag filter parsing and normalization
-- Better state management with computed fields
-- Default values are now explicit (scope defaults to `INCLUDE_NO_DOWNSTREAM`, boundary_scope to `DEFAULT`)
-
-#### OLD (v5.x) Syntax:
 
 ### Basic Application Configuration
 
@@ -83,9 +66,9 @@ resource "instana_application_config" "application_perspective_config" {
     },
   ]
   boundary_scope = "INBOUND"
-  label          = "Label"
-  scope          = "INCLUDE_NO_DOWNSTREAM"
-  tag_filter     = "((call.type@na EQUALS 'HTTP' AND service.name@dest EQUALS 'cart' AND kubernetes.namespace@dest EQUALS 'robot-shop') OR service.name@dest EQUALS 'catalogue')"
+  label          = "Label" # Replace with your own value
+  scope          = "INCLUDE_NO_DOWNSTREAM" # Replace with your own value
+  tag_filter     = "((call.type@na EQUALS 'HTTP' AND service.name@dest EQUALS 'cart' AND kubernetes.namespace@dest EQUALS 'robot-shop') OR service.name@dest EQUALS 'catalogue')" # Replace with your own value
 }
 ```
 
@@ -101,9 +84,9 @@ resource "instana_application_config" "tf_b_application_perspective_config_8" {
     },
   ]
   boundary_scope = "ALL"
-  label          = "Label"
-  scope          = "INCLUDE_IMMEDIATE_DOWNSTREAM_DATABASE_AND_MESSAGING"
-  tag_filter     = "(kubernetes.deployment.namespace@dest EQUALS 'release-pink' AND container.image.name@dest EQUALS 'containers.instana.io/synthetic/synthetic-playback-browserscript:1.296.0')"
+  label          = "Label" # Replace with your own value
+  scope          = "INCLUDE_IMMEDIATE_DOWNSTREAM_DATABASE_AND_MESSAGING" # Replace with your own value
+  tag_filter     = "(kubernetes.deployment.namespace@dest EQUALS 'release-pink' AND container.image.name@dest EQUALS 'containers.instana.io/synthetic/synthetic-playback-browserscript:1.296.0')" # Replace with your own value
 }
 ```
 
@@ -310,36 +293,6 @@ label = "Production E-commerce API"
 
 # Avoid
 label = "app1"
-```
-
-## Common Tag Filter Patterns
-
-### Environment-Based
-
-```hcl
-tag_filter = "agent.tag:environment EQUALS 'production'"
-```
-
-### Service Name Patterns
-
-```hcl
-tag_filter = "service.name STARTS_WITH 'prod-' AND service.name NOT_CONTAINS 'test'"
-```
-
-### Cloud Provider Tags
-
-```hcl
-# AWS
-tag_filter = "aws.ec2.tag:Environment EQUALS 'production' AND aws.ec2.tag:Team EQUALS 'platform'"
-
-# Kubernetes
-tag_filter = "kubernetes.pod.label:app EQUALS 'my-app' AND kubernetes.namespace EQUALS 'production'"
-```
-
-### Call-Based Filtering
-
-```hcl
-tag_filter = "call.type@na EQUALS 'HTTP' AND call.http.status@na GREATER_OR_EQUAL_THAN 200 AND call.http.status@na LESS_THAN 300"
 ```
 
 ## Notes

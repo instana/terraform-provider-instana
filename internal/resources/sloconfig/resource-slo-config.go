@@ -212,7 +212,7 @@ func buildSyntheticEntityAttribute() schema.SingleNestedAttribute {
 		Description: SloConfigDescSyntheticEntity,
 		Optional:    true,
 		Attributes: map[string]schema.Attribute{
-			SloConfigFieldSyntheticTestIDs: schema.ListAttribute{
+			SloConfigFieldSyntheticTestIDs: schema.SetAttribute{
 				ElementType: types.StringType,
 				Optional:    true,
 				Description: SloConfigDescSyntheticTestIDs,
@@ -424,6 +424,7 @@ func buildRollingTimeWindowAttribute() schema.SingleNestedAttribute {
 			},
 			SloConfigFieldTimezone: schema.StringAttribute{
 				Optional:    true,
+				Computed:    true,
 				Description: SloConfigDescTimezone,
 			},
 		},
@@ -675,7 +676,7 @@ func (r *sloConfigResource) validateAndMapSyntheticEntity(model *SyntheticEntity
 func (r *sloConfigResource) validateSyntheticEntityFields(model *SyntheticEntityModel) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	if len(model.SyntheticTestIDs) == 0 {
+	if model.SyntheticTestIDs.IsNull() || len(model.SyntheticTestIDs.Elements()) == 0 {
 		diags.AddError(SloConfigErrSyntheticTestIDsRequired, SloConfigErrSyntheticTestIDsRequired)
 	}
 
@@ -684,10 +685,15 @@ func (r *sloConfigResource) validateSyntheticEntityFields(model *SyntheticEntity
 
 // buildSyntheticEntity constructs synthetic entity from model
 func (r *sloConfigResource) buildSyntheticEntity(model *SyntheticEntityModel) restapi.SloEntity {
-	testIDs := make([]interface{}, 0, len(model.SyntheticTestIDs))
-	for _, id := range model.SyntheticTestIDs {
-		if !id.IsNull() && !id.IsUnknown() {
-			testIDs = append(testIDs, id.ValueString())
+	testIDs := make([]interface{}, 0)
+
+	// Extract elements from the Set
+	elements := model.SyntheticTestIDs.Elements()
+	for _, elem := range elements {
+		if strVal, ok := elem.(types.String); ok {
+			if !strVal.IsNull() && !strVal.IsUnknown() {
+				testIDs = append(testIDs, strVal.ValueString())
+			}
 		}
 	}
 
@@ -1062,7 +1068,7 @@ func (r *sloConfigResource) UpdateState(ctx context.Context, state *tfsdk.State,
 		model.RbacTags = r.mapRbacTagsToState(apiObject.RbacTags)
 	}
 
-	entityData, entityDiags := r.mapEntityToState(apiObject)
+	entityData, entityDiags := r.mapEntityToState(apiObject, model.Entity)
 	diags.Append(entityDiags...)
 	if diags.HasError() {
 		return diags
@@ -1116,7 +1122,7 @@ func (r *sloConfigResource) mapRbacTagsToState(rbacTags []restapi.RbacTag) []Rba
 	return stateRbacTags
 }
 
-func (r *sloConfigResource) mapEntityToState(apiObject *restapi.SloConfig) (EntityModel, diag.Diagnostics) {
+func (r *sloConfigResource) mapEntityToState(apiObject *restapi.SloConfig, currentEntityModel *EntityModel) (EntityModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	entityModel := EntityModel{}
@@ -1124,24 +1130,36 @@ func (r *sloConfigResource) mapEntityToState(apiObject *restapi.SloConfig) (Enti
 	switch apiObject.Entity.Type {
 	case SloConfigApplicationEntity:
 		appModel, appDiags := r.mapApplicationEntityToState(apiObject.Entity)
+		if currentEntityModel != nil && currentEntityModel.ApplicationEntityModel != nil {
+			appModel.FilterExpression = currentEntityModel.ApplicationEntityModel.FilterExpression
+		}
 		diags.Append(appDiags...)
 		if !diags.HasError() {
 			entityModel.ApplicationEntityModel = &appModel
 		}
 	case SloConfigWebsiteEntity:
 		websiteModel, websiteDiags := r.mapWebsiteEntityToState(apiObject.Entity)
+		if currentEntityModel != nil && currentEntityModel.WebsiteEntityModel != nil {
+			websiteModel.FilterExpression = currentEntityModel.WebsiteEntityModel.FilterExpression
+		}
 		diags.Append(websiteDiags...)
 		if !diags.HasError() {
 			entityModel.WebsiteEntityModel = &websiteModel
 		}
 	case SloConfigSyntheticEntity:
 		syntheticModel, syntheticDiags := r.mapSyntheticEntityToState(apiObject.Entity)
+		if currentEntityModel != nil && currentEntityModel.SyntheticEntityModel != nil {
+			syntheticModel.FilterExpression = currentEntityModel.SyntheticEntityModel.FilterExpression
+		}
 		diags.Append(syntheticDiags...)
 		if !diags.HasError() {
 			entityModel.SyntheticEntityModel = &syntheticModel
 		}
 	case SloConfigInfrastructureEntity:
 		infraModel, infraDiags := r.mapInfrastructureEntityToState(apiObject.Entity)
+		if currentEntityModel != nil && currentEntityModel.InfrastructureEntityModel != nil {
+			infraModel.FilterExpression = currentEntityModel.InfrastructureEntityModel.FilterExpression
+		}
 		diags.Append(infraDiags...)
 		if !diags.HasError() {
 			entityModel.InfrastructureEntityModel = &infraModel
@@ -1195,15 +1213,20 @@ func (r *sloConfigResource) mapWebsiteEntityToState(entity restapi.SloEntity) (W
 func (r *sloConfigResource) mapSyntheticEntityToState(entity restapi.SloEntity) (SyntheticEntityModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	testIDs := make([]types.String, 0, len(entity.SyntheticTestIDs))
+	// Convert API response slice to string slice
+	testIDStrings := make([]string, 0, len(entity.SyntheticTestIDs))
 	for _, id := range entity.SyntheticTestIDs {
 		if idStr, ok := id.(string); ok {
-			testIDs = append(testIDs, types.StringValue(idStr))
+			testIDStrings = append(testIDStrings, idStr)
 		}
 	}
 
+	// Convert string slice to Set
+	testIDsSet, setDiags := types.SetValueFrom(context.Background(), types.StringType, testIDStrings)
+	diags.Append(setDiags...)
+
 	model := SyntheticEntityModel{
-		SyntheticTestIDs: testIDs,
+		SyntheticTestIDs: testIDsSet,
 	}
 
 	filterExpr, filterDiags := r.mapFilterExpressionToState(entity.FilterExpression)
@@ -1276,10 +1299,14 @@ func (r *sloConfigResource) mapIndicatorToState(apiObject *restapi.SloConfig, sl
 		indicatorModel.TrafficIndicatorModel = r.createTrafficModel(indicator, existingVal)
 
 	case indicator.Type == SloConfigAPIIndicatorMeasurementTypeEventBased && indicator.Blueprint == SloConfigAPIIndicatorBlueprintCustom:
-		customModel, customDiags := r.createCustomModel(indicator)
-		diags.Append(customDiags...)
-		if !diags.HasError() {
-			indicatorModel.CustomIndicatorModel = customModel
+		if existingVal != nil && existingVal.CustomIndicatorModel != nil {
+			indicatorModel.CustomIndicatorModel = existingVal.CustomIndicatorModel
+		} else {
+			customModel, customDiags := r.createCustomModel(indicator)
+			diags.Append(customDiags...)
+			if !diags.HasError() {
+				indicatorModel.CustomIndicatorModel = customModel
+			}
 		}
 
 	case indicator.Type == SloConfigAPIIndicatorMeasurementTypeTimeBased && indicator.Blueprint == SloConfigAPIIndicatorBlueprintSaturation:

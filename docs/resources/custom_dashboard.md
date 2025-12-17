@@ -50,7 +50,7 @@ resource "instana_custom_dashboard" "example" {
   access_rule = [{
     access_type   = "READ_WRITE"
     relation_type = "USER"
-    related_id    = "user-id-1"
+    related_id    = "5ee8a3e8cd70020001ecb007" # replace with actual user id
   }, {
     access_type   = "READ"
     relation_type = "GLOBAL"
@@ -77,7 +77,7 @@ resource "instana_custom_dashboard" "custom_dashboard" {
   access_rule = [
     {
       access_type   = "READ_WRITE"
-      related_id    = "5ee8a3e8cd70020001ecb007"
+      related_id    = "5ee8a3e8cd70020001ecb007" # replace with actual user id
       relation_type = "USER"
     },
   ]

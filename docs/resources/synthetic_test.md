@@ -46,11 +46,11 @@ resource "instana_synthetic_test" "example" {
     retries             = 0
     retry_interval      = 1
     timeout             = "0m"
-    url                 = "var.url"
+    url                 = "https://api.example.com/status" # replace with actual url
     validation_string   = "test"
   }
   label           = "test label"
-  locations       = ["var.location"]
+  locations       = ["b8dsyQt4fDukWzR9RMXW"] # replace with actual location Ids
   playback_mode   = "Simultaneous"
   test_frequency  = 15
 }
@@ -71,12 +71,13 @@ resource "instana_synthetic_test" "example" {
 Basic HTTP GET request test:
 
 ```hcl
+
 resource "instana_synthetic_test" "http_action_basic" {
   label          = "Basic HTTP Test"
   description    = "Monitor website availability"
   active         = true
-  application_id = "my-app-id"
-  locations      = [data.instana_synthetic_location.loc1.id]
+  applications = ["NQIAsj1tSJm2zxMQx78MSA"] # replace with actual application Ids
+  locations      = ["b8dsyQt4fDukWzR9RMXW"] # replace with actual location Ids
   test_frequency = 15
   playback_mode  = "Simultaneous"
   
@@ -108,7 +109,7 @@ resource "instana_synthetic_test" "http_action_advanced" {
   label       = "API Endpoint Test"
   description = "Test API with authentication"
   active      = true
-  locations   = [data.instana_synthetic_location.us_east.id]
+  locations   = ["b8dsyQt4fDukWzR9RMXW"] # replace with actual location ids
   
   http_action = {
     url       = "https://api.example.com/v1/users"
@@ -135,15 +136,15 @@ Validate JSON response structure:
 resource "instana_synthetic_test" "http_json_validation" {
   label     = "JSON API Test"
   active    = true
-  locations = [data.instana_synthetic_location.loc1.id]
+  locations = ["b8dsyQt4fDukWzR9RMXW"] # replace with actual location ids
   
   http_action = {
     url           = "https://api.example.com/status"
     operation     = "GET"
     expect_status = 200
-    expect_json = {
+    expect_json = jsonencode({
       "status" = "ok"
-    }
+    })
   }
 }
 ```
@@ -157,7 +158,7 @@ resource "instana_synthetic_test" "dns_test" {
   active            = true
   dns = {
     accept_cname        = false
-    lookup              = "var.url"
+    lookup              = "https://api.example.com/status" # replace with actual url
     lookup_server_name  = false
     mark_synthetic_call = true
     query_time = {
@@ -174,7 +175,7 @@ resource "instana_synthetic_test" "dns_test" {
     timeout           = "0m"
     transport         = "UDP"
   }
-  locations       = ["b8dsyQt4fDukWzR9RMXW"]
+  locations       = ["b8dsyQt4fDukWzR9RMXW"] # replace with actual location ids
   playback_mode   = "Simultaneous"
   test_frequency  = 15
 
@@ -190,11 +191,11 @@ resource "instana_synthetic_test" "ssl_cert_test" {
   label       = "SSL Certificate Test"
   description = "Monitor SSL certificate expiration"
   active      = true
-  locations   = [data.instana_synthetic_location.loc1.id]
+  locations   = ["b8dsyQt4fDukWzR9RMXW"] # replace with actual location ids
   ssl_certificate = {
     accept_self_signed_certificate = false
     days_remaining_check           = 11
-    hostname                       = "var.url"
+    hostname                       = "hostname" # replace with actual hostname
     mark_synthetic_call            = true
     port                           = null
     retries                        = 0

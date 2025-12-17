@@ -51,7 +51,7 @@ const (
 	// SloConfigDescSyntheticEntity is the description for the synthetic entity block
 	SloConfigDescSyntheticEntity = "Synthetic entity of SLO"
 	// SloConfigDescSyntheticTestIDs is the description for the synthetic_test_ids field
-	SloConfigDescSyntheticTestIDs = "The synthetics ID of the entity"
+	SloConfigDescSyntheticTestIDs = "A set of synthetic test IDs."
 	// SloConfigDescInfrastructureEntity is the description for the infrastructure entity block
 	SloConfigDescInfrastructureEntity = "Infrastructure entity of SLO"
 	// SloConfigDescInfraType is the description for the infra_type field

@@ -36,24 +36,13 @@ resource "instana_api_token" "example" {
 resource "instana_api_token" "example" {
   name                          = "my-token"
   can_configure_service_mapping = true
-  # Omitted attributes explicitly default to false
   # All boolean attributes now have computed defaults
 }
 ```
 
  **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
 
-## Migration Guide (v5 to v6)
-
-### Syntax Changes Overview
-
-- All attributes are now top-level attributes (no nested blocks)
-- Boolean attributes now use explicit `true`/`false` values with defaults
-- The `id`, `access_granting_token`, and `internal_id` attributes are computed
-- All permission and scope attributes have default values of `false`
-- Attribute syntax remains the same (key = value), but schema validation is stricter
-
-#### OLD (v5.x) Syntax:
+## Example Usage
 
 ### Basic API Token
 
@@ -76,8 +65,8 @@ resource "instana_api_token" "readonly" {
 ####  Access Token with More Permissions
 
 ```hcl
-resource "instana_api_token" "production_full" {
-  name = "production-full-access-token"
+resource "instana_api_token" "production_example" {
+  name = "production-access-token"
   
   # Application and Service Configuration
   can_configure_service_mapping       = true
@@ -106,6 +95,7 @@ resource "instana_api_token" "production_full" {
   # Synthetic Monitoring
   can_configure_synthetic_tests       = true
   can_configure_synthetic_locations   = true
+  can_view_synthetic_locations        = true
   can_view_synthetic_tests            = true
   can_view_synthetic_test_results     = true
   

@@ -137,20 +137,31 @@ func (r *groupResource) SetComputedFields(_ context.Context, _ *tfsdk.Plan) diag
 }
 
 // UpdateState updates the Terraform state with data from the API response
-func (r *groupResource) UpdateState(ctx context.Context, state *tfsdk.State, _ *tfsdk.Plan, group *restapi.Group) diag.Diagnostics {
-	model := r.buildGroupModelFromAPIResponse(group)
+func (r *groupResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, group *restapi.Group) diag.Diagnostics {
+	var diags diag.Diagnostics
+	var model GroupModel
+	if plan != nil {
+		diags.Append(plan.Get(ctx, &model)...)
+	} else if state != nil {
+		diags.Append(state.Get(ctx, &model)...)
+	} else {
+		model = GroupModel{}
+	}
+	model = r.buildGroupModelFromAPIResponse(group, model)
 	return state.Set(ctx, model)
 }
 
 // buildGroupModelFromAPIResponse constructs a GroupModel from the API Group response
-func (r *groupResource) buildGroupModelFromAPIResponse(group *restapi.Group) GroupModel {
+func (r *groupResource) buildGroupModelFromAPIResponse(group *restapi.Group, groupModel GroupModel) GroupModel {
 	model := GroupModel{
 		ID:   types.StringValue(group.ID),
 		Name: types.StringValue(group.Name),
 	}
 
-	if len(group.Members) > 0 {
+	if groupModel.Members == nil || len(groupModel.Members) == 0 {
 		model.Members = r.mapMembersToModel(group.Members)
+	} else {
+		model.Members = groupModel.Members
 	}
 
 	if !group.PermissionSet.IsEmpty() {
@@ -162,6 +173,9 @@ func (r *groupResource) buildGroupModelFromAPIResponse(group *restapi.Group) Gro
 
 // mapMembersToModel converts API members to model members
 func (r *groupResource) mapMembersToModel(apiMembers []restapi.APIMember) []GroupMemberModel {
+	if len(apiMembers) == 0 {
+		return nil
+	}
 	members := make([]GroupMemberModel, len(apiMembers))
 	for i, apiMember := range apiMembers {
 		members[i] = GroupMemberModel{
