@@ -54,23 +54,6 @@ resource "instana_application_config" "example" {
 }
 ```
 
----
-
-
- **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
-
-
-## Migration Guide (v5 to v6)
-
-### Syntax Changes Overview
-
-- `match_specification` has been replaced with `access_rules` (list attribute with `= [{ }]`)
-- Enhanced validation for scope and boundary_scope values
-- Improved tag filter parsing and normalization
-- Better state management with computed fields
-- Default values are now explicit (scope defaults to `INCLUDE_NO_DOWNSTREAM`, boundary_scope to `DEFAULT`)
-
-#### OLD (v5.x) Syntax:
 
 ### Basic Application Configuration
 

@@ -108,8 +108,8 @@ resource "instana_alerting_channel" "office365_basic" {
 resource "instana_alerting_channel" "opsgenie_eu" {
   name = "opsgenie-eu-alerts"
   
-  ops_genie = {
-    api_key = "a1b2c3d4-e5f6-7890-abcd" # Replace with your own value
+  ops_genie = { # Replace with your own value
+    api_key = "a1b2c3d4-e5f6-7890-abcd" 
     tags    = ["instana", "production"]
     region  = "EU"
   }
@@ -121,8 +121,8 @@ resource "instana_alerting_channel" "opsgenie_eu" {
 resource "instana_alerting_channel" "opsgenie_detailed" {
   name = "opsgenie-detailed-alerts"
   
-  ops_genie = {
-    api_key = "f9e8d7c6-b5a4-3210-9876" # Replace with your own value
+  ops_genie = { # Replace with your own value
+    api_key = "f9e8d7c6-b5a4-3210-9876" 
     tags = [
       "environment:production",
       "team:platform",
@@ -254,7 +254,7 @@ resource "instana_alerting_channel" "webhook_multiple" {
   
   webhook = {
     http_headers = {}
-    webhook_urls = [ # Replace with your own value
+    webhook_urls = [ # Replace with your own values
       "https://api.example.com/instana/alerts",
       "https://backup-api.example.com/alerts",
       "https://monitoring.example.com/webhooks/instana"
@@ -395,12 +395,12 @@ resource "instana_alerting_channel" "watson_with_headers" {
 resource "instana_alerting_channel" "slack_app_basic" {
   name = "slack-app-alerts"
   
-  slack_app = {
-    app_id       = "A01234567" # Replace with your own value
-    team_id      = "T01234567" # Replace with your own value
-    team_name    = "My Team" # Replace with your own value
-    channel_id   = "C01234567" # Replace with your own value
-    channel_name = "#alerts" # Replace with your own value
+  slack_app = { # Replace with your own value
+    app_id       = "A01234567" 
+    team_id      = "T01234567" 
+    team_name    = "My Team"
+    channel_id   = "C01234567" 
+    channel_name = "#alerts" 
   }
 }
 ```
@@ -410,12 +410,12 @@ resource "instana_alerting_channel" "slack_app_basic" {
 resource "instana_alerting_channel" "slack_app_with_emoji" {
   name = "slack-app-emoji-alerts"
   
-  slack_app = {
-    app_id          = "A01234567" # Replace with your own value
-    team_id         = "T01234567" # Replace with your own value
-    team_name       = "My Team" # Replace with your own value
-    channel_id      = "C01234567" # Replace with your own value
-    channel_name    = "#production-alerts" # Replace with your own value
+  slack_app = { # Replace with your own values
+    app_id          = "A01234567" 
+    team_id         = "T01234567" 
+    team_name       = "My Team" 
+    channel_id      = "C01234567" 
+    channel_name    = "#production-alerts" 
     emoji_rendering = true
   }
 }
@@ -427,14 +427,14 @@ resource "instana_alerting_channel" "slack_app_with_emoji" {
 ```hcl
 resource "instana_alerting_channel" "ms_teams_bidirect" {
   name           = "MS Teams App Alert Channel"
-  ms_teams_app = {
-    channel_id   = "19:a1b2c3d4e5f6g7h8i9j0@thread.tacv2" # Replace with your own value
-    channel_name = "Instana Alerts" # Replace with your own value
-    service_url  = "https://smba.trafficmanager.net/amer/" # Replace with your own value
-    team_id      = "a1b2c3d4-e5f6-7890-abcd-ef1234567890" # Replace with your own value
-    team_name    = "Platform Engineering" # Replace with your own value
-    tenant_id    = "f9e8d7c6-b5a4-3210-9876-543210fedcba" # Replace with your own value
-    tenant_name  = "Acme Corporation" # Replace with your own value
+  ms_teams_app = { # Replace with your own values
+    channel_id   = "19:a1b2c3d4e5f6g7h8i9j0@thread.tacv2" 
+    channel_name = "Instana Alerts" 
+    service_url  = "https://smba.trafficmanager.net/amer/" 
+    team_id      = "a1b2c3d4-e5f6-7890-abcd-ef1234567890" 
+    team_name    = "Platform Engineering" 
+    tenant_id    = "f9e8d7c6-b5a4-3210-9876-543210fedcba" 
+    tenant_name  = "Acme Corporation" 
   }
 }
 ```
