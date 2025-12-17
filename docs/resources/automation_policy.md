@@ -48,7 +48,6 @@ resource "instana_automation_policy" "example" {
       }
       agent_id = "agent-id"
     }]
-    
     condition = {
       query = "entity.agent.capability:action-script"
     }
@@ -100,7 +99,6 @@ resource "instana_automation_policy" "example" {
 resource "instana_automation_policy" "automation_policy" {
   description = "Stop the KLO Log File Agent on Linux"
   name        = "Policy_Stop"
-  tags        = []
   trigger = {
     description = "Stop ping-springboot-app.sh to trigger event."
     id          = "HNgvGZRl4cxfifOS"

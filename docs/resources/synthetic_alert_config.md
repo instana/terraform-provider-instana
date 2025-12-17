@@ -233,11 +233,6 @@ boolean_value             := TRUE | FALSE
 identifier                := [a-zA-Z_][\.a-zA-Z0-9_\-/]*
 ```
 
-**Common Tag Filter Examples:**
-* `synthetic.locationLabel@na EQUALS 'us-east-1'` - Tests in US East region
-* `synthetic.testType@na EQUALS 'api'` - API tests only
-* `synthetic.environment@na EQUALS 'production'` - Production tests
-* `(synthetic.locationLabel@na EQUALS 'us-east-1' OR synthetic.locationLabel@na EQUALS 'us-west-2') AND synthetic.testType@na EQUALS 'api'` - API tests in US regions
 
 ## Attributes Reference
 

@@ -212,7 +212,6 @@ resource "instana_automation_action" "Jira_task" {
     project     = "Project"                     # Replace with your own value
     title       = "Title"                       # Replace with your own value
   }
-  manual = null
   name   = "Jira-test" # Replace with your own value
 }
 ```
@@ -269,7 +268,7 @@ resource "instana_automation_action" "create_gitlab_issue" {
     type        = "dynamic"
     required    = true
     hidden      = false
-    value       = ""
+    value       = "value"
   }]
 }
 ```
@@ -293,45 +292,9 @@ resource "instana_automation_action" "runbook_link" {
     type        = "dynamic"
     required    = true
     hidden      = false
-    value       = ""
+    value       = "value"
   }]
 }
-```
-
-### Ansible Integration
-
-```hcl
-resource "instana_automation_action" "tf_b_ansible_1" {
-  ansible = {
-    host_id            = "<host_id>"            # Replace with your own value
-    playbook_file_name = "<file_name>"          # Replace with your own value
-    playbook_id        = "<id>"                 # Replace with your own value
-    url                = "<url>"                # Replace with your own value
-  }
-  description = "Test"
-  input_parameter = [
-    {
-      description = "test" # Replace with your own value
-      hidden      = false
-      label       = "Label"
-      name        = "Name" # Replace with your own value
-      required    = false
-      type        = "static"
-      value       = ""
-    },
-    {
-      description = "" # Replace with your own value
-      hidden      = false
-      label       = "Label" # Replace with your own value
-      name        = "Name" # Replace with your own value
-      required    = false
-      type        = "static"
-      value       = ""
-    },
-  ]
-  name   = "Ansible Test"
-}
-
 ```
 
 ## Generating Configuration from Existing Resources
@@ -394,7 +357,6 @@ terraform apply
 * `github` - Optional - GitHub Integration Configuration (object). [Details](#github-argument-reference)
 * `gitlab` - Optional - GitLab Integration Configuration (object). [Details](#gitlab-argument-reference)
 * `doc_link` - Optional - Documentation Link Configuration (object). [Details](#doc-link-argument-reference)
-* `ansible` - Optional - Ansible Integration Configuration (object). [Details](#ansible-argument-reference)
 
 ### Input Parameter Argument Reference
 
@@ -478,14 +440,6 @@ Exactly one of the following must be configured:
 ### Doc Link Argument Reference
 
 * `url` - Required - URL to the documentation/runbook
-
-### Ansible Argument Reference
-
-* `workflow_id` - Optional - Ansible workflow identifier
-* `playbook_id` - Optional - Ansible playbook identifier
-* `playbook_file_name` - Optional - Name of the playbook file
-* `url` - Optional - Ansible Tower/AWX URL
-* `host_id` - Optional - Target host identifier
 
 ## Attributes Reference
 

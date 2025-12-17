@@ -107,7 +107,7 @@ resource "instana_global_application_alert_config" "example" {
 4. **Rule**: `rule { }` → `rule = { }`
 5. **Threshold**: `threshold { }` → `threshold = { }`
 6. **Time Threshold**: `time_threshold { }` → `time_threshold = { }`
-7. **Custom Payload Fields**: `custom_payload_field { }` (multiple) → `custom_payload_fields = [{ }]` (list)
+7. **Custom Payload Fields**: `custom_payload_field { }` (multiple) → `custom_payload_field = [{ }]` (list)
 8. **Aggregation**: Case-insensitive but lowercase recommended: `P90` → `p90`
 
 ## Example Usage
@@ -235,7 +235,7 @@ terraform apply
 * `rule` - Required - Alert rule configuration [Details](#rule-reference)
 * `threshold` - Required - Threshold configuration [Details](#threshold-reference)
 * `time_threshold` - Required - Time threshold configuration [Details](#time-threshold-reference)
-* `custom_payload_fields` - Optional - List of custom payload fields for alert notifications [Details](#custom-payload-fields-reference)
+* `custom_payload_field` - Optional - List of custom payload fields for alert notifications [Details](#custom-payload-fields-reference)
 
 ### Application Reference
 
