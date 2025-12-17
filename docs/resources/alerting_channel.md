@@ -319,7 +319,6 @@ resource "instana_alerting_channel" "service_now_channel" {
     enable_send_instana_notes          = true
     enable_send_service_now_activities = true
     enable_send_service_now_work_notes = true
-    instana_url                        = "https://test-instana.pink.instana.rocks/" # Replace with your own value
     manually_closed_incidents          = true
     username                           = "servicenow_itsm_user" # Replace with your own value
     password                           = "ITSM@Pass2024!Secure" # Replace with your own value
@@ -649,7 +648,7 @@ terraform apply
 * `team_name` - (Required) The Team Name where the MS Teams App is installed.
 * `channel_id` - (Required) The Channel ID where alerts will be sent.
 * `channel_name` - (Required) The Channel Name where alerts will be sent.
-* `instana_url` - (Required) The Instana URL for linking back from MS Teams.
+* `instana_url` - (Optional) The Instana URL for linking back from MS Teams.
 * `service_url` - (Required) The MS Teams service URL.
 * `tenant_id` - (Required) The Tenant ID for MS Teams.
 * `tenant_name` - (Required) The Tenant Name for MS Teams.
