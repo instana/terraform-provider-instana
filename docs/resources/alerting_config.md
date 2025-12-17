@@ -72,14 +72,14 @@ resource "instana_alerting_config" "alert_config" {
 ```hcl
 resource "instana_alerting_config" "alert_config_multi_channel" {
   alert_name = "Critical System Alerts" # Replace with your own value
-  custom_payload_field = [
+  custom_payload_field = [ # Replace with your own values
     {
-      key           = "key" # Replace with your own value
-      value         = "value" # Replace with your own value
-    },
+      key           = "key" 
+      value         = "value" 
+    }
   ]
-  event_filter_event_types           = ["critical", "incident", "warning"] # Replace with your own value
-  integration_ids                    = ["id1","id2"] # Replace with your own value
+  event_filter_event_types           = ["critical", "incident", "warning"] 
+  integration_ids                    = ["id1","id2"] 
 }
 ```
 
@@ -88,20 +88,19 @@ resource "instana_alerting_config" "alert_config_multi_channel" {
 ```hcl
 resource "instana_alerting_config" "infra_monitoring" {
   alert_name      = "Infrastructure Health" # Replace with your own value
-  integration_ids = [instana_alerting_channel_opsgenie.infra.id] # Replace with your own value
-  
+  integration_ids = [int-id] # Replace with your own value
   event_filter_query       = "entity.zone:us-east-1 AND (entity.type:host OR entity.type:container)" # Replace with your own value
-  event_filter_event_types = ["incident", "critical", "agent_monitoring_issue"] # Replace with your own value
+  event_filter_event_types = ["incident", "critical", "agent_monitoring_issue"] # Replace with your own values
   
-  custom_payload_field = [{
-    key   = "region" # Replace with your own value
-    value = "us-east-1" # Replace with your own value
+  custom_payload_field = [{ # Replace with your own values
+    key   = "region" 
+    value = "us-east-1" 
   }, {
-    key   = "priority" # Replace with your own value
-    value = "P1" # Replace with your own value
+    key   = "priority" 
+    value = "P1" 
   }, {
-    key   = "runbook" # Replace with your own value
-    value = "https://wiki.example.com/runbooks/infrastructure" # Replace with your own value
+    key   = "runbook" 
+    value = "https://wiki.example.com/runbooks/infrastructure" 
   }]
 }
 ```
