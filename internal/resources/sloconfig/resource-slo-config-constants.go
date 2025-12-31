@@ -70,8 +70,10 @@ const (
 	SloConfigDescTraffic = "Traffic indicator"
 	// SloConfigDescCustom is the description for the custom indicator
 	SloConfigDescCustom = "Custom indicator"
-	// SloConfigDescSaturation is the description for the saturation indicator
-	SloConfigDescSaturation = "Saturation indicator"
+	// SloConfigTimeBasedDescSaturation is the description for the time-based saturation indicator
+	SloConfigDescTimeBasedSaturation = "Time-based Saturation indicator"
+	// SloConfigDescEventBasedSaturation is the description for the event-based saturation indicator
+	SloConfigDescEventBasedSaturation = "Event-based Saturation indicator"
 	// SloConfigDescMetricName is the description for the metric_name field
 	SloConfigDescMetricName = "The metric name for saturation indicator"
 	// SloConfigDescThreshold is the description for the threshold field
@@ -172,10 +174,13 @@ const (
 	// SloConfigErrInfraTypeRequiredMsg is the error message for missing infrastructure type
 	SloConfigErrInfraTypeRequiredMsg = "infra_type is required for infrastructure entity"
 	// SloConfigErrSaturationRequired is the error title for missing saturation indicator fields
-	SloConfigErrSaturationRequired = "Saturation indicator fields required"
+	SloConfigErrTimeBasedSaturationRequired = "Time-based Saturation indicator fields required"
+	// SloConfigErrSaturationRequired is the error title for missing saturation indicator fields
+	SloConfigErrEventBasedSaturationRequired = "Event-based Saturation indicator fields required"
 	// SloConfigErrSaturationRequiredMsg is the error message for missing saturation indicator fields
-	SloConfigErrSaturationRequiredMsg = "threshold and operator are required for saturation indicator"
-
+	SloConfigErrTimeBasedSaturationRequiredMsg = "threshold and operator are required for time-based saturation indicator"
+	// SloConfigErrSaturationRequiredMsg is the error message for missing saturation indicator fields
+	SloConfigErrEventBasedSaturationRequiredMsg = "threshold and operator are required for event-based saturation indicator"
 	SloConfigFromTerraformIdPrefix = "SLOTF"
 
 	//SloConfigField names for terraform
@@ -275,8 +280,10 @@ const (
 	SchemaFieldTraffic = "traffic"
 	// SchemaFieldCustom represents the custom field identifier
 	SchemaFieldCustom = "custom"
-	// SchemaFieldSaturation represents the saturation field identifier
-	SchemaFieldSaturation = "saturation"
+	// SchemaFieldTimeBasedSaturation represents the time-based saturation field identifier
+	SchemaFieldTimeBasedSaturation = "time_based_saturation"
+	// SchemaFieldEventBasedSaturation represents the event-based saturation field identifier
+	SchemaFieldEventBasedSaturation = "event_based_saturation"
 	// SchemaFieldOperator represents the operator field identifier
 	SchemaFieldOperator = "operator"
 
