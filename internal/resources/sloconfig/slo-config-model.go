@@ -119,7 +119,6 @@ type TimeBasedSaturationIndicatorModel struct {
 type EventBasedSaturationIndicatorModel struct {
 	MetricName  types.String  `tfsdk:"metric_name"`
 	Threshold   types.Float64 `tfsdk:"threshold"`
-	Aggregation types.String  `tfsdk:"aggregation"`
 	Operator    types.String  `tfsdk:"operator"`
 }
 

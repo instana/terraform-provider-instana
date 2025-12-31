@@ -178,9 +178,9 @@ const (
 	// SloConfigErrSaturationRequired is the error title for missing saturation indicator fields
 	SloConfigErrEventBasedSaturationRequired = "Event-based Saturation indicator fields required"
 	// SloConfigErrSaturationRequiredMsg is the error message for missing saturation indicator fields
-	SloConfigErrTimeBasedSaturationRequiredMsg = "threshold and operator are required for time-based saturation indicator"
+	SloConfigErrTimeBasedSaturationRequiredMsg = "threshold is required for time-based saturation indicator"
 	// SloConfigErrSaturationRequiredMsg is the error message for missing saturation indicator fields
-	SloConfigErrEventBasedSaturationRequiredMsg = "threshold and operator are required for event-based saturation indicator"
+	SloConfigErrEventBasedSaturationRequiredMsg = "threshold is required for event-based saturation indicator"
 	SloConfigFromTerraformIdPrefix = "SLOTF"
 
 	//SloConfigField names for terraform
