@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
@@ -1260,25 +1261,25 @@ func TestEdgeCases(t *testing.T) {
 
 	t.Run("should handle empty tags list", func(t *testing.T) {
 		model := SloConfigModel{
-			Tags: []types.String{},
+			Tags: types.SetValueMust(types.StringType, []attr.Value{}),
 		}
 
 		// Test that empty tags are handled correctly
-		assert.NotNil(t, model.Tags)
-		assert.Empty(t, model.Tags)
+		assert.False(t, model.Tags.IsNull())
+		assert.True(t, model.Tags.IsUnknown() || len(model.Tags.Elements()) == 0)
 	})
 
 	t.Run("should handle null values in tags", func(t *testing.T) {
 		model := SloConfigModel{
-			Tags: []types.String{
+			Tags: types.SetValueMust(types.StringType, []attr.Value{
 				types.StringValue("tag1"),
 				types.StringNull(),
 				types.StringValue("tag2"),
-			},
+			}),
 		}
 
 		// Verify tags with null values
-		assert.Len(t, model.Tags, 3)
+		assert.Equal(t, 3, len(model.Tags.Elements()))
 	})
 
 	t.Run("should handle unknown values gracefully", func(t *testing.T) {
@@ -1371,10 +1372,10 @@ func TestMapStateToDataObjectWithFullModel(t *testing.T) {
 			ID:     types.StringValue("test-id"),
 			Name:   types.StringValue("Test SLO"),
 			Target: types.Float64Value(99.5),
-			Tags: []types.String{
+			Tags: types.SetValueMust(types.StringType, []attr.Value{
 				types.StringValue("tag1"),
 				types.StringValue("tag2"),
-			},
+			}),
 			RbacTags: []RbacTagModel{
 				{
 					DisplayName: types.StringValue("Team A"),
@@ -1628,7 +1629,7 @@ func TestUpdateStateWithEmptyTags(t *testing.T) {
 			ID:     types.StringValue("test-id"),
 			Name:   types.StringValue("Old Name"),
 			Target: types.Float64Value(95.0),
-			Tags:   []types.String{types.StringValue("existing-tag")},
+			Tags:   types.SetValueMust(types.StringType, []attr.Value{types.StringValue("existing-tag")}),
 			Entity: &EntityModel{
 				ApplicationEntityModel: &ApplicationEntityModel{
 					ApplicationID: types.StringValue(appID),

@@ -58,7 +58,7 @@ func NewAlertingChannelResourceHandle() resourcehandle.ResourceHandle[*restapi.A
 								Required:    true,
 								Description: AlertingChannelDescOpsGenieAPIKey,
 							},
-							AlertingChannelOpsGenieFieldTags: schema.ListAttribute{
+							AlertingChannelOpsGenieFieldTags: schema.SetAttribute{
 								Required:    true,
 								Description: AlertingChannelDescOpsGenieTags,
 								ElementType: types.StringType,
@@ -284,7 +284,7 @@ func NewAlertingChannelResourceHandle() resourcehandle.ResourceHandle[*restapi.A
 								Required:    true,
 								Description: AlertingChannelDescWatsonAIOpsWebhookURL,
 							},
-							AlertingChannelWebhookFieldHTTPHeaders: schema.ListAttribute{
+							AlertingChannelWebhookFieldHTTPHeaders: schema.SetAttribute{
 								Optional:    true,
 								Description: AlertingChannelDescWatsonAIOpsHTTPHeaders,
 								ElementType: types.StringType,
@@ -349,7 +349,7 @@ func NewAlertingChannelResourceHandle() resourcehandle.ResourceHandle[*restapi.A
 							},
 							AlertingChannelMsTeamsAppFieldInstanaURL: schema.StringAttribute{
 								Optional:    true,
-								Computed: true,
+								Computed:    true,
 								Description: AlertingChannelDescMsTeamsAppInstanaURL,
 							},
 							AlertingChannelMsTeamsAppFieldServiceURL: schema.StringAttribute{

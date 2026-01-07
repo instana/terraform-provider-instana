@@ -48,7 +48,7 @@ func NewAutomationActionResourceHandle() resourcehandle.ResourceHandle[*restapi.
 						Required:    true,
 						Description: AutomationActionDescDescription,
 					},
-					AutomationActionFieldTags: schema.ListAttribute{
+					AutomationActionFieldTags: schema.SetAttribute{
 						ElementType: types.StringType,
 						Optional:    true,
 						Description: AutomationActionDescTags,
@@ -417,7 +417,7 @@ func (r *automationActionResource) UpdateState(ctx context.Context, state *tfsdk
 			model.Tags = tagsList
 		}
 	} else {
-		model.Tags = types.ListNull(types.StringType)
+		model.Tags = types.SetNull(types.StringType)
 	}
 
 	// Handle input parameters
@@ -447,11 +447,11 @@ func (r *automationActionResource) mapActionTypeFieldsToState(ctx context.Contex
 }
 
 // mapTagsToState converts tags from API format to Terraform state format
-func (r *automationActionResource) mapTagsToState(ctx context.Context, tags interface{}) (types.List, diag.Diagnostics) {
+func (r *automationActionResource) mapTagsToState(ctx context.Context, tags interface{}) (types.Set, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if tags == nil {
-		return types.ListNull(types.StringType), diags
+		return types.SetNull(types.StringType), diags
 	}
 
 	// Handle tags based on their type
@@ -466,16 +466,16 @@ func (r *automationActionResource) mapTagsToState(ctx context.Context, tags inte
 					AutomationActionErrMappingTags,
 					fmt.Sprintf(AutomationActionErrTagNotString, i),
 				)
-				return types.ListNull(types.StringType), diags
+				return types.SetNull(types.StringType), diags
 			}
 		}
-		return types.ListValueMust(types.StringType, elements), diags
+		return types.SetValueMust(types.StringType, elements), diags
 	default:
 		diags.AddError(
 			AutomationActionErrMappingTags,
 			AutomationActionErrTagsFormat,
 		)
-		return types.ListNull(types.StringType), diags
+		return types.SetNull(types.StringType), diags
 	}
 }
 

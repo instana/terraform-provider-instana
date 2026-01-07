@@ -301,5 +301,3 @@ func escapeShellString(s string) string {
 	}
 	return s
 }
-
-// Made with Bob

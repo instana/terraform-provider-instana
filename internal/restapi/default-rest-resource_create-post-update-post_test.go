@@ -108,6 +108,23 @@ func TestShouldFailToUpdateTestObjectThroughCreatePOSTUpdatePOSTRestResourceWhen
 	})
 }
 
+func TestShouldReturnOriginalDataWhenUpdateReturnsNoContent(t *testing.T) {
+	executeCreateOrUpdateOperationThroughCreatePOSTUpdatePOSTRestResourceTest(t, func(t *testing.T, sut RestResource[*testObject], client *mocks.MockRestClient, unmarshaller *mocks.MockJSONUnmarshaller[*testObject]) {
+		testObject := makeTestObject()
+		emptyJSONResponse := []byte("{}")
+
+		client.EXPECT().PostWithID(gomock.Eq(testObject), gomock.Eq(testObjectResourcePath)).Return(emptyJSONResponse, nil)
+		client.EXPECT().Post(gomock.Any(), gomock.Eq(testObjectResourcePath)).Times(0)
+		client.EXPECT().Put(gomock.Any(), gomock.Eq(testObjectResourcePath)).Times(0)
+		unmarshaller.EXPECT().Unmarshal(gomock.Any()).Times(0)
+
+		result, err := sut.Update(testObject)
+
+		assert.NoError(t, err)
+		assert.Equal(t, testObject, result)
+	})
+}
+
 func executeCreateOrUpdateOperationThroughCreatePOSTUpdatePOSTRestResourceTest(t *testing.T, testFunction func(t *testing.T, sut RestResource[*testObject], client *mocks.MockRestClient, unmarshaller *mocks.MockJSONUnmarshaller[*testObject])) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()

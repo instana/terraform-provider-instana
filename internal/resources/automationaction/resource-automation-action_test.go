@@ -68,7 +68,7 @@ func TestMapStateToDataObject_ScriptAction(t *testing.T) {
 		ID:          types.StringValue("test-id"),
 		Name:        types.StringValue("Test Script Action"),
 		Description: types.StringValue("Test Description"),
-		Tags:        types.ListNull(types.StringType),
+		Tags:        types.SetNull(types.StringType),
 		Script: &shared.ScriptModel{
 			Content:     types.StringValue("echo 'Hello World'"),
 			Interpreter: types.StringValue("bash"),
@@ -104,7 +104,7 @@ func TestMapStateToDataObject_HttpAction(t *testing.T) {
 		ID:          types.StringValue("test-id"),
 		Name:        types.StringValue("Test HTTP Action"),
 		Description: types.StringValue("Test Description"),
-		Tags:        types.ListNull(types.StringType),
+		Tags:        types.SetNull(types.StringType),
 		Http: &shared.HttpModel{
 			Host:             types.StringValue("https://example.com/api"),
 			Method:           types.StringValue("POST"),
@@ -146,7 +146,7 @@ func TestMapStateToDataObject_HttpActionWithBasicAuth(t *testing.T) {
 		ID:          types.StringValue("test-id"),
 		Name:        types.StringValue("Test HTTP Action"),
 		Description: types.StringValue("Test Description"),
-		Tags:        types.ListNull(types.StringType),
+		Tags:        types.SetNull(types.StringType),
 		Http: &shared.HttpModel{
 			Host:    types.StringValue("https://example.com/api"),
 			Method:  types.StringValue("GET"),
@@ -181,7 +181,7 @@ func TestMapStateToDataObject_HttpActionWithBearerToken(t *testing.T) {
 		ID:          types.StringValue("test-id"),
 		Name:        types.StringValue("Test HTTP Action"),
 		Description: types.StringValue("Test Description"),
-		Tags:        types.ListNull(types.StringType),
+		Tags:        types.SetNull(types.StringType),
 		Http: &shared.HttpModel{
 			Host:    types.StringValue("https://example.com/api"),
 			Method:  types.StringValue("GET"),
@@ -214,7 +214,7 @@ func TestMapStateToDataObject_HttpActionWithApiKey(t *testing.T) {
 		ID:          types.StringValue("test-id"),
 		Name:        types.StringValue("Test HTTP Action"),
 		Description: types.StringValue("Test Description"),
-		Tags:        types.ListNull(types.StringType),
+		Tags:        types.SetNull(types.StringType),
 		Http: &shared.HttpModel{
 			Host:    types.StringValue("https://example.com/api"),
 			Method:  types.StringValue("GET"),
@@ -254,7 +254,7 @@ func TestMapStateToDataObject_HttpActionWithHeaders(t *testing.T) {
 		ID:          types.StringValue("test-id"),
 		Name:        types.StringValue("Test HTTP Action"),
 		Description: types.StringValue("Test Description"),
-		Tags:        types.ListNull(types.StringType),
+		Tags:        types.SetNull(types.StringType),
 		Http: &shared.HttpModel{
 			Host:    types.StringValue("https://example.com/api"),
 			Method:  types.StringValue("POST"),
@@ -282,7 +282,7 @@ func TestMapStateToDataObject_ManualAction(t *testing.T) {
 		ID:          types.StringValue("test-id"),
 		Name:        types.StringValue("Test Manual Action"),
 		Description: types.StringValue("Test Description"),
-		Tags:        types.ListNull(types.StringType),
+		Tags:        types.SetNull(types.StringType),
 		Manual: &shared.ManualModel{
 			Content: types.StringValue("Manual instructions here"),
 		},
@@ -308,7 +308,7 @@ func TestMapStateToDataObject_JiraAction(t *testing.T) {
 		ID:          types.StringValue("test-id"),
 		Name:        types.StringValue("Test Jira Action"),
 		Description: types.StringValue("Test Description"),
-		Tags:        types.ListNull(types.StringType),
+		Tags:        types.SetNull(types.StringType),
 		Jira: &shared.JiraModel{
 			Project:     types.StringValue("PROJ"),
 			Operation:   types.StringValue("create"),
@@ -341,7 +341,7 @@ func TestMapStateToDataObject_GitHubAction(t *testing.T) {
 		ID:          types.StringValue("test-id"),
 		Name:        types.StringValue("Test GitHub Action"),
 		Description: types.StringValue("Test Description"),
-		Tags:        types.ListNull(types.StringType),
+		Tags:        types.SetNull(types.StringType),
 		GitHub: &shared.GitHubModel{
 			Owner:     types.StringValue("owner"),
 			Repo:      types.StringValue("repo"),
@@ -374,7 +374,7 @@ func TestMapStateToDataObject_DocLinkAction(t *testing.T) {
 		ID:          types.StringValue("test-id"),
 		Name:        types.StringValue("Test DocLink Action"),
 		Description: types.StringValue("Test Description"),
-		Tags:        types.ListNull(types.StringType),
+		Tags:        types.SetNull(types.StringType),
 		DocLink: &shared.DocLinkModel{
 			Url: types.StringValue("https://docs.example.com"),
 		},
@@ -401,7 +401,7 @@ func TestMapStateToDataObject_GitLabAction(t *testing.T) {
 		ID:          types.StringValue("test-id"),
 		Name:        types.StringValue("Test GitLab Action"),
 		Description: types.StringValue("Test Description"),
-		Tags:        types.ListNull(types.StringType),
+		Tags:        types.SetNull(types.StringType),
 		GitLab: &shared.GitLabModel{
 			ProjectId:   types.StringValue("123"),
 			Title:       types.StringValue("Issue Title"),
@@ -433,7 +433,7 @@ func TestMapStateToDataObject_AnsibleAction(t *testing.T) {
 		ID:          types.StringValue("test-id"),
 		Name:        types.StringValue("Test Ansible Action"),
 		Description: types.StringValue("Test Description"),
-		Tags:        types.ListNull(types.StringType),
+		Tags:        types.SetNull(types.StringType),
 		Ansible: &shared.AnsibleModel{
 			WorkflowId:       types.StringValue("workflow-123"),
 			PlaybookId:       types.StringValue("playbook-456"),
@@ -459,7 +459,7 @@ func TestMapStateToDataObject_WithTags(t *testing.T) {
 	ctx := context.Background()
 	resource := &automationActionResource{}
 
-	tags := types.ListValueMust(types.StringType, []attr.Value{
+	tags := types.SetValueMust(types.StringType, []attr.Value{
 		types.StringValue("tag1"),
 		types.StringValue("tag2"),
 		types.StringValue("tag3"),
@@ -498,7 +498,7 @@ func TestMapStateToDataObject_WithInputParameters(t *testing.T) {
 		ID:          types.StringValue("test-id"),
 		Name:        types.StringValue("Test Action"),
 		Description: types.StringValue("Test Description"),
-		Tags:        types.ListNull(types.StringType),
+		Tags:        types.SetNull(types.StringType),
 		Manual: &shared.ManualModel{
 			Content: types.StringValue("Manual content"),
 		},
@@ -547,7 +547,7 @@ func TestMapStateToDataObject_InvalidConfig(t *testing.T) {
 		ID:             types.StringValue("test-id"),
 		Name:           types.StringValue("Test Action"),
 		Description:    types.StringValue("Test Description"),
-		Tags:           types.ListNull(types.StringType),
+		Tags:           types.SetNull(types.StringType),
 		InputParameter: []shared.ParameterModel{},
 	})
 
@@ -824,7 +824,7 @@ func TestMapTagsFromState(t *testing.T) {
 		{
 			name: "with tags",
 			model: shared.AutomationActionModel{
-				Tags: types.ListValueMust(types.StringType, []attr.Value{
+				Tags: types.SetValueMust(types.StringType, []attr.Value{
 					types.StringValue("tag1"),
 					types.StringValue("tag2"),
 				}),
@@ -834,7 +834,7 @@ func TestMapTagsFromState(t *testing.T) {
 		{
 			name: "null tags",
 			model: shared.AutomationActionModel{
-				Tags: types.ListNull(types.StringType),
+				Tags: types.SetNull(types.StringType),
 			},
 			expected: nil,
 		},
@@ -929,7 +929,7 @@ func TestMapActionTypeAndFields_AllHTTPMethods(t *testing.T) {
 				ID:          types.StringValue("test-id"),
 				Name:        types.StringValue("Test Action"),
 				Description: types.StringValue("Test Description"),
-				Tags:        types.ListNull(types.StringType),
+				Tags:        types.SetNull(types.StringType),
 				Http: &shared.HttpModel{
 					Host:    types.StringValue("https://example.com"),
 					Method:  types.StringValue(method),
@@ -962,7 +962,7 @@ func TestMapActionTypeAndFields_AllParameterTypes(t *testing.T) {
 				ID:          types.StringValue("test-id"),
 				Name:        types.StringValue("Test Action"),
 				Description: types.StringValue("Test Description"),
-				Tags:        types.ListNull(types.StringType),
+				Tags:        types.SetNull(types.StringType),
 				Manual: &shared.ManualModel{
 					Content: types.StringValue("Manual content"),
 				},
@@ -1019,7 +1019,7 @@ func TestMapStateToDataObject_FromPlan(t *testing.T) {
 		ID:          types.StringValue("test-id"),
 		Name:        types.StringValue("Test Action"),
 		Description: types.StringValue("Test Description"),
-		Tags:        types.ListNull(types.StringType),
+		Tags:        types.SetNull(types.StringType),
 		Manual: &shared.ManualModel{
 			Content: types.StringValue("Manual content"),
 		},
@@ -1108,7 +1108,7 @@ func TestMapStateToDataObject_NullID(t *testing.T) {
 		ID:          types.StringNull(),
 		Name:        types.StringValue("Test Action"),
 		Description: types.StringValue("Test Description"),
-		Tags:        types.ListNull(types.StringType),
+		Tags:        types.SetNull(types.StringType),
 		Manual: &shared.ManualModel{
 			Content: types.StringValue("Manual content"),
 		},
@@ -1130,7 +1130,7 @@ func TestMapActionTypeAndFields_ScriptWithAllFields(t *testing.T) {
 		ID:          types.StringValue("test-id"),
 		Name:        types.StringValue("Test Script Action"),
 		Description: types.StringValue("Test Description"),
-		Tags:        types.ListNull(types.StringType),
+		Tags:        types.SetNull(types.StringType),
 		Script: &shared.ScriptModel{
 			Content:     types.StringValue("#!/bin/bash\necho 'test'"),
 			Interpreter: types.StringValue("bash"),
@@ -1172,7 +1172,7 @@ func TestMapActionTypeAndFields_HttpWithAllOptionalFields(t *testing.T) {
 		ID:          types.StringValue("test-id"),
 		Name:        types.StringValue("Test HTTP Action"),
 		Description: types.StringValue("Test Description"),
-		Tags:        types.ListNull(types.StringType),
+		Tags:        types.SetNull(types.StringType),
 		Http: &shared.HttpModel{
 			Host:             types.StringValue("https://api.example.com"),
 			Method:           types.StringValue("POST"),
@@ -1305,7 +1305,7 @@ func TestMapStateToDataObject_FromState(t *testing.T) {
 		ID:          types.StringValue("test-id"),
 		Name:        types.StringValue("Test Action"),
 		Description: types.StringValue("Test Description"),
-		Tags:        types.ListNull(types.StringType),
+		Tags:        types.SetNull(types.StringType),
 		Script: &shared.ScriptModel{
 			Content:     types.StringValue("echo 'test'"),
 			Interpreter: types.StringValue("bash"),
@@ -1335,7 +1335,7 @@ func TestMapTagsFromState_NullTags(t *testing.T) {
 
 	// Test with null tags
 	model := shared.AutomationActionModel{
-		Tags: types.ListNull(types.StringType),
+		Tags: types.SetNull(types.StringType),
 	}
 
 	result, diags := resource.mapTagsFromState(ctx, model)
@@ -1762,7 +1762,7 @@ func TestMapTagsFromState_WithValidTags(t *testing.T) {
 	resource := NewAutomationActionResourceHandle().(*automationActionResource)
 	ctx := context.Background()
 
-	tags := types.ListValueMust(types.StringType, []attr.Value{
+	tags := types.SetValueMust(types.StringType, []attr.Value{
 		types.StringValue("tag1"),
 		types.StringValue("tag2"),
 		types.StringValue("tag3"),

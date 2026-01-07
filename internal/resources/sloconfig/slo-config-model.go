@@ -9,7 +9,7 @@ type SloConfigModel struct {
 	ID         types.String     `tfsdk:"id"`
 	Name       types.String     `tfsdk:"name"`
 	Target     types.Float64    `tfsdk:"target"`
-	Tags       []types.String   `tfsdk:"tags"`
+	Tags       types.Set        `tfsdk:"tags"`
 	RbacTags   []RbacTagModel   `tfsdk:"rbac_tags"`
 	Entity     *EntityModel     `tfsdk:"entity"`
 	Indicator  *IndicatorModel  `tfsdk:"indicator"`

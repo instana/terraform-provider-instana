@@ -11,7 +11,7 @@ type InfraAlertConfigModel struct {
 	Name               types.String             `tfsdk:"name"`
 	Description        types.String             `tfsdk:"description"`
 	TagFilter          types.String             `tfsdk:"tag_filter"`
-	GroupBy            types.List               `tfsdk:"group_by"`
+	GroupBy            types.Set                `tfsdk:"group_by"`
 	AlertChannels      *InfraAlertChannelsModel `tfsdk:"alert_channels"`
 	Granularity        types.Int64              `tfsdk:"granularity"`
 	TimeThreshold      *InfraTimeThresholdModel `tfsdk:"time_threshold"`
@@ -23,8 +23,8 @@ type InfraAlertConfigModel struct {
 
 // InfraAlertChannelsModel represents the alert channels model
 type InfraAlertChannelsModel struct {
-	Warning  types.List `tfsdk:"warning"`
-	Critical types.List `tfsdk:"critical"`
+	Warning  types.Set `tfsdk:"warning"`
+	Critical types.Set `tfsdk:"critical"`
 }
 
 // InfraTimeThresholdModel represents the time threshold model

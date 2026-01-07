@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -99,20 +100,20 @@ func buildAlertChannelsSchema() schema.SingleNestedAttribute {
 		Description: LogAlertConfigDescAlertChannels,
 		Optional:    true,
 		Attributes: map[string]schema.Attribute{
-			shared.ThresholdFieldWarning: schema.ListAttribute{
+			shared.ThresholdFieldWarning: schema.SetAttribute{
 				Optional:    true,
 				Description: LogAlertConfigDescAlertChannelIDs,
 				ElementType: types.StringType,
-				Validators: []validator.List{
-					listvalidator.SizeAtLeast(1),
+				Validators: []validator.Set{
+					setvalidator.SizeAtLeast(1),
 				},
 			},
-			shared.ThresholdFieldCritical: schema.ListAttribute{
+			shared.ThresholdFieldCritical: schema.SetAttribute{
 				Optional:    true,
 				Description: LogAlertConfigDescAlertChannelIDs,
 				ElementType: types.StringType,
-				Validators: []validator.List{
-					listvalidator.SizeAtLeast(1),
+				Validators: []validator.Set{
+					setvalidator.SizeAtLeast(1),
 				},
 			},
 		},
@@ -355,17 +356,17 @@ func (r *logAlertConfigResource) mapAlertChannelsToModel(ctx context.Context, al
 }
 
 // mapSeverityChannelsToModel converts alert channels for a specific severity to model representation
-func (r *logAlertConfigResource) mapSeverityChannelsToModel(ctx context.Context, alertChannels map[restapi.AlertSeverity][]string, severity restapi.AlertSeverity) (types.List, diag.Diagnostics) {
+func (r *logAlertConfigResource) mapSeverityChannelsToModel(ctx context.Context, alertChannels map[restapi.AlertSeverity][]string, severity restapi.AlertSeverity) (types.Set, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	channels, exists := alertChannels[severity]
 	if !exists || len(channels) == 0 {
-		return types.ListNull(types.StringType), diags
+		return types.SetNull(types.StringType), diags
 	}
 
-	channelList, listDiags := types.ListValueFrom(ctx, types.StringType, channels)
-	diags.Append(listDiags...)
-	return channelList, diags
+	channelSet, setDiags := types.SetValueFrom(ctx, types.StringType, channels)
+	diags.Append(setDiags...)
+	return channelSet, diags
 }
 
 // mapTimeThresholdToModel converts API time threshold to model representation
@@ -620,15 +621,15 @@ func (r *logAlertConfigResource) mapModelAlertChannelsToAPI(ctx context.Context,
 }
 
 // extractChannelsForSeverity extracts channel IDs from a list for a specific severity
-func (r *logAlertConfigResource) extractChannelsForSeverity(ctx context.Context, channelList types.List) ([]string, diag.Diagnostics) {
+func (r *logAlertConfigResource) extractChannelsForSeverity(ctx context.Context, channelSet types.Set) ([]string, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	if channelList.IsNull() || channelList.IsUnknown() {
+	if channelSet.IsNull() || channelSet.IsUnknown() {
 		return nil, diags
 	}
 
 	var channels []string
-	diags.Append(channelList.ElementsAs(ctx, &channels, false)...)
+	diags.Append(channelSet.ElementsAs(ctx, &channels, false)...)
 	return channels, diags
 }
 

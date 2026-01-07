@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -16,7 +17,6 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/shared"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // ============================================================================
@@ -46,7 +46,7 @@ func NewAutomationPolicyResourceHandle() resourcehandle.ResourceHandle[*restapi.
 						Required:    true,
 						Description: AutomationPolicyDescDescription,
 					},
-					shared.AutomationPolicyFieldTags: schema.ListAttribute{
+					shared.AutomationPolicyFieldTags: schema.SetAttribute{
 						ElementType: types.StringType,
 						Optional:    true,
 						Description: AutomationPolicyDescTags,
@@ -207,7 +207,7 @@ func (r *automationPolicyResource) UpdateState(ctx context.Context, state *tfsdk
 			model.Tags = tagsList
 		}
 	} else {
-		model.Tags = types.ListNull(types.StringType)
+		model.Tags = types.SetNull(types.StringType)
 	}
 
 	// Map trigger (only update if not in plan or state to handle the drift)
@@ -224,11 +224,11 @@ func (r *automationPolicyResource) UpdateState(ctx context.Context, state *tfsdk
 }
 
 // mapTagsToState converts tags from API format to Terraform state format
-func (r *automationPolicyResource) mapTagsToState(ctx context.Context, tags interface{}) (types.List, diag.Diagnostics) {
+func (r *automationPolicyResource) mapTagsToState(ctx context.Context, tags interface{}) (types.Set, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if tags == nil {
-		return types.ListNull(types.StringType), diags
+		return types.SetNull(types.StringType), diags
 	}
 
 	// Handle tags based on their type
@@ -243,16 +243,16 @@ func (r *automationPolicyResource) mapTagsToState(ctx context.Context, tags inte
 					AutomationPolicyErrMappingTags,
 					fmt.Sprintf(AutomationPolicyErrTagNotString, i),
 				)
-				return types.ListNull(types.StringType), diags
+				return types.SetNull(types.StringType), diags
 			}
 		}
-		return types.ListValueMust(types.StringType, elements), diags
+		return types.SetValueMust(types.StringType, elements), diags
 	default:
 		diags.AddError(
 			AutomationPolicyErrMappingTags,
 			AutomationPolicyErrTagsFormat,
 		)
-		return types.ListNull(types.StringType), diags
+		return types.SetNull(types.StringType), diags
 	}
 }
 
@@ -586,7 +586,7 @@ func (r *automationPolicyResource) mapRunnableFromState(ctx context.Context, act
 // ============================================================================
 
 // mapTagsFromState converts tags from state to API format
-func (r *automationPolicyResource) mapTagsFromState(ctx context.Context, tagsList types.List) (interface{}, diag.Diagnostics) {
+func (r *automationPolicyResource) mapTagsFromState(ctx context.Context, tagsList types.Set) (interface{}, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if tagsList.IsNull() {

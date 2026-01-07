@@ -68,7 +68,7 @@ func TestMapStateToDataObject_BasicPolicy(t *testing.T) {
 		ID:          types.StringValue("test-id"),
 		Name:        types.StringValue("Test Policy"),
 		Description: types.StringValue("Test Description"),
-		Tags:        types.ListNull(types.StringType),
+		Tags:        types.SetNull(types.StringType),
 		Trigger: &TriggerModel{
 			ID:          types.StringValue("trigger-123"),
 			Type:        types.StringValue("customEvent"),
@@ -86,7 +86,7 @@ func TestMapStateToDataObject_BasicPolicy(t *testing.T) {
 							ID:             types.StringValue("action-123"),
 							Name:           types.StringValue("Test Action"),
 							Description:    types.StringValue("Action Description"),
-							Tags:           types.ListNull(types.StringType),
+							Tags:           types.SetNull(types.StringType),
 							InputParameter: []shared.ParameterModel{},
 							Manual: &shared.ManualModel{
 								Content: types.StringValue("Manual content"),
@@ -118,7 +118,7 @@ func TestMapStateToDataObject_WithTags(t *testing.T) {
 	ctx := context.Background()
 	resource := &automationPolicyResource{}
 
-	tags := types.ListValueMust(types.StringType, []attr.Value{
+	tags := types.SetValueMust(types.StringType, []attr.Value{
 		types.StringValue("tag1"),
 		types.StringValue("tag2"),
 		types.StringValue("tag3"),
@@ -167,7 +167,7 @@ func TestMapStateToDataObject_WithScheduling(t *testing.T) {
 		ID:          types.StringValue("test-id"),
 		Name:        types.StringValue("Test Policy"),
 		Description: types.StringValue("Test Description"),
-		Tags:        types.ListNull(types.StringType),
+		Tags:        types.SetNull(types.StringType),
 		Trigger: &TriggerModel{
 			ID:          types.StringValue("trigger-123"),
 			Type:        types.StringValue("schedule"),
@@ -219,7 +219,7 @@ func TestMapStateToDataObject_WithCondition(t *testing.T) {
 		ID:          types.StringValue("test-id"),
 		Name:        types.StringValue("Test Policy"),
 		Description: types.StringValue("Test Description"),
-		Tags:        types.ListNull(types.StringType),
+		Tags:        types.SetNull(types.StringType),
 		Trigger: &TriggerModel{
 			ID:   types.StringValue("trigger-123"),
 			Type: types.StringValue("applicationSmartAlert"),
@@ -261,7 +261,7 @@ func TestMapStateToDataObject_WithMultipleActions(t *testing.T) {
 		ID:          types.StringValue("test-id"),
 		Name:        types.StringValue("Test Policy"),
 		Description: types.StringValue("Test Description"),
-		Tags:        types.ListNull(types.StringType),
+		Tags:        types.SetNull(types.StringType),
 		Trigger: &TriggerModel{
 			ID:   types.StringValue("trigger-123"),
 			Type: types.StringValue("customEvent"),
@@ -279,7 +279,7 @@ func TestMapStateToDataObject_WithMultipleActions(t *testing.T) {
 							ID:             types.StringValue("action-456"),
 							Name:           types.StringValue("Second Action"),
 							Description:    types.StringValue("Second Description"),
-							Tags:           types.ListNull(types.StringType),
+							Tags:           types.SetNull(types.StringType),
 							InputParameter: []shared.ParameterModel{},
 							Manual: &shared.ManualModel{
 								Content: types.StringValue("Second manual content"),
@@ -317,7 +317,7 @@ func TestMapStateToDataObject_FromPlan(t *testing.T) {
 		ID:          types.StringValue("test-id"),
 		Name:        types.StringValue("Test Policy"),
 		Description: types.StringValue("Test Description"),
-		Tags:        types.ListNull(types.StringType),
+		Tags:        types.SetNull(types.StringType),
 		Trigger: &TriggerModel{
 			ID:   types.StringValue("trigger-123"),
 			Type: types.StringValue("customEvent"),
@@ -353,7 +353,7 @@ func TestMapStateToDataObject_NullID(t *testing.T) {
 		ID:          types.StringNull(),
 		Name:        types.StringValue("Test Policy"),
 		Description: types.StringValue("Test Description"),
-		Tags:        types.ListNull(types.StringType),
+		Tags:        types.SetNull(types.StringType),
 		Trigger: &TriggerModel{
 			ID:   types.StringValue("trigger-123"),
 			Type: types.StringValue("customEvent"),
@@ -428,7 +428,7 @@ func TestUpdateState_BasicPolicy(t *testing.T) {
 		ID:                types.StringNull(),
 		Name:              types.StringNull(),
 		Description:       types.StringNull(),
-		Tags:              types.ListNull(types.StringType),
+		Tags:              types.SetNull(types.StringType),
 		Trigger:           nil,
 		TypeConfiguration: []TypeConfigurationModel{},
 	}
@@ -491,7 +491,7 @@ func TestUpdateState_WithTags(t *testing.T) {
 		ID:                types.StringNull(),
 		Name:              types.StringNull(),
 		Description:       types.StringNull(),
-		Tags:              types.ListNull(types.StringType),
+		Tags:              types.SetNull(types.StringType),
 		Trigger:           nil,
 		TypeConfiguration: []TypeConfigurationModel{},
 	}
@@ -566,7 +566,7 @@ func TestUpdateState_WithScheduling(t *testing.T) {
 		ID:                types.StringNull(),
 		Name:              types.StringNull(),
 		Description:       types.StringNull(),
-		Tags:              types.ListNull(types.StringType),
+		Tags:              types.SetNull(types.StringType),
 		Trigger:           nil,
 		TypeConfiguration: []TypeConfigurationModel{},
 	}
@@ -662,12 +662,12 @@ func TestMapTagsFromState(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		tagsList types.List
+		tagsList types.Set
 		expected interface{}
 	}{
 		{
 			name: "with tags",
-			tagsList: types.ListValueMust(types.StringType, []attr.Value{
+			tagsList: types.SetValueMust(types.StringType, []attr.Value{
 				types.StringValue("tag1"),
 				types.StringValue("tag2"),
 			}),
@@ -675,7 +675,7 @@ func TestMapTagsFromState(t *testing.T) {
 		},
 		{
 			name:     "null tags",
-			tagsList: types.ListNull(types.StringType),
+			tagsList: types.SetNull(types.StringType),
 			expected: nil,
 		},
 	}
@@ -1049,7 +1049,7 @@ func TestUpdateState_AllTriggerTypes(t *testing.T) {
 				ID:                types.StringNull(),
 				Name:              types.StringNull(),
 				Description:       types.StringNull(),
-				Tags:              types.ListNull(types.StringType),
+				Tags:              types.SetNull(types.StringType),
 				Trigger:           nil,
 				TypeConfiguration: []TypeConfigurationModel{},
 			}
@@ -1110,7 +1110,7 @@ func TestUpdateState_AllPolicyTypes(t *testing.T) {
 				ID:                types.StringNull(),
 				Name:              types.StringNull(),
 				Description:       types.StringNull(),
-				Tags:              types.ListNull(types.StringType),
+				Tags:              types.SetNull(types.StringType),
 				Trigger:           nil,
 				TypeConfiguration: []TypeConfigurationModel{},
 			}
@@ -1239,7 +1239,7 @@ func createMinimalManualAction() shared.AutomationActionModel {
 		ID:             types.StringValue("action-123"),
 		Name:           types.StringValue("Test Action"),
 		Description:    types.StringValue("Action Description"),
-		Tags:           types.ListNull(types.StringType),
+		Tags:           types.SetNull(types.StringType),
 		InputParameter: []shared.ParameterModel{},
 		Manual: &shared.ManualModel{
 			Content: types.StringValue("Manual content"),
@@ -1274,7 +1274,7 @@ func TestUpdateState_WithPlan(t *testing.T) {
 		ID:          types.StringValue("plan-id"),
 		Name:        types.StringValue("Plan Policy"),
 		Description: types.StringValue("Plan Description"),
-		Tags:        types.ListNull(types.StringType),
+		Tags:        types.SetNull(types.StringType),
 		Trigger: &TriggerModel{
 			ID:   types.StringValue("trigger-plan"),
 			Type: types.StringValue("customEvent"),
@@ -1407,7 +1407,7 @@ func TestMapStateToDataObject_ErrorInTriggerMapping(t *testing.T) {
 		ID:          types.StringValue("test-id"),
 		Name:        types.StringValue("Test Policy"),
 		Description: types.StringValue("Test Description"),
-		Tags:        types.ListNull(types.StringType),
+		Tags:        types.SetNull(types.StringType),
 		Trigger: &TriggerModel{
 			ID:   types.StringValue("trigger-123"),
 			Type: types.StringValue("customEvent"),
@@ -1464,7 +1464,7 @@ func TestMapRunnableFromState_WithInputParameters(t *testing.T) {
 				ID:          types.StringValue("action-123"),
 				Name:        types.StringValue("Test Action"),
 				Description: types.StringValue("Action Description"),
-				Tags: types.ListValueMust(types.StringType, []attr.Value{
+				Tags: types.SetValueMust(types.StringType, []attr.Value{
 					types.StringValue("tag1"),
 				}),
 				InputParameter: []shared.ParameterModel{
@@ -1506,7 +1506,7 @@ func TestMapRunnableFromState_MultipleActionsSetRunnableID(t *testing.T) {
 				ID:             types.StringValue("first-action"),
 				Name:           types.StringValue("First Action"),
 				Description:    types.StringValue("First Description"),
-				Tags:           types.ListNull(types.StringType),
+				Tags:           types.SetNull(types.StringType),
 				InputParameter: []shared.ParameterModel{},
 				Manual: &shared.ManualModel{
 					Content: types.StringValue("First content"),
@@ -1519,7 +1519,7 @@ func TestMapRunnableFromState_MultipleActionsSetRunnableID(t *testing.T) {
 				ID:             types.StringValue("second-action"),
 				Name:           types.StringValue("Second Action"),
 				Description:    types.StringValue("Second Description"),
-				Tags:           types.ListNull(types.StringType),
+				Tags:           types.SetNull(types.StringType),
 				InputParameter: []shared.ParameterModel{},
 				Manual: &shared.ManualModel{
 					Content: types.StringValue("Second content"),
@@ -1542,7 +1542,7 @@ func TestMapTagsFromState_ErrorInElementsAs(t *testing.T) {
 	resource := &automationPolicyResource{}
 
 	// Create a list with invalid element type that will cause ElementsAs to fail
-	invalidList := types.ListValueMust(types.Int64Type, []attr.Value{
+	invalidList := types.SetValueMust(types.Int64Type, []attr.Value{
 		types.Int64Value(123),
 	})
 
@@ -1597,7 +1597,7 @@ func TestUpdateState_WithSchedulingEmptyFields(t *testing.T) {
 		ID:                types.StringNull(),
 		Name:              types.StringNull(),
 		Description:       types.StringNull(),
-		Tags:              types.ListNull(types.StringType),
+		Tags:              types.SetNull(types.StringType),
 		Trigger:           nil,
 		TypeConfiguration: []TypeConfigurationModel{},
 	}
@@ -1746,7 +1746,7 @@ func TestUpdateState_NullTags(t *testing.T) {
 		ID:                types.StringNull(),
 		Name:              types.StringNull(),
 		Description:       types.StringNull(),
-		Tags:              types.ListNull(types.StringType),
+		Tags:              types.SetNull(types.StringType),
 		Trigger:           nil,
 		TypeConfiguration: []TypeConfigurationModel{},
 	}

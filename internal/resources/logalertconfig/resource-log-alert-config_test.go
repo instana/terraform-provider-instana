@@ -547,11 +547,11 @@ func TestMapStateToDataObject_WithAlertChannels(t *testing.T) {
 	ctx := context.Background()
 	resource := NewLogAlertConfigResourceHandle()
 
-	warningList := types.ListValueMust(types.StringType, []attr.Value{
+	warningSet := types.SetValueMust(types.StringType, []attr.Value{
 		types.StringValue("channel-1"),
 		types.StringValue("channel-2"),
 	})
-	criticalList := types.ListValueMust(types.StringType, []attr.Value{
+	criticalSet := types.SetValueMust(types.StringType, []attr.Value{
 		types.StringValue("channel-3"),
 	})
 
@@ -562,8 +562,8 @@ func TestMapStateToDataObject_WithAlertChannels(t *testing.T) {
 		Granularity: types.Int64Value(600000),
 		TagFilter:   types.StringValue("entity.type EQUALS 'log'"),
 		AlertChannels: &AlertChannelsModel{
-			Warning:  warningList,
-			Critical: criticalList,
+			Warning:  warningSet,
+			Critical: criticalSet,
 		},
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
@@ -1008,8 +1008,8 @@ func TestMapStateToDataObject_WithEmptyAlertChannelLists(t *testing.T) {
 	ctx := context.Background()
 	resource := NewLogAlertConfigResourceHandle()
 
-	warningList := types.ListValueMust(types.StringType, []attr.Value{})
-	criticalList := types.ListValueMust(types.StringType, []attr.Value{})
+	warningSet := types.SetValueMust(types.StringType, []attr.Value{})
+	criticalSet := types.SetValueMust(types.StringType, []attr.Value{})
 
 	state := createMockState(t, LogAlertConfigModel{
 		ID:          types.StringValue("test-id"),
@@ -1018,8 +1018,8 @@ func TestMapStateToDataObject_WithEmptyAlertChannelLists(t *testing.T) {
 		Granularity: types.Int64Value(600000),
 		TagFilter:   types.StringValue("entity.type EQUALS 'log'"),
 		AlertChannels: &AlertChannelsModel{
-			Warning:  warningList,
-			Critical: criticalList,
+			Warning:  warningSet,
+			Critical: criticalSet,
 		},
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
@@ -1173,7 +1173,7 @@ func TestMapStateToDataObject_WithSingleWarningAlertChannel(t *testing.T) {
 	ctx := context.Background()
 	resource := NewLogAlertConfigResourceHandle()
 
-	warningList := types.ListValueMust(types.StringType, []attr.Value{
+	warningSet := types.SetValueMust(types.StringType, []attr.Value{
 		types.StringValue("channel-1"),
 	})
 
@@ -1184,8 +1184,8 @@ func TestMapStateToDataObject_WithSingleWarningAlertChannel(t *testing.T) {
 		Granularity: types.Int64Value(600000),
 		TagFilter:   types.StringValue("entity.type EQUALS 'log'"),
 		AlertChannels: &AlertChannelsModel{
-			Warning:  warningList,
-			Critical: types.ListNull(types.StringType),
+			Warning:  warningSet,
+			Critical: types.SetNull(types.StringType),
 		},
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
@@ -1205,7 +1205,7 @@ func TestMapStateToDataObject_WithSingleCriticalAlertChannel(t *testing.T) {
 	ctx := context.Background()
 	resource := NewLogAlertConfigResourceHandle()
 
-	criticalList := types.ListValueMust(types.StringType, []attr.Value{
+	criticalSet := types.SetValueMust(types.StringType, []attr.Value{
 		types.StringValue("channel-1"),
 	})
 
@@ -1216,8 +1216,8 @@ func TestMapStateToDataObject_WithSingleCriticalAlertChannel(t *testing.T) {
 		Granularity: types.Int64Value(600000),
 		TagFilter:   types.StringValue("entity.type EQUALS 'log'"),
 		AlertChannels: &AlertChannelsModel{
-			Warning:  types.ListNull(types.StringType),
-			Critical: criticalList,
+			Warning:  types.SetNull(types.StringType),
+			Critical: criticalSet,
 		},
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
@@ -1511,8 +1511,8 @@ func TestMapStateToDataObject_WithUnknownAlertChannels(t *testing.T) {
 		Granularity: types.Int64Value(600000),
 		TagFilter:   types.StringValue("entity.type EQUALS 'log'"),
 		AlertChannels: &AlertChannelsModel{
-			Warning:  types.ListUnknown(types.StringType),
-			Critical: types.ListUnknown(types.StringType),
+			Warning:  types.SetUnknown(types.StringType),
+			Critical: types.SetUnknown(types.StringType),
 		},
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
