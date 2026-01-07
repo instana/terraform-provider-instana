@@ -38,7 +38,8 @@ type IndicatorModel struct {
 	EventBasedAvailabilityIndicatorModel *EventBasedAvailabilityIndicatorModel `tfsdk:"event_based_availability"`
 	TrafficIndicatorModel                *TrafficIndicatorModel                `tfsdk:"traffic"`
 	CustomIndicatorModel                 *CustomIndicatorModel                 `tfsdk:"custom"`
-	SaturationIndicatorModel             *SaturationIndicatorModel             `tfsdk:"saturation"`
+	TimeBasedSaturationIndicatorModel    *TimeBasedSaturationIndicatorModel    `tfsdk:"time_based_saturation"`
+	EventBasedSaturationIndicatorModel   *EventBasedSaturationIndicatorModel   `tfsdk:"event_based_saturation"`
 }
 
 // ApplicationEntityModel represents an application entity in the Terraform model
@@ -107,10 +108,17 @@ type CustomIndicatorModel struct {
 }
 
 // SaturationIndicatorModel represents a saturation indicator in the Terraform model
-type SaturationIndicatorModel struct {
+type TimeBasedSaturationIndicatorModel struct {
 	MetricName  types.String  `tfsdk:"metric_name"`
 	Threshold   types.Float64 `tfsdk:"threshold"`
 	Aggregation types.String  `tfsdk:"aggregation"`
+	Operator    types.String  `tfsdk:"operator"`
+}
+
+// SaturationIndicatorModel represents a saturation indicator in the Terraform model
+type EventBasedSaturationIndicatorModel struct {
+	MetricName  types.String  `tfsdk:"metric_name"`
+	Threshold   types.Float64 `tfsdk:"threshold"`
 	Operator    types.String  `tfsdk:"operator"`
 }
 

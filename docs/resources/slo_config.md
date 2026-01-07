@@ -336,6 +336,65 @@ resource "instana_slo_config" "synthetic_basic" {
 }
 ```
 
+### Infrastructure Entity SLOs
+
+#### Infrastructure SLO with Time-Based Saturation
+
+```hcl
+resource "instana_slo_config" "infra_saturation_time_based" {
+  name   = "infra_saturation_time_based"
+  entity = {
+    infrastructure = {
+      infra_type    = "host"
+    }
+  }
+  indicator = {
+    time_based_saturation = {
+      aggregation = "MEAN"
+      metric_name = "cpu.sys" 
+      threshold   = 0.58
+    }
+  }
+  target    = 0.99
+  time_window = {
+    fixed = {
+      duration        = 1
+      duration_unit   = "week"
+      start_timestamp = 1757961000000
+      timezone        = "UTC"
+    }
+  }
+}
+```
+
+#### Infrastructure SLO with Event-Based Saturation
+
+```hcl
+resource "instana_slo_config" "infra_saturation_event_based" {
+  name   = "infra_saturation_event_based"
+  entity = {
+    infrastructure = {
+      infra_type    = "host"
+    }
+  }
+  indicator = {
+    event_based_saturation = {
+      metric_name = "cpu.sys" 
+      threshold   = 0.58
+    }
+  }
+  target    = 0.99
+  time_window = {
+    fixed = {
+      duration        = 1
+      duration_unit   = "week"
+      start_timestamp = 1757961000000
+      timezone        = "UTC"
+    }
+  }
+}
+```
+
 ### Custom Indicator SLOs
 
 #### Custom SLO with Good Events Only
@@ -397,6 +456,36 @@ resource "instana_slo_config" "custom_good_bad_events" {
 }
 ```
 
+#### Custom Infrastructure SLO with Good and Bad Events
+```hcl
+resource "instana_slo_config" "custom_infrastructure_slo" {
+  name   = "custom_infrastructure_slo"
+  target = 0.9999
+  tags   = ["infrastructure", "custom"]
+
+  entity = {
+    infrastructure = {
+      infra_type = "docker"
+    }
+  }
+
+  indicator = {
+    custom = {
+      good_event_filter_expression = "memory.usage@na LESS_OR_EQUAL_THAN 1300000002"
+      bad_event_filter_expression  = "memory.usage@na GREATER_THAN 2000000000"
+    }
+  }
+
+  time_window = {
+    fixed = {
+      duration        = 1
+      duration_unit   = "week"
+      start_timestamp = 1761868800000
+      timezone        = "UTC"
+    }
+  }
+}
+```
 ### SLOs with RBAC Tags
 
 #### SLO with RBAC Tags
@@ -506,6 +595,7 @@ The `entity` attribute must contain exactly one of the following:
 * `application` - Application-based SLO entity - [Details](#application-entity-attributes)
 * `website` - Website-based SLO entity - [Details](#website-entity-attributes)
 * `synthetic` - Synthetic-based SLO entity - [Details](#synthetic-entity-attributes)
+* `infrastructure` - Infrastructure-based SLO entity - [Details](#infrastructure-entity-attributes)
 
 #### Application Entity Attributes
 
@@ -528,6 +618,11 @@ The `entity` attribute must contain exactly one of the following:
 * `synthetic_test_ids` - (Required) A set of synthetic test IDs. Must contain at least one ID.
 * `filter_expression` - (Optional) Tag filter expression to match events/calls - [Details](#tag-filter-expression-syntax)
 
+#### Infrastructure Entity Attributes
+
+* `infra_type` - (Required) Type of the infrastructure entity.
+* `filter_expression` - (Optional) Tag filter expression that allows additional scoping or matching of infrastructure entities - [Details](#tag-filter-expression-syntax)
+
 ### Indicator Attribute
 
 The `indicator` attribute must contain exactly one of the following:
@@ -538,6 +633,8 @@ The `indicator` attribute must contain exactly one of the following:
 * `event_based_availability` - Event-based availability indicator - [Details](#event-based-availability-indicator-attributes)
 * `traffic` - Traffic indicator - [Details](#traffic-indicator-attributes)
 * `custom` - Custom indicator - [Details](#custom-indicator-attributes)
+* `time_based_saturation` - Time-based saturation indicator - [Details](#time-based-saturation-indicator-attributes)
+* `event_based_saturation` - Event-based saturation indicator - [Details](#event-based-saturation-indicator-attributes)
 
 #### Time-Based Latency Indicator Attributes
 
@@ -567,6 +664,19 @@ No additional attributes required. This is an empty object: `event_based_availab
 
 * `good_event_filter_expression` - (Required) Tag filter expression to match good events/calls - [Details](#tag-filter-expression-syntax)
 * `bad_event_filter_expression` - (Optional) Tag filter expression to match bad events/calls. If omitted, the opposite of good events is used - [Details](#tag-filter-expression-syntax)
+
+#### Time-Based Saturation Indicator Attributes
+
+* `metric_name` - (Required) The name of the metric which needs to be measured.
+* `threshold` - (Required) The saturation threshold. Must be greater than or equal to 0
+* `aggregation` - (Required) The aggregation type. Valid values: `MEAN`, `MAX`, `MIN`, `P25`, `P50`, `P75`, `P90`, `P95`, `P98`, `P99`
+* `operator` - (Optional) Comparison operator used to evaluate the metric. Valid values: `>`, `>=`, `<`, `<=`. Defaults to `>=` if not specified.
+
+#### Event-Based Saturation Indicator Attributes
+
+* `metric_name` - (Required) The name of the metric which needs to be measured.
+* `threshold` - (Required) The saturation threshold. Must be greater than or equal to 0
+* `operator` - (Optional) Comparison operator used to evaluate the metric. Valid values: `>`, `>=`, `<`, `<=`. Defaults to `>=` if not specified.
 
 ### Time Window Attribute
 

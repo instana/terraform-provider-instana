@@ -195,6 +195,67 @@ func TestMapStateToDataObject_SyntheticEntity(t *testing.T) {
 	})
 }
 
+func TestMapStateToDataObject_InfrastructureEntity(t *testing.T) {
+	resource := &sloConfigResource{}
+
+	t.Run("should map infrastructure entity successfully", func(t *testing.T) {
+		entityModel := EntityModel{
+			InfrastructureEntityModel: &InfrastructureEntityModel{
+				InfraType:        types.StringValue("host"),
+				FilterExpression: types.StringValue("entity.tag.host.name EQUALS 'worker-1'"),
+			},
+		}
+
+		result, diags := resource.mapEntityFromState(entityModel)
+
+		assert.False(t, diags.HasError())
+		assert.Equal(t, SloConfigInfrastructureEntity, result.Type)
+		require.NotNil(t, result.InfraType)
+		assert.Equal(t, "host", *result.InfraType)
+		assert.NotNil(t, result.FilterExpression)
+	})
+
+	t.Run("should return error when infrastructure entity missing required fields", func(t *testing.T) {
+		entityModel := EntityModel{
+			InfrastructureEntityModel: &InfrastructureEntityModel{
+				InfraType: types.StringNull(), // required field missing
+			},
+		}
+
+		_, diags := resource.mapEntityFromState(entityModel)
+
+		assert.True(t, diags.HasError())
+		assert.Contains(t, diags[0].Summary(), SloConfigErrInfraTypeRequired)
+	})
+
+	t.Run("should return error when infrastructure entity infra type is unknown", func(t *testing.T) {
+		entityModel := EntityModel{
+			InfrastructureEntityModel: &InfrastructureEntityModel{
+				InfraType: types.StringUnknown(),
+			},
+		}
+
+		_, diags := resource.mapEntityFromState(entityModel)
+
+		assert.True(t, diags.HasError())
+		assert.Contains(t, diags[0].Summary(), SloConfigErrInfraTypeRequired)
+	})
+
+	t.Run("should return error when filter expression is invalid", func(t *testing.T) {
+		entityModel := EntityModel{
+			InfrastructureEntityModel: &InfrastructureEntityModel{
+				InfraType:        types.StringValue("kubernetes.cluster"),
+				FilterExpression: types.StringValue("invalid((expression"),
+			},
+		}
+
+		_, diags := resource.mapEntityFromState(entityModel)
+
+		assert.True(t, diags.HasError())
+		assert.Contains(t, diags[0].Summary(), SloConfigErrParsingFilterExpression)
+	})
+}
+
 func TestMapIndicatorFromState_TimeBasedLatency(t *testing.T) {
 	resource := &sloConfigResource{}
 
@@ -362,6 +423,87 @@ func TestMapIndicatorFromState_Traffic(t *testing.T) {
 		_, diags := resource.mapIndicatorFromState(model)
 
 		assert.True(t, diags.HasError())
+	})
+}
+
+func TestMapIndicatorFromState_Saturation(t *testing.T) {
+	resource := &sloConfigResource{}
+
+	t.Run("should map time-based saturation indicator successfully", func(t *testing.T) {
+		model := IndicatorModel{
+			TimeBasedSaturationIndicatorModel: &TimeBasedSaturationIndicatorModel{
+				MetricName:  types.StringValue("cpu.sys"),
+				Threshold:   types.Float64Value(0.80),
+				Aggregation: types.StringValue("MEAN"),
+				Operator:    types.StringValue(">="),
+			},
+		}
+
+		result, diags := resource.mapIndicatorFromState(model)
+
+		assert.False(t, diags.HasError())
+		assert.Equal(t, SloConfigAPIIndicatorBlueprintSaturation, result.Blueprint)
+		assert.Equal(t, SloConfigAPIIndicatorMeasurementTypeTimeBased, result.Type)
+		assert.Equal(t, 0.80, result.Threshold)
+		assert.NotNil(t, result.MetricName)
+		assert.Equal(t, "cpu.sys", *result.MetricName)
+		assert.NotNil(t, result.Aggregation)
+		assert.Equal(t, "MEAN", *result.Aggregation)
+		assert.NotNil(t, result.Operator)
+		assert.Equal(t, ">=", *result.Operator)
+	})
+
+	t.Run("should return error when threshold is missing for time-based saturation", func(t *testing.T) {
+		model := IndicatorModel{
+			TimeBasedSaturationIndicatorModel: &TimeBasedSaturationIndicatorModel{
+				MetricName:  types.StringValue("cpu.sys"),
+				Threshold:   types.Float64Null(),
+				Aggregation: types.StringValue("MEAN"),
+				Operator:    types.StringValue(">"),
+			},
+		}
+
+		_, diags := resource.mapIndicatorFromState(model)
+
+		assert.True(t, diags.HasError())
+		assert.Contains(t, diags[0].Summary(), SloConfigErrTimeBasedSaturationRequired)
+	})
+
+	t.Run("should map event-based saturation indicator successfully", func(t *testing.T) {
+		model := IndicatorModel{
+			EventBasedSaturationIndicatorModel: &EventBasedSaturationIndicatorModel{
+				MetricName: types.StringValue("cpu.sys"),
+				Threshold:  types.Float64Value(0.90),
+				Operator:   types.StringValue("<="),
+			},
+		}
+
+		result, diags := resource.mapIndicatorFromState(model)
+
+		assert.False(t, diags.HasError())
+		assert.Equal(t, SloConfigAPIIndicatorBlueprintSaturation, result.Blueprint)
+		assert.Equal(t, SloConfigAPIIndicatorMeasurementTypeEventBased, result.Type)
+		assert.Equal(t, 0.90, result.Threshold)
+		assert.NotNil(t, result.MetricName)
+		assert.Equal(t, "cpu.sys", *result.MetricName)
+		assert.NotNil(t, result.Operator)
+		assert.Equal(t, "<=", *result.Operator)
+		assert.NotNil(t, result.Aggregation) // default aggregation
+	})
+
+	t.Run("should return error when threshold is missing for event-based saturation", func(t *testing.T) {
+		model := IndicatorModel{
+			EventBasedSaturationIndicatorModel: &EventBasedSaturationIndicatorModel{
+				MetricName: types.StringValue("cpu.sys"),
+				Threshold:  types.Float64Null(),
+				Operator:   types.StringValue(">"),
+			},
+		}
+
+		_, diags := resource.mapIndicatorFromState(model)
+
+		assert.True(t, diags.HasError())
+		assert.Contains(t, diags[0].Summary(), SloConfigErrEventBasedSaturationRequired)
 	})
 }
 
@@ -870,6 +1012,59 @@ func TestMapIndicatorToState(t *testing.T) {
 		_, diags := resource.mapIndicatorToState(apiObject, &SloConfigModel{})
 
 		assert.True(t, diags.HasError())
+	})
+}
+
+func TestMapIndicatorToState_Saturation(t *testing.T) {
+	resource := &sloConfigResource{}
+
+	t.Run("should map time-based saturation indicator to state", func(t *testing.T) {
+		aggregation := "MEAN"
+		operator := ">="
+		metricName := "cpu.sys"
+
+		apiObject := &restapi.SloConfig{
+			Indicator: restapi.SloIndicator{
+				Blueprint:   SloConfigAPIIndicatorBlueprintSaturation,
+				Type:        SloConfigAPIIndicatorMeasurementTypeTimeBased,
+				Threshold:   0.75,
+				Aggregation: &aggregation,
+				Operator:    &operator,
+				MetricName:  &metricName,
+			},
+		}
+
+		result, diags := resource.mapIndicatorToState(apiObject, &SloConfigModel{})
+
+		assert.False(t, diags.HasError())
+		assert.NotNil(t, result.TimeBasedSaturationIndicatorModel)
+		assert.Equal(t, 0.75, result.TimeBasedSaturationIndicatorModel.Threshold.ValueFloat64())
+		assert.Equal(t, "MEAN", result.TimeBasedSaturationIndicatorModel.Aggregation.ValueString())
+		assert.Equal(t, ">=", result.TimeBasedSaturationIndicatorModel.Operator.ValueString())
+		assert.Equal(t, "cpu.sys", result.TimeBasedSaturationIndicatorModel.MetricName.ValueString())
+	})
+
+	t.Run("should map event-based saturation indicator to state", func(t *testing.T) {
+		operator := "<"
+		metricName := "cpu.sys"
+
+		apiObject := &restapi.SloConfig{
+			Indicator: restapi.SloIndicator{
+				Blueprint:  SloConfigAPIIndicatorBlueprintSaturation,
+				Type:       SloConfigAPIIndicatorMeasurementTypeEventBased,
+				Threshold:  0.85,
+				Operator:   &operator,
+				MetricName: &metricName,
+			},
+		}
+
+		result, diags := resource.mapIndicatorToState(apiObject, &SloConfigModel{})
+
+		assert.False(t, diags.HasError())
+		assert.NotNil(t, result.EventBasedSaturationIndicatorModel)
+		assert.Equal(t, 0.85, result.EventBasedSaturationIndicatorModel.Threshold.ValueFloat64())
+		assert.Equal(t, "<", result.EventBasedSaturationIndicatorModel.Operator.ValueString())
+		assert.Equal(t, "cpu.sys", result.EventBasedSaturationIndicatorModel.MetricName.ValueString())
 	})
 }
 

@@ -255,7 +255,8 @@ func buildIndicatorAttribute() schema.SingleNestedAttribute {
 			SchemaFieldEventBasedAvailability: buildEventBasedAvailabilityIndicatorAttribute(),
 			SchemaFieldTraffic:                buildTrafficIndicatorAttribute(),
 			SchemaFieldCustom:                 buildCustomIndicatorAttribute(),
-			SchemaFieldSaturation:             buildSaturationIndicatorAttribute(),
+			SchemaFieldTimeBasedSaturation:    buildTimeBasedSaturationIndicatorAttribute(),
+			SchemaFieldEventBasedSaturation:   buildEventBasedSaturationIndicatorAttribute(),
 		},
 	}
 }
@@ -367,10 +368,10 @@ func buildCustomIndicatorAttribute() schema.SingleNestedAttribute {
 	}
 }
 
-// buildSaturationIndicatorAttribute creates the saturation indicator attribute
-func buildSaturationIndicatorAttribute() schema.SingleNestedAttribute {
+// buildTimeBasedSaturationIndicatorAttribute creates the time-based saturation indicator attribute
+func buildTimeBasedSaturationIndicatorAttribute() schema.SingleNestedAttribute {
 	return schema.SingleNestedAttribute{
-		Description: SloConfigDescSaturation,
+		Description: SloConfigDescTimeBasedSaturation,
 		Optional:    true,
 		Attributes: map[string]schema.Attribute{
 			SloConfigFieldMetricName: schema.StringAttribute{
@@ -386,10 +387,53 @@ func buildSaturationIndicatorAttribute() schema.SingleNestedAttribute {
 				Description: SloConfigDescAggregation,
 			},
 			SchemaFieldOperator: schema.StringAttribute{
-				Optional:    true,
+				Optional: true,
+				Computed: true,
 				Description: SloConfigDescOperator,
 				Validators: []validator.String{
-					stringvalidator.OneOf(OperatorGreaterThan, OperatorGreaterThanOrEqual, OperatorLessThan, OperatorLessThanOrEqual),
+					stringvalidator.OneOf(
+						OperatorGreaterThan,
+						OperatorGreaterThanOrEqual,
+						OperatorLessThan,
+						OperatorLessThanOrEqual,
+					),
+				},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+		},
+	}
+}
+
+// buildEventBasedSaturationIndicatorAttribute creates the event-based saturation indicator attribute
+func buildEventBasedSaturationIndicatorAttribute() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Description: SloConfigDescEventBasedSaturation,
+		Optional:    true,
+		Attributes: map[string]schema.Attribute{
+			SloConfigFieldMetricName: schema.StringAttribute{
+				Optional:    true,
+				Description: SloConfigDescMetricName,
+			},
+			SloConfigFieldThreshold: schema.Float64Attribute{
+				Optional:    true,
+				Description: SloConfigDescThreshold,
+			},
+			SchemaFieldOperator: schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+				Description: SloConfigDescOperator,
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						OperatorGreaterThan,
+						OperatorGreaterThanOrEqual,
+						OperatorLessThan,
+						OperatorLessThanOrEqual,
+					),
+				},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 		},
@@ -796,9 +840,14 @@ func (r *sloConfigResource) mapIndicatorFromState(indicatorModel IndicatorModel)
 		return r.mapCustomIndicator(indicatorModel.CustomIndicatorModel)
 	}
 
-	if indicatorModel.SaturationIndicatorModel != nil {
-		return r.mapSaturationIndicator(indicatorModel.SaturationIndicatorModel)
+	if indicatorModel.TimeBasedSaturationIndicatorModel != nil {
+		return r.mapTimeBasedSaturationIndicator(indicatorModel.TimeBasedSaturationIndicatorModel)
 	}
+
+	if indicatorModel.EventBasedSaturationIndicatorModel != nil {
+		return r.mapEventBasedSaturationIndicator(indicatorModel.EventBasedSaturationIndicatorModel)
+	}
+
 
 	var diags diag.Diagnostics
 	diags.AddError(SloConfigErrMissingIndicator, SloConfigErrExactlyOneIndicator)
@@ -927,13 +976,12 @@ func (r *sloConfigResource) mapCustomIndicator(model *CustomIndicatorModel) (res
 	}, diags
 }
 
-// mapSaturationIndicator maps saturation indicator from state
-func (r *sloConfigResource) mapSaturationIndicator(model *SaturationIndicatorModel) (restapi.SloIndicator, diag.Diagnostics) {
+// mapTimeBasedSaturationIndicator maps saturation indicator from state
+func (r *sloConfigResource) mapTimeBasedSaturationIndicator(model *TimeBasedSaturationIndicatorModel) (restapi.SloIndicator, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	if model.Threshold.IsNull() || model.Threshold.IsUnknown() ||
-		model.Operator.IsNull() || model.Operator.IsUnknown() {
-		diags.AddError(SloConfigErrSaturationRequired, SloConfigErrSaturationRequiredMsg)
+	if model.Threshold.IsNull() || model.Threshold.IsUnknown(){
+		diags.AddError(SloConfigErrTimeBasedSaturationRequired, SloConfigErrTimeBasedSaturationRequiredMsg)
 		return restapi.SloIndicator{}, diags
 	}
 
@@ -949,6 +997,30 @@ func (r *sloConfigResource) mapSaturationIndicator(model *SaturationIndicatorMod
 		Operator:    &operator,
 		MetricName:  &metricName,
 	}, diags
+}
+
+// mapEventBasedSaturationIndicator maps saturation indicator from state
+func (r *sloConfigResource) mapEventBasedSaturationIndicator(model *EventBasedSaturationIndicatorModel) (restapi.SloIndicator, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	if model.Threshold.IsNull() || model.Threshold.IsUnknown() {
+		diags.AddError(SloConfigErrEventBasedSaturationRequired, SloConfigErrEventBasedSaturationRequiredMsg)
+		return restapi.SloIndicator{}, diags
+	}
+
+	defaultAgg := r.getDefaultAggregation()
+	operator := model.Operator.ValueString()
+	metricName := model.MetricName.ValueString()
+
+	return restapi.SloIndicator{
+		Blueprint:   SloConfigAPIIndicatorBlueprintSaturation,
+		Type:        SloConfigAPIIndicatorMeasurementTypeEventBased,
+		Threshold:   model.Threshold.ValueFloat64(),
+		Aggregation: defaultAgg,
+		Operator:    &operator,
+		MetricName:  &metricName,
+	}, diags
+
 }
 
 // getDefaultAggregation returns the default aggregation value
@@ -1310,7 +1382,10 @@ func (r *sloConfigResource) mapIndicatorToState(apiObject *restapi.SloConfig, sl
 		}
 
 	case indicator.Type == SloConfigAPIIndicatorMeasurementTypeTimeBased && indicator.Blueprint == SloConfigAPIIndicatorBlueprintSaturation:
-		indicatorModel.SaturationIndicatorModel = r.createSaturationModel(indicator)
+		indicatorModel.TimeBasedSaturationIndicatorModel = r.createTimeBasedSaturationModel(indicator)
+	
+	case indicator.Type == SloConfigAPIIndicatorMeasurementTypeEventBased && indicator.Blueprint == SloConfigAPIIndicatorBlueprintSaturation:
+		indicatorModel.EventBasedSaturationIndicatorModel = r.createEventBasedSaturationModel(indicator)
 
 	default:
 		diags.AddError(SloConfigErrMappingIndicatorToState, fmt.Sprintf(SloConfigErrUnsupportedIndicatorType, indicator.Type, indicator.Blueprint))
@@ -1379,12 +1454,21 @@ func (r *sloConfigResource) createCustomModel(indicator restapi.SloIndicator) (*
 	return model, diags
 }
 
-// createSaturationModel creates saturation indicator model
-func (r *sloConfigResource) createSaturationModel(indicator restapi.SloIndicator) *SaturationIndicatorModel {
-	return &SaturationIndicatorModel{
+// createTimeBasedSaturationModel creates saturation indicator model
+func (r *sloConfigResource) createTimeBasedSaturationModel(indicator restapi.SloIndicator) *TimeBasedSaturationIndicatorModel {
+	return &TimeBasedSaturationIndicatorModel{
 		MetricName:  util.SetStringPointerToState(indicator.MetricName),
 		Threshold:   types.Float64Value(indicator.Threshold),
 		Aggregation: util.SetStringPointerToState(indicator.Aggregation),
+		Operator:    util.SetStringPointerToState(indicator.Operator),
+	}
+}
+
+// createEventBasedSaturationModel creates saturation indicator model
+func (r *sloConfigResource) createEventBasedSaturationModel(indicator restapi.SloIndicator) *EventBasedSaturationIndicatorModel {
+	return &EventBasedSaturationIndicatorModel{
+		MetricName:  util.SetStringPointerToState(indicator.MetricName),
+		Threshold:   types.Float64Value(indicator.Threshold),
 		Operator:    util.SetStringPointerToState(indicator.Operator),
 	}
 }
