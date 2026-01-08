@@ -79,7 +79,7 @@ func TestUpdateState_BasicConfig(t *testing.T) {
 		Name:               types.StringNull(),
 		Description:        types.StringNull(),
 		TagFilter:          types.StringNull(),
-		GroupBy:            types.ListNull(types.StringType),
+		GroupBy:            types.SetNull(types.StringType),
 		Granularity:        types.Int64Null(),
 		EvaluationType:     types.StringNull(),
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
@@ -142,7 +142,7 @@ func TestUpdateState_WithTagFilter(t *testing.T) {
 		Name:               types.StringNull(),
 		Description:        types.StringNull(),
 		TagFilter:          types.StringNull(),
-		GroupBy:            types.ListNull(types.StringType),
+		GroupBy:            types.SetNull(types.StringType),
 		Granularity:        types.Int64Null(),
 		EvaluationType:     types.StringNull(),
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
@@ -186,7 +186,7 @@ func TestUpdateState_WithGroupBy(t *testing.T) {
 		Name:               types.StringNull(),
 		Description:        types.StringNull(),
 		TagFilter:          types.StringNull(),
-		GroupBy:            types.ListNull(types.StringType),
+		GroupBy:            types.SetNull(types.StringType),
 		Granularity:        types.Int64Null(),
 		EvaluationType:     types.StringNull(),
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
@@ -461,7 +461,7 @@ func TestMapStateToDataObject_BasicConfig(t *testing.T) {
 		Granularity:        types.Int64Value(600000),
 		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
 		TagFilter:          types.StringNull(),
-		GroupBy:            types.ListNull(types.StringType),
+		GroupBy:            types.SetNull(types.StringType),
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
 
@@ -487,7 +487,7 @@ func TestMapStateToDataObject_WithTagFilter(t *testing.T) {
 		Granularity:        types.Int64Value(600000),
 		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
 		TagFilter:          types.StringValue("entity.type EQUALS 'host'"),
-		GroupBy:            types.ListNull(types.StringType),
+		GroupBy:            types.SetNull(types.StringType),
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
 
@@ -508,7 +508,7 @@ func TestMapStateToDataObject_WithInvalidTagFilter(t *testing.T) {
 		Granularity:        types.Int64Value(600000),
 		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
 		TagFilter:          types.StringValue("invalid tag filter syntax"),
-		GroupBy:            types.ListNull(types.StringType),
+		GroupBy:            types.SetNull(types.StringType),
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
 
@@ -520,7 +520,7 @@ func TestMapStateToDataObject_WithGroupBy(t *testing.T) {
 	ctx := context.Background()
 	resource := NewInfraAlertConfigResourceHandle()
 
-	groupByList := types.ListValueMust(types.StringType, []attr.Value{
+	groupBySet := types.SetValueMust(types.StringType, []attr.Value{
 		types.StringValue("host.name"),
 		types.StringValue("zone"),
 	})
@@ -532,7 +532,7 @@ func TestMapStateToDataObject_WithGroupBy(t *testing.T) {
 		Granularity:        types.Int64Value(600000),
 		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
 		TagFilter:          types.StringNull(),
-		GroupBy:            groupByList,
+		GroupBy:            groupBySet,
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
 
@@ -548,11 +548,11 @@ func TestMapStateToDataObject_WithAlertChannels(t *testing.T) {
 	ctx := context.Background()
 	resource := NewInfraAlertConfigResourceHandle()
 
-	warningList := types.ListValueMust(types.StringType, []attr.Value{
+	warningSet := types.SetValueMust(types.StringType, []attr.Value{
 		types.StringValue("channel-1"),
 		types.StringValue("channel-2"),
 	})
-	criticalList := types.ListValueMust(types.StringType, []attr.Value{
+	criticalSet := types.SetValueMust(types.StringType, []attr.Value{
 		types.StringValue("channel-3"),
 	})
 
@@ -563,10 +563,10 @@ func TestMapStateToDataObject_WithAlertChannels(t *testing.T) {
 		Granularity:    types.Int64Value(600000),
 		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
 		TagFilter:      types.StringNull(),
-		GroupBy:        types.ListNull(types.StringType),
+		GroupBy:        types.SetNull(types.StringType),
 		AlertChannels: &InfraAlertChannelsModel{
-			Warning:  warningList,
-			Critical: criticalList,
+			Warning:  warningSet,
+			Critical: criticalSet,
 		},
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
@@ -590,7 +590,7 @@ func TestMapStateToDataObject_WithTimeThreshold(t *testing.T) {
 		Granularity:    types.Int64Value(600000),
 		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
 		TagFilter:      types.StringNull(),
-		GroupBy:        types.ListNull(types.StringType),
+		GroupBy:        types.SetNull(types.StringType),
 		TimeThreshold: &InfraTimeThresholdModel{
 			ViolationsInSequence: &InfraViolationsInSequenceModel{
 				TimeWindow: types.Int64Value(300000),
@@ -636,7 +636,7 @@ func TestMapStateToDataObject_WithCustomPayloadFields(t *testing.T) {
 		Granularity:        types.Int64Value(600000),
 		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
 		TagFilter:          types.StringNull(),
-		GroupBy:            types.ListNull(types.StringType),
+		GroupBy:            types.SetNull(types.StringType),
 		CustomPayloadField: customPayloadFields,
 	})
 
@@ -660,7 +660,7 @@ func TestMapStateToDataObject_WithRulesAndStaticThreshold(t *testing.T) {
 		Granularity:    types.Int64Value(600000),
 		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
 		TagFilter:      types.StringNull(),
-		GroupBy:        types.ListNull(types.StringType),
+		GroupBy:        types.SetNull(types.StringType),
 		Rules: &InfraRulesModel{
 			GenericRule: &InfraGenericRuleModel{
 				MetricName:             types.StringValue("cpu.usage"),
@@ -713,7 +713,7 @@ func TestMapStateToDataObject_WithRulesAndAdaptiveBaselineThreshold(t *testing.T
 		Granularity:    types.Int64Value(600000),
 		EvaluationType: types.StringValue(string(restapi.EvaluationTypeCustom)),
 		TagFilter:      types.StringNull(),
-		GroupBy:        types.ListNull(types.StringType),
+		GroupBy:        types.SetNull(types.StringType),
 		Rules: &InfraRulesModel{
 			GenericRule: &InfraGenericRuleModel{
 				MetricName:             types.StringValue("memory.usage"),
@@ -764,7 +764,7 @@ func TestMapStateToDataObject_WithBothThresholds(t *testing.T) {
 		Granularity:    types.Int64Value(600000),
 		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
 		TagFilter:      types.StringNull(),
-		GroupBy:        types.ListNull(types.StringType),
+		GroupBy:        types.SetNull(types.StringType),
 		Rules: &InfraRulesModel{
 			GenericRule: &InfraGenericRuleModel{
 				MetricName:             types.StringValue("disk.usage"),
@@ -814,7 +814,7 @@ func TestMapStateToDataObject_WithEmptyTagFilter(t *testing.T) {
 		Granularity:        types.Int64Value(600000),
 		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
 		TagFilter:          types.StringValue(""),
-		GroupBy:            types.ListNull(types.StringType),
+		GroupBy:            types.SetNull(types.StringType),
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
 
@@ -835,7 +835,7 @@ func TestMapStateToDataObject_WithNullGranularity(t *testing.T) {
 		Granularity:        types.Int64Null(),
 		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
 		TagFilter:          types.StringNull(),
-		GroupBy:            types.ListNull(types.StringType),
+		GroupBy:            types.SetNull(types.StringType),
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
 
@@ -860,7 +860,7 @@ func TestMapStateToDataObject_FromPlan(t *testing.T) {
 		Granularity:        types.Int64Value(600000),
 		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
 		TagFilter:          types.StringNull(),
-		GroupBy:            types.ListNull(types.StringType),
+		GroupBy:            types.SetNull(types.StringType),
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 	}
 
@@ -1043,7 +1043,7 @@ func TestMapStateToDataObject_WithNullTimeThreshold(t *testing.T) {
 		Granularity:        types.Int64Value(600000),
 		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
 		TagFilter:          types.StringNull(),
-		GroupBy:            types.ListNull(types.StringType),
+		GroupBy:            types.SetNull(types.StringType),
 		TimeThreshold:      nil,
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
@@ -1065,7 +1065,7 @@ func TestMapStateToDataObject_WithNullAlertChannels(t *testing.T) {
 		Granularity:        types.Int64Value(600000),
 		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
 		TagFilter:          types.StringNull(),
-		GroupBy:            types.ListNull(types.StringType),
+		GroupBy:            types.SetNull(types.StringType),
 		AlertChannels:      nil,
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
@@ -1087,7 +1087,7 @@ func TestMapStateToDataObject_WithNullRules(t *testing.T) {
 		Granularity:        types.Int64Value(600000),
 		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
 		TagFilter:          types.StringNull(),
-		GroupBy:            types.ListNull(types.StringType),
+		GroupBy:            types.SetNull(types.StringType),
 		Rules:              nil,
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
@@ -1170,7 +1170,7 @@ func TestMapStateToDataObject_WithOnlyWarningAlertChannel(t *testing.T) {
 	ctx := context.Background()
 	resource := NewInfraAlertConfigResourceHandle()
 
-	warningList := types.ListValueMust(types.StringType, []attr.Value{
+	warningSet := types.SetValueMust(types.StringType, []attr.Value{
 		types.StringValue("channel-1"),
 	})
 
@@ -1181,10 +1181,10 @@ func TestMapStateToDataObject_WithOnlyWarningAlertChannel(t *testing.T) {
 		Granularity:    types.Int64Value(600000),
 		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
 		TagFilter:      types.StringNull(),
-		GroupBy:        types.ListNull(types.StringType),
+		GroupBy:        types.SetNull(types.StringType),
 		AlertChannels: &InfraAlertChannelsModel{
-			Warning:  warningList,
-			Critical: types.ListNull(types.StringType),
+			Warning:  warningSet,
+			Critical: types.SetNull(types.StringType),
 		},
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
@@ -1217,7 +1217,7 @@ func TestMapStateToDataObject_AllEvaluationTypes(t *testing.T) {
 				Granularity:        types.Int64Value(600000),
 				EvaluationType:     types.StringValue(string(evalType)),
 				TagFilter:          types.StringNull(),
-				GroupBy:            types.ListNull(types.StringType),
+				GroupBy:            types.SetNull(types.StringType),
 				CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 			})
 
@@ -1271,7 +1271,7 @@ func initializeEmptyState(ctx context.Context, t *testing.T, state *tfsdk.State)
 		Name:               types.StringNull(),
 		Description:        types.StringNull(),
 		TagFilter:          types.StringNull(),
-		GroupBy:            types.ListNull(types.StringType),
+		GroupBy:            types.SetNull(types.StringType),
 		Granularity:        types.Int64Null(),
 		EvaluationType:     types.StringNull(),
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
@@ -1390,7 +1390,7 @@ func TestMapStateToDataObject_WithEmptyCustomPayloadFields(t *testing.T) {
 		Granularity:        types.Int64Value(600000),
 		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
 		TagFilter:          types.StringNull(),
-		GroupBy:            types.ListNull(types.StringType),
+		GroupBy:            types.SetNull(types.StringType),
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
 
@@ -1411,7 +1411,7 @@ func TestMapStateToDataObject_WithNullID(t *testing.T) {
 		Granularity:        types.Int64Value(600000),
 		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
 		TagFilter:          types.StringNull(),
-		GroupBy:            types.ListNull(types.StringType),
+		GroupBy:            types.SetNull(types.StringType),
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
 
@@ -1464,7 +1464,7 @@ func TestMapStateToDataObject_WithOnlyCriticalAlertChannel(t *testing.T) {
 	ctx := context.Background()
 	resource := NewInfraAlertConfigResourceHandle()
 
-	criticalList := types.ListValueMust(types.StringType, []attr.Value{
+	criticalSet := types.SetValueMust(types.StringType, []attr.Value{
 		types.StringValue("channel-1"),
 	})
 
@@ -1475,10 +1475,10 @@ func TestMapStateToDataObject_WithOnlyCriticalAlertChannel(t *testing.T) {
 		Granularity:    types.Int64Value(600000),
 		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
 		TagFilter:      types.StringNull(),
-		GroupBy:        types.ListNull(types.StringType),
+		GroupBy:        types.SetNull(types.StringType),
 		AlertChannels: &InfraAlertChannelsModel{
-			Warning:  types.ListNull(types.StringType),
-			Critical: criticalList,
+			Warning:  types.SetNull(types.StringType),
+			Critical: criticalSet,
 		},
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
@@ -1529,8 +1529,8 @@ func TestMapStateToDataObject_WithEmptyAlertChannelLists(t *testing.T) {
 	ctx := context.Background()
 	resource := NewInfraAlertConfigResourceHandle()
 
-	warningList := types.ListValueMust(types.StringType, []attr.Value{})
-	criticalList := types.ListValueMust(types.StringType, []attr.Value{})
+	warningSet := types.SetValueMust(types.StringType, []attr.Value{})
+	criticalSet := types.SetValueMust(types.StringType, []attr.Value{})
 
 	state := createMockState(t, InfraAlertConfigModel{
 		ID:             types.StringValue("test-id"),
@@ -1539,10 +1539,10 @@ func TestMapStateToDataObject_WithEmptyAlertChannelLists(t *testing.T) {
 		Granularity:    types.Int64Value(600000),
 		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
 		TagFilter:      types.StringNull(),
-		GroupBy:        types.ListNull(types.StringType),
+		GroupBy:        types.SetNull(types.StringType),
 		AlertChannels: &InfraAlertChannelsModel{
-			Warning:  warningList,
-			Critical: criticalList,
+			Warning:  warningSet,
+			Critical: criticalSet,
 		},
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
@@ -1598,7 +1598,7 @@ func TestMapStateToDataObject_WithNullTimeWindowInTimeThreshold(t *testing.T) {
 		Granularity:    types.Int64Value(600000),
 		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
 		TagFilter:      types.StringNull(),
-		GroupBy:        types.ListNull(types.StringType),
+		GroupBy:        types.SetNull(types.StringType),
 		TimeThreshold: &InfraTimeThresholdModel{
 			ViolationsInSequence: &InfraViolationsInSequenceModel{
 				TimeWindow: types.Int64Null(),
@@ -1661,7 +1661,7 @@ func TestMapStateToDataObject_WithRulesButNoThresholds(t *testing.T) {
 		Granularity:    types.Int64Value(600000),
 		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
 		TagFilter:      types.StringNull(),
-		GroupBy:        types.ListNull(types.StringType),
+		GroupBy:        types.SetNull(types.StringType),
 		Rules: &InfraRulesModel{
 			GenericRule: &InfraGenericRuleModel{
 				MetricName:             types.StringValue("cpu.usage"),

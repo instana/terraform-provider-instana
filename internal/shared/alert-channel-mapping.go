@@ -44,11 +44,11 @@ type EmailModel struct {
 type OpsGenieModel struct {
 	APIKey types.String `tfsdk:"api_key"`
 	Region types.String `tfsdk:"region"`
-	Tags   types.List   `tfsdk:"tags"`
+	Tags   types.Set    `tfsdk:"tags"`
 }
 type WatsonAIOpsWebhookModel struct {
 	WebhookURL  types.String `tfsdk:"webhook_url"`
-	HTTPHeaders types.List   `tfsdk:"http_headers"`
+	HTTPHeaders types.Set    `tfsdk:"http_headers"`
 }
 
 type PrometheusWebhookModel struct {
@@ -331,14 +331,14 @@ func MapWatsonAIOpsWebhookChannelToState(ctx context.Context, channel *restapi.A
 
 	// Add optional headers field
 	if channel.Headers != nil && len(channel.Headers) > 0 {
-		headersList, headersDiags := types.ListValueFrom(ctx, types.StringType, channel.Headers)
+		headersSet, headersDiags := types.SetValueFrom(ctx, types.StringType, channel.Headers)
 		if headersDiags.HasError() {
 			diags.Append(headersDiags...)
 			return nil, diags
 		}
-		model.HTTPHeaders = headersList
+		model.HTTPHeaders = headersSet
 	} else {
-		model.HTTPHeaders = types.ListNull(types.StringType)
+		model.HTTPHeaders = types.SetNull(types.StringType)
 	}
 
 	return model, diags
@@ -365,8 +365,8 @@ func MapOpsGenieChannelToState(ctx context.Context, channel *restapi.AlertingCha
 	// Convert comma-separated tags to slice
 	tags := ConvertCommaSeparatedListToSlice(*channel.Tags)
 
-	// Create tags list
-	tagsList, tagsDiags := types.ListValueFrom(ctx, types.StringType, tags)
+	// Create tags set
+	tagsSet, tagsDiags := types.SetValueFrom(ctx, types.StringType, tags)
 	if tagsDiags.HasError() {
 		diags.Append(tagsDiags...)
 		return nil, diags
@@ -376,7 +376,7 @@ func MapOpsGenieChannelToState(ctx context.Context, channel *restapi.AlertingCha
 	return &OpsGenieModel{
 		APIKey: util.SetStringPointerToState(channel.APIKey),
 		Region: util.SetStringPointerToState(channel.Region),
-		Tags:   tagsList,
+		Tags:   tagsSet,
 	}, diags
 }
 

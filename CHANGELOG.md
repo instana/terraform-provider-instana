@@ -1,4 +1,21 @@
 # Changelog
+## [v6.0.4](https://github.com/instana/terraform-provider-instana/tree/v6.0.4) (2026-01-08)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v6.0.3...v6.0.4)
+
+**Fixed bugs:**
+- Eliminate false positive changes from list ordering by converting to Sets
+
+**Implemented enhancements:**
+
+- Added support for creating and managing Infrastructure SLOs using the newly introduced Saturation blueprint
+
+**Merged pull requests:**
+
+- List ordering fix [\#70](https://github.com/instana/terraform-provider-instana/pull/70) ([georgekutty-1](https://github.com/georgekutty-1))
+- Add Saturation Blueprint support to SLO configs [\#69](https://github.com/instana/terraform-provider-instana/pull/69) ([nikhilgowda123](https://github.com/nikhilgowda123))
+
+
 ## [v6.0.3](https://github.com/instana/terraform-provider-instana/tree/v6.0.3) (2025-12-17)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v6.0.2...v6.0.3)

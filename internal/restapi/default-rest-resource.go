@@ -110,7 +110,7 @@ func (r *defaultRestResource[T]) Create(data T) (T, error) {
 
 func (r *defaultRestResource[T]) Update(data T) (T, error) {
 	if r.mode == DefaultRestResourceModeCreateAndUpdatePOST {
-		return r.upsert(data, r.client.PostWithID)
+		return r.upsertWithNoContentHandling(data, r.client.PostWithID)
 	} else if r.mode == DefaultRestResourceModeCreatePOSTAndUpdateNotSupported || r.mode == DefaultRestResourceModeCreatePUTAndUpdateNotSupported {
 		emptyObject, err := r.unmarshaller.Unmarshal([]byte("{}"))
 		if err != nil {
@@ -118,13 +118,26 @@ func (r *defaultRestResource[T]) Update(data T) (T, error) {
 		}
 		return emptyObject, fmt.Errorf("update is not supported for %s", r.resourcePath)
 	}
-	return r.upsert(data, r.client.Put)
+	return r.upsertWithNoContentHandling(data, r.client.Put)
 }
 
 func (r *defaultRestResource[T]) upsert(data T, operation restClientOperation) (T, error) {
 	response, err := operation(data, r.resourcePath)
 	if err != nil {
 		return data, err
+	}
+	return r.validateResponseAndConvertToStruct(response)
+}
+
+func (r *defaultRestResource[T]) upsertWithNoContentHandling(data T, operation restClientOperation) (T, error) {
+	response, err := operation(data, r.resourcePath)
+	if err != nil {
+		return data, err
+	}
+	// Handle 204 No Content response (when API returns empty JSON object "{}")
+	// This happens when there are no changes to update
+	if string(response) == "{}" {
+		return data, nil
 	}
 	return r.validateResponseAndConvertToStruct(response)
 }

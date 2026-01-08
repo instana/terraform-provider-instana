@@ -56,6 +56,26 @@ func TestShouldFailToCreateOrUpdateTestObjectThroughCreatePUTUpdatePUTRestResour
 	})
 }
 
+func TestShouldReturnOriginalDataWhenUpdateReturnsNoContentForCreatePUTUpdatePUT(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	client := mocks.NewMockRestClient(ctrl)
+	unmarshaller := mocks.NewMockJSONUnmarshaller[*testObject](ctrl)
+
+	sut := NewCreatePUTUpdatePUTRestResource[*testObject](testObjectResourcePath, unmarshaller, client)
+
+	testObject := makeTestObject()
+	emptyJSONResponse := []byte("{}")
+
+	client.EXPECT().Put(gomock.Eq(testObject), gomock.Eq(testObjectResourcePath)).Return(emptyJSONResponse, nil)
+	unmarshaller.EXPECT().Unmarshal(gomock.Any()).Times(0)
+
+	result, err := sut.Update(testObject)
+
+	assert.NoError(t, err)
+	assert.Equal(t, testObject, result)
+}
+
 type createUpdateFunc func(data *testObject) (*testObject, error)
 type createPutUpdatePutContext struct {
 	operation           string

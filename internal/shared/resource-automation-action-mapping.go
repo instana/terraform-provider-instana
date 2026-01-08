@@ -21,7 +21,7 @@ type AutomationActionModel struct {
 	ID             types.String     `tfsdk:"id"`
 	Name           types.String     `tfsdk:"name"`
 	Description    types.String     `tfsdk:"description"`
-	Tags           types.List       `tfsdk:"tags"`
+	Tags           types.Set        `tfsdk:"tags"`
 	Script         *ScriptModel     `tfsdk:"script"`
 	Http           *HttpModel       `tfsdk:"http"`
 	Manual         *ManualModel     `tfsdk:"manual"`
@@ -150,11 +150,11 @@ const UTF8Encoding = "UTF8"
 // Common mapping functions
 
 // MapTagsToState maps tags from API to Terraform state
-func MapTagsToState(ctx context.Context, tags interface{}) (types.List, diag.Diagnostics) {
+func MapTagsToState(ctx context.Context, tags interface{}) (types.Set, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if tags == nil {
-		return types.ListNull(types.StringType), diags
+		return types.SetNull(types.StringType), diags
 	}
 
 	// Handle tags based on their type
@@ -169,29 +169,29 @@ func MapTagsToState(ctx context.Context, tags interface{}) (types.List, diag.Dia
 					"Error mapping tags",
 					fmt.Sprintf("Tag at index %d is not a string", i),
 				)
-				return types.ListNull(types.StringType), diags
+				return types.SetNull(types.StringType), diags
 			}
 		}
-		return types.ListValueMust(types.StringType, elements), diags
+		return types.SetValueMust(types.StringType, elements), diags
 	default:
 		diags.AddError(
 			"Error mapping tags",
 			"Tags are not in the expected format",
 		)
-		return types.ListNull(types.StringType), diags
+		return types.SetNull(types.StringType), diags
 	}
 }
 
 // MapTagsFromState maps tags from Terraform state to API
-func MapTagsFromState(ctx context.Context, tagsList types.List) (interface{}, diag.Diagnostics) {
+func MapTagsFromState(ctx context.Context, tagsSet types.Set) (interface{}, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	if tagsList.IsNull() {
+	if tagsSet.IsNull() {
 		return nil, diags
 	}
 
 	var tags []string
-	diags.Append(tagsList.ElementsAs(ctx, &tags, false)...)
+	diags.Append(tagsSet.ElementsAs(ctx, &tags, false)...)
 	if diags.HasError() {
 		return nil, diags
 	}
@@ -301,7 +301,7 @@ func GetAutomationActionSchemaAttributes() map[string]schema.Attribute {
 			Optional:    true,
 			Description: "The description of the automation action.",
 		},
-		AutomationActionFieldTags: schema.ListAttribute{
+		AutomationActionFieldTags: schema.SetAttribute{
 			ElementType: types.StringType,
 			Optional:    true,
 			Description: "The tags of the automation action.",

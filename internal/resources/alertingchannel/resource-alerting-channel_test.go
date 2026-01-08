@@ -71,7 +71,7 @@ func TestMapOpsGenieChannelFromState(t *testing.T) {
 	ctx := context.Background()
 
 	tags := []string{"tag1", "tag2", "tag3"}
-	tagsList, _ := types.ListValueFrom(ctx, types.StringType, tags)
+	tagsList, _ := types.SetValueFrom(ctx, types.StringType, tags)
 
 	opsGenieModel := &shared.OpsGenieModel{
 		APIKey: types.StringValue("test-api-key"),
@@ -400,7 +400,7 @@ func TestMapWatsonAIOpsWebhookChannelFromState(t *testing.T) {
 
 	t.Run("with headers", func(t *testing.T) {
 		headers := []string{"Authorization: Bearer token", "Content-Type: application/json"}
-		headersList, _ := types.ListValueFrom(ctx, types.StringType, headers)
+		headersList, _ := types.SetValueFrom(ctx, types.StringType, headers)
 
 		watsonModel := &shared.WatsonAIOpsWebhookModel{
 			WebhookURL:  types.StringValue("https://watson.example.com"),
@@ -418,7 +418,7 @@ func TestMapWatsonAIOpsWebhookChannelFromState(t *testing.T) {
 	t.Run("without headers", func(t *testing.T) {
 		watsonModel := &shared.WatsonAIOpsWebhookModel{
 			WebhookURL:  types.StringValue("https://watson.example.com"),
-			HTTPHeaders: types.ListNull(types.StringType),
+			HTTPHeaders: types.SetNull(types.StringType),
 		}
 
 		channel, diags := resource.mapWatsonAIOpsWebhookChannelFromState(ctx, "test-id", "test-name", watsonModel)
@@ -453,7 +453,7 @@ func TestMapStateToDataObject(t *testing.T) {
 
 	t.Run("OpsGenie channel", func(t *testing.T) {
 		tags := []string{"tag1"}
-		tagsList, _ := types.ListValueFrom(ctx, types.StringType, tags)
+		tagsList, _ := types.SetValueFrom(ctx, types.StringType, tags)
 
 		model := AlertingChannelModel{
 			ID:   types.StringValue("test-id"),
@@ -667,7 +667,7 @@ func TestMapStateToDataObject(t *testing.T) {
 			Name: types.StringValue("test-name"),
 			WatsonAIOpsWebhook: &shared.WatsonAIOpsWebhookModel{
 				WebhookURL:  types.StringValue("https://watson.com/webhook"),
-				HTTPHeaders: types.ListNull(types.StringType),
+				HTTPHeaders: types.SetNull(types.StringType),
 			},
 		}
 

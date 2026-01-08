@@ -36,8 +36,8 @@ type GroupByModel struct {
 
 // AlertChannelsModel represents alert channels in the Terraform model
 type AlertChannelsModel struct {
-	Warning  types.List `tfsdk:"warning"`
-	Critical types.List `tfsdk:"critical"`
+	Warning  types.Set `tfsdk:"warning"`
+	Critical types.Set `tfsdk:"critical"`
 }
 
 // LogAlertRuleModel represents a log alert rule in the Terraform model

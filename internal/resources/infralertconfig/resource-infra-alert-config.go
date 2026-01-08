@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -59,12 +59,12 @@ func buildInfraAlertConfigSchema() schema.Schema {
 				Description: InfraAlertConfigDescTagFilter,
 				Optional:    true,
 			},
-			InfraAlertConfigFieldGroupBy: schema.ListAttribute{
+			InfraAlertConfigFieldGroupBy: schema.SetAttribute{
 				Description: InfraAlertConfigDescGroupBy,
 				Optional:    true,
 				ElementType: types.StringType,
-				Validators: []validator.List{
-					listvalidator.SizeAtLeast(1),
+				Validators: []validator.Set{
+					setvalidator.SizeAtLeast(1),
 				},
 			},
 			InfraAlertConfigFieldGranularity: schema.Int64Attribute{
@@ -153,20 +153,20 @@ func buildAlertChannelsSchema() schema.SingleNestedAttribute {
 		Description: InfraAlertConfigDescAlertChannels,
 		Optional:    true,
 		Attributes: map[string]schema.Attribute{
-			ResourceFieldThresholdRuleWarningSeverity: schema.ListAttribute{
+			ResourceFieldThresholdRuleWarningSeverity: schema.SetAttribute{
 				Optional:    true,
 				Description: InfraAlertConfigDescAlertChannelIDs,
 				ElementType: types.StringType,
-				Validators: []validator.List{
-					listvalidator.SizeAtLeast(1),
+				Validators: []validator.Set{
+					setvalidator.SizeAtLeast(1),
 				},
 			},
-			ResourceFieldThresholdRuleCriticalSeverity: schema.ListAttribute{
+			ResourceFieldThresholdRuleCriticalSeverity: schema.SetAttribute{
 				Optional:    true,
 				Description: InfraAlertConfigDescAlertChannelIDs,
 				ElementType: types.StringType,
-				Validators: []validator.List{
-					listvalidator.SizeAtLeast(1),
+				Validators: []validator.Set{
+					setvalidator.SizeAtLeast(1),
 				},
 			},
 		},
@@ -280,16 +280,16 @@ func (r *infraAlertConfigResource) mapTagFilterToModel(tagFilterExpression *rest
 }
 
 // mapGroupByToModel converts API group by slice to model representation
-func (r *infraAlertConfigResource) mapGroupByToModel(groupBy []string) types.List {
+func (r *infraAlertConfigResource) mapGroupByToModel(groupBy []string) types.Set {
 	if len(groupBy) == 0 {
-		return types.ListNull(types.StringType)
+		return types.SetNull(types.StringType)
 	}
 
 	groupByElements := make([]attr.Value, len(groupBy))
 	for i, groupByValue := range groupBy {
 		groupByElements[i] = types.StringValue(groupByValue)
 	}
-	return types.ListValueMust(types.StringType, groupByElements)
+	return types.SetValueMust(types.StringType, groupByElements)
 }
 
 // mapAlertChannelsToModel converts API alert channels to model representation
@@ -304,8 +304,8 @@ func (r *infraAlertConfigResource) mapAlertChannelsToModel(ctx context.Context, 
 		return nil, diags
 	}
 	alertChannelsModel := &InfraAlertChannelsModel{
-		Warning:  types.ListNull(types.StringType),
-		Critical: types.ListNull(types.StringType),
+		Warning:  types.SetNull(types.StringType),
+		Critical: types.SetNull(types.StringType),
 	}
 
 	// Only populate the lists if there are actual channels in the API response
@@ -323,17 +323,17 @@ func (r *infraAlertConfigResource) mapAlertChannelsToModel(ctx context.Context, 
 }
 
 // mapSeverityChannelsToModel converts alert channels for a specific severity to model representation
-func (r *infraAlertConfigResource) mapSeverityChannelsToModel(ctx context.Context, alertChannels map[restapi.AlertSeverity][]string, severity restapi.AlertSeverity) (types.List, diag.Diagnostics) {
+func (r *infraAlertConfigResource) mapSeverityChannelsToModel(ctx context.Context, alertChannels map[restapi.AlertSeverity][]string, severity restapi.AlertSeverity) (types.Set, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	channels, exists := alertChannels[severity]
 	if !exists || len(channels) == 0 {
-		return types.ListNull(types.StringType), diags
+		return types.SetNull(types.StringType), diags
 	}
 
-	channelList, listDiags := types.ListValueFrom(ctx, types.StringType, channels)
-	diags.Append(listDiags...)
-	return channelList, diags
+	channelSet, setDiags := types.SetValueFrom(ctx, types.StringType, channels)
+	diags.Append(setDiags...)
+	return channelSet, diags
 }
 
 // mapTimeThresholdToModel converts API time threshold to model representation
@@ -484,7 +484,7 @@ func (r *infraAlertConfigResource) mapModelTagFilterToAPI(tagFilter types.String
 }
 
 // mapModelGroupByToAPI converts model group by to API representation
-func (r *infraAlertConfigResource) mapModelGroupByToAPI(ctx context.Context, groupBy types.List) ([]string, diag.Diagnostics) {
+func (r *infraAlertConfigResource) mapModelGroupByToAPI(ctx context.Context, groupBy types.Set) ([]string, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if groupBy.IsNull() || groupBy.IsUnknown() {
@@ -524,16 +524,16 @@ func (r *infraAlertConfigResource) mapModelAlertChannelsToAPI(ctx context.Contex
 	return alertChannels, diags
 }
 
-// extractChannelsForSeverity extracts channel IDs from a list for a specific severity
-func (r *infraAlertConfigResource) extractChannelsForSeverity(ctx context.Context, channelList types.List) ([]string, diag.Diagnostics) {
+// extractChannelsForSeverity extracts channel IDs from a set for a specific severity
+func (r *infraAlertConfigResource) extractChannelsForSeverity(ctx context.Context, channelSet types.Set) ([]string, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	if channelList.IsNull() || channelList.IsUnknown() {
+	if channelSet.IsNull() || channelSet.IsUnknown() {
 		return nil, diags
 	}
 
 	var channels []string
-	diags.Append(channelList.ElementsAs(ctx, &channels, false)...)
+	diags.Append(channelSet.ElementsAs(ctx, &channels, false)...)
 	return channels, diags
 }
 

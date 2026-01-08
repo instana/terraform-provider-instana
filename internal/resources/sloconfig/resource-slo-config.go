@@ -5,7 +5,9 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -96,13 +98,13 @@ func buildTargetAttribute() schema.Float64Attribute {
 }
 
 // buildTagsAttribute creates the tags field schema attribute
-func buildTagsAttribute() schema.ListAttribute {
-	return schema.ListAttribute{
+func buildTagsAttribute() schema.SetAttribute {
+	return schema.SetAttribute{
 		ElementType: types.StringType,
 		Optional:    true,
 		Description: SloConfigDescTags,
-		Validators: []validator.List{
-			listvalidator.SizeAtLeast(1),
+		Validators: []validator.Set{
+			setvalidator.SizeAtLeast(1),
 		},
 	}
 }
@@ -561,9 +563,16 @@ func (r *sloConfigResource) extractIDFromModel(model SloConfigModel) string {
 }
 
 // mapTagsFromState converts tags from state to string slice
-func (r *sloConfigResource) mapTagsFromState(tags []types.String) []string {
-	tagsList := make([]string, 0, len(tags))
-	for _, tag := range tags {
+func (r *sloConfigResource) mapTagsFromState(tags types.Set) []string {
+	if tags.IsNull() || tags.IsUnknown() {
+		return []string{}
+	}
+
+	var elements []types.String
+	tags.ElementsAs(context.Background(), &elements, false)
+
+	tagsList := make([]string, 0, len(elements))
+	for _, tag := range elements {
 		if !tag.IsNull() && !tag.IsUnknown() {
 			tagsList = append(tagsList, tag.ValueString())
 		}
@@ -1166,16 +1175,16 @@ func (r *sloConfigResource) UpdateState(ctx context.Context, state *tfsdk.State,
 }
 
 // mapTagsToState converts tags from API to state
-func (r *sloConfigResource) mapTagsToState(tags []string) []types.String {
+func (r *sloConfigResource) mapTagsToState(tags []string) types.Set {
 	if tags == nil {
-		return nil
+		return types.SetNull(types.StringType)
 	}
 
-	stateTags := make([]types.String, 0, len(tags))
+	elements := make([]attr.Value, 0, len(tags))
 	for _, tag := range tags {
-		stateTags = append(stateTags, types.StringValue(tag))
+		elements = append(elements, types.StringValue(tag))
 	}
-	return stateTags
+	return types.SetValueMust(types.StringType, elements)
 }
 
 // mapRbacTagsToState converts RBAC tags from API to state

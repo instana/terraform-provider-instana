@@ -243,6 +243,11 @@ func (client *restClientImpl) executeRequest(method string, url string, req *res
 	if statusCode < 200 || statusCode >= 300 {
 		return emptyResponse, fmt.Errorf("failed to send HTTP %s request to Instana API; status code = %d; status message = %s; Headers %s\nBody: %s", method, statusCode, resp.Status(), resp.Header(), resp.Body())
 	}
+	// Handle 204 No Content - return empty JSON object instead of empty body
+	if statusCode == 204 {
+		log.Printf("[DEBUG] Received 204 No Content, returning empty JSON object\n")
+		return []byte("{}"), nil
+	}
 	return resp.Body(), nil
 }
 
