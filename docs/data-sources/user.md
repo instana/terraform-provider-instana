@@ -8,17 +8,16 @@ API Documentation: <https://instana.github.io/openapi/#operation/getUsers>
 
 ```hcl
 data "instana_user" "example" {
-  email = "user@example.com"
+  email = "user@example.com" # replace with a valid user email
 }
 
 # Use the user ID in a role resource
 resource "instana_rbac_role" "example_role" {
   name = "Example Role"
-  
-  member {
+  member = [{
     user_id = data.instana_user.example.id
-  }
-  
+    }
+  ]
   permissions = ["CAN_CONFIGURE_APPLICATIONS"]
 }
 
@@ -26,13 +25,14 @@ resource "instana_rbac_role" "example_role" {
 resource "instana_rbac_team" "example_team" {
   tag = "example-team"
   
-  member {
+  member = [{
     user_id = data.instana_user.example.id
     
-    role {
+    roles = [ {
       role_id = instana_rbac_role.example_role.id
-    }
+    }]
   }
+  ]
 }
 
 output "user_id" {
