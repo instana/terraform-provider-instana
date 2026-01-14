@@ -132,6 +132,11 @@ func (m *MockInstanaAPI) HostAgents() restapi.ReadOnlyRestResource[*restapi.Host
 	return nil
 }
 
+// Users mock implementation
+func (m *MockInstanaAPI) Users() restapi.ReadOnlyRestResource[*restapi.User] {
+	return nil
+}
+
 // LogAlertConfig mock implementation
 func (m *MockInstanaAPI) LogAlertConfig() restapi.RestResource[*restapi.LogAlertConfig] {
 	return nil
