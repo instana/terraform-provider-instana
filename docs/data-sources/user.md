@@ -34,6 +34,22 @@ resource "instana_rbac_team" "example_team" {
     }
   }
 }
+
+output "user_id" {
+  description = "user Id"
+  value       = data.instana_user.example.id
+}
+
+output "user_email" {
+  description = "user email"
+  value       = data.instana_user.example.email
+}
+
+output "user_full_name" {
+  description = "user full name"
+  value       = data.instana_user.example.full_name
+}
+
 ```
 
 ## Argument Reference
