@@ -223,16 +223,23 @@ func (r *teamResource) SetComputedFields(_ context.Context, _ *tfsdk.Plan) diag.
 }
 
 // UpdateState updates the Terraform state with data from the API response
-func (r *teamResource) UpdateState(ctx context.Context, state *tfsdk.State, _ *tfsdk.Plan, team *restapi.Team) diag.Diagnostics {
-	model, diags := r.buildTeamModelFromAPIResponse(team)
+func (r *teamResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, team *restapi.Team) diag.Diagnostics {
+	var diags diag.Diagnostics
+	var model TeamModel
+	if plan != nil {
+		diags.Append(plan.Get(ctx, &model)...)
+	} else if state != nil {
+		diags.Append(state.Get(ctx, &model)...)
+	}
+	m, diags := r.buildTeamModelFromAPIResponse(team, model)
 	if diags.HasError() {
 		return diags
 	}
-	return state.Set(ctx, model)
+	return state.Set(ctx, m)
 }
 
 // buildTeamModelFromAPIResponse constructs a TeamModel from the API Team response
-func (r *teamResource) buildTeamModelFromAPIResponse(team *restapi.Team) (TeamModel, diag.Diagnostics) {
+func (r *teamResource) buildTeamModelFromAPIResponse(team *restapi.Team, planModel TeamModel) (TeamModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	model := TeamModel{
@@ -240,7 +247,7 @@ func (r *teamResource) buildTeamModelFromAPIResponse(team *restapi.Team) (TeamMo
 		Tag: types.StringValue(team.Tag),
 	}
 
-	if team.Info != nil {
+	if planModel.Info != nil {
 		model.Info = r.mapTeamInfoToModel(team.Info)
 	}
 

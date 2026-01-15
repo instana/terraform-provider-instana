@@ -97,7 +97,17 @@ func TestUpdateState(t *testing.T) {
 			Schema: handle.MetaData().Schema,
 		}
 
-		diags := resource.UpdateState(ctx, state, nil, team)
+		// Create a plan with Info field set
+		planModel := TeamModel{
+			ID:  types.StringValue("test-id"),
+			Tag: types.StringValue("test-team"),
+			Info: &TeamInfoModel{
+				Description: types.StringValue("Test team description"),
+			},
+		}
+		plan := createMockTeamPlan(t, ctx, planModel)
+
+		diags := resource.UpdateState(ctx, state, plan, team)
 		require.False(t, diags.HasError())
 
 		var model TeamModel
@@ -120,7 +130,17 @@ func TestUpdateState(t *testing.T) {
 			Schema: handle.MetaData().Schema,
 		}
 
-		diags := resource.UpdateState(ctx, state, nil, team)
+		// Create a plan with Info field set but description null
+		planModel := TeamModel{
+			ID:  types.StringValue("test-id"),
+			Tag: types.StringValue("test-team"),
+			Info: &TeamInfoModel{
+				Description: types.StringNull(),
+			},
+		}
+		plan := createMockTeamPlan(t, ctx, planModel)
+
+		diags := resource.UpdateState(ctx, state, plan, team)
 		require.False(t, diags.HasError())
 
 		var model TeamModel
@@ -726,7 +746,43 @@ func TestUpdateState(t *testing.T) {
 			Schema: handle.MetaData().Schema,
 		}
 
-		diags := resource.UpdateState(ctx, state, nil, team)
+		// Create a plan with all fields populated
+		planModel := TeamModel{
+			ID:  types.StringValue("test-id"),
+			Tag: types.StringValue("test-team"),
+			Info: &TeamInfoModel{
+				Description: types.StringValue("Full team"),
+			},
+			Members: []TeamMemberModel{
+				{
+					UserID: types.StringValue("user-1"),
+					Roles: []TeamMemberRole{
+						{RoleID: types.StringValue("role-1")},
+					},
+				},
+			},
+			Scope: &TeamScopeModel{
+				AccessPermissions:    []string{"perm-1"},
+				Applications:         []string{"app-1"},
+				KubernetesClusters:   []string{"k8s-1"},
+				KubernetesNamespaces: []string{"ns-1"},
+				MobileApps:           []string{"mobile-1"},
+				Websites:             []string{"website-1"},
+				InfraDFQFilter:       types.StringValue("entity.type:host"),
+				BusinessPerspectives: []string{"bp-1"},
+				SloIDs:               []string{"slo-1"},
+				SyntheticTests:       []string{"test-1"},
+				SyntheticCredentials: []string{"cred-1"},
+				TagIDs:               []string{"tag-1"},
+				RestrictedApplicationFilter: &TeamRestrictedApplicationFilterModel{
+					Label: types.StringValue("test-label"),
+					Scope: types.StringValue(string(restapi.RestrictedApplicationFilterScopeIncludeAllDownstream)),
+				},
+			},
+		}
+		plan := createMockTeamPlan(t, ctx, planModel)
+
+		diags := resource.UpdateState(ctx, state, plan, team)
 		require.False(t, diags.HasError())
 
 		var model TeamModel
@@ -1250,12 +1306,48 @@ func TestRoundTripConversion(t *testing.T) {
 			},
 		}
 
+		// Create a plan with all fields set
+		planModel := TeamModel{
+			ID:  types.StringValue("test-id"),
+			Tag: types.StringValue("test-team"),
+			Info: &TeamInfoModel{
+				Description: types.StringValue("Test team"),
+			},
+			Members: []TeamMemberModel{
+				{
+					UserID: types.StringValue("user-1"),
+					Roles: []TeamMemberRole{
+						{RoleID: types.StringValue("role-1")},
+					},
+				},
+			},
+			Scope: &TeamScopeModel{
+				AccessPermissions:    []string{"perm-1"},
+				Applications:         []string{"app-1"},
+				KubernetesClusters:   []string{"k8s-1"},
+				KubernetesNamespaces: []string{"ns-1"},
+				MobileApps:           []string{"mobile-1"},
+				Websites:             []string{"website-1"},
+				InfraDFQFilter:       types.StringValue("entity.type:host"),
+				BusinessPerspectives: []string{"bp-1"},
+				SloIDs:               []string{"slo-1"},
+				SyntheticTests:       []string{"test-1"},
+				SyntheticCredentials: []string{"cred-1"},
+				TagIDs:               []string{"tag-1"},
+				RestrictedApplicationFilter: &TeamRestrictedApplicationFilterModel{
+					Label: types.StringValue("test-label"),
+					Scope: types.StringValue(string(restapi.RestrictedApplicationFilterScopeIncludeAllDownstream)),
+				},
+			},
+		}
+		plan := createMockTeamPlan(t, ctx, planModel)
+
 		// Convert to state
 		handle := NewTeamResourceHandle()
 		state := &tfsdk.State{
 			Schema: handle.MetaData().Schema,
 		}
-		diags := resource.UpdateState(ctx, state, nil, originalTeam)
+		diags := resource.UpdateState(ctx, state, plan, originalTeam)
 		require.False(t, diags.HasError())
 
 		// Convert back to API object
@@ -1266,9 +1358,11 @@ func TestRoundTripConversion(t *testing.T) {
 		// Verify all fields match
 		assert.Equal(t, originalTeam.ID, convertedTeam.ID)
 		assert.Equal(t, originalTeam.Tag, convertedTeam.Tag)
+		require.NotNil(t, convertedTeam.Info)
 		assert.Equal(t, *originalTeam.Info.Description, *convertedTeam.Info.Description)
 		assert.Len(t, convertedTeam.Members, 1)
 		assert.Equal(t, originalTeam.Members[0].UserID, convertedTeam.Members[0].UserID)
+		require.NotNil(t, convertedTeam.Scope)
 		assert.Len(t, convertedTeam.Scope.AccessPermissions, 1)
 		assert.Equal(t, originalTeam.Scope.AccessPermissions[0], convertedTeam.Scope.AccessPermissions[0])
 		assert.Equal(t, *originalTeam.Scope.InfraDFQFilter, *convertedTeam.Scope.InfraDFQFilter)
