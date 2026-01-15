@@ -1,4 +1,17 @@
 # Changelog
+
+## [v6.1.0](https://github.com/instana/terraform-provider-instana/tree/v6.1.0) (2026-01-15)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v6.0.4...v6.1.0)
+
+**Implemented enhancements:**
+
+- Added new instana_user data source that allows users to retrieve Instana user details by email address.
+
+**Merged pull requests:**
+
+- Datasource user [\#71](https://github.com/instana/terraform-provider-instana/pull/71) ([georgekutty-1](https://github.com/georgekutty-1))
+
 ## [v6.0.4](https://github.com/instana/terraform-provider-instana/tree/v6.0.4) (2026-01-08)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v6.0.3...v6.0.4)
