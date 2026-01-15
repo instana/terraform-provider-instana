@@ -54,6 +54,7 @@ type InstanaAPI interface {
 	AutomationActions() RestResource[*AutomationAction]
 	AutomationPolicies() RestResource[*AutomationPolicy]
 	HostAgents() ReadOnlyRestResource[*HostAgent]
+	Users() ReadOnlyRestResource[*User]
 	LogAlertConfig() RestResource[*LogAlertConfig]
 }
 
@@ -175,6 +176,9 @@ func (api *baseInstanaAPI) AutomationPolicies() RestResource[*AutomationPolicy] 
 
 func (api *baseInstanaAPI) HostAgents() ReadOnlyRestResource[*HostAgent] {
 	return NewReadOnlyRestResource(HostAgentResourcePath, NewHostAgentJSONUnmarshaller(&HostAgent{}), api.client)
+}
+func (api *baseInstanaAPI) Users() ReadOnlyRestResource[*User] {
+	return NewReadOnlyRestResource(UsersResourcePath, NewDefaultJSONUnmarshaller(&User{}), api.client)
 }
 
 // LogAlertConfig implementation of InstanaAPI interface
