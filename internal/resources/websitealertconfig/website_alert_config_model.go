@@ -11,6 +11,7 @@ type WebsiteAlertConfigModel struct {
 	Name                types.String                   `tfsdk:"name"`
 	Description         types.String                   `tfsdk:"description"`
 	Triggering          types.Bool                     `tfsdk:"triggering"`
+	Enabled             types.Bool                     `tfsdk:"enabled"`
 	WebsiteID           types.String                   `tfsdk:"website_id"`
 	TagFilter           types.String                   `tfsdk:"tag_filter"`
 	AlertChannelIDs     types.Set                      `tfsdk:"alert_channel_ids"`

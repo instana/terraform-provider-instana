@@ -14,6 +14,8 @@ const (
 	WebsiteAlertConfigFieldGranularity = "granularity"
 	//WebsiteAlertConfigFieldName constant value for field name of resource instana_website_alert_config
 	WebsiteAlertConfigFieldName = "name"
+	//WebsiteAlertConfigFieldEnabled constant value for field enabled of resource instana_website_alert_config
+	WebsiteAlertConfigFieldEnabled = "enabled"
 
 	//WebsiteAlertConfigFieldRule constant value for field rule of resource instana_website_alert_config
 	WebsiteAlertConfigFieldRule = "rule"
@@ -66,6 +68,7 @@ const (
 	WebsiteAlertConfigDescName            = "The name of the Website Alert Configuration."
 	WebsiteAlertConfigDescDescription     = "The description of the Website Alert Configuration."
 	WebsiteAlertConfigDescTriggering      = "Flag to indicate whether also an Incident is triggered or not."
+	WebsiteAlertConfigDescEnabled         = "Flag to enable or disable the smart alert."
 	WebsiteAlertConfigDescWebsiteID       = "Unique ID of the website."
 	WebsiteAlertConfigDescTagFilter       = "The tag filter expression for the Website Alert Configuration."
 	WebsiteAlertConfigDescAlertChannelIDs = "List of IDs of alert channels defined in Instana."
@@ -191,6 +194,7 @@ const (
 // Default value constants
 const (
 	WebsiteAlertConfigDefaultTriggering  = false
+	WebsiteAlertConfigDefaultEnabled     = true
 	WebsiteAlertConfigDefaultGranularity = 600000
 )
 
