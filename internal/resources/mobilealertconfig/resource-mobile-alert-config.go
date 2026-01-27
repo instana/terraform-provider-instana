@@ -80,6 +80,7 @@ func NewMobileAlertConfigResourceHandle() resourcehandle.ResourceHandle[*restapi
 					},
 					MobileAlertConfigFieldCompleteTagFilter: schema.StringAttribute{
 						Optional:    true,
+						Computed:    true,
 						Description: MobileAlertConfigDescCompleteTagFilter,
 					},
 					MobileAlertConfigFieldAlertChannels: schema.MapAttribute{
