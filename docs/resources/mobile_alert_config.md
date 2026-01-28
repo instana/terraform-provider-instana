@@ -169,9 +169,7 @@ resource "instana_mobile_alert_config" "violations_period_example" {
 
 ### Optional
 
-- `severity` (Number) The severity of the alert when triggered (5 for Warning, 10 for Critical). **Deprecated** - use `rules` with `threshold` instead. Valid values: 5, 10.
 - `triggering` (Boolean) Flag to indicate whether an Incident is also triggered or not. Default: `false`.
-- `complete_tag_filter` (String) The complete tag filter expression for the Mobile Alert Configuration.
 - `alert_channels` (Map of List of String) Set of alert channel IDs associated with the severity. The map key is the severity level ("5" for Warning, "10" for Critical), and the value is a list of alert channel IDs.
 - `granularity` (Number) The evaluation granularity used for detection of violations of the defined threshold. Defines the size of the tumbling window used. Default: `600000` (10 minutes). Valid values: 60000, 300000, 600000, 900000, 1200000, 1800000.
 - `grace_period` (Number) The duration (in milliseconds) for which an alert remains open after conditions are no longer violated, with the alert auto-closing once the grace period expires.

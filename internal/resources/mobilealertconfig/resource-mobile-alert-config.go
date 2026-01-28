@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -60,14 +59,6 @@ func NewMobileAlertConfigResourceHandle() resourcehandle.ResourceHandle[*restapi
 							stringvalidator.LengthBetween(MobileAlertConfigMinMobileAppIDLength, MobileAlertConfigMaxMobileAppIDLength),
 						},
 					},
-					MobileAlertConfigFieldSeverity: schema.Int64Attribute{
-						Optional:    true,
-						Computed:    true,
-						Description: MobileAlertConfigDescSeverity,
-						Validators: []validator.Int64{
-							int64validator.Between(MobileAlertConfigMinSeverity, MobileAlertConfigMaxSeverity),
-						},
-					},
 					MobileAlertConfigFieldTriggering: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
@@ -77,11 +68,6 @@ func NewMobileAlertConfigResourceHandle() resourcehandle.ResourceHandle[*restapi
 					MobileAlertConfigFieldTagFilter: schema.StringAttribute{
 						Optional:    true,
 						Description: MobileAlertConfigDescTagFilter,
-					},
-					MobileAlertConfigFieldCompleteTagFilter: schema.StringAttribute{
-						Optional:    true,
-						Computed:    true,
-						Description: MobileAlertConfigDescCompleteTagFilter,
 					},
 					MobileAlertConfigFieldAlertChannels: schema.MapAttribute{
 						Optional:    true,
@@ -273,16 +259,6 @@ func (r *mobileAlertConfigResource) MapStateToDataObject(ctx context.Context, pl
 		return nil, diags
 	}
 
-	// Map complete tag filter if provided
-	var completeTagFilter *restapi.TagFilter
-	if !model.CompleteTagFilter.IsNull() && !model.CompleteTagFilter.IsUnknown() {
-		completeTagFilter, tagFilterDiags = r.mapCompleteTagFilterToAPI(model)
-		diags.Append(tagFilterDiags...)
-		if diags.HasError() {
-			return nil, diags
-		}
-	}
-
 	// Map alert channels
 	alertChannels, channelDiags := r.mapAlertChannelsToAPI(ctx, model)
 	diags.Append(channelDiags...)
@@ -311,13 +287,6 @@ func (r *mobileAlertConfigResource) MapStateToDataObject(ctx context.Context, pl
 		return nil, diags
 	}
 
-	// Map severity
-	var severity *int
-	if !model.Severity.IsNull() && !model.Severity.IsUnknown() {
-		sev := int(model.Severity.ValueInt64())
-		severity = &sev
-	}
-
 	// Map grace period
 	var gracePeriod *int64
 	if !model.GracePeriod.IsNull() && !model.GracePeriod.IsUnknown() {
@@ -327,20 +296,19 @@ func (r *mobileAlertConfigResource) MapStateToDataObject(ctx context.Context, pl
 
 	// Create API object
 	return &restapi.MobileAlertConfig{
-		ID:                          model.ID.ValueString(),
-		Name:                        model.Name.ValueString(),
-		Description:                 model.Description.ValueString(),
-		MobileAppID:                 model.MobileAppID.ValueString(),
-		Severity:                    severity,
-		Triggering:                  model.Triggering.ValueBool(),
-		TagFilterExpression:         tagFilter,
-		CompleteTagFilterExpression: completeTagFilter,
-		AlertChannels:               alertChannels,
-		Granularity:                 restapi.Granularity(model.Granularity.ValueInt64()),
-		GracePeriod:                 gracePeriod,
-		CustomerPayloadFields:       customPayloadFields,
-		Rules:                       rules,
-		TimeThreshold:               timeThreshold,
+		ID:                  model.ID.ValueString(),
+		Name:                model.Name.ValueString(),
+		Description:         model.Description.ValueString(),
+		MobileAppID:         model.MobileAppID.ValueString(),
+		Severity:            nil,
+		Triggering:          model.Triggering.ValueBool(),
+		TagFilterExpression:   tagFilter,
+		AlertChannels:         alertChannels,
+		Granularity:           restapi.Granularity(model.Granularity.ValueInt64()),
+		GracePeriod:           gracePeriod,
+		CustomerPayloadFields: customPayloadFields,
+		Rules:                 rules,
+		TimeThreshold:         timeThreshold,
 	}, diags
 }
 
@@ -366,20 +334,6 @@ func (r *mobileAlertConfigResource) mapTagFilterToAPI(model MobileAlertConfigMod
 		LogicalOperator: &operator,
 		Elements:        []*restapi.TagFilter{},
 	}, diags
-}
-
-// mapCompleteTagFilterToAPI maps complete tag filter expression from model to API
-func (r *mobileAlertConfigResource) mapCompleteTagFilterToAPI(model MobileAlertConfigModel) (*restapi.TagFilter, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
-	parser := tagfilter.NewParser()
-	expr, err := parser.Parse(model.CompleteTagFilter.ValueString())
-	if err != nil {
-		diags.AddError(MobileAlertConfigErrParseTagFilter, err.Error())
-		return nil, diags
-	}
-	mapper := tagfilter.NewMapper()
-	return mapper.ToAPIModel(expr), diags
 }
 
 // mapAlertChannelsToAPI maps alert channels from model to API
@@ -589,12 +543,13 @@ func (r *mobileAlertConfigResource) mapOptionalInt64ToInt32Field(field types.Int
 func (r *mobileAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *restapi.MobileAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var model MobileAlertConfigModel
+
+	// Get current state from plan or state to preserve optional fields
+	// Don't check for errors here as state might be empty on first create
 	if plan != nil {
-		diags.Append(plan.Get(ctx, &model)...)
+		plan.Get(ctx, &model)
 	} else if state != nil {
-		diags.Append(state.Get(ctx, &model)...)
-	} else {
-		model = MobileAlertConfigModel{}
+		state.Get(ctx, &model)
 	}
 
 	// Create base model
@@ -604,13 +559,6 @@ func (r *mobileAlertConfigResource) UpdateState(ctx context.Context, state *tfsd
 	model.MobileAppID = types.StringValue(apiObject.MobileAppID)
 	model.Triggering = types.BoolValue(apiObject.Triggering)
 	model.Granularity = types.Int64Value(int64(apiObject.Granularity))
-
-	// Map severity
-	if apiObject.Severity != nil {
-		model.Severity = types.Int64Value(int64(*apiObject.Severity))
-	} else {
-		model.Severity = types.Int64Null()
-	}
 
 	// Map grace period
 	if apiObject.GracePeriod != nil {
@@ -624,17 +572,6 @@ func (r *mobileAlertConfigResource) UpdateState(ctx context.Context, state *tfsd
 	diags.Append(tagFilterDiags...)
 	if diags.HasError() {
 		return diags
-	}
-
-	// Map complete tag filter expression
-	if apiObject.CompleteTagFilterExpression != nil {
-		completeTagFilterDiags := r.mapCompleteTagFilterExpressionToState(&model, apiObject)
-		diags.Append(completeTagFilterDiags...)
-		if diags.HasError() {
-			return diags
-		}
-	} else {
-		model.CompleteTagFilter = types.StringNull()
 	}
 
 	// Map alert channels
@@ -679,23 +616,6 @@ func (r *mobileAlertConfigResource) mapTagFilterExpressionToState(model *MobileA
 	} else {
 		model.TagFilter = types.StringNull()
 	}
-
-	return diags
-}
-
-// mapCompleteTagFilterExpressionToState maps complete tag filter expression from API to state
-func (r *mobileAlertConfigResource) mapCompleteTagFilterExpressionToState(model *MobileAlertConfigModel, apiObject *restapi.MobileAlertConfig) diag.Diagnostics {
-	var diags diag.Diagnostics
-
-	filterExprStr, err := tagfilter.MapTagFilterToNormalizedString(apiObject.CompleteTagFilterExpression)
-	if err != nil {
-		diags.AddError(
-			MobileAlertConfigErrMapFilterExpression,
-			fmt.Sprintf(MobileAlertConfigErrMapFilterExpressionMsg, err),
-		)
-		return diags
-	}
-	model.CompleteTagFilter = util.SetStringPointerToState(filterExprStr)
 
 	return diags
 }

@@ -18,8 +18,6 @@ const (
 	MobileAlertConfigFieldTriggering = "triggering"
 	// MobileAlertConfigFieldTagFilter constant value for field tag_filter of resource instana_mobile_alert_config
 	MobileAlertConfigFieldTagFilter = "tag_filter"
-	// MobileAlertConfigFieldCompleteTagFilter constant value for field complete_tag_filter of resource instana_mobile_alert_config
-	MobileAlertConfigFieldCompleteTagFilter = "complete_tag_filter"
 	// MobileAlertConfigFieldAlertChannels constant value for field alert_channels of resource instana_mobile_alert_config
 	MobileAlertConfigFieldAlertChannels = "alert_channels"
 	// MobileAlertConfigFieldGranularity constant value for field granularity of resource instana_mobile_alert_config
@@ -74,7 +72,6 @@ const (
 	MobileAlertConfigDescSeverity                          = "The severity of the alert when triggered (5 for Warning, 10 for Critical). Deprecated - use rules with thresholds instead."
 	MobileAlertConfigDescTriggering                        = "Flag to indicate whether an Incident is also triggered or not."
 	MobileAlertConfigDescTagFilter                         = "The tag filter expression for the Mobile Alert Configuration."
-	MobileAlertConfigDescCompleteTagFilter                 = "The complete tag filter expression for the Mobile Alert Configuration."
 	MobileAlertConfigDescAlertChannels                     = "Set of alert channel IDs associated with the severity."
 	MobileAlertConfigDescGranularity                       = "The evaluation granularity used for detection of violations of the defined threshold."
 	MobileAlertConfigDescGracePeriod                       = "The duration for which an alert remains open after conditions are no longer violated."
