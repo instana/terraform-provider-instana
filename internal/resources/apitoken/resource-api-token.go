@@ -35,10 +35,16 @@ func NewAPITokenResourceHandle() resourcehandle.ResourceHandle[*restapi.APIToken
 					APITokenFieldAccessGrantingToken: schema.StringAttribute{
 						Computed:    true,
 						Description: APITokenDescAccessGrantingToken,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 					APITokenFieldInternalID: schema.StringAttribute{
 						Computed:    true,
 						Description: APITokenDescInternalID,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 					APITokenFieldName: schema.StringAttribute{
 						Required:    true,
