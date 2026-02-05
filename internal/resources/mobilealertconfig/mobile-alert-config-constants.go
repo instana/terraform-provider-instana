@@ -60,6 +60,8 @@ const (
 	MobileAlertConfigFieldRuleOperator = "operator"
 	// MobileAlertConfigFieldRuleValue constant value for field rule.value
 	MobileAlertConfigFieldRuleValue = "value"
+	// MobileAlertConfigFieldRuleCustomEventName constant value for field rule.custom_event_name
+	MobileAlertConfigFieldRuleCustomEventName = "custom_event_name"
 )
 
 // Resource description constants
@@ -92,6 +94,7 @@ const (
 	MobileAlertConfigDescRuleAggregation                   = "The aggregation function of the mobile alert rule."
 	MobileAlertConfigDescRuleOperator                      = "The operator for the rule. Valid values are STARTS_WITH and EQUALS."
 	MobileAlertConfigDescRuleValue                         = "The value to compare against."
+	MobileAlertConfigDescRuleCustomEventName               = "The name of the custom event to monitor. Required when alert_type is 'customEvent'."
 )
 
 // Error message constants

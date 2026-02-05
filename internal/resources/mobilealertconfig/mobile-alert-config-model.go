@@ -30,11 +30,12 @@ type MobileRuleWithThresholdModel struct {
 
 // MobileAlertRuleModel represents a mobile app alert rule
 type MobileAlertRuleModel struct {
-	AlertType   types.String `tfsdk:"alert_type"`
-	MetricName  types.String `tfsdk:"metric_name"`
-	Aggregation types.String `tfsdk:"aggregation"`
-	Operator    types.String `tfsdk:"operator"`
-	Value       types.String `tfsdk:"value"`
+	AlertType       types.String `tfsdk:"alert_type"`
+	MetricName      types.String `tfsdk:"metric_name"`
+	Aggregation     types.String `tfsdk:"aggregation"`
+	Operator        types.String `tfsdk:"operator"`
+	Value           types.String `tfsdk:"value"`
+	CustomEventName types.String `tfsdk:"custom_event_name"`
 }
 
 // MobileAlertTimeThresholdModel represents the time threshold configuration for mobile app alerts

@@ -138,6 +138,11 @@ func NewMobileAlertConfigResourceHandle() resourcehandle.ResourceHandle[*restapi
 											Computed:    true,
 											Description: MobileAlertConfigDescRuleValue,
 										},
+										MobileAlertConfigFieldRuleCustomEventName: schema.StringAttribute{
+											Optional:    true,
+											Computed:    true,
+											Description: MobileAlertConfigDescRuleCustomEventName,
+										},
 									},
 								},
 								MobileAlertConfigFieldThresholdOperator: schema.StringAttribute{
@@ -424,12 +429,19 @@ func (r *mobileAlertConfigResource) mapSingleRuleFromCollection(ctx context.Cont
 		valuePtr = &value
 	}
 
+	var customEventNamePtr *string
+	if !ruleModel.Rule.CustomEventName.IsNull() && !ruleModel.Rule.CustomEventName.IsUnknown() {
+		customEventName := ruleModel.Rule.CustomEventName.ValueString()
+		customEventNamePtr = &customEventName
+	}
+
 	return &restapi.MobileAppAlertRule{
-		AlertType:   ruleModel.Rule.AlertType.ValueString(),
-		MetricName:  ruleModel.Rule.MetricName.ValueString(),
-		Aggregation: aggregationPtr,
-		Operator:    operatorPtr,
-		Value:       valuePtr,
+		AlertType:       ruleModel.Rule.AlertType.ValueString(),
+		MetricName:      ruleModel.Rule.MetricName.ValueString(),
+		Aggregation:     aggregationPtr,
+		Operator:        operatorPtr,
+		Value:           valuePtr,
+		CustomEventName: customEventNamePtr,
 	}, diags
 }
 
@@ -577,10 +589,8 @@ func (r *mobileAlertConfigResource) UpdateState(ctx context.Context, state *tfsd
 	// Map alert channels
 	r.mapAlertChannelsToState(ctx, &model, apiObject)
 
-	// Map rules collection (preserve the plan values / update only if empty)
-	if len(model.Rules) == 0 {
-		model.Rules = r.mapRulesToState(ctx, apiObject)
-	}
+	// Map rules collection from API response
+	model.Rules = r.mapRulesToState(ctx, apiObject)
 
 	// Map custom payload fields
 	customPayloadDiags := r.mapCustomPayloadFieldsToState(ctx, &model, apiObject)
@@ -694,12 +704,20 @@ func (r *mobileAlertConfigResource) mapRuleToState(ctx context.Context, rule *re
 		value = types.StringNull()
 	}
 
+	var customEventName types.String
+	if rule.CustomEventName != nil {
+		customEventName = types.StringValue(*rule.CustomEventName)
+	} else {
+		customEventName = types.StringNull()
+	}
+
 	return &MobileAlertRuleModel{
-		AlertType:   types.StringValue(rule.AlertType),
-		MetricName:  types.StringValue(rule.MetricName),
-		Aggregation: aggregation,
-		Operator:    operator,
-		Value:       value,
+		AlertType:       types.StringValue(rule.AlertType),
+		MetricName:      types.StringValue(rule.MetricName),
+		Aggregation:     aggregation,
+		Operator:        operator,
+		Value:           value,
+		CustomEventName: customEventName,
 	}
 }
 

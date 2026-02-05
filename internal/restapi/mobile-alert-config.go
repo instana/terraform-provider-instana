@@ -37,11 +37,12 @@ func (m *MobileAlertConfig) SetCustomerPayloadFields(fields []CustomPayloadField
 
 // MobileAppAlertRule represents a mobile app alert rule
 type MobileAppAlertRule struct {
-	AlertType   string       `json:"alertType"`
-	MetricName  string       `json:"metricName"`
-	Aggregation *Aggregation `json:"aggregation,omitempty"`
-	Operator    *string      `json:"operator,omitempty"`
-	Value       *string      `json:"value,omitempty"`
+	AlertType       string       `json:"alertType"`
+	MetricName      string       `json:"metricName"`
+	Aggregation     *Aggregation `json:"aggregation,omitempty"`
+	Operator        *string      `json:"operator,omitempty"`
+	Value           *string      `json:"value,omitempty"`
+	CustomEventName *string      `json:"customEventName,omitempty"`
 }
 
 // MobileAppAlertRuleWithThresholds represents a rule with multiple thresholds and severity levels
