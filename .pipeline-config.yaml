@@ -7,6 +7,7 @@ tasks:
       #   script: |
       - name: build-artifact
         displayName: "Instana Terraform Provider Publish"
+        image: goreleaser/goreleaser:latest
         # runAfter:
           # - setup
         securityContext:
@@ -19,4 +20,9 @@ tasks:
             env
             set -x
           fi
+
+                  
+          go version
+          goreleaser release --skip-publish --clean
+
 
