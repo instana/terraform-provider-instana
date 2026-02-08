@@ -1,0 +1,22 @@
+version: '2'
+tasks:
+  code-build:
+    steps:
+      # - name: setup
+      #   displayName: "Instana Terraform Provider Setup"
+      #   script: |
+      - name: build-artifact
+        displayName: "Instana Terraform Provider Publish"
+        # runAfter:
+          # - setup
+        securityContext:
+          privileged: true
+        script: |
+          #!/usr/bin/env bash
+
+          if [[ "$PIPELINE_DEBUG" == 1 ]]; then
+            trap env EXIT
+            env
+            set -x
+          fi
+
