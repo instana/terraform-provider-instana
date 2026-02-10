@@ -56,6 +56,7 @@ type InstanaAPI interface {
 	HostAgents() ReadOnlyRestResource[*HostAgent]
 	Users() ReadOnlyRestResource[*User]
 	LogAlertConfig() RestResource[*LogAlertConfig]
+	MaintenanceWindowConfigs() RestResource[*MaintenanceWindowConfig]
 }
 
 // NewInstanaAPI creates a new instance of the instana API
@@ -184,4 +185,9 @@ func (api *baseInstanaAPI) Users() ReadOnlyRestResource[*User] {
 // LogAlertConfig implementation of InstanaAPI interface
 func (api *baseInstanaAPI) LogAlertConfig() RestResource[*LogAlertConfig] {
 	return NewCreatePOSTUpdatePOSTRestResource(LogAlertConfigResourcePath, NewCustomPayloadFieldsUnmarshallerAdapter(NewDefaultJSONUnmarshaller(&LogAlertConfig{})), api.client)
+}
+
+// MaintenanceWindowConfigs implementation of InstanaAPI interface
+func (api *baseInstanaAPI) MaintenanceWindowConfigs() RestResource[*MaintenanceWindowConfig] {
+	return NewCreatePUTUpdatePUTRestResource(MaintenanceWindowConfigResourcePath, NewDefaultJSONUnmarshaller(&MaintenanceWindowConfig{}), api.client)
 }
