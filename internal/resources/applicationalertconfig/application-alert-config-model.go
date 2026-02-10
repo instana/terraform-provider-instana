@@ -13,6 +13,7 @@ type ApplicationAlertConfigModel struct {
 	BoundaryScope       types.String                `tfsdk:"boundary_scope"`
 	CustomPayloadFields types.List                  `tfsdk:"custom_payload_field"`
 	Description         types.String                `tfsdk:"description"`
+	Enabled             types.Bool                  `tfsdk:"enabled"`
 	EvaluationType      types.String                `tfsdk:"evaluation_type"`
 	GracePeriod         types.Int64                 `tfsdk:"grace_period"`
 	Granularity         types.Int64                 `tfsdk:"granularity"`

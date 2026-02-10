@@ -12,6 +12,7 @@ type ApplicationAlertConfig struct {
 	Name                  string                               `json:"name"`
 	Description           string                               `json:"description"`
 	Triggering            bool                                 `json:"triggering"`
+	Enabled               *bool                                `json:"enabled,omitempty"`
 	Applications          map[string]IncludedApplication       `json:"applications"`
 	BoundaryScope         BoundaryScope                        `json:"boundaryScope"`
 	TagFilterExpression   *TagFilter                           `json:"tagFilterExpression"`
