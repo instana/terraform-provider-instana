@@ -15,7 +15,6 @@ tasks:
         script: |
           #!/usr/bin/env bash
           
-          
           if [[ "$PIPELINE_DEBUG" == 1 ]]; then
             trap env EXIT
             env
