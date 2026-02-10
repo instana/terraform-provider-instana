@@ -9,6 +9,8 @@ tasks:
         when: false 
       - name: static-scan
         when: false
+      - name: peer-review
+        when: false
   code-build:
     displayName: "build"
     steps:
@@ -33,7 +35,7 @@ tasks:
           cd $WORKSPACE/terraform-provider-instana
 
           go version
-          goreleaser release --dry-run --clean
+          goreleaser release --snapshot --skip=publish --clean
       - name: sign-artifact
         when: false
       - name: unit-test
