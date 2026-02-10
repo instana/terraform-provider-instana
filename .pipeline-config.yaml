@@ -1,13 +1,25 @@
 version: '2'
+
 tasks:
+  code-checks:
+    steps:
+      - name: detect-secrets 
+        when: false 
+      - name: compliance-checks 
+        when: false 
+      - name: static-scan
+        when: false
   code-build:
+    displayName: "build"
+    onError: stopAndFail
     steps:
       # - name: setup
-      #   displayName: "Instana Terraform Provider Setup"
+        # displayName: "Instana Terraform Provider Setup"
       #   script: |
       - name: build-artifact
         displayName: "Instana Terraform Provider Publish"
         image: goreleaser/goreleaser:latest
+        # image: icr.io/continuous-delivery/pipeline/pipeline-base-image:2.86
         # runAfter:
           # - setup
         securityContext:
@@ -20,6 +32,16 @@ tasks:
             env
             set -x
           fi
+
+          cd $WORKSPACE/terraform-provider-instana
+
           go version
           goreleaser release --skip-publish --clean
-
+      - name: sign-artifact
+        when: false
+      - name: unit-test
+        when: false
+      - name: collect-evidence
+        when: false
+      - name: setup
+        when: false
