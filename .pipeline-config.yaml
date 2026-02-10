@@ -20,8 +20,6 @@ tasks:
             env
             set -x
           fi
-
           go version
           goreleaser release --skip-publish --clean
-
 
