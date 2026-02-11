@@ -12,30 +12,91 @@ tasks:
       - name: peer-review
         when: false
   code-build:
-    displayName: "build"
+    displayName: "Instana Terraform Provider Publish"
     steps:
       - name: build-artifact
-        displayName: "Instana Terraform Provider Publish"
+        displayName: "Build & Publish Instana Terraform Provider"
         image: goreleaser/goreleaser:latest
-        # image: icr.io/continuous-delivery/pipeline/pipeline-base-image:2.86
-        # runAfter:
-          # - setup
         securityContext:
           privileged: true
         script: |
           #!/usr/bin/env bash
-          echo "################# Executing Script ####################"
+          set -e
+
+          echo "################# Preparing Environment ####################"
+          
+          echo "Fetching variables from SPS Environment Properties..."
+          export GITHUB_TOKEN=$(get_env git-token)
+          export GPG_FINGERPRINT=$(get_env GPG_FINGERPRINT)
+          # export GPG_PRIVATE_KEY=$(get_env GPG_PRIVATE_KEY)
+          # export GPG_PASSPHRASE=$(get_env GPG_PASSPHRASE)
+          export TAG=$(get_env TAG)
           
           if [[ "$PIPELINE_DEBUG" == 1 ]]; then
-            trap env EXIT
-            env
             set -x
           fi
 
           cd $WORKSPACE/terraform-provider-instana
 
-          go version
+          echo "Performing validation of required inputs..."
+          if [[ -z "${GITHUB_TOKEN:-}" ]]; then
+            echo "ERROR: git-token (GITHUB_TOKEN) is required"
+            exit 1
+          fi
+          if [[ -z "${GPG_FINGERPRINT:-}" ]]; then
+            echo "ERROR: GPG_FINGERPRINT is required"
+            exit 1
+          fi
+          # if [[ -z "${GPG_PRIVATE_KEY:-}" ]]; then
+          #   echo "ERROR: GPG_PRIVATE_KEY is required"
+          #   exit 1
+          # fi
+          # if [[ -z "${GPG_PASSPHRASE:-}" ]]; then
+          #   echo "ERROR: GPG_PASSPHRASE is required"
+          #   exit 1
+          # fi
+          if [[ -z "${TAG:-}" ]]; then
+            echo "ERROR: TAG (release version without leading 'v') is required"
+            exit 1
+          fi
+
+          echo "Importing GPG Key..."
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+
+          echo "Validating semantic versioning format for release tag: $TAG"
+          semver_regex='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((0|[1-9][0-9]*|[0-9A-Za-z-][0-9A-Za-z-]*)(\.(0|[1-9][0-9]*|[0-9A-Za-z-][0-9A-Za-z-]*))*))?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$'
+          if [[ $TAG =~ $semver_regex ]]; then
+              echo "Valid SemVer. Proceeding with release process..."
+          else
+              echo "Invalid release version format. Please adhere to semantic versioning syntax"
+          fi
+  
+          echo "Ensuring release version $TAG does not already exist..."
+          export RELEASE_VERSION="v$TAG"
+          if git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_VERSION" >/dev/null 2>&1; then
+              echo "Release version $RELEASE_VERSION already exists. Aborting release..."
+              exit 1
+          fi
+
+          echo "Configure GPG TTY for non-interactive signing..."
+          export GPG_TTY=$(tty)
+          eval $(gpg-agent --daemon)
+          # echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+          # gpg-connect-agent reloadagent /bye
+
+          echo "Tagging repository with $RELEASE_VERSION..."
+          git tag -a "$RELEASE_VERSION" -m "Release $RELEASE_VERSION"
+          # git push https://x-access-token:${GITHUB_TOKEN}@github.com/instana/terraform-provider-instana.git $RELEASE_VERSION
+          
+          # Passphrase trick: feed it to gpg-agent's cache so goreleaser doesn't prompt
+          /usr/lib/gnupg2/gpg-preset-passphrase --preset \
+            $(gpg --with-colons --list-keys $GPG_FINGERPRINT | grep '^grp' | cut -d: -f10) <<< "$GPG_PASSPHRASE"
+          echo "Starting GoReleaser..."
           goreleaser release --snapshot --skip=publish --clean
+          # goreleaser release --clean
+
+          echo "===== SPS release script completed ====="
+
       - name: sign-artifact
         when: false
       - name: unit-test
@@ -44,3 +105,6 @@ tasks:
         when: false
       - name: setup
         when: false
+
+
+
