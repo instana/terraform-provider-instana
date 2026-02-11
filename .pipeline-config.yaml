@@ -86,6 +86,8 @@ tasks:
           # gpg-connect-agent reloadagent /bye
 
           echo "Tagging repository with $RELEASE_VERSION..."
+          git config --global user.email "dev.jinchun@gmail.com"
+          git config --global user.name "jinchun-dev"
           git tag -a "$RELEASE_VERSION" -m "Release $RELEASE_VERSION"
           # git push https://x-access-token:${GITHUB_TOKEN}@github.com/instana/terraform-provider-instana.git $RELEASE_VERSION
           
