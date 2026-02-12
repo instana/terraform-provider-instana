@@ -81,7 +81,7 @@ tasks:
 
           echo "Configure GPG TTY for non-interactive signing..."
           export GPG_TTY=$(tty)
-          eval $(gpg-agent --daemon)
+          # eval $(gpg-agent --daemon)
           # echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
           # gpg-connect-agent reloadagent /bye
 
