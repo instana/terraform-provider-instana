@@ -1,5 +1,17 @@
 # Changelog
 
+## [v6.1.1](https://github.com/instana/terraform-provider-instana/tree/v6.1.1) (2026-02-05)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v6.1.0...v6.1.1)
+
+**Fixed bugs:**
+
+- Fix state management issue in API token resource
+
+**Merged pull requests:**
+
+- api-token-resource fix [\#73](https://github.com/instana/terraform-provider-instana/pull/73) ([georgekutty-1](https://github.com/georgekutty-1))
+
 ## [v6.1.0](https://github.com/instana/terraform-provider-instana/tree/v6.1.0) (2026-01-15)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v6.0.4...v6.1.0)
