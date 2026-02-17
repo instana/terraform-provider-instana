@@ -346,14 +346,13 @@ func (r *websiteAlertConfigResource) MapStateToDataObject(ctx context.Context, p
 	}
 
 	// Create API object
-	enabled := model.Enabled.ValueBool()
 	return &restapi.WebsiteAlertConfig{
 		ID:                    model.ID.ValueString(),
 		Name:                  model.Name.ValueString(),
 		Description:           model.Description.ValueString(),
 		Severity:              nil,
 		Triggering:            model.Triggering.ValueBool(),
-		Enabled:               &enabled,
+		Enabled:               extractEnabledFlag(model.Enabled),
 		WebsiteID:             model.WebsiteID.ValueString(),
 		TagFilterExpression:   tagFilter,
 		AlertChannelIDs:       alertChannelIDs,
@@ -849,4 +848,13 @@ func (r *websiteAlertConfigResource) GetStateUpgraders(ctx context.Context) map[
 	return map[int64]resource.StateUpgrader{
 		1: resourcehandle.CreateStateUpgraderForVersion(1),
 	}
+}
+
+// extractEnabled converts types.Bool to *bool for API, handling null/unknown values
+func extractEnabledFlag(v types.Bool) *bool {
+	if v.IsNull() || v.IsUnknown() {
+		return nil
+	}
+	val := v.ValueBool()
+	return &val
 }
