@@ -1,5 +1,17 @@
 # Changelog
 
+## [v6.1.2](https://github.com/instana/terraform-provider-instana/tree/v6.1.2) (2026-02-19)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v6.1.1...v6.1.2)
+
+**Implemented enhancements:**
+
+- Enable/Disable support for application and website alerts
+
+**Merged pull requests:**
+
+- Enable/Disable support for application and website alerts [\#74](https://github.com/instana/terraform-provider-instana/pull/74) ([georgekutty-1](https://github.com/georgekutty-1))
+
 ## [v6.1.1](https://github.com/instana/terraform-provider-instana/tree/v6.1.1) (2026-02-05)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v6.1.0...v6.1.1)
