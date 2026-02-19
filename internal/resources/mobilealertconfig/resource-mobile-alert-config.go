@@ -311,9 +311,8 @@ func (r *mobileAlertConfigResource) MapStateToDataObject(ctx context.Context, pl
 		Name:                  model.Name.ValueString(),
 		Description:           model.Description.ValueString(),
 		MobileAppID:           model.MobileAppID.ValueString(),
-		Severity:              nil,
 		Triggering:            model.Triggering.ValueBool(),
-		Enabled:               model.Enabled.ValueBool(),
+		Enabled:               util.SetBoolPointerFromState(model.Enabled),
 		TagFilterExpression:   tagFilter,
 		AlertChannels:         alertChannels,
 		Granularity:           restapi.Granularity(model.Granularity.ValueInt64()),
@@ -577,7 +576,7 @@ func (r *mobileAlertConfigResource) UpdateState(ctx context.Context, state *tfsd
 	model.Description = types.StringValue(apiObject.Description)
 	model.MobileAppID = types.StringValue(apiObject.MobileAppID)
 	model.Triggering = types.BoolValue(apiObject.Triggering)
-	model.Enabled = types.BoolValue(apiObject.Enabled)
+	model.Enabled = util.SetBoolPointerToState(apiObject.Enabled)
 	model.Granularity = types.Int64Value(int64(apiObject.Granularity))
 
 	// Map grace period

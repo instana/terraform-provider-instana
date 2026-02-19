@@ -76,7 +76,6 @@ func TestNewMobileAlertConfigResourceHandle(t *testing.T) {
 		assert.NotNil(t, schema.Attributes[MobileAlertConfigFieldName])
 		assert.NotNil(t, schema.Attributes[MobileAlertConfigFieldDescription])
 		assert.NotNil(t, schema.Attributes[MobileAlertConfigFieldMobileAppID])
-		assert.NotNil(t, schema.Attributes[MobileAlertConfigFieldSeverity])
 		assert.NotNil(t, schema.Attributes[MobileAlertConfigFieldTriggering])
 		assert.NotNil(t, schema.Attributes[MobileAlertConfigFieldTagFilter])
 		assert.NotNil(t, schema.Attributes[MobileAlertConfigFieldAlertChannels])
@@ -156,10 +155,11 @@ func TestMapStateToDataObject_BasicConfig(t *testing.T) {
 		Description: types.StringValue("Test Description"),
 		MobileAppID: types.StringValue("mobile-app-123"),
 		Triggering:  types.BoolValue(false),
+		Enabled:     types.BoolValue(true),
 		Granularity: types.Int64Value(600000),
 
-		TagFilter:     types.StringNull(),
-		AlertChannels: types.MapNull(types.SetType{ElemType: types.StringType}),
+		TagFilter:           types.StringNull(),
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		GracePeriod:         types.Int64Null(),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Rules:               []MobileRuleWithThresholdModel{},
@@ -178,9 +178,9 @@ func TestMapStateToDataObject_BasicConfig(t *testing.T) {
 	assert.Equal(t, "Test Mobile Alert", result.Name)
 	assert.Equal(t, "Test Description", result.Description)
 	assert.Equal(t, "mobile-app-123", result.MobileAppID)
-	assert.NotNil(t, result.Severity)
-	assert.Equal(t, 5, *result.Severity)
 	assert.False(t, result.Triggering)
+	assert.NotNil(t, result.Enabled)
+	assert.True(t, *result.Enabled)
 	assert.Equal(t, restapi.Granularity(600000), result.Granularity)
 }
 
@@ -197,8 +197,8 @@ func TestMapStateToDataObject_WithGracePeriod(t *testing.T) {
 		Granularity: types.Int64Value(600000),
 		GracePeriod: types.Int64Value(300000),
 
-		TagFilter:     types.StringNull(),
-		AlertChannels: types.MapNull(types.SetType{ElemType: types.StringType}),
+		TagFilter:           types.StringNull(),
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Rules:               []MobileRuleWithThresholdModel{},
 		TimeThreshold: &MobileAlertTimeThresholdModel{
@@ -220,14 +220,14 @@ func TestMapStateToDataObject_WithTagFilter(t *testing.T) {
 	resource := &mobileAlertConfigResource{}
 
 	state := createMockState(t, MobileAlertConfigModel{
-		ID:          types.StringValue("test-id"),
-		Name:        types.StringValue("Test Mobile Alert"),
-		Description: types.StringValue("Test Description"),
-		MobileAppID: types.StringValue("mobile-app-123"),
-		Triggering:  types.BoolValue(false),
-		Granularity: types.Int64Value(600000),
-		TagFilter:     types.StringValue("entity.type EQUALS 'mobileApp'"),
-		AlertChannels: types.MapNull(types.SetType{ElemType: types.StringType}),
+		ID:                  types.StringValue("test-id"),
+		Name:                types.StringValue("Test Mobile Alert"),
+		Description:         types.StringValue("Test Description"),
+		MobileAppID:         types.StringValue("mobile-app-123"),
+		Triggering:          types.BoolValue(false),
+		Granularity:         types.Int64Value(600000),
+		TagFilter:           types.StringValue("entity.type EQUALS 'mobileApp'"),
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		GracePeriod:         types.Int64Null(),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Rules:               []MobileRuleWithThresholdModel{},
@@ -267,8 +267,8 @@ func TestMapStateToDataObject_WithAlertChannels(t *testing.T) {
 		Granularity:   types.Int64Value(600000),
 		AlertChannels: types.MapValueMust(types.SetType{ElemType: types.StringType}, alertChannelsMap),
 
-		TagFilter:   types.StringNull(),
-		GracePeriod: types.Int64Null(),
+		TagFilter:           types.StringNull(),
+		GracePeriod:         types.Int64Null(),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Rules:               []MobileRuleWithThresholdModel{},
 		TimeThreshold: &MobileAlertTimeThresholdModel{
@@ -301,8 +301,8 @@ func TestMapStateToDataObject_WithRules(t *testing.T) {
 		Triggering:  types.BoolValue(false),
 		Granularity: types.Int64Value(600000),
 
-		TagFilter:     types.StringNull(),
-		AlertChannels: types.MapNull(types.SetType{ElemType: types.StringType}),
+		TagFilter:           types.StringNull(),
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		GracePeriod:         types.Int64Null(),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Rules: []MobileRuleWithThresholdModel{
@@ -405,8 +405,8 @@ func TestMapStateToDataObject_TimeThresholdTypes(t *testing.T) {
 				Triggering:  types.BoolValue(false),
 				Granularity: types.Int64Value(600000),
 
-				TagFilter:     types.StringNull(),
-				AlertChannels: types.MapNull(types.SetType{ElemType: types.StringType}),
+				TagFilter:           types.StringNull(),
+				AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 				GracePeriod:         types.Int64Null(),
 				CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 				Rules:               []MobileRuleWithThresholdModel{},
@@ -434,8 +434,8 @@ func TestMapStateToDataObject_MissingTimeThreshold(t *testing.T) {
 		Triggering:  types.BoolValue(false),
 		Granularity: types.Int64Value(600000),
 
-		TagFilter:     types.StringNull(),
-		AlertChannels: types.MapNull(types.SetType{ElemType: types.StringType}),
+		TagFilter:           types.StringNull(),
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		GracePeriod:         types.Int64Null(),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Rules:               []MobileRuleWithThresholdModel{},
@@ -459,8 +459,8 @@ func TestMapStateToDataObject_InvalidTimeThresholdConfig(t *testing.T) {
 		Triggering:  types.BoolValue(false),
 		Granularity: types.Int64Value(600000),
 
-		TagFilter:     types.StringNull(),
-		AlertChannels: types.MapNull(types.SetType{ElemType: types.StringType}),
+		TagFilter:           types.StringNull(),
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		GracePeriod:         types.Int64Null(),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Rules:               []MobileRuleWithThresholdModel{},
@@ -520,15 +520,15 @@ func TestUpdateState_WithSeverity(t *testing.T) {
 	ctx := context.Background()
 	resource := &mobileAlertConfigResource{}
 
-	severity := 10
 	operator := restapi.LogicalOperatorType("AND")
+	enabled := true
 	data := &restapi.MobileAlertConfig{
 		ID:          "test-id",
 		Name:        "Test Mobile Alert",
 		Description: "Test Description",
 		MobileAppID: "mobile-app-123",
-		Severity:    &severity,
 		Triggering:  false,
+		Enabled:     &enabled,
 		Granularity: 600000,
 		TagFilterExpression: &restapi.TagFilter{
 			Type:            "EXPRESSION",
@@ -863,8 +863,8 @@ func TestMapStateToDataObject_FromPlan(t *testing.T) {
 		Triggering:  types.BoolValue(false),
 		Granularity: types.Int64Value(600000),
 
-		TagFilter:     types.StringNull(),
-		AlertChannels: types.MapNull(types.SetType{ElemType: types.StringType}),
+		TagFilter:           types.StringNull(),
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		GracePeriod:         types.Int64Null(),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Rules:               []MobileRuleWithThresholdModel{},
@@ -893,8 +893,8 @@ func TestMapStateToDataObject_WithNullRule(t *testing.T) {
 		Triggering:  types.BoolValue(false),
 		Granularity: types.Int64Value(600000),
 
-		TagFilter:     types.StringNull(),
-		AlertChannels: types.MapNull(types.SetType{ElemType: types.StringType}),
+		TagFilter:           types.StringNull(),
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		GracePeriod:         types.Int64Null(),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Rules: []MobileRuleWithThresholdModel{
@@ -949,8 +949,8 @@ func TestUpdateState_WithPlan(t *testing.T) {
 		Triggering:  types.BoolValue(false),
 		Granularity: types.Int64Value(600000),
 
-		TagFilter:     types.StringNull(),
-		AlertChannels: types.MapNull(types.SetType{ElemType: types.StringType}),
+		TagFilter:           types.StringNull(),
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		GracePeriod:         types.Int64Null(),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Rules:               []MobileRuleWithThresholdModel{},
@@ -975,7 +975,7 @@ func TestUpdateState_WithPlan(t *testing.T) {
 	assert.Equal(t, "test-id", model.ID.ValueString())
 }
 
-func TestMapStateToDataObject_WithNullSeverity(t *testing.T) {
+func TestMapStateToDataObject_WithNullEnabled(t *testing.T) {
 	ctx := context.Background()
 	resource := &mobileAlertConfigResource{}
 
@@ -987,8 +987,8 @@ func TestMapStateToDataObject_WithNullSeverity(t *testing.T) {
 		Triggering:  types.BoolValue(false),
 		Granularity: types.Int64Value(600000),
 
-		TagFilter:     types.StringNull(),
-		AlertChannels: types.MapNull(types.SetType{ElemType: types.StringType}),
+		TagFilter:           types.StringNull(),
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		GracePeriod:         types.Int64Null(),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Rules:               []MobileRuleWithThresholdModel{},
@@ -1002,10 +1002,10 @@ func TestMapStateToDataObject_WithNullSeverity(t *testing.T) {
 	result, diags := resource.MapStateToDataObject(ctx, nil, state)
 	require.False(t, diags.HasError())
 	require.NotNil(t, result)
-	assert.Nil(t, result.Severity)
+	assert.Nil(t, result.Enabled)
 }
 
-func TestUpdateState_WithNullSeverity(t *testing.T) {
+func TestUpdateState_WithNullEnabled(t *testing.T) {
 	ctx := context.Background()
 	resource := &mobileAlertConfigResource{}
 
@@ -1015,7 +1015,7 @@ func TestUpdateState_WithNullSeverity(t *testing.T) {
 		Name:        "Test Mobile Alert",
 		Description: "Test Description",
 		MobileAppID: "mobile-app-123",
-		Severity:    nil,
+		Enabled:     nil,
 		Triggering:  false,
 		Granularity: 600000,
 		TagFilterExpression: &restapi.TagFilter{
@@ -1055,8 +1055,8 @@ func TestMapStateToDataObject_WithRulesNullOptionalFields(t *testing.T) {
 		Triggering:  types.BoolValue(false),
 		Granularity: types.Int64Value(600000),
 
-		TagFilter:     types.StringNull(),
-		AlertChannels: types.MapNull(types.SetType{ElemType: types.StringType}),
+		TagFilter:           types.StringNull(),
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		GracePeriod:         types.Int64Null(),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 		Rules: []MobileRuleWithThresholdModel{

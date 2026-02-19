@@ -560,7 +560,7 @@ func (r *applicationAlertConfigResourceImpl) MapStateToDataObject(ctx context.Co
 		IncludeInternal:  model.IncludeInternal.ValueBool(),
 		IncludeSynthetic: model.IncludeSynthetic.ValueBool(),
 		Triggering:       model.Triggering.ValueBool(),
-		Enabled:          extractEnabled(model.Enabled),
+		Enabled:          util.SetBoolPointerFromState(model.Enabled),
 		GracePeriod:      extractGracePeriod(model.GracePeriod),
 	}
 	// Map granularity if present
@@ -956,15 +956,6 @@ func extractGracePeriod(v types.Int64) *int64 {
 		return nil // send as null (omitted in JSON)
 	}
 	val := v.ValueInt64()
-	return &val
-}
-
-// extractEnabled converts types.Bool to *bool for API, handling null/unknown values
-func extractEnabled(v types.Bool) *bool {
-	if v.IsNull() || v.IsUnknown() {
-		return nil
-	}
-	val := v.ValueBool()
 	return &val
 }
 

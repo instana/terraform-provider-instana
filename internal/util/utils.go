@@ -321,6 +321,16 @@ func SetStringPointerFromState(s types.String) *string {
 	return &v
 }
 
+// SetBoolPointerFromState converts types.Bool to *bool for API calls
+// Returns nil if the value is null or unknown, otherwise returns a pointer to the boolean value
+func SetBoolPointerFromState(v types.Bool) *bool {
+	if v.IsNull() || v.IsUnknown() {
+		return nil
+	}
+	val := v.ValueBool()
+	return &val
+}
+
 // SetInt32PointerToInt64State converts an int32 pointer to types.Int64
 func SetInt32PointerToInt64State(i *int32) types.Int64 {
 	if i == nil {

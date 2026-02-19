@@ -9,9 +9,8 @@ type MobileAlertConfig struct {
 	Name                  string                             `json:"name"`
 	Description           string                             `json:"description"`
 	MobileAppID           string                             `json:"mobileAppId"`
-	Severity              *int                               `json:"severity,omitempty"`
 	Triggering            bool                               `json:"triggering"`
-	Enabled               bool                               `json:"enabled"`
+	Enabled               *bool                              `json:"enabled,omitempty"`
 	TagFilterExpression   *TagFilter                         `json:"tagFilterExpression"`
 	AlertChannels         map[string][]string                `json:"alertChannels,omitempty"`
 	Granularity           Granularity                        `json:"granularity"`

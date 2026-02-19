@@ -10,6 +10,7 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/shared"
+	"github.com/instana/terraform-provider-instana/internal/util"
 	"github.com/instana/terraform-provider-instana/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -1074,7 +1075,7 @@ func TestExtractEnabledFlag(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := extractEnabledFlag(tt.input)
+			result := util.SetBoolPointerFromState(tt.input)
 			if tt.expected == nil {
 				assert.Nil(t, result, "Expected nil for %s", tt.name)
 			} else {
