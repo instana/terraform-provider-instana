@@ -11,6 +11,7 @@ type MobileAlertConfig struct {
 	MobileAppID           string                             `json:"mobileAppId"`
 	Severity              *int                               `json:"severity,omitempty"`
 	Triggering            bool                               `json:"triggering"`
+	Enabled               bool                               `json:"enabled"`
 	TagFilterExpression   *TagFilter                         `json:"tagFilterExpression"`
 	AlertChannels         map[string][]string                `json:"alertChannels,omitempty"`
 	Granularity           Granularity                        `json:"granularity"`
@@ -54,10 +55,10 @@ type MobileAppAlertRuleWithThresholds struct {
 
 // MobileAppTimeThreshold represents the time threshold configuration for mobile app alerts
 type MobileAppTimeThreshold struct {
-	Type       string  `json:"type"`
-	TimeWindow *int64  `json:"timeWindow,omitempty"`
-	Violations *int32  `json:"violations,omitempty"`
-	Users      *int32  `json:"users,omitempty"`
+	Type       string   `json:"type"`
+	TimeWindow *int64   `json:"timeWindow,omitempty"`
+	Violations *int32   `json:"violations,omitempty"`
+	Users      *int32   `json:"users,omitempty"`
 	Percentage *float64 `json:"percentage,omitempty"`
 }
 

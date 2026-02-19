@@ -65,6 +65,12 @@ func NewMobileAlertConfigResourceHandle() resourcehandle.ResourceHandle[*restapi
 						Description: MobileAlertConfigDescTriggering,
 						Default:     booldefault.StaticBool(MobileAlertConfigDefaultTriggering),
 					},
+					MobileAlertConfigFieldEnabled: schema.BoolAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: MobileAlertConfigDescEnabled,
+						Default:     booldefault.StaticBool(MobileAlertConfigDefaultEnabled),
+					},
 					MobileAlertConfigFieldTagFilter: schema.StringAttribute{
 						Optional:    true,
 						Description: MobileAlertConfigDescTagFilter,
@@ -301,12 +307,13 @@ func (r *mobileAlertConfigResource) MapStateToDataObject(ctx context.Context, pl
 
 	// Create API object
 	return &restapi.MobileAlertConfig{
-		ID:                  model.ID.ValueString(),
-		Name:                model.Name.ValueString(),
-		Description:         model.Description.ValueString(),
-		MobileAppID:         model.MobileAppID.ValueString(),
-		Severity:            nil,
-		Triggering:          model.Triggering.ValueBool(),
+		ID:                    model.ID.ValueString(),
+		Name:                  model.Name.ValueString(),
+		Description:           model.Description.ValueString(),
+		MobileAppID:           model.MobileAppID.ValueString(),
+		Severity:              nil,
+		Triggering:            model.Triggering.ValueBool(),
+		Enabled:               model.Enabled.ValueBool(),
 		TagFilterExpression:   tagFilter,
 		AlertChannels:         alertChannels,
 		Granularity:           restapi.Granularity(model.Granularity.ValueInt64()),
@@ -570,6 +577,7 @@ func (r *mobileAlertConfigResource) UpdateState(ctx context.Context, state *tfsd
 	model.Description = types.StringValue(apiObject.Description)
 	model.MobileAppID = types.StringValue(apiObject.MobileAppID)
 	model.Triggering = types.BoolValue(apiObject.Triggering)
+	model.Enabled = types.BoolValue(apiObject.Enabled)
 	model.Granularity = types.Int64Value(int64(apiObject.Granularity))
 
 	// Map grace period

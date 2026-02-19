@@ -12,6 +12,7 @@ type MobileAlertConfigModel struct {
 	Description         types.String                   `tfsdk:"description"`
 	MobileAppID         types.String                   `tfsdk:"mobile_app_id"`
 	Triggering          types.Bool                     `tfsdk:"triggering"`
+	Enabled             types.Bool                     `tfsdk:"enabled"`
 	TagFilter           types.String                   `tfsdk:"tag_filter"`
 	AlertChannels       types.Map                      `tfsdk:"alert_channels"`
 	Granularity         types.Int64                    `tfsdk:"granularity"`

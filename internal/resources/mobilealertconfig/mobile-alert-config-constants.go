@@ -16,6 +16,8 @@ const (
 	MobileAlertConfigFieldSeverity = "severity"
 	// MobileAlertConfigFieldTriggering constant value for field triggering of resource instana_mobile_alert_config
 	MobileAlertConfigFieldTriggering = "triggering"
+	// MobileAlertConfigFieldEnabled constant value for field enabled of resource instana_mobile_alert_config
+	MobileAlertConfigFieldEnabled = "enabled"
 	// MobileAlertConfigFieldTagFilter constant value for field tag_filter of resource instana_mobile_alert_config
 	MobileAlertConfigFieldTagFilter = "tag_filter"
 	// MobileAlertConfigFieldAlertChannels constant value for field alert_channels of resource instana_mobile_alert_config
@@ -73,6 +75,7 @@ const (
 	MobileAlertConfigDescMobileAppID                       = "ID of the mobile app that this Smart Alert configuration is applied to."
 	MobileAlertConfigDescSeverity                          = "The severity of the alert when triggered (5 for Warning, 10 for Critical). Deprecated - use rules with thresholds instead."
 	MobileAlertConfigDescTriggering                        = "Flag to indicate whether an Incident is also triggered or not."
+	MobileAlertConfigDescEnabled                           = "Flag to enable or disable the alert configuration."
 	MobileAlertConfigDescTagFilter                         = "The tag filter expression for the Mobile Alert Configuration."
 	MobileAlertConfigDescAlertChannels                     = "Set of alert channel IDs associated with the severity."
 	MobileAlertConfigDescGranularity                       = "The evaluation granularity used for detection of violations of the defined threshold."
@@ -124,6 +127,7 @@ const (
 // Default value constants
 const (
 	MobileAlertConfigDefaultTriggering  = false
+	MobileAlertConfigDefaultEnabled     = true
 	MobileAlertConfigDefaultGranularity = 600000
 )
 
