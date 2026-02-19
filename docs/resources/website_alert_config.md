@@ -118,6 +118,7 @@ Monitor page load time:
 resource "instana_website_alert_config" "slowness_basic" {
   name        = "Page Load Time Alert - $${severity}" # Use double $$ to define placeholders
   description = "Alert when page load time exceeds threshold"
+  enabled     = true
   triggering  = false
   website_id  = "KExRPJGcSvOjBPD_JrwAIA" # replace with your actual website Id
   
@@ -145,7 +146,7 @@ resource "instana_website_alert_config" "slowness_basic" {
   time_threshold = {
     violations_in_sequence = {
       time_window = 600000
-    } 
+    }
   }
 }
 ```
@@ -158,8 +159,9 @@ Monitor specific pages or user segments:
 resource "instana_website_alert_config" "slowness_filtered" {
   name        = "Checkout Page Slowness"
   description = "Monitor checkout page performance"
+  enabled     = true
   website_id  = "KExRPJGcSvOjBPD_JrwAIA" # replace with your actual website Id
-  tag_filter = "beacon.error.count@na GREATER_THAN 1"  
+  tag_filter = "beacon.error.count@na GREATER_THAN 1"
    rules = [
     {
       operator = ">="
@@ -197,6 +199,7 @@ Monitor HTTP status codes:
 resource "instana_website_alert_config" "status_code" {
   name        = "4xx Error Alert"
   description = "Alert on client errors"
+  enabled     = true
   website_id  = "KExRPJGcSvOjBPD_JrwAIA" # replace with your actual website Id
   rules = [
     {
@@ -238,6 +241,7 @@ Use adaptive baseline for dynamic thresholds:
 resource "instana_website_alert_config" "adaptive_slowness" {
   name        = "4xx Error Alert"
   description = "Alert on client errors"
+  enabled     = true
   website_id  = "KExRPJGcSvOjBPD_JrwAIA" # replace with your actual website Id
   rules = [
     {
@@ -281,6 +285,7 @@ Add custom fields to alert notifications:
 resource "instana_website_alert_config" "with_custom_payload" {
   name        = "4xx Error Alert"
   description = "Alert on client errors"
+  enabled     = true
   website_id  = "KExRPJGcSvOjBPD_JrwAIA" # replace with your actual website Id
   rules = [
     {
@@ -382,6 +387,7 @@ terraform apply
 
 * `name` - Required - Name of the website alert configuration (max 256 characters)
 * `description` - Required - Description of the alert configuration (max 65536 characters)
+* `enabled` - Optional - Boolean flag to enable or disable the alert configuration. Default: `true`
 * `triggering` - Optional - Boolean flag to trigger incidents. Default: `false`
 * `website_id` - Required - Unique ID of the website to monitor (max 64 characters)
 * `tag_filter` - Optional - Tag filter expression to limit monitoring scope [Details](#tag-filter-reference)

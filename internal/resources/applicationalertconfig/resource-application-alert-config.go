@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
@@ -22,7 +23,6 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
 	"github.com/instana/terraform-provider-instana/internal/util"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // NewApplicationAlertConfigResourceHandle creates the resource handle for Application Alert Configuration
@@ -107,6 +107,12 @@ func NewApplicationAlertConfigResourceHandle() resourcehandle.ResourceHandle[*re
 						Computed:    true,
 						Default:     booldefault.StaticBool(false),
 						Description: "Optional flag to indicate whether also an Incident is triggered or not. The default is false",
+					},
+					ApplicationAlertConfigFieldEnabled: schema.BoolAttribute{
+						Optional:    true,
+						Computed:    true,
+						Default:     booldefault.StaticBool(ApplicationAlertConfigDefaultEnabled),
+						Description: "Flag to enable or disable the alert configuration",
 					},
 					shared.DefaultCustomPayloadFieldsName: shared.GetCustomPayloadFieldsSchema(),
 					ApplicationAlertConfigFieldRules: schema.ListNestedAttribute{
@@ -391,7 +397,7 @@ func NewApplicationAlertConfigResourceHandle() resourcehandle.ResourceHandle[*re
 				},
 			},
 			SkipIDGeneration: true,
-			SchemaVersion: 2,
+			SchemaVersion:    2,
 		},
 	}
 }
@@ -554,6 +560,7 @@ func (r *applicationAlertConfigResourceImpl) MapStateToDataObject(ctx context.Co
 		IncludeInternal:  model.IncludeInternal.ValueBool(),
 		IncludeSynthetic: model.IncludeSynthetic.ValueBool(),
 		Triggering:       model.Triggering.ValueBool(),
+		Enabled:          extractEnabled(model.Enabled),
 		GracePeriod:      extractGracePeriod(model.GracePeriod),
 	}
 	// Map granularity if present
@@ -952,6 +959,15 @@ func extractGracePeriod(v types.Int64) *int64 {
 	return &val
 }
 
+// extractEnabled converts types.Bool to *bool for API, handling null/unknown values
+func extractEnabled(v types.Bool) *bool {
+	if v.IsNull() || v.IsUnknown() {
+		return nil
+	}
+	val := v.ValueBool()
+	return &val
+}
+
 // ============================================================================
 // API to State Mapping
 // ============================================================================
@@ -977,6 +993,13 @@ func (r *applicationAlertConfigResourceImpl) UpdateState(ctx context.Context, st
 	model.IncludeInternal = types.BoolValue(data.IncludeInternal)
 	model.IncludeSynthetic = types.BoolValue(data.IncludeSynthetic)
 	model.Triggering = types.BoolValue(data.Triggering)
+
+	// Map enabled field
+	if data.Enabled != nil {
+		model.Enabled = types.BoolValue(*data.Enabled)
+	} else {
+		model.Enabled = types.BoolValue(ApplicationAlertConfigDefaultEnabled)
+	}
 
 	// Map complex fields with error handling
 	if err := r.updateGracePeriod(&model, data); err != nil {

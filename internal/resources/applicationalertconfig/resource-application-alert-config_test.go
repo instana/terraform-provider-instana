@@ -125,6 +125,7 @@ func TestMapStateToDataObject_BasicConfig(t *testing.T) {
 		IncludeInternal:  types.BoolValue(false),
 		IncludeSynthetic: types.BoolValue(false),
 		Triggering:       types.BoolValue(false),
+		Enabled:          types.BoolValue(true),
 
 		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
@@ -145,6 +146,9 @@ func TestMapStateToDataObject_BasicConfig(t *testing.T) {
 	assert.False(t, result.IncludeInternal)
 	assert.False(t, result.IncludeSynthetic)
 	assert.False(t, result.Triggering)
+	// Verify enabled field defaults to true when not specified
+	require.NotNil(t, result.Enabled)
+	assert.True(t, *result.Enabled)
 }
 
 func TestMapStateToDataObject_WithGracePeriod(t *testing.T) {
@@ -2219,6 +2223,175 @@ func TestUpdateState_WithNullTagFilter(t *testing.T) {
 }
 
 // Helper functions
+func TestExtractEnabled(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    types.Bool
+		expected *bool
+	}{
+		{
+			name:     "explicit true",
+			input:    types.BoolValue(true),
+			expected: ptr(true),
+		},
+		{
+			name:     "explicit false",
+			input:    types.BoolValue(false),
+			expected: ptr(false),
+		},
+		{
+			name:     "null value returns nil",
+			input:    types.BoolNull(),
+			expected: nil,
+		},
+		{
+			name:     "unknown value returns nil",
+			input:    types.BoolUnknown(),
+			expected: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := extractEnabled(tt.input)
+			if tt.expected == nil {
+				assert.Nil(t, result, "Expected nil for %s", tt.name)
+			} else {
+				require.NotNil(t, result, "Expected non-nil for %s", tt.name)
+				assert.Equal(t, *tt.expected, *result, "Expected %v for %s", *tt.expected, tt.name)
+			}
+		})
+	}
+}
+
+func TestMapStateToDataObject_EnabledField(t *testing.T) {
+	ctx := context.Background()
+	resource := &applicationAlertConfigResourceImpl{}
+
+	tests := []struct {
+		name            string
+		enabledValue    types.Bool
+		expectedEnabled *bool
+		description     string
+	}{
+		{
+			name:            "enabled explicitly set to true",
+			enabledValue:    types.BoolValue(true),
+			expectedEnabled: ptr(true),
+			description:     "When user explicitly sets enabled=true, API should receive true",
+		},
+		{
+			name:            "enabled explicitly set to false",
+			enabledValue:    types.BoolValue(false),
+			expectedEnabled: ptr(false),
+			description:     "When user explicitly sets enabled=false, API should receive false",
+		},
+		{
+			name:            "enabled is null - should send nil to API",
+			enabledValue:    types.BoolNull(),
+			expectedEnabled: nil,
+			description:     "When enabled is null, API should receive nil (omitted in JSON)",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			state := createMockState(t, ApplicationAlertConfigModel{
+				ID:                  types.StringValue("test-id"),
+				Name:                types.StringValue("Test Alert"),
+				Description:         types.StringValue("Test Description"),
+				BoundaryScope:       types.StringValue("ALL"),
+				EvaluationType:      types.StringValue("PER_AP"),
+				Granularity:         types.Int64Value(600000),
+				IncludeInternal:     types.BoolValue(false),
+				IncludeSynthetic:    types.BoolValue(false),
+				Triggering:          types.BoolValue(false),
+				Enabled:             tt.enabledValue,
+				AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
+				CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
+				Applications:        []ApplicationModel{},
+				Rules:               []RuleWithThresholdModel{},
+			})
+
+			result, diags := resource.MapStateToDataObject(ctx, state)
+			require.False(t, diags.HasError(), "Expected no errors for %s", tt.name)
+			require.NotNil(t, result, "Expected result for %s", tt.name)
+
+			if tt.expectedEnabled == nil {
+				assert.Nil(t, result.Enabled, "%s: %s", tt.name, tt.description)
+			} else {
+				require.NotNil(t, result.Enabled, "%s: %s", tt.name, tt.description)
+				assert.Equal(t, *tt.expectedEnabled, *result.Enabled, "%s: %s", tt.name, tt.description)
+			}
+		})
+	}
+}
+
+func TestUpdateState_EnabledField(t *testing.T) {
+	ctx := context.Background()
+	resource := &applicationAlertConfigResourceImpl{}
+
+	tests := []struct {
+		name            string
+		apiEnabled      *bool
+		expectedEnabled bool
+		description     string
+	}{
+		{
+			name:            "API returns enabled=true",
+			apiEnabled:      ptr(true),
+			expectedEnabled: true,
+			description:     "When API returns enabled=true, state should have enabled=true",
+		},
+		{
+			name:            "API returns enabled=false",
+			apiEnabled:      ptr(false),
+			expectedEnabled: false,
+			description:     "When API returns enabled=false, state should have enabled=false",
+		},
+		{
+			name:            "API returns nil - should use default true",
+			apiEnabled:      nil,
+			expectedEnabled: ApplicationAlertConfigDefaultEnabled,
+			description:     "When API returns nil, state should use default value (true)",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			apiData := &restapi.ApplicationAlertConfig{
+				ID:               "test-id",
+				Name:             "Test Alert",
+				Description:      "Test Description",
+				BoundaryScope:    "ALL",
+				EvaluationType:   "PER_AP",
+				Granularity:      600000,
+				IncludeInternal:  false,
+				IncludeSynthetic: false,
+				Triggering:       false,
+				Enabled:          tt.apiEnabled,
+				Applications:     map[string]restapi.IncludedApplication{},
+				AlertChannelIDs:  []string{},
+				Rules:            []restapi.ApplicationAlertRuleWithThresholds{},
+			}
+
+			state := tfsdk.State{
+				Schema: schema.Schema{
+					Attributes: NewApplicationAlertConfigResourceHandle().MetaData().Schema.Attributes,
+				},
+			}
+
+			diags := resource.UpdateState(ctx, &state, nil, apiData)
+			require.False(t, diags.HasError(), "Expected no errors for %s", tt.name)
+
+			var model ApplicationAlertConfigModel
+			diags = state.Get(ctx, &model)
+			require.False(t, diags.HasError(), "Expected no errors getting state for %s", tt.name)
+
+			assert.Equal(t, tt.expectedEnabled, model.Enabled.ValueBool(), "%s: %s", tt.name, tt.description)
+		})
+	}
+}
 
 func createMockState(t *testing.T, model ApplicationAlertConfigModel) tfsdk.State {
 	state := tfsdk.State{

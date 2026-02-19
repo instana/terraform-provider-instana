@@ -10,6 +10,7 @@ type WebsiteAlertConfig struct {
 	Description           string                           `json:"description"`
 	Severity              *int                             `json:"severity"`
 	Triggering            bool                             `json:"triggering"`
+	Enabled               *bool                            `json:"enabled,omitempty"`
 	WebsiteID             string                           `json:"websiteId"`
 	TagFilterExpression   *TagFilter                       `json:"tagFilterExpression"`
 	AlertChannelIDs       []string                         `json:"alertChannelIds"`

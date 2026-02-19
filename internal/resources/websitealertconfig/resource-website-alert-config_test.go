@@ -1033,3 +1033,204 @@ func initializeEmptyState(t *testing.T, ctx context.Context, state *tfsdk.State)
 	diags := state.Set(ctx, emptyModel)
 	require.False(t, diags.HasError(), "Failed to initialize empty state")
 }
+
+// Helper function to create bool pointer
+func ptrBool(v bool) *bool {
+	return &v
+}
+
+// Helper function to create int64 pointer
+func ptrInt64(v int64) *int64 {
+	return &v
+}
+
+func TestExtractEnabledFlag(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    types.Bool
+		expected *bool
+	}{
+		{
+			name:     "explicit true",
+			input:    types.BoolValue(true),
+			expected: ptrBool(true),
+		},
+		{
+			name:     "explicit false",
+			input:    types.BoolValue(false),
+			expected: ptrBool(false),
+		},
+		{
+			name:     "null value returns nil",
+			input:    types.BoolNull(),
+			expected: nil,
+		},
+		{
+			name:     "unknown value returns nil",
+			input:    types.BoolUnknown(),
+			expected: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := extractEnabledFlag(tt.input)
+			if tt.expected == nil {
+				assert.Nil(t, result, "Expected nil for %s", tt.name)
+			} else {
+				require.NotNil(t, result, "Expected non-nil for %s", tt.name)
+				assert.Equal(t, *tt.expected, *result, "Expected %v for %s", *tt.expected, tt.name)
+			}
+		})
+	}
+}
+
+func TestMapStateToDataObject_EnabledField(t *testing.T) {
+	resource := &websiteAlertConfigResource{
+		metaData: resourcehandle.ResourceMetaData{
+			ResourceName:  ResourceInstanaWebsiteAlertConfig,
+			Schema:        NewWebsiteAlertConfigResourceHandle().MetaData().Schema,
+			SchemaVersion: 1,
+		},
+	}
+	ctx := context.Background()
+
+	tests := []struct {
+		name            string
+		enabledValue    types.Bool
+		expectedEnabled *bool
+		description     string
+	}{
+		{
+			name:            "enabled explicitly set to true",
+			enabledValue:    types.BoolValue(true),
+			expectedEnabled: ptrBool(true),
+			description:     "When user explicitly sets enabled=true, API should receive true",
+		},
+		{
+			name:            "enabled explicitly set to false",
+			enabledValue:    types.BoolValue(false),
+			expectedEnabled: ptrBool(false),
+			description:     "When user explicitly sets enabled=false, API should receive false",
+		},
+		{
+			name:            "enabled is null - should send nil to API",
+			enabledValue:    types.BoolNull(),
+			expectedEnabled: nil,
+			description:     "When enabled is null, API should receive nil (omitted in JSON)",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			model := WebsiteAlertConfigModel{
+				ID:                  types.StringValue("test-id"),
+				Name:                types.StringValue("Test Alert"),
+				Description:         types.StringValue("Test Description"),
+				Triggering:          types.BoolValue(false),
+				Enabled:             tt.enabledValue,
+				WebsiteID:           types.StringValue("website-1"),
+				TagFilter:           types.StringNull(),
+				Granularity:         types.Int64Value(600000),
+				AlertChannelIDs:     types.SetNull(types.StringType),
+				CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
+				Rules:               []RuleWithThresholdPluginModel{},
+				TimeThreshold: &WebsiteTimeThresholdModel{
+					ViolationsInSequence: &WebsiteViolationsInSequenceModel{
+						TimeWindow: types.Int64Value(300000),
+					},
+				},
+			}
+
+			state := &tfsdk.State{
+				Schema: resource.metaData.Schema,
+			}
+			diags := state.Set(ctx, model)
+			require.False(t, diags.HasError())
+
+			result, resultDiags := resource.MapStateToDataObject(ctx, nil, state)
+			require.False(t, resultDiags.HasError(), "Expected no errors for %s", tt.name)
+			require.NotNil(t, result, "Expected result for %s", tt.name)
+
+			if tt.expectedEnabled == nil {
+				assert.Nil(t, result.Enabled, "%s: %s", tt.name, tt.description)
+			} else {
+				require.NotNil(t, result.Enabled, "%s: %s", tt.name, tt.description)
+				assert.Equal(t, *tt.expectedEnabled, *result.Enabled, "%s: %s", tt.name, tt.description)
+			}
+		})
+	}
+}
+
+func TestUpdateState_EnabledField(t *testing.T) {
+	resource := &websiteAlertConfigResource{
+		metaData: resourcehandle.ResourceMetaData{
+			ResourceName:  ResourceInstanaWebsiteAlertConfig,
+			Schema:        NewWebsiteAlertConfigResourceHandle().MetaData().Schema,
+			SchemaVersion: 1,
+		},
+	}
+	ctx := context.Background()
+
+	tests := []struct {
+		name            string
+		apiEnabled      *bool
+		expectedEnabled bool
+		description     string
+	}{
+		{
+			name:            "API returns enabled=true",
+			apiEnabled:      ptrBool(true),
+			expectedEnabled: true,
+			description:     "When API returns enabled=true, state should have enabled=true",
+		},
+		{
+			name:            "API returns enabled=false",
+			apiEnabled:      ptrBool(false),
+			expectedEnabled: false,
+			description:     "When API returns enabled=false, state should have enabled=false",
+		},
+		{
+			name:            "API returns nil - should use default true",
+			apiEnabled:      nil,
+			expectedEnabled: WebsiteAlertConfigDefaultEnabled,
+			description:     "When API returns nil, state should use default value (true)",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			apiObject := &restapi.WebsiteAlertConfig{
+				ID:          "test-id",
+				Name:        "Test Alert",
+				Description: "Test Description",
+				Triggering:  false,
+				Enabled:     tt.apiEnabled,
+				WebsiteID:   "website-1",
+				Granularity: 600000,
+				TimeThreshold: restapi.WebsiteTimeThreshold{
+					Type:       "violationsInSequence",
+					TimeWindow: ptrInt64(300000),
+				},
+				CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
+				Rules:                 []restapi.WebsiteAlertRuleWithThresholds{},
+			}
+
+			state := &tfsdk.State{
+				Schema: resource.metaData.Schema,
+			}
+
+			// Initialize state with empty model
+			initializeEmptyState(t, ctx, state)
+
+			diags := resource.UpdateState(ctx, state, nil, apiObject)
+			require.False(t, diags.HasError(), "Expected no errors for %s", tt.name)
+
+			var model WebsiteAlertConfigModel
+			diags = state.Get(ctx, &model)
+			require.False(t, diags.HasError(), "Expected no errors getting state for %s", tt.name)
+
+			assert.Equal(t, tt.expectedEnabled, model.Enabled.ValueBool(), "%s: %s", tt.name, tt.description)
+		})
+	}
+}

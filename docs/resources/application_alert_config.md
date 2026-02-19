@@ -113,6 +113,7 @@ resource "instana_application_alert_config" "application_alert_config" {
   ]
   boundary_scope       = "INBOUND"
   description          = "Calls are slower or equal to 5 ms based on latency (90th)."
+  enabled              = true
   evaluation_type      = "PER_AP"
   granularity          = 600000
   rules = [
@@ -159,6 +160,7 @@ resource "instana_application_alert_config" "application_alert_config" {
   ]
   boundary_scope       = "ALL"
   description          = "Occurrences of HTTP Status Code 5XX (Server Error) is higher or equal to ." # Replace with your own value
+  enabled              = true
   evaluation_type      = "PER_AP"
   granularity          = 600000
   name                 = "AN Smart alert" # Replace with your own value
@@ -221,6 +223,7 @@ resource "instana_application_alert_config" "alert_config_3" {
     },
   ]
   description       = "test-alert-description" # Replace with your own value
+  enabled           = true
   evaluation_type   = "PER_AP"
   granularity       = 600000
   name              = "test-alert" # Replace with your own value
@@ -277,6 +280,7 @@ resource "instana_application_alert_config" "throughput_application_alert_config
   ]
   boundary_scope       = "ALL"
   description          = "The number of calls is lower or equal to  calls."
+  enabled              = true
   evaluation_type      = "PER_AP"
   granularity          = 600000
   include_internal     = false
@@ -321,6 +325,7 @@ resource "instana_application_alert_config" "errors_application_alert_config" {
   ]
   boundary_scope       = "ALL"
   description          = "errors based alert"
+  enabled              = true
   evaluation_type      = "PER_AP_SERVICE"
   granularity          = 60000
   include_internal     = false
@@ -403,6 +408,7 @@ terraform apply
 * `description` - Required - The description text of the application alert config
 * `boundary_scope` - Required - The boundary scope of the application alert config. Allowed values: `INBOUND`, `ALL`, `DEFAULT`
 * `evaluation_type` - Required - The evaluation type of the application alert config. Allowed values: `PER_AP`, `PER_AP_SERVICE`, `PER_AP_ENDPOINT`
+* `enabled` - Optional - default `true` - Flag to indicate whether the alert configuration is enabled or not
 * `triggering` - Optional - default `false` - Flag to indicate whether also an Incident is triggered or not
 * `include_internal` - Optional - default `false` - Flag to indicate whether also internal calls are included in the scope or not
 * `include_synthetic` - Optional - default `false` - Flag to indicate whether also synthetic calls are included in the scope or not

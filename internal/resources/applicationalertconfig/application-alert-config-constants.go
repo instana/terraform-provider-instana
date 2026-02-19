@@ -69,6 +69,8 @@ const (
 	ApplicationAlertConfigFieldTimeThresholdViolationsInSequence = "violations_in_sequence"
 	//ApplicationAlertConfigFieldTriggering constant value for field triggering of resource instana_application_alert_config
 	ApplicationAlertConfigFieldTriggering = "triggering"
+	//ApplicationAlertConfigFieldEnabled constant value for field enabled of resource instana_application_alert_config
+	ApplicationAlertConfigFieldEnabled = "enabled"
 
 	// Additional application alert config field names
 
@@ -125,4 +127,9 @@ const (
 	APIAlertTypeSlowness   = "slowness"
 	APIAlertTypeStatusCode = "statusCode"
 	APIAlertTypeThroughput = "throughput"
+)
+
+// Default value constants
+const (
+	ApplicationAlertConfigDefaultEnabled = true
 )

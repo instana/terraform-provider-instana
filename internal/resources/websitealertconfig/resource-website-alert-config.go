@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
@@ -20,7 +21,6 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
 	"github.com/instana/terraform-provider-instana/internal/util"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // NewWebsiteAlertConfigResourceHandle creates the resource handle for Website Alert Configs
@@ -57,6 +57,12 @@ func NewWebsiteAlertConfigResourceHandle() resourcehandle.ResourceHandle[*restap
 						Computed:    true,
 						Description: WebsiteAlertConfigDescTriggering,
 						Default:     booldefault.StaticBool(WebsiteAlertConfigDefaultTriggering),
+					},
+					WebsiteAlertConfigFieldEnabled: schema.BoolAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: WebsiteAlertConfigDescEnabled,
+						Default:     booldefault.StaticBool(WebsiteAlertConfigDefaultEnabled),
 					},
 					WebsiteAlertConfigFieldWebsiteID: schema.StringAttribute{
 						Required:    true,
@@ -346,6 +352,7 @@ func (r *websiteAlertConfigResource) MapStateToDataObject(ctx context.Context, p
 		Description:           model.Description.ValueString(),
 		Severity:              nil,
 		Triggering:            model.Triggering.ValueBool(),
+		Enabled:               extractEnabledFlag(model.Enabled),
 		WebsiteID:             model.WebsiteID.ValueString(),
 		TagFilterExpression:   tagFilter,
 		AlertChannelIDs:       alertChannelIDs,
@@ -664,6 +671,13 @@ func (r *websiteAlertConfigResource) UpdateState(ctx context.Context, state *tfs
 	model.WebsiteID = types.StringValue(apiObject.WebsiteID)
 	model.Granularity = types.Int64Value(int64(apiObject.Granularity))
 
+	// Map enabled field
+	if apiObject.Enabled != nil {
+		model.Enabled = types.BoolValue(*apiObject.Enabled)
+	} else {
+		model.Enabled = types.BoolValue(WebsiteAlertConfigDefaultEnabled)
+	}
+
 	// Map tag filter expression
 	tagFilterDiags := r.mapTagFilterExpressionToState(&model, apiObject)
 	diags.Append(tagFilterDiags...)
@@ -834,4 +848,13 @@ func (r *websiteAlertConfigResource) GetStateUpgraders(ctx context.Context) map[
 	return map[int64]resource.StateUpgrader{
 		1: resourcehandle.CreateStateUpgraderForVersion(1),
 	}
+}
+
+// extractEnabled converts types.Bool to *bool for API, handling null/unknown values
+func extractEnabledFlag(v types.Bool) *bool {
+	if v.IsNull() || v.IsUnknown() {
+		return nil
+	}
+	val := v.ValueBool()
+	return &val
 }
