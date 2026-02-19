@@ -584,7 +584,7 @@ func (r *applicationAlertConfigResourceImpl) MapStateToDataObject(ctx context.Co
 		return nil, diags
 	}
 
-	if err := r.mapRules(&model, result, &diags); err != nil {
+	if err := r.mapRules(ctx, &model, result, &diags); err != nil {
 		return nil, diags
 	}
 
@@ -706,14 +706,14 @@ func (r *applicationAlertConfigResourceImpl) mapCustomPayloadFields(ctx context.
 }
 
 // mapRules converts alert rules with thresholds from state to API format
-func (r *applicationAlertConfigResourceImpl) mapRules(model *ApplicationAlertConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
+func (r *applicationAlertConfigResourceImpl) mapRules(ctx context.Context, model *ApplicationAlertConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
 	if len(model.Rules) == 0 {
 		return nil
 	}
 
 	result.Rules = make([]restapi.ApplicationAlertRuleWithThresholds, len(model.Rules))
 	for i, ruleWithThreshold := range model.Rules {
-		if err := r.mapSingleRule(i, &ruleWithThreshold, result, diags); err != nil {
+		if err := r.mapSingleRule(ctx, i, &ruleWithThreshold, result, diags); err != nil {
 			return err
 		}
 
@@ -757,7 +757,7 @@ func (r *applicationAlertConfigResourceImpl) validateRuleThresholds(index int, r
 }
 
 // mapSingleRule converts a single rule with its thresholds
-func (r *applicationAlertConfigResourceImpl) mapSingleRule(index int, ruleWithThreshold *RuleWithThresholdModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
+func (r *applicationAlertConfigResourceImpl) mapSingleRule(ctx context.Context, index int, ruleWithThreshold *RuleWithThresholdModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
 	result.Rules[index] = restapi.ApplicationAlertRuleWithThresholds{
 		ThresholdOperator: ruleWithThreshold.ThresholdOperator.ValueString(),
 	}
@@ -769,7 +769,7 @@ func (r *applicationAlertConfigResourceImpl) mapSingleRule(index int, ruleWithTh
 	}
 
 	if ruleWithThreshold.Thresholds != nil {
-		r.mapThresholds(index, ruleWithThreshold.Thresholds, result)
+		r.mapThresholds(ctx, index, ruleWithThreshold.Thresholds, result)
 	}
 
 	return nil
@@ -896,7 +896,7 @@ func (r *applicationAlertConfigResourceImpl) mapThroughputRule(index int, throug
 }
 
 // mapThresholds converts threshold configurations for warning and critical severity levels using shared mapping
-func (r *applicationAlertConfigResourceImpl) mapThresholds(index int, thresholds *ApplicationThresholdModel, result *restapi.ApplicationAlertConfig) {
+func (r *applicationAlertConfigResourceImpl) mapThresholds(ctx context.Context, index int, thresholds *ApplicationThresholdModel, result *restapi.ApplicationAlertConfig) {
 	// Convert ApplicationThresholdModel to shared.ThresholdAllPluginModel
 	sharedThresholds := &shared.ThresholdAllPluginModel{}
 
@@ -917,7 +917,7 @@ func (r *applicationAlertConfigResourceImpl) mapThresholds(index int, thresholds
 	}
 
 	// Use shared mapping function
-	thresholdMap, _ := shared.MapThresholdsAllPluginFromState(nil, sharedThresholds)
+	thresholdMap, _ := shared.MapThresholdsAllPluginFromState(ctx, sharedThresholds)
 	result.Rules[index].Thresholds = thresholdMap
 }
 

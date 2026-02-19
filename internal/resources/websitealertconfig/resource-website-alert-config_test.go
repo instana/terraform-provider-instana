@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
@@ -417,22 +416,6 @@ func TestMapStateToDataObject_MissingTimeThreshold(t *testing.T) {
 }
 
 // Helper functions
-
-func createMockState(t *testing.T, model WebsiteAlertConfigModel) tfsdk.State {
-	state := tfsdk.State{
-		Schema: getTestSchema(),
-	}
-
-	diags := state.Set(context.Background(), model)
-	require.False(t, diags.HasError(), "Failed to set state: %v", diags)
-
-	return state
-}
-
-func getTestSchema() schema.Schema {
-	resource := NewWebsiteAlertConfigResourceHandle()
-	return resource.MetaData().Schema
-}
 
 func TestMapStateToDataObject_InvalidSeverity(t *testing.T) {
 	resource := &websiteAlertConfigResource{
