@@ -3,6 +3,7 @@ package util
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/google/go-cmp/cmp"
 
@@ -275,9 +276,16 @@ func SetFloat32PointerToState[T numericPtr](i T) types.Float32 {
 	case *int64:
 		return types.Float32Value(float32(*v))
 	case *float32:
-		return types.Float32Value(float32(*v))
+		// Round to 2 decimal places to avoid floating-point precision issues
+		// Format to 2 decimal places and parse back to ensure exact precision
+		formatted := strconv.FormatFloat(float64(*v), 'f', 2, 32)
+		parsed, _ := strconv.ParseFloat(formatted, 32)
+		return types.Float32Value(float32(parsed))
 	case *float64:
-		return types.Float32Value(float32(*v))
+		// Round to 2 decimal places to avoid floating-point precision issues
+		formatted := strconv.FormatFloat(*v, 'f', 2, 64)
+		parsed, _ := strconv.ParseFloat(formatted, 32)
+		return types.Float32Value(float32(parsed))
 	default:
 		// unreachable because of the constraint, but keep safe fallback
 		return types.Float32Null()
@@ -296,9 +304,16 @@ func SetFloat64PointerToState[T numericPtr](i T) types.Float64 {
 	case *int64:
 		return types.Float64Value(float64(*v))
 	case *float32:
-		return types.Float64Value(float64(*v))
+		// Round to 2 decimal places to avoid floating-point precision issues
+		// Convert float32 to float64 and format with bitSize=64 to avoid float32 precision artifacts
+		formatted := strconv.FormatFloat(float64(*v), 'f', 2, 64)
+		parsed, _ := strconv.ParseFloat(formatted, 64)
+		return types.Float64Value(parsed)
 	case *float64:
-		return types.Float64Value(float64(*v))
+		// Round to 2 decimal places to avoid floating-point precision issues
+		formatted := strconv.FormatFloat(*v, 'f', 2, 64)
+		parsed, _ := strconv.ParseFloat(formatted, 64)
+		return types.Float64Value(parsed)
 	default:
 		// unreachable because of the constraint, but keep safe fallback
 		return types.Float64Null()

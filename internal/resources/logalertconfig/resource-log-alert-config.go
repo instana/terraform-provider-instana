@@ -3,6 +3,7 @@ package logalertconfig
 import (
 	"context"
 	"math"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
@@ -445,8 +446,8 @@ func (r *logAlertConfigResource) createThresholdModel(threshold restapi.Threshol
 	if threshold.Type == "adaptiveBaseline" {
 		return &shared.ThresholdTypeModel{
 			AdaptiveBaseline: &shared.AdaptiveBaselineModel{
-				DeviationFactor: util.SetFloat32PointerToState(threshold.DeviationFactor),
-				Adaptability:    util.SetFloat32PointerToState(threshold.Adaptability),
+				DeviationFactor: util.SetFloat64PointerToState(threshold.DeviationFactor),
+				Adaptability:    util.SetFloat64PointerToState(threshold.Adaptability),
 				Seasonality:     types.StringValue(string(*threshold.Seasonality)),
 			},
 		}
@@ -456,9 +457,15 @@ func (r *logAlertConfigResource) createThresholdModel(threshold restapi.Threshol
 	if threshold.Value == nil {
 		return nil
 	}
+	// Round to 2 decimal places to avoid floating-point precision issues
+	var roundedValue types.Float64
+	formatted := strconv.FormatFloat(*threshold.Value, 'f', 2, 64)
+	parsed, _ := strconv.ParseFloat(formatted, 64)
+	roundedValue = types.Float64Value(parsed)
+
 	return &shared.ThresholdTypeModel{
 		Static: &shared.StaticTypeModel{
-			Value: types.Float64Value(*threshold.Value),
+			Value: roundedValue,
 		},
 	}
 }
@@ -744,8 +751,18 @@ func (r *logAlertConfigResource) convertThresholdModelToAPI(threshold *shared.Th
 	// Handle adaptive baseline threshold
 	if threshold.AdaptiveBaseline != nil {
 		seasonality := restapi.ThresholdSeasonality(threshold.AdaptiveBaseline.Seasonality.ValueString())
-		deviationFactor := threshold.AdaptiveBaseline.DeviationFactor.ValueFloat32()
-		adaptability := threshold.AdaptiveBaseline.Adaptability.ValueFloat32()
+		deviationFactorVal := threshold.AdaptiveBaseline.DeviationFactor.ValueFloat64()
+		adaptabilityVal := threshold.AdaptiveBaseline.Adaptability.ValueFloat64()
+
+		// Convert float64 to float32 with rounding
+		formatted := strconv.FormatFloat(deviationFactorVal, 'f', 2, 64)
+		parsed, _ := strconv.ParseFloat(formatted, 64)
+		deviationFactor := float32(parsed)
+
+		formattedAdapt := strconv.FormatFloat(adaptabilityVal, 'f', 2, 64)
+		parsedAdapt, _ := strconv.ParseFloat(formattedAdapt, 64)
+		adaptability := float32(parsedAdapt)
+
 		return &restapi.ThresholdRule{
 			Type:            "adaptiveBaseline",
 			Seasonality:     &seasonality,

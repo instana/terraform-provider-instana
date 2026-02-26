@@ -57,15 +57,15 @@ const (
 
 type AdaptiveBaselineModel struct {
 	//Operator        types.String  `tfsdk:"operator"`
-	DeviationFactor types.Float32 `tfsdk:"deviation_factor"`
-	Adaptability    types.Float32 `tfsdk:"adaptability"`
+	DeviationFactor types.Float64 `tfsdk:"deviation_factor"`
+	Adaptability    types.Float64 `tfsdk:"adaptability"`
 	Seasonality     types.String  `tfsdk:"seasonality"`
 }
 
 type HistoricBaselineModel struct {
 	//Operator    types.String  `tfsdk:"operator"`
 	Baseline    types.List    `tfsdk:"baseline"`
-	Deviation   types.Float32 `tfsdk:"deviation_factor"`
+	Deviation   types.Float64 `tfsdk:"deviation_factor"`
 	Seasonality types.String  `tfsdk:"seasonality"`
 }
 
@@ -129,11 +129,11 @@ func AdaptiveAttributeSchema() schema.SingleNestedAttribute {
 		Description: "Threshold configuration",
 		Optional:    true,
 		Attributes: map[string]schema.Attribute{
-			ThresholdFieldAdaptiveBaselineDeviation: schema.Float32Attribute{
+			ThresholdFieldAdaptiveBaselineDeviation: schema.Float64Attribute{
 				Optional:    true,
 				Description: "The deviation factor for the adaptive baseline threshold",
 			},
-			ThresholdFieldAdaptiveBaselineAdaptability: schema.Float32Attribute{
+			ThresholdFieldAdaptiveBaselineAdaptability: schema.Float64Attribute{
 				Optional:    true,
 				Description: "The adaptability for the adaptive baseline threshold",
 			},
@@ -158,7 +158,7 @@ func HistoricAttributeSchema() schema.SingleNestedAttribute {
 		Description: "Threshold configuration",
 		Optional:    true,
 		Attributes: map[string]schema.Attribute{
-			ThresholdFieldHistoricBaselineDeviation: schema.Float32Attribute{
+			ThresholdFieldHistoricBaselineDeviation: schema.Float64Attribute{
 				Optional:    true,
 				Computed:    true,
 				Description: "The deviation factor for the adaptive baseline threshold",
@@ -279,8 +279,16 @@ func MapThresholdRulePluginFromState(ctx context.Context, thresholdObj *Threshol
 	if thresholdObj.AdaptiveBaseline != nil {
 		adaptiveVal := thresholdObj.AdaptiveBaseline
 		seasonality := restapi.ThresholdSeasonality(adaptiveVal.Seasonality.ValueString())
-		deviationFactor := float32(adaptiveVal.DeviationFactor.ValueFloat32())
-		adaptability := adaptiveVal.Adaptability.ValueFloat32()
+		// Round to 2 decimal places to avoid floating-point precision issues
+		deviationFactorVal := adaptiveVal.DeviationFactor.ValueFloat64()
+		formatted := strconv.FormatFloat(deviationFactorVal, 'f', 2, 64)
+		parsed, _ := strconv.ParseFloat(formatted, 64)
+		deviationFactor := float32(parsed)
+
+		adaptabilityVal := adaptiveVal.Adaptability.ValueFloat64()
+		formattedAdapt := strconv.FormatFloat(adaptabilityVal, 'f', 2, 64)
+		parsedAdapt, _ := strconv.ParseFloat(formattedAdapt, 64)
+		adaptability := float32(parsedAdapt)
 		//operator := util.SetStringPointerFromState(adaptiveVal.Operator)
 		return &restapi.ThresholdRule{
 			Type:            "adaptiveBaseline",
@@ -357,8 +365,16 @@ func MapThresholdRuleAllPluginFromState(ctx context.Context, thresholdObj *Thres
 
 		adaptiveVal := thresholdObj.AdaptiveBaseline
 		seasonality := restapi.ThresholdSeasonality(adaptiveVal.Seasonality.ValueString())
-		deviationFactor := float32(adaptiveVal.DeviationFactor.ValueFloat32())
-		adaptability := adaptiveVal.Adaptability.ValueFloat32()
+		// Round to 2 decimal places to avoid floating-point precision issues
+		deviationFactorVal := adaptiveVal.DeviationFactor.ValueFloat64()
+		formatted := strconv.FormatFloat(deviationFactorVal, 'f', 2, 64)
+		parsed, _ := strconv.ParseFloat(formatted, 64)
+		deviationFactor := float32(parsed)
+
+		adaptabilityVal := adaptiveVal.Adaptability.ValueFloat64()
+		formattedAdapt := strconv.FormatFloat(adaptabilityVal, 'f', 2, 64)
+		parsedAdapt, _ := strconv.ParseFloat(formattedAdapt, 64)
+		adaptability := float32(parsedAdapt)
 		//operator := util.SetStringPointerFromState(adaptiveVal.Operator)
 		return &restapi.ThresholdRule{
 			Type:            "adaptiveBaseline",
@@ -375,7 +391,11 @@ func MapThresholdRuleAllPluginFromState(ctx context.Context, thresholdObj *Thres
 		baselineVal := thresholdObj.HistoricBaseline
 		//operator := util.SetStringPointerFromState(baselineVal.Operator)
 		seasonality := restapi.ThresholdSeasonality(baselineVal.Seasonality.ValueString())
-		deviationFactor := float32(baselineVal.Deviation.ValueFloat32())
+		// Round to 2 decimal places to avoid floating-point precision issues
+		deviationFactorVal := baselineVal.Deviation.ValueFloat64()
+		formatted := strconv.FormatFloat(deviationFactorVal, 'f', 2, 64)
+		parsed, _ := strconv.ParseFloat(formatted, 64)
+		deviationFactor := float32(parsed)
 
 		// Convert types.List to [][]float64
 		var baseline *[][]float64
@@ -472,8 +492,8 @@ func MapThresholdPluginToState(ctx context.Context, threshold *restapi.Threshold
 		}
 		adaptiveBaselineModel := AdaptiveBaselineModel{
 			//Operator:        util.SetStringPointerToState(threshold.Operator),
-			DeviationFactor: util.SetFloat32PointerToState(threshold.DeviationFactor),
-			Adaptability:    util.SetFloat32PointerToState(threshold.Adaptability),
+			DeviationFactor: util.SetFloat64PointerToState(threshold.DeviationFactor),
+			Adaptability:    util.SetFloat64PointerToState(threshold.Adaptability),
 			Seasonality:     seasonality,
 		}
 		thresholdTypeModel.AdaptiveBaseline = &adaptiveBaselineModel
@@ -515,8 +535,8 @@ func MapAllThresholdPluginToState(ctx context.Context, threshold *restapi.Thresh
 		}
 		adaptiveBaselineModel := AdaptiveBaselineModel{
 			//Operator:        util.SetStringPointerToState(threshold.Operator),
-			DeviationFactor: util.SetFloat32PointerToState(threshold.DeviationFactor),
-			Adaptability:    util.SetFloat32PointerToState(threshold.Adaptability),
+			DeviationFactor: util.SetFloat64PointerToState(threshold.DeviationFactor),
+			Adaptability:    util.SetFloat64PointerToState(threshold.Adaptability),
 			Seasonality:     seasonality,
 		}
 		thresholdTypeModel.AdaptiveBaseline = &adaptiveBaselineModel
@@ -541,7 +561,7 @@ func MapAllThresholdPluginToState(ctx context.Context, threshold *restapi.Thresh
 		}
 		historicBaselineModel := HistoricBaselineModel{
 			Baseline:    baselineList,
-			Deviation:   util.SetFloat32PointerToState(threshold.DeviationFactor),
+			Deviation:   util.SetFloat64PointerToState(threshold.DeviationFactor),
 			Seasonality: seasonality,
 		}
 		thresholdTypeModel.HistoricBaseline = &historicBaselineModel

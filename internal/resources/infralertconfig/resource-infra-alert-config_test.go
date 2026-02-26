@@ -445,8 +445,8 @@ func TestUpdateState_WithRulesAndAdaptiveBaselineThreshold(t *testing.T) {
 	require.NotNil(t, model.Rules.GenericRule.ThresholdRule.Critical.AdaptiveBaseline)
 
 	adaptiveModel := model.Rules.GenericRule.ThresholdRule.Critical.AdaptiveBaseline
-	assert.Equal(t, float32(2.0), adaptiveModel.DeviationFactor.ValueFloat32())
-	assert.Equal(t, float32(0.5), adaptiveModel.Adaptability.ValueFloat32())
+	assert.Equal(t, float64(2.0), adaptiveModel.DeviationFactor.ValueFloat64())
+	assert.Equal(t, float64(0.5), adaptiveModel.Adaptability.ValueFloat64())
 	assert.Equal(t, "DAILY", adaptiveModel.Seasonality.ValueString())
 }
 
@@ -725,8 +725,8 @@ func TestMapStateToDataObject_WithRulesAndAdaptiveBaselineThreshold(t *testing.T
 				ThresholdRule: &shared.ThresholdPluginModel{
 					Critical: &shared.ThresholdTypeModel{
 						AdaptiveBaseline: &shared.AdaptiveBaselineModel{
-							DeviationFactor: types.Float32Value(2.0),
-							Adaptability:    types.Float32Value(0.5),
+							DeviationFactor: types.Float64Value(2.0),
+							Adaptability:    types.Float64Value(0.5),
 							Seasonality:     types.StringValue("DAILY"),
 						},
 					},

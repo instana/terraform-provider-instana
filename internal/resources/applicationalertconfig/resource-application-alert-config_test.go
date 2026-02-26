@@ -1710,8 +1710,8 @@ func TestMapStateToDataObject_WithAdaptiveBaselineThreshold(t *testing.T) {
 				Thresholds: &ApplicationThresholdModel{
 					Warning: &ThresholdLevelModel{
 						AdaptiveBaseline: &shared.AdaptiveBaselineModel{
-							DeviationFactor: types.Float32Value(2.0),
-							Adaptability:    types.Float32Value(0.5),
+							DeviationFactor: types.Float64Value(2.0),
+							Adaptability:    types.Float64Value(0.5),
 							Seasonality:     types.StringValue("DAILY"),
 						},
 					},
@@ -1767,8 +1767,8 @@ func TestMapStateToDataObject_WithAdaptiveBaselineCriticalThreshold(t *testing.T
 				Thresholds: &ApplicationThresholdModel{
 					Critical: &ThresholdLevelModel{
 						AdaptiveBaseline: &shared.AdaptiveBaselineModel{
-							DeviationFactor: types.Float32Value(3.0),
-							Adaptability:    types.Float32Value(0.8),
+							DeviationFactor: types.Float64Value(3.0),
+							Adaptability:    types.Float64Value(0.8),
 							Seasonality:     types.StringValue("WEEKLY"),
 						},
 					},
@@ -1851,8 +1851,8 @@ func TestUpdateState_WithAdaptiveBaselineThreshold(t *testing.T) {
 	require.NotNil(t, model.Rules[0].Thresholds.Warning.AdaptiveBaseline)
 
 	adaptiveModel := model.Rules[0].Thresholds.Warning.AdaptiveBaseline
-	assert.Equal(t, float32(2.0), adaptiveModel.DeviationFactor.ValueFloat32())
-	assert.Equal(t, float32(0.5), adaptiveModel.Adaptability.ValueFloat32())
+	assert.Equal(t, float64(2.0), adaptiveModel.DeviationFactor.ValueFloat64())
+	assert.Equal(t, float64(0.5), adaptiveModel.Adaptability.ValueFloat64())
 	assert.Equal(t, "DAILY", adaptiveModel.Seasonality.ValueString())
 }
 
@@ -1924,8 +1924,8 @@ func TestUpdateState_WithMixedThresholds(t *testing.T) {
 	// Check critical adaptive baseline threshold
 	require.NotNil(t, model.Rules[0].Thresholds.Critical)
 	require.NotNil(t, model.Rules[0].Thresholds.Critical.AdaptiveBaseline)
-	assert.Equal(t, float32(3.0), model.Rules[0].Thresholds.Critical.AdaptiveBaseline.DeviationFactor.ValueFloat32())
-	assert.Equal(t, float32(0.8), model.Rules[0].Thresholds.Critical.AdaptiveBaseline.Adaptability.ValueFloat32())
+	assert.Equal(t, float64(3.0), model.Rules[0].Thresholds.Critical.AdaptiveBaseline.DeviationFactor.ValueFloat64())
+	assert.Equal(t, float64(0.8), model.Rules[0].Thresholds.Critical.AdaptiveBaseline.Adaptability.ValueFloat64())
 	assert.Equal(t, "WEEKLY", model.Rules[0].Thresholds.Critical.AdaptiveBaseline.Seasonality.ValueString())
 }
 
@@ -1960,8 +1960,8 @@ func TestMapStateToDataObject_WithNullAdaptiveBaselineFields(t *testing.T) {
 				Thresholds: &ApplicationThresholdModel{
 					Warning: &ThresholdLevelModel{
 						AdaptiveBaseline: &shared.AdaptiveBaselineModel{
-							DeviationFactor: types.Float32Null(),
-							Adaptability:    types.Float32Null(),
+							DeviationFactor: types.Float64Null(),
+							Adaptability:    types.Float64Null(),
 							Seasonality:     types.StringNull(),
 						},
 					},
@@ -2077,15 +2077,15 @@ func TestMapStateToDataObject_WithBothAdaptiveBaselineThresholds(t *testing.T) {
 				Thresholds: &ApplicationThresholdModel{
 					Warning: &ThresholdLevelModel{
 						AdaptiveBaseline: &shared.AdaptiveBaselineModel{
-							DeviationFactor: types.Float32Value(1.5),
-							Adaptability:    types.Float32Value(0.3),
+							DeviationFactor: types.Float64Value(1.5),
+							Adaptability:    types.Float64Value(0.3),
 							Seasonality:     types.StringValue("DAILY"),
 						},
 					},
 					Critical: &ThresholdLevelModel{
 						AdaptiveBaseline: &shared.AdaptiveBaselineModel{
-							DeviationFactor: types.Float32Value(2.5),
-							Adaptability:    types.Float32Value(0.6),
+							DeviationFactor: types.Float64Value(2.5),
+							Adaptability:    types.Float64Value(0.6),
 							Seasonality:     types.StringValue("WEEKLY"),
 						},
 					},

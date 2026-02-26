@@ -3,6 +3,7 @@ package mobilealertconfig
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -545,8 +546,11 @@ func (r *mobileAlertConfigResource) mapOptionalFloat64Field(field types.Float64)
 	if field.IsNull() || field.IsUnknown() {
 		return nil
 	}
+	// Round to 2 decimal places to avoid floating-point precision issues
 	value := field.ValueFloat64()
-	return &value
+	formatted := strconv.FormatFloat(value, 'f', 2, 64)
+	parsed, _ := strconv.ParseFloat(formatted, 64)
+	return &parsed
 }
 
 // mapOptionalInt64ToInt32Field extracts an optional int64 field and converts it to int32, returning nil if null or unknown
