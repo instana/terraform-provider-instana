@@ -89,7 +89,6 @@ func NewMobileAlertConfigResourceHandle() resourcehandle.ResourceHandle[*restapi
 					},
 					MobileAlertConfigFieldGracePeriod: schema.Int64Attribute{
 						Optional:    true,
-						Computed:    true,
 						Description: MobileAlertConfigDescGracePeriod,
 					},
 					MobileAlertConfigFieldCustomPayloadFields: shared.GetCustomPayloadFieldsSchema(),
@@ -134,7 +133,6 @@ func NewMobileAlertConfigResourceHandle() resourcehandle.ResourceHandle[*restapi
 										},
 										MobileAlertConfigFieldRuleOperator: schema.StringAttribute{
 											Optional:    true,
-											Computed:    true,
 											Description: MobileAlertConfigDescRuleOperator,
 											Validators: []validator.String{
 												stringvalidator.OneOf("STARTS_WITH", "EQUALS"),
@@ -142,12 +140,10 @@ func NewMobileAlertConfigResourceHandle() resourcehandle.ResourceHandle[*restapi
 										},
 										MobileAlertConfigFieldRuleValue: schema.StringAttribute{
 											Optional:    true,
-											Computed:    true,
 											Description: MobileAlertConfigDescRuleValue,
 										},
 										MobileAlertConfigFieldRuleCustomEventName: schema.StringAttribute{
 											Optional:    true,
-											Computed:    true,
 											Description: MobileAlertConfigDescRuleCustomEventName,
 										},
 									},
@@ -583,12 +579,14 @@ func (r *mobileAlertConfigResource) UpdateState(ctx context.Context, state *tfsd
 	model.Enabled = util.SetBoolPointerToState(apiObject.Enabled)
 	model.Granularity = types.Int64Value(int64(apiObject.Granularity))
 
-	// Map grace period
+	// Map grace period - preserve existing value if API returns nil
 	if apiObject.GracePeriod != nil {
 		model.GracePeriod = types.Int64Value(*apiObject.GracePeriod)
-	} else {
+	} else if model.GracePeriod.IsUnknown() {
+		// Only set to null if it was previously unknown (not set in config)
 		model.GracePeriod = types.Int64Null()
 	}
+	// Otherwise preserve the existing value from plan/state
 
 	// Map tag filter expression
 	tagFilterDiags := r.mapTagFilterExpressionToState(&model, apiObject)
@@ -694,41 +692,15 @@ func (r *mobileAlertConfigResource) mapTimeThresholdToState(timeThreshold restap
 }
 
 func (r *mobileAlertConfigResource) mapRuleToState(ctx context.Context, rule *restapi.MobileAppAlertRule) *MobileAlertRuleModel {
-	var aggregation types.String
-	if rule.Aggregation != nil {
-		aggregation = types.StringValue(string(*rule.Aggregation))
-	} else {
-		aggregation = types.StringNull()
-	}
-
-	var operator types.String
-	if rule.Operator != nil {
-		operator = types.StringValue(*rule.Operator)
-	} else {
-		operator = types.StringNull()
-	}
-
-	var value types.String
-	if rule.Value != nil {
-		value = types.StringValue(*rule.Value)
-	} else {
-		value = types.StringNull()
-	}
-
-	var customEventName types.String
-	if rule.CustomEventName != nil {
-		customEventName = types.StringValue(*rule.CustomEventName)
-	} else {
-		customEventName = types.StringNull()
-	}
-
+	// For optional+computed fields, we don't set them to null if API returns nil
+	// This prevents drift during import when these fields are not specified in config
 	return &MobileAlertRuleModel{
 		AlertType:       types.StringValue(rule.AlertType),
 		MetricName:      types.StringValue(rule.MetricName),
-		Aggregation:     aggregation,
-		Operator:        operator,
-		Value:           value,
-		CustomEventName: customEventName,
+		Aggregation:     util.SetStringPointerToState((*string)(rule.Aggregation)),
+		Operator:        util.SetStringPointerToState(rule.Operator),
+		Value:           util.SetStringPointerToState(rule.Value),
+		CustomEventName: util.SetStringPointerToState(rule.CustomEventName),
 	}
 }
 
