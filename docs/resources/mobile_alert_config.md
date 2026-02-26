@@ -1,265 +1,323 @@
----
-page_title: "instana_mobile_alert_config Resource - terraform-provider-instana"
-subcategory: ""
-description: |-
-  Manages Mobile App Alert Configurations in Instana.
----
+# Mobile Alert Configuration Resource
 
-# instana_mobile_alert_config (Resource)
+This resource manages mobile app alert configurations in Instana. Mobile alerts monitor mobile application metrics and trigger notifications based on defined thresholds and conditions.
 
-This resource manages Mobile App Alert Configurations in Instana. Mobile alert configurations allow you to define alert rules for mobile applications based on various metrics and thresholds.
+API Documentation: <https://developer.ibm.com/apis/catalog/instana--instana-rest-api/api/API--instana--instana-rest-api-documentation#createMobileAppAlertConfig>
 
 ## Example Usage
 
-```terraform
-resource "instana_mobile_alert_config" "example" {
-  name            = "My Mobile Alert"
-  description     = "Alert for mobile app performance issues"
-  mobile_app_id   = "mobile-app-123"
-  triggering      = false
-  granularity     = 600000
-  tag_filter      = "entity.type:mobileApp"
+### Mobile App slowness Alert
 
-  custom_payload_field {
-    type = "staticString"
-    key  = "team"
-    value = "mobile-team"
-  }
-
-  rules {
-    rule {
+```hcl
+resource "instana_mobile_alert_config" "slowness" {
+  name          = "tf High Crash Rate - $${severity}" # Use double $$ to define placeholders
+  description   = "Alert when mobile app crash rate exceeds thresholds"
+  mobile_app_id = "mobile-app-id" # replace with valid mobile App Id
+  triggering    = true
+  granularity   = 600000
+  tag_filter    = "mobileBeacon.http.status@na EQUALS '500'"
+  enabled = false
+  rules = [{
+    rule = {
       alert_type  = "slowness"
-      metric_name = "mobile.app.crash.rate"
-      aggregation = "MEAN"
+      metric_name = "httpLatency"
+      aggregation = "P90"
     }
-    
-    threshold_operator = ">"
-    
-    threshold {
-      warning {
-        static {
-          operator = ">="
-          value    = 50
+    threshold_operator = ">="
+    threshold = {
+      warning = {
+        static = {
+          value = 50
         }
       }
-      
-      critical {
-        static {
-          operator = ">="
-          value    = 100
+      critical = {
+        static = {
+          value = 100
         }
       }
     }
-  }
+  }]
 
-  time_threshold {
-    violations_in_sequence {
+  time_threshold = {
+    violations_in_sequence = {
       time_window = 600000
     }
   }
 
-  alert_channels = {
-    "5"  = ["alert-channel-id-1"]
-    "10" = ["alert-channel-id-2"]
-  }
+  custom_payload_field = [
+    {
+      key   = "team"
+      value = "mobile-team"
+    }
+  ]
 }
 ```
 
-## Example with User Impact Time Threshold
+### Mobile App Crash Alert 
 
-```terraform
-resource "instana_mobile_alert_config" "user_impact_example" {
-  name            = "Mobile User Impact Alert"
-  description     = "Alert based on user impact"
-  mobile_app_id   = "mobile-app-456"
-  triggering      = true
-  granularity     = 300000
-  tag_filter      = "entity.type:mobileApp"
+```hcl
+resource "instana_mobile_alert_config" "crash_rate" {
+  name          = "Mobile Error Rate Alert tf"
+  description   = "Alert based on error rate and user impact"
+  mobile_app_id = "mobile-app-id" # replace with valid mobile App Id
+  triggering    = true
+  granularity   = 300000
 
-  custom_payload_field {
-    type = "dynamic"
-    key  = "app_version"
-    value = "entity.app.version"
+   alert_channels = {
+    warning  = ["channel-id-1"] # replace with actual channel Ids
+    critical = ["channel-id-2"]
   }
 
-  rules {
-    rule {
-      alert_type  = "errors"
-      metric_name = "mobile.app.error.rate"
-      aggregation = "SUM"
+  rules = [{
+    rule = {
+      alert_type  = "crash"
+      metric_name = "crashAffectedSessionRate"
+      aggregation = "MEAN"
     }
-    
     threshold_operator = ">="
-    
-    threshold {
-      critical {
-        static {
-          operator = ">="
-          value    = 10
+    threshold = {
+      critical = {
+        static = {
+          value = 10
         }
       }
     }
-  }
+  }]
 
-  time_threshold {
-    user_impact_of_violations_in_sequence {
+  time_threshold = {
+    user_impact_of_violations_in_sequence = {
       time_window = 900000
       users       = 100
-      percentage  = 5.0
+      percentage  = 1.0
     }
   }
+
+  custom_payload_field = [
+    {
+      key = "applicationName"
+      dynamic_value = {
+        tag_name = "mobileBeacon.mobileApp.name"
+      }
+    }
+  ]
 }
 ```
 
-## Example with Violations in Period
+### Mobile App Throughput with Violations in Period
 
-```terraform
-resource "instana_mobile_alert_config" "violations_period_example" {
-  name            = "Mobile Violations Period Alert"
-  description     = "Alert based on violations in period"
-  mobile_app_id   = "mobile-app-789"
-  triggering      = false
-  granularity     = 600000
-  tag_filter      = "entity.type:mobileApp"
-  grace_period    = 300000
+```hcl
+resource "instana_mobile_alert_config" "throughput" {
+  name          = "Low Mobile App Throughput tf"
+  description   = "Alert when throughput drops below threshold"
+  mobile_app_id = "mobile-app-id" # replace with valid mobile App Id
+  triggering    = false
+  granularity   = 600000
 
-  custom_payload_field {
-    type = "staticString"
-    key  = "environment"
-    value = "production"
+  alert_channels = {
+    warning  = ["channel-id-1"] # replace with actual channel Ids
+    critical = ["channel-id-2"]
   }
 
-  rules {
-    rule {
+  rules =[ {
+    rule = {
       alert_type  = "throughput"
-      metric_name = "mobile.app.requests"
-      aggregation = "P95"
+      metric_name = "views"
+      aggregation = "SUM"
     }
-    
     threshold_operator = "<"
-    
-    threshold {
-      warning {
-        static {
-          operator = "<="
-          value    = 1000
+    threshold = {
+      warning = {
+        static = {
+          value = 1000
         }
       }
     }
-  }
+  }]
 
-  time_threshold {
-    violations_in_period {
+  time_threshold = {
+    violations_in_period = {
       time_window = 1800000
       violations  = 3
     }
   }
+
+  custom_payload_field = [
+    {
+      key   = "environment"
+      value = "production"
+    }
+  ]
 }
 ```
 
-## Schema
+## Generating Configuration from Existing Resources
 
-### Required
+If you have already created a mobile alert configuration in Instana and want to generate the Terraform configuration for it, you can use Terraform's import block feature with the `-generate-config-out` flag.
 
-- `name` (String) The name of the Mobile Alert Configuration. Used as a template for the title of alert/event notifications triggered by this Smart Alert configuration. Maximum length: 256 characters.
-- `description` (String) The description of the Mobile Alert Configuration. Used as a template for the description of alert/event notifications triggered by this Smart Alert configuration. Maximum length: 65536 characters.
-- `mobile_app_id` (String) ID of the mobile app that this Smart Alert configuration is applied to. Maximum length: 64 characters.
-- `tag_filter` (String) The tag filter expression for the Mobile Alert Configuration. Defines which mobile app entities this alert applies to.
-- `time_threshold` (Block) The type of threshold to define the criteria when the event and alert triggers and resolves. (see [below for nested schema](#nestedblock--time_threshold))
+This approach is also helpful when you're unsure about the correct Terraform structure for a specific resource configuration. Simply create the resource in Instana first, then use this functionality to automatically generate the corresponding Terraform configuration.
 
-### Optional
+### Steps to Generate Configuration:
 
-- `triggering` (Boolean) Flag to indicate whether an Incident is also triggered or not. Default: `false`.
-- `alert_channels` (Map of List of String) Set of alert channel IDs associated with the severity. The map key is the severity level ("5" for Warning, "10" for Critical), and the value is a list of alert channel IDs.
-- `granularity` (Number) The evaluation granularity used for detection of violations of the defined threshold. Defines the size of the tumbling window used. Default: `600000` (10 minutes). Valid values: 60000, 300000, 600000, 900000, 1200000, 1800000.
-- `grace_period` (Number) The duration (in milliseconds) for which an alert remains open after conditions are no longer violated, with the alert auto-closing once the grace period expires.
-- `custom_payload_field` (Block List) Custom payload fields to send additional information in the alert notifications. Maximum 20 fields. (see [below for nested schema](#nestedblock--custom_payload_field))
-- `rules` (Block List) A list of rules where each rule is associated with multiple thresholds and their corresponding severity levels. This enables more complex alert configurations with validations to ensure consistent and logical threshold-severity combinations. Maximum 1 rule. (see [below for nested schema](#nestedblock--rules))
+1. **Get the Resource ID**: First, locate the ID of your mobile alert configuration in Instana. You can find this in the Instana UI or via the API.
 
-### Read-Only
+2. **Create an Import Block**: Create a new `.tf` file (e.g., `import.tf`) with an import block:
 
-- `id` (String) The ID of the Mobile Alert Configuration.
+```hcl
+import {
+  to = instana_mobile_alert_config.example
+  id = "resource_id"
+}
+```
 
-<a id="nestedblock--custom_payload_field"></a>
-### Nested Schema for `custom_payload_field`
+Replace:
+- `example` with your desired terraform block name
+- `resource_id` with your actual mobile alert configuration ID from Instana
 
-Required:
+3. **Generate the Configuration**: Run the following Terraform command:
 
-- `type` (String) The type of custom payload field. Valid values: `staticString`, `dynamic`.
-- `key` (String) A user-specified unique identifier or name for a custom payload entry.
+```bash
+terraform plan -generate-config-out=generated.tf
+```
 
-Optional:
+This will:
+- Import the existing resource state
+- Generate the complete Terraform configuration in `generated.tf`
+- Show you what will be imported
 
-- `value` (String) The value of the custom payload field. For `staticString` type, this is a static string value. For `dynamic` type, this is a reference to a dynamic field (e.g., `entity.app.version`).
+4. **Review and Apply**: Review the generated configuration in `generated.tf` and make any necessary adjustments.
 
-<a id="nestedblock--rules"></a>
-### Nested Schema for `rules`
+   - **To import the existing resource**: Keep the import block and run `terraform apply`. This will import the resource into your Terraform state and link it to the existing Instana resource.
+   
+   - **To create a new resource**: If you only need the configuration structure as a template, remove the import block from your configuration. Modify the generated configuration as needed, and when you run `terraform apply`, it will create a new resource in Instana instead of importing the existing one.
 
-Optional:
+```bash
+terraform apply
+```
 
-- `rule` (Block) The mobile app alert rule configuration. (see [below for nested schema](#nestedblock--rules--rule))
-- `threshold_operator` (String) The operator to apply for threshold comparison. Valid values: `>`, `>=`, `<`, `<=`.
-- `threshold` (Block) Threshold configuration for different severity levels. (see [below for nested schema](#nestedblock--rules--threshold))
+## Argument Reference
 
-<a id="nestedblock--rules--rule"></a>
-### Nested Schema for `rules.rule`
+* `name` - Required - The name of the mobile alert configuration (max 256 characters). Used as a template for the title of alert/event notifications
+* `description` - Required - The description of the mobile alert configuration (max 65536 characters). Used as a template for the description of alert/event notifications
+* `mobile_app_id` - Required - ID of the mobile app that this alert configuration is applied to (max 64 characters)
+* `tag_filter` - Required - The tag filter expression for the mobile alert configuration. Defines which mobile app entities this alert applies to [Details](#tag-filter-argument-reference)
+* `time_threshold` - Required - The type of threshold to define the criteria when the event and alert triggers and resolves [Details](#time-threshold-argument-reference)
+* `triggering` - Optional - Flag to indicate whether an Incident is also triggered. Default: `false`
+* `alert_channels` - Optional - Set of alert channel IDs associated with the severity [Details](#alert-channels-reference)
+* `granularity` - Optional - The evaluation granularity in milliseconds. Default: `600000` (10 minutes). Allowed values: `60000`, `300000`, `600000`, `900000`, `1200000`, `1800000`
+* `grace_period` - Optional - The duration in milliseconds for which an alert remains open after conditions are no longer violated. The alert auto-closes once the grace period expires
+* `custom_payload_field` - Optional - A list of custom payload fields (static key/value pairs or dynamic tag values added to the event). Maximum 20 fields [Details](#custom-payload-field-argument-reference)
+* `rules` - Optional - A rule configuration with thresholds and their corresponding severity levels. Maximum 1 rule [Details](#rules-argument-reference)
 
-Required:
+### Alert Channels Reference
 
-- `alert_type` (String) The type of alert rule (e.g., `slowness`, `errors`, `throughput`).
-- `metric_name` (String) The metric name of the mobile alert rule.
+* `warning` - Optional - List of alert channel IDs associated with the warning severity
+* `critical` - Optional - List of alert channel IDs associated with the critical severity
 
-Optional:
+### Tag Filter Argument Reference
 
-- `aggregation` (String) The aggregation function of the mobile alert rule. Valid values: `SUM`, `MEAN`, `MAX`, `MIN`, `P25`, `P50`, `P75`, `P90`, `P95`, `P98`, `P99`.
+The **tag_filter** defines which mobile app entities should be included in the alert scope. It supports:
 
-<a id="nestedblock--rules--threshold"></a>
-### Nested Schema for `rules.threshold`
+* Logical AND and/or logical OR conjunctions (AND has higher precedence than OR)
+* Comparison operators: `EQUALS`, `NOT_EQUAL`, `CONTAINS`, `NOT_CONTAIN`, `STARTS_WITH`, `ENDS_WITH`, `NOT_STARTS_WITH`, `NOT_ENDS_WITH`, `GREATER_OR_EQUAL_THAN`, `LESS_OR_EQUAL_THAN`, `LESS_THAN`, `GREATER_THAN`
+* Unary operators: `IS_EMPTY`, `NOT_EMPTY`, `IS_BLANK`, `NOT_BLANK`
 
-Optional:
+The **tag_filter** is defined by the following eBNF:
 
-- `warning` (Block) Warning threshold configuration. (see [below for nested schema](#nestedblock--rules--threshold--warning))
-- `critical` (Block) Critical threshold configuration. (see [below for nested schema](#nestedblock--rules--threshold--critical))
+```plain
+tag_filter                := logical_or
+logical_or                := logical_and OR logical_or | logical_and
+logical_and               := primary_expression AND logical_and | primary_expression
+primary_expression        := comparison | unary_operator_expression
+comparison                := identifier comparison_operator value | identifier@entity_origin comparison_operator value | identifier:tag_key comparison_operator value | identifier:tag_key@entity_origin comparison_operator value
+comparison_operator       := EQUALS | NOT_EQUAL | CONTAINS | NOT_CONTAIN | STARTS_WITH | ENDS_WITH | NOT_STARTS_WITH | NOT_ENDS_WITH | GREATER_OR_EQUAL_THAN | LESS_OR_EQUAL_THAN | LESS_THAN | GREATER_THAN
+unary_operator_expression := identifier unary_operator | identifier@entity_origin unary_operator
+unary_operator            := IS_EMPTY | NOT_EMPTY | IS_BLANK | NOT_BLANK
+tag_key                   := identifier | string_value
+entity_origin             := src | dest | na
+value                     := string_value | number_value | boolean_value
+string_value              := "'" <string> "'"
+number_value              := (+-)?[0-9]+
+boolean_value             := TRUE | FALSE
+identifier                := [a-zA-Z_][\.a-zA-Z0-9_\-/]*
+```
 
-<a id="nestedblock--rules--threshold--warning"></a>
-<a id="nestedblock--rules--threshold--critical"></a>
-### Nested Schema for `rules.threshold.warning` and `rules.threshold.critical`
+### Rules Argument Reference
 
-Optional (exactly one must be specified):
+* `rule` - Required - The mobile app alert rule configuration [Details](#rule-argument-reference)
+* `threshold_operator` - Required - The operator to apply for threshold comparison. Supported values: `>`, `>=`, `<`, `<=`
+* `threshold` - Required - Threshold configuration for different severity levels [Details](#threshold-rule-argument-reference)
 
-- `static` (Block) Static threshold definition.
-  - `operator` (String) Comparison operator for the static threshold. Valid values: `>`, `>=`, `<`, `<=`, `==`.
-  - `value` (Number) The numeric value for the static threshold.
+#### Rule Argument Reference
 
-- `adaptive_baseline` (Block) Adaptive baseline threshold definition.
-  - `deviation_factor` (Number) The numeric value for the deviation factor.
-  - `adaptability` (Number) The numeric value for the adaptability.
-  - `seasonality` (String) Value for the seasonality.
+* `alert_type` - Required - The type of alert rule. Supported values: `slowness`, `errors`, `throughput`
+* `metric_name` - Required - The metric name of the mobile alert rule
+* `aggregation` - Optional - The aggregation function of the mobile alert rule. Supported values: `SUM`, `MEAN`, `MAX`, `MIN`, `P25`, `P50`, `P75`, `P90`, `P95`, `P98`, `P99`
 
-- `historic_baseline` (Block) Historic baseline threshold definition.
-  - `seasonality` (String) Value for the seasonality.
-  - `baseline` (Number) The baseline value.
+#### Threshold Rule Argument Reference
 
-<a id="nestedblock--time_threshold"></a>
-### Nested Schema for `time_threshold`
+At least one of the elements below must be configured:
 
-Optional (exactly one must be specified):
+* `warning` - Optional - Threshold associated with the warning severity [Details](#threshold-argument-reference)
+* `critical` - Optional - Threshold associated with the critical severity [Details](#threshold-argument-reference)
 
-- `violations_in_sequence` (Block) Time threshold based on violations in sequence.
-  - `time_window` (Number) The time window (in milliseconds) of the time threshold. Default: `600000`.
+##### Threshold Argument Reference
 
-- `user_impact_of_violations_in_sequence` (Block) Time threshold based on user impact of violations in sequence.
-  - `time_window` (Number) The time window (in milliseconds) of the time threshold.
-  - `users` (Number) The number of impacted users.
-  - `percentage` (Number) The percentage of impacted users.
+Exactly one of the following must be specified:
 
-- `violations_in_period` (Block) Time threshold based on violations in period.
-  - `time_window` (Number) The time window (in milliseconds) of the time threshold.
-  - `violations` (Number) The number of violations that must appear in the period.
+* `static` - Static threshold definition [Details](#static-threshold-argument-reference)
+* `adaptive_baseline` - Adaptive baseline threshold definition [Details](#adaptive-baseline-threshold-argument-reference)
+* `historic_baseline` - Historic baseline threshold definition [Details](#historic-baseline-threshold-argument-reference)
 
-## Import
+###### Static Threshold Argument Reference
 
-Mobile Alert Configurations can be imported using the alert configuration ID:
+* `value` - Required - The numeric value for the static threshold
 
-```shell
-terraform import instana_mobile_alert_config.example alert-config-id-here
+###### Adaptive Baseline Threshold Argument Reference
+
+* `deviation_factor` - Required - The numeric value for the deviation factor
+* `adaptability` - Required - The numeric value for the adaptability
+* `seasonality` - Required - Value for the seasonality
+
+###### Historic Baseline Threshold Argument Reference
+
+* `seasonality` - Required - Value for the seasonality
+* `baseline` - Required - The baseline value
+
+### Time Threshold Argument Reference
+
+Exactly one of the following must be specified:
+
+* `violations_in_sequence` - Time threshold based on violations in sequence [Details](#violations-in-sequence-time-threshold-argument-reference)
+* `user_impact_of_violations_in_sequence` - Time threshold based on user impact of violations in sequence [Details](#user-impact-violations-in-sequence-time-threshold-argument-reference)
+* `violations_in_period` - Time threshold based on violations in period [Details](#violations-in-period-time-threshold-argument-reference)
+
+#### Violations In Sequence Time Threshold Argument Reference
+
+* `time_window` - Required - The time window in milliseconds. Default: `600000`
+
+#### User Impact Violations In Sequence Time Threshold Argument Reference
+
+* `time_window` - Required - The time window in milliseconds
+* `users` - Optional - The number of impacted users
+* `percentage` - Optional - The percentage of impacted users
+* `impact_measurement_method` - Optional - The method to measure user impact. Supported values: `AGGREGATED`, `PER_WINDOW`
+
+#### Violations In Period Time Threshold Argument Reference
+
+* `time_window` - Required - The time window in milliseconds
+* `violations` - Required - The number of violations that must appear in the period
+
+### Custom Payload Field Argument Reference
+
+* `key` - Required - The key of the custom payload field
+* `value` - Optional - The static string value of the custom payload field. Either `value` or `dynamic_value` must be defined
+* `dynamic_value` - Optional - The dynamic value of the custom payload field [Details](#dynamic-custom-payload-field-value). Either `value` or `dynamic_value` must be defined
+
+#### Dynamic Custom Payload Field Value
+
+* `key` - Optional - The key of the tag which should be added to the payload
+* `tag_name` - Required - The name of the tag which should be added to the payload
+
+## Attributes Reference
+
+* `id` - The ID of the mobile alert configuration

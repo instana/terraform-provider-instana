@@ -21,5 +21,3 @@ const (
 	// UserFieldFullName constant value for the schema field full_name
 	UserFieldFullName = "full_name"
 )
-
-// Made with Bob

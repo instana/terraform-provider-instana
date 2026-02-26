@@ -3,7 +3,9 @@ package mobilealertconfig
 import (
 	"context"
 	"fmt"
+	"strings"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/float64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -12,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
@@ -88,7 +91,6 @@ func NewMobileAlertConfigResourceHandle() resourcehandle.ResourceHandle[*restapi
 					},
 					MobileAlertConfigFieldGracePeriod: schema.Int64Attribute{
 						Optional:    true,
-						Computed:    true,
 						Description: MobileAlertConfigDescGracePeriod,
 					},
 					MobileAlertConfigFieldCustomPayloadFields: shared.GetCustomPayloadFieldsSchema(),
@@ -133,7 +135,6 @@ func NewMobileAlertConfigResourceHandle() resourcehandle.ResourceHandle[*restapi
 										},
 										MobileAlertConfigFieldRuleOperator: schema.StringAttribute{
 											Optional:    true,
-											Computed:    true,
 											Description: MobileAlertConfigDescRuleOperator,
 											Validators: []validator.String{
 												stringvalidator.OneOf("STARTS_WITH", "EQUALS"),
@@ -141,12 +142,10 @@ func NewMobileAlertConfigResourceHandle() resourcehandle.ResourceHandle[*restapi
 										},
 										MobileAlertConfigFieldRuleValue: schema.StringAttribute{
 											Optional:    true,
-											Computed:    true,
 											Description: MobileAlertConfigDescRuleValue,
 										},
 										MobileAlertConfigFieldRuleCustomEventName: schema.StringAttribute{
 											Optional:    true,
-											Computed:    true,
 											Description: MobileAlertConfigDescRuleCustomEventName,
 										},
 									},
@@ -193,6 +192,19 @@ func NewMobileAlertConfigResourceHandle() resourcehandle.ResourceHandle[*restapi
 										Optional:    true,
 										Computed:    true,
 										Description: MobileAlertConfigDescTimeThresholdPercentage,
+										Validators: []validator.Float64{
+											float64validator.AtLeast(0),
+											float64validator.AtMost(1),
+										},
+									},
+									MobileAlertConfigFieldTimeThresholdUserImpactMeasurementMethod: schema.StringAttribute{
+										Optional:    true,
+										Computed:    true,
+										Description: MobileAlertConfigDescTimeThresholdImpactMeasurementMethod,
+										Default:     stringdefault.StaticString("AGGREGATED"),
+										Validators: []validator.String{
+											stringvalidator.OneOf("AGGREGATED", "PER_WINDOW"),
+										},
 									},
 								},
 							},
@@ -236,18 +248,22 @@ type mobileAlertConfigResource struct {
 	metaData resourcehandle.ResourceMetaData
 }
 
+// MetaData returns the resource metadata including schema and resource name
 func (r *mobileAlertConfigResource) MetaData() *resourcehandle.ResourceMetaData {
 	return &r.metaData
 }
 
+// GetRestResource returns the REST resource for mobile alert configurations from the Instana API
 func (r *mobileAlertConfigResource) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.MobileAlertConfig] {
 	return api.MobileAlertConfig()
 }
 
+// SetComputedFields sets computed fields in the plan (currently no computed fields need to be set)
 func (r *mobileAlertConfigResource) SetComputedFields(_ context.Context, _ *tfsdk.Plan) diag.Diagnostics {
 	return nil
 }
 
+// MapStateToDataObject converts Terraform state/plan to API data object for mobile alert configuration
 func (r *mobileAlertConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.MobileAlertConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var model MobileAlertConfigModel
@@ -307,19 +323,19 @@ func (r *mobileAlertConfigResource) MapStateToDataObject(ctx context.Context, pl
 
 	// Create API object
 	return &restapi.MobileAlertConfig{
-		ID:                    model.ID.ValueString(),
-		Name:                  model.Name.ValueString(),
-		Description:           model.Description.ValueString(),
-		MobileAppID:           model.MobileAppID.ValueString(),
-		Triggering:            model.Triggering.ValueBool(),
-		Enabled:               util.SetBoolPointerFromState(model.Enabled),
-		TagFilterExpression:   tagFilter,
-		AlertChannels:         alertChannels,
-		Granularity:           restapi.Granularity(model.Granularity.ValueInt64()),
-		GracePeriod:           gracePeriod,
-		CustomerPayloadFields: customPayloadFields,
-		Rules:                 rules,
-		TimeThreshold:         timeThreshold,
+		ID:                  model.ID.ValueString(),
+		Name:                model.Name.ValueString(),
+		Description:         model.Description.ValueString(),
+		MobileAppID:         model.MobileAppID.ValueString(),
+		Triggering:          model.Triggering.ValueBool(),
+		Enabled:             util.SetBoolPointerFromState(model.Enabled),
+		TagFilterExpression: tagFilter,
+		AlertChannels:       alertChannels,
+		Granularity:         restapi.Granularity(model.Granularity.ValueInt64()),
+		GracePeriod:         gracePeriod,
+		CustomPayloadFields: customPayloadFields,
+		Rules:               rules,
+		TimeThreshold:       timeThreshold,
 	}, diags
 }
 
@@ -353,7 +369,14 @@ func (r *mobileAlertConfigResource) mapAlertChannelsToAPI(ctx context.Context, m
 	alertChannels := make(map[string][]string)
 
 	if !model.AlertChannels.IsNull() && !model.AlertChannels.IsUnknown() {
-		diags.Append(model.AlertChannels.ElementsAs(ctx, &alertChannels, false)...)
+		var tempChannels map[string][]string
+		diags.Append(model.AlertChannels.ElementsAs(ctx, &tempChannels, false)...)
+
+		// Normalize severity keys to uppercase to match API expectations
+		for severity, channelIDs := range tempChannels {
+			normalizedSeverity := strings.ToUpper(severity)
+			alertChannels[normalizedSeverity] = channelIDs
+		}
 	}
 
 	return alertChannels, diags
@@ -493,7 +516,12 @@ func (r *mobileAlertConfigResource) mapUserImpactTimeThreshold(
 	threshold.Users = r.mapOptionalInt64ToInt32Field(userImpactModel.Users)
 
 	// Map percentage
-	threshold.Percentage = r.mapOptionalFloat64Field(userImpactModel.Percentage)
+	threshold.UserPercentage = r.mapOptionalFloat64Field(userImpactModel.Percentage)
+
+	// Map impact measurement method
+	if !userImpactModel.ImpactMeasurementMethod.IsNull() && !userImpactModel.ImpactMeasurementMethod.IsUnknown() {
+		threshold.ImpactMeasurementMethod = userImpactModel.ImpactMeasurementMethod.ValueString()
+	}
 
 	return threshold, diags
 }
@@ -545,7 +573,7 @@ func (r *mobileAlertConfigResource) mapOptionalFloat64Field(field types.Float64)
 	if field.IsNull() || field.IsUnknown() {
 		return nil
 	}
-	value := field.ValueFloat64()
+	value := util.RoundFloat64To2Decimals(field.ValueFloat64())
 	return &value
 }
 
@@ -554,10 +582,15 @@ func (r *mobileAlertConfigResource) mapOptionalInt64ToInt32Field(field types.Int
 	if field.IsNull() || field.IsUnknown() {
 		return nil
 	}
-	value := int32(field.ValueInt64())
+	value, ok := util.ConvertInt64ToInt32WithValidation(field.ValueInt64())
+	if !ok {
+		// Value exceeds int32 range, return nil to avoid overflow
+		return nil
+	}
 	return &value
 }
 
+// UpdateState updates the Terraform state with values from the API response
 func (r *mobileAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *restapi.MobileAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var model MobileAlertConfigModel
@@ -579,12 +612,14 @@ func (r *mobileAlertConfigResource) UpdateState(ctx context.Context, state *tfsd
 	model.Enabled = util.SetBoolPointerToState(apiObject.Enabled)
 	model.Granularity = types.Int64Value(int64(apiObject.Granularity))
 
-	// Map grace period
+	// Map grace period - preserve existing value if API returns nil
 	if apiObject.GracePeriod != nil {
 		model.GracePeriod = types.Int64Value(*apiObject.GracePeriod)
-	} else {
+	} else if model.GracePeriod.IsUnknown() {
+		// Only set to null if it was previously unknown (not set in config)
 		model.GracePeriod = types.Int64Null()
 	}
+	// Otherwise preserve the existing value from plan/state
 
 	// Map tag filter expression
 	tagFilterDiags := r.mapTagFilterExpressionToState(&model, apiObject)
@@ -640,17 +675,44 @@ func (r *mobileAlertConfigResource) mapTagFilterExpressionToState(model *MobileA
 // mapAlertChannelsToState maps alert channels from API to state
 func (r *mobileAlertConfigResource) mapAlertChannelsToState(ctx context.Context, model *MobileAlertConfigModel, apiObject *restapi.MobileAlertConfig) {
 	if len(apiObject.AlertChannels) > 0 {
+		// Get the original keys from the plan/state to preserve their case
+		var originalKeys map[string]bool
+		if !model.AlertChannels.IsNull() && !model.AlertChannels.IsUnknown() {
+			originalKeys = make(map[string]bool)
+			for key := range model.AlertChannels.Elements() {
+				originalKeys[strings.ToUpper(key)] = true
+			}
+		}
+
 		alertChannelsMap := make(map[string]attr.Value)
 		for severity, channelIDs := range apiObject.AlertChannels {
 			channelElements := make([]attr.Value, len(channelIDs))
 			for i, id := range channelIDs {
 				channelElements[i] = types.StringValue(id)
 			}
-			alertChannelsMap[severity] = types.SetValueMust(types.StringType, channelElements)
+
+			// Use the original case from plan/state if available
+			severityKey := severity
+			if originalKeys != nil {
+				// Find the original key with matching case-insensitive comparison
+				for origKey := range model.AlertChannels.Elements() {
+					if strings.EqualFold(origKey, severity) {
+						severityKey = origKey
+						break
+					}
+				}
+			}
+
+			alertChannelsMap[severityKey] = types.SetValueMust(types.StringType, channelElements)
 		}
 		model.AlertChannels = types.MapValueMust(types.SetType{ElemType: types.StringType}, alertChannelsMap)
 	} else {
-		model.AlertChannels = types.MapNull(types.SetType{ElemType: types.StringType})
+		// Preserve the existing value from plan/state if it was set, otherwise set to null
+		// This prevents inconsistency when alert_channels is optional and not specified
+		if model.AlertChannels.IsNull() || model.AlertChannels.IsUnknown() {
+			model.AlertChannels = types.MapNull(types.SetType{ElemType: types.StringType})
+		}
+		// If alert_channels was explicitly set in config (even as empty), preserve it as empty map
 	}
 }
 
@@ -658,7 +720,7 @@ func (r *mobileAlertConfigResource) mapAlertChannelsToState(ctx context.Context,
 func (r *mobileAlertConfigResource) mapCustomPayloadFieldsToState(ctx context.Context, model *MobileAlertConfigModel, apiObject *restapi.MobileAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	customPayloadFieldsList, payloadDiags := shared.CustomPayloadFieldsToTerraform(ctx, apiObject.CustomerPayloadFields)
+	customPayloadFieldsList, payloadDiags := shared.CustomPayloadFieldsToTerraform(ctx, apiObject.CustomPayloadFields)
 	diags.Append(payloadDiags...)
 	if !diags.HasError() {
 		model.CustomPayloadFields = customPayloadFieldsList
@@ -676,9 +738,10 @@ func (r *mobileAlertConfigResource) mapTimeThresholdToState(timeThreshold restap
 		}
 	case MobileAlertConfigTimeThresholdTypeUserImpactOfViolationsInSequence:
 		mobileTimeThresholdModel.UserImpactOfViolationsInSequence = &MobileUserImpactOfViolationsInSequenceModel{
-			TimeWindow: util.SetInt64PointerToState(timeThreshold.TimeWindow),
-			Users:      util.SetInt64PointerToState(timeThreshold.Users),
-			Percentage: util.SetFloat64PointerToState(timeThreshold.Percentage),
+			TimeWindow:              util.SetInt64PointerToState(timeThreshold.TimeWindow),
+			Users:                   util.SetInt64PointerToState(timeThreshold.Users),
+			Percentage:              util.SetFloat64PointerToState(timeThreshold.UserPercentage),
+			ImpactMeasurementMethod: types.StringValue(timeThreshold.ImpactMeasurementMethod),
 		}
 	case MobileAlertConfigTimeThresholdTypeViolationsInPeriod:
 		mobileTimeThresholdModel.ViolationsInPeriod = &MobileViolationsInPeriodModel{
@@ -690,41 +753,15 @@ func (r *mobileAlertConfigResource) mapTimeThresholdToState(timeThreshold restap
 }
 
 func (r *mobileAlertConfigResource) mapRuleToState(ctx context.Context, rule *restapi.MobileAppAlertRule) *MobileAlertRuleModel {
-	var aggregation types.String
-	if rule.Aggregation != nil {
-		aggregation = types.StringValue(string(*rule.Aggregation))
-	} else {
-		aggregation = types.StringNull()
-	}
-
-	var operator types.String
-	if rule.Operator != nil {
-		operator = types.StringValue(*rule.Operator)
-	} else {
-		operator = types.StringNull()
-	}
-
-	var value types.String
-	if rule.Value != nil {
-		value = types.StringValue(*rule.Value)
-	} else {
-		value = types.StringNull()
-	}
-
-	var customEventName types.String
-	if rule.CustomEventName != nil {
-		customEventName = types.StringValue(*rule.CustomEventName)
-	} else {
-		customEventName = types.StringNull()
-	}
-
+	// For optional+computed fields, we don't set them to null if API returns nil
+	// This prevents drift during import when these fields are not specified in config
 	return &MobileAlertRuleModel{
 		AlertType:       types.StringValue(rule.AlertType),
 		MetricName:      types.StringValue(rule.MetricName),
-		Aggregation:     aggregation,
-		Operator:        operator,
-		Value:           value,
-		CustomEventName: customEventName,
+		Aggregation:     util.SetStringPointerToState((*string)(rule.Aggregation)),
+		Operator:        util.SetStringPointerToState(rule.Operator),
+		Value:           util.SetStringPointerToState(rule.Value),
+		CustomEventName: util.SetStringPointerToState(rule.CustomEventName),
 	}
 }
 

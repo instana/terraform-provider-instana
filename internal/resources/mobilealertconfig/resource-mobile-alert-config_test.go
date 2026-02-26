@@ -493,7 +493,7 @@ func TestUpdateState_BasicConfig(t *testing.T) {
 			Type:       MobileAlertConfigTimeThresholdTypeViolationsInSequence,
 			TimeWindow: ptr(int64(600000)),
 		},
-		CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
+		CustomPayloadFields: []restapi.CustomPayloadField[any]{},
 		Rules:                 []restapi.MobileAppAlertRuleWithThresholds{},
 	}
 
@@ -539,7 +539,7 @@ func TestUpdateState_WithSeverity(t *testing.T) {
 			Type:       MobileAlertConfigTimeThresholdTypeViolationsInSequence,
 			TimeWindow: ptr(int64(600000)),
 		},
-		CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
+		CustomPayloadFields: []restapi.CustomPayloadField[any]{},
 		Rules:                 []restapi.MobileAppAlertRuleWithThresholds{},
 	}
 
@@ -578,7 +578,7 @@ func TestUpdateState_WithGracePeriod(t *testing.T) {
 			Type:       MobileAlertConfigTimeThresholdTypeViolationsInSequence,
 			TimeWindow: ptr(int64(600000)),
 		},
-		CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
+		CustomPayloadFields: []restapi.CustomPayloadField[any]{},
 		Rules:                 []restapi.MobileAppAlertRuleWithThresholds{},
 	}
 
@@ -622,7 +622,7 @@ func TestUpdateState_WithAlertChannels(t *testing.T) {
 			Type:       MobileAlertConfigTimeThresholdTypeViolationsInSequence,
 			TimeWindow: ptr(int64(600000)),
 		},
-		CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
+		CustomPayloadFields: []restapi.CustomPayloadField[any]{},
 		Rules:                 []restapi.MobileAppAlertRuleWithThresholds{},
 	}
 
@@ -689,7 +689,7 @@ func TestUpdateState_WithRules(t *testing.T) {
 			Type:       MobileAlertConfigTimeThresholdTypeViolationsInSequence,
 			TimeWindow: ptr(int64(600000)),
 		},
-		CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
+		CustomPayloadFields: []restapi.CustomPayloadField[any]{},
 	}
 
 	state := &tfsdk.State{
@@ -726,10 +726,10 @@ func TestUpdateState_TimeThresholdTypes(t *testing.T) {
 		{
 			name: "user_impact_of_violations_in_sequence",
 			timeThreshold: &restapi.MobileAppTimeThreshold{
-				Type:       MobileAlertConfigTimeThresholdTypeUserImpactOfViolationsInSequence,
-				TimeWindow: ptr(int64(600000)),
-				Users:      ptr(int32(100)),
-				Percentage: ptr(50.0),
+				Type:           MobileAlertConfigTimeThresholdTypeUserImpactOfViolationsInSequence,
+				TimeWindow:     ptr(int64(600000)),
+				Users:          ptr(int32(100)),
+				UserPercentage: ptr(50.0),
 			},
 			expectedType: MobileAlertConfigTimeThresholdTypeUserImpactOfViolationsInSequence,
 		},
@@ -763,7 +763,7 @@ func TestUpdateState_TimeThresholdTypes(t *testing.T) {
 					Elements:        []*restapi.TagFilter{},
 				},
 				TimeThreshold:         tt.timeThreshold,
-				CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
+				CustomPayloadFields: []restapi.CustomPayloadField[any]{},
 				Rules:                 []restapi.MobileAppAlertRuleWithThresholds{},
 			}
 
@@ -937,7 +937,7 @@ func TestUpdateState_WithPlan(t *testing.T) {
 			Type:       MobileAlertConfigTimeThresholdTypeViolationsInSequence,
 			TimeWindow: ptr(int64(600000)),
 		},
-		CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
+		CustomPayloadFields: []restapi.CustomPayloadField[any]{},
 		Rules:                 []restapi.MobileAppAlertRuleWithThresholds{},
 	}
 
@@ -1027,7 +1027,7 @@ func TestUpdateState_WithNullEnabled(t *testing.T) {
 			Type:       MobileAlertConfigTimeThresholdTypeViolationsInSequence,
 			TimeWindow: ptr(int64(600000)),
 		},
-		CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
+		CustomPayloadFields: []restapi.CustomPayloadField[any]{},
 		Rules:                 []restapi.MobileAppAlertRuleWithThresholds{},
 	}
 
@@ -1137,7 +1137,7 @@ func TestUpdateState_WithRulesNullOptionalFields(t *testing.T) {
 			Type:       MobileAlertConfigTimeThresholdTypeViolationsInSequence,
 			TimeWindow: ptr(int64(600000)),
 		},
-		CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
+		CustomPayloadFields: []restapi.CustomPayloadField[any]{},
 	}
 
 	state := &tfsdk.State{
@@ -1180,7 +1180,7 @@ func TestUpdateState_EmptyAlertChannels(t *testing.T) {
 			Type:       MobileAlertConfigTimeThresholdTypeViolationsInSequence,
 			TimeWindow: ptr(int64(600000)),
 		},
-		CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
+		CustomPayloadFields: []restapi.CustomPayloadField[any]{},
 		Rules:                 []restapi.MobileAppAlertRuleWithThresholds{},
 	}
 
@@ -1215,10 +1215,10 @@ func TestMapTimeThresholdToState_AllTypes(t *testing.T) {
 
 	t.Run("user_impact_of_violations_in_sequence", func(t *testing.T) {
 		threshold := restapi.MobileAppTimeThreshold{
-			Type:       MobileAlertConfigTimeThresholdTypeUserImpactOfViolationsInSequence,
-			TimeWindow: ptr(int64(600000)),
-			Users:      ptr(int32(100)),
-			Percentage: ptr(50.0),
+			Type:           MobileAlertConfigTimeThresholdTypeUserImpactOfViolationsInSequence,
+			TimeWindow:     ptr(int64(600000)),
+			Users:          ptr(int32(100)),
+			UserPercentage: ptr(50.0),
 		}
 
 		result := resource.mapTimeThresholdToState(threshold)
