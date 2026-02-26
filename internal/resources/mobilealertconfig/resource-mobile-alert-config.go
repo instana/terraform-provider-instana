@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/float64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -13,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
@@ -190,6 +192,19 @@ func NewMobileAlertConfigResourceHandle() resourcehandle.ResourceHandle[*restapi
 										Optional:    true,
 										Computed:    true,
 										Description: MobileAlertConfigDescTimeThresholdPercentage,
+										Validators: []validator.Float64{
+											float64validator.AtLeast(0),
+											float64validator.AtMost(1),
+										},
+									},
+									MobileAlertConfigFieldTimeThresholdUserImpactMeasurementMethod: schema.StringAttribute{
+										Optional:    true,
+										Computed:    true,
+										Description: MobileAlertConfigDescTimeThresholdImpactMeasurementMethod,
+										Default:     stringdefault.StaticString("AGGREGATED"),
+										Validators: []validator.String{
+											stringvalidator.OneOf("AGGREGATED", "PER_WINDOW"),
+										},
 									},
 								},
 							},
@@ -490,7 +505,12 @@ func (r *mobileAlertConfigResource) mapUserImpactTimeThreshold(
 	threshold.Users = r.mapOptionalInt64ToInt32Field(userImpactModel.Users)
 
 	// Map percentage
-	threshold.Percentage = r.mapOptionalFloat64Field(userImpactModel.Percentage)
+	threshold.UserPercentage = r.mapOptionalFloat64Field(userImpactModel.Percentage)
+
+	// Map impact measurement method
+	if !userImpactModel.ImpactMeasurementMethod.IsNull() && !userImpactModel.ImpactMeasurementMethod.IsUnknown() {
+		threshold.ImpactMeasurementMethod = userImpactModel.ImpactMeasurementMethod.ValueString()
+	}
 
 	return threshold, diags
 }
@@ -652,7 +672,12 @@ func (r *mobileAlertConfigResource) mapAlertChannelsToState(ctx context.Context,
 		}
 		model.AlertChannels = types.MapValueMust(types.SetType{ElemType: types.StringType}, alertChannelsMap)
 	} else {
-		model.AlertChannels = types.MapNull(types.SetType{ElemType: types.StringType})
+		// Preserve the existing value from plan/state if it was set, otherwise set to null
+		// This prevents inconsistency when alert_channels is optional and not specified
+		if model.AlertChannels.IsNull() || model.AlertChannels.IsUnknown() {
+			model.AlertChannels = types.MapNull(types.SetType{ElemType: types.StringType})
+		}
+		// If alert_channels was explicitly set in config (even as empty), preserve it as empty map
 	}
 }
 
@@ -678,9 +703,10 @@ func (r *mobileAlertConfigResource) mapTimeThresholdToState(timeThreshold restap
 		}
 	case MobileAlertConfigTimeThresholdTypeUserImpactOfViolationsInSequence:
 		mobileTimeThresholdModel.UserImpactOfViolationsInSequence = &MobileUserImpactOfViolationsInSequenceModel{
-			TimeWindow: util.SetInt64PointerToState(timeThreshold.TimeWindow),
-			Users:      util.SetInt64PointerToState(timeThreshold.Users),
-			Percentage: util.SetFloat64PointerToState(timeThreshold.Percentage),
+			TimeWindow:              util.SetInt64PointerToState(timeThreshold.TimeWindow),
+			Users:                   util.SetInt64PointerToState(timeThreshold.Users),
+			Percentage:              util.SetFloat64PointerToState(timeThreshold.UserPercentage),
+			ImpactMeasurementMethod: types.StringValue(timeThreshold.ImpactMeasurementMethod),
 		}
 	case MobileAlertConfigTimeThresholdTypeViolationsInPeriod:
 		mobileTimeThresholdModel.ViolationsInPeriod = &MobileViolationsInPeriodModel{

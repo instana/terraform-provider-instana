@@ -726,10 +726,10 @@ func TestUpdateState_TimeThresholdTypes(t *testing.T) {
 		{
 			name: "user_impact_of_violations_in_sequence",
 			timeThreshold: &restapi.MobileAppTimeThreshold{
-				Type:       MobileAlertConfigTimeThresholdTypeUserImpactOfViolationsInSequence,
-				TimeWindow: ptr(int64(600000)),
-				Users:      ptr(int32(100)),
-				Percentage: ptr(50.0),
+				Type:           MobileAlertConfigTimeThresholdTypeUserImpactOfViolationsInSequence,
+				TimeWindow:     ptr(int64(600000)),
+				Users:          ptr(int32(100)),
+				UserPercentage: ptr(50.0),
 			},
 			expectedType: MobileAlertConfigTimeThresholdTypeUserImpactOfViolationsInSequence,
 		},
@@ -1215,10 +1215,10 @@ func TestMapTimeThresholdToState_AllTypes(t *testing.T) {
 
 	t.Run("user_impact_of_violations_in_sequence", func(t *testing.T) {
 		threshold := restapi.MobileAppTimeThreshold{
-			Type:       MobileAlertConfigTimeThresholdTypeUserImpactOfViolationsInSequence,
-			TimeWindow: ptr(int64(600000)),
-			Users:      ptr(int32(100)),
-			Percentage: ptr(50.0),
+			Type:           MobileAlertConfigTimeThresholdTypeUserImpactOfViolationsInSequence,
+			TimeWindow:     ptr(int64(600000)),
+			Users:          ptr(int32(100)),
+			UserPercentage: ptr(50.0),
 		}
 
 		result := resource.mapTimeThresholdToState(threshold)

@@ -54,11 +54,10 @@ type MobileAppAlertRuleWithThresholds struct {
 
 // MobileAppTimeThreshold represents the time threshold configuration for mobile app alerts
 type MobileAppTimeThreshold struct {
-	Type       string   `json:"type"`
-	TimeWindow *int64   `json:"timeWindow,omitempty"`
-	Violations *int32   `json:"violations,omitempty"`
-	Users      *int32   `json:"users,omitempty"`
-	Percentage *float64 `json:"percentage,omitempty"`
+	Type                    string   `json:"type"`
+	TimeWindow              *int64   `json:"timeWindow,omitempty"`
+	Violations              *int32   `json:"violations,omitempty"`
+	Users                   *int32   `json:"users,omitempty"`
+	UserPercentage          *float64 `json:"userPercentage,omitempty"`
+	ImpactMeasurementMethod string   `json:"impactMeasurementMethod,omitempty"`
 }
-
-// Made with Bob

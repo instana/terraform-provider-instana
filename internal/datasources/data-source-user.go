@@ -114,5 +114,3 @@ func (d *UserDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	// Set the data in the response
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
-
-// Made with Bob

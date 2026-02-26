@@ -55,5 +55,3 @@ func TestUserDataSourceSchema(t *testing.T) {
 	fullNameAttr := resp.Schema.Attributes[UserFieldFullName]
 	require.True(t, fullNameAttr.(schema.StringAttribute).Computed)
 }
-
-// Made with Bob

@@ -48,9 +48,10 @@ type MobileAlertTimeThresholdModel struct {
 
 // MobileUserImpactOfViolationsInSequenceModel represents the user impact configuration for time threshold
 type MobileUserImpactOfViolationsInSequenceModel struct {
-	TimeWindow types.Int64   `tfsdk:"time_window"`
-	Users      types.Int64   `tfsdk:"users"`
-	Percentage types.Float64 `tfsdk:"percentage"`
+	TimeWindow              types.Int64   `tfsdk:"time_window"`
+	Users                   types.Int64   `tfsdk:"users"`
+	Percentage              types.Float64 `tfsdk:"percentage"`
+	ImpactMeasurementMethod types.String  `tfsdk:"impact_measurement_method"`
 }
 
 // MobileViolationsInPeriodModel represents the violations in period configuration for time threshold
