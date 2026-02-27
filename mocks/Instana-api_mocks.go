@@ -271,6 +271,20 @@ func (mr *MockInstanaAPIMockRecorder) WebsiteAlertConfig() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WebsiteAlertConfig", reflect.TypeOf((*MockInstanaAPI)(nil).WebsiteAlertConfig))
 }
+// MobileAlertConfig mocks base method.
+func (m *MockInstanaAPI) MobileAlertConfig() restapi.RestResource[*restapi.MobileAlertConfig] {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "MobileAlertConfig")
+	ret0, _ := ret[0].(restapi.RestResource[*restapi.MobileAlertConfig])
+	return ret0
+}
+
+// MobileAlertConfig indicates an expected call of MobileAlertConfig.
+func (mr *MockInstanaAPIMockRecorder) MobileAlertConfig() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MobileAlertConfig", reflect.TypeOf((*MockInstanaAPI)(nil).MobileAlertConfig))
+}
+
 
 // WebsiteMonitoringConfig mocks base method.
 func (m *MockInstanaAPI) WebsiteMonitoringConfig() restapi.RestResource[*restapi.WebsiteMonitoringConfig] {
@@ -361,6 +375,34 @@ func (m *MockInstanaAPI) Teams() restapi.RestResource[*restapi.Team] {
 func (mr *MockInstanaAPIMockRecorder) Teams() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Teams", reflect.TypeOf((*MockInstanaAPI)(nil).Teams))
+}
+
+// Roles mocks base method.
+func (m *MockInstanaAPI) Roles() restapi.RestResource[*restapi.Role] {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Roles")
+	ret0, _ := ret[0].(restapi.RestResource[*restapi.Role])
+	return ret0
+}
+
+// Roles indicates an expected call of Roles.
+func (mr *MockInstanaAPIMockRecorder) Roles() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Roles", reflect.TypeOf((*MockInstanaAPI)(nil).Roles))
+}
+
+// Users mocks base method.
+func (m *MockInstanaAPI) Users() restapi.ReadOnlyRestResource[*restapi.User] {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Users")
+	ret0, _ := ret[0].(restapi.ReadOnlyRestResource[*restapi.User])
+	return ret0
+}
+
+// Users indicates an expected call of Users.
+func (mr *MockInstanaAPIMockRecorder) Users() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Users", reflect.TypeOf((*MockInstanaAPI)(nil).Users))
 }
 
 // SyntheticAlertConfigs mocks base method.

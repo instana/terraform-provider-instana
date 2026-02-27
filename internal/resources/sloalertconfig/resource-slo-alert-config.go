@@ -372,10 +372,14 @@ func (r *sloAlertConfigResource) mapThresholdToState(threshold *restapi.SloAlert
 		thresholdType = ThresholdTypeStaticThreshold
 	}
 
+	// Round to 2 decimal places to avoid floating-point precision issues
+	formatted := strconv.FormatFloat(threshold.Value, 'f', 2, 64)
+	parsed, _ := strconv.ParseFloat(formatted, 64)
+
 	return &SloAlertThresholdModel{
 		Type:     types.StringValue(thresholdType),
 		Operator: types.StringValue(threshold.Operator),
-		Value:    types.Float64Value(threshold.Value),
+		Value:    types.Float64Value(parsed),
 	}
 }
 

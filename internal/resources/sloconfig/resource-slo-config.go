@@ -3,6 +3,7 @@ package sloconfig
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
@@ -389,8 +390,8 @@ func buildTimeBasedSaturationIndicatorAttribute() schema.SingleNestedAttribute {
 				Description: SloConfigDescAggregation,
 			},
 			SchemaFieldOperator: schema.StringAttribute{
-				Optional: true,
-				Computed: true,
+				Optional:    true,
+				Computed:    true,
 				Description: SloConfigDescOperator,
 				Validators: []validator.String{
 					stringvalidator.OneOf(
@@ -423,8 +424,8 @@ func buildEventBasedSaturationIndicatorAttribute() schema.SingleNestedAttribute 
 				Description: SloConfigDescThreshold,
 			},
 			SchemaFieldOperator: schema.StringAttribute{
-				Optional: true,
-				Computed: true,
+				Optional:    true,
+				Computed:    true,
 				Description: SloConfigDescOperator,
 				Validators: []validator.String{
 					stringvalidator.OneOf(
@@ -857,7 +858,6 @@ func (r *sloConfigResource) mapIndicatorFromState(indicatorModel IndicatorModel)
 		return r.mapEventBasedSaturationIndicator(indicatorModel.EventBasedSaturationIndicatorModel)
 	}
 
-
 	var diags diag.Diagnostics
 	diags.AddError(SloConfigErrMissingIndicator, SloConfigErrExactlyOneIndicator)
 	return restapi.SloIndicator{}, diags
@@ -989,7 +989,7 @@ func (r *sloConfigResource) mapCustomIndicator(model *CustomIndicatorModel) (res
 func (r *sloConfigResource) mapTimeBasedSaturationIndicator(model *TimeBasedSaturationIndicatorModel) (restapi.SloIndicator, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	if model.Threshold.IsNull() || model.Threshold.IsUnknown(){
+	if model.Threshold.IsNull() || model.Threshold.IsUnknown() {
 		diags.AddError(SloConfigErrTimeBasedSaturationRequired, SloConfigErrTimeBasedSaturationRequiredMsg)
 		return restapi.SloIndicator{}, diags
 	}
@@ -1392,7 +1392,7 @@ func (r *sloConfigResource) mapIndicatorToState(apiObject *restapi.SloConfig, sl
 
 	case indicator.Type == SloConfigAPIIndicatorMeasurementTypeTimeBased && indicator.Blueprint == SloConfigAPIIndicatorBlueprintSaturation:
 		indicatorModel.TimeBasedSaturationIndicatorModel = r.createTimeBasedSaturationModel(indicator)
-	
+
 	case indicator.Type == SloConfigAPIIndicatorMeasurementTypeEventBased && indicator.Blueprint == SloConfigAPIIndicatorBlueprintSaturation:
 		indicatorModel.EventBasedSaturationIndicatorModel = r.createEventBasedSaturationModel(indicator)
 
@@ -1405,23 +1405,35 @@ func (r *sloConfigResource) mapIndicatorToState(apiObject *restapi.SloConfig, sl
 
 // createTimeBasedLatencyModel creates time-based latency indicator model
 func (r *sloConfigResource) createTimeBasedLatencyModel(indicator restapi.SloIndicator) *TimeBasedLatencyIndicatorModel {
+	// Round to 2 decimal places to avoid floating-point precision issues
+	formatted := strconv.FormatFloat(indicator.Threshold, 'f', 2, 64)
+	parsed, _ := strconv.ParseFloat(formatted, 64)
+
 	return &TimeBasedLatencyIndicatorModel{
-		Threshold:   types.Float64Value(indicator.Threshold),
+		Threshold:   types.Float64Value(parsed),
 		Aggregation: util.SetStringPointerToState(indicator.Aggregation),
 	}
 }
 
 // createEventBasedLatencyModel creates event-based latency indicator model
 func (r *sloConfigResource) createEventBasedLatencyModel(indicator restapi.SloIndicator) *EventBasedLatencyIndicatorModel {
+	// Round to 2 decimal places to avoid floating-point precision issues
+	formatted := strconv.FormatFloat(indicator.Threshold, 'f', 2, 64)
+	parsed, _ := strconv.ParseFloat(formatted, 64)
+
 	return &EventBasedLatencyIndicatorModel{
-		Threshold: types.Float64Value(indicator.Threshold),
+		Threshold: types.Float64Value(parsed),
 	}
 }
 
 // createTimeBasedAvailabilityModel creates time-based availability indicator model
 func (r *sloConfigResource) createTimeBasedAvailabilityModel(indicator restapi.SloIndicator) *TimeBasedAvailabilityIndicatorModel {
+	// Round to 2 decimal places to avoid floating-point precision issues
+	formatted := strconv.FormatFloat(indicator.Threshold, 'f', 2, 64)
+	parsed, _ := strconv.ParseFloat(formatted, 64)
+
 	return &TimeBasedAvailabilityIndicatorModel{
-		Threshold:   types.Float64Value(indicator.Threshold),
+		Threshold:   types.Float64Value(parsed),
 		Aggregation: util.SetStringPointerToState(indicator.Aggregation),
 	}
 }
@@ -1433,9 +1445,13 @@ func (r *sloConfigResource) createEventBasedAvailabilityModel() *EventBasedAvail
 
 // createTrafficModel creates traffic indicator model
 func (r *sloConfigResource) createTrafficModel(indicator restapi.SloIndicator, existingVal *IndicatorModel) *TrafficIndicatorModel {
+	// Round to 2 decimal places to avoid floating-point precision issues
+	formatted := strconv.FormatFloat(indicator.Threshold, 'f', 2, 64)
+	parsed, _ := strconv.ParseFloat(formatted, 64)
+
 	trafficIndicatorModel := &TrafficIndicatorModel{
 		TrafficType: util.SetStringPointerToState(indicator.TrafficType),
-		Threshold:   types.Float64Value(indicator.Threshold),
+		Threshold:   types.Float64Value(parsed),
 	}
 	if existingVal == nil {
 		trafficIndicatorModel.Operator = util.SetStringPointerToState(indicator.Operator)
@@ -1465,9 +1481,13 @@ func (r *sloConfigResource) createCustomModel(indicator restapi.SloIndicator) (*
 
 // createTimeBasedSaturationModel creates saturation indicator model
 func (r *sloConfigResource) createTimeBasedSaturationModel(indicator restapi.SloIndicator) *TimeBasedSaturationIndicatorModel {
+	// Round to 2 decimal places to avoid floating-point precision issues
+	formatted := strconv.FormatFloat(indicator.Threshold, 'f', 2, 64)
+	parsed, _ := strconv.ParseFloat(formatted, 64)
+
 	return &TimeBasedSaturationIndicatorModel{
 		MetricName:  util.SetStringPointerToState(indicator.MetricName),
-		Threshold:   types.Float64Value(indicator.Threshold),
+		Threshold:   types.Float64Value(parsed),
 		Aggregation: util.SetStringPointerToState(indicator.Aggregation),
 		Operator:    util.SetStringPointerToState(indicator.Operator),
 	}
@@ -1475,10 +1495,14 @@ func (r *sloConfigResource) createTimeBasedSaturationModel(indicator restapi.Slo
 
 // createEventBasedSaturationModel creates saturation indicator model
 func (r *sloConfigResource) createEventBasedSaturationModel(indicator restapi.SloIndicator) *EventBasedSaturationIndicatorModel {
+	// Round to 2 decimal places to avoid floating-point precision issues
+	formatted := strconv.FormatFloat(indicator.Threshold, 'f', 2, 64)
+	parsed, _ := strconv.ParseFloat(formatted, 64)
+
 	return &EventBasedSaturationIndicatorModel{
-		MetricName:  util.SetStringPointerToState(indicator.MetricName),
-		Threshold:   types.Float64Value(indicator.Threshold),
-		Operator:    util.SetStringPointerToState(indicator.Operator),
+		MetricName: util.SetStringPointerToState(indicator.MetricName),
+		Threshold:  types.Float64Value(parsed),
+		Operator:   util.SetStringPointerToState(indicator.Operator),
 	}
 }
 
