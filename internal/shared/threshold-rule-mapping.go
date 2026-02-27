@@ -279,16 +279,9 @@ func MapThresholdRulePluginFromState(ctx context.Context, thresholdObj *Threshol
 	if thresholdObj.AdaptiveBaseline != nil {
 		adaptiveVal := thresholdObj.AdaptiveBaseline
 		seasonality := restapi.ThresholdSeasonality(adaptiveVal.Seasonality.ValueString())
-		// Round to 2 decimal places to avoid floating-point precision issues
-		deviationFactorVal := adaptiveVal.DeviationFactor.ValueFloat64()
-		formatted := strconv.FormatFloat(deviationFactorVal, 'f', 2, 64)
-		parsed, _ := strconv.ParseFloat(formatted, 64)
-		deviationFactor := float32(parsed)
-
-		adaptabilityVal := adaptiveVal.Adaptability.ValueFloat64()
-		formattedAdapt := strconv.FormatFloat(adaptabilityVal, 'f', 2, 64)
-		parsedAdapt, _ := strconv.ParseFloat(formattedAdapt, 64)
-		adaptability := float32(parsedAdapt)
+		deviationFactor := float32(util.RoundFloat64To2Decimals(adaptiveVal.DeviationFactor.ValueFloat64()))
+		adaptability := float32(util.RoundFloat64To2Decimals(adaptiveVal.Adaptability.ValueFloat64()))
+		// Note: Operator field is currently not used by the API but kept for future compatibility
 		//operator := util.SetStringPointerFromState(adaptiveVal.Operator)
 		return &restapi.ThresholdRule{
 			Type:            "adaptiveBaseline",
@@ -365,16 +358,9 @@ func MapThresholdRuleAllPluginFromState(ctx context.Context, thresholdObj *Thres
 
 		adaptiveVal := thresholdObj.AdaptiveBaseline
 		seasonality := restapi.ThresholdSeasonality(adaptiveVal.Seasonality.ValueString())
-		// Round to 2 decimal places to avoid floating-point precision issues
-		deviationFactorVal := adaptiveVal.DeviationFactor.ValueFloat64()
-		formatted := strconv.FormatFloat(deviationFactorVal, 'f', 2, 64)
-		parsed, _ := strconv.ParseFloat(formatted, 64)
-		deviationFactor := float32(parsed)
-
-		adaptabilityVal := adaptiveVal.Adaptability.ValueFloat64()
-		formattedAdapt := strconv.FormatFloat(adaptabilityVal, 'f', 2, 64)
-		parsedAdapt, _ := strconv.ParseFloat(formattedAdapt, 64)
-		adaptability := float32(parsedAdapt)
+		deviationFactor := float32(util.RoundFloat64To2Decimals(adaptiveVal.DeviationFactor.ValueFloat64()))
+		adaptability := float32(util.RoundFloat64To2Decimals(adaptiveVal.Adaptability.ValueFloat64()))
+		// Note: Operator field is currently not used by the API but kept for future compatibility
 		//operator := util.SetStringPointerFromState(adaptiveVal.Operator)
 		return &restapi.ThresholdRule{
 			Type:            "adaptiveBaseline",
@@ -389,13 +375,10 @@ func MapThresholdRuleAllPluginFromState(ctx context.Context, thresholdObj *Thres
 	if thresholdObj.HistoricBaseline != nil {
 
 		baselineVal := thresholdObj.HistoricBaseline
+		// Note: Operator field is currently not used by the API but kept for future compatibility
 		//operator := util.SetStringPointerFromState(baselineVal.Operator)
 		seasonality := restapi.ThresholdSeasonality(baselineVal.Seasonality.ValueString())
-		// Round to 2 decimal places to avoid floating-point precision issues
-		deviationFactorVal := baselineVal.Deviation.ValueFloat64()
-		formatted := strconv.FormatFloat(deviationFactorVal, 'f', 2, 64)
-		parsed, _ := strconv.ParseFloat(formatted, 64)
-		deviationFactor := float32(parsed)
+		deviationFactor := float32(util.RoundFloat64To2Decimals(baselineVal.Deviation.ValueFloat64()))
 
 		// Convert types.List to [][]float64
 		var baseline *[][]float64

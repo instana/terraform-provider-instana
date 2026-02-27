@@ -5,19 +5,19 @@ const MobileAlertConfigResourcePath = EventSettingsBasePath + "/mobile-app-alert
 
 // MobileAlertConfig is the representation of a mobile app alert configuration in Instana
 type MobileAlertConfig struct {
-	ID                    string                             `json:"id"`
-	Name                  string                             `json:"name"`
-	Description           string                             `json:"description"`
-	MobileAppID           string                             `json:"mobileAppId"`
-	Triggering            bool                               `json:"triggering"`
-	Enabled               *bool                              `json:"enabled,omitempty"`
-	TagFilterExpression   *TagFilter                         `json:"tagFilterExpression"`
-	AlertChannels         map[string][]string                `json:"alertChannels,omitempty"`
-	Granularity           Granularity                        `json:"granularity"`
-	GracePeriod           *int64                             `json:"gracePeriod,omitempty"`
-	CustomerPayloadFields []CustomPayloadField[any]          `json:"customPayloadFields"`
-	Rules                 []MobileAppAlertRuleWithThresholds `json:"rules,omitempty"`
-	TimeThreshold         *MobileAppTimeThreshold            `json:"timeThreshold"`
+	ID                  string                             `json:"id"`
+	Name                string                             `json:"name"`
+	Description         string                             `json:"description"`
+	MobileAppID         string                             `json:"mobileAppId"`
+	Triggering          bool                               `json:"triggering"`
+	Enabled             *bool                              `json:"enabled,omitempty"`
+	TagFilterExpression *TagFilter                         `json:"tagFilterExpression"`
+	AlertChannels       map[string][]string                `json:"alertChannels,omitempty"`
+	Granularity         Granularity                        `json:"granularity"`
+	GracePeriod         *int64                             `json:"gracePeriod,omitempty"`
+	CustomPayloadFields []CustomPayloadField[any]          `json:"customPayloadFields"`
+	Rules               []MobileAppAlertRuleWithThresholds `json:"rules,omitempty"`
+	TimeThreshold       *MobileAppTimeThreshold            `json:"timeThreshold"`
 }
 
 // GetIDForResourcePath implementation of the interface InstanaDataObject
@@ -25,14 +25,14 @@ func (m *MobileAlertConfig) GetIDForResourcePath() string {
 	return m.ID
 }
 
-// GetCustomerPayloadFields implementation of the interface customPayloadFieldsAwareInstanaDataObject
-func (m *MobileAlertConfig) GetCustomerPayloadFields() []CustomPayloadField[any] {
-	return m.CustomerPayloadFields
+// GetCustomPayloadFields implementation of the interface customPayloadFieldsAwareInstanaDataObject
+func (m *MobileAlertConfig) GetCustomPayloadFields() []CustomPayloadField[any] {
+	return m.CustomPayloadFields
 }
 
-// SetCustomerPayloadFields implementation of the interface customPayloadFieldsAwareInstanaDataObject
-func (m *MobileAlertConfig) SetCustomerPayloadFields(fields []CustomPayloadField[any]) {
-	m.CustomerPayloadFields = fields
+// SetCustomPayloadFields implementation of the interface customPayloadFieldsAwareInstanaDataObject
+func (m *MobileAlertConfig) SetCustomPayloadFields(fields []CustomPayloadField[any]) {
+	m.CustomPayloadFields = fields
 }
 
 // MobileAppAlertRule represents a mobile app alert rule

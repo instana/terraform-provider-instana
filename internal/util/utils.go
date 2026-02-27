@@ -3,7 +3,7 @@ package util
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
+	"math"
 
 	"github.com/google/go-cmp/cmp"
 
@@ -13,6 +13,29 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rs/xid"
 )
+
+// DecimalPrecisionMultiplier is used for rounding floats to 2 decimal places
+const DecimalPrecisionMultiplier = 100
+
+// RoundFloat64To2Decimals rounds a float64 value to 2 decimal places
+// This is more efficient than string formatting and parsing
+func RoundFloat64To2Decimals(value float64) float64 {
+	return math.Round(value*DecimalPrecisionMultiplier) / DecimalPrecisionMultiplier
+}
+
+// RoundFloat32To2Decimals rounds a float32 value to 2 decimal places and returns float32
+func RoundFloat32To2Decimals(value float32) float32 {
+	return float32(math.Round(float64(value)*DecimalPrecisionMultiplier) / DecimalPrecisionMultiplier)
+}
+
+// ConvertInt64ToInt32WithValidation converts int64 to int32 with overflow checking
+// Returns the converted value and a boolean indicating if the conversion was successful
+func ConvertInt64ToInt32WithValidation(value int64) (int32, bool) {
+	if value > math.MaxInt32 || value < math.MinInt32 {
+		return 0, false
+	}
+	return int32(value), true
+}
 
 // RandomID generates a random ID for a resource
 func RandomID() string {
@@ -276,16 +299,9 @@ func SetFloat32PointerToState[T numericPtr](i T) types.Float32 {
 	case *int64:
 		return types.Float32Value(float32(*v))
 	case *float32:
-		// Round to 2 decimal places to avoid floating-point precision issues
-		// Format to 2 decimal places and parse back to ensure exact precision
-		formatted := strconv.FormatFloat(float64(*v), 'f', 2, 32)
-		parsed, _ := strconv.ParseFloat(formatted, 32)
-		return types.Float32Value(float32(parsed))
+		return types.Float32Value(RoundFloat32To2Decimals(*v))
 	case *float64:
-		// Round to 2 decimal places to avoid floating-point precision issues
-		formatted := strconv.FormatFloat(*v, 'f', 2, 64)
-		parsed, _ := strconv.ParseFloat(formatted, 32)
-		return types.Float32Value(float32(parsed))
+		return types.Float32Value(float32(RoundFloat64To2Decimals(*v)))
 	default:
 		// unreachable because of the constraint, but keep safe fallback
 		return types.Float32Null()
@@ -304,16 +320,9 @@ func SetFloat64PointerToState[T numericPtr](i T) types.Float64 {
 	case *int64:
 		return types.Float64Value(float64(*v))
 	case *float32:
-		// Round to 2 decimal places to avoid floating-point precision issues
-		// Convert float32 to float64 and format with bitSize=64 to avoid float32 precision artifacts
-		formatted := strconv.FormatFloat(float64(*v), 'f', 2, 64)
-		parsed, _ := strconv.ParseFloat(formatted, 64)
-		return types.Float64Value(parsed)
+		return types.Float64Value(RoundFloat64To2Decimals(float64(*v)))
 	case *float64:
-		// Round to 2 decimal places to avoid floating-point precision issues
-		formatted := strconv.FormatFloat(*v, 'f', 2, 64)
-		parsed, _ := strconv.ParseFloat(formatted, 64)
-		return types.Float64Value(parsed)
+		return types.Float64Value(RoundFloat64To2Decimals(*v))
 	default:
 		// unreachable because of the constraint, but keep safe fallback
 		return types.Float64Null()

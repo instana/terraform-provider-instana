@@ -3,7 +3,6 @@ package mobilealertconfig
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/float64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -248,18 +247,22 @@ type mobileAlertConfigResource struct {
 	metaData resourcehandle.ResourceMetaData
 }
 
+// MetaData returns the resource metadata including schema and resource name
 func (r *mobileAlertConfigResource) MetaData() *resourcehandle.ResourceMetaData {
 	return &r.metaData
 }
 
+// GetRestResource returns the REST resource for mobile alert configurations from the Instana API
 func (r *mobileAlertConfigResource) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.MobileAlertConfig] {
 	return api.MobileAlertConfig()
 }
 
+// SetComputedFields sets computed fields in the plan (currently no computed fields need to be set)
 func (r *mobileAlertConfigResource) SetComputedFields(_ context.Context, _ *tfsdk.Plan) diag.Diagnostics {
 	return nil
 }
 
+// MapStateToDataObject converts Terraform state/plan to API data object for mobile alert configuration
 func (r *mobileAlertConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.MobileAlertConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var model MobileAlertConfigModel
@@ -319,19 +322,19 @@ func (r *mobileAlertConfigResource) MapStateToDataObject(ctx context.Context, pl
 
 	// Create API object
 	return &restapi.MobileAlertConfig{
-		ID:                    model.ID.ValueString(),
-		Name:                  model.Name.ValueString(),
-		Description:           model.Description.ValueString(),
-		MobileAppID:           model.MobileAppID.ValueString(),
-		Triggering:            model.Triggering.ValueBool(),
-		Enabled:               util.SetBoolPointerFromState(model.Enabled),
-		TagFilterExpression:   tagFilter,
-		AlertChannels:         alertChannels,
-		Granularity:           restapi.Granularity(model.Granularity.ValueInt64()),
-		GracePeriod:           gracePeriod,
-		CustomerPayloadFields: customPayloadFields,
-		Rules:                 rules,
-		TimeThreshold:         timeThreshold,
+		ID:                  model.ID.ValueString(),
+		Name:                model.Name.ValueString(),
+		Description:         model.Description.ValueString(),
+		MobileAppID:         model.MobileAppID.ValueString(),
+		Triggering:          model.Triggering.ValueBool(),
+		Enabled:             util.SetBoolPointerFromState(model.Enabled),
+		TagFilterExpression: tagFilter,
+		AlertChannels:       alertChannels,
+		Granularity:         restapi.Granularity(model.Granularity.ValueInt64()),
+		GracePeriod:         gracePeriod,
+		CustomPayloadFields: customPayloadFields,
+		Rules:               rules,
+		TimeThreshold:       timeThreshold,
 	}, diags
 }
 
@@ -562,11 +565,8 @@ func (r *mobileAlertConfigResource) mapOptionalFloat64Field(field types.Float64)
 	if field.IsNull() || field.IsUnknown() {
 		return nil
 	}
-	// Round to 2 decimal places to avoid floating-point precision issues
-	value := field.ValueFloat64()
-	formatted := strconv.FormatFloat(value, 'f', 2, 64)
-	parsed, _ := strconv.ParseFloat(formatted, 64)
-	return &parsed
+	value := util.RoundFloat64To2Decimals(field.ValueFloat64())
+	return &value
 }
 
 // mapOptionalInt64ToInt32Field extracts an optional int64 field and converts it to int32, returning nil if null or unknown
@@ -574,10 +574,15 @@ func (r *mobileAlertConfigResource) mapOptionalInt64ToInt32Field(field types.Int
 	if field.IsNull() || field.IsUnknown() {
 		return nil
 	}
-	value := int32(field.ValueInt64())
+	value, ok := util.ConvertInt64ToInt32WithValidation(field.ValueInt64())
+	if !ok {
+		// Value exceeds int32 range, return nil to avoid overflow
+		return nil
+	}
 	return &value
 }
 
+// UpdateState updates the Terraform state with values from the API response
 func (r *mobileAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *restapi.MobileAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var model MobileAlertConfigModel
@@ -685,7 +690,7 @@ func (r *mobileAlertConfigResource) mapAlertChannelsToState(ctx context.Context,
 func (r *mobileAlertConfigResource) mapCustomPayloadFieldsToState(ctx context.Context, model *MobileAlertConfigModel, apiObject *restapi.MobileAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	customPayloadFieldsList, payloadDiags := shared.CustomPayloadFieldsToTerraform(ctx, apiObject.CustomerPayloadFields)
+	customPayloadFieldsList, payloadDiags := shared.CustomPayloadFieldsToTerraform(ctx, apiObject.CustomPayloadFields)
 	diags.Append(payloadDiags...)
 	if !diags.HasError() {
 		model.CustomPayloadFields = customPayloadFieldsList
