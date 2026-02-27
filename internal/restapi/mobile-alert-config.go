@@ -25,13 +25,13 @@ func (m *MobileAlertConfig) GetIDForResourcePath() string {
 	return m.ID
 }
 
-// GetCustomPayloadFields implementation of the interface customPayloadFieldsAwareInstanaDataObject
-func (m *MobileAlertConfig) GetCustomPayloadFields() []CustomPayloadField[any] {
+// GetCustomerPayloadFields implementation of the interface customPayloadFieldsAwareInstanaDataObject
+func (m *MobileAlertConfig) GetCustomerPayloadFields() []CustomPayloadField[any] {
 	return m.CustomPayloadFields
 }
 
-// SetCustomPayloadFields implementation of the interface customPayloadFieldsAwareInstanaDataObject
-func (m *MobileAlertConfig) SetCustomPayloadFields(fields []CustomPayloadField[any]) {
+// SetCustomerPayloadFields implementation of the interface customPayloadFieldsAwareInstanaDataObject
+func (m *MobileAlertConfig) SetCustomerPayloadFields(fields []CustomPayloadField[any]) {
 	m.CustomPayloadFields = fields
 }
 
