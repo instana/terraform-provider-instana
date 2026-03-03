@@ -44,5 +44,3 @@ type MaintenanceOccurrence struct {
 func (m *MaintenanceWindowConfig) GetIDForResourcePath() string {
 	return m.ID
 }
-
-// Made with Bob

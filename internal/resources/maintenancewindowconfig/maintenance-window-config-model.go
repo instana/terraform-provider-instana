@@ -26,5 +26,3 @@ type MaintenanceDurationModel struct {
 	Amount types.Int64  `tfsdk:"amount"`
 	Unit   types.String `tfsdk:"unit"`
 }
-
-// Made with Bob

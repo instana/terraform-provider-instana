@@ -77,5 +77,3 @@ var SupportedSchedulingTypes = []string{"ONE_TIME", "RECURRENT"}
 
 // Supported duration units
 var SupportedDurationUnits = []string{"MINUTES", "HOURS", "DAYS"}
-
-// Made with Bob

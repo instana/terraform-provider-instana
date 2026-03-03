@@ -374,5 +374,3 @@ func (r *maintenanceWindowConfigResource) mapSchedulingFromModel(ctx context.Con
 func (r *maintenanceWindowConfigResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
 	return nil
 }
-
-// Made with Bob

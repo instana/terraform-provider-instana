@@ -349,5 +349,3 @@ func TestGetStateUpgraders(t *testing.T) {
 	upgraders := resource.GetStateUpgraders(ctx)
 	assert.Nil(t, upgraders)
 }
-
-// Made with Bob
