@@ -30,6 +30,8 @@ resource.
   * Service Level Objective Config - `instana_slo_config`
   * Service Level Objective (SLO) Alert Config - `instana_slo_alert_config`
   * Service Level Indicator (SLI) Correction Config - `instana_slo_correction_config`
+* Maintenance
+  * Maintenance Window Config - `instana_maintenance_window_config`
 * Settings
   * API Tokens - `instana_api_token`
   * Groups - `instana_rbac_group`
