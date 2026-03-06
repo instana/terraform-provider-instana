@@ -24,11 +24,8 @@ resource "instana_maintenance_window_config" "deployment_window" {
       unit   = "HOURS"
     }
 
-    rrule       = null
-    timezone_id = null
   }
 
-  tag_filter_expression         = null
   tag_filter_expression_enabled = false
 }
 ```
@@ -51,11 +48,8 @@ resource "instana_maintenance_window_config" "quick_patch" {
       unit   = "MINUTES"
     }
 
-    rrule       = null
-    timezone_id = null
   }
 
-  tag_filter_expression         = null
   tag_filter_expression_enabled = false
 }
 ```
@@ -78,11 +72,8 @@ resource "instana_maintenance_window_config" "major_upgrade" {
       unit   = "DAYS"
     }
 
-    rrule       = null
-    timezone_id = null
   }
 
-  tag_filter_expression         = null
   tag_filter_expression_enabled = false
 }
 ```
@@ -105,8 +96,6 @@ resource "instana_maintenance_window_config" "synthetic_test_maintenance" {
       unit   = "HOURS"
     }
 
-    rrule       = null
-    timezone_id = null
   }
 
   tag_filter_expression         = "synthetic.testName@na EQUALS 'My Synthetic Test'"
@@ -135,7 +124,6 @@ resource "instana_maintenance_window_config" "monthly_friday_maintenance" {
     }
   }
 
-  tag_filter_expression         = null
   tag_filter_expression_enabled = false
 }
 ```
@@ -161,7 +149,6 @@ resource "instana_maintenance_window_config" "monthly_thursday_limited" {
     }
   }
 
-  tag_filter_expression         = null
   tag_filter_expression_enabled = false
 }
 ```
@@ -187,7 +174,6 @@ resource "instana_maintenance_window_config" "weekly_maintenance" {
     }
   }
 
-  tag_filter_expression         = null
   tag_filter_expression_enabled = false
 }
 ```
@@ -210,11 +196,8 @@ resource "instana_maintenance_window_config" "app_maintenance" {
       unit   = "DAYS"
     }
 
-    rrule       = null
-    timezone_id = null
   }
 
-  tag_filter_expression         = null
   tag_filter_expression_enabled = false
 }
 ```
@@ -236,12 +219,8 @@ resource "instana_maintenance_window_config" "deployment_maintenance" {
       amount = 14
       unit   = "MINUTES"
     }
-
-    rrule       = null
-    timezone_id = null
   }
 
-  tag_filter_expression         = null
   tag_filter_expression_enabled = false
 }
 ```
