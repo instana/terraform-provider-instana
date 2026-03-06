@@ -141,3 +141,8 @@ func (m *MockInstanaAPI) Users() restapi.ReadOnlyRestResource[*restapi.User] {
 func (m *MockInstanaAPI) LogAlertConfig() restapi.RestResource[*restapi.LogAlertConfig] {
 	return nil
 }
+
+// MobileAlertConfig mock implementation
+func (m *MockInstanaAPI) MobileAlertConfig() restapi.RestResource[*restapi.MobileAlertConfig] {
+	return nil
+}

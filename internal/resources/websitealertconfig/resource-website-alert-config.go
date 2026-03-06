@@ -3,6 +3,7 @@ package websitealertconfig
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -352,7 +353,7 @@ func (r *websiteAlertConfigResource) MapStateToDataObject(ctx context.Context, p
 		Description:           model.Description.ValueString(),
 		Severity:              nil,
 		Triggering:            model.Triggering.ValueBool(),
-		Enabled:               extractEnabledFlag(model.Enabled),
+		Enabled:               util.SetBoolPointerFromState(model.Enabled),
 		WebsiteID:             model.WebsiteID.ValueString(),
 		TagFilterExpression:   tagFilter,
 		AlertChannelIDs:       alertChannelIDs,
@@ -640,8 +641,11 @@ func (r *websiteAlertConfigResource) mapOptionalFloat64Field(field types.Float64
 	if field.IsNull() || field.IsUnknown() {
 		return nil
 	}
+	// Round to 2 decimal places to avoid floating-point precision issues
 	value := field.ValueFloat64()
-	return &value
+	formatted := strconv.FormatFloat(value, 'f', 2, 64)
+	parsed, _ := strconv.ParseFloat(formatted, 64)
+	return &parsed
 }
 
 // mapOptionalInt64ToInt32Field extracts an optional int64 field and converts it to int32, returning nil if null or unknown.
@@ -848,13 +852,4 @@ func (r *websiteAlertConfigResource) GetStateUpgraders(ctx context.Context) map[
 	return map[int64]resource.StateUpgrader{
 		1: resourcehandle.CreateStateUpgraderForVersion(1),
 	}
-}
-
-// extractEnabled converts types.Bool to *bool for API, handling null/unknown values
-func extractEnabledFlag(v types.Bool) *bool {
-	if v.IsNull() || v.IsUnknown() {
-		return nil
-	}
-	val := v.ValueBool()
-	return &val
 }

@@ -4,12 +4,12 @@ import (
 	"context"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/shared"
+	"github.com/instana/terraform-provider-instana/internal/util"
 	"github.com/instana/terraform-provider-instana/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -416,22 +416,6 @@ func TestMapStateToDataObject_MissingTimeThreshold(t *testing.T) {
 }
 
 // Helper functions
-
-func createMockState(t *testing.T, model WebsiteAlertConfigModel) tfsdk.State {
-	state := tfsdk.State{
-		Schema: getTestSchema(),
-	}
-
-	diags := state.Set(context.Background(), model)
-	require.False(t, diags.HasError(), "Failed to set state: %v", diags)
-
-	return state
-}
-
-func getTestSchema() schema.Schema {
-	resource := NewWebsiteAlertConfigResourceHandle()
-	return resource.MetaData().Schema
-}
 
 func TestMapStateToDataObject_InvalidSeverity(t *testing.T) {
 	resource := &websiteAlertConfigResource{
@@ -1074,7 +1058,7 @@ func TestExtractEnabledFlag(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := extractEnabledFlag(tt.input)
+			result := util.SetBoolPointerFromState(tt.input)
 			if tt.expected == nil {
 				assert.Nil(t, result, "Expected nil for %s", tt.name)
 			} else {

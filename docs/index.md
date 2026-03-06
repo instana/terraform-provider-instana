@@ -24,9 +24,12 @@ resource.
   * Infrastructure Alert Config - `instana_infra_alert_config`
 * Log monitoring
   * Log Alert Config - `instana_log_alert_config`
+* Mobile App Monitoring
+  * Mobile Alert Config - `instana_mobile_alert_config`
 * Service Levels
   * Service Level Objective Config - `instana_slo_config`
   * Service Level Objective (SLO) Alert Config - `instana_slo_alert_config`
+  * Service Level Indicator (SLI) Correction Config - `instana_slo_correction_config`
 * Settings
   * API Tokens - `instana_api_token`
   * Groups - `instana_rbac_group`
@@ -50,6 +53,8 @@ resource.
   * Builtin Event Specifications - `instana_builtin_event_spec`
   * Custom Event Specifications - `instana_custom_event_spec`
 * Host Agent - `instana_host_agents`
+* Settings
+  * User - `instana_user`
 * Synthetic Settings
   * Synthetic Location - `instana_synthetic_location`
 

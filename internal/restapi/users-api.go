@@ -17,5 +17,3 @@ type User struct {
 func (u *User) GetIDForResourcePath() string {
 	return u.ID
 }
-
-// Made with Bob
