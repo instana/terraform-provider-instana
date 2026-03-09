@@ -7,7 +7,7 @@ package mocks
 import (
 	reflect "reflect"
 
-	restapi "github.com/instana/instana-go-client/instana"
+	instana "github.com/instana/instana-go-client/instana"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -49,18 +49,18 @@ func (mr *MockInstanaDataObjectMockRecorder) GetIDForResourcePath() *gomock.Call
 }
 
 // MockRestResource is a mock of RestResource interface.
-type MockRestResource[T restapi.InstanaDataObject] struct {
+type MockRestResource[T instana.InstanaDataObject] struct {
 	ctrl     *gomock.Controller
 	recorder *MockRestResourceMockRecorder[T]
 }
 
 // MockRestResourceMockRecorder is the mock recorder for MockRestResource.
-type MockRestResourceMockRecorder[T restapi.InstanaDataObject] struct {
+type MockRestResourceMockRecorder[T instana.InstanaDataObject] struct {
 	mock *MockRestResource[T]
 }
 
 // NewMockRestResource creates a new mock instance.
-func NewMockRestResource[T restapi.InstanaDataObject](ctrl *gomock.Controller) *MockRestResource[T] {
+func NewMockRestResource[T instana.InstanaDataObject](ctrl *gomock.Controller) *MockRestResource[T] {
 	mock := &MockRestResource[T]{ctrl: ctrl}
 	mock.recorder = &MockRestResourceMockRecorder[T]{mock}
 	return mock
@@ -160,18 +160,18 @@ func (mr *MockRestResourceMockRecorder[T]) Update(data interface{}) *gomock.Call
 }
 
 // MockReadOnlyRestResource is a mock of ReadOnlyRestResource interface.
-type MockReadOnlyRestResource[T restapi.InstanaDataObject] struct {
+type MockReadOnlyRestResource[T instana.InstanaDataObject] struct {
 	ctrl     *gomock.Controller
 	recorder *MockReadOnlyRestResourceMockRecorder[T]
 }
 
 // MockReadOnlyRestResourceMockRecorder is the mock recorder for MockReadOnlyRestResource.
-type MockReadOnlyRestResourceMockRecorder[T restapi.InstanaDataObject] struct {
+type MockReadOnlyRestResourceMockRecorder[T instana.InstanaDataObject] struct {
 	mock *MockReadOnlyRestResource[T]
 }
 
 // NewMockReadOnlyRestResource creates a new mock instance.
-func NewMockReadOnlyRestResource[T restapi.InstanaDataObject](ctrl *gomock.Controller) *MockReadOnlyRestResource[T] {
+func NewMockReadOnlyRestResource[T instana.InstanaDataObject](ctrl *gomock.Controller) *MockReadOnlyRestResource[T] {
 	mock := &MockReadOnlyRestResource[T]{ctrl: ctrl}
 	mock.recorder = &MockReadOnlyRestResourceMockRecorder[T]{mock}
 	return mock

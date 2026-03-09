@@ -148,11 +148,11 @@ func (m *MockInstanaAPI) MobileAppConfig() restapi.RestResource[*restapi.MobileA
 }
 
 // MobileAlertConfig mock implementation
-func (m *MockInstanaAPI) MobileAlertConfig() restapi.RestResource[*restapi.MobileAlertConfig] {
+func (m *MockInstanaAPI) MobileAlertConfig() instana.RestResource[*instana.MobileAlertConfig] {
 	return nil
 }
 
 // MaintenanceWindowConfigs mock implementation
-func (m *MockInstanaAPI) MaintenanceWindowConfigs() restapi.RestResource[*restapi.MaintenanceWindowConfig] {
+func (m *MockInstanaAPI) MaintenanceWindowConfigs() instana.RestResource[*instana.MaintenanceWindowConfig] {
 	return nil
 }

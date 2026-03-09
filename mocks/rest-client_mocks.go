@@ -7,7 +7,7 @@ package mocks
 import (
 	reflect "reflect"
 
-	restapi "github.com/instana/instana-go-client/instana"
+	instana "github.com/instana/instana-go-client/instana"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -94,7 +94,7 @@ func (mr *MockRestClientMockRecorder) GetOne(id, resourcePath interface{}) *gomo
 }
 
 // Post mocks base method.
-func (m *MockRestClient) Post(data restapi.InstanaDataObject, resourcePath string) ([]byte, error) {
+func (m *MockRestClient) Post(data instana.InstanaDataObject, resourcePath string) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Post", data, resourcePath)
 	ret0, _ := ret[0].([]byte)
@@ -124,7 +124,7 @@ func (mr *MockRestClientMockRecorder) PostByQuery(resourcePath, queryParams inte
 }
 
 // PostWithID mocks base method.
-func (m *MockRestClient) PostWithID(data restapi.InstanaDataObject, resourcePath string) ([]byte, error) {
+func (m *MockRestClient) PostWithID(data instana.InstanaDataObject, resourcePath string) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PostWithID", data, resourcePath)
 	ret0, _ := ret[0].([]byte)
@@ -139,7 +139,7 @@ func (mr *MockRestClientMockRecorder) PostWithID(data, resourcePath interface{})
 }
 
 // Put mocks base method.
-func (m *MockRestClient) Put(data restapi.InstanaDataObject, resourcePath string) ([]byte, error) {
+func (m *MockRestClient) Put(data instana.InstanaDataObject, resourcePath string) ([]byte, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Put", data, resourcePath)
 	ret0, _ := ret[0].([]byte)

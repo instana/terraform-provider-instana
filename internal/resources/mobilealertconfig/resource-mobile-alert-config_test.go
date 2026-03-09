@@ -8,8 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	instana "github.com/instana/instana-go-client/instana"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/instana/terraform-provider-instana/testutils"
 	"github.com/stretchr/testify/assert"
@@ -26,7 +26,7 @@ type mockMobileAlertAPI struct {
 	testutils.MockInstanaAPI
 }
 
-func (m *mockMobileAlertAPI) MobileAlertConfig() restapi.RestResource[*restapi.MobileAlertConfig] {
+func (m *mockMobileAlertAPI) MobileAlertConfig() instana.RestResource[*instana.MobileAlertConfig] {
 	return nil
 }
 
@@ -181,7 +181,7 @@ func TestMapStateToDataObject_BasicConfig(t *testing.T) {
 	assert.False(t, result.Triggering)
 	assert.NotNil(t, result.Enabled)
 	assert.True(t, *result.Enabled)
-	assert.Equal(t, restapi.Granularity(600000), result.Granularity)
+	assert.Equal(t, instana.Granularity(600000), result.Granularity)
 }
 
 func TestMapStateToDataObject_WithGracePeriod(t *testing.T) {
@@ -289,7 +289,7 @@ func TestMapStateToDataObject_WithRules(t *testing.T) {
 	ctx := context.Background()
 	resource := &mobileAlertConfigResource{}
 
-	aggregation := restapi.Aggregation("MEAN")
+	aggregation := instana.Aggregation("MEAN")
 	operator := "EQUALS"
 	value := "test-value"
 
@@ -476,25 +476,25 @@ func TestUpdateState_BasicConfig(t *testing.T) {
 	ctx := context.Background()
 	resource := &mobileAlertConfigResource{}
 
-	operator := restapi.LogicalOperatorType("AND")
-	data := &restapi.MobileAlertConfig{
+	operator := instana.LogicalOperatorType("AND")
+	data := &instana.MobileAlertConfig{
 		ID:          "test-id",
 		Name:        "Test Mobile Alert",
 		Description: "Test Description",
 		MobileAppID: "mobile-app-123",
 		Triggering:  false,
 		Granularity: 600000,
-		TagFilterExpression: &restapi.TagFilter{
+		TagFilterExpression: &instana.TagFilter{
 			Type:            "EXPRESSION",
 			LogicalOperator: &operator,
-			Elements:        []*restapi.TagFilter{},
+			Elements:        []*instana.TagFilter{},
 		},
-		TimeThreshold: &restapi.MobileAppTimeThreshold{
+		TimeThreshold: &instana.MobileAppTimeThreshold{
 			Type:       MobileAlertConfigTimeThresholdTypeViolationsInSequence,
 			TimeWindow: ptr(int64(600000)),
 		},
-		CustomPayloadFields: []restapi.CustomPayloadField[any]{},
-		Rules:                 []restapi.MobileAppAlertRuleWithThresholds{},
+		CustomPayloadFields: []instana.CustomPayloadField[any]{},
+		Rules:               []instana.MobileAppAlertRuleWithThresholds{},
 	}
 
 	state := &tfsdk.State{
@@ -520,9 +520,9 @@ func TestUpdateState_WithSeverity(t *testing.T) {
 	ctx := context.Background()
 	resource := &mobileAlertConfigResource{}
 
-	operator := restapi.LogicalOperatorType("AND")
+	operator := instana.LogicalOperatorType("AND")
 	enabled := true
-	data := &restapi.MobileAlertConfig{
+	data := &instana.MobileAlertConfig{
 		ID:          "test-id",
 		Name:        "Test Mobile Alert",
 		Description: "Test Description",
@@ -530,17 +530,17 @@ func TestUpdateState_WithSeverity(t *testing.T) {
 		Triggering:  false,
 		Enabled:     &enabled,
 		Granularity: 600000,
-		TagFilterExpression: &restapi.TagFilter{
+		TagFilterExpression: &instana.TagFilter{
 			Type:            "EXPRESSION",
 			LogicalOperator: &operator,
-			Elements:        []*restapi.TagFilter{},
+			Elements:        []*instana.TagFilter{},
 		},
-		TimeThreshold: &restapi.MobileAppTimeThreshold{
+		TimeThreshold: &instana.MobileAppTimeThreshold{
 			Type:       MobileAlertConfigTimeThresholdTypeViolationsInSequence,
 			TimeWindow: ptr(int64(600000)),
 		},
-		CustomPayloadFields: []restapi.CustomPayloadField[any]{},
-		Rules:                 []restapi.MobileAppAlertRuleWithThresholds{},
+		CustomPayloadFields: []instana.CustomPayloadField[any]{},
+		Rules:               []instana.MobileAppAlertRuleWithThresholds{},
 	}
 
 	state := &tfsdk.State{
@@ -560,8 +560,8 @@ func TestUpdateState_WithGracePeriod(t *testing.T) {
 	resource := &mobileAlertConfigResource{}
 
 	gracePeriod := int64(300000)
-	operator := restapi.LogicalOperatorType("AND")
-	data := &restapi.MobileAlertConfig{
+	operator := instana.LogicalOperatorType("AND")
+	data := &instana.MobileAlertConfig{
 		ID:          "test-id",
 		Name:        "Test Mobile Alert",
 		Description: "Test Description",
@@ -569,17 +569,17 @@ func TestUpdateState_WithGracePeriod(t *testing.T) {
 		GracePeriod: &gracePeriod,
 		Triggering:  false,
 		Granularity: 600000,
-		TagFilterExpression: &restapi.TagFilter{
+		TagFilterExpression: &instana.TagFilter{
 			Type:            "EXPRESSION",
 			LogicalOperator: &operator,
-			Elements:        []*restapi.TagFilter{},
+			Elements:        []*instana.TagFilter{},
 		},
-		TimeThreshold: &restapi.MobileAppTimeThreshold{
+		TimeThreshold: &instana.MobileAppTimeThreshold{
 			Type:       MobileAlertConfigTimeThresholdTypeViolationsInSequence,
 			TimeWindow: ptr(int64(600000)),
 		},
-		CustomPayloadFields: []restapi.CustomPayloadField[any]{},
-		Rules:                 []restapi.MobileAppAlertRuleWithThresholds{},
+		CustomPayloadFields: []instana.CustomPayloadField[any]{},
+		Rules:               []instana.MobileAppAlertRuleWithThresholds{},
 	}
 
 	state := &tfsdk.State{
@@ -601,8 +601,8 @@ func TestUpdateState_WithAlertChannels(t *testing.T) {
 	ctx := context.Background()
 	resource := &mobileAlertConfigResource{}
 
-	operator := restapi.LogicalOperatorType("AND")
-	data := &restapi.MobileAlertConfig{
+	operator := instana.LogicalOperatorType("AND")
+	data := &instana.MobileAlertConfig{
 		ID:          "test-id",
 		Name:        "Test Mobile Alert",
 		Description: "Test Description",
@@ -613,17 +613,17 @@ func TestUpdateState_WithAlertChannels(t *testing.T) {
 			"5":  {"channel-1", "channel-2"},
 			"10": {"channel-3"},
 		},
-		TagFilterExpression: &restapi.TagFilter{
+		TagFilterExpression: &instana.TagFilter{
 			Type:            "EXPRESSION",
 			LogicalOperator: &operator,
-			Elements:        []*restapi.TagFilter{},
+			Elements:        []*instana.TagFilter{},
 		},
-		TimeThreshold: &restapi.MobileAppTimeThreshold{
+		TimeThreshold: &instana.MobileAppTimeThreshold{
 			Type:       MobileAlertConfigTimeThresholdTypeViolationsInSequence,
 			TimeWindow: ptr(int64(600000)),
 		},
-		CustomPayloadFields: []restapi.CustomPayloadField[any]{},
-		Rules:                 []restapi.MobileAppAlertRuleWithThresholds{},
+		CustomPayloadFields: []instana.CustomPayloadField[any]{},
+		Rules:               []instana.MobileAppAlertRuleWithThresholds{},
 	}
 
 	state := &tfsdk.State{
@@ -644,21 +644,21 @@ func TestUpdateState_WithRules(t *testing.T) {
 	ctx := context.Background()
 	resource := &mobileAlertConfigResource{}
 
-	aggregation := restapi.Aggregation("MEAN")
+	aggregation := instana.Aggregation("MEAN")
 	operator := "EQUALS"
 	value := "test-value"
-	operatorLogical := restapi.LogicalOperatorType("AND")
+	operatorLogical := instana.LogicalOperatorType("AND")
 
-	data := &restapi.MobileAlertConfig{
+	data := &instana.MobileAlertConfig{
 		ID:          "test-id",
 		Name:        "Test Mobile Alert",
 		Description: "Test Description",
 		MobileAppID: "mobile-app-123",
 		Triggering:  false,
 		Granularity: 600000,
-		Rules: []restapi.MobileAppAlertRuleWithThresholds{
+		Rules: []instana.MobileAppAlertRuleWithThresholds{
 			{
-				Rule: &restapi.MobileAppAlertRule{
+				Rule: &instana.MobileAppAlertRule{
 					AlertType:   "httpError",
 					MetricName:  "errors",
 					Aggregation: &aggregation,
@@ -666,13 +666,13 @@ func TestUpdateState_WithRules(t *testing.T) {
 					Value:       &value,
 				},
 				ThresholdOperator: ">",
-				Thresholds: map[restapi.AlertSeverity]restapi.ThresholdRule{
-					restapi.WarningSeverity: {
+				Thresholds: map[instana.AlertSeverity]instana.ThresholdRule{
+					instana.WarningSeverity: {
 						Type:     "staticThreshold",
 						Operator: ptr(">"),
 						Value:    ptr(100.0),
 					},
-					restapi.CriticalSeverity: {
+					instana.CriticalSeverity: {
 						Type:     "staticThreshold",
 						Operator: ptr(">"),
 						Value:    ptr(200.0),
@@ -680,16 +680,16 @@ func TestUpdateState_WithRules(t *testing.T) {
 				},
 			},
 		},
-		TagFilterExpression: &restapi.TagFilter{
+		TagFilterExpression: &instana.TagFilter{
 			Type:            "EXPRESSION",
 			LogicalOperator: &operatorLogical,
-			Elements:        []*restapi.TagFilter{},
+			Elements:        []*instana.TagFilter{},
 		},
-		TimeThreshold: &restapi.MobileAppTimeThreshold{
+		TimeThreshold: &instana.MobileAppTimeThreshold{
 			Type:       MobileAlertConfigTimeThresholdTypeViolationsInSequence,
 			TimeWindow: ptr(int64(600000)),
 		},
-		CustomPayloadFields: []restapi.CustomPayloadField[any]{},
+		CustomPayloadFields: []instana.CustomPayloadField[any]{},
 	}
 
 	state := &tfsdk.State{
@@ -712,12 +712,12 @@ func TestUpdateState_WithRules(t *testing.T) {
 func TestUpdateState_TimeThresholdTypes(t *testing.T) {
 	tests := []struct {
 		name          string
-		timeThreshold *restapi.MobileAppTimeThreshold
+		timeThreshold *instana.MobileAppTimeThreshold
 		expectedType  string
 	}{
 		{
 			name: "violations_in_sequence",
-			timeThreshold: &restapi.MobileAppTimeThreshold{
+			timeThreshold: &instana.MobileAppTimeThreshold{
 				Type:       MobileAlertConfigTimeThresholdTypeViolationsInSequence,
 				TimeWindow: ptr(int64(600000)),
 			},
@@ -725,7 +725,7 @@ func TestUpdateState_TimeThresholdTypes(t *testing.T) {
 		},
 		{
 			name: "user_impact_of_violations_in_sequence",
-			timeThreshold: &restapi.MobileAppTimeThreshold{
+			timeThreshold: &instana.MobileAppTimeThreshold{
 				Type:           MobileAlertConfigTimeThresholdTypeUserImpactOfViolationsInSequence,
 				TimeWindow:     ptr(int64(600000)),
 				Users:          ptr(int32(100)),
@@ -735,7 +735,7 @@ func TestUpdateState_TimeThresholdTypes(t *testing.T) {
 		},
 		{
 			name: "violations_in_period",
-			timeThreshold: &restapi.MobileAppTimeThreshold{
+			timeThreshold: &instana.MobileAppTimeThreshold{
 				Type:       MobileAlertConfigTimeThresholdTypeViolationsInPeriod,
 				TimeWindow: ptr(int64(600000)),
 				Violations: ptr(int32(5)),
@@ -749,22 +749,22 @@ func TestUpdateState_TimeThresholdTypes(t *testing.T) {
 			ctx := context.Background()
 			resource := &mobileAlertConfigResource{}
 
-			operator := restapi.LogicalOperatorType("AND")
-			data := &restapi.MobileAlertConfig{
+			operator := instana.LogicalOperatorType("AND")
+			data := &instana.MobileAlertConfig{
 				ID:          "test-id",
 				Name:        "Test Mobile Alert",
 				Description: "Test Description",
 				MobileAppID: "mobile-app-123",
 				Triggering:  false,
 				Granularity: 600000,
-				TagFilterExpression: &restapi.TagFilter{
+				TagFilterExpression: &instana.TagFilter{
 					Type:            "EXPRESSION",
 					LogicalOperator: &operator,
-					Elements:        []*restapi.TagFilter{},
+					Elements:        []*instana.TagFilter{},
 				},
-				TimeThreshold:         tt.timeThreshold,
-				CustomPayloadFields: []restapi.CustomPayloadField[any]{},
-				Rules:                 []restapi.MobileAppAlertRuleWithThresholds{},
+				TimeThreshold:       tt.timeThreshold,
+				CustomPayloadFields: []instana.CustomPayloadField[any]{},
+				Rules:               []instana.MobileAppAlertRuleWithThresholds{},
 			}
 
 			state := &tfsdk.State{
@@ -920,25 +920,25 @@ func TestUpdateState_WithPlan(t *testing.T) {
 	ctx := context.Background()
 	resource := &mobileAlertConfigResource{}
 
-	operator := restapi.LogicalOperatorType("AND")
-	data := &restapi.MobileAlertConfig{
+	operator := instana.LogicalOperatorType("AND")
+	data := &instana.MobileAlertConfig{
 		ID:          "test-id",
 		Name:        "Test Mobile Alert",
 		Description: "Test Description",
 		MobileAppID: "mobile-app-123",
 		Triggering:  false,
 		Granularity: 600000,
-		TagFilterExpression: &restapi.TagFilter{
+		TagFilterExpression: &instana.TagFilter{
 			Type:            "EXPRESSION",
 			LogicalOperator: &operator,
-			Elements:        []*restapi.TagFilter{},
+			Elements:        []*instana.TagFilter{},
 		},
-		TimeThreshold: &restapi.MobileAppTimeThreshold{
+		TimeThreshold: &instana.MobileAppTimeThreshold{
 			Type:       MobileAlertConfigTimeThresholdTypeViolationsInSequence,
 			TimeWindow: ptr(int64(600000)),
 		},
-		CustomPayloadFields: []restapi.CustomPayloadField[any]{},
-		Rules:                 []restapi.MobileAppAlertRuleWithThresholds{},
+		CustomPayloadFields: []instana.CustomPayloadField[any]{},
+		Rules:               []instana.MobileAppAlertRuleWithThresholds{},
 	}
 
 	plan := createMockPlan(t, MobileAlertConfigModel{
@@ -1009,8 +1009,8 @@ func TestUpdateState_WithNullEnabled(t *testing.T) {
 	ctx := context.Background()
 	resource := &mobileAlertConfigResource{}
 
-	operator := restapi.LogicalOperatorType("AND")
-	data := &restapi.MobileAlertConfig{
+	operator := instana.LogicalOperatorType("AND")
+	data := &instana.MobileAlertConfig{
 		ID:          "test-id",
 		Name:        "Test Mobile Alert",
 		Description: "Test Description",
@@ -1018,17 +1018,17 @@ func TestUpdateState_WithNullEnabled(t *testing.T) {
 		Enabled:     nil,
 		Triggering:  false,
 		Granularity: 600000,
-		TagFilterExpression: &restapi.TagFilter{
+		TagFilterExpression: &instana.TagFilter{
 			Type:            "EXPRESSION",
 			LogicalOperator: &operator,
-			Elements:        []*restapi.TagFilter{},
+			Elements:        []*instana.TagFilter{},
 		},
-		TimeThreshold: &restapi.MobileAppTimeThreshold{
+		TimeThreshold: &instana.MobileAppTimeThreshold{
 			Type:       MobileAlertConfigTimeThresholdTypeViolationsInSequence,
 			TimeWindow: ptr(int64(600000)),
 		},
-		CustomPayloadFields: []restapi.CustomPayloadField[any]{},
-		Rules:                 []restapi.MobileAppAlertRuleWithThresholds{},
+		CustomPayloadFields: []instana.CustomPayloadField[any]{},
+		Rules:               []instana.MobileAppAlertRuleWithThresholds{},
 	}
 
 	state := &tfsdk.State{
@@ -1101,17 +1101,17 @@ func TestUpdateState_WithRulesNullOptionalFields(t *testing.T) {
 	ctx := context.Background()
 	resource := &mobileAlertConfigResource{}
 
-	operator := restapi.LogicalOperatorType("AND")
-	data := &restapi.MobileAlertConfig{
+	operator := instana.LogicalOperatorType("AND")
+	data := &instana.MobileAlertConfig{
 		ID:          "test-id",
 		Name:        "Test Mobile Alert",
 		Description: "Test Description",
 		MobileAppID: "mobile-app-123",
 		Triggering:  false,
 		Granularity: 600000,
-		Rules: []restapi.MobileAppAlertRuleWithThresholds{
+		Rules: []instana.MobileAppAlertRuleWithThresholds{
 			{
-				Rule: &restapi.MobileAppAlertRule{
+				Rule: &instana.MobileAppAlertRule{
 					AlertType:   "httpError",
 					MetricName:  "errors",
 					Aggregation: nil,
@@ -1119,8 +1119,8 @@ func TestUpdateState_WithRulesNullOptionalFields(t *testing.T) {
 					Value:       nil,
 				},
 				ThresholdOperator: ">",
-				Thresholds: map[restapi.AlertSeverity]restapi.ThresholdRule{
-					restapi.WarningSeverity: {
+				Thresholds: map[instana.AlertSeverity]instana.ThresholdRule{
+					instana.WarningSeverity: {
 						Type:     "staticThreshold",
 						Operator: ptr(">"),
 						Value:    ptr(100.0),
@@ -1128,16 +1128,16 @@ func TestUpdateState_WithRulesNullOptionalFields(t *testing.T) {
 				},
 			},
 		},
-		TagFilterExpression: &restapi.TagFilter{
+		TagFilterExpression: &instana.TagFilter{
 			Type:            "EXPRESSION",
 			LogicalOperator: &operator,
-			Elements:        []*restapi.TagFilter{},
+			Elements:        []*instana.TagFilter{},
 		},
-		TimeThreshold: &restapi.MobileAppTimeThreshold{
+		TimeThreshold: &instana.MobileAppTimeThreshold{
 			Type:       MobileAlertConfigTimeThresholdTypeViolationsInSequence,
 			TimeWindow: ptr(int64(600000)),
 		},
-		CustomPayloadFields: []restapi.CustomPayloadField[any]{},
+		CustomPayloadFields: []instana.CustomPayloadField[any]{},
 	}
 
 	state := &tfsdk.State{
@@ -1162,8 +1162,8 @@ func TestUpdateState_EmptyAlertChannels(t *testing.T) {
 	ctx := context.Background()
 	resource := &mobileAlertConfigResource{}
 
-	operator := restapi.LogicalOperatorType("AND")
-	data := &restapi.MobileAlertConfig{
+	operator := instana.LogicalOperatorType("AND")
+	data := &instana.MobileAlertConfig{
 		ID:            "test-id",
 		Name:          "Test Mobile Alert",
 		Description:   "Test Description",
@@ -1171,17 +1171,17 @@ func TestUpdateState_EmptyAlertChannels(t *testing.T) {
 		Triggering:    false,
 		Granularity:   600000,
 		AlertChannels: map[string][]string{},
-		TagFilterExpression: &restapi.TagFilter{
+		TagFilterExpression: &instana.TagFilter{
 			Type:            "EXPRESSION",
 			LogicalOperator: &operator,
-			Elements:        []*restapi.TagFilter{},
+			Elements:        []*instana.TagFilter{},
 		},
-		TimeThreshold: &restapi.MobileAppTimeThreshold{
+		TimeThreshold: &instana.MobileAppTimeThreshold{
 			Type:       MobileAlertConfigTimeThresholdTypeViolationsInSequence,
 			TimeWindow: ptr(int64(600000)),
 		},
-		CustomPayloadFields: []restapi.CustomPayloadField[any]{},
-		Rules:                 []restapi.MobileAppAlertRuleWithThresholds{},
+		CustomPayloadFields: []instana.CustomPayloadField[any]{},
+		Rules:               []instana.MobileAppAlertRuleWithThresholds{},
 	}
 
 	state := &tfsdk.State{
@@ -1202,7 +1202,7 @@ func TestMapTimeThresholdToState_AllTypes(t *testing.T) {
 	resource := &mobileAlertConfigResource{}
 
 	t.Run("violations_in_sequence", func(t *testing.T) {
-		threshold := restapi.MobileAppTimeThreshold{
+		threshold := instana.MobileAppTimeThreshold{
 			Type:       MobileAlertConfigTimeThresholdTypeViolationsInSequence,
 			TimeWindow: ptr(int64(600000)),
 		}
@@ -1214,7 +1214,7 @@ func TestMapTimeThresholdToState_AllTypes(t *testing.T) {
 	})
 
 	t.Run("user_impact_of_violations_in_sequence", func(t *testing.T) {
-		threshold := restapi.MobileAppTimeThreshold{
+		threshold := instana.MobileAppTimeThreshold{
 			Type:           MobileAlertConfigTimeThresholdTypeUserImpactOfViolationsInSequence,
 			TimeWindow:     ptr(int64(600000)),
 			Users:          ptr(int32(100)),
@@ -1230,7 +1230,7 @@ func TestMapTimeThresholdToState_AllTypes(t *testing.T) {
 	})
 
 	t.Run("violations_in_period", func(t *testing.T) {
-		threshold := restapi.MobileAppTimeThreshold{
+		threshold := instana.MobileAppTimeThreshold{
 			Type:       MobileAlertConfigTimeThresholdTypeViolationsInPeriod,
 			TimeWindow: ptr(int64(600000)),
 			Violations: ptr(int32(5)),
@@ -1249,11 +1249,11 @@ func TestMapRuleToState(t *testing.T) {
 	resource := &mobileAlertConfigResource{}
 
 	t.Run("with all fields", func(t *testing.T) {
-		aggregation := restapi.Aggregation("MEAN")
+		aggregation := instana.Aggregation("MEAN")
 		operator := "EQUALS"
 		value := "test-value"
 
-		rule := &restapi.MobileAppAlertRule{
+		rule := &instana.MobileAppAlertRule{
 			AlertType:   "httpError",
 			MetricName:  "errors",
 			Aggregation: &aggregation,
@@ -1271,7 +1271,7 @@ func TestMapRuleToState(t *testing.T) {
 	})
 
 	t.Run("with null optional fields", func(t *testing.T) {
-		rule := &restapi.MobileAppAlertRule{
+		rule := &instana.MobileAppAlertRule{
 			AlertType:   "httpError",
 			MetricName:  "errors",
 			Aggregation: nil,

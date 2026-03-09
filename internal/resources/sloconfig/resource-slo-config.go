@@ -18,14 +18,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	instana "github.com/instana/instana-go-client/instana"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
 	"github.com/instana/terraform-provider-instana/internal/util"
 )
 
 // NewSloConfigResourceHandle creates the resource handle for SLO Config
-func NewSloConfigResourceHandle() resourcehandle.ResourceHandle[*restapi.SloConfig] {
+func NewSloConfigResourceHandle() resourcehandle.ResourceHandle[*instana.SloConfig] {
 	return &sloConfigResource{
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:     ResourceInstanaSloConfig,
@@ -44,7 +44,7 @@ func (r *sloConfigResource) MetaData() *resourcehandle.ResourceMetaData {
 	return &r.metaData
 }
 
-func (r *sloConfigResource) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.SloConfig] {
+func (r *sloConfigResource) GetRestResource(api instana.InstanaAPI) instana.RestResource[*instana.SloConfig] {
 	return api.SloConfigs()
 }
 
@@ -505,7 +505,7 @@ func buildFixedTimeWindowAttribute() schema.SingleNestedAttribute {
 	}
 }
 
-func (r *sloConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.SloConfig, diag.Diagnostics) {
+func (r *sloConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*instana.SloConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var model SloConfigModel
 
@@ -528,7 +528,7 @@ func (r *sloConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsd
 	if diags.HasError() {
 		return nil, diags
 	}
-	return &restapi.SloConfig{
+	return &instana.SloConfig{
 		ID:         id,
 		Name:       model.Name.ValueString(),
 		Target:     model.Target.ValueFloat64(),
@@ -582,10 +582,10 @@ func (r *sloConfigResource) mapTagsFromState(tags types.Set) []string {
 }
 
 // mapRbacTagsFromState converts RBAC tags from state to API model
-func (r *sloConfigResource) mapRbacTagsFromState(rbacTags []RbacTagModel) []restapi.RbacTag {
-	rbacTagsList := make([]restapi.RbacTag, 0, len(rbacTags))
+func (r *sloConfigResource) mapRbacTagsFromState(rbacTags []RbacTagModel) []instana.RbacTag {
+	rbacTagsList := make([]instana.RbacTag, 0, len(rbacTags))
 	for _, t := range rbacTags {
-		rbacTagsList = append(rbacTagsList, restapi.RbacTag{
+		rbacTagsList = append(rbacTagsList, instana.RbacTag{
 			DisplayName: t.DisplayName.ValueString(),
 			ID:          t.ID.ValueString(),
 		})
@@ -593,7 +593,7 @@ func (r *sloConfigResource) mapRbacTagsFromState(rbacTags []RbacTagModel) []rest
 	return rbacTagsList
 }
 
-func (r *sloConfigResource) mapEntityFromState(entityObj EntityModel) (restapi.SloEntity, diag.Diagnostics) {
+func (r *sloConfigResource) mapEntityFromState(entityObj EntityModel) (instana.SloEntity, diag.Diagnostics) {
 	if entityObj.ApplicationEntityModel != nil {
 		return r.validateAndMapApplicationEntity(entityObj.ApplicationEntityModel)
 	}
@@ -612,15 +612,15 @@ func (r *sloConfigResource) mapEntityFromState(entityObj EntityModel) (restapi.S
 
 	var diags diag.Diagnostics
 	diags.AddError(SloConfigErrMissingEntity, SloConfigErrExactlyOneEntity)
-	return restapi.SloEntity{}, diags
+	return instana.SloEntity{}, diags
 }
 
 // validateAndMapApplicationEntity validates and maps application entity from state
-func (r *sloConfigResource) validateAndMapApplicationEntity(model *ApplicationEntityModel) (restapi.SloEntity, diag.Diagnostics) {
+func (r *sloConfigResource) validateAndMapApplicationEntity(model *ApplicationEntityModel) (instana.SloEntity, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if err := r.validateApplicationEntityFields(model); err.HasError() {
-		return restapi.SloEntity{}, err
+		return instana.SloEntity{}, err
 	}
 
 	entity := r.buildApplicationEntity(model)
@@ -628,7 +628,7 @@ func (r *sloConfigResource) validateAndMapApplicationEntity(model *ApplicationEn
 	filterExpr, filterDiags := r.mapFilterExpressionToEntity(model.FilterExpression)
 	diags.Append(filterDiags...)
 	if diags.HasError() {
-		return restapi.SloEntity{}, diags
+		return instana.SloEntity{}, diags
 	}
 
 	entity.FilterExpression = filterExpr
@@ -648,13 +648,13 @@ func (r *sloConfigResource) validateApplicationEntityFields(model *ApplicationEn
 }
 
 // buildApplicationEntity constructs application entity from model
-func (r *sloConfigResource) buildApplicationEntity(model *ApplicationEntityModel) restapi.SloEntity {
+func (r *sloConfigResource) buildApplicationEntity(model *ApplicationEntityModel) instana.SloEntity {
 	applicationID := model.ApplicationID.ValueString()
 	boundaryScope := util.SetStringPointerFromState(model.BoundaryScope)
 	includeInternal := model.IncludeInternal.ValueBool()
 	includeSynthetic := model.IncludeSynthetic.ValueBool()
 
-	return restapi.SloEntity{
+	return instana.SloEntity{
 		Type:             SloConfigApplicationEntity,
 		ApplicationID:    &applicationID,
 		ServiceID:        util.SetStringPointerFromState(model.ServiceID),
@@ -666,11 +666,11 @@ func (r *sloConfigResource) buildApplicationEntity(model *ApplicationEntityModel
 }
 
 // validateAndMapWebsiteEntity validates and maps website entity from state
-func (r *sloConfigResource) validateAndMapWebsiteEntity(model *WebsiteEntityModel) (restapi.SloEntity, diag.Diagnostics) {
+func (r *sloConfigResource) validateAndMapWebsiteEntity(model *WebsiteEntityModel) (instana.SloEntity, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if err := r.validateWebsiteEntityFields(model); err.HasError() {
-		return restapi.SloEntity{}, err
+		return instana.SloEntity{}, err
 	}
 
 	entity := r.buildWebsiteEntity(model)
@@ -678,7 +678,7 @@ func (r *sloConfigResource) validateAndMapWebsiteEntity(model *WebsiteEntityMode
 	filterExpr, filterDiags := r.mapFilterExpressionToEntity(model.FilterExpression)
 	diags.Append(filterDiags...)
 	if diags.HasError() {
-		return restapi.SloEntity{}, diags
+		return instana.SloEntity{}, diags
 	}
 
 	entity.FilterExpression = filterExpr
@@ -698,8 +698,8 @@ func (r *sloConfigResource) validateWebsiteEntityFields(model *WebsiteEntityMode
 }
 
 // buildWebsiteEntity constructs website entity from model
-func (r *sloConfigResource) buildWebsiteEntity(model *WebsiteEntityModel) restapi.SloEntity {
-	return restapi.SloEntity{
+func (r *sloConfigResource) buildWebsiteEntity(model *WebsiteEntityModel) instana.SloEntity {
+	return instana.SloEntity{
 		Type:       SloConfigWebsiteEntity,
 		WebsiteId:  util.SetStringPointerFromState(model.WebsiteID),
 		BeaconType: util.SetStringPointerFromState(model.BeaconType),
@@ -707,11 +707,11 @@ func (r *sloConfigResource) buildWebsiteEntity(model *WebsiteEntityModel) restap
 }
 
 // validateAndMapSyntheticEntity validates and maps synthetic entity from state
-func (r *sloConfigResource) validateAndMapSyntheticEntity(model *SyntheticEntityModel) (restapi.SloEntity, diag.Diagnostics) {
+func (r *sloConfigResource) validateAndMapSyntheticEntity(model *SyntheticEntityModel) (instana.SloEntity, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if err := r.validateSyntheticEntityFields(model); err.HasError() {
-		return restapi.SloEntity{}, err
+		return instana.SloEntity{}, err
 	}
 
 	entity := r.buildSyntheticEntity(model)
@@ -719,7 +719,7 @@ func (r *sloConfigResource) validateAndMapSyntheticEntity(model *SyntheticEntity
 	filterExpr, filterDiags := r.mapFilterExpressionToEntity(model.FilterExpression)
 	diags.Append(filterDiags...)
 	if diags.HasError() {
-		return restapi.SloEntity{}, diags
+		return instana.SloEntity{}, diags
 	}
 
 	entity.FilterExpression = filterExpr
@@ -738,7 +738,7 @@ func (r *sloConfigResource) validateSyntheticEntityFields(model *SyntheticEntity
 }
 
 // buildSyntheticEntity constructs synthetic entity from model
-func (r *sloConfigResource) buildSyntheticEntity(model *SyntheticEntityModel) restapi.SloEntity {
+func (r *sloConfigResource) buildSyntheticEntity(model *SyntheticEntityModel) instana.SloEntity {
 	testIDs := make([]interface{}, 0)
 
 	// Extract elements from the Set
@@ -751,18 +751,18 @@ func (r *sloConfigResource) buildSyntheticEntity(model *SyntheticEntityModel) re
 		}
 	}
 
-	return restapi.SloEntity{
+	return instana.SloEntity{
 		Type:             SloConfigSyntheticEntity,
 		SyntheticTestIDs: testIDs,
 	}
 }
 
 // validateAndMapInfrastructureEntity validates and maps infrastructure entity from state
-func (r *sloConfigResource) validateAndMapInfrastructureEntity(model *InfrastructureEntityModel) (restapi.SloEntity, diag.Diagnostics) {
+func (r *sloConfigResource) validateAndMapInfrastructureEntity(model *InfrastructureEntityModel) (instana.SloEntity, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if err := r.validateInfrastructureEntityFields(model); err.HasError() {
-		return restapi.SloEntity{}, err
+		return instana.SloEntity{}, err
 	}
 
 	entity := r.buildInfrastructureEntity(model)
@@ -770,7 +770,7 @@ func (r *sloConfigResource) validateAndMapInfrastructureEntity(model *Infrastruc
 	filterExpr, filterDiags := r.mapFilterExpressionToEntity(model.FilterExpression)
 	diags.Append(filterDiags...)
 	if diags.HasError() {
-		return restapi.SloEntity{}, diags
+		return instana.SloEntity{}, diags
 	}
 
 	entity.FilterExpression = filterExpr
@@ -789,16 +789,16 @@ func (r *sloConfigResource) validateInfrastructureEntityFields(model *Infrastruc
 }
 
 // buildInfrastructureEntity constructs infrastructure entity from model
-func (r *sloConfigResource) buildInfrastructureEntity(model *InfrastructureEntityModel) restapi.SloEntity {
+func (r *sloConfigResource) buildInfrastructureEntity(model *InfrastructureEntityModel) instana.SloEntity {
 	infraType := model.InfraType.ValueString()
-	return restapi.SloEntity{
+	return instana.SloEntity{
 		Type:      SloConfigInfrastructureEntity,
 		InfraType: &infraType,
 	}
 }
 
 // mapFilterExpressionToEntity converts filter expression to API model
-func (r *sloConfigResource) mapFilterExpressionToEntity(filterExpression types.String) (*restapi.TagFilter, diag.Diagnostics) {
+func (r *sloConfigResource) mapFilterExpressionToEntity(filterExpression types.String) (*instana.TagFilter, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if !filterExpression.IsNull() && !filterExpression.IsUnknown() {
@@ -816,16 +816,16 @@ func (r *sloConfigResource) mapFilterExpressionToEntity(filterExpression types.S
 }
 
 // createDefaultTagFilter creates a default empty tag filter
-func (r *sloConfigResource) createDefaultTagFilter() *restapi.TagFilter {
-	operator := restapi.LogicalOperatorType(LogicalOperatorAnd)
-	return &restapi.TagFilter{
+func (r *sloConfigResource) createDefaultTagFilter() *instana.TagFilter {
+	operator := instana.LogicalOperatorType(LogicalOperatorAnd)
+	return &instana.TagFilter{
 		Type:            TagFilterTypeExpression,
 		LogicalOperator: &operator,
-		Elements:        []*restapi.TagFilter{},
+		Elements:        []*instana.TagFilter{},
 	}
 }
 
-func (r *sloConfigResource) mapIndicatorFromState(indicatorModel IndicatorModel) (restapi.SloIndicator, diag.Diagnostics) {
+func (r *sloConfigResource) mapIndicatorFromState(indicatorModel IndicatorModel) (instana.SloIndicator, diag.Diagnostics) {
 	if indicatorModel.TimeBasedLatencyIndicatorModel != nil {
 		return r.mapTimeBasedLatencyIndicator(indicatorModel.TimeBasedLatencyIndicatorModel)
 	}
@@ -860,21 +860,21 @@ func (r *sloConfigResource) mapIndicatorFromState(indicatorModel IndicatorModel)
 
 	var diags diag.Diagnostics
 	diags.AddError(SloConfigErrMissingIndicator, SloConfigErrExactlyOneIndicator)
-	return restapi.SloIndicator{}, diags
+	return instana.SloIndicator{}, diags
 }
 
 // mapTimeBasedLatencyIndicator maps time-based latency indicator from state
-func (r *sloConfigResource) mapTimeBasedLatencyIndicator(model *TimeBasedLatencyIndicatorModel) (restapi.SloIndicator, diag.Diagnostics) {
+func (r *sloConfigResource) mapTimeBasedLatencyIndicator(model *TimeBasedLatencyIndicatorModel) (instana.SloIndicator, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if model.Threshold.IsNull() || model.Threshold.IsUnknown() ||
 		model.Aggregation.IsNull() || model.Aggregation.IsUnknown() {
 		diags.AddError(SloConfigErrTimeBasedLatencyRequired, SloConfigErrTimeBasedLatencyRequired)
-		return restapi.SloIndicator{}, diags
+		return instana.SloIndicator{}, diags
 	}
 
 	aggregation := model.Aggregation.ValueString()
-	return restapi.SloIndicator{
+	return instana.SloIndicator{
 		Blueprint:   SloConfigAPIIndicatorBlueprintLatency,
 		Type:        SloConfigAPIIndicatorMeasurementTypeTimeBased,
 		Threshold:   model.Threshold.ValueFloat64(),
@@ -883,16 +883,16 @@ func (r *sloConfigResource) mapTimeBasedLatencyIndicator(model *TimeBasedLatency
 }
 
 // mapEventBasedLatencyIndicator maps event-based latency indicator from state
-func (r *sloConfigResource) mapEventBasedLatencyIndicator(model *EventBasedLatencyIndicatorModel) (restapi.SloIndicator, diag.Diagnostics) {
+func (r *sloConfigResource) mapEventBasedLatencyIndicator(model *EventBasedLatencyIndicatorModel) (instana.SloIndicator, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if model.Threshold.IsNull() || model.Threshold.IsUnknown() {
 		diags.AddError(SloConfigErrEventBasedLatencyRequired, SloConfigErrEventBasedLatencyRequired)
-		return restapi.SloIndicator{}, diags
+		return instana.SloIndicator{}, diags
 	}
 
 	defaultAgg := r.getDefaultAggregation()
-	return restapi.SloIndicator{
+	return instana.SloIndicator{
 		Blueprint:   SloConfigAPIIndicatorBlueprintLatency,
 		Type:        SloConfigAPIIndicatorMeasurementTypeEventBased,
 		Threshold:   model.Threshold.ValueFloat64(),
@@ -901,17 +901,17 @@ func (r *sloConfigResource) mapEventBasedLatencyIndicator(model *EventBasedLaten
 }
 
 // mapTimeBasedAvailabilityIndicator maps time-based availability indicator from state
-func (r *sloConfigResource) mapTimeBasedAvailabilityIndicator(model *TimeBasedAvailabilityIndicatorModel) (restapi.SloIndicator, diag.Diagnostics) {
+func (r *sloConfigResource) mapTimeBasedAvailabilityIndicator(model *TimeBasedAvailabilityIndicatorModel) (instana.SloIndicator, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if model.Threshold.IsNull() || model.Threshold.IsUnknown() ||
 		model.Aggregation.IsNull() || model.Aggregation.IsUnknown() {
 		diags.AddError(SloConfigErrTimeBasedAvailabilityRequired, SloConfigErrTimeBasedAvailabilityRequired)
-		return restapi.SloIndicator{}, diags
+		return instana.SloIndicator{}, diags
 	}
 
 	aggregation := model.Aggregation.ValueString()
-	return restapi.SloIndicator{
+	return instana.SloIndicator{
 		Blueprint:   SloConfigAPIIndicatorBlueprintAvailability,
 		Type:        SloConfigAPIIndicatorMeasurementTypeTimeBased,
 		Threshold:   model.Threshold.ValueFloat64(),
@@ -920,11 +920,11 @@ func (r *sloConfigResource) mapTimeBasedAvailabilityIndicator(model *TimeBasedAv
 }
 
 // mapEventBasedAvailabilityIndicator maps event-based availability indicator from state
-func (r *sloConfigResource) mapEventBasedAvailabilityIndicator() (restapi.SloIndicator, diag.Diagnostics) {
+func (r *sloConfigResource) mapEventBasedAvailabilityIndicator() (instana.SloIndicator, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	defaultAgg := r.getDefaultAggregation()
 
-	return restapi.SloIndicator{
+	return instana.SloIndicator{
 		Blueprint:   SloConfigAPIIndicatorBlueprintAvailability,
 		Type:        SloConfigAPIIndicatorMeasurementTypeEventBased,
 		Aggregation: defaultAgg,
@@ -932,19 +932,19 @@ func (r *sloConfigResource) mapEventBasedAvailabilityIndicator() (restapi.SloInd
 }
 
 // mapTrafficIndicator maps traffic indicator from state
-func (r *sloConfigResource) mapTrafficIndicator(model *TrafficIndicatorModel) (restapi.SloIndicator, diag.Diagnostics) {
+func (r *sloConfigResource) mapTrafficIndicator(model *TrafficIndicatorModel) (instana.SloIndicator, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if model.Threshold.IsNull() || model.Threshold.IsUnknown() {
 		diags.AddError(SloConfigErrTrafficRequired, SloConfigErrTrafficRequired)
-		return restapi.SloIndicator{}, diags
+		return instana.SloIndicator{}, diags
 	}
 
 	trafficType := model.TrafficType.ValueString()
 	operator := model.Operator.ValueString()
 	defaultAgg := r.getDefaultAggregation()
 
-	return restapi.SloIndicator{
+	return instana.SloIndicator{
 		Blueprint:   SloConfigAPIIndicatorBlueprintTraffic,
 		Type:        SloConfigAPIIndicatorMeasurementTypeTimeBased,
 		TrafficType: &trafficType,
@@ -955,28 +955,28 @@ func (r *sloConfigResource) mapTrafficIndicator(model *TrafficIndicatorModel) (r
 }
 
 // mapCustomIndicator maps custom indicator from state
-func (r *sloConfigResource) mapCustomIndicator(model *CustomIndicatorModel) (restapi.SloIndicator, diag.Diagnostics) {
+func (r *sloConfigResource) mapCustomIndicator(model *CustomIndicatorModel) (instana.SloIndicator, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if model.GoodEventFilterExpression.IsNull() || model.GoodEventFilterExpression.IsUnknown() {
 		diags.AddError(SloConfigErrCustomRequired, SloConfigErrCustomRequired)
-		return restapi.SloIndicator{}, diags
+		return instana.SloIndicator{}, diags
 	}
 
 	goodEventFilter, goodDiags := r.mapFilterExpressionToEntity(model.GoodEventFilterExpression)
 	diags.Append(goodDiags...)
 	if diags.HasError() {
-		return restapi.SloIndicator{}, diags
+		return instana.SloIndicator{}, diags
 	}
 
 	badEventFilter, badDiags := r.mapFilterExpressionToEntity(model.BadEventFilterExpression)
 	diags.Append(badDiags...)
 	if diags.HasError() {
-		return restapi.SloIndicator{}, diags
+		return instana.SloIndicator{}, diags
 	}
 
 	defaultAgg := r.getDefaultAggregation()
-	return restapi.SloIndicator{
+	return instana.SloIndicator{
 		Type:                      SloConfigAPIIndicatorMeasurementTypeEventBased,
 		Blueprint:                 SloConfigAPIIndicatorBlueprintCustom,
 		GoodEventFilterExpression: goodEventFilter,
@@ -986,19 +986,19 @@ func (r *sloConfigResource) mapCustomIndicator(model *CustomIndicatorModel) (res
 }
 
 // mapTimeBasedSaturationIndicator maps saturation indicator from state
-func (r *sloConfigResource) mapTimeBasedSaturationIndicator(model *TimeBasedSaturationIndicatorModel) (restapi.SloIndicator, diag.Diagnostics) {
+func (r *sloConfigResource) mapTimeBasedSaturationIndicator(model *TimeBasedSaturationIndicatorModel) (instana.SloIndicator, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if model.Threshold.IsNull() || model.Threshold.IsUnknown() {
 		diags.AddError(SloConfigErrTimeBasedSaturationRequired, SloConfigErrTimeBasedSaturationRequiredMsg)
-		return restapi.SloIndicator{}, diags
+		return instana.SloIndicator{}, diags
 	}
 
 	aggregation := model.Aggregation.ValueString()
 	operator := model.Operator.ValueString()
 	metricName := model.MetricName.ValueString()
 
-	return restapi.SloIndicator{
+	return instana.SloIndicator{
 		Blueprint:   SloConfigAPIIndicatorBlueprintSaturation,
 		Type:        SloConfigAPIIndicatorMeasurementTypeTimeBased,
 		Threshold:   model.Threshold.ValueFloat64(),
@@ -1009,19 +1009,19 @@ func (r *sloConfigResource) mapTimeBasedSaturationIndicator(model *TimeBasedSatu
 }
 
 // mapEventBasedSaturationIndicator maps saturation indicator from state
-func (r *sloConfigResource) mapEventBasedSaturationIndicator(model *EventBasedSaturationIndicatorModel) (restapi.SloIndicator, diag.Diagnostics) {
+func (r *sloConfigResource) mapEventBasedSaturationIndicator(model *EventBasedSaturationIndicatorModel) (instana.SloIndicator, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if model.Threshold.IsNull() || model.Threshold.IsUnknown() {
 		diags.AddError(SloConfigErrEventBasedSaturationRequired, SloConfigErrEventBasedSaturationRequiredMsg)
-		return restapi.SloIndicator{}, diags
+		return instana.SloIndicator{}, diags
 	}
 
 	defaultAgg := r.getDefaultAggregation()
 	operator := model.Operator.ValueString()
 	metricName := model.MetricName.ValueString()
 
-	return restapi.SloIndicator{
+	return instana.SloIndicator{
 		Blueprint:   SloConfigAPIIndicatorBlueprintSaturation,
 		Type:        SloConfigAPIIndicatorMeasurementTypeEventBased,
 		Threshold:   model.Threshold.ValueFloat64(),
@@ -1038,7 +1038,7 @@ func (r *sloConfigResource) getDefaultAggregation() *string {
 	return &defaultAgg
 }
 
-func (r *sloConfigResource) mapTimeWindowFromState(timeWindowModel TimeWindowModel) (restapi.SloTimeWindow, diag.Diagnostics) {
+func (r *sloConfigResource) mapTimeWindowFromState(timeWindowModel TimeWindowModel) (instana.SloTimeWindow, diag.Diagnostics) {
 	if timeWindowModel.RollingTimeWindowModel != nil {
 		return r.mapRollingTimeWindow(timeWindowModel.RollingTimeWindowModel)
 	}
@@ -1049,15 +1049,15 @@ func (r *sloConfigResource) mapTimeWindowFromState(timeWindowModel TimeWindowMod
 
 	var diags diag.Diagnostics
 	diags.AddError(SloConfigErrMissingTimeWindow, SloConfigErrExactlyOneTimeWindow)
-	return restapi.SloTimeWindow{}, diags
+	return instana.SloTimeWindow{}, diags
 }
 
 // mapRollingTimeWindow maps rolling time window from state
-func (r *sloConfigResource) mapRollingTimeWindow(model *RollingTimeWindowModel) (restapi.SloTimeWindow, diag.Diagnostics) {
+func (r *sloConfigResource) mapRollingTimeWindow(model *RollingTimeWindowModel) (instana.SloTimeWindow, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if err := r.validateRollingTimeWindowFields(model); err.HasError() {
-		return restapi.SloTimeWindow{}, err
+		return instana.SloTimeWindow{}, err
 	}
 
 	timeWindow := r.buildRollingTimeWindow(model)
@@ -1079,8 +1079,8 @@ func (r *sloConfigResource) validateRollingTimeWindowFields(model *RollingTimeWi
 }
 
 // buildRollingTimeWindow constructs rolling time window from model
-func (r *sloConfigResource) buildRollingTimeWindow(model *RollingTimeWindowModel) restapi.SloTimeWindow {
-	return restapi.SloTimeWindow{
+func (r *sloConfigResource) buildRollingTimeWindow(model *RollingTimeWindowModel) instana.SloTimeWindow {
+	return instana.SloTimeWindow{
 		Type:         SloConfigRollingTimeWindow,
 		Duration:     int(model.Duration.ValueInt64()),
 		DurationUnit: model.DurationUnit.ValueString(),
@@ -1088,11 +1088,11 @@ func (r *sloConfigResource) buildRollingTimeWindow(model *RollingTimeWindowModel
 }
 
 // mapFixedTimeWindow maps fixed time window from state
-func (r *sloConfigResource) mapFixedTimeWindow(model *FixedTimeWindowModel) (restapi.SloTimeWindow, diag.Diagnostics) {
+func (r *sloConfigResource) mapFixedTimeWindow(model *FixedTimeWindowModel) (instana.SloTimeWindow, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if err := r.validateFixedTimeWindowFields(model); err.HasError() {
-		return restapi.SloTimeWindow{}, err
+		return instana.SloTimeWindow{}, err
 	}
 
 	timeWindow := r.buildFixedTimeWindow(model)
@@ -1115,8 +1115,8 @@ func (r *sloConfigResource) validateFixedTimeWindowFields(model *FixedTimeWindow
 }
 
 // buildFixedTimeWindow constructs fixed time window from model
-func (r *sloConfigResource) buildFixedTimeWindow(model *FixedTimeWindowModel) restapi.SloTimeWindow {
-	return restapi.SloTimeWindow{
+func (r *sloConfigResource) buildFixedTimeWindow(model *FixedTimeWindowModel) instana.SloTimeWindow {
+	return instana.SloTimeWindow{
 		Type:         SloConfigFixedTimeWindow,
 		Duration:     int(model.Duration.ValueInt64()),
 		DurationUnit: model.DurationUnit.ValueString(),
@@ -1125,13 +1125,13 @@ func (r *sloConfigResource) buildFixedTimeWindow(model *FixedTimeWindowModel) re
 }
 
 // setTimezoneIfPresent sets timezone on time window if present in model
-func (r *sloConfigResource) setTimezoneIfPresent(timeWindow *restapi.SloTimeWindow, timezone types.String) {
+func (r *sloConfigResource) setTimezoneIfPresent(timeWindow *instana.SloTimeWindow, timezone types.String) {
 	if !timezone.IsNull() && !timezone.IsUnknown() {
 		timeWindow.Timezone = timezone.ValueString()
 	}
 }
 
-func (r *sloConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *restapi.SloConfig) diag.Diagnostics {
+func (r *sloConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *instana.SloConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var model SloConfigModel
 	if plan != nil {
@@ -1188,7 +1188,7 @@ func (r *sloConfigResource) mapTagsToState(tags []string) types.Set {
 }
 
 // mapRbacTagsToState converts RBAC tags from API to state
-func (r *sloConfigResource) mapRbacTagsToState(rbacTags []restapi.RbacTag) []RbacTagModel {
+func (r *sloConfigResource) mapRbacTagsToState(rbacTags []instana.RbacTag) []RbacTagModel {
 	if rbacTags == nil {
 		return nil
 	}
@@ -1203,7 +1203,7 @@ func (r *sloConfigResource) mapRbacTagsToState(rbacTags []restapi.RbacTag) []Rba
 	return stateRbacTags
 }
 
-func (r *sloConfigResource) mapEntityToState(apiObject *restapi.SloConfig, currentEntityModel *EntityModel) (EntityModel, diag.Diagnostics) {
+func (r *sloConfigResource) mapEntityToState(apiObject *instana.SloConfig, currentEntityModel *EntityModel) (EntityModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	entityModel := EntityModel{}
@@ -1253,7 +1253,7 @@ func (r *sloConfigResource) mapEntityToState(apiObject *restapi.SloConfig, curre
 }
 
 // mapApplicationEntityToState converts application entity from API to state
-func (r *sloConfigResource) mapApplicationEntityToState(entity restapi.SloEntity) (ApplicationEntityModel, diag.Diagnostics) {
+func (r *sloConfigResource) mapApplicationEntityToState(entity instana.SloEntity) (ApplicationEntityModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	model := ApplicationEntityModel{
@@ -1273,7 +1273,7 @@ func (r *sloConfigResource) mapApplicationEntityToState(entity restapi.SloEntity
 }
 
 // mapWebsiteEntityToState converts website entity from API to state
-func (r *sloConfigResource) mapWebsiteEntityToState(entity restapi.SloEntity) (WebsiteEntityModel, diag.Diagnostics) {
+func (r *sloConfigResource) mapWebsiteEntityToState(entity instana.SloEntity) (WebsiteEntityModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	model := WebsiteEntityModel{
@@ -1291,7 +1291,7 @@ func (r *sloConfigResource) mapWebsiteEntityToState(entity restapi.SloEntity) (W
 }
 
 // mapSyntheticEntityToState converts synthetic entity from API to state
-func (r *sloConfigResource) mapSyntheticEntityToState(entity restapi.SloEntity) (SyntheticEntityModel, diag.Diagnostics) {
+func (r *sloConfigResource) mapSyntheticEntityToState(entity instana.SloEntity) (SyntheticEntityModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Convert API response slice to string slice
@@ -1320,7 +1320,7 @@ func (r *sloConfigResource) mapSyntheticEntityToState(entity restapi.SloEntity) 
 }
 
 // mapInfrastructureEntityToState converts infrastructure entity from API to state
-func (r *sloConfigResource) mapInfrastructureEntityToState(entity restapi.SloEntity) (InfrastructureEntityModel, diag.Diagnostics) {
+func (r *sloConfigResource) mapInfrastructureEntityToState(entity instana.SloEntity) (InfrastructureEntityModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	model := InfrastructureEntityModel{
@@ -1337,7 +1337,7 @@ func (r *sloConfigResource) mapInfrastructureEntityToState(entity restapi.SloEnt
 }
 
 // mapFilterExpressionToState converts filter expression from API to state
-func (r *sloConfigResource) mapFilterExpressionToState(filterExpression *restapi.TagFilter) (types.String, diag.Diagnostics) {
+func (r *sloConfigResource) mapFilterExpressionToState(filterExpression *instana.TagFilter) (types.String, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if filterExpression == nil {
@@ -1356,7 +1356,7 @@ func (r *sloConfigResource) mapFilterExpressionToState(filterExpression *restapi
 	return types.StringNull(), diags
 }
 
-func (r *sloConfigResource) mapIndicatorToState(apiObject *restapi.SloConfig, sloConfigModel *SloConfigModel) (IndicatorModel, diag.Diagnostics) {
+func (r *sloConfigResource) mapIndicatorToState(apiObject *instana.SloConfig, sloConfigModel *SloConfigModel) (IndicatorModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	indicator := apiObject.Indicator
 
@@ -1404,7 +1404,7 @@ func (r *sloConfigResource) mapIndicatorToState(apiObject *restapi.SloConfig, sl
 }
 
 // createTimeBasedLatencyModel creates time-based latency indicator model
-func (r *sloConfigResource) createTimeBasedLatencyModel(indicator restapi.SloIndicator) *TimeBasedLatencyIndicatorModel {
+func (r *sloConfigResource) createTimeBasedLatencyModel(indicator instana.SloIndicator) *TimeBasedLatencyIndicatorModel {
 	// Round to 2 decimal places to avoid floating-point precision issues
 	formatted := strconv.FormatFloat(indicator.Threshold, 'f', 2, 64)
 	parsed, _ := strconv.ParseFloat(formatted, 64)
@@ -1416,7 +1416,7 @@ func (r *sloConfigResource) createTimeBasedLatencyModel(indicator restapi.SloInd
 }
 
 // createEventBasedLatencyModel creates event-based latency indicator model
-func (r *sloConfigResource) createEventBasedLatencyModel(indicator restapi.SloIndicator) *EventBasedLatencyIndicatorModel {
+func (r *sloConfigResource) createEventBasedLatencyModel(indicator instana.SloIndicator) *EventBasedLatencyIndicatorModel {
 	// Round to 2 decimal places to avoid floating-point precision issues
 	formatted := strconv.FormatFloat(indicator.Threshold, 'f', 2, 64)
 	parsed, _ := strconv.ParseFloat(formatted, 64)
@@ -1427,7 +1427,7 @@ func (r *sloConfigResource) createEventBasedLatencyModel(indicator restapi.SloIn
 }
 
 // createTimeBasedAvailabilityModel creates time-based availability indicator model
-func (r *sloConfigResource) createTimeBasedAvailabilityModel(indicator restapi.SloIndicator) *TimeBasedAvailabilityIndicatorModel {
+func (r *sloConfigResource) createTimeBasedAvailabilityModel(indicator instana.SloIndicator) *TimeBasedAvailabilityIndicatorModel {
 	// Round to 2 decimal places to avoid floating-point precision issues
 	formatted := strconv.FormatFloat(indicator.Threshold, 'f', 2, 64)
 	parsed, _ := strconv.ParseFloat(formatted, 64)
@@ -1444,7 +1444,7 @@ func (r *sloConfigResource) createEventBasedAvailabilityModel() *EventBasedAvail
 }
 
 // createTrafficModel creates traffic indicator model
-func (r *sloConfigResource) createTrafficModel(indicator restapi.SloIndicator, existingVal *IndicatorModel) *TrafficIndicatorModel {
+func (r *sloConfigResource) createTrafficModel(indicator instana.SloIndicator, existingVal *IndicatorModel) *TrafficIndicatorModel {
 	// Round to 2 decimal places to avoid floating-point precision issues
 	formatted := strconv.FormatFloat(indicator.Threshold, 'f', 2, 64)
 	parsed, _ := strconv.ParseFloat(formatted, 64)
@@ -1460,7 +1460,7 @@ func (r *sloConfigResource) createTrafficModel(indicator restapi.SloIndicator, e
 }
 
 // createCustomModel creates custom indicator model
-func (r *sloConfigResource) createCustomModel(indicator restapi.SloIndicator) (*CustomIndicatorModel, diag.Diagnostics) {
+func (r *sloConfigResource) createCustomModel(indicator instana.SloIndicator) (*CustomIndicatorModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	model := &CustomIndicatorModel{}
 
@@ -1480,7 +1480,7 @@ func (r *sloConfigResource) createCustomModel(indicator restapi.SloIndicator) (*
 }
 
 // createTimeBasedSaturationModel creates saturation indicator model
-func (r *sloConfigResource) createTimeBasedSaturationModel(indicator restapi.SloIndicator) *TimeBasedSaturationIndicatorModel {
+func (r *sloConfigResource) createTimeBasedSaturationModel(indicator instana.SloIndicator) *TimeBasedSaturationIndicatorModel {
 	// Round to 2 decimal places to avoid floating-point precision issues
 	formatted := strconv.FormatFloat(indicator.Threshold, 'f', 2, 64)
 	parsed, _ := strconv.ParseFloat(formatted, 64)
@@ -1494,7 +1494,7 @@ func (r *sloConfigResource) createTimeBasedSaturationModel(indicator restapi.Slo
 }
 
 // createEventBasedSaturationModel creates saturation indicator model
-func (r *sloConfigResource) createEventBasedSaturationModel(indicator restapi.SloIndicator) *EventBasedSaturationIndicatorModel {
+func (r *sloConfigResource) createEventBasedSaturationModel(indicator instana.SloIndicator) *EventBasedSaturationIndicatorModel {
 	// Round to 2 decimal places to avoid floating-point precision issues
 	formatted := strconv.FormatFloat(indicator.Threshold, 'f', 2, 64)
 	parsed, _ := strconv.ParseFloat(formatted, 64)
@@ -1506,7 +1506,7 @@ func (r *sloConfigResource) createEventBasedSaturationModel(indicator restapi.Sl
 	}
 }
 
-func (r *sloConfigResource) mapTimeWindowToState(apiObject *restapi.SloConfig) (TimeWindowModel, diag.Diagnostics) {
+func (r *sloConfigResource) mapTimeWindowToState(apiObject *instana.SloConfig) (TimeWindowModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	timeWindow := apiObject.TimeWindow
 
@@ -1527,7 +1527,7 @@ func (r *sloConfigResource) mapTimeWindowToState(apiObject *restapi.SloConfig) (
 }
 
 // createRollingTimeWindowModel creates rolling time window model
-func (r *sloConfigResource) createRollingTimeWindowModel(timeWindow restapi.SloTimeWindow) *RollingTimeWindowModel {
+func (r *sloConfigResource) createRollingTimeWindowModel(timeWindow instana.SloTimeWindow) *RollingTimeWindowModel {
 	return &RollingTimeWindowModel{
 		Duration:     types.Int64Value(int64(timeWindow.Duration)),
 		DurationUnit: types.StringValue(timeWindow.DurationUnit),
@@ -1536,7 +1536,7 @@ func (r *sloConfigResource) createRollingTimeWindowModel(timeWindow restapi.SloT
 }
 
 // createFixedTimeWindowModel creates fixed time window model
-func (r *sloConfigResource) createFixedTimeWindowModel(timeWindow restapi.SloTimeWindow) *FixedTimeWindowModel {
+func (r *sloConfigResource) createFixedTimeWindowModel(timeWindow instana.SloTimeWindow) *FixedTimeWindowModel {
 	return &FixedTimeWindowModel{
 		Duration:       types.Int64Value(int64(timeWindow.Duration)),
 		DurationUnit:   types.StringValue(timeWindow.DurationUnit),
