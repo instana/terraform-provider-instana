@@ -1,5 +1,19 @@
 # Changelog
 
+## [v6.2.0](https://github.com/instana/terraform-provider-instana/tree/v6.2.0) (2026-03-09)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v6.1.2...v6.2.0)
+
+**Implemented enhancements:**
+
+- Added support for Maintenance Window resource configuration
+- Added support for Mobile Alert configuration
+
+**Merged pull requests:**
+
+- Maintenance window resource [\#76](https://github.com/instana/terraform-provider-instana/pull/76) ([georgekutty-1](https://github.com/georgekutty-1))
+- Mobile alert config [\#75](https://github.com/instana/terraform-provider-instana/pull/75) ([georgekutty-1](https://github.com/georgekutty-1))
+
 ## [v6.1.2](https://github.com/instana/terraform-provider-instana/tree/v6.1.2) (2026-02-19)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v6.1.1...v6.1.2)
