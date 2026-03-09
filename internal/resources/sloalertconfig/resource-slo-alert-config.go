@@ -18,12 +18,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/instana-go-client/instana"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 )
 
 // NewSloAlertConfigResourceHandle creates the resource handle for SLO Alert configuration
-func NewSloAlertConfigResourceHandle() resourcehandle.ResourceHandle[*restapi.SloAlertConfig] {
+func NewSloAlertConfigResourceHandle() resourcehandle.ResourceHandle[*instana.SloAlertConfig] {
 	return &sloAlertConfigResource{
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:  ResourceInstanaSloAlertConfig,
@@ -286,7 +286,7 @@ func (r *sloAlertConfigResource) MetaData() *resourcehandle.ResourceMetaData {
 	return &r.metaData
 }
 
-func (r *sloAlertConfigResource) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.SloAlertConfig] {
+func (r *sloAlertConfigResource) GetRestResource(api instana.InstanaAPI) instana.RestResource[*instana.SloAlertConfig] {
 	return api.SloAlertConfig()
 }
 
@@ -294,7 +294,7 @@ func (r *sloAlertConfigResource) SetComputedFields(_ context.Context, _ *tfsdk.P
 	return nil
 }
 
-func (r *sloAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, sloAlertConfig *restapi.SloAlertConfig) diag.Diagnostics {
+func (r *sloAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, sloAlertConfig *instana.SloAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var model SloAlertConfigModel
 	if plan != nil {
@@ -340,7 +340,7 @@ func (r *sloAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.S
 }
 
 // mapAPIAlertTypeToTerraform converts API alert type and metric to Terraform alert type
-func (r *sloAlertConfigResource) mapAPIAlertTypeToTerraform(rule restapi.SloAlertRule) string {
+func (r *sloAlertConfigResource) mapAPIAlertTypeToTerraform(rule instana.SloAlertRule) string {
 	if rule.AlertType == APIAlertTypeServiceLevelsObjective && rule.Metric == APIMetricStatus {
 		return SloAlertConfigStatus
 	}
@@ -362,7 +362,7 @@ func (r *sloAlertConfigResource) mapAPIAlertTypeToTerraform(rule restapi.SloAler
 }
 
 // mapThresholdToState converts API threshold to state model
-func (r *sloAlertConfigResource) mapThresholdToState(threshold *restapi.SloAlertThreshold) *SloAlertThresholdModel {
+func (r *sloAlertConfigResource) mapThresholdToState(threshold *instana.SloAlertThreshold) *SloAlertThresholdModel {
 	if threshold == nil {
 		return nil
 	}
@@ -384,7 +384,7 @@ func (r *sloAlertConfigResource) mapThresholdToState(threshold *restapi.SloAlert
 }
 
 // mapTimeThresholdToState converts API time threshold to state model
-func (r *sloAlertConfigResource) mapTimeThresholdToState(timeThreshold restapi.SloAlertTimeThreshold) *SloAlertTimeThresholdModel {
+func (r *sloAlertConfigResource) mapTimeThresholdToState(timeThreshold instana.SloAlertTimeThreshold) *SloAlertTimeThresholdModel {
 	return &SloAlertTimeThresholdModel{
 		WarmUp:   types.Int64Value(int64(timeThreshold.TimeWindow)),
 		CoolDown: types.Int64Value(int64(timeThreshold.Expiry)),
@@ -401,7 +401,7 @@ func (r *sloAlertConfigResource) mapStringSliceToSet(values []string) types.Set 
 }
 
 // mapBurnRateConfigsToState converts API burn rate configs to state models
-func (r *sloAlertConfigResource) mapBurnRateConfigsToState(burnRateConfigs *[]restapi.BurnRateConfig) ([]SloAlertBurnRateConfigModel, diag.Diagnostics) {
+func (r *sloAlertConfigResource) mapBurnRateConfigsToState(burnRateConfigs *[]instana.BurnRateConfig) ([]SloAlertBurnRateConfigModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if burnRateConfigs == nil || len(*burnRateConfigs) == 0 {
@@ -422,7 +422,7 @@ func (r *sloAlertConfigResource) mapBurnRateConfigsToState(burnRateConfigs *[]re
 	return configs, diags
 }
 
-func (r *sloAlertConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.SloAlertConfig, diag.Diagnostics) {
+func (r *sloAlertConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*instana.SloAlertConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var model SloAlertConfigModel
 
@@ -449,7 +449,7 @@ func (r *sloAlertConfigResource) MapStateToDataObject(ctx context.Context, plan 
 		return nil, diags
 	}
 
-	return &restapi.SloAlertConfig{
+	return &instana.SloAlertConfig{
 		ID:                    r.extractIDFromModel(model),
 		Name:                  model.Name.ValueString(),
 		Description:           model.Description.ValueString(),
@@ -486,24 +486,24 @@ func (r *sloAlertConfigResource) extractIDFromModel(model SloAlertConfigModel) s
 }
 
 // mapAlertTypeToAPIRule converts Terraform alert type to API rule
-func (r *sloAlertConfigResource) mapAlertTypeToAPIRule(terraformAlertType string) (restapi.SloAlertRule, diag.Diagnostics) {
+func (r *sloAlertConfigResource) mapAlertTypeToAPIRule(terraformAlertType string) (instana.SloAlertRule, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	normalizedType := r.normalizeAlertType(terraformAlertType)
 
 	switch normalizedType {
 	case SloAlertConfigStatus:
-		return restapi.SloAlertRule{
+		return instana.SloAlertRule{
 			AlertType: APIAlertTypeServiceLevelsObjective,
 			Metric:    APIMetricStatus,
 		}, diags
 	case SloAlertConfigErrorBudget:
-		return restapi.SloAlertRule{
+		return instana.SloAlertRule{
 			AlertType: APIAlertTypeErrorBudget,
 			Metric:    APIMetricBurnedPercentage,
 		}, diags
 	case SloAlertConfigBurnRateV2:
-		return restapi.SloAlertRule{
+		return instana.SloAlertRule{
 			AlertType: APIAlertTypeErrorBudget,
 			Metric:    APIMetricBurnRateV2,
 		}, diags
@@ -512,7 +512,7 @@ func (r *sloAlertConfigResource) mapAlertTypeToAPIRule(terraformAlertType string
 			SloAlertConfigErrMappingAlertType,
 			fmt.Sprintf(SloAlertConfigErrInvalidAlertType, terraformAlertType),
 		)
-		return restapi.SloAlertRule{}, diags
+		return instana.SloAlertRule{}, diags
 	}
 }
 
@@ -531,7 +531,7 @@ func (r *sloAlertConfigResource) normalizeAlertType(alertType string) string {
 }
 
 // mapThresholdFromState converts state threshold to API threshold
-func (r *sloAlertConfigResource) mapThresholdFromState(alertType string, threshold *SloAlertThresholdModel) *restapi.SloAlertThreshold {
+func (r *sloAlertConfigResource) mapThresholdFromState(alertType string, threshold *SloAlertThresholdModel) *instana.SloAlertThreshold {
 	if threshold == nil {
 		return nil
 	}
@@ -541,7 +541,7 @@ func (r *sloAlertConfigResource) mapThresholdFromState(alertType string, thresho
 		thresholdType = threshold.Type.ValueString()
 	}
 
-	return &restapi.SloAlertThreshold{
+	return &instana.SloAlertThreshold{
 		Type:     thresholdType,
 		Operator: threshold.Operator.ValueString(),
 		Value:    threshold.Value.ValueFloat64(),
@@ -549,12 +549,12 @@ func (r *sloAlertConfigResource) mapThresholdFromState(alertType string, thresho
 }
 
 // mapTimeThresholdFromState converts state time threshold to API time threshold
-func (r *sloAlertConfigResource) mapTimeThresholdFromState(timeThreshold *SloAlertTimeThresholdModel) restapi.SloAlertTimeThreshold {
+func (r *sloAlertConfigResource) mapTimeThresholdFromState(timeThreshold *SloAlertTimeThresholdModel) instana.SloAlertTimeThreshold {
 	if timeThreshold == nil {
-		return restapi.SloAlertTimeThreshold{}
+		return instana.SloAlertTimeThreshold{}
 	}
 
-	return restapi.SloAlertTimeThreshold{
+	return instana.SloAlertTimeThreshold{
 		TimeWindow: int(timeThreshold.WarmUp.ValueInt64()),
 		Expiry:     int(timeThreshold.CoolDown.ValueInt64()),
 	}
@@ -574,14 +574,14 @@ func (r *sloAlertConfigResource) mapSetToStringSlice(ctx context.Context, set ty
 }
 
 // mapBurnRateConfigsFromState converts state burn rate configs to API burn rate configs
-func (r *sloAlertConfigResource) mapBurnRateConfigsFromState(alertType string, configs []SloAlertBurnRateConfigModel) ([]restapi.BurnRateConfig, diag.Diagnostics) {
+func (r *sloAlertConfigResource) mapBurnRateConfigsFromState(alertType string, configs []SloAlertBurnRateConfigModel) ([]instana.BurnRateConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if alertType != SloAlertConfigBurnRateV2 || configs == nil || len(configs) == 0 {
-		return []restapi.BurnRateConfig{}, diags
+		return []instana.BurnRateConfig{}, diags
 	}
 
-	burnRateConfigs := make([]restapi.BurnRateConfig, 0, len(configs))
+	burnRateConfigs := make([]instana.BurnRateConfig, 0, len(configs))
 	for _, configModel := range configs {
 		duration, durationErr := r.parseIntFromString(configModel.Duration.ValueString(), SloAlertConfigErrParsingDuration, SloAlertConfigErrParsingDurationMsg)
 		if durationErr != nil {
@@ -595,11 +595,11 @@ func (r *sloAlertConfigResource) mapBurnRateConfigsFromState(alertType string, c
 			return nil, diags
 		}
 
-		burnRateConfigs = append(burnRateConfigs, restapi.BurnRateConfig{
+		burnRateConfigs = append(burnRateConfigs, instana.BurnRateConfig{
 			AlertWindowType:  configModel.AlertWindowType.ValueString(),
 			Duration:         duration,
 			DurationUnitType: configModel.DurationUnitType.ValueString(),
-			Threshold: restapi.ServiceLevelsStaticThresholdConfig{
+			Threshold: instana.ServiceLevelsStaticThresholdConfig{
 				Operator: configModel.ThresholdOperator.ValueString(),
 				Value:    value,
 			},
@@ -628,7 +628,7 @@ func (r *sloAlertConfigResource) parseFloatFromString(value, errorTitle, errorMs
 }
 
 // mapCustomPayloadFieldsFromState converts state custom payload fields to API custom payload fields
-func (r *sloAlertConfigResource) mapCustomPayloadFieldsFromState(ctx context.Context, customPayload types.List) ([]restapi.CustomPayloadField[any], diag.Diagnostics) {
+func (r *sloAlertConfigResource) mapCustomPayloadFieldsFromState(ctx context.Context, customPayload types.List) ([]instana.CustomPayloadField[any], diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if customPayload.IsNull() || customPayload.IsUnknown() {

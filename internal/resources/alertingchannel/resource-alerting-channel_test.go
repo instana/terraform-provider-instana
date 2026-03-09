@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/instana-go-client/instana"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -62,7 +62,7 @@ func TestMapEmailChannelFromState(t *testing.T) {
 	require.NotNil(t, channel)
 	assert.Equal(t, "test-id", channel.ID)
 	assert.Equal(t, "test-name", channel.Name)
-	assert.Equal(t, restapi.EmailChannelType, channel.Kind)
+	assert.Equal(t, instana.EmailChannelType, channel.Kind)
 	assert.Equal(t, emails, channel.Emails)
 }
 
@@ -84,7 +84,7 @@ func TestMapOpsGenieChannelFromState(t *testing.T) {
 	require.NotNil(t, channel)
 	assert.Equal(t, "test-id", channel.ID)
 	assert.Equal(t, "test-name", channel.Name)
-	assert.Equal(t, restapi.OpsGenieChannelType, channel.Kind)
+	assert.Equal(t, instana.OpsGenieChannelType, channel.Kind)
 	assert.Equal(t, "test-api-key", *channel.APIKey)
 	assert.Equal(t, "EU", *channel.Region)
 	assert.Equal(t, "tag1,tag2,tag3", *channel.Tags)
@@ -103,7 +103,7 @@ func TestMapPagerDutyChannelFromState(t *testing.T) {
 	require.NotNil(t, channel)
 	assert.Equal(t, "test-id", channel.ID)
 	assert.Equal(t, "test-name", channel.Name)
-	assert.Equal(t, restapi.PagerDutyChannelType, channel.Kind)
+	assert.Equal(t, instana.PagerDutyChannelType, channel.Kind)
 	assert.Equal(t, "test-integration-key", *channel.ServiceIntegrationKey)
 }
 
@@ -123,7 +123,7 @@ func TestMapSlackChannelFromState(t *testing.T) {
 		require.NotNil(t, channel)
 		assert.Equal(t, "test-id", channel.ID)
 		assert.Equal(t, "test-name", channel.Name)
-		assert.Equal(t, restapi.SlackChannelType, channel.Kind)
+		assert.Equal(t, instana.SlackChannelType, channel.Kind)
 		assert.Equal(t, "https://hooks.slack.com/test", *channel.WebhookURL)
 		assert.Equal(t, "https://example.com/icon.png", *channel.IconURL)
 		assert.Equal(t, "#alerts", *channel.Channel)
@@ -139,7 +139,7 @@ func TestMapSlackChannelFromState(t *testing.T) {
 		channel, diags := resource.mapSlackChannelFromState(ctx, "test-id", "test-name", slackModel)
 		require.False(t, diags.HasError())
 		require.NotNil(t, channel)
-		assert.Equal(t, restapi.SlackChannelType, channel.Kind)
+		assert.Equal(t, instana.SlackChannelType, channel.Kind)
 		assert.Nil(t, channel.IconURL)
 		assert.Nil(t, channel.Channel)
 	})
@@ -159,7 +159,7 @@ func TestMapSplunkChannelFromState(t *testing.T) {
 	require.NotNil(t, channel)
 	assert.Equal(t, "test-id", channel.ID)
 	assert.Equal(t, "test-name", channel.Name)
-	assert.Equal(t, restapi.SplunkChannelType, channel.Kind)
+	assert.Equal(t, instana.SplunkChannelType, channel.Kind)
 	assert.Equal(t, "https://splunk.example.com", *channel.URL)
 	assert.Equal(t, "test-token", *channel.Token)
 }
@@ -178,7 +178,7 @@ func TestMapVictorOpsChannelFromState(t *testing.T) {
 	require.NotNil(t, channel)
 	assert.Equal(t, "test-id", channel.ID)
 	assert.Equal(t, "test-name", channel.Name)
-	assert.Equal(t, restapi.VictorOpsChannelType, channel.Kind)
+	assert.Equal(t, instana.VictorOpsChannelType, channel.Kind)
 	assert.Equal(t, "test-api-key", *channel.APIKey)
 	assert.Equal(t, "test-routing-key", *channel.RoutingKey)
 }
@@ -207,7 +207,7 @@ func TestMapWebhookChannelFromState(t *testing.T) {
 		require.NotNil(t, channel)
 		assert.Equal(t, "test-id", channel.ID)
 		assert.Equal(t, "test-name", channel.Name)
-		assert.Equal(t, restapi.WebhookChannelType, channel.Kind)
+		assert.Equal(t, instana.WebhookChannelType, channel.Kind)
 		assert.Equal(t, webhookURLs, channel.WebhookURLs)
 		assert.Len(t, channel.Headers, 2)
 	})
@@ -224,7 +224,7 @@ func TestMapWebhookChannelFromState(t *testing.T) {
 		channel, diags := resource.mapWebhookChannelFromState(ctx, "test-id", "test-name", webhookModel)
 		require.False(t, diags.HasError())
 		require.NotNil(t, channel)
-		assert.Equal(t, restapi.WebhookChannelType, channel.Kind)
+		assert.Equal(t, instana.WebhookChannelType, channel.Kind)
 		assert.Nil(t, channel.Headers)
 	})
 }
@@ -238,25 +238,25 @@ func TestMapWebhookBasedChannelFromState(t *testing.T) {
 	}
 
 	t.Run("Office365", func(t *testing.T) {
-		channel, diags := resource.mapWebhookBasedChannelFromState(ctx, "test-id", "test-name", webhookBasedModel, restapi.Office365ChannelType)
+		channel, diags := resource.mapWebhookBasedChannelFromState(ctx, "test-id", "test-name", webhookBasedModel, instana.Office365ChannelType)
 		require.False(t, diags.HasError())
 		require.NotNil(t, channel)
-		assert.Equal(t, restapi.Office365ChannelType, channel.Kind)
+		assert.Equal(t, instana.Office365ChannelType, channel.Kind)
 		assert.Equal(t, "https://webhook.example.com", *channel.WebhookURL)
 	})
 
 	t.Run("GoogleChat", func(t *testing.T) {
-		channel, diags := resource.mapWebhookBasedChannelFromState(ctx, "test-id", "test-name", webhookBasedModel, restapi.GoogleChatChannelType)
+		channel, diags := resource.mapWebhookBasedChannelFromState(ctx, "test-id", "test-name", webhookBasedModel, instana.GoogleChatChannelType)
 		require.False(t, diags.HasError())
 		require.NotNil(t, channel)
-		assert.Equal(t, restapi.GoogleChatChannelType, channel.Kind)
+		assert.Equal(t, instana.GoogleChatChannelType, channel.Kind)
 	})
 
 	t.Run("WebexTeamsWebhook", func(t *testing.T) {
-		channel, diags := resource.mapWebhookBasedChannelFromState(ctx, "test-id", "test-name", webhookBasedModel, restapi.WebexTeamsWebhookChannelType)
+		channel, diags := resource.mapWebhookBasedChannelFromState(ctx, "test-id", "test-name", webhookBasedModel, instana.WebexTeamsWebhookChannelType)
 		require.False(t, diags.HasError())
 		require.NotNil(t, channel)
-		assert.Equal(t, restapi.WebexTeamsWebhookChannelType, channel.Kind)
+		assert.Equal(t, instana.WebexTeamsWebhookChannelType, channel.Kind)
 	})
 }
 
@@ -276,7 +276,7 @@ func TestMapServiceNowChannelFromState(t *testing.T) {
 		channel, diags := resource.mapServiceNowChannelFromState(ctx, "test-id", "test-name", serviceNowModel)
 		require.False(t, diags.HasError())
 		require.NotNil(t, channel)
-		assert.Equal(t, restapi.ServiceNowChannelType, channel.Kind)
+		assert.Equal(t, instana.ServiceNowChannelType, channel.Kind)
 		assert.Equal(t, "https://servicenow.example.com", *channel.ServiceNowURL)
 		assert.Equal(t, "test-user", *channel.Username)
 		assert.Equal(t, "test-password", *channel.Password)
@@ -322,7 +322,7 @@ func TestMapServiceNowApplicationChannelFromState(t *testing.T) {
 		channel, diags := resource.mapServiceNowApplicationChannelFromState(ctx, "test-id", "test-name", serviceNowAppModel)
 		require.False(t, diags.HasError())
 		require.NotNil(t, channel)
-		assert.Equal(t, restapi.ServiceNowApplicationChannelType, channel.Kind)
+		assert.Equal(t, instana.ServiceNowApplicationChannelType, channel.Kind)
 		assert.Equal(t, "https://servicenow.example.com", *channel.ServiceNowURL)
 		assert.Equal(t, "test-user", *channel.Username)
 		assert.Equal(t, "test-password", *channel.Password)
@@ -376,7 +376,7 @@ func TestMapPrometheusWebhookChannelFromState(t *testing.T) {
 		channel, diags := resource.mapPrometheusWebhookChannelFromState(ctx, "test-id", "test-name", prometheusModel)
 		require.False(t, diags.HasError())
 		require.NotNil(t, channel)
-		assert.Equal(t, restapi.PrometheusWebhookChannelType, channel.Kind)
+		assert.Equal(t, instana.PrometheusWebhookChannelType, channel.Kind)
 		assert.Equal(t, "https://prometheus.example.com", *channel.WebhookURL)
 		assert.Equal(t, "test-receiver", *channel.Receiver)
 	})
@@ -410,7 +410,7 @@ func TestMapWatsonAIOpsWebhookChannelFromState(t *testing.T) {
 		channel, diags := resource.mapWatsonAIOpsWebhookChannelFromState(ctx, "test-id", "test-name", watsonModel)
 		require.False(t, diags.HasError())
 		require.NotNil(t, channel)
-		assert.Equal(t, restapi.WatsonAIOpsWebhookChannelType, channel.Kind)
+		assert.Equal(t, instana.WatsonAIOpsWebhookChannelType, channel.Kind)
 		assert.Equal(t, "https://watson.example.com", *channel.WebhookURL)
 		assert.Equal(t, headers, channel.Headers)
 	})
@@ -448,7 +448,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		channel, diags := resource.MapStateToDataObject(ctx, nil, state)
 		require.False(t, diags.HasError())
 		require.NotNil(t, channel)
-		assert.Equal(t, restapi.EmailChannelType, channel.Kind)
+		assert.Equal(t, instana.EmailChannelType, channel.Kind)
 	})
 
 	t.Run("OpsGenie channel", func(t *testing.T) {
@@ -469,7 +469,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		channel, diags := resource.MapStateToDataObject(ctx, nil, state)
 		require.False(t, diags.HasError())
 		require.NotNil(t, channel)
-		assert.Equal(t, restapi.OpsGenieChannelType, channel.Kind)
+		assert.Equal(t, instana.OpsGenieChannelType, channel.Kind)
 	})
 
 	t.Run("PagerDuty channel", func(t *testing.T) {
@@ -485,7 +485,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		channel, diags := resource.MapStateToDataObject(ctx, nil, state)
 		require.False(t, diags.HasError())
 		require.NotNil(t, channel)
-		assert.Equal(t, restapi.PagerDutyChannelType, channel.Kind)
+		assert.Equal(t, instana.PagerDutyChannelType, channel.Kind)
 	})
 
 	t.Run("Slack channel", func(t *testing.T) {
@@ -501,7 +501,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		channel, diags := resource.MapStateToDataObject(ctx, nil, state)
 		require.False(t, diags.HasError())
 		require.NotNil(t, channel)
-		assert.Equal(t, restapi.SlackChannelType, channel.Kind)
+		assert.Equal(t, instana.SlackChannelType, channel.Kind)
 	})
 
 	t.Run("Splunk channel", func(t *testing.T) {
@@ -518,7 +518,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		channel, diags := resource.MapStateToDataObject(ctx, nil, state)
 		require.False(t, diags.HasError())
 		require.NotNil(t, channel)
-		assert.Equal(t, restapi.SplunkChannelType, channel.Kind)
+		assert.Equal(t, instana.SplunkChannelType, channel.Kind)
 	})
 
 	t.Run("VictorOps channel", func(t *testing.T) {
@@ -535,7 +535,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		channel, diags := resource.MapStateToDataObject(ctx, nil, state)
 		require.False(t, diags.HasError())
 		require.NotNil(t, channel)
-		assert.Equal(t, restapi.VictorOpsChannelType, channel.Kind)
+		assert.Equal(t, instana.VictorOpsChannelType, channel.Kind)
 	})
 
 	t.Run("Webhook channel", func(t *testing.T) {
@@ -555,7 +555,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		channel, diags := resource.MapStateToDataObject(ctx, nil, state)
 		require.False(t, diags.HasError())
 		require.NotNil(t, channel)
-		assert.Equal(t, restapi.WebhookChannelType, channel.Kind)
+		assert.Equal(t, instana.WebhookChannelType, channel.Kind)
 	})
 
 	t.Run("Office365 channel", func(t *testing.T) {
@@ -571,7 +571,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		channel, diags := resource.MapStateToDataObject(ctx, nil, state)
 		require.False(t, diags.HasError())
 		require.NotNil(t, channel)
-		assert.Equal(t, restapi.Office365ChannelType, channel.Kind)
+		assert.Equal(t, instana.Office365ChannelType, channel.Kind)
 	})
 
 	t.Run("GoogleChat channel", func(t *testing.T) {
@@ -587,7 +587,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		channel, diags := resource.MapStateToDataObject(ctx, nil, state)
 		require.False(t, diags.HasError())
 		require.NotNil(t, channel)
-		assert.Equal(t, restapi.GoogleChatChannelType, channel.Kind)
+		assert.Equal(t, instana.GoogleChatChannelType, channel.Kind)
 	})
 
 	t.Run("ServiceNow channel", func(t *testing.T) {
@@ -605,7 +605,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		channel, diags := resource.MapStateToDataObject(ctx, nil, state)
 		require.False(t, diags.HasError())
 		require.NotNil(t, channel)
-		assert.Equal(t, restapi.ServiceNowChannelType, channel.Kind)
+		assert.Equal(t, instana.ServiceNowChannelType, channel.Kind)
 	})
 
 	t.Run("ServiceNowApplication channel", func(t *testing.T) {
@@ -626,7 +626,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		channel, diags := resource.MapStateToDataObject(ctx, nil, state)
 		require.False(t, diags.HasError())
 		require.NotNil(t, channel)
-		assert.Equal(t, restapi.ServiceNowApplicationChannelType, channel.Kind)
+		assert.Equal(t, instana.ServiceNowApplicationChannelType, channel.Kind)
 	})
 
 	t.Run("PrometheusWebhook channel", func(t *testing.T) {
@@ -642,7 +642,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		channel, diags := resource.MapStateToDataObject(ctx, nil, state)
 		require.False(t, diags.HasError())
 		require.NotNil(t, channel)
-		assert.Equal(t, restapi.PrometheusWebhookChannelType, channel.Kind)
+		assert.Equal(t, instana.PrometheusWebhookChannelType, channel.Kind)
 	})
 
 	t.Run("WebexTeamsWebhook channel", func(t *testing.T) {
@@ -658,7 +658,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		channel, diags := resource.MapStateToDataObject(ctx, nil, state)
 		require.False(t, diags.HasError())
 		require.NotNil(t, channel)
-		assert.Equal(t, restapi.WebexTeamsWebhookChannelType, channel.Kind)
+		assert.Equal(t, instana.WebexTeamsWebhookChannelType, channel.Kind)
 	})
 
 	t.Run("WatsonAIOpsWebhook channel", func(t *testing.T) {
@@ -675,7 +675,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		channel, diags := resource.MapStateToDataObject(ctx, nil, state)
 		require.False(t, diags.HasError())
 		require.NotNil(t, channel)
-		assert.Equal(t, restapi.WatsonAIOpsWebhookChannelType, channel.Kind)
+		assert.Equal(t, instana.WatsonAIOpsWebhookChannelType, channel.Kind)
 	})
 
 	t.Run("No channel configured", func(t *testing.T) {
@@ -697,10 +697,10 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("Email channel", func(t *testing.T) {
 		resource := &alertingChannelResource{}
-		apiChannel := &restapi.AlertingChannel{
+		apiChannel := &instana.AlertingChannel{
 			ID:     "test-id",
 			Name:   "test-name",
-			Kind:   restapi.EmailChannelType,
+			Kind:   instana.EmailChannelType,
 			Emails: []string{"test@example.com"},
 		}
 
@@ -725,10 +725,10 @@ func TestUpdateState(t *testing.T) {
 		apiKey := "test-api-key"
 		region := "EU"
 		tags := "tag1,tag2"
-		apiChannel := &restapi.AlertingChannel{
+		apiChannel := &instana.AlertingChannel{
 			ID:     "test-id",
 			Name:   "test-name",
-			Kind:   restapi.OpsGenieChannelType,
+			Kind:   instana.OpsGenieChannelType,
 			APIKey: &apiKey,
 			Region: &region,
 			Tags:   &tags,
@@ -751,10 +751,10 @@ func TestUpdateState(t *testing.T) {
 	t.Run("PagerDuty channel", func(t *testing.T) {
 		resource := &alertingChannelResource{}
 		serviceKey := "service-key"
-		apiChannel := &restapi.AlertingChannel{
+		apiChannel := &instana.AlertingChannel{
 			ID:                    "test-id",
 			Name:                  "test-name",
-			Kind:                  restapi.PagerDutyChannelType,
+			Kind:                  instana.PagerDutyChannelType,
 			ServiceIntegrationKey: &serviceKey,
 		}
 
@@ -775,10 +775,10 @@ func TestUpdateState(t *testing.T) {
 	t.Run("Slack channel", func(t *testing.T) {
 		resource := &alertingChannelResource{}
 		webhookURL := "https://slack.com/webhook"
-		apiChannel := &restapi.AlertingChannel{
+		apiChannel := &instana.AlertingChannel{
 			ID:         "test-id",
 			Name:       "test-name",
-			Kind:       restapi.SlackChannelType,
+			Kind:       instana.SlackChannelType,
 			WebhookURL: &webhookURL,
 		}
 
@@ -800,10 +800,10 @@ func TestUpdateState(t *testing.T) {
 		resource := &alertingChannelResource{}
 		url := "https://splunk.com"
 		token := "token"
-		apiChannel := &restapi.AlertingChannel{
+		apiChannel := &instana.AlertingChannel{
 			ID:    "test-id",
 			Name:  "test-name",
-			Kind:  restapi.SplunkChannelType,
+			Kind:  instana.SplunkChannelType,
 			URL:   &url,
 			Token: &token,
 		}
@@ -826,10 +826,10 @@ func TestUpdateState(t *testing.T) {
 		resource := &alertingChannelResource{}
 		apiKey := "api-key"
 		routingKey := "routing-key"
-		apiChannel := &restapi.AlertingChannel{
+		apiChannel := &instana.AlertingChannel{
 			ID:         "test-id",
 			Name:       "test-name",
-			Kind:       restapi.VictorOpsChannelType,
+			Kind:       instana.VictorOpsChannelType,
 			APIKey:     &apiKey,
 			RoutingKey: &routingKey,
 		}
@@ -850,10 +850,10 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("Webhook channel", func(t *testing.T) {
 		resource := &alertingChannelResource{}
-		apiChannel := &restapi.AlertingChannel{
+		apiChannel := &instana.AlertingChannel{
 			ID:          "test-id",
 			Name:        "test-name",
-			Kind:        restapi.WebhookChannelType,
+			Kind:        instana.WebhookChannelType,
 			WebhookURLs: []string{"https://webhook.com"},
 		}
 
@@ -874,10 +874,10 @@ func TestUpdateState(t *testing.T) {
 	t.Run("Office365 channel", func(t *testing.T) {
 		resource := &alertingChannelResource{}
 		webhookURL := "https://office365.com/webhook"
-		apiChannel := &restapi.AlertingChannel{
+		apiChannel := &instana.AlertingChannel{
 			ID:         "test-id",
 			Name:       "test-name",
-			Kind:       restapi.Office365ChannelType,
+			Kind:       instana.Office365ChannelType,
 			WebhookURL: &webhookURL,
 		}
 
@@ -898,10 +898,10 @@ func TestUpdateState(t *testing.T) {
 	t.Run("GoogleChat channel", func(t *testing.T) {
 		resource := &alertingChannelResource{}
 		webhookURL := "https://chat.google.com/webhook"
-		apiChannel := &restapi.AlertingChannel{
+		apiChannel := &instana.AlertingChannel{
 			ID:         "test-id",
 			Name:       "test-name",
-			Kind:       restapi.GoogleChatChannelType,
+			Kind:       instana.GoogleChatChannelType,
 			WebhookURL: &webhookURL,
 		}
 
@@ -924,10 +924,10 @@ func TestUpdateState(t *testing.T) {
 		serviceNowURL := "https://servicenow.com"
 		username := "user"
 		password := "pass"
-		apiChannel := &restapi.AlertingChannel{
+		apiChannel := &instana.AlertingChannel{
 			ID:            "test-id",
 			Name:          "test-name",
-			Kind:          restapi.ServiceNowChannelType,
+			Kind:          instana.ServiceNowChannelType,
 			ServiceNowURL: &serviceNowURL,
 			Username:      &username,
 			Password:      &password,
@@ -954,10 +954,10 @@ func TestUpdateState(t *testing.T) {
 		password := "pass"
 		tenant := "tenant"
 		unit := "unit"
-		apiChannel := &restapi.AlertingChannel{
+		apiChannel := &instana.AlertingChannel{
 			ID:            "test-id",
 			Name:          "test-name",
-			Kind:          restapi.ServiceNowApplicationChannelType,
+			Kind:          instana.ServiceNowApplicationChannelType,
 			ServiceNowURL: &serviceNowURL,
 			Username:      &username,
 			Password:      &password,
@@ -982,10 +982,10 @@ func TestUpdateState(t *testing.T) {
 	t.Run("PrometheusWebhook channel", func(t *testing.T) {
 		resource := &alertingChannelResource{}
 		webhookURL := "https://prometheus.com/webhook"
-		apiChannel := &restapi.AlertingChannel{
+		apiChannel := &instana.AlertingChannel{
 			ID:         "test-id",
 			Name:       "test-name",
-			Kind:       restapi.PrometheusWebhookChannelType,
+			Kind:       instana.PrometheusWebhookChannelType,
 			WebhookURL: &webhookURL,
 		}
 
@@ -1006,10 +1006,10 @@ func TestUpdateState(t *testing.T) {
 	t.Run("WebexTeamsWebhook channel", func(t *testing.T) {
 		resource := &alertingChannelResource{}
 		webhookURL := "https://webex.com/webhook"
-		apiChannel := &restapi.AlertingChannel{
+		apiChannel := &instana.AlertingChannel{
 			ID:         "test-id",
 			Name:       "test-name",
-			Kind:       restapi.WebexTeamsWebhookChannelType,
+			Kind:       instana.WebexTeamsWebhookChannelType,
 			WebhookURL: &webhookURL,
 		}
 
@@ -1030,10 +1030,10 @@ func TestUpdateState(t *testing.T) {
 	t.Run("WatsonAIOpsWebhook channel", func(t *testing.T) {
 		resource := &alertingChannelResource{}
 		webhookURL := "https://watson.com/webhook"
-		apiChannel := &restapi.AlertingChannel{
+		apiChannel := &instana.AlertingChannel{
 			ID:         "test-id",
 			Name:       "test-name",
-			Kind:       restapi.WatsonAIOpsWebhookChannelType,
+			Kind:       instana.WatsonAIOpsWebhookChannelType,
 			WebhookURL: &webhookURL,
 		}
 
@@ -1053,10 +1053,10 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("Unsupported channel type", func(t *testing.T) {
 		resource := &alertingChannelResource{}
-		apiChannel := &restapi.AlertingChannel{
+		apiChannel := &instana.AlertingChannel{
 			ID:   "test-id",
 			Name: "test-name",
-			Kind: restapi.AlertingChannelType("UNSUPPORTED"),
+			Kind: instana.AlertingChannelType("UNSUPPORTED"),
 		}
 
 		handle := NewAlertingChannelResourceHandle()

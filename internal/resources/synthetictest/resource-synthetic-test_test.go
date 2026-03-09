@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/instana-go-client/instana"
 	"github.com/instana/terraform-provider-instana/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -85,30 +85,30 @@ type mockSyntheticTestAPI struct {
 	testutils.MockInstanaAPI
 }
 
-func (m *mockSyntheticTestAPI) SyntheticTest() restapi.RestResource[*restapi.SyntheticTest] {
+func (m *mockSyntheticTestAPI) SyntheticTest() instana.RestResource[*instana.SyntheticTest] {
 	return &mockSyntheticTestRestResource{}
 }
 
 // Mock rest resource
 type mockSyntheticTestRestResource struct{}
 
-func (m *mockSyntheticTestRestResource) GetAll() (*[]*restapi.SyntheticTest, error) {
+func (m *mockSyntheticTestRestResource) GetAll() (*[]*instana.SyntheticTest, error) {
 	return nil, nil
 }
 
-func (m *mockSyntheticTestRestResource) GetOne(id string) (*restapi.SyntheticTest, error) {
+func (m *mockSyntheticTestRestResource) GetOne(id string) (*instana.SyntheticTest, error) {
 	return nil, nil
 }
 
-func (m *mockSyntheticTestRestResource) Create(data *restapi.SyntheticTest) (*restapi.SyntheticTest, error) {
+func (m *mockSyntheticTestRestResource) Create(data *instana.SyntheticTest) (*instana.SyntheticTest, error) {
 	return nil, nil
 }
 
-func (m *mockSyntheticTestRestResource) Update(data *restapi.SyntheticTest) (*restapi.SyntheticTest, error) {
+func (m *mockSyntheticTestRestResource) Update(data *instana.SyntheticTest) (*instana.SyntheticTest, error) {
 	return nil, nil
 }
 
-func (m *mockSyntheticTestRestResource) Delete(data *restapi.SyntheticTest) error {
+func (m *mockSyntheticTestRestResource) Delete(data *instana.SyntheticTest) error {
 	return nil
 }
 
@@ -971,13 +971,13 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("should update state with HTTP Action", func(t *testing.T) {
 		url := "https://example.com"
-		apiObject := &restapi.SyntheticTest{
+		apiObject := &instana.SyntheticTest{
 			ID:           "test-id",
 			Label:        "Test",
 			Active:       true,
 			PlaybackMode: "Simultaneous",
 			Locations:    []string{"loc-1"},
-			Configuration: restapi.SyntheticTestConfig{
+			Configuration: instana.SyntheticTestConfig{
 				MarkSyntheticCall: false,
 				Retries:           0,
 				RetryInterval:     1,
@@ -1005,13 +1005,13 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("should update state with HTTP Script", func(t *testing.T) {
 		script := "console.log('test');"
-		apiObject := &restapi.SyntheticTest{
+		apiObject := &instana.SyntheticTest{
 			ID:           "test-id",
 			Label:        "Test",
 			Active:       true,
 			PlaybackMode: "Simultaneous",
 			Locations:    []string{"loc-1"},
-			Configuration: restapi.SyntheticTestConfig{
+			Configuration: instana.SyntheticTestConfig{
 				MarkSyntheticCall: false,
 				Retries:           0,
 				RetryInterval:     1,
@@ -1039,13 +1039,13 @@ func TestUpdateState(t *testing.T) {
 	t.Run("should update state with Browser Script", func(t *testing.T) {
 		script := "browser script"
 		browser := "chrome"
-		apiObject := &restapi.SyntheticTest{
+		apiObject := &instana.SyntheticTest{
 			ID:           "test-id",
 			Label:        "Test",
 			Active:       true,
 			PlaybackMode: "Simultaneous",
 			Locations:    []string{"loc-1"},
-			Configuration: restapi.SyntheticTestConfig{
+			Configuration: instana.SyntheticTestConfig{
 				MarkSyntheticCall: false,
 				Retries:           0,
 				RetryInterval:     1,
@@ -1074,13 +1074,13 @@ func TestUpdateState(t *testing.T) {
 	t.Run("should update state with DNS", func(t *testing.T) {
 		lookup := "example.com"
 		server := "8.8.8.8"
-		apiObject := &restapi.SyntheticTest{
+		apiObject := &instana.SyntheticTest{
 			ID:           "test-id",
 			Label:        "Test",
 			Active:       true,
 			PlaybackMode: "Simultaneous",
 			Locations:    []string{"loc-1"},
-			Configuration: restapi.SyntheticTestConfig{
+			Configuration: instana.SyntheticTestConfig{
 				MarkSyntheticCall: false,
 				Retries:           0,
 				RetryInterval:     1,
@@ -1109,13 +1109,13 @@ func TestUpdateState(t *testing.T) {
 	t.Run("should update state with SSL Certificate", func(t *testing.T) {
 		hostname := "example.com"
 		days := int32(30)
-		apiObject := &restapi.SyntheticTest{
+		apiObject := &instana.SyntheticTest{
 			ID:           "test-id",
 			Label:        "Test",
 			Active:       true,
 			PlaybackMode: "Simultaneous",
 			Locations:    []string{"loc-1"},
-			Configuration: restapi.SyntheticTestConfig{
+			Configuration: instana.SyntheticTestConfig{
 				MarkSyntheticCall:  false,
 				Retries:            0,
 				RetryInterval:      1,
@@ -1143,13 +1143,13 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("should update state with Webpage Action", func(t *testing.T) {
 		url := "https://example.com"
-		apiObject := &restapi.SyntheticTest{
+		apiObject := &instana.SyntheticTest{
 			ID:           "test-id",
 			Label:        "Test",
 			Active:       true,
 			PlaybackMode: "Simultaneous",
 			Locations:    []string{"loc-1"},
-			Configuration: restapi.SyntheticTestConfig{
+			Configuration: instana.SyntheticTestConfig{
 				MarkSyntheticCall: false,
 				Retries:           0,
 				RetryInterval:     1,
@@ -1176,13 +1176,13 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("should update state with Webpage Script", func(t *testing.T) {
 		script := "webpage script"
-		apiObject := &restapi.SyntheticTest{
+		apiObject := &instana.SyntheticTest{
 			ID:           "test-id",
 			Label:        "Test",
 			Active:       true,
 			PlaybackMode: "Simultaneous",
 			Locations:    []string{"loc-1"},
-			Configuration: restapi.SyntheticTestConfig{
+			Configuration: instana.SyntheticTestConfig{
 				MarkSyntheticCall: false,
 				Retries:           0,
 				RetryInterval:     1,
@@ -1213,13 +1213,13 @@ func TestUpdateState(t *testing.T) {
 		fileName := "test.js"
 		bundle := "bundle content"
 		scriptFile := "script file content"
-		apiObject := &restapi.SyntheticTest{
+		apiObject := &instana.SyntheticTest{
 			ID:           "test-id",
 			Label:        "Test",
 			Active:       true,
 			PlaybackMode: "Simultaneous",
 			Locations:    []string{"loc-1"},
-			Configuration: restapi.SyntheticTestConfig{
+			Configuration: instana.SyntheticTestConfig{
 				MarkSyntheticCall: false,
 				Retries:           0,
 				RetryInterval:     1,
@@ -1227,7 +1227,7 @@ func TestUpdateState(t *testing.T) {
 				Script:            &script,
 				ScriptType:        &scriptType,
 				FileName:          &fileName,
-				Scripts: &restapi.MultipleScriptsConfiguration{
+				Scripts: &instana.MultipleScriptsConfiguration{
 					Bundle:     &bundle,
 					ScriptFile: &scriptFile,
 				},
@@ -1258,13 +1258,13 @@ func TestUpdateState(t *testing.T) {
 		recordVideo := true
 		bundle := "browser bundle"
 		scriptFile := "browser script file"
-		apiObject := &restapi.SyntheticTest{
+		apiObject := &instana.SyntheticTest{
 			ID:           "test-id",
 			Label:        "Test",
 			Active:       true,
 			PlaybackMode: "Simultaneous",
 			Locations:    []string{"loc-1"},
-			Configuration: restapi.SyntheticTestConfig{
+			Configuration: instana.SyntheticTestConfig{
 				MarkSyntheticCall: false,
 				Retries:           0,
 				RetryInterval:     1,
@@ -1272,7 +1272,7 @@ func TestUpdateState(t *testing.T) {
 				Script:            &script,
 				Browser:           &browser,
 				RecordVideo:       &recordVideo,
-				Scripts: &restapi.MultipleScriptsConfiguration{
+				Scripts: &instana.MultipleScriptsConfiguration{
 					Bundle:     &bundle,
 					ScriptFile: &scriptFile,
 				},
@@ -1305,13 +1305,13 @@ func TestUpdateState(t *testing.T) {
 		acceptCNAME := true
 		lookupServerName := false
 		recursiveLookups := true
-		apiObject := &restapi.SyntheticTest{
+		apiObject := &instana.SyntheticTest{
 			ID:           "test-id",
 			Label:        "Test",
 			Active:       true,
 			PlaybackMode: "Simultaneous",
 			Locations:    []string{"loc-1"},
-			Configuration: restapi.SyntheticTestConfig{
+			Configuration: instana.SyntheticTestConfig{
 				MarkSyntheticCall: false,
 				Retries:           0,
 				RetryInterval:     1,
@@ -1323,7 +1323,7 @@ func TestUpdateState(t *testing.T) {
 				AcceptCNAME:       &acceptCNAME,
 				LookupServerName:  &lookupServerName,
 				RecursiveLookups:  &recursiveLookups,
-				QueryTime: &restapi.DNSFilterQueryTime{
+				QueryTime: &instana.DNSFilterQueryTime{
 					Key:      "query_time",
 					Operator: "LESS_THAN",
 					Value:    100,
@@ -1354,13 +1354,13 @@ func TestUpdateState(t *testing.T) {
 		days := int32(30)
 		port := int32(443)
 		acceptSelfSigned := true
-		apiObject := &restapi.SyntheticTest{
+		apiObject := &instana.SyntheticTest{
 			ID:           "test-id",
 			Label:        "Test",
 			Active:       true,
 			PlaybackMode: "Simultaneous",
 			Locations:    []string{"loc-1"},
-			Configuration: restapi.SyntheticTestConfig{
+			Configuration: instana.SyntheticTestConfig{
 				MarkSyntheticCall:    false,
 				Retries:              0,
 				RetryInterval:        1,
@@ -1393,13 +1393,13 @@ func TestUpdateState(t *testing.T) {
 	t.Run("should update state with HTTP Script with empty FileName", func(t *testing.T) {
 		script := "console.log('test');"
 		fileName := ""
-		apiObject := &restapi.SyntheticTest{
+		apiObject := &instana.SyntheticTest{
 			ID:           "test-id",
 			Label:        "Test",
 			Active:       true,
 			PlaybackMode: "Simultaneous",
 			Locations:    []string{"loc-1"},
-			Configuration: restapi.SyntheticTestConfig{
+			Configuration: instana.SyntheticTestConfig{
 				MarkSyntheticCall: false,
 				Retries:           0,
 				RetryInterval:     1,
@@ -1429,13 +1429,13 @@ func TestUpdateState(t *testing.T) {
 	t.Run("should update state with Browser Script with empty FileName", func(t *testing.T) {
 		script := "browser script"
 		fileName := ""
-		apiObject := &restapi.SyntheticTest{
+		apiObject := &instana.SyntheticTest{
 			ID:           "test-id",
 			Label:        "Test",
 			Active:       true,
 			PlaybackMode: "Simultaneous",
 			Locations:    []string{"loc-1"},
-			Configuration: restapi.SyntheticTestConfig{
+			Configuration: instana.SyntheticTestConfig{
 				MarkSyntheticCall: false,
 				Retries:           0,
 				RetryInterval:     1,
@@ -1465,13 +1465,13 @@ func TestUpdateState(t *testing.T) {
 	t.Run("should update state with Webpage Script with empty FileName", func(t *testing.T) {
 		script := "webpage script"
 		fileName := ""
-		apiObject := &restapi.SyntheticTest{
+		apiObject := &instana.SyntheticTest{
 			ID:           "test-id",
 			Label:        "Test",
 			Active:       true,
 			PlaybackMode: "Simultaneous",
 			Locations:    []string{"loc-1"},
-			Configuration: restapi.SyntheticTestConfig{
+			Configuration: instana.SyntheticTestConfig{
 				MarkSyntheticCall: false,
 				Retries:           0,
 				RetryInterval:     1,
@@ -1507,13 +1507,13 @@ func TestUpdateState(t *testing.T) {
 		allowInsecure := false
 		expectStatus := int32(200)
 		expectMatch := ".*success.*"
-		apiObject := &restapi.SyntheticTest{
+		apiObject := &instana.SyntheticTest{
 			ID:           "test-id",
 			Label:        "Test",
 			Active:       true,
 			PlaybackMode: "Simultaneous",
 			Locations:    []string{"loc-1"},
-			Configuration: restapi.SyntheticTestConfig{
+			Configuration: instana.SyntheticTestConfig{
 				MarkSyntheticCall: false,
 				Retries:           0,
 				RetryInterval:     1,
@@ -1549,7 +1549,7 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("should update state with empty arrays", func(t *testing.T) {
 		url := "https://example.com"
-		apiObject := &restapi.SyntheticTest{
+		apiObject := &instana.SyntheticTest{
 			ID:           "test-id",
 			Label:        "Test",
 			Active:       true,
@@ -1558,8 +1558,8 @@ func TestUpdateState(t *testing.T) {
 			Applications: []string{},
 			MobileApps:   []string{},
 			Websites:     []string{},
-			RbacTags:     []restapi.ApiTag{},
-			Configuration: restapi.SyntheticTestConfig{
+			RbacTags:     []instana.ApiTag{},
+			Configuration: instana.SyntheticTestConfig{
 				MarkSyntheticCall: false,
 				Retries:           0,
 				RetryInterval:     1,
@@ -1590,14 +1590,14 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("should update state with nil TestFrequency", func(t *testing.T) {
 		url := "https://example.com"
-		apiObject := &restapi.SyntheticTest{
+		apiObject := &instana.SyntheticTest{
 			ID:            "test-id",
 			Label:         "Test",
 			Active:        true,
 			PlaybackMode:  "Simultaneous",
 			Locations:     []string{"loc-1"},
 			TestFrequency: nil,
-			Configuration: restapi.SyntheticTestConfig{
+			Configuration: instana.SyntheticTestConfig{
 				MarkSyntheticCall: false,
 				Retries:           0,
 				RetryInterval:     1,
@@ -1624,14 +1624,14 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("should update state with empty CustomProperties", func(t *testing.T) {
 		url := "https://example.com"
-		apiObject := &restapi.SyntheticTest{
+		apiObject := &instana.SyntheticTest{
 			ID:               "test-id",
 			Label:            "Test",
 			Active:           true,
 			PlaybackMode:     "Simultaneous",
 			Locations:        []string{"loc-1"},
 			CustomProperties: map[string]string{},
-			Configuration: restapi.SyntheticTestConfig{
+			Configuration: instana.SyntheticTestConfig{
 				MarkSyntheticCall: false,
 				Retries:           0,
 				RetryInterval:     1,
@@ -1658,13 +1658,13 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("should update state with HTTP Action empty Headers and ExpectJson", func(t *testing.T) {
 		url := "https://example.com"
-		apiObject := &restapi.SyntheticTest{
+		apiObject := &instana.SyntheticTest{
 			ID:           "test-id",
 			Label:        "Test",
 			Active:       true,
 			PlaybackMode: "Simultaneous",
 			Locations:    []string{"loc-1"},
-			Configuration: restapi.SyntheticTestConfig{
+			Configuration: instana.SyntheticTestConfig{
 				MarkSyntheticCall: false,
 				Retries:           0,
 				RetryInterval:     1,
@@ -1696,20 +1696,20 @@ func TestUpdateState(t *testing.T) {
 	t.Run("should update state with DNS empty TargetValues", func(t *testing.T) {
 		lookup := "example.com"
 		server := "8.8.8.8"
-		apiObject := &restapi.SyntheticTest{
+		apiObject := &instana.SyntheticTest{
 			ID:           "test-id",
 			Label:        "Test",
 			Active:       true,
 			PlaybackMode: "Simultaneous",
 			Locations:    []string{"loc-1"},
-			Configuration: restapi.SyntheticTestConfig{
+			Configuration: instana.SyntheticTestConfig{
 				MarkSyntheticCall: false,
 				Retries:           0,
 				RetryInterval:     1,
 				SyntheticType:     "DNS",
 				Lookup:            &lookup,
 				Server:            &server,
-				TargetValues:      []restapi.DNSFilterTargetValue{},
+				TargetValues:      []instana.DNSFilterTargetValue{},
 			},
 		}
 
@@ -1733,20 +1733,20 @@ func TestUpdateState(t *testing.T) {
 	t.Run("should update state with SSL Certificate empty ValidationRules", func(t *testing.T) {
 		hostname := "example.com"
 		days := int32(30)
-		apiObject := &restapi.SyntheticTest{
+		apiObject := &instana.SyntheticTest{
 			ID:           "test-id",
 			Label:        "Test",
 			Active:       true,
 			PlaybackMode: "Simultaneous",
 			Locations:    []string{"loc-1"},
-			Configuration: restapi.SyntheticTestConfig{
+			Configuration: instana.SyntheticTestConfig{
 				MarkSyntheticCall:  false,
 				Retries:            0,
 				RetryInterval:      1,
 				SyntheticType:      "SSLCertificate",
 				Hostname:           &hostname,
 				DaysRemainingCheck: &days,
-				ValidationRules:    []restapi.SSLCertificateValidation{},
+				ValidationRules:    []instana.SSLCertificateValidation{},
 			},
 		}
 
@@ -1773,7 +1773,7 @@ func TestUpdateState(t *testing.T) {
 		url := "https://example.com"
 		desc := "Test Description"
 
-		apiObject := &restapi.SyntheticTest{
+		apiObject := &instana.SyntheticTest{
 			ID:            "test-id",
 			Label:         "Test",
 			Description:   &desc,
@@ -1788,10 +1788,10 @@ func TestUpdateState(t *testing.T) {
 			CustomProperties: map[string]string{
 				"env": "prod",
 			},
-			RbacTags: []restapi.ApiTag{
+			RbacTags: []instana.ApiTag{
 				{Name: "dept", Value: "eng"},
 			},
-			Configuration: restapi.SyntheticTestConfig{
+			Configuration: instana.SyntheticTestConfig{
 				MarkSyntheticCall: false,
 				Retries:           0,
 				RetryInterval:     1,
@@ -1909,13 +1909,13 @@ func TestUpdateStateEdgeCases(t *testing.T) {
 		url := "https://example.com"
 		browser := "chrome"
 		recordVideo := true
-		apiObject := &restapi.SyntheticTest{
+		apiObject := &instana.SyntheticTest{
 			ID:           "test-id",
 			Label:        "Test",
 			Active:       true,
 			PlaybackMode: "Simultaneous",
 			Locations:    []string{"loc-1"},
-			Configuration: restapi.SyntheticTestConfig{
+			Configuration: instana.SyntheticTestConfig{
 				MarkSyntheticCall: false,
 				Retries:           0,
 				RetryInterval:     1,
@@ -1945,13 +1945,13 @@ func TestUpdateStateEdgeCases(t *testing.T) {
 
 	t.Run("should update state with HTTP Action with populated Headers and ExpectJson", func(t *testing.T) {
 		url := "https://example.com"
-		apiObject := &restapi.SyntheticTest{
+		apiObject := &instana.SyntheticTest{
 			ID:           "test-id",
 			Label:        "Test",
 			Active:       true,
 			PlaybackMode: "Simultaneous",
 			Locations:    []string{"loc-1"},
-			Configuration: restapi.SyntheticTestConfig{
+			Configuration: instana.SyntheticTestConfig{
 				MarkSyntheticCall: false,
 				Retries:           0,
 				RetryInterval:     1,
@@ -1990,20 +1990,20 @@ func TestUpdateStateEdgeCases(t *testing.T) {
 	t.Run("should update state with DNS with populated TargetValues", func(t *testing.T) {
 		lookup := "example.com"
 		server := "8.8.8.8"
-		apiObject := &restapi.SyntheticTest{
+		apiObject := &instana.SyntheticTest{
 			ID:           "test-id",
 			Label:        "Test",
 			Active:       true,
 			PlaybackMode: "Simultaneous",
 			Locations:    []string{"loc-1"},
-			Configuration: restapi.SyntheticTestConfig{
+			Configuration: instana.SyntheticTestConfig{
 				MarkSyntheticCall: false,
 				Retries:           0,
 				RetryInterval:     1,
 				SyntheticType:     "DNS",
 				Lookup:            &lookup,
 				Server:            &server,
-				TargetValues: []restapi.DNSFilterTargetValue{
+				TargetValues: []instana.DNSFilterTargetValue{
 					{
 						Key:      "A",
 						Operator: "EQUALS",
@@ -2038,20 +2038,20 @@ func TestUpdateStateEdgeCases(t *testing.T) {
 	t.Run("should update state with SSL Certificate with populated ValidationRules", func(t *testing.T) {
 		hostname := "example.com"
 		days := int32(30)
-		apiObject := &restapi.SyntheticTest{
+		apiObject := &instana.SyntheticTest{
 			ID:           "test-id",
 			Label:        "Test",
 			Active:       true,
 			PlaybackMode: "Simultaneous",
 			Locations:    []string{"loc-1"},
-			Configuration: restapi.SyntheticTestConfig{
+			Configuration: instana.SyntheticTestConfig{
 				MarkSyntheticCall:  false,
 				Retries:            0,
 				RetryInterval:      1,
 				SyntheticType:      "SSLCertificate",
 				Hostname:           &hostname,
 				DaysRemainingCheck: &days,
-				ValidationRules: []restapi.SSLCertificateValidation{
+				ValidationRules: []instana.SSLCertificateValidation{
 					{
 						Key:      "issuer",
 						Operator: "CONTAINS",
@@ -2087,13 +2087,13 @@ func TestUpdateStateEdgeCases(t *testing.T) {
 		script := "webpage script"
 		browser := "firefox"
 		recordVideo := false
-		apiObject := &restapi.SyntheticTest{
+		apiObject := &instana.SyntheticTest{
 			ID:           "test-id",
 			Label:        "Test",
 			Active:       true,
 			PlaybackMode: "Simultaneous",
 			Locations:    []string{"loc-1"},
-			Configuration: restapi.SyntheticTestConfig{
+			Configuration: instana.SyntheticTestConfig{
 				MarkSyntheticCall: false,
 				Retries:           0,
 				RetryInterval:     1,

@@ -38,7 +38,7 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/resources/team"
 	"github.com/instana/terraform-provider-instana/internal/resources/websitealertconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/websitemonitoringconfig"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/instana-go-client/instana"
 )
 
 // Ensure the implementation satisfies the expected interfaces
@@ -158,13 +158,13 @@ func (p *InstanaProvider) Configure(ctx context.Context, req provider.ConfigureR
 	}
 
 	// Create a new Instana client using the configuration values
-	instanaAPI := restapi.NewInstanaAPI(apiToken, endpoint, skipTlsVerify)
+	instanaAPI := instana.NewInstanaAPI(apiToken, endpoint, skipTlsVerify)
 
 	// Make the Instana client available during DataSource and Resource Configure methods
-	resp.DataSourceData = &restapi.ProviderMeta{
+	resp.DataSourceData = &instana.ProviderMeta{
 		InstanaAPI: instanaAPI,
 	}
-	resp.ResourceData = &restapi.ProviderMeta{
+	resp.ResourceData = &instana.ProviderMeta{
 		InstanaAPI: instanaAPI,
 	}
 }
@@ -217,7 +217,7 @@ func (p *InstanaProvider) Resources(_ context.Context) []func() resource.Resourc
 }
 
 // Helper function to wrap resource handles
-func addResouceHandle[T restapi.InstanaDataObject](handleFunc func() resourcehandle.ResourceHandle[T]) func() resource.Resource {
+func addResouceHandle[T instana.InstanaDataObject](handleFunc func() resourcehandle.ResourceHandle[T]) func() resource.Resource {
 	return func() resource.Resource {
 		return NewTerraformResource(handleFunc())
 	}

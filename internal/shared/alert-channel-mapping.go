@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/instana-go-client/instana"
 	"github.com/instana/terraform-provider-instana/internal/util"
 )
 
@@ -107,7 +107,7 @@ type MsTeamsAppModel struct {
 	TenantName  types.String `tfsdk:"tenant_name"`
 }
 
-func MapAlertChannelsToState(ctx context.Context, alertChannels map[restapi.AlertSeverity][]string) (types.Object, diag.Diagnostics) {
+func MapAlertChannelsToState(ctx context.Context, alertChannels map[instana.AlertSeverity][]string) (types.Object, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	attrTypes := map[string]attr.Type{
@@ -122,7 +122,7 @@ func MapAlertChannelsToState(ctx context.Context, alertChannels map[restapi.Aler
 	alertChannelsObj := map[string]attr.Value{}
 
 	// Map warning severity
-	if warningChannels, ok := alertChannels[restapi.WarningSeverity]; ok && len(warningChannels) > 0 {
+	if warningChannels, ok := alertChannels[instana.WarningSeverity]; ok && len(warningChannels) > 0 {
 		warningList, warningDiags := types.ListValueFrom(ctx, types.StringType, warningChannels)
 		diags.Append(warningDiags...)
 		if diags.HasError() {
@@ -134,7 +134,7 @@ func MapAlertChannelsToState(ctx context.Context, alertChannels map[restapi.Aler
 	}
 
 	// Map critical severity
-	if criticalChannels, ok := alertChannels[restapi.CriticalSeverity]; ok && len(criticalChannels) > 0 {
+	if criticalChannels, ok := alertChannels[instana.CriticalSeverity]; ok && len(criticalChannels) > 0 {
 		criticalList, criticalDiags := types.ListValueFrom(ctx, types.StringType, criticalChannels)
 		diags.Append(criticalDiags...)
 		if diags.HasError() {
@@ -148,9 +148,9 @@ func MapAlertChannelsToState(ctx context.Context, alertChannels map[restapi.Aler
 	return types.ObjectValue(attrTypes, alertChannelsObj)
 }
 
-func MapAlertChannelsFromState(ctx context.Context, alertChannelsObj types.Object) (map[restapi.AlertSeverity][]string, diag.Diagnostics) {
+func MapAlertChannelsFromState(ctx context.Context, alertChannelsObj types.Object) (map[instana.AlertSeverity][]string, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	alertChannelsMap := make(map[restapi.AlertSeverity][]string)
+	alertChannelsMap := make(map[instana.AlertSeverity][]string)
 
 	if alertChannelsObj.IsNull() || alertChannelsObj.IsUnknown() {
 		return alertChannelsMap, diags
@@ -177,7 +177,7 @@ func MapAlertChannelsFromState(ctx context.Context, alertChannelsObj types.Objec
 
 		//}
 	}
-	alertChannelsMap[restapi.WarningSeverity] = warningChannels
+	alertChannelsMap[instana.WarningSeverity] = warningChannels
 
 	criticalChannels := make([]string, 0)
 	// Map critical severity
@@ -191,12 +191,12 @@ func MapAlertChannelsFromState(ctx context.Context, alertChannelsObj types.Objec
 
 		//}
 	}
-	alertChannelsMap[restapi.CriticalSeverity] = criticalChannels
+	alertChannelsMap[instana.CriticalSeverity] = criticalChannels
 
 	return alertChannelsMap, diags
 }
 
-func MapWebhookBasedChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*WebhookBasedModel, diag.Diagnostics) {
+func MapWebhookBasedChannelToState(ctx context.Context, channel *instana.AlertingChannel) (*WebhookBasedModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Create and return webhook-based model
@@ -205,7 +205,7 @@ func MapWebhookBasedChannelToState(ctx context.Context, channel *restapi.Alertin
 	}, diags
 }
 
-func MapServiceNowChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*ServiceNowModel, diag.Diagnostics) {
+func MapServiceNowChannelToState(ctx context.Context, channel *instana.AlertingChannel) (*ServiceNowModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Create ServiceNow model
@@ -231,7 +231,7 @@ func MapServiceNowChannelToState(ctx context.Context, channel *restapi.AlertingC
 	return model, diags
 }
 
-func MapServiceNowApplicationChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*ServiceNowApplicationModel, diag.Diagnostics) {
+func MapServiceNowApplicationChannelToState(ctx context.Context, channel *instana.AlertingChannel) (*ServiceNowApplicationModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Create ServiceNow Enhanced model with required fields
@@ -303,7 +303,7 @@ func MapServiceNowApplicationChannelToState(ctx context.Context, channel *restap
 	return model, diags
 }
 
-func MapPrometheusWebhookChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*PrometheusWebhookModel, diag.Diagnostics) {
+func MapPrometheusWebhookChannelToState(ctx context.Context, channel *instana.AlertingChannel) (*PrometheusWebhookModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Create Prometheus Webhook model
@@ -321,7 +321,7 @@ func MapPrometheusWebhookChannelToState(ctx context.Context, channel *restapi.Al
 	return model, diags
 }
 
-func MapWatsonAIOpsWebhookChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*WatsonAIOpsWebhookModel, diag.Diagnostics) {
+func MapWatsonAIOpsWebhookChannelToState(ctx context.Context, channel *instana.AlertingChannel) (*WatsonAIOpsWebhookModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Create Watson AIOps Webhook model
@@ -343,7 +343,7 @@ func MapWatsonAIOpsWebhookChannelToState(ctx context.Context, channel *restapi.A
 
 	return model, diags
 }
-func MapEmailChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*EmailModel, diag.Diagnostics) {
+func MapEmailChannelToState(ctx context.Context, channel *instana.AlertingChannel) (*EmailModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Create email set
@@ -359,7 +359,7 @@ func MapEmailChannelToState(ctx context.Context, channel *restapi.AlertingChanne
 	}, diags
 }
 
-func MapOpsGenieChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*OpsGenieModel, diag.Diagnostics) {
+func MapOpsGenieChannelToState(ctx context.Context, channel *instana.AlertingChannel) (*OpsGenieModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Convert comma-separated tags to slice
@@ -380,7 +380,7 @@ func MapOpsGenieChannelToState(ctx context.Context, channel *restapi.AlertingCha
 	}, diags
 }
 
-func MapPagerDutyChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*PagerDutyModel, diag.Diagnostics) {
+func MapPagerDutyChannelToState(ctx context.Context, channel *instana.AlertingChannel) (*PagerDutyModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Create and return PagerDuty model
@@ -389,7 +389,7 @@ func MapPagerDutyChannelToState(ctx context.Context, channel *restapi.AlertingCh
 	}, diags
 }
 
-func MapSlackChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*SlackModel, diag.Diagnostics) {
+func MapSlackChannelToState(ctx context.Context, channel *instana.AlertingChannel) (*SlackModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Create Slack model
@@ -413,7 +413,7 @@ func MapSlackChannelToState(ctx context.Context, channel *restapi.AlertingChanne
 	return model, diags
 }
 
-func MapSplunkChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*SplunkModel, diag.Diagnostics) {
+func MapSplunkChannelToState(ctx context.Context, channel *instana.AlertingChannel) (*SplunkModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Create and return Splunk model
@@ -423,7 +423,7 @@ func MapSplunkChannelToState(ctx context.Context, channel *restapi.AlertingChann
 	}, diags
 }
 
-func MapVictorOpsChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*VictorOpsModel, diag.Diagnostics) {
+func MapVictorOpsChannelToState(ctx context.Context, channel *instana.AlertingChannel) (*VictorOpsModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Create and return VictorOps model
@@ -433,7 +433,7 @@ func MapVictorOpsChannelToState(ctx context.Context, channel *restapi.AlertingCh
 	}, diags
 }
 
-func MapWebhookChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*WebhookModel, diag.Diagnostics) {
+func MapWebhookChannelToState(ctx context.Context, channel *instana.AlertingChannel) (*WebhookModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Create webhook URLs set
@@ -480,7 +480,7 @@ func CreateHTTPHeaderMapFromList(headers []string) map[string]string {
 	return result
 }
 
-func MapSlackAppChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*SlackAppModel, diag.Diagnostics) {
+func MapSlackAppChannelToState(ctx context.Context, channel *instana.AlertingChannel) (*SlackAppModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Create Slack App model
@@ -502,7 +502,7 @@ func MapSlackAppChannelToState(ctx context.Context, channel *restapi.AlertingCha
 	return model, diags
 }
 
-func MapMsTeamsAppChannelToState(ctx context.Context, channel *restapi.AlertingChannel) (*MsTeamsAppModel, diag.Diagnostics) {
+func MapMsTeamsAppChannelToState(ctx context.Context, channel *instana.AlertingChannel) (*MsTeamsAppModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Create MS Teams App model

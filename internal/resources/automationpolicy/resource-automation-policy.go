@@ -15,7 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/instana-go-client/instana"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 )
 
@@ -24,7 +24,7 @@ import (
 // ============================================================================
 
 // NewAutomationPolicyResourceHandle creates the resource handle for Automation Policies
-func NewAutomationPolicyResourceHandle() resourcehandle.ResourceHandle[*restapi.AutomationPolicy] {
+func NewAutomationPolicyResourceHandle() resourcehandle.ResourceHandle[*instana.AutomationPolicy] {
 	return &automationPolicyResource{
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName: ResourceInstanaAutomationPolicy,
@@ -168,7 +168,7 @@ func (r *automationPolicyResource) MetaData() *resourcehandle.ResourceMetaData {
 }
 
 // GetRestResource returns the REST resource for automation policies
-func (r *automationPolicyResource) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.AutomationPolicy] {
+func (r *automationPolicyResource) GetRestResource(api instana.InstanaAPI) instana.RestResource[*instana.AutomationPolicy] {
 	return api.AutomationPolicies()
 }
 
@@ -182,7 +182,7 @@ func (r *automationPolicyResource) SetComputedFields(_ context.Context, _ *tfsdk
 // ============================================================================
 
 // UpdateState converts API data object to Terraform state
-func (r *automationPolicyResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, policy *restapi.AutomationPolicy) diag.Diagnostics {
+func (r *automationPolicyResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, policy *instana.AutomationPolicy) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	var model AutomationPolicyModel
@@ -257,7 +257,7 @@ func (r *automationPolicyResource) mapTagsToState(ctx context.Context, tags inte
 }
 
 // mapTriggerToState maps trigger data from API to state model
-func (r *automationPolicyResource) mapTriggerToState(trigger restapi.Trigger) *TriggerModel {
+func (r *automationPolicyResource) mapTriggerToState(trigger instana.Trigger) *TriggerModel {
 	triggerModel := &TriggerModel{}
 	triggerModel.ID = types.StringValue(trigger.Id)
 
@@ -307,7 +307,7 @@ func (r *automationPolicyResource) mapTriggerToState(trigger restapi.Trigger) *T
 }
 
 // mapTypeConfigurationsToState maps type configurations from API to state models
-func (r *automationPolicyResource) mapTypeConfigurationsToState(ctx context.Context, typeConfigs []restapi.TypeConfiguration) []TypeConfigurationModel {
+func (r *automationPolicyResource) mapTypeConfigurationsToState(ctx context.Context, typeConfigs []instana.TypeConfiguration) []TypeConfigurationModel {
 	result := make([]TypeConfigurationModel, len(typeConfigs))
 
 	for i, typeConfig := range typeConfigs {
@@ -333,7 +333,7 @@ func (r *automationPolicyResource) mapTypeConfigurationsToState(ctx context.Cont
 }
 
 // mapActionsToState maps automation actions from API runnable to state models
-func (r *automationPolicyResource) mapActionsToState(ctx context.Context, runnable *restapi.Runnable) []PolicyActionModel {
+func (r *automationPolicyResource) mapActionsToState(ctx context.Context, runnable *instana.Runnable) []PolicyActionModel {
 	result := make([]PolicyActionModel, len(runnable.RunConfiguration.Actions))
 
 	for i, actionPolicy := range runnable.RunConfiguration.Actions {
@@ -371,7 +371,7 @@ func (r *automationPolicyResource) mapActionsToState(ctx context.Context, runnab
 // ============================================================================
 
 // MapStateToDataObject converts Terraform state to API data object
-func (r *automationPolicyResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.AutomationPolicy, diag.Diagnostics) {
+func (r *automationPolicyResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*instana.AutomationPolicy, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var model AutomationPolicyModel
 
@@ -413,7 +413,7 @@ func (r *automationPolicyResource) MapStateToDataObject(ctx context.Context, pla
 		return nil, diags
 	}
 
-	return &restapi.AutomationPolicy{
+	return &instana.AutomationPolicy{
 		ID:                 id,
 		Name:               model.Name.ValueString(),
 		Description:        model.Description.ValueString(),
@@ -424,10 +424,10 @@ func (r *automationPolicyResource) MapStateToDataObject(ctx context.Context, pla
 }
 
 // mapTriggerFromState converts trigger from state model to API format
-func (r *automationPolicyResource) mapTriggerFromState(ctx context.Context, triggerModel *TriggerModel) (restapi.Trigger, diag.Diagnostics) {
+func (r *automationPolicyResource) mapTriggerFromState(ctx context.Context, triggerModel *TriggerModel) (instana.Trigger, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	trigger := restapi.Trigger{
+	trigger := instana.Trigger{
 		Id:   triggerModel.ID.ValueString(),
 		Type: triggerModel.Type.ValueString(),
 	}
@@ -447,10 +447,10 @@ func (r *automationPolicyResource) mapTriggerFromState(ctx context.Context, trig
 
 		// Only set scheduling if at least start_time is provided
 		if !schedulingModel.StartTime.IsNull() && !schedulingModel.StartTime.IsUnknown() {
-			trigger.Scheduling = restapi.Scheduling{
+			trigger.Scheduling = instana.Scheduling{
 				StartTime:    schedulingModel.StartTime.ValueInt64(),
 				Duration:     int(schedulingModel.Duration.ValueInt64()),
-				DurationUnit: restapi.DurationUnit(schedulingModel.DurationUnit.ValueString()),
+				DurationUnit: instana.DurationUnit(schedulingModel.DurationUnit.ValueString()),
 				Recurrent:    schedulingModel.Recurrent.ValueBool(),
 			}
 
@@ -464,10 +464,10 @@ func (r *automationPolicyResource) mapTriggerFromState(ctx context.Context, trig
 }
 
 // mapTypeConfigurationsFromState converts type configurations from state to API format
-func (r *automationPolicyResource) mapTypeConfigurationsFromState(ctx context.Context, typeConfigModels []TypeConfigurationModel) ([]restapi.TypeConfiguration, diag.Diagnostics) {
+func (r *automationPolicyResource) mapTypeConfigurationsFromState(ctx context.Context, typeConfigModels []TypeConfigurationModel) ([]instana.TypeConfiguration, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	typeConfigurations := make([]restapi.TypeConfiguration, len(typeConfigModels))
+	typeConfigurations := make([]instana.TypeConfiguration, len(typeConfigModels))
 	for i, typeConfigModel := range typeConfigModels {
 		// Map condition
 		condition, d := r.mapConditionFromState(ctx, typeConfigModel.Condition)
@@ -483,7 +483,7 @@ func (r *automationPolicyResource) mapTypeConfigurationsFromState(ctx context.Co
 			return nil, diags
 		}
 
-		typeConfigurations[i] = restapi.TypeConfiguration{
+		typeConfigurations[i] = instana.TypeConfiguration{
 			Name:      typeConfigModel.Name.ValueString(),
 			Condition: condition,
 			Runnable:  runnable,
@@ -494,14 +494,14 @@ func (r *automationPolicyResource) mapTypeConfigurationsFromState(ctx context.Co
 }
 
 // mapConditionFromState converts condition from state model to API format
-func (r *automationPolicyResource) mapConditionFromState(ctx context.Context, conditionModel *ConditionModel) (*restapi.Condition, diag.Diagnostics) {
+func (r *automationPolicyResource) mapConditionFromState(ctx context.Context, conditionModel *ConditionModel) (*instana.Condition, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if conditionModel == nil {
-		return &restapi.Condition{Query: ""}, diags
+		return &instana.Condition{Query: ""}, diags
 	}
 
-	condition := &restapi.Condition{
+	condition := &instana.Condition{
 		Query: conditionModel.Query.ValueString(),
 	}
 
@@ -509,12 +509,12 @@ func (r *automationPolicyResource) mapConditionFromState(ctx context.Context, co
 }
 
 // mapRunnableFromState converts policy actions from state to API runnable format
-func (r *automationPolicyResource) mapRunnableFromState(ctx context.Context, actionModels []PolicyActionModel) (restapi.Runnable, diag.Diagnostics) {
+func (r *automationPolicyResource) mapRunnableFromState(ctx context.Context, actionModels []PolicyActionModel) (instana.Runnable, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	runnable := restapi.Runnable{
+	runnable := instana.Runnable{
 		Type: actionRunnable,
-		RunConfiguration: restapi.RunConfiguration{
-			Actions: []restapi.AutomationActionPolicy{},
+		RunConfiguration: instana.RunConfiguration{
+			Actions: []instana.AutomationActionPolicy{},
 		},
 	}
 
@@ -522,7 +522,7 @@ func (r *automationPolicyResource) mapRunnableFromState(ctx context.Context, act
 		return runnable, diags
 	}
 
-	actions := make([]restapi.AutomationActionPolicy, len(actionModels))
+	actions := make([]instana.AutomationActionPolicy, len(actionModels))
 	for i, policyActionModel := range actionModels {
 		// Map the automation action from the model
 		actionModel := policyActionModel.Action
@@ -542,7 +542,7 @@ func (r *automationPolicyResource) mapRunnableFromState(ctx context.Context, act
 		}
 
 		// Create the automation action
-		automationAction := restapi.AutomationAction{
+		automationAction := instana.AutomationAction{
 			ID:              actionModel.ID.ValueString(),
 			Name:            actionModel.Name.ValueString(),
 			Description:     actionModel.Description.ValueString(),
@@ -566,7 +566,7 @@ func (r *automationPolicyResource) mapRunnableFromState(ctx context.Context, act
 			agentId = policyActionModel.AgentID.ValueString()
 		}
 
-		actions[i] = restapi.AutomationActionPolicy{
+		actions[i] = instana.AutomationActionPolicy{
 			Action:  automationAction,
 			AgentId: agentId,
 		}

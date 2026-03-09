@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/instana-go-client/instana"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -52,16 +52,16 @@ func TestUpdateState(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("basic configuration", func(t *testing.T) {
-		apiConfig := &restapi.AlertingConfiguration{
+		apiConfig := &instana.AlertingConfiguration{
 			ID:             "test-id",
 			AlertName:      "test-alert",
 			IntegrationIDs: []string{"integration-1", "integration-2"},
-			EventFilteringConfiguration: restapi.EventFilteringConfiguration{
+			EventFilteringConfiguration: instana.EventFilteringConfiguration{
 				Query:      nil,
 				RuleIDs:    []string{},
-				EventTypes: []restapi.AlertEventType{},
+				EventTypes: []instana.AlertEventType{},
 			},
-			CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
+			CustomerPayloadFields: []instana.CustomPayloadField[any]{},
 		}
 
 		handle := NewAlertingConfigResourceHandle()
@@ -86,16 +86,16 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("with event filter query", func(t *testing.T) {
 		query := "entity.type:host"
-		apiConfig := &restapi.AlertingConfiguration{
+		apiConfig := &instana.AlertingConfiguration{
 			ID:             "test-id",
 			AlertName:      "test-alert",
 			IntegrationIDs: []string{"integration-1"},
-			EventFilteringConfiguration: restapi.EventFilteringConfiguration{
+			EventFilteringConfiguration: instana.EventFilteringConfiguration{
 				Query:      &query,
 				RuleIDs:    []string{},
-				EventTypes: []restapi.AlertEventType{},
+				EventTypes: []instana.AlertEventType{},
 			},
-			CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
+			CustomerPayloadFields: []instana.CustomPayloadField[any]{},
 		}
 
 		handle := NewAlertingConfigResourceHandle()
@@ -113,16 +113,16 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("with event types", func(t *testing.T) {
-		apiConfig := &restapi.AlertingConfiguration{
+		apiConfig := &instana.AlertingConfiguration{
 			ID:             "test-id",
 			AlertName:      "test-alert",
 			IntegrationIDs: []string{"integration-1"},
-			EventFilteringConfiguration: restapi.EventFilteringConfiguration{
+			EventFilteringConfiguration: instana.EventFilteringConfiguration{
 				Query:      nil,
 				RuleIDs:    []string{},
-				EventTypes: []restapi.AlertEventType{restapi.CriticalAlertEventType, restapi.WarningAlertEventType},
+				EventTypes: []instana.AlertEventType{instana.CriticalAlertEventType, instana.WarningAlertEventType},
 			},
-			CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
+			CustomerPayloadFields: []instana.CustomPayloadField[any]{},
 		}
 
 		handle := NewAlertingConfigResourceHandle()
@@ -145,16 +145,16 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("with rule IDs", func(t *testing.T) {
-		apiConfig := &restapi.AlertingConfiguration{
+		apiConfig := &instana.AlertingConfiguration{
 			ID:             "test-id",
 			AlertName:      "test-alert",
 			IntegrationIDs: []string{"integration-1"},
-			EventFilteringConfiguration: restapi.EventFilteringConfiguration{
+			EventFilteringConfiguration: instana.EventFilteringConfiguration{
 				Query:      nil,
 				RuleIDs:    []string{"rule-1", "rule-2"},
-				EventTypes: []restapi.AlertEventType{},
+				EventTypes: []instana.AlertEventType{},
 			},
-			CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
+			CustomerPayloadFields: []instana.CustomPayloadField[any]{},
 		}
 
 		handle := NewAlertingConfigResourceHandle()
@@ -176,18 +176,18 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("with custom payload fields", func(t *testing.T) {
-		apiConfig := &restapi.AlertingConfiguration{
+		apiConfig := &instana.AlertingConfiguration{
 			ID:             "test-id",
 			AlertName:      "test-alert",
 			IntegrationIDs: []string{"integration-1"},
-			EventFilteringConfiguration: restapi.EventFilteringConfiguration{
+			EventFilteringConfiguration: instana.EventFilteringConfiguration{
 				Query:      nil,
 				RuleIDs:    []string{},
-				EventTypes: []restapi.AlertEventType{},
+				EventTypes: []instana.AlertEventType{},
 			},
-			CustomerPayloadFields: []restapi.CustomPayloadField[any]{
+			CustomerPayloadFields: []instana.CustomPayloadField[any]{
 				{
-					Type:  restapi.StaticStringCustomPayloadType,
+					Type:  instana.StaticStringCustomPayloadType,
 					Key:   "static_key",
 					Value: "static_value",
 				},
@@ -308,8 +308,8 @@ func TestMapStateToDataObject(t *testing.T) {
 		require.False(t, diags.HasError())
 		require.NotNil(t, config)
 		assert.Len(t, config.EventFilteringConfiguration.EventTypes, 2)
-		assert.Contains(t, config.EventFilteringConfiguration.EventTypes, restapi.CriticalAlertEventType)
-		assert.Contains(t, config.EventFilteringConfiguration.EventTypes, restapi.WarningAlertEventType)
+		assert.Contains(t, config.EventFilteringConfiguration.EventTypes, instana.CriticalAlertEventType)
+		assert.Contains(t, config.EventFilteringConfiguration.EventTypes, instana.WarningAlertEventType)
 	})
 
 	t.Run("with rule IDs", func(t *testing.T) {
@@ -372,27 +372,27 @@ func TestConvertEventTypesToHarmonizedStringRepresentation(t *testing.T) {
 
 	testCases := []struct {
 		name     string
-		input    []restapi.AlertEventType
+		input    []instana.AlertEventType
 		expected []string
 	}{
 		{
 			name:     "empty slice",
-			input:    []restapi.AlertEventType{},
+			input:    []instana.AlertEventType{},
 			expected: []string{},
 		},
 		{
 			name:     "single event type",
-			input:    []restapi.AlertEventType{restapi.CriticalAlertEventType},
+			input:    []instana.AlertEventType{instana.CriticalAlertEventType},
 			expected: []string{"critical"},
 		},
 		{
 			name:     "multiple event types",
-			input:    []restapi.AlertEventType{restapi.CriticalAlertEventType, restapi.WarningAlertEventType, restapi.IncidentAlertEventType},
+			input:    []instana.AlertEventType{instana.CriticalAlertEventType, instana.WarningAlertEventType, instana.IncidentAlertEventType},
 			expected: []string{"critical", "warning", "incident"},
 		},
 		{
 			name:     "all supported event types",
-			input:    restapi.SupportedAlertEventTypes,
+			input:    instana.SupportedAlertEventTypes,
 			expected: []string{"incident", "critical", "warning", "change", "online", "offline", "none", "agent_monitoring_issue"},
 		},
 	}
@@ -411,27 +411,27 @@ func TestReadEventTypesFromStrings(t *testing.T) {
 	testCases := []struct {
 		name     string
 		input    []string
-		expected []restapi.AlertEventType
+		expected []instana.AlertEventType
 	}{
 		{
 			name:     "empty slice",
 			input:    []string{},
-			expected: []restapi.AlertEventType{},
+			expected: []instana.AlertEventType{},
 		},
 		{
 			name:     "single event type",
 			input:    []string{"critical"},
-			expected: []restapi.AlertEventType{restapi.CriticalAlertEventType},
+			expected: []instana.AlertEventType{instana.CriticalAlertEventType},
 		},
 		{
 			name:     "multiple event types",
 			input:    []string{"critical", "warning", "incident"},
-			expected: []restapi.AlertEventType{restapi.CriticalAlertEventType, restapi.WarningAlertEventType, restapi.IncidentAlertEventType},
+			expected: []instana.AlertEventType{instana.CriticalAlertEventType, instana.WarningAlertEventType, instana.IncidentAlertEventType},
 		},
 		{
 			name:     "mixed case input",
 			input:    []string{"CRITICAL", "Warning", "incident"},
-			expected: []restapi.AlertEventType{restapi.CriticalAlertEventType, restapi.WarningAlertEventType, restapi.IncidentAlertEventType},
+			expected: []instana.AlertEventType{instana.CriticalAlertEventType, instana.WarningAlertEventType, instana.IncidentAlertEventType},
 		},
 	}
 
@@ -458,13 +458,13 @@ func TestConvertSupportedEventTypesToStringSlice(t *testing.T) {
 	}
 
 	assert.Equal(t, expected, result)
-	assert.Equal(t, len(restapi.SupportedAlertEventTypes), len(result))
+	assert.Equal(t, len(instana.SupportedAlertEventTypes), len(result))
 }
 
 func TestSupportedEventTypes(t *testing.T) {
 	// Test that the supportedEventTypes variable is properly initialized
 	assert.NotEmpty(t, supportedEventTypes)
-	assert.Equal(t, len(restapi.SupportedAlertEventTypes), len(supportedEventTypes))
+	assert.Equal(t, len(instana.SupportedAlertEventTypes), len(supportedEventTypes))
 
 	// Verify all expected event types are present
 	expectedTypes := []string{
@@ -599,7 +599,7 @@ func TestMapStateToDataObjectWithDynamicCustomPayloadFields(t *testing.T) {
 		require.NotNil(t, config)
 		assert.Len(t, config.CustomerPayloadFields, 2)
 		assert.Equal(t, "key1", config.CustomerPayloadFields[0].Key)
-		assert.Equal(t, restapi.DynamicCustomPayloadType, config.CustomerPayloadFields[0].Type)
+		assert.Equal(t, instana.DynamicCustomPayloadType, config.CustomerPayloadFields[0].Type)
 	})
 }
 
@@ -609,20 +609,20 @@ func TestUpdateStateWithComplexCustomPayloadFields(t *testing.T) {
 
 	t.Run("with dynamic custom payload fields", func(t *testing.T) {
 		dynamicKey := "dynamic_key"
-		apiConfig := &restapi.AlertingConfiguration{
+		apiConfig := &instana.AlertingConfiguration{
 			ID:             "test-id",
 			AlertName:      "test-alert",
 			IntegrationIDs: []string{"integration-1"},
-			EventFilteringConfiguration: restapi.EventFilteringConfiguration{
+			EventFilteringConfiguration: instana.EventFilteringConfiguration{
 				Query:      nil,
 				RuleIDs:    []string{},
-				EventTypes: []restapi.AlertEventType{},
+				EventTypes: []instana.AlertEventType{},
 			},
-			CustomerPayloadFields: []restapi.CustomPayloadField[any]{
+			CustomerPayloadFields: []instana.CustomPayloadField[any]{
 				{
-					Type: restapi.DynamicCustomPayloadType,
+					Type: instana.DynamicCustomPayloadType,
 					Key:  "dynamic_field",
-					Value: restapi.DynamicCustomPayloadFieldValue{
+					Value: instana.DynamicCustomPayloadFieldValue{
 						Key:     &dynamicKey,
 						TagName: "test_tag",
 					},
@@ -728,16 +728,16 @@ func TestUpdateStateWithAllEventTypes(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("with all supported event types", func(t *testing.T) {
-		apiConfig := &restapi.AlertingConfiguration{
+		apiConfig := &instana.AlertingConfiguration{
 			ID:             "test-id",
 			AlertName:      "test-alert-all-types",
 			IntegrationIDs: []string{"integration-1"},
-			EventFilteringConfiguration: restapi.EventFilteringConfiguration{
+			EventFilteringConfiguration: instana.EventFilteringConfiguration{
 				Query:      nil,
 				RuleIDs:    []string{},
-				EventTypes: restapi.SupportedAlertEventTypes,
+				EventTypes: instana.SupportedAlertEventTypes,
 			},
-			CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
+			CustomerPayloadFields: []instana.CustomPayloadField[any]{},
 		}
 
 		handle := NewAlertingConfigResourceHandle()
@@ -755,7 +755,7 @@ func TestUpdateStateWithAllEventTypes(t *testing.T) {
 		var eventTypes []string
 		diags = model.EventFilterEventTypes.ElementsAs(ctx, &eventTypes, false)
 		require.False(t, diags.HasError())
-		assert.Len(t, eventTypes, len(restapi.SupportedAlertEventTypes))
+		assert.Len(t, eventTypes, len(instana.SupportedAlertEventTypes))
 
 		// Verify all event types are present
 		for _, expectedType := range supportedEventTypes {
@@ -766,25 +766,25 @@ func TestUpdateStateWithAllEventTypes(t *testing.T) {
 	t.Run("with mixed payload fields and all filters", func(t *testing.T) {
 		query := "entity.type:host"
 		dynamicKey := "dynamic_key"
-		apiConfig := &restapi.AlertingConfiguration{
+		apiConfig := &instana.AlertingConfiguration{
 			ID:             "test-id",
 			AlertName:      "test-alert-mixed",
 			IntegrationIDs: []string{"integration-1", "integration-2"},
-			EventFilteringConfiguration: restapi.EventFilteringConfiguration{
+			EventFilteringConfiguration: instana.EventFilteringConfiguration{
 				Query:      &query,
 				RuleIDs:    []string{"rule-1", "rule-2", "rule-3"},
-				EventTypes: []restapi.AlertEventType{restapi.CriticalAlertEventType, restapi.WarningAlertEventType, restapi.IncidentAlertEventType},
+				EventTypes: []instana.AlertEventType{instana.CriticalAlertEventType, instana.WarningAlertEventType, instana.IncidentAlertEventType},
 			},
-			CustomerPayloadFields: []restapi.CustomPayloadField[any]{
+			CustomerPayloadFields: []instana.CustomPayloadField[any]{
 				{
-					Type:  restapi.StaticStringCustomPayloadType,
+					Type:  instana.StaticStringCustomPayloadType,
 					Key:   "static_key",
 					Value: "static_value",
 				},
 				{
-					Type: restapi.DynamicCustomPayloadType,
+					Type: instana.DynamicCustomPayloadType,
 					Key:  "dynamic_field",
-					Value: restapi.DynamicCustomPayloadFieldValue{
+					Value: instana.DynamicCustomPayloadFieldValue{
 						Key:     &dynamicKey,
 						TagName: "test_tag",
 					},

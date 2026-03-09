@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/instana-go-client/instana"
 	"github.com/instana/terraform-provider-instana/internal/util"
 )
 
@@ -31,7 +31,7 @@ func NewBuiltinEventDataSource() datasource.DataSource {
 }
 
 type builtinEventDataSource struct {
-	instanaAPI restapi.InstanaAPI
+	instanaAPI instana.InstanaAPI
 }
 
 func (d *builtinEventDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -83,7 +83,7 @@ func (d *builtinEventDataSource) Configure(_ context.Context, req datasource.Con
 		return
 	}
 
-	providerMeta, ok := req.ProviderData.(*restapi.ProviderMeta)
+	providerMeta, ok := req.ProviderData.(*instana.ProviderMeta)
 	if !ok {
 		resp.Diagnostics.AddError(
 			BuiltinEventErrUnexpectedConfigureType,
@@ -117,7 +117,7 @@ func (d *builtinEventDataSource) Read(ctx context.Context, req datasource.ReadRe
 	}
 
 	// Find the event with the matching name and short plugin ID
-	var matchingEvent *restapi.BuiltinEventSpecification
+	var matchingEvent *instana.BuiltinEventSpecification
 	for _, event := range *events {
 		if event.Name == name && event.ShortPluginID == shortPluginID {
 			matchingEvent = event

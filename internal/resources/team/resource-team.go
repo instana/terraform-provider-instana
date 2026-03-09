@@ -13,13 +13,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/instana-go-client/instana"
 	"github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
 	"github.com/instana/terraform-provider-instana/internal/util"
 )
 
 // NewTeamResourceHandle creates the resource handle for RBAC Teams
-func NewTeamResourceHandle() resourcehandle.ResourceHandle[*restapi.Team] {
+func NewTeamResourceHandle() resourcehandle.ResourceHandle[*instana.Team] {
 	return &teamResource{
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:  ResourceInstanaTeam,
@@ -193,9 +193,9 @@ func buildRestrictedApplicationFilterAttributes() map[string]schema.Attribute {
 			Description: TeamDescScopeRestrictedApplicationFilterScope,
 			Validators: []validator.String{
 				stringvalidator.OneOf(
-					string(restapi.RestrictedApplicationFilterScopeIncludeNoDownstream),
-					string(restapi.RestrictedApplicationFilterScopeIncludeImmediateDownstream),
-					string(restapi.RestrictedApplicationFilterScopeIncludeAllDownstream),
+					string(instana.RestrictedApplicationFilterScopeIncludeNoDownstream),
+					string(instana.RestrictedApplicationFilterScopeIncludeImmediateDownstream),
+					string(instana.RestrictedApplicationFilterScopeIncludeAllDownstream),
 				),
 			},
 		},
@@ -214,7 +214,7 @@ func (r *teamResource) MetaData() *resourcehandle.ResourceMetaData {
 	return &r.metaData
 }
 
-func (r *teamResource) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.Team] {
+func (r *teamResource) GetRestResource(api instana.InstanaAPI) instana.RestResource[*instana.Team] {
 	return api.Teams()
 }
 
@@ -223,7 +223,7 @@ func (r *teamResource) SetComputedFields(_ context.Context, _ *tfsdk.Plan) diag.
 }
 
 // UpdateState updates the Terraform state with data from the API response
-func (r *teamResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, team *restapi.Team) diag.Diagnostics {
+func (r *teamResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, team *instana.Team) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var model TeamModel
 	if plan != nil {
@@ -239,7 +239,7 @@ func (r *teamResource) UpdateState(ctx context.Context, state *tfsdk.State, plan
 }
 
 // buildTeamModelFromAPIResponse constructs a TeamModel from the API Team response
-func (r *teamResource) buildTeamModelFromAPIResponse(team *restapi.Team, planModel TeamModel) (TeamModel, diag.Diagnostics) {
+func (r *teamResource) buildTeamModelFromAPIResponse(team *instana.Team, planModel TeamModel) (TeamModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	model := TeamModel{
@@ -267,14 +267,14 @@ func (r *teamResource) buildTeamModelFromAPIResponse(team *restapi.Team, planMod
 }
 
 // mapTeamInfoToModel converts API team info to model team info
-func (r *teamResource) mapTeamInfoToModel(apiInfo *restapi.TeamInfo) *TeamInfoModel {
+func (r *teamResource) mapTeamInfoToModel(apiInfo *instana.TeamInfo) *TeamInfoModel {
 	return &TeamInfoModel{
 		Description: util.SetStringPointerToState(apiInfo.Description),
 	}
 }
 
 // mapMembersToModel converts API members to model members
-func (r *teamResource) mapMembersToModel(apiMembers []restapi.TeamMember) []TeamMemberModel {
+func (r *teamResource) mapMembersToModel(apiMembers []instana.TeamMember) []TeamMemberModel {
 	members := make([]TeamMemberModel, len(apiMembers))
 	for i, apiMember := range apiMembers {
 		members[i] = TeamMemberModel{
@@ -286,7 +286,7 @@ func (r *teamResource) mapMembersToModel(apiMembers []restapi.TeamMember) []Team
 }
 
 // mapRolesToModel converts API roles to model roles
-func (r *teamResource) mapRolesToModel(apiRoles []restapi.TeamRole) []TeamMemberRole {
+func (r *teamResource) mapRolesToModel(apiRoles []instana.TeamRole) []TeamMemberRole {
 	if len(apiRoles) == 0 {
 		return nil
 	}
@@ -301,7 +301,7 @@ func (r *teamResource) mapRolesToModel(apiRoles []restapi.TeamRole) []TeamMember
 }
 
 // mapScopeToModel converts API scope to model scope
-func (r *teamResource) mapScopeToModel(apiScope *restapi.TeamScope) (*TeamScopeModel, diag.Diagnostics) {
+func (r *teamResource) mapScopeToModel(apiScope *instana.TeamScope) (*TeamScopeModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	scopeModel := &TeamScopeModel{
@@ -333,7 +333,7 @@ func (r *teamResource) mapScopeToModel(apiScope *restapi.TeamScope) (*TeamScopeM
 }
 
 // mapRestrictedApplicationFilterToModel converts API restricted application filter to model
-func (r *teamResource) mapRestrictedApplicationFilterToModel(apiFilter *restapi.RestrictedApplicationFilter) (*TeamRestrictedApplicationFilterModel, diag.Diagnostics) {
+func (r *teamResource) mapRestrictedApplicationFilterToModel(apiFilter *instana.RestrictedApplicationFilter) (*TeamRestrictedApplicationFilterModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	filterModel := &TeamRestrictedApplicationFilterModel{
@@ -361,7 +361,7 @@ func (r *teamResource) mapRestrictedApplicationFilterToModel(apiFilter *restapi.
 }
 
 // MapStateToDataObject maps Terraform state/plan to API Team object
-func (r *teamResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.Team, diag.Diagnostics) {
+func (r *teamResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*instana.Team, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	model, modelDiags := r.extractModelFromPlanOrState(ctx, plan, state)
@@ -370,7 +370,7 @@ func (r *teamResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Pla
 		return nil, diags
 	}
 
-	team := &restapi.Team{
+	team := &instana.Team{
 		ID:  r.extractTeamID(model),
 		Tag: model.Tag.ValueString(),
 	}
@@ -417,26 +417,26 @@ func (r *teamResource) extractTeamID(model TeamModel) string {
 }
 
 // mapModelInfoToAPI converts model team info to API team info
-func (r *teamResource) mapModelInfoToAPI(modelInfo *TeamInfoModel) *restapi.TeamInfo {
+func (r *teamResource) mapModelInfoToAPI(modelInfo *TeamInfoModel) *instana.TeamInfo {
 	if modelInfo.Description.IsNull() || modelInfo.Description.IsUnknown() {
 		return nil
 	}
 
 	desc := modelInfo.Description.ValueString()
-	return &restapi.TeamInfo{
+	return &instana.TeamInfo{
 		Description: &desc,
 	}
 }
 
 // mapModelMembersToAPI converts model members to API members
-func (r *teamResource) mapModelMembersToAPI(modelMembers []TeamMemberModel) []restapi.TeamMember {
+func (r *teamResource) mapModelMembersToAPI(modelMembers []TeamMemberModel) []instana.TeamMember {
 	if len(modelMembers) == 0 {
 		return nil
 	}
 
-	apiMembers := make([]restapi.TeamMember, 0, len(modelMembers))
+	apiMembers := make([]instana.TeamMember, 0, len(modelMembers))
 	for _, memberModel := range modelMembers {
-		apiMember := restapi.TeamMember{
+		apiMember := instana.TeamMember{
 			UserID: memberModel.UserID.ValueString(),
 		}
 
@@ -451,14 +451,14 @@ func (r *teamResource) mapModelMembersToAPI(modelMembers []TeamMemberModel) []re
 }
 
 // mapModelRolesToAPI converts model roles to API roles
-func (r *teamResource) mapModelRolesToAPI(modelRoles []TeamMemberRole) []restapi.TeamRole {
+func (r *teamResource) mapModelRolesToAPI(modelRoles []TeamMemberRole) []instana.TeamRole {
 	if len(modelRoles) == 0 {
 		return nil
 	}
 
-	apiRoles := make([]restapi.TeamRole, len(modelRoles))
+	apiRoles := make([]instana.TeamRole, len(modelRoles))
 	for i, roleModel := range modelRoles {
-		apiRoles[i] = restapi.TeamRole{
+		apiRoles[i] = instana.TeamRole{
 			RoleID: roleModel.RoleID.ValueString(),
 		}
 	}
@@ -467,10 +467,10 @@ func (r *teamResource) mapModelRolesToAPI(modelRoles []TeamMemberRole) []restapi
 }
 
 // mapModelScopeToAPI converts model scope to API scope
-func (r *teamResource) mapModelScopeToAPI(modelScope *TeamScopeModel) (*restapi.TeamScope, diag.Diagnostics) {
+func (r *teamResource) mapModelScopeToAPI(modelScope *TeamScopeModel) (*instana.TeamScope, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	apiScope := &restapi.TeamScope{
+	apiScope := &instana.TeamScope{
 		AccessPermissions:    modelScope.AccessPermissions,
 		Applications:         modelScope.Applications,
 		KubernetesClusters:   modelScope.KubernetesClusters,
@@ -511,10 +511,10 @@ func (r *teamResource) mapModelScopeToAPI(modelScope *TeamScopeModel) (*restapi.
 }
 
 // mapModelRestrictedApplicationFilterToAPI converts model restricted application filter to API
-func (r *teamResource) mapModelRestrictedApplicationFilterToAPI(modelFilter *TeamRestrictedApplicationFilterModel) (*restapi.RestrictedApplicationFilter, diag.Diagnostics) {
+func (r *teamResource) mapModelRestrictedApplicationFilterToAPI(modelFilter *TeamRestrictedApplicationFilterModel) (*instana.RestrictedApplicationFilter, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	apiFilter := &restapi.RestrictedApplicationFilter{}
+	apiFilter := &instana.RestrictedApplicationFilter{}
 
 	if !modelFilter.Label.IsNull() && !modelFilter.Label.IsUnknown() {
 		label := modelFilter.Label.ValueString()
@@ -522,7 +522,7 @@ func (r *teamResource) mapModelRestrictedApplicationFilterToAPI(modelFilter *Tea
 	}
 
 	if !modelFilter.Scope.IsNull() && !modelFilter.Scope.IsUnknown() {
-		scope := restapi.RestrictedApplicationFilterScope(modelFilter.Scope.ValueString())
+		scope := instana.RestrictedApplicationFilterScope(modelFilter.Scope.ValueString())
 		apiFilter.Scope = &scope
 	}
 

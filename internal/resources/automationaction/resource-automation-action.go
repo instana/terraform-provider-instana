@@ -17,7 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/instana-go-client/instana"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 )
 
@@ -26,7 +26,7 @@ import (
 // ============================================================================
 
 // NewAutomationActionResourceHandle creates the resource handle for Automation Actions
-func NewAutomationActionResourceHandle() resourcehandle.ResourceHandle[*restapi.AutomationAction] {
+func NewAutomationActionResourceHandle() resourcehandle.ResourceHandle[*instana.AutomationAction] {
 	return &automationActionResource{
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName: ResourceInstanaAutomationAction,
@@ -385,7 +385,7 @@ func (r *automationActionResource) MetaData() *resourcehandle.ResourceMetaData {
 }
 
 // GetRestResource returns the REST resource for automation actions
-func (r *automationActionResource) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.AutomationAction] {
+func (r *automationActionResource) GetRestResource(api instana.InstanaAPI) instana.RestResource[*instana.AutomationAction] {
 	return api.AutomationActions()
 }
 
@@ -399,7 +399,7 @@ func (r *automationActionResource) SetComputedFields(_ context.Context, _ *tfsdk
 // ============================================================================
 
 // UpdateState converts API data object to Terraform state
-func (r *automationActionResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, automationAction *restapi.AutomationAction) diag.Diagnostics {
+func (r *automationActionResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, automationAction *instana.AutomationAction) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	// Create a model and populate it with values from the API response
@@ -437,7 +437,7 @@ func (r *automationActionResource) UpdateState(ctx context.Context, state *tfsdk
 }
 
 // mapActionTypeFieldsToState maps action type specific fields from API to state
-func (r *automationActionResource) mapActionTypeFieldsToState(ctx context.Context, action *restapi.AutomationAction, model *shared.AutomationActionModel) diag.Diagnostics {
+func (r *automationActionResource) mapActionTypeFieldsToState(ctx context.Context, action *instana.AutomationAction, model *shared.AutomationActionModel) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	// Use the common mapping function
@@ -484,7 +484,7 @@ func (r *automationActionResource) mapTagsToState(ctx context.Context, tags inte
 // ============================================================================
 
 // MapStateToDataObject converts Terraform state to API data object
-func (r *automationActionResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.AutomationAction, diag.Diagnostics) {
+func (r *automationActionResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*instana.AutomationAction, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var model shared.AutomationActionModel
 
@@ -526,7 +526,7 @@ func (r *automationActionResource) MapStateToDataObject(ctx context.Context, pla
 		id = model.ID.ValueString()
 	}
 
-	return &restapi.AutomationAction{
+	return &instana.AutomationAction{
 		ID:              id,
 		Name:            model.Name.ValueString(),
 		Description:     model.Description.ValueString(),
@@ -542,7 +542,7 @@ func (r *automationActionResource) MapStateToDataObject(ctx context.Context, pla
 // ============================================================================
 
 // mapActionTypeAndFields determines the action type and maps corresponding fields
-func (r *automationActionResource) mapActionTypeAndFields(ctx context.Context, model shared.AutomationActionModel) (string, []restapi.Field, diag.Diagnostics) {
+func (r *automationActionResource) mapActionTypeAndFields(ctx context.Context, model shared.AutomationActionModel) (string, []instana.Field, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Check each action type and delegate to specific mapper
@@ -572,15 +572,15 @@ func (r *automationActionResource) mapActionTypeAndFields(ctx context.Context, m
 }
 
 // mapScriptAction maps script action configuration to API fields
-func (r *automationActionResource) mapScriptAction(model shared.AutomationActionModel) (string, []restapi.Field, diag.Diagnostics) {
+func (r *automationActionResource) mapScriptAction(model shared.AutomationActionModel) (string, []instana.Field, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	scriptModel := *model.Script
-	fields := make([]restapi.Field, 0)
+	fields := make([]instana.Field, 0)
 
 	// Content is required
-	fields = append(fields, restapi.Field{
-		Name:        restapi.ScriptSshFieldName,
-		Description: restapi.ScriptSshFieldDescription,
+	fields = append(fields, instana.Field{
+		Name:        instana.ScriptSshFieldName,
+		Description: instana.ScriptSshFieldDescription,
 		Value:       scriptModel.Content.ValueString(),
 		Encoding:    shared.Base64Encoding,
 		Secured:     false,
@@ -588,9 +588,9 @@ func (r *automationActionResource) mapScriptAction(model shared.AutomationAction
 
 	// Interpreter is optional
 	if !scriptModel.Interpreter.IsNull() {
-		fields = append(fields, restapi.Field{
-			Name:        restapi.SubtypeFieldName,
-			Description: restapi.SubtypeFieldDescription,
+		fields = append(fields, instana.Field{
+			Name:        instana.SubtypeFieldName,
+			Description: instana.SubtypeFieldDescription,
 			Value:       scriptModel.Interpreter.ValueString(),
 			Encoding:    shared.AsciiEncoding,
 			Secured:     false,
@@ -599,9 +599,9 @@ func (r *automationActionResource) mapScriptAction(model shared.AutomationAction
 
 	// Timeout is optional
 	if !scriptModel.Timeout.IsNull() {
-		fields = append(fields, restapi.Field{
-			Name:        restapi.TimeoutFieldName,
-			Description: restapi.TimeoutFieldDescription,
+		fields = append(fields, instana.Field{
+			Name:        instana.TimeoutFieldName,
+			Description: instana.TimeoutFieldDescription,
 			Value:       scriptModel.Timeout.ValueString(),
 			Encoding:    shared.AsciiEncoding,
 			Secured:     false,
@@ -610,7 +610,7 @@ func (r *automationActionResource) mapScriptAction(model shared.AutomationAction
 
 	// Source is optional
 	if !scriptModel.Source.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionFieldSource,
 			Description: AutomationActionDescFieldSource,
 			Value:       scriptModel.Source.ValueString(),
@@ -623,10 +623,10 @@ func (r *automationActionResource) mapScriptAction(model shared.AutomationAction
 }
 
 // mapHttpAction maps HTTP action configuration to API fields
-func (r *automationActionResource) mapHttpAction(ctx context.Context, model shared.AutomationActionModel) (string, []restapi.Field, diag.Diagnostics) {
+func (r *automationActionResource) mapHttpAction(ctx context.Context, model shared.AutomationActionModel) (string, []instana.Field, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	httpModel := *model.Http
-	fields := make([]restapi.Field, 0)
+	fields := make([]instana.Field, 0)
 
 	// Map basic HTTP fields
 	fields = r.mapHttpBasicFields(httpModel, fields)
@@ -651,19 +651,19 @@ func (r *automationActionResource) mapHttpAction(ctx context.Context, model shar
 }
 
 // mapHttpBasicFields maps basic HTTP fields (host, method, body, etc.)
-func (r *automationActionResource) mapHttpBasicFields(httpModel shared.HttpModel, fields []restapi.Field) []restapi.Field {
+func (r *automationActionResource) mapHttpBasicFields(httpModel shared.HttpModel, fields []instana.Field) []instana.Field {
 	// Host and method are required
-	fields = append(fields, restapi.Field{
-		Name:        restapi.HttpHostFieldName,
-		Description: restapi.HttpHostFieldDescription,
+	fields = append(fields, instana.Field{
+		Name:        instana.HttpHostFieldName,
+		Description: instana.HttpHostFieldDescription,
 		Value:       httpModel.Host.ValueString(),
 		Encoding:    shared.AsciiEncoding,
 		Secured:     false,
 	})
 
-	fields = append(fields, restapi.Field{
-		Name:        restapi.HttpMethodFieldName,
-		Description: restapi.HttpMethodFieldDescription,
+	fields = append(fields, instana.Field{
+		Name:        instana.HttpMethodFieldName,
+		Description: instana.HttpMethodFieldDescription,
 		Value:       httpModel.Method.ValueString(),
 		Encoding:    shared.AsciiEncoding,
 		Secured:     false,
@@ -671,9 +671,9 @@ func (r *automationActionResource) mapHttpBasicFields(httpModel shared.HttpModel
 
 	// Body is optional
 	if !httpModel.Body.IsNull() {
-		fields = append(fields, restapi.Field{
-			Name:        restapi.HttpBodyFieldName,
-			Description: restapi.HttpBodyFieldDescription,
+		fields = append(fields, instana.Field{
+			Name:        instana.HttpBodyFieldName,
+			Description: instana.HttpBodyFieldDescription,
 			Value:       httpModel.Body.ValueString(),
 			Encoding:    shared.AsciiEncoding,
 			Secured:     false,
@@ -682,9 +682,9 @@ func (r *automationActionResource) mapHttpBasicFields(httpModel shared.HttpModel
 
 	// IgnoreCertErrors is optional
 	if !httpModel.IgnoreCertErrors.IsNull() {
-		fields = append(fields, restapi.Field{
-			Name:        restapi.HttpIgnoreCertErrorsFieldName,
-			Description: restapi.HttpIgnoreCertErrorsFieldDescription,
+		fields = append(fields, instana.Field{
+			Name:        instana.HttpIgnoreCertErrorsFieldName,
+			Description: instana.HttpIgnoreCertErrorsFieldDescription,
 			Value:       strconv.FormatBool(httpModel.IgnoreCertErrors.ValueBool()),
 			Encoding:    shared.AsciiEncoding,
 			Secured:     false,
@@ -693,9 +693,9 @@ func (r *automationActionResource) mapHttpBasicFields(httpModel shared.HttpModel
 
 	// Timeout is optional
 	if !httpModel.Timeout.IsNull() {
-		fields = append(fields, restapi.Field{
-			Name:        restapi.TimeoutFieldName,
-			Description: restapi.TimeoutFieldDescription,
+		fields = append(fields, instana.Field{
+			Name:        instana.TimeoutFieldName,
+			Description: instana.TimeoutFieldDescription,
 			Value:       httpModel.Timeout.ValueString(),
 			Encoding:    shared.AsciiEncoding,
 			Secured:     false,
@@ -704,7 +704,7 @@ func (r *automationActionResource) mapHttpBasicFields(httpModel shared.HttpModel
 
 	// Language is optional
 	if !httpModel.Language.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionFieldLanguage,
 			Description: AutomationActionDescFieldLanguage,
 			Value:       httpModel.Language.ValueString(),
@@ -715,7 +715,7 @@ func (r *automationActionResource) mapHttpBasicFields(httpModel shared.HttpModel
 
 	// Content Type is optional
 	if !httpModel.ContentType.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionFieldContentType,
 			Description: AutomationActionDescFieldContentType,
 			Value:       httpModel.ContentType.ValueString(),
@@ -728,7 +728,7 @@ func (r *automationActionResource) mapHttpBasicFields(httpModel shared.HttpModel
 }
 
 // mapHttpAuth maps HTTP authentication configuration to API fields
-func (r *automationActionResource) mapHttpAuth(httpModel shared.HttpModel) ([]restapi.Field, diag.Diagnostics) {
+func (r *automationActionResource) mapHttpAuth(httpModel shared.HttpModel) ([]instana.Field, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var authValue string
 
@@ -750,7 +750,7 @@ func (r *automationActionResource) mapHttpAuth(httpModel shared.HttpModel) ([]re
 		return nil, diags
 	}
 
-	return []restapi.Field{{
+	return []instana.Field{{
 		Name:        AutomationActionAPIFieldAuthen,
 		Description: AutomationActionDescFieldAuthen,
 		Value:       authValue,
@@ -830,7 +830,7 @@ func (r *automationActionResource) marshalNoAuth(diags *diag.Diagnostics) string
 }
 
 // mapHttpHeaders maps HTTP headers to API fields
-func (r *automationActionResource) mapHttpHeaders(ctx context.Context, httpModel shared.HttpModel) ([]restapi.Field, diag.Diagnostics) {
+func (r *automationActionResource) mapHttpHeaders(ctx context.Context, httpModel shared.HttpModel) ([]instana.Field, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if httpModel.Headers.IsNull() {
@@ -852,9 +852,9 @@ func (r *automationActionResource) mapHttpHeaders(ctx context.Context, httpModel
 		return nil, diags
 	}
 
-	return []restapi.Field{{
-		Name:        restapi.HttpHeaderFieldName,
-		Description: restapi.HttpHeaderFieldDescription,
+	return []instana.Field{{
+		Name:        instana.HttpHeaderFieldName,
+		Description: instana.HttpHeaderFieldDescription,
 		Value:       string(headersJson),
 		Encoding:    shared.AsciiEncoding,
 		Secured:     false,
@@ -862,9 +862,9 @@ func (r *automationActionResource) mapHttpHeaders(ctx context.Context, httpModel
 }
 
 // mapManualAction maps manual action configuration to API fields
-func (r *automationActionResource) mapManualAction(model shared.AutomationActionModel) (string, []restapi.Field, diag.Diagnostics) {
+func (r *automationActionResource) mapManualAction(model shared.AutomationActionModel) (string, []instana.Field, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	fields := []restapi.Field{{
+	fields := []instana.Field{{
 		Name:        AutomationActionFieldContent,
 		Description: AutomationActionDescAPIFieldContent,
 		Value:       model.Manual.Content.ValueString(),
@@ -875,12 +875,12 @@ func (r *automationActionResource) mapManualAction(model shared.AutomationAction
 }
 
 // mapJiraAction maps Jira action configuration to API fields
-func (r *automationActionResource) mapJiraAction(model shared.AutomationActionModel) (string, []restapi.Field, diag.Diagnostics) {
+func (r *automationActionResource) mapJiraAction(model shared.AutomationActionModel) (string, []instana.Field, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	fields := make([]restapi.Field, 0)
+	fields := make([]instana.Field, 0)
 
 	if !model.Jira.Project.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionFieldProject,
 			Description: AutomationActionDescAPIFieldProject,
 			Value:       model.Jira.Project.ValueString(),
@@ -888,7 +888,7 @@ func (r *automationActionResource) mapJiraAction(model shared.AutomationActionMo
 		})
 	}
 	if !model.Jira.Operation.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionAPIFieldTicketActionType,
 			Description: AutomationActionDescAPIFieldTicketActionType,
 			Value:       model.Jira.Operation.ValueString(),
@@ -896,7 +896,7 @@ func (r *automationActionResource) mapJiraAction(model shared.AutomationActionMo
 		})
 	}
 	if !model.Jira.IssueType.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionFieldIssueType,
 			Description: AutomationActionDescAPIFieldIssueType,
 			Value:       model.Jira.IssueType.ValueString(),
@@ -904,7 +904,7 @@ func (r *automationActionResource) mapJiraAction(model shared.AutomationActionMo
 		})
 	}
 	if !model.Jira.Description.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionFieldBody,
 			Description: AutomationActionDescAPIFieldBody,
 			Value:       model.Jira.Description.ValueString(),
@@ -912,7 +912,7 @@ func (r *automationActionResource) mapJiraAction(model shared.AutomationActionMo
 		})
 	}
 	if !model.Jira.Assignee.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionFieldAssignee,
 			Description: AutomationActionDescAPIFieldAssignee,
 			Value:       model.Jira.Assignee.ValueString(),
@@ -920,7 +920,7 @@ func (r *automationActionResource) mapJiraAction(model shared.AutomationActionMo
 		})
 	}
 	if !model.Jira.Title.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionAPIFieldSummary,
 			Description: AutomationActionDescAPIFieldSummary,
 			Value:       model.Jira.Title.ValueString(),
@@ -928,7 +928,7 @@ func (r *automationActionResource) mapJiraAction(model shared.AutomationActionMo
 		})
 	}
 	if !model.Jira.Labels.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionFieldLabels,
 			Description: AutomationActionDescAPIFieldLabels,
 			Value:       model.Jira.Labels.ValueString(),
@@ -936,7 +936,7 @@ func (r *automationActionResource) mapJiraAction(model shared.AutomationActionMo
 		})
 	}
 	if !model.Jira.Comment.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionFieldComment,
 			Description: AutomationActionDescAPIFieldComment,
 			Value:       model.Jira.Comment.ValueString(),
@@ -948,12 +948,12 @@ func (r *automationActionResource) mapJiraAction(model shared.AutomationActionMo
 }
 
 // mapGitHubAction maps GitHub action configuration to API fields
-func (r *automationActionResource) mapGitHubAction(model shared.AutomationActionModel) (string, []restapi.Field, diag.Diagnostics) {
+func (r *automationActionResource) mapGitHubAction(model shared.AutomationActionModel) (string, []instana.Field, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	fields := make([]restapi.Field, 0)
+	fields := make([]instana.Field, 0)
 
 	if !model.GitHub.Owner.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionFieldOwner,
 			Description: AutomationActionDescAPIFieldOwner,
 			Value:       model.GitHub.Owner.ValueString(),
@@ -961,7 +961,7 @@ func (r *automationActionResource) mapGitHubAction(model shared.AutomationAction
 		})
 	}
 	if !model.GitHub.Repo.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionFieldRepo,
 			Description: AutomationActionDescAPIFieldRepo,
 			Value:       model.GitHub.Repo.ValueString(),
@@ -969,7 +969,7 @@ func (r *automationActionResource) mapGitHubAction(model shared.AutomationAction
 		})
 	}
 	if !model.GitHub.Title.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionFieldTitle,
 			Description: AutomationActionDescAPIFieldTitle,
 			Value:       model.GitHub.Title.ValueString(),
@@ -977,7 +977,7 @@ func (r *automationActionResource) mapGitHubAction(model shared.AutomationAction
 		})
 	}
 	if !model.GitHub.Body.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionFieldBody,
 			Description: AutomationActionDescAPIFieldGitHubBody,
 			Value:       model.GitHub.Body.ValueString(),
@@ -985,7 +985,7 @@ func (r *automationActionResource) mapGitHubAction(model shared.AutomationAction
 		})
 	}
 	if !model.GitHub.Operation.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionAPIFieldTicketType,
 			Description: AutomationActionDescAPIFieldTicketType,
 			Value:       model.GitHub.Operation.ValueString(),
@@ -993,7 +993,7 @@ func (r *automationActionResource) mapGitHubAction(model shared.AutomationAction
 		})
 	}
 	if !model.GitHub.Assignees.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionFieldAssignees,
 			Description: AutomationActionDescAPIFieldAssignees,
 			Value:       model.GitHub.Assignees.ValueString(),
@@ -1001,7 +1001,7 @@ func (r *automationActionResource) mapGitHubAction(model shared.AutomationAction
 		})
 	}
 	if !model.GitHub.Labels.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionFieldLabels,
 			Description: AutomationActionDescAPIFieldGitHubLabels,
 			Value:       model.GitHub.Labels.ValueString(),
@@ -1009,7 +1009,7 @@ func (r *automationActionResource) mapGitHubAction(model shared.AutomationAction
 		})
 	}
 	if !model.GitHub.Comment.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionFieldComment,
 			Description: AutomationActionDescAPIFieldGitHubComment,
 			Value:       model.GitHub.Comment.ValueString(),
@@ -1021,9 +1021,9 @@ func (r *automationActionResource) mapGitHubAction(model shared.AutomationAction
 }
 
 // mapDocLinkAction maps documentation link action configuration to API fields
-func (r *automationActionResource) mapDocLinkAction(model shared.AutomationActionModel) (string, []restapi.Field, diag.Diagnostics) {
+func (r *automationActionResource) mapDocLinkAction(model shared.AutomationActionModel) (string, []instana.Field, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	fields := []restapi.Field{{
+	fields := []instana.Field{{
 		Name:        AutomationActionFieldUrl,
 		Description: AutomationActionDescFieldUrl,
 		Value:       model.DocLink.Url.ValueString(),
@@ -1034,12 +1034,12 @@ func (r *automationActionResource) mapDocLinkAction(model shared.AutomationActio
 }
 
 // mapGitLabAction maps GitLab action configuration to API fields
-func (r *automationActionResource) mapGitLabAction(model shared.AutomationActionModel) (string, []restapi.Field, diag.Diagnostics) {
+func (r *automationActionResource) mapGitLabAction(model shared.AutomationActionModel) (string, []instana.Field, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	fields := make([]restapi.Field, 0)
+	fields := make([]instana.Field, 0)
 
 	if !model.GitLab.ProjectId.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionAPIFieldProjectId,
 			Description: AutomationActionDescAPIFieldProjectId,
 			Value:       model.GitLab.ProjectId.ValueString(),
@@ -1047,7 +1047,7 @@ func (r *automationActionResource) mapGitLabAction(model shared.AutomationAction
 		})
 	}
 	if !model.GitLab.Title.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionFieldTitle,
 			Description: AutomationActionDescAPIFieldGitLabTitle,
 			Value:       model.GitLab.Title.ValueString(),
@@ -1055,7 +1055,7 @@ func (r *automationActionResource) mapGitLabAction(model shared.AutomationAction
 		})
 	}
 	if !model.GitLab.Description.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionFieldBody,
 			Description: AutomationActionDescAPIFieldGitLabBody,
 			Value:       model.GitLab.Description.ValueString(),
@@ -1063,7 +1063,7 @@ func (r *automationActionResource) mapGitLabAction(model shared.AutomationAction
 		})
 	}
 	if !model.GitLab.Operation.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionAPIFieldTicketActionType,
 			Description: AutomationActionDescAPIFieldGitLabTicketActionType,
 			Value:       model.GitLab.Operation.ValueString(),
@@ -1071,7 +1071,7 @@ func (r *automationActionResource) mapGitLabAction(model shared.AutomationAction
 		})
 	}
 	if !model.GitLab.Labels.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionFieldLabels,
 			Description: AutomationActionDescAPIFieldGitLabLabels,
 			Value:       model.GitLab.Labels.ValueString(),
@@ -1079,7 +1079,7 @@ func (r *automationActionResource) mapGitLabAction(model shared.AutomationAction
 		})
 	}
 	if !model.GitLab.IssueType.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionFieldIssueType,
 			Description: AutomationActionDescAPIFieldGitLabIssueType,
 			Value:       model.GitLab.IssueType.ValueString(),
@@ -1087,7 +1087,7 @@ func (r *automationActionResource) mapGitLabAction(model shared.AutomationAction
 		})
 	}
 	if !model.GitLab.Comment.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionFieldComment,
 			Description: AutomationActionDescAPIFieldGitLabComment,
 			Value:       model.GitLab.Comment.ValueString(),
@@ -1099,12 +1099,12 @@ func (r *automationActionResource) mapGitLabAction(model shared.AutomationAction
 }
 
 // mapAnsibleAction maps Ansible action configuration to API fields
-func (r *automationActionResource) mapAnsibleAction(model shared.AutomationActionModel) (string, []restapi.Field, diag.Diagnostics) {
+func (r *automationActionResource) mapAnsibleAction(model shared.AutomationActionModel) (string, []instana.Field, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	fields := make([]restapi.Field, 0)
+	fields := make([]instana.Field, 0)
 
 	if !model.Ansible.WorkflowId.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionAPIFieldWorkflowId,
 			Description: AutomationActionDescAPIFieldWorkflowId,
 			Value:       model.Ansible.WorkflowId.ValueString(),
@@ -1112,7 +1112,7 @@ func (r *automationActionResource) mapAnsibleAction(model shared.AutomationActio
 		})
 	}
 	if !model.Ansible.AnsibleUrl.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionAPIFieldAnsibleUrl,
 			Description: AutomationActionDescAPIFieldAnsibleUrl,
 			Value:       model.Ansible.AnsibleUrl.ValueString(),
@@ -1120,7 +1120,7 @@ func (r *automationActionResource) mapAnsibleAction(model shared.AutomationActio
 		})
 	}
 	if !model.Ansible.HostId.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionAPIFieldHostId,
 			Description: AutomationActionDescAPIFieldHostId,
 			Value:       model.Ansible.HostId.ValueString(),
@@ -1128,7 +1128,7 @@ func (r *automationActionResource) mapAnsibleAction(model shared.AutomationActio
 		})
 	}
 	if !model.Ansible.PlaybookId.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionAPIFieldPlaybookId,
 			Description: AutomationActionDescAPIFieldPlaybookId,
 			Value:       model.Ansible.PlaybookId.ValueString(),
@@ -1136,7 +1136,7 @@ func (r *automationActionResource) mapAnsibleAction(model shared.AutomationActio
 		})
 	}
 	if !model.Ansible.PlaybookFileName.IsNull() {
-		fields = append(fields, restapi.Field{
+		fields = append(fields, instana.Field{
 			Name:        AutomationActionAPIFieldPlaybookFileName,
 			Description: AutomationActionDescAPIFieldPlaybookFileName,
 			Value:       model.Ansible.PlaybookFileName.ValueString(),
@@ -1152,7 +1152,7 @@ func (r *automationActionResource) mapAnsibleAction(model shared.AutomationActio
 // ============================================================================
 
 // mapInputParametersFromState maps input parameters from state to API format
-func (r *automationActionResource) mapInputParametersFromState(ctx context.Context, model shared.AutomationActionModel) ([]restapi.Parameter, diag.Diagnostics) {
+func (r *automationActionResource) mapInputParametersFromState(ctx context.Context, model shared.AutomationActionModel) ([]instana.Parameter, diag.Diagnostics) {
 	return shared.MapInputParametersFromState(ctx, model)
 }
 

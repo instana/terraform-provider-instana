@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/instana-go-client/instana"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -101,10 +101,10 @@ func ReadSetParameterFromMap[T any](data map[string]interface{}, key string) []T
 
 // ConvertSeverityFromInstanaAPIToTerraformRepresentation converts the integer representation of the Instana API to the string representation of the Terraform provider
 func ConvertSeverityFromInstanaAPIToTerraformRepresentation(severity int) (string, error) {
-	if severity == restapi.SeverityWarning.GetAPIRepresentation() {
-		return restapi.SeverityWarning.GetTerraformRepresentation(), nil
-	} else if severity == restapi.SeverityCritical.GetAPIRepresentation() {
-		return restapi.SeverityCritical.GetTerraformRepresentation(), nil
+	if severity == instana.SeverityWarning.GetAPIRepresentation() {
+		return instana.SeverityWarning.GetTerraformRepresentation(), nil
+	} else if severity == instana.SeverityCritical.GetAPIRepresentation() {
+		return instana.SeverityCritical.GetTerraformRepresentation(), nil
 	} else {
 		return "INVALID", fmt.Errorf("%d is not a valid severity", severity)
 	}
@@ -112,10 +112,10 @@ func ConvertSeverityFromInstanaAPIToTerraformRepresentation(severity int) (strin
 
 // ConvertSeverityFromTerraformToInstanaAPIRepresentation converts the string representation of the Terraform to the int representation of the Instana API provider
 func ConvertSeverityFromTerraformToInstanaAPIRepresentation(severity string) (int, error) {
-	if severity == restapi.SeverityWarning.GetTerraformRepresentation() {
-		return restapi.SeverityWarning.GetAPIRepresentation(), nil
-	} else if severity == restapi.SeverityCritical.GetTerraformRepresentation() {
-		return restapi.SeverityCritical.GetAPIRepresentation(), nil
+	if severity == instana.SeverityWarning.GetTerraformRepresentation() {
+		return instana.SeverityWarning.GetAPIRepresentation(), nil
+	} else if severity == instana.SeverityCritical.GetTerraformRepresentation() {
+		return instana.SeverityCritical.GetAPIRepresentation(), nil
 	} else {
 		return -1, fmt.Errorf("%s is not a valid severity", severity)
 	}

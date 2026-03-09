@@ -43,7 +43,7 @@ const (
 	// SyntheticLocationErrUnexpectedConfigureType error message for unexpected configure type
 	SyntheticLocationErrUnexpectedConfigureType = "Unexpected Data Source Configure Type"
 	// SyntheticLocationErrUnexpectedConfigureTypeDetail error message detail for unexpected configure type
-	SyntheticLocationErrUnexpectedConfigureTypeDetail = "Expected *restapi.ProviderMeta, got: %T. Please report this issue to the provider developers."
+	SyntheticLocationErrUnexpectedConfigureTypeDetail = "Expected *instana.ProviderMeta, got: %T. Please report this issue to the provider developers."
 	// SyntheticLocationErrReadingLocations error message for reading synthetic locations
 	SyntheticLocationErrReadingLocations = "Error reading synthetic locations"
 	// SyntheticLocationErrReadingLocationsDetail error message detail for reading synthetic locations

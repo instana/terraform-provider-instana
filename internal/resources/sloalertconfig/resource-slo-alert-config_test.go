@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/instana-go-client/instana"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -18,30 +18,30 @@ func TestUpdateState_StatusAlertType(t *testing.T) {
 	ctx := context.Background()
 	resource := NewSloAlertConfigResourceHandle()
 
-	apiConfig := &restapi.SloAlertConfig{
+	apiConfig := &instana.SloAlertConfig{
 		ID:          "test-id",
 		Name:        "Test SLO Alert",
 		Description: "Test Description",
 		Severity:    5,
 		Triggering:  true,
 		Enabled:     true,
-		Rule: restapi.SloAlertRule{
+		Rule: instana.SloAlertRule{
 			AlertType: "SERVICE_LEVELS_OBJECTIVE",
 			Metric:    "STATUS",
 		},
-		Threshold: &restapi.SloAlertThreshold{
+		Threshold: &instana.SloAlertThreshold{
 			Type:     "static",
 			Operator: ">=",
 			Value:    95.0,
 		},
-		TimeThreshold: restapi.SloAlertTimeThreshold{
+		TimeThreshold: instana.SloAlertTimeThreshold{
 			TimeWindow: 300000,
 			Expiry:     600000,
 		},
 		SloIds:                []string{"slo-1", "slo-2"},
 		AlertChannelIds:       []string{"channel-1"},
-		CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
-		BurnRateConfigs:       &[]restapi.BurnRateConfig{},
+		CustomerPayloadFields: []instana.CustomPayloadField[any]{},
+		BurnRateConfigs:       &[]instana.BurnRateConfig{},
 	}
 
 	state := tfsdk.State{
@@ -74,30 +74,30 @@ func TestUpdateState_ErrorBudgetAlertType(t *testing.T) {
 	ctx := context.Background()
 	resource := NewSloAlertConfigResourceHandle()
 
-	apiConfig := &restapi.SloAlertConfig{
+	apiConfig := &instana.SloAlertConfig{
 		ID:          "test-id-2",
 		Name:        "Error Budget Alert",
 		Description: "Error Budget Description",
 		Severity:    8,
 		Triggering:  false,
 		Enabled:     true,
-		Rule: restapi.SloAlertRule{
+		Rule: instana.SloAlertRule{
 			AlertType: "ERROR_BUDGET",
 			Metric:    "BURNED_PERCENTAGE",
 		},
-		Threshold: &restapi.SloAlertThreshold{
+		Threshold: &instana.SloAlertThreshold{
 			Type:     "staticThreshold",
 			Operator: "<=",
 			Value:    10.0,
 		},
-		TimeThreshold: restapi.SloAlertTimeThreshold{
+		TimeThreshold: instana.SloAlertTimeThreshold{
 			TimeWindow: 60000,
 			Expiry:     120000,
 		},
 		SloIds:                []string{"slo-3"},
 		AlertChannelIds:       []string{"channel-2", "channel-3"},
-		CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
-		BurnRateConfigs:       &[]restapi.BurnRateConfig{},
+		CustomerPayloadFields: []instana.CustomPayloadField[any]{},
+		BurnRateConfigs:       &[]instana.BurnRateConfig{},
 	}
 
 	state := tfsdk.State{
@@ -126,12 +126,12 @@ func TestUpdateState_BurnRateV2AlertType(t *testing.T) {
 	ctx := context.Background()
 	resource := NewSloAlertConfigResourceHandle()
 
-	burnRateConfigs := []restapi.BurnRateConfig{
+	burnRateConfigs := []instana.BurnRateConfig{
 		{
 			AlertWindowType:  "SHORT",
 			Duration:         60,
 			DurationUnitType: "MINUTES",
-			Threshold: restapi.ServiceLevelsStaticThresholdConfig{
+			Threshold: instana.ServiceLevelsStaticThresholdConfig{
 				Operator: ">",
 				Value:    2.5,
 			},
@@ -140,32 +140,32 @@ func TestUpdateState_BurnRateV2AlertType(t *testing.T) {
 			AlertWindowType:  "LONG",
 			Duration:         360,
 			DurationUnitType: "MINUTES",
-			Threshold: restapi.ServiceLevelsStaticThresholdConfig{
+			Threshold: instana.ServiceLevelsStaticThresholdConfig{
 				Operator: ">=",
 				Value:    1.5,
 			},
 		},
 	}
 
-	apiConfig := &restapi.SloAlertConfig{
+	apiConfig := &instana.SloAlertConfig{
 		ID:          "test-id-3",
 		Name:        "Burn Rate Alert",
 		Description: "Burn Rate Description",
 		Severity:    10,
 		Triggering:  true,
 		Enabled:     true,
-		Rule: restapi.SloAlertRule{
+		Rule: instana.SloAlertRule{
 			AlertType: "ERROR_BUDGET",
 			Metric:    "BURN_RATE_V2",
 		},
 		Threshold: nil,
-		TimeThreshold: restapi.SloAlertTimeThreshold{
+		TimeThreshold: instana.SloAlertTimeThreshold{
 			TimeWindow: 180000,
 			Expiry:     360000,
 		},
 		SloIds:                []string{"slo-4", "slo-5"},
 		AlertChannelIds:       []string{"channel-4"},
-		CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
+		CustomerPayloadFields: []instana.CustomPayloadField[any]{},
 		BurnRateConfigs:       &burnRateConfigs,
 	}
 
@@ -205,43 +205,43 @@ func TestUpdateState_WithCustomPayloadFields(t *testing.T) {
 	ctx := context.Background()
 	resource := NewSloAlertConfigResourceHandle()
 
-	customPayloadFields := []restapi.CustomPayloadField[any]{
+	customPayloadFields := []instana.CustomPayloadField[any]{
 		{
 			Key:   "environment",
 			Value: "production",
-			Type:  restapi.StaticStringCustomPayloadType,
+			Type:  instana.StaticStringCustomPayloadType,
 		},
 		{
 			Key:   "team",
 			Value: "platform",
-			Type:  restapi.StaticStringCustomPayloadType,
+			Type:  instana.StaticStringCustomPayloadType,
 		},
 	}
 
-	apiConfig := &restapi.SloAlertConfig{
+	apiConfig := &instana.SloAlertConfig{
 		ID:          "test-id-4",
 		Name:        "Alert with Custom Payload",
 		Description: "Custom Payload Description",
 		Severity:    7,
 		Triggering:  false,
 		Enabled:     true,
-		Rule: restapi.SloAlertRule{
+		Rule: instana.SloAlertRule{
 			AlertType: "SERVICE_LEVELS_OBJECTIVE",
 			Metric:    "STATUS",
 		},
-		Threshold: &restapi.SloAlertThreshold{
+		Threshold: &instana.SloAlertThreshold{
 			Type:     "static",
 			Operator: ">=",
 			Value:    99.0,
 		},
-		TimeThreshold: restapi.SloAlertTimeThreshold{
+		TimeThreshold: instana.SloAlertTimeThreshold{
 			TimeWindow: 300000,
 			Expiry:     600000,
 		},
 		SloIds:                []string{"slo-6"},
 		AlertChannelIds:       []string{"channel-5"},
 		CustomerPayloadFields: customPayloadFields,
-		BurnRateConfigs:       &[]restapi.BurnRateConfig{},
+		BurnRateConfigs:       &[]instana.BurnRateConfig{},
 	}
 
 	state := tfsdk.State{
@@ -264,26 +264,26 @@ func TestUpdateState_WithNullThreshold(t *testing.T) {
 	ctx := context.Background()
 	resource := NewSloAlertConfigResourceHandle()
 
-	apiConfig := &restapi.SloAlertConfig{
+	apiConfig := &instana.SloAlertConfig{
 		ID:          "test-id-5",
 		Name:        "Alert without Threshold",
 		Description: "No Threshold Description",
 		Severity:    6,
 		Triggering:  true,
 		Enabled:     false,
-		Rule: restapi.SloAlertRule{
+		Rule: instana.SloAlertRule{
 			AlertType: "ERROR_BUDGET",
 			Metric:    "BURN_RATE_V2",
 		},
 		Threshold: nil,
-		TimeThreshold: restapi.SloAlertTimeThreshold{
+		TimeThreshold: instana.SloAlertTimeThreshold{
 			TimeWindow: 120000,
 			Expiry:     240000,
 		},
 		SloIds:                []string{"slo-7"},
 		AlertChannelIds:       []string{"channel-6"},
-		CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
-		BurnRateConfigs:       &[]restapi.BurnRateConfig{},
+		CustomerPayloadFields: []instana.CustomPayloadField[any]{},
+		BurnRateConfigs:       &[]instana.BurnRateConfig{},
 	}
 
 	state := tfsdk.State{
@@ -306,30 +306,30 @@ func TestUpdateState_WithEmptyBurnRateConfigs(t *testing.T) {
 	ctx := context.Background()
 	resource := NewSloAlertConfigResourceHandle()
 
-	apiConfig := &restapi.SloAlertConfig{
+	apiConfig := &instana.SloAlertConfig{
 		ID:          "test-id-6",
 		Name:        "Alert with Empty Burn Rate",
 		Description: "Empty Burn Rate Description",
 		Severity:    5,
 		Triggering:  false,
 		Enabled:     true,
-		Rule: restapi.SloAlertRule{
+		Rule: instana.SloAlertRule{
 			AlertType: "SERVICE_LEVELS_OBJECTIVE",
 			Metric:    "STATUS",
 		},
-		Threshold: &restapi.SloAlertThreshold{
+		Threshold: &instana.SloAlertThreshold{
 			Type:     "static",
 			Operator: ">=",
 			Value:    98.0,
 		},
-		TimeThreshold: restapi.SloAlertTimeThreshold{
+		TimeThreshold: instana.SloAlertTimeThreshold{
 			TimeWindow: 300000,
 			Expiry:     600000,
 		},
 		SloIds:                []string{"slo-8"},
 		AlertChannelIds:       []string{"channel-7"},
-		CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
-		BurnRateConfigs:       &[]restapi.BurnRateConfig{},
+		CustomerPayloadFields: []instana.CustomPayloadField[any]{},
+		BurnRateConfigs:       &[]instana.BurnRateConfig{},
 	}
 
 	state := tfsdk.State{
@@ -352,30 +352,30 @@ func TestUpdateState_WithMultipleSloIds(t *testing.T) {
 	ctx := context.Background()
 	resource := NewSloAlertConfigResourceHandle()
 
-	apiConfig := &restapi.SloAlertConfig{
+	apiConfig := &instana.SloAlertConfig{
 		ID:          "test-id-7",
 		Name:        "Multi SLO Alert",
 		Description: "Multiple SLOs",
 		Severity:    9,
 		Triggering:  true,
 		Enabled:     true,
-		Rule: restapi.SloAlertRule{
+		Rule: instana.SloAlertRule{
 			AlertType: "SERVICE_LEVELS_OBJECTIVE",
 			Metric:    "STATUS",
 		},
-		Threshold: &restapi.SloAlertThreshold{
+		Threshold: &instana.SloAlertThreshold{
 			Type:     "static",
 			Operator: ">",
 			Value:    90.0,
 		},
-		TimeThreshold: restapi.SloAlertTimeThreshold{
+		TimeThreshold: instana.SloAlertTimeThreshold{
 			TimeWindow: 180000,
 			Expiry:     360000,
 		},
 		SloIds:                []string{"slo-9", "slo-10", "slo-11", "slo-12"},
 		AlertChannelIds:       []string{"channel-8", "channel-9"},
-		CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
-		BurnRateConfigs:       &[]restapi.BurnRateConfig{},
+		CustomerPayloadFields: []instana.CustomPayloadField[any]{},
+		BurnRateConfigs:       &[]instana.BurnRateConfig{},
 	}
 
 	state := tfsdk.State{

@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/instana-go-client/instana"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 )
 
@@ -40,7 +40,7 @@ func NewAlertingChannelDataSource() datasource.DataSource {
 }
 
 type AlertingChannelDataSource struct {
-	instanaAPI restapi.InstanaAPI
+	instanaAPI instana.InstanaAPI
 }
 
 func (d *AlertingChannelDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -317,11 +317,11 @@ func (d *AlertingChannelDataSource) Configure(_ context.Context, req datasource.
 		return
 	}
 
-	providerMeta, ok := req.ProviderData.(*restapi.ProviderMeta)
+	providerMeta, ok := req.ProviderData.(*instana.ProviderMeta)
 	if !ok {
 		resp.Diagnostics.AddError(
 			AlertingChannelErrUnexpectedConfigureType,
-			fmt.Sprintf("Expected *restapi.ProviderMeta, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *instana.ProviderMeta, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 		return
 	}
@@ -350,7 +350,7 @@ func (d *AlertingChannelDataSource) Read(ctx context.Context, req datasource.Rea
 	}
 
 	// Find the channel with the matching name
-	var matchingChannel *restapi.AlertingChannel
+	var matchingChannel *instana.AlertingChannel
 	for _, channel := range *channels {
 		if channel.Name == name {
 			matchingChannel = channel
@@ -377,98 +377,98 @@ func (d *AlertingChannelDataSource) Read(ctx context.Context, req datasource.Rea
 
 	// Set the appropriate channel type based on the alerting channel kind
 	switch matchingChannel.Kind {
-	case restapi.EmailChannelType:
+	case instana.EmailChannelType:
 		emailChannel, emailDiags := shared.MapEmailChannelToState(ctx, matchingChannel)
 		if emailDiags.HasError() {
 			resp.Diagnostics.Append(emailDiags...)
 			return
 		}
 		data.Email = emailChannel
-	case restapi.OpsGenieChannelType:
+	case instana.OpsGenieChannelType:
 		opsGenieChannel, opsGenieDiags := shared.MapOpsGenieChannelToState(ctx, matchingChannel)
 		if opsGenieDiags.HasError() {
 			resp.Diagnostics.Append(opsGenieDiags...)
 			return
 		}
 		data.OpsGenie = opsGenieChannel
-	case restapi.PagerDutyChannelType:
+	case instana.PagerDutyChannelType:
 		pagerDutyChannel, pagerDutyDiags := shared.MapPagerDutyChannelToState(ctx, matchingChannel)
 		if pagerDutyDiags.HasError() {
 			resp.Diagnostics.Append(pagerDutyDiags...)
 			return
 		}
 		data.PagerDuty = pagerDutyChannel
-	case restapi.SlackChannelType:
+	case instana.SlackChannelType:
 		slackChannel, slackDiags := shared.MapSlackChannelToState(ctx, matchingChannel)
 		if slackDiags.HasError() {
 			resp.Diagnostics.Append(slackDiags...)
 			return
 		}
 		data.Slack = slackChannel
-	case restapi.SplunkChannelType:
+	case instana.SplunkChannelType:
 		splunkChannel, splunkDiags := shared.MapSplunkChannelToState(ctx, matchingChannel)
 		if splunkDiags.HasError() {
 			resp.Diagnostics.Append(splunkDiags...)
 			return
 		}
 		data.Splunk = splunkChannel
-	case restapi.VictorOpsChannelType:
+	case instana.VictorOpsChannelType:
 		victorOpsChannel, victorOpsDiags := shared.MapVictorOpsChannelToState(ctx, matchingChannel)
 		if victorOpsDiags.HasError() {
 			resp.Diagnostics.Append(victorOpsDiags...)
 			return
 		}
 		data.VictorOps = victorOpsChannel
-	case restapi.WebhookChannelType:
+	case instana.WebhookChannelType:
 		webhookChannel, webhookDiags := shared.MapWebhookChannelToState(ctx, matchingChannel)
 		if webhookDiags.HasError() {
 			resp.Diagnostics.Append(webhookDiags...)
 			return
 		}
 		data.Webhook = webhookChannel
-	case restapi.Office365ChannelType:
+	case instana.Office365ChannelType:
 		office365Channel, office365Diags := shared.MapWebhookBasedChannelToState(ctx, matchingChannel)
 		if office365Diags.HasError() {
 			resp.Diagnostics.Append(office365Diags...)
 			return
 		}
 		data.Office365 = office365Channel
-	case restapi.GoogleChatChannelType:
+	case instana.GoogleChatChannelType:
 		googleChatChannel, googleChatDiags := shared.MapWebhookBasedChannelToState(ctx, matchingChannel)
 		if googleChatDiags.HasError() {
 			resp.Diagnostics.Append(googleChatDiags...)
 			return
 		}
 		data.GoogleChat = googleChatChannel
-	case restapi.ServiceNowChannelType:
+	case instana.ServiceNowChannelType:
 		serviceNowChannel, serviceNowDiags := shared.MapServiceNowChannelToState(ctx, matchingChannel)
 		if serviceNowDiags.HasError() {
 			resp.Diagnostics.Append(serviceNowDiags...)
 			return
 		}
 		data.ServiceNow = serviceNowChannel
-	case restapi.ServiceNowApplicationChannelType:
+	case instana.ServiceNowApplicationChannelType:
 		serviceNowApplicationChannel, serviceNowApplicationDiags := shared.MapServiceNowApplicationChannelToState(ctx, matchingChannel)
 		if serviceNowApplicationDiags.HasError() {
 			resp.Diagnostics.Append(serviceNowApplicationDiags...)
 			return
 		}
 		data.ServiceNowApplication = serviceNowApplicationChannel
-	case restapi.PrometheusWebhookChannelType:
+	case instana.PrometheusWebhookChannelType:
 		prometheusWebhookChannel, prometheusWebhookDiags := shared.MapPrometheusWebhookChannelToState(ctx, matchingChannel)
 		if prometheusWebhookDiags.HasError() {
 			resp.Diagnostics.Append(prometheusWebhookDiags...)
 			return
 		}
 		data.PrometheusWebhook = prometheusWebhookChannel
-	case restapi.WebexTeamsWebhookChannelType:
+	case instana.WebexTeamsWebhookChannelType:
 		webexTeamsWebhookChannel, webexTeamsWebhookDiags := shared.MapWebhookBasedChannelToState(ctx, matchingChannel)
 		if webexTeamsWebhookDiags.HasError() {
 			resp.Diagnostics.Append(webexTeamsWebhookDiags...)
 			return
 		}
 		data.WebexTeamsWebhook = webexTeamsWebhookChannel
-	case restapi.WatsonAIOpsWebhookChannelType:
+	case instana.WatsonAIOpsWebhookChannelType:
 		watsonAIOpsWebhookChannel, watsonAIOpsWebhookDiags := shared.MapWatsonAIOpsWebhookChannelToState(ctx, matchingChannel)
 		if watsonAIOpsWebhookDiags.HasError() {
 			resp.Diagnostics.Append(watsonAIOpsWebhookDiags...)

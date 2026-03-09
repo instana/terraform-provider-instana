@@ -14,12 +14,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/instana-go-client/instana"
 	"github.com/instana/terraform-provider-instana/internal/util"
 )
 
 // NewGroupResourceHandle creates the resource handle for RBAC Groups
-func NewGroupResourceHandle() resourcehandle.ResourceHandle[*restapi.Group] {
+func NewGroupResourceHandle() resourcehandle.ResourceHandle[*instana.Group] {
 	return &groupResource{
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:  ResourceInstanaGroup,
@@ -97,7 +97,7 @@ func buildPermissionSetAttributes() map[string]schema.Attribute {
 			ElementType: types.StringType,
 			Validators: []validator.Set{
 				setvalidator.ValueStringsAre(
-					stringvalidator.OneOf(restapi.SupportedInstanaPermissions.ToStringSlice()...),
+					stringvalidator.OneOf(instana.SupportedInstanaPermissions.ToStringSlice()...),
 				),
 			},
 		},
@@ -128,7 +128,7 @@ func (r *groupResource) MetaData() *resourcehandle.ResourceMetaData {
 	return &r.metaData
 }
 
-func (r *groupResource) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.Group] {
+func (r *groupResource) GetRestResource(api instana.InstanaAPI) instana.RestResource[*instana.Group] {
 	return api.Groups()
 }
 
@@ -137,7 +137,7 @@ func (r *groupResource) SetComputedFields(_ context.Context, _ *tfsdk.Plan) diag
 }
 
 // UpdateState updates the Terraform state with data from the API response
-func (r *groupResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, group *restapi.Group) diag.Diagnostics {
+func (r *groupResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, group *instana.Group) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var model GroupModel
 	if plan != nil {
@@ -152,7 +152,7 @@ func (r *groupResource) UpdateState(ctx context.Context, state *tfsdk.State, pla
 }
 
 // buildGroupModelFromAPIResponse constructs a GroupModel from the API Group response
-func (r *groupResource) buildGroupModelFromAPIResponse(group *restapi.Group, groupModel GroupModel) GroupModel {
+func (r *groupResource) buildGroupModelFromAPIResponse(group *instana.Group, groupModel GroupModel) GroupModel {
 	model := GroupModel{
 		ID:   types.StringValue(group.ID),
 		Name: types.StringValue(group.Name),
@@ -172,7 +172,7 @@ func (r *groupResource) buildGroupModelFromAPIResponse(group *restapi.Group, gro
 }
 
 // mapMembersToModel converts API members to model members
-func (r *groupResource) mapMembersToModel(apiMembers []restapi.APIMember) []GroupMemberModel {
+func (r *groupResource) mapMembersToModel(apiMembers []instana.APIMember) []GroupMemberModel {
 	if len(apiMembers) == 0 {
 		return nil
 	}
@@ -187,7 +187,7 @@ func (r *groupResource) mapMembersToModel(apiMembers []restapi.APIMember) []Grou
 }
 
 // mapPermissionSetToModel converts API permission set to model permission set
-func (r *groupResource) mapPermissionSetToModel(apiPermissionSet *restapi.APIPermissionSetWithRoles) *GroupPermissionSetModel {
+func (r *groupResource) mapPermissionSetToModel(apiPermissionSet *instana.APIPermissionSetWithRoles) *GroupPermissionSetModel {
 	permissionSetModel := &GroupPermissionSetModel{
 		InfraDFQFilter: r.mapInfraDFQFilterToModel(apiPermissionSet.InfraDFQFilter),
 	}
@@ -203,7 +203,7 @@ func (r *groupResource) mapPermissionSetToModel(apiPermissionSet *restapi.APIPer
 }
 
 // mapInfraDFQFilterToModel converts the infra DFQ filter to a Terraform string type
-func (r *groupResource) mapInfraDFQFilterToModel(infraFilter *restapi.ScopeBinding) types.String {
+func (r *groupResource) mapInfraDFQFilterToModel(infraFilter *instana.ScopeBinding) types.String {
 	if infraFilter != nil && len(infraFilter.ScopeID) > 0 {
 		return types.StringValue(infraFilter.ScopeID)
 	}
@@ -211,7 +211,7 @@ func (r *groupResource) mapInfraDFQFilterToModel(infraFilter *restapi.ScopeBindi
 }
 
 // extractScopeIDs extracts scope IDs from a slice of ScopeBindings
-func (r *groupResource) extractScopeIDs(scopeBindings []restapi.ScopeBinding) []string {
+func (r *groupResource) extractScopeIDs(scopeBindings []instana.ScopeBinding) []string {
 	if len(scopeBindings) == 0 {
 		return nil
 	}
@@ -224,7 +224,7 @@ func (r *groupResource) extractScopeIDs(scopeBindings []restapi.ScopeBinding) []
 }
 
 // convertPermissionsToStrings converts InstanaPermission slice to string slice
-func (r *groupResource) convertPermissionsToStrings(permissions []restapi.InstanaPermission) []string {
+func (r *groupResource) convertPermissionsToStrings(permissions []instana.InstanaPermission) []string {
 	if len(permissions) == 0 {
 		return nil
 	}
@@ -237,7 +237,7 @@ func (r *groupResource) convertPermissionsToStrings(permissions []restapi.Instan
 }
 
 // MapStateToDataObject maps Terraform state/plan to API Group object
-func (r *groupResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.Group, diag.Diagnostics) {
+func (r *groupResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*instana.Group, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	model, modelDiags := r.extractModelFromPlanOrState(ctx, plan, state)
@@ -246,7 +246,7 @@ func (r *groupResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Pl
 		return nil, diags
 	}
 
-	group := &restapi.Group{
+	group := &instana.Group{
 		ID:            r.extractGroupID(model),
 		Name:          model.Name.ValueString(),
 		Members:       r.mapModelMembersToAPI(model.Members),
@@ -279,14 +279,14 @@ func (r *groupResource) extractGroupID(model GroupModel) string {
 }
 
 // mapModelMembersToAPI converts model members to API members
-func (r *groupResource) mapModelMembersToAPI(modelMembers []GroupMemberModel) []restapi.APIMember {
+func (r *groupResource) mapModelMembersToAPI(modelMembers []GroupMemberModel) []instana.APIMember {
 	if len(modelMembers) == 0 {
-		return make([]restapi.APIMember, 0)
+		return make([]instana.APIMember, 0)
 	}
 
-	apiMembers := make([]restapi.APIMember, 0, len(modelMembers))
+	apiMembers := make([]instana.APIMember, 0, len(modelMembers))
 	for _, memberModel := range modelMembers {
-		apiMember := restapi.APIMember{
+		apiMember := instana.APIMember{
 			UserID: memberModel.UserID.ValueString(),
 		}
 
@@ -302,7 +302,7 @@ func (r *groupResource) mapModelMembersToAPI(modelMembers []GroupMemberModel) []
 }
 
 // mapModelPermissionSetToAPI converts model permission set to API permission set
-func (r *groupResource) mapModelPermissionSetToAPI(modelPermissionSet *GroupPermissionSetModel) restapi.APIPermissionSetWithRoles {
+func (r *groupResource) mapModelPermissionSetToAPI(modelPermissionSet *GroupPermissionSetModel) instana.APIPermissionSetWithRoles {
 	permissionSet := r.initializeEmptyPermissionSet()
 
 	if modelPermissionSet == nil {
@@ -321,55 +321,55 @@ func (r *groupResource) mapModelPermissionSetToAPI(modelPermissionSet *GroupPerm
 }
 
 // initializeEmptyPermissionSet creates an empty permission set with initialized slices
-func (r *groupResource) initializeEmptyPermissionSet() restapi.APIPermissionSetWithRoles {
-	emptyScopeBindings := make([]restapi.ScopeBinding, 0)
-	return restapi.APIPermissionSetWithRoles{
+func (r *groupResource) initializeEmptyPermissionSet() instana.APIPermissionSetWithRoles {
+	emptyScopeBindings := make([]instana.ScopeBinding, 0)
+	return instana.APIPermissionSetWithRoles{
 		ApplicationIDs:          emptyScopeBindings,
 		KubernetesNamespaceUIDs: emptyScopeBindings,
 		KubernetesClusterUUIDs:  emptyScopeBindings,
 		WebsiteIDs:              emptyScopeBindings,
 		MobileAppIDs:            emptyScopeBindings,
-		Permissions:             make([]restapi.InstanaPermission, 0),
+		Permissions:             make([]instana.InstanaPermission, 0),
 	}
 }
 
 // createScopeBindings creates ScopeBinding slice from string slice
-func (r *groupResource) createScopeBindings(scopeIDs []string) []restapi.ScopeBinding {
+func (r *groupResource) createScopeBindings(scopeIDs []string) []instana.ScopeBinding {
 	if len(scopeIDs) == 0 {
-		return make([]restapi.ScopeBinding, 0)
+		return make([]instana.ScopeBinding, 0)
 	}
 
-	scopeBindings := make([]restapi.ScopeBinding, len(scopeIDs))
+	scopeBindings := make([]instana.ScopeBinding, len(scopeIDs))
 	for i, scopeID := range scopeIDs {
-		scopeBindings[i] = restapi.ScopeBinding{ScopeID: scopeID}
+		scopeBindings[i] = instana.ScopeBinding{ScopeID: scopeID}
 	}
 	return scopeBindings
 }
 
 // mapModelInfraDFQFilterToAPI converts model infra DFQ filter to API format
-func (r *groupResource) mapModelInfraDFQFilterToAPI(infraFilter types.String) *restapi.ScopeBinding {
+func (r *groupResource) mapModelInfraDFQFilterToAPI(infraFilter types.String) *instana.ScopeBinding {
 	if !infraFilter.IsNull() && !infraFilter.IsUnknown() {
-		return &restapi.ScopeBinding{
+		return &instana.ScopeBinding{
 			ScopeID: infraFilter.ValueString(),
 		}
 	}
 
 	roleID := DefaultScopeRoleID
-	return &restapi.ScopeBinding{
+	return &instana.ScopeBinding{
 		ScopeID:     EmptyScopeID,
 		ScopeRoleID: &roleID,
 	}
 }
 
 // convertStringsToPermissions converts string slice to InstanaPermission slice
-func (r *groupResource) convertStringsToPermissions(permissionStrings []string) []restapi.InstanaPermission {
+func (r *groupResource) convertStringsToPermissions(permissionStrings []string) []instana.InstanaPermission {
 	if len(permissionStrings) == 0 {
-		return make([]restapi.InstanaPermission, 0)
+		return make([]instana.InstanaPermission, 0)
 	}
 
-	permissions := make([]restapi.InstanaPermission, len(permissionStrings))
+	permissions := make([]instana.InstanaPermission, len(permissionStrings))
 	for i, permissionString := range permissionStrings {
-		permissions[i] = restapi.InstanaPermission(permissionString)
+		permissions[i] = instana.InstanaPermission(permissionString)
 	}
 	return permissions
 }

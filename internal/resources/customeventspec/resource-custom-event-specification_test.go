@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/instana-go-client/instana"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -57,7 +57,7 @@ func TestGetRestResource(t *testing.T) {
 	resource := &customEventSpecificationResource{}
 
 	// Verify the method exists and interface is properly implemented
-	var _ resourcehandle.ResourceHandle[*restapi.CustomEventSpecification] = resource
+	var _ resourcehandle.ResourceHandle[*instana.CustomEventSpecification] = resource
 	assert.NotNil(t, resource.GetRestResource)
 }
 
@@ -196,7 +196,7 @@ func TestMapStateToDataObject_WithEntityCountRule(t *testing.T) {
 	require.Len(t, result.Rules, 1)
 
 	rule := result.Rules[0]
-	assert.Equal(t, restapi.EntityCountRuleType, rule.DType)
+	assert.Equal(t, instana.EntityCountRuleType, rule.DType)
 	assert.Equal(t, 5, rule.Severity)
 	assert.NotNil(t, rule.ConditionOperator)
 	assert.Equal(t, ">", *rule.ConditionOperator)
@@ -233,7 +233,7 @@ func TestMapStateToDataObject_WithEntityCountVerificationRule(t *testing.T) {
 	require.Len(t, result.Rules, 1)
 
 	rule := result.Rules[0]
-	assert.Equal(t, restapi.EntityCountVerificationRuleType, rule.DType)
+	assert.Equal(t, instana.EntityCountVerificationRuleType, rule.DType)
 	assert.Equal(t, 10, rule.Severity)
 	assert.Equal(t, ">=", *rule.ConditionOperator)
 	assert.Equal(t, 5.0, *rule.ConditionValue)
@@ -270,7 +270,7 @@ func TestMapStateToDataObject_WithEntityVerificationRule(t *testing.T) {
 	require.Len(t, result.Rules, 1)
 
 	rule := result.Rules[0]
-	assert.Equal(t, restapi.EntityVerificationRuleType, rule.DType)
+	assert.Equal(t, instana.EntityVerificationRuleType, rule.DType)
 	assert.Equal(t, 5, rule.Severity)
 	assert.Equal(t, "process", *rule.MatchingEntityType)
 	assert.Equal(t, "contains", *rule.MatchingOperator)
@@ -305,7 +305,7 @@ func TestMapStateToDataObject_WithHostAvailabilityRule(t *testing.T) {
 	require.Len(t, result.Rules, 1)
 
 	rule := result.Rules[0]
-	assert.Equal(t, restapi.HostAvailabilityRuleType, rule.DType)
+	assert.Equal(t, instana.HostAvailabilityRuleType, rule.DType)
 	assert.Equal(t, 10, rule.Severity)
 	assert.Equal(t, 120000, *rule.OfflineDuration)
 	assert.NotNil(t, rule.CloseAfter)
@@ -340,7 +340,7 @@ func TestMapStateToDataObject_WithHostAvailabilityRuleNoCloseAfter(t *testing.T)
 	require.Len(t, result.Rules, 1)
 
 	rule := result.Rules[0]
-	assert.Equal(t, restapi.HostAvailabilityRuleType, rule.DType)
+	assert.Equal(t, instana.HostAvailabilityRuleType, rule.DType)
 	assert.Nil(t, rule.CloseAfter)
 	assert.Nil(t, rule.TagFilter)
 }
@@ -394,7 +394,7 @@ func TestMapStateToDataObject_WithSystemRule(t *testing.T) {
 	require.Len(t, result.Rules, 1)
 
 	rule := result.Rules[0]
-	assert.Equal(t, restapi.SystemRuleType, rule.DType)
+	assert.Equal(t, instana.SystemRuleType, rule.DType)
 	assert.Equal(t, 10, rule.Severity)
 	assert.NotNil(t, rule.SystemRuleID)
 	assert.Equal(t, "system-rule-123", *rule.SystemRuleID)
@@ -430,7 +430,7 @@ func TestMapStateToDataObject_WithThresholdRule(t *testing.T) {
 	require.Len(t, result.Rules, 1)
 
 	rule := result.Rules[0]
-	assert.Equal(t, restapi.ThresholdRuleType, rule.DType)
+	assert.Equal(t, instana.ThresholdRuleType, rule.DType)
 	assert.Equal(t, 5, rule.Severity)
 	assert.Equal(t, "cpu.usage", *rule.MetricName)
 	assert.Equal(t, 60000, *rule.Rollup)
@@ -477,7 +477,7 @@ func TestMapStateToDataObject_WithThresholdRuleAndMetricPattern(t *testing.T) {
 	require.Len(t, result.Rules, 1)
 
 	rule := result.Rules[0]
-	assert.Equal(t, restapi.ThresholdRuleType, rule.DType)
+	assert.Equal(t, instana.ThresholdRuleType, rule.DType)
 	require.NotNil(t, rule.MetricPattern)
 	assert.Equal(t, "jvm.", rule.MetricPattern.Prefix)
 	assert.NotNil(t, rule.MetricPattern.Postfix)
@@ -572,9 +572,9 @@ func TestMapStateToDataObject_WithMultipleRules(t *testing.T) {
 	for _, rule := range result.Rules {
 		ruleTypes[rule.DType] = true
 	}
-	assert.True(t, ruleTypes[restapi.EntityCountRuleType])
-	assert.True(t, ruleTypes[restapi.SystemRuleType])
-	assert.True(t, ruleTypes[restapi.ThresholdRuleType])
+	assert.True(t, ruleTypes[instana.EntityCountRuleType])
+	assert.True(t, ruleTypes[instana.SystemRuleType])
+	assert.True(t, ruleTypes[instana.ThresholdRuleType])
 }
 
 func TestMapStateToDataObject_FromPlan(t *testing.T) {
@@ -628,7 +628,7 @@ func TestUpdateState_BasicConfig(t *testing.T) {
 	ctx := context.Background()
 	resource := &customEventSpecificationResource{}
 
-	spec := &restapi.CustomEventSpecification{
+	spec := &instana.CustomEventSpecification{
 		ID:                  "test-id",
 		Name:                "Test Event",
 		EntityType:          "host",
@@ -638,7 +638,7 @@ func TestUpdateState_BasicConfig(t *testing.T) {
 		ExpirationTime:      ptr(3600000),
 		Enabled:             true,
 		RuleLogicalOperator: "AND",
-		Rules:               []restapi.RuleSpecification{},
+		Rules:               []instana.RuleSpecification{},
 	}
 
 	state := &tfsdk.State{
@@ -672,16 +672,16 @@ func TestUpdateState_WithEntityCountRule(t *testing.T) {
 
 	conditionOp := ">"
 	conditionVal := 10.0
-	spec := &restapi.CustomEventSpecification{
+	spec := &instana.CustomEventSpecification{
 		ID:                  "test-id",
 		Name:                "Test Event",
 		EntityType:          "host",
 		Triggering:          false,
 		Enabled:             true,
 		RuleLogicalOperator: "AND",
-		Rules: []restapi.RuleSpecification{
+		Rules: []instana.RuleSpecification{
 			{
-				DType:             restapi.EntityCountRuleType,
+				DType:             instana.EntityCountRuleType,
 				Severity:          5,
 				ConditionOperator: &conditionOp,
 				ConditionValue:    &conditionVal,
@@ -720,16 +720,16 @@ func TestUpdateState_WithEntityCountVerificationRule(t *testing.T) {
 	matchingOp := "is"
 	matchingLabel := "test-service"
 
-	spec := &restapi.CustomEventSpecification{
+	spec := &instana.CustomEventSpecification{
 		ID:                  "test-id",
 		Name:                "Test Event",
 		EntityType:          "host",
 		Triggering:          false,
 		Enabled:             true,
 		RuleLogicalOperator: "AND",
-		Rules: []restapi.RuleSpecification{
+		Rules: []instana.RuleSpecification{
 			{
-				DType:               restapi.EntityCountVerificationRuleType,
+				DType:               instana.EntityCountVerificationRuleType,
 				Severity:            10,
 				ConditionOperator:   &conditionOp,
 				ConditionValue:      &conditionVal,
@@ -773,16 +773,16 @@ func TestUpdateState_WithEntityVerificationRule(t *testing.T) {
 	matchingLabel := "java"
 	offlineDur := 60000
 
-	spec := &restapi.CustomEventSpecification{
+	spec := &instana.CustomEventSpecification{
 		ID:                  "test-id",
 		Name:                "Test Event",
 		EntityType:          "host",
 		Triggering:          false,
 		Enabled:             true,
 		RuleLogicalOperator: "AND",
-		Rules: []restapi.RuleSpecification{
+		Rules: []instana.RuleSpecification{
 			{
-				DType:               restapi.EntityVerificationRuleType,
+				DType:               instana.EntityVerificationRuleType,
 				Severity:            5,
 				MatchingEntityType:  &matchingType,
 				MatchingOperator:    &matchingOp,
@@ -823,23 +823,23 @@ func TestUpdateState_WithHostAvailabilityRule(t *testing.T) {
 	closeAfter := 300000
 	tagName := "entity.type"
 	tagValue := "host"
-	tagOp := restapi.EqualsOperator
+	tagOp := instana.EqualsOperator
 
-	spec := &restapi.CustomEventSpecification{
+	spec := &instana.CustomEventSpecification{
 		ID:                  "test-id",
 		Name:                "Test Event",
 		EntityType:          "host",
 		Triggering:          false,
 		Enabled:             true,
 		RuleLogicalOperator: "AND",
-		Rules: []restapi.RuleSpecification{
+		Rules: []instana.RuleSpecification{
 			{
-				DType:           restapi.HostAvailabilityRuleType,
+				DType:           instana.HostAvailabilityRuleType,
 				Severity:        10,
 				OfflineDuration: &offlineDur,
 				CloseAfter:      &closeAfter,
-				TagFilter: &restapi.TagFilter{
-					Type:     restapi.TagFilterExpressionType,
+				TagFilter: &instana.TagFilter{
+					Type:     instana.TagFilterExpressionType,
 					Name:     &tagName,
 					Operator: &tagOp,
 					Value:    &tagValue,
@@ -876,16 +876,16 @@ func TestUpdateState_WithHostAvailabilityRuleNoCloseAfter(t *testing.T) {
 
 	offlineDur := 60000
 
-	spec := &restapi.CustomEventSpecification{
+	spec := &instana.CustomEventSpecification{
 		ID:                  "test-id",
 		Name:                "Test Event",
 		EntityType:          "host",
 		Triggering:          false,
 		Enabled:             true,
 		RuleLogicalOperator: "AND",
-		Rules: []restapi.RuleSpecification{
+		Rules: []instana.RuleSpecification{
 			{
-				DType:           restapi.HostAvailabilityRuleType,
+				DType:           instana.HostAvailabilityRuleType,
 				Severity:        5,
 				OfflineDuration: &offlineDur,
 				CloseAfter:      nil,
@@ -920,16 +920,16 @@ func TestUpdateState_WithSystemRule(t *testing.T) {
 
 	systemRuleID := "system-rule-123"
 
-	spec := &restapi.CustomEventSpecification{
+	spec := &instana.CustomEventSpecification{
 		ID:                  "test-id",
 		Name:                "Test Event",
 		EntityType:          "host",
 		Triggering:          false,
 		Enabled:             true,
 		RuleLogicalOperator: "AND",
-		Rules: []restapi.RuleSpecification{
+		Rules: []instana.RuleSpecification{
 			{
-				DType:        restapi.SystemRuleType,
+				DType:        instana.SystemRuleType,
 				Severity:     10,
 				SystemRuleID: &systemRuleID,
 			},
@@ -967,16 +967,16 @@ func TestUpdateState_WithThresholdRule(t *testing.T) {
 	conditionOp := ">"
 	conditionVal := 80.0
 
-	spec := &restapi.CustomEventSpecification{
+	spec := &instana.CustomEventSpecification{
 		ID:                  "test-id",
 		Name:                "Test Event",
 		EntityType:          "host",
 		Triggering:          false,
 		Enabled:             true,
 		RuleLogicalOperator: "AND",
-		Rules: []restapi.RuleSpecification{
+		Rules: []instana.RuleSpecification{
 			{
-				DType:             restapi.ThresholdRuleType,
+				DType:             instana.ThresholdRuleType,
 				Severity:          5,
 				MetricName:        &metricName,
 				Rollup:            &rollup,
@@ -1027,16 +1027,16 @@ func TestUpdateState_WithThresholdRuleAndMetricPattern(t *testing.T) {
 	postfix := ".heap"
 	placeholder := "instance"
 
-	spec := &restapi.CustomEventSpecification{
+	spec := &instana.CustomEventSpecification{
 		ID:                  "test-id",
 		Name:                "Test Event",
 		EntityType:          "host",
 		Triggering:          false,
 		Enabled:             true,
 		RuleLogicalOperator: "AND",
-		Rules: []restapi.RuleSpecification{
+		Rules: []instana.RuleSpecification{
 			{
-				DType:             restapi.ThresholdRuleType,
+				DType:             instana.ThresholdRuleType,
 				Severity:          10,
 				MetricName:        &metricName,
 				Rollup:            &rollup,
@@ -1044,7 +1044,7 @@ func TestUpdateState_WithThresholdRuleAndMetricPattern(t *testing.T) {
 				Aggregation:       &aggregation,
 				ConditionOperator: &conditionOp,
 				ConditionValue:    &conditionVal,
-				MetricPattern: &restapi.MetricPattern{
+				MetricPattern: &instana.MetricPattern{
 					Prefix:      "jvm.",
 					Postfix:     &postfix,
 					Placeholder: &placeholder,
@@ -1091,27 +1091,27 @@ func TestUpdateState_WithMultipleRules(t *testing.T) {
 	thresholdOp := ">"
 	thresholdVal := 75.0
 
-	spec := &restapi.CustomEventSpecification{
+	spec := &instana.CustomEventSpecification{
 		ID:                  "test-id",
 		Name:                "Test Event",
 		EntityType:          "host",
 		Triggering:          false,
 		Enabled:             true,
 		RuleLogicalOperator: "OR",
-		Rules: []restapi.RuleSpecification{
+		Rules: []instana.RuleSpecification{
 			{
-				DType:             restapi.EntityCountRuleType,
+				DType:             instana.EntityCountRuleType,
 				Severity:          5,
 				ConditionOperator: &conditionOp,
 				ConditionValue:    &conditionVal,
 			},
 			{
-				DType:        restapi.SystemRuleType,
+				DType:        instana.SystemRuleType,
 				Severity:     10,
 				SystemRuleID: &systemRuleID,
 			},
 			{
-				DType:             restapi.ThresholdRuleType,
+				DType:             instana.ThresholdRuleType,
 				Severity:          5,
 				MetricName:        &metricName,
 				Rollup:            &rollup,
@@ -1147,14 +1147,14 @@ func TestUpdateState_WithNoRules(t *testing.T) {
 	ctx := context.Background()
 	resource := &customEventSpecificationResource{}
 
-	spec := &restapi.CustomEventSpecification{
+	spec := &instana.CustomEventSpecification{
 		ID:                  "test-id",
 		Name:                "Test Event",
 		EntityType:          "host",
 		Triggering:          false,
 		Enabled:             true,
 		RuleLogicalOperator: "AND",
-		Rules:               []restapi.RuleSpecification{},
+		Rules:               []instana.RuleSpecification{},
 	}
 
 	state := &tfsdk.State{
@@ -1185,7 +1185,7 @@ func TestUpdateState_WithNullOptionalFields(t *testing.T) {
 	ctx := context.Background()
 	resource := &customEventSpecificationResource{}
 
-	spec := &restapi.CustomEventSpecification{
+	spec := &instana.CustomEventSpecification{
 		ID:                  "test-id",
 		Name:                "Test Event",
 		EntityType:          "host",
@@ -1195,7 +1195,7 @@ func TestUpdateState_WithNullOptionalFields(t *testing.T) {
 		ExpirationTime:      nil,
 		Enabled:             true,
 		RuleLogicalOperator: "AND",
-		Rules:               []restapi.RuleSpecification{},
+		Rules:               []instana.RuleSpecification{},
 	}
 
 	state := &tfsdk.State{
@@ -1222,16 +1222,16 @@ func TestUpdateState_SkipsIncompleteRules(t *testing.T) {
 	resource := &customEventSpecificationResource{}
 
 	// Entity count rule without required fields
-	spec := &restapi.CustomEventSpecification{
+	spec := &instana.CustomEventSpecification{
 		ID:                  "test-id",
 		Name:                "Test Event",
 		EntityType:          "host",
 		Triggering:          false,
 		Enabled:             true,
 		RuleLogicalOperator: "AND",
-		Rules: []restapi.RuleSpecification{
+		Rules: []instana.RuleSpecification{
 			{
-				DType:             restapi.EntityCountRuleType,
+				DType:             instana.EntityCountRuleType,
 				Severity:          5,
 				ConditionOperator: nil, // Missing required field
 				ConditionValue:    nil, // Missing required field

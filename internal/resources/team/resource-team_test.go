@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/instana-go-client/instana"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -58,7 +58,7 @@ func TestUpdateState(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("basic team without members or scope", func(t *testing.T) {
-		team := &restapi.Team{
+		team := &instana.Team{
 			ID:  "test-id",
 			Tag: "test-team",
 		}
@@ -84,10 +84,10 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("team with info", func(t *testing.T) {
 		desc := "Test team description"
-		team := &restapi.Team{
+		team := &instana.Team{
 			ID:  "test-id",
 			Tag: "test-team",
-			Info: &restapi.TeamInfo{
+			Info: &instana.TeamInfo{
 				Description: &desc,
 			},
 		}
@@ -119,10 +119,10 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("team with info nil description", func(t *testing.T) {
-		team := &restapi.Team{
+		team := &instana.Team{
 			ID:   "test-id",
 			Tag:  "test-team",
-			Info: &restapi.TeamInfo{},
+			Info: &instana.TeamInfo{},
 		}
 
 		handle := NewTeamResourceHandle()
@@ -152,10 +152,10 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("team with members without roles", func(t *testing.T) {
-		team := &restapi.Team{
+		team := &instana.Team{
 			ID:  "test-id",
 			Tag: "test-team",
-			Members: []restapi.TeamMember{
+			Members: []instana.TeamMember{
 				{
 					UserID: "user-1",
 				},
@@ -185,13 +185,13 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("team with members with roles", func(t *testing.T) {
-		team := &restapi.Team{
+		team := &instana.Team{
 			ID:  "test-id",
 			Tag: "test-team",
-			Members: []restapi.TeamMember{
+			Members: []instana.TeamMember{
 				{
 					UserID: "user-1",
-					Roles: []restapi.TeamRole{
+					Roles: []instana.TeamRole{
 						{RoleID: "role-1"},
 						{RoleID: "role-2"},
 					},
@@ -218,13 +218,13 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("team with members with empty roles", func(t *testing.T) {
-		team := &restapi.Team{
+		team := &instana.Team{
 			ID:  "test-id",
 			Tag: "test-team",
-			Members: []restapi.TeamMember{
+			Members: []instana.TeamMember{
 				{
 					UserID: "user-1",
-					Roles:  []restapi.TeamRole{},
+					Roles:  []instana.TeamRole{},
 				},
 			},
 		}
@@ -246,10 +246,10 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("team with scope - access permissions", func(t *testing.T) {
-		team := &restapi.Team{
+		team := &instana.Team{
 			ID:  "test-id",
 			Tag: "test-team",
-			Scope: &restapi.TeamScope{
+			Scope: &instana.TeamScope{
 				AccessPermissions: []string{"perm-1", "perm-2"},
 			},
 		}
@@ -273,10 +273,10 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("team with scope - applications", func(t *testing.T) {
-		team := &restapi.Team{
+		team := &instana.Team{
 			ID:  "test-id",
 			Tag: "test-team",
-			Scope: &restapi.TeamScope{
+			Scope: &instana.TeamScope{
 				Applications: []string{"app-1", "app-2"},
 			},
 		}
@@ -299,10 +299,10 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("team with scope - kubernetes clusters", func(t *testing.T) {
-		team := &restapi.Team{
+		team := &instana.Team{
 			ID:  "test-id",
 			Tag: "test-team",
-			Scope: &restapi.TeamScope{
+			Scope: &instana.TeamScope{
 				KubernetesClusters: []string{"k8s-1", "k8s-2"},
 			},
 		}
@@ -325,10 +325,10 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("team with scope - kubernetes namespaces", func(t *testing.T) {
-		team := &restapi.Team{
+		team := &instana.Team{
 			ID:  "test-id",
 			Tag: "test-team",
-			Scope: &restapi.TeamScope{
+			Scope: &instana.TeamScope{
 				KubernetesNamespaces: []string{"ns-1", "ns-2"},
 			},
 		}
@@ -351,10 +351,10 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("team with scope - mobile apps", func(t *testing.T) {
-		team := &restapi.Team{
+		team := &instana.Team{
 			ID:  "test-id",
 			Tag: "test-team",
-			Scope: &restapi.TeamScope{
+			Scope: &instana.TeamScope{
 				MobileApps: []string{"mobile-1", "mobile-2"},
 			},
 		}
@@ -377,10 +377,10 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("team with scope - websites", func(t *testing.T) {
-		team := &restapi.Team{
+		team := &instana.Team{
 			ID:  "test-id",
 			Tag: "test-team",
-			Scope: &restapi.TeamScope{
+			Scope: &instana.TeamScope{
 				Websites: []string{"website-1", "website-2"},
 			},
 		}
@@ -404,10 +404,10 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("team with scope - infra DFQ filter", func(t *testing.T) {
 		filter := "entity.type:host"
-		team := &restapi.Team{
+		team := &instana.Team{
 			ID:  "test-id",
 			Tag: "test-team",
-			Scope: &restapi.TeamScope{
+			Scope: &instana.TeamScope{
 				InfraDFQFilter: &filter,
 			},
 		}
@@ -430,10 +430,10 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("team with scope - action filter", func(t *testing.T) {
 		filter := "action.type:custom"
-		team := &restapi.Team{
+		team := &instana.Team{
 			ID:  "test-id",
 			Tag: "test-team",
-			Scope: &restapi.TeamScope{
+			Scope: &instana.TeamScope{
 				ActionFilter: &filter,
 			},
 		}
@@ -456,10 +456,10 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("team with scope - log filter", func(t *testing.T) {
 		filter := "log.level:error"
-		team := &restapi.Team{
+		team := &instana.Team{
 			ID:  "test-id",
 			Tag: "test-team",
-			Scope: &restapi.TeamScope{
+			Scope: &instana.TeamScope{
 				LogFilter: &filter,
 			},
 		}
@@ -481,10 +481,10 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("team with scope - business perspectives", func(t *testing.T) {
-		team := &restapi.Team{
+		team := &instana.Team{
 			ID:  "test-id",
 			Tag: "test-team",
-			Scope: &restapi.TeamScope{
+			Scope: &instana.TeamScope{
 				BusinessPerspectives: []string{"bp-1", "bp-2"},
 			},
 		}
@@ -507,10 +507,10 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("team with scope - SLO IDs", func(t *testing.T) {
-		team := &restapi.Team{
+		team := &instana.Team{
 			ID:  "test-id",
 			Tag: "test-team",
-			Scope: &restapi.TeamScope{
+			Scope: &instana.TeamScope{
 				SloIDs: []string{"slo-1", "slo-2"},
 			},
 		}
@@ -533,10 +533,10 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("team with scope - synthetic tests", func(t *testing.T) {
-		team := &restapi.Team{
+		team := &instana.Team{
 			ID:  "test-id",
 			Tag: "test-team",
-			Scope: &restapi.TeamScope{
+			Scope: &instana.TeamScope{
 				SyntheticTests: []string{"test-1", "test-2"},
 			},
 		}
@@ -559,10 +559,10 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("team with scope - synthetic credentials", func(t *testing.T) {
-		team := &restapi.Team{
+		team := &instana.Team{
 			ID:  "test-id",
 			Tag: "test-team",
-			Scope: &restapi.TeamScope{
+			Scope: &instana.TeamScope{
 				SyntheticCredentials: []string{"cred-1", "cred-2"},
 			},
 		}
@@ -585,10 +585,10 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("team with scope - tag IDs", func(t *testing.T) {
-		team := &restapi.Team{
+		team := &instana.Team{
 			ID:  "test-id",
 			Tag: "test-team",
-			Scope: &restapi.TeamScope{
+			Scope: &instana.TeamScope{
 				TagIDs: []string{"tag-1", "tag-2"},
 			},
 		}
@@ -612,11 +612,11 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("team with scope - restricted application filter with label", func(t *testing.T) {
 		label := "test-label"
-		team := &restapi.Team{
+		team := &instana.Team{
 			ID:  "test-id",
 			Tag: "test-team",
-			Scope: &restapi.TeamScope{
-				RestrictedApplicationFilter: &restapi.RestrictedApplicationFilter{
+			Scope: &instana.TeamScope{
+				RestrictedApplicationFilter: &instana.RestrictedApplicationFilter{
 					Label: &label,
 				},
 			},
@@ -640,12 +640,12 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("team with scope - restricted application filter with scope", func(t *testing.T) {
-		scope := restapi.RestrictedApplicationFilterScopeIncludeNoDownstream
-		team := &restapi.Team{
+		scope := instana.RestrictedApplicationFilterScopeIncludeNoDownstream
+		team := &instana.Team{
 			ID:  "test-id",
 			Tag: "test-team",
-			Scope: &restapi.TeamScope{
-				RestrictedApplicationFilter: &restapi.RestrictedApplicationFilter{
+			Scope: &instana.TeamScope{
+				RestrictedApplicationFilter: &instana.RestrictedApplicationFilter{
 					Scope: &scope,
 				},
 			},
@@ -665,19 +665,19 @@ func TestUpdateState(t *testing.T) {
 
 		require.NotNil(t, model.Scope)
 		require.NotNil(t, model.Scope.RestrictedApplicationFilter)
-		assert.Equal(t, string(restapi.RestrictedApplicationFilterScopeIncludeNoDownstream), model.Scope.RestrictedApplicationFilter.Scope.ValueString())
+		assert.Equal(t, string(instana.RestrictedApplicationFilterScopeIncludeNoDownstream), model.Scope.RestrictedApplicationFilter.Scope.ValueString())
 	})
 
 	t.Run("team with scope - restricted application filter with tag filter", func(t *testing.T) {
-		team := &restapi.Team{
+		team := &instana.Team{
 			ID:  "test-id",
 			Tag: "test-team",
-			Scope: &restapi.TeamScope{
-				RestrictedApplicationFilter: &restapi.RestrictedApplicationFilter{
-					TagFilterExpression: restapi.NewStringTagFilter(
-						restapi.TagFilterEntityNotApplicable,
+			Scope: &instana.TeamScope{
+				RestrictedApplicationFilter: &instana.RestrictedApplicationFilter{
+					TagFilterExpression: instana.NewStringTagFilter(
+						instana.TagFilterEntityNotApplicable,
 						"entity.type",
-						restapi.EqualsOperator,
+						instana.EqualsOperator,
 						"service",
 					),
 				},
@@ -705,23 +705,23 @@ func TestUpdateState(t *testing.T) {
 		desc := "Full team"
 		filter := "entity.type:host"
 		label := "test-label"
-		scope := restapi.RestrictedApplicationFilterScopeIncludeAllDownstream
+		scope := instana.RestrictedApplicationFilterScopeIncludeAllDownstream
 
-		team := &restapi.Team{
+		team := &instana.Team{
 			ID:  "test-id",
 			Tag: "test-team",
-			Info: &restapi.TeamInfo{
+			Info: &instana.TeamInfo{
 				Description: &desc,
 			},
-			Members: []restapi.TeamMember{
+			Members: []instana.TeamMember{
 				{
 					UserID: "user-1",
-					Roles: []restapi.TeamRole{
+					Roles: []instana.TeamRole{
 						{RoleID: "role-1"},
 					},
 				},
 			},
-			Scope: &restapi.TeamScope{
+			Scope: &instana.TeamScope{
 				AccessPermissions:    []string{"perm-1"},
 				Applications:         []string{"app-1"},
 				KubernetesClusters:   []string{"k8s-1"},
@@ -734,7 +734,7 @@ func TestUpdateState(t *testing.T) {
 				SyntheticTests:       []string{"test-1"},
 				SyntheticCredentials: []string{"cred-1"},
 				TagIDs:               []string{"tag-1"},
-				RestrictedApplicationFilter: &restapi.RestrictedApplicationFilter{
+				RestrictedApplicationFilter: &instana.RestrictedApplicationFilter{
 					Label: &label,
 					Scope: &scope,
 				},
@@ -776,7 +776,7 @@ func TestUpdateState(t *testing.T) {
 				TagIDs:               []string{"tag-1"},
 				RestrictedApplicationFilter: &TeamRestrictedApplicationFilterModel{
 					Label: types.StringValue("test-label"),
-					Scope: types.StringValue(string(restapi.RestrictedApplicationFilterScopeIncludeAllDownstream)),
+					Scope: types.StringValue(string(instana.RestrictedApplicationFilterScopeIncludeAllDownstream)),
 				},
 			},
 		}
@@ -1146,7 +1146,7 @@ func TestMapStateToDataObject(t *testing.T) {
 			Tag: types.StringValue("test-team"),
 			Scope: &TeamScopeModel{
 				RestrictedApplicationFilter: &TeamRestrictedApplicationFilterModel{
-					Scope: types.StringValue(string(restapi.RestrictedApplicationFilterScopeIncludeNoDownstream)),
+					Scope: types.StringValue(string(instana.RestrictedApplicationFilterScopeIncludeNoDownstream)),
 				},
 			},
 		}
@@ -1159,7 +1159,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		require.NotNil(t, team.Scope)
 		require.NotNil(t, team.Scope.RestrictedApplicationFilter)
 		require.NotNil(t, team.Scope.RestrictedApplicationFilter.Scope)
-		assert.Equal(t, restapi.RestrictedApplicationFilterScopeIncludeNoDownstream, *team.Scope.RestrictedApplicationFilter.Scope)
+		assert.Equal(t, instana.RestrictedApplicationFilterScopeIncludeNoDownstream, *team.Scope.RestrictedApplicationFilter.Scope)
 	})
 
 	t.Run("team with scope - restricted application filter with tag filter", func(t *testing.T) {
@@ -1240,7 +1240,7 @@ func TestMapStateToDataObject(t *testing.T) {
 				TagIDs:               []string{"tag-1"},
 				RestrictedApplicationFilter: &TeamRestrictedApplicationFilterModel{
 					Label:               types.StringValue("test-label"),
-					Scope:               types.StringValue(string(restapi.RestrictedApplicationFilterScopeIncludeAllDownstream)),
+					Scope:               types.StringValue(string(instana.RestrictedApplicationFilterScopeIncludeAllDownstream)),
 					TagFilterExpression: types.StringValue("entity.type EQUALS 'service'"),
 				},
 			},
@@ -1270,23 +1270,23 @@ func TestRoundTripConversion(t *testing.T) {
 		desc := "Test team"
 		filter := "entity.type:host"
 		label := "test-label"
-		scope := restapi.RestrictedApplicationFilterScopeIncludeAllDownstream
+		scope := instana.RestrictedApplicationFilterScopeIncludeAllDownstream
 
-		originalTeam := &restapi.Team{
+		originalTeam := &instana.Team{
 			ID:  "test-id",
 			Tag: "test-team",
-			Info: &restapi.TeamInfo{
+			Info: &instana.TeamInfo{
 				Description: &desc,
 			},
-			Members: []restapi.TeamMember{
+			Members: []instana.TeamMember{
 				{
 					UserID: "user-1",
-					Roles: []restapi.TeamRole{
+					Roles: []instana.TeamRole{
 						{RoleID: "role-1"},
 					},
 				},
 			},
-			Scope: &restapi.TeamScope{
+			Scope: &instana.TeamScope{
 				AccessPermissions:    []string{"perm-1"},
 				Applications:         []string{"app-1"},
 				KubernetesClusters:   []string{"k8s-1"},
@@ -1299,7 +1299,7 @@ func TestRoundTripConversion(t *testing.T) {
 				SyntheticTests:       []string{"test-1"},
 				SyntheticCredentials: []string{"cred-1"},
 				TagIDs:               []string{"tag-1"},
-				RestrictedApplicationFilter: &restapi.RestrictedApplicationFilter{
+				RestrictedApplicationFilter: &instana.RestrictedApplicationFilter{
 					Label: &label,
 					Scope: &scope,
 				},
@@ -1336,7 +1336,7 @@ func TestRoundTripConversion(t *testing.T) {
 				TagIDs:               []string{"tag-1"},
 				RestrictedApplicationFilter: &TeamRestrictedApplicationFilterModel{
 					Label: types.StringValue("test-label"),
-					Scope: types.StringValue(string(restapi.RestrictedApplicationFilterScopeIncludeAllDownstream)),
+					Scope: types.StringValue(string(instana.RestrictedApplicationFilterScopeIncludeAllDownstream)),
 				},
 			},
 		}
@@ -1429,7 +1429,7 @@ func TestEdgeCases(t *testing.T) {
 	})
 
 	t.Run("nil scope", func(t *testing.T) {
-		team := &restapi.Team{
+		team := &instana.Team{
 			ID:    "test-id",
 			Tag:   "test-team",
 			Scope: nil,
@@ -1471,7 +1471,7 @@ func TestHelperFunctions(t *testing.T) {
 	resource := &teamResource{}
 
 	t.Run("mapTeamInfoToModel with nil description", func(t *testing.T) {
-		apiInfo := &restapi.TeamInfo{
+		apiInfo := &instana.TeamInfo{
 			Description: nil,
 		}
 
@@ -1482,7 +1482,7 @@ func TestHelperFunctions(t *testing.T) {
 
 	t.Run("mapTeamInfoToModel with description", func(t *testing.T) {
 		desc := "Test description"
-		apiInfo := &restapi.TeamInfo{
+		apiInfo := &instana.TeamInfo{
 			Description: &desc,
 		}
 
@@ -1492,7 +1492,7 @@ func TestHelperFunctions(t *testing.T) {
 	})
 
 	t.Run("mapMembersToModel with empty members", func(t *testing.T) {
-		apiMembers := []restapi.TeamMember{}
+		apiMembers := []instana.TeamMember{}
 
 		modelMembers := resource.mapMembersToModel(apiMembers)
 		assert.Empty(t, modelMembers)
@@ -1504,7 +1504,7 @@ func TestHelperFunctions(t *testing.T) {
 	})
 
 	t.Run("mapRolesToModel with empty roles", func(t *testing.T) {
-		apiRoles := []restapi.TeamRole{}
+		apiRoles := []instana.TeamRole{}
 		roles := resource.mapRolesToModel(apiRoles)
 		assert.Nil(t, roles)
 	})

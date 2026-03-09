@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/instana-go-client/instana"
 )
 
 // Constants are now defined in data-source-synthetic-location-constants.go
@@ -26,7 +26,7 @@ func NewSyntheticLocationDataSource() datasource.DataSource {
 }
 
 type syntheticLocationDataSource struct {
-	instanaAPI restapi.InstanaAPI
+	instanaAPI instana.InstanaAPI
 }
 
 func (d *syntheticLocationDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -63,7 +63,7 @@ func (d *syntheticLocationDataSource) Configure(_ context.Context, req datasourc
 		return
 	}
 
-	providerMeta, ok := req.ProviderData.(*restapi.ProviderMeta)
+	providerMeta, ok := req.ProviderData.(*instana.ProviderMeta)
 	if !ok {
 		resp.Diagnostics.AddError(
 			SyntheticLocationErrUnexpectedConfigureType,
@@ -96,7 +96,7 @@ func (d *syntheticLocationDataSource) Read(ctx context.Context, req datasource.R
 	label := data.Label.ValueString()
 	locationType := data.LocationType.ValueString()
 
-	var matchingLocation *restapi.SyntheticLocation
+	var matchingLocation *instana.SyntheticLocation
 	for _, location := range *syntheticLocations {
 		if location.Label == label && location.LocationType == locationType {
 			matchingLocation = location

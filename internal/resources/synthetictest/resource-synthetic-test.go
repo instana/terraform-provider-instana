@@ -20,12 +20,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/instana-go-client/instana"
 	"github.com/instana/terraform-provider-instana/internal/util"
 )
 
 // NewSyntheticTestResourceHandle creates the resource handle for Synthetic Tests
-func NewSyntheticTestResourceHandle() resourcehandle.ResourceHandle[*restapi.SyntheticTest] {
+func NewSyntheticTestResourceHandle() resourcehandle.ResourceHandle[*instana.SyntheticTest] {
 	return &syntheticTestResource{
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:  ResourceInstanaSyntheticTest,
@@ -645,7 +645,7 @@ func (r *syntheticTestResource) MetaData() *resourcehandle.ResourceMetaData {
 	return &r.metaData
 }
 
-func (r *syntheticTestResource) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.SyntheticTest] {
+func (r *syntheticTestResource) GetRestResource(api instana.InstanaAPI) instana.RestResource[*instana.SyntheticTest] {
 	return api.SyntheticTest()
 }
 
@@ -653,7 +653,7 @@ func (r *syntheticTestResource) SetComputedFields(_ context.Context, _ *tfsdk.Pl
 	return nil
 }
 
-func (r *syntheticTestResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.SyntheticTest, diag.Diagnostics) {
+func (r *syntheticTestResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*instana.SyntheticTest, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var model SyntheticTestModel
 
@@ -700,7 +700,7 @@ func (r *syntheticTestResource) MapStateToDataObject(ctx context.Context, plan *
 	}
 
 	// Create API object
-	return &restapi.SyntheticTest{
+	return &instana.SyntheticTest{
 		ID:               model.ID.ValueString(),
 		Label:            model.Label.ValueString(),
 		Description:      getStringPointerFromType(model.Description),
@@ -791,15 +791,15 @@ func (r *syntheticTestResource) mapLocationsFromModel(ctx context.Context, model
 }
 
 // mapRbacTagsFromModel maps RBAC tags from model
-func (r *syntheticTestResource) mapRbacTagsFromModel(ctx context.Context, model SyntheticTestModel) ([]restapi.ApiTag, diag.Diagnostics) {
+func (r *syntheticTestResource) mapRbacTagsFromModel(ctx context.Context, model SyntheticTestModel) ([]instana.ApiTag, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	var rbacTags []restapi.ApiTag
+	var rbacTags []instana.ApiTag
 	if !model.RbacTags.IsNull() && !model.RbacTags.IsUnknown() {
 		var rbacTagModels []RbacTagModel
 		diags.Append(model.RbacTags.ElementsAs(ctx, &rbacTagModels, false)...)
 		if !diags.HasError() {
 			for _, tagModel := range rbacTagModels {
-				rbacTags = append(rbacTags, restapi.ApiTag{
+				rbacTags = append(rbacTags, instana.ApiTag{
 					Name:  tagModel.Name.ValueString(),
 					Value: tagModel.Value.ValueString(),
 				})
@@ -857,10 +857,10 @@ func (r *syntheticTestResource) validateSingleConfigType(model SyntheticTestMode
 }
 
 // mapHttpActionFromModel maps HTTP Action model to API configuration
-func (r *syntheticTestResource) mapHttpActionFromModel(ctx context.Context, httpActionModel *HttpActionConfigModel) (restapi.SyntheticTestConfig, diag.Diagnostics) {
+func (r *syntheticTestResource) mapHttpActionFromModel(ctx context.Context, httpActionModel *HttpActionConfigModel) (instana.SyntheticTestConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	config := restapi.SyntheticTestConfig{
+	config := instana.SyntheticTestConfig{
 		MarkSyntheticCall: httpActionModel.MarkSyntheticCall.ValueBool(),
 		Retries:           int32(httpActionModel.Retries.ValueInt64()),
 		RetryInterval:     int32(httpActionModel.RetryInterval.ValueInt64()),
@@ -919,10 +919,10 @@ func (r *syntheticTestResource) mapHttpActionFromModel(ctx context.Context, http
 }
 
 // mapHttpScriptFromModel maps HTTP Script model to API configuration
-func (r *syntheticTestResource) mapHttpScriptFromModel(httpScriptModel *HttpScriptConfigModel) (restapi.SyntheticTestConfig, diag.Diagnostics) {
+func (r *syntheticTestResource) mapHttpScriptFromModel(httpScriptModel *HttpScriptConfigModel) (instana.SyntheticTestConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	config := restapi.SyntheticTestConfig{
+	config := instana.SyntheticTestConfig{
 		MarkSyntheticCall: httpScriptModel.MarkSyntheticCall.ValueBool(),
 		Retries:           int32(httpScriptModel.Retries.ValueInt64()),
 		RetryInterval:     int32(httpScriptModel.RetryInterval.ValueInt64()),
@@ -935,7 +935,7 @@ func (r *syntheticTestResource) mapHttpScriptFromModel(httpScriptModel *HttpScri
 
 	// Map scripts if present
 	if httpScriptModel.Scripts != nil {
-		config.Scripts = &restapi.MultipleScriptsConfiguration{
+		config.Scripts = &instana.MultipleScriptsConfiguration{
 			Bundle:     getStringPointerFromType(httpScriptModel.Scripts.Bundle),
 			ScriptFile: getStringPointerFromType(httpScriptModel.Scripts.ScriptFile),
 		}
@@ -945,10 +945,10 @@ func (r *syntheticTestResource) mapHttpScriptFromModel(httpScriptModel *HttpScri
 }
 
 // mapBrowserScriptFromModel maps Browser Script model to API configuration
-func (r *syntheticTestResource) mapBrowserScriptFromModel(browserScriptModel *BrowserScriptConfigModel) (restapi.SyntheticTestConfig, diag.Diagnostics) {
+func (r *syntheticTestResource) mapBrowserScriptFromModel(browserScriptModel *BrowserScriptConfigModel) (instana.SyntheticTestConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	config := restapi.SyntheticTestConfig{
+	config := instana.SyntheticTestConfig{
 		MarkSyntheticCall: browserScriptModel.MarkSyntheticCall.ValueBool(),
 		Retries:           int32(browserScriptModel.Retries.ValueInt64()),
 		RetryInterval:     int32(browserScriptModel.RetryInterval.ValueInt64()),
@@ -963,7 +963,7 @@ func (r *syntheticTestResource) mapBrowserScriptFromModel(browserScriptModel *Br
 
 	// Map scripts if present
 	if browserScriptModel.Scripts != nil {
-		config.Scripts = &restapi.MultipleScriptsConfiguration{
+		config.Scripts = &instana.MultipleScriptsConfiguration{
 			Bundle:     getStringPointerFromType(browserScriptModel.Scripts.Bundle),
 			ScriptFile: getStringPointerFromType(browserScriptModel.Scripts.ScriptFile),
 		}
@@ -973,10 +973,10 @@ func (r *syntheticTestResource) mapBrowserScriptFromModel(browserScriptModel *Br
 }
 
 // mapDNSFromModel maps DNS model to API configuration
-func (r *syntheticTestResource) mapDNSFromModel(ctx context.Context, dnsModel *DNSConfigModel) (restapi.SyntheticTestConfig, diag.Diagnostics) {
+func (r *syntheticTestResource) mapDNSFromModel(ctx context.Context, dnsModel *DNSConfigModel) (instana.SyntheticTestConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	config := restapi.SyntheticTestConfig{
+	config := instana.SyntheticTestConfig{
 		MarkSyntheticCall: dnsModel.MarkSyntheticCall.ValueBool(),
 		Retries:           int32(dnsModel.Retries.ValueInt64()),
 		RetryInterval:     int32(dnsModel.RetryInterval.ValueInt64()),
@@ -1005,7 +1005,7 @@ func (r *syntheticTestResource) mapDNSFromModel(ctx context.Context, dnsModel *D
 
 	// Map query time
 	if dnsModel.QueryTime != nil {
-		config.QueryTime = &restapi.DNSFilterQueryTime{
+		config.QueryTime = &instana.DNSFilterQueryTime{
 			Key:      dnsModel.QueryTime.Key.ValueString(),
 			Operator: dnsModel.QueryTime.Operator.ValueString(),
 			Value:    dnsModel.QueryTime.Value.ValueInt64(),
@@ -1018,7 +1018,7 @@ func (r *syntheticTestResource) mapDNSFromModel(ctx context.Context, dnsModel *D
 		diags.Append(dnsModel.TargetValues.ElementsAs(ctx, &targetValueModels, false)...)
 		if !diags.HasError() {
 			for _, tvModel := range targetValueModels {
-				config.TargetValues = append(config.TargetValues, restapi.DNSFilterTargetValue{
+				config.TargetValues = append(config.TargetValues, instana.DNSFilterTargetValue{
 					Key:      tvModel.Key.ValueString(),
 					Operator: tvModel.Operator.ValueString(),
 					Value:    tvModel.Value.ValueString(),
@@ -1031,10 +1031,10 @@ func (r *syntheticTestResource) mapDNSFromModel(ctx context.Context, dnsModel *D
 }
 
 // mapSSLCertificateFromModel maps SSL Certificate model to API configuration
-func (r *syntheticTestResource) mapSSLCertificateFromModel(ctx context.Context, sslModel *SSLCertificateConfigModel) (restapi.SyntheticTestConfig, diag.Diagnostics) {
+func (r *syntheticTestResource) mapSSLCertificateFromModel(ctx context.Context, sslModel *SSLCertificateConfigModel) (instana.SyntheticTestConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	config := restapi.SyntheticTestConfig{
+	config := instana.SyntheticTestConfig{
 		MarkSyntheticCall:    sslModel.MarkSyntheticCall.ValueBool(),
 		Retries:              int32(sslModel.Retries.ValueInt64()),
 		RetryInterval:        int32(sslModel.RetryInterval.ValueInt64()),
@@ -1062,7 +1062,7 @@ func (r *syntheticTestResource) mapSSLCertificateFromModel(ctx context.Context, 
 		diags.Append(sslModel.ValidationRules.ElementsAs(ctx, &validationRuleModels, false)...)
 		if !diags.HasError() {
 			for _, vrModel := range validationRuleModels {
-				config.ValidationRules = append(config.ValidationRules, restapi.SSLCertificateValidation{
+				config.ValidationRules = append(config.ValidationRules, instana.SSLCertificateValidation{
 					Key:      vrModel.Key.ValueString(),
 					Operator: vrModel.Operator.ValueString(),
 					Value:    vrModel.Value.ValueString(),
@@ -1075,10 +1075,10 @@ func (r *syntheticTestResource) mapSSLCertificateFromModel(ctx context.Context, 
 }
 
 // mapWebpageActionFromModel maps Webpage Action model to API configuration
-func (r *syntheticTestResource) mapWebpageActionFromModel(webpageActionModel *WebpageActionConfigModel) (restapi.SyntheticTestConfig, diag.Diagnostics) {
+func (r *syntheticTestResource) mapWebpageActionFromModel(webpageActionModel *WebpageActionConfigModel) (instana.SyntheticTestConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	return restapi.SyntheticTestConfig{
+	return instana.SyntheticTestConfig{
 		MarkSyntheticCall: webpageActionModel.MarkSyntheticCall.ValueBool(),
 		Retries:           int32(webpageActionModel.Retries.ValueInt64()),
 		RetryInterval:     int32(webpageActionModel.RetryInterval.ValueInt64()),
@@ -1091,10 +1091,10 @@ func (r *syntheticTestResource) mapWebpageActionFromModel(webpageActionModel *We
 }
 
 // mapWebpageScriptFromModel maps Webpage Script model to API configuration
-func (r *syntheticTestResource) mapWebpageScriptFromModel(webpageScriptModel *WebpageScriptConfigModel) (restapi.SyntheticTestConfig, diag.Diagnostics) {
+func (r *syntheticTestResource) mapWebpageScriptFromModel(webpageScriptModel *WebpageScriptConfigModel) (instana.SyntheticTestConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	return restapi.SyntheticTestConfig{
+	return instana.SyntheticTestConfig{
 		MarkSyntheticCall: webpageScriptModel.MarkSyntheticCall.ValueBool(),
 		Retries:           int32(webpageScriptModel.Retries.ValueInt64()),
 		RetryInterval:     int32(webpageScriptModel.RetryInterval.ValueInt64()),
@@ -1107,13 +1107,13 @@ func (r *syntheticTestResource) mapWebpageScriptFromModel(webpageScriptModel *We
 	}, diags
 }
 
-func (r *syntheticTestResource) mapConfigurationFromModel(ctx context.Context, model SyntheticTestModel) (restapi.SyntheticTestConfig, diag.Diagnostics) {
+func (r *syntheticTestResource) mapConfigurationFromModel(ctx context.Context, model SyntheticTestModel) (instana.SyntheticTestConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Validate exactly one configuration type is set
 	_, validationDiags := r.validateSingleConfigType(model)
 	if validationDiags.HasError() {
-		return restapi.SyntheticTestConfig{}, validationDiags
+		return instana.SyntheticTestConfig{}, validationDiags
 	}
 
 	// Map configuration based on type
@@ -1141,10 +1141,10 @@ func (r *syntheticTestResource) mapConfigurationFromModel(ctx context.Context, m
 
 	// This should never happen due to validation above
 	diags.AddError(SyntheticTestErrNoValidConfig, "No valid synthetic test configuration found")
-	return restapi.SyntheticTestConfig{}, diags
+	return instana.SyntheticTestConfig{}, diags
 }
 
-func (r *syntheticTestResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *restapi.SyntheticTest) diag.Diagnostics {
+func (r *syntheticTestResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *instana.SyntheticTest) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var model SyntheticTestModel
 
@@ -1222,7 +1222,7 @@ func getBoolPointerFromType(value types.Bool) *bool {
 // UpdateState helper methods for mapping API objects to Terraform state
 
 // mapBasicFieldsToModel maps basic fields from API object to model
-func (r *syntheticTestResource) mapBasicFieldsToModel(apiObject *restapi.SyntheticTest) SyntheticTestModel {
+func (r *syntheticTestResource) mapBasicFieldsToModel(apiObject *instana.SyntheticTest) SyntheticTestModel {
 	return SyntheticTestModel{
 		ID:            types.StringValue(apiObject.ID),
 		Label:         types.StringValue(apiObject.Label),
@@ -1234,7 +1234,7 @@ func (r *syntheticTestResource) mapBasicFieldsToModel(apiObject *restapi.Synthet
 }
 
 // mapApplicationsToModel maps applications array to model
-func (r *syntheticTestResource) mapApplicationsToModel(apiObject *restapi.SyntheticTest) types.Set {
+func (r *syntheticTestResource) mapApplicationsToModel(apiObject *instana.SyntheticTest) types.Set {
 	if len(apiObject.Applications) > 0 {
 		appValues := make([]attr.Value, len(apiObject.Applications))
 		for i, app := range apiObject.Applications {
@@ -1246,7 +1246,7 @@ func (r *syntheticTestResource) mapApplicationsToModel(apiObject *restapi.Synthe
 }
 
 // mapMobileAppsToModel maps mobile apps array to model
-func (r *syntheticTestResource) mapMobileAppsToModel(apiObject *restapi.SyntheticTest) types.Set {
+func (r *syntheticTestResource) mapMobileAppsToModel(apiObject *instana.SyntheticTest) types.Set {
 	if len(apiObject.MobileApps) > 0 {
 		mobileAppValues := make([]attr.Value, len(apiObject.MobileApps))
 		for i, app := range apiObject.MobileApps {
@@ -1258,7 +1258,7 @@ func (r *syntheticTestResource) mapMobileAppsToModel(apiObject *restapi.Syntheti
 }
 
 // mapWebsitesToModel maps websites array to model
-func (r *syntheticTestResource) mapWebsitesToModel(apiObject *restapi.SyntheticTest) types.Set {
+func (r *syntheticTestResource) mapWebsitesToModel(apiObject *instana.SyntheticTest) types.Set {
 	if len(apiObject.Websites) > 0 {
 		websiteValues := make([]attr.Value, len(apiObject.Websites))
 		for i, website := range apiObject.Websites {
@@ -1270,7 +1270,7 @@ func (r *syntheticTestResource) mapWebsitesToModel(apiObject *restapi.SyntheticT
 }
 
 // mapTestFrequencyToModel maps test frequency to model
-func (r *syntheticTestResource) mapTestFrequencyToModel(apiObject *restapi.SyntheticTest) types.Int64 {
+func (r *syntheticTestResource) mapTestFrequencyToModel(apiObject *instana.SyntheticTest) types.Int64 {
 	if apiObject.TestFrequency != nil {
 		return util.SetInt64PointerToState(apiObject.TestFrequency)
 	}
@@ -1278,7 +1278,7 @@ func (r *syntheticTestResource) mapTestFrequencyToModel(apiObject *restapi.Synth
 }
 
 // mapCustomPropertiesToModel maps custom properties to model
-func (r *syntheticTestResource) mapCustomPropertiesToModel(apiObject *restapi.SyntheticTest) types.Map {
+func (r *syntheticTestResource) mapCustomPropertiesToModel(apiObject *instana.SyntheticTest) types.Map {
 	if len(apiObject.CustomProperties) > 0 {
 		customPropertiesMap := make(map[string]attr.Value)
 		for k, v := range apiObject.CustomProperties {
@@ -1290,7 +1290,7 @@ func (r *syntheticTestResource) mapCustomPropertiesToModel(apiObject *restapi.Sy
 }
 
 // mapLocationsToModel maps locations array to model
-func (r *syntheticTestResource) mapLocationsToModel(apiObject *restapi.SyntheticTest) types.Set {
+func (r *syntheticTestResource) mapLocationsToModel(apiObject *instana.SyntheticTest) types.Set {
 	if len(apiObject.Locations) > 0 {
 		locationValues := make([]attr.Value, len(apiObject.Locations))
 		for i, location := range apiObject.Locations {
@@ -1302,7 +1302,7 @@ func (r *syntheticTestResource) mapLocationsToModel(apiObject *restapi.Synthetic
 }
 
 // mapRbacTagsToModel maps RBAC tags to model
-func (r *syntheticTestResource) mapRbacTagsToModel(apiObject *restapi.SyntheticTest) types.Set {
+func (r *syntheticTestResource) mapRbacTagsToModel(apiObject *instana.SyntheticTest) types.Set {
 	if len(apiObject.RbacTags) > 0 {
 		rbacTagValues := make([]attr.Value, len(apiObject.RbacTags))
 		for i, tag := range apiObject.RbacTags {
@@ -1333,7 +1333,7 @@ func (r *syntheticTestResource) mapRbacTagsToModel(apiObject *restapi.SyntheticT
 }
 
 // mapHttpActionConfigToModel maps HTTP Action configuration to model
-func (r *syntheticTestResource) mapHttpActionConfigToModel(config restapi.SyntheticTestConfig, httpModel *HttpActionConfigModel) *HttpActionConfigModel {
+func (r *syntheticTestResource) mapHttpActionConfigToModel(config instana.SyntheticTestConfig, httpModel *HttpActionConfigModel) *HttpActionConfigModel {
 	httpActionModel := &HttpActionConfigModel{
 		MarkSyntheticCall: types.BoolValue(config.MarkSyntheticCall),
 		Retries:           types.Int64Value(int64(config.Retries)),
@@ -1439,7 +1439,7 @@ func (r *syntheticTestResource) mapExpectJsonToModel(expectJson json.RawMessage)
 }
 
 // mapHttpScriptConfigToModel maps HTTP Script configuration to model
-func (r *syntheticTestResource) mapHttpScriptConfigToModel(config restapi.SyntheticTestConfig) *HttpScriptConfigModel {
+func (r *syntheticTestResource) mapHttpScriptConfigToModel(config instana.SyntheticTestConfig) *HttpScriptConfigModel {
 	httpScriptModel := &HttpScriptConfigModel{
 		MarkSyntheticCall: types.BoolValue(config.MarkSyntheticCall),
 		Retries:           types.Int64Value(int64(config.Retries)),
@@ -1466,7 +1466,7 @@ func (r *syntheticTestResource) mapHttpScriptConfigToModel(config restapi.Synthe
 }
 
 // mapBrowserScriptConfigToModel maps Browser Script configuration to model
-func (r *syntheticTestResource) mapBrowserScriptConfigToModel(config restapi.SyntheticTestConfig) *BrowserScriptConfigModel {
+func (r *syntheticTestResource) mapBrowserScriptConfigToModel(config instana.SyntheticTestConfig) *BrowserScriptConfigModel {
 	browserScriptModel := &BrowserScriptConfigModel{
 		MarkSyntheticCall: types.BoolValue(config.MarkSyntheticCall),
 		Retries:           types.Int64Value(int64(config.Retries)),
@@ -1498,7 +1498,7 @@ func (r *syntheticTestResource) mapBrowserScriptConfigToModel(config restapi.Syn
 }
 
 // mapDNSConfigToModel maps DNS configuration to model
-func (r *syntheticTestResource) mapDNSConfigToModel(config restapi.SyntheticTestConfig) *DNSConfigModel {
+func (r *syntheticTestResource) mapDNSConfigToModel(config instana.SyntheticTestConfig) *DNSConfigModel {
 	dnsModel := &DNSConfigModel{
 		MarkSyntheticCall: types.BoolValue(config.MarkSyntheticCall),
 		Retries:           types.Int64Value(int64(config.Retries)),
@@ -1540,7 +1540,7 @@ func (r *syntheticTestResource) mapDNSConfigToModel(config restapi.SyntheticTest
 }
 
 // mapDNSTargetValuesToModel maps DNS target values to model
-func (r *syntheticTestResource) mapDNSTargetValuesToModel(targetValues []restapi.DNSFilterTargetValue) types.Set {
+func (r *syntheticTestResource) mapDNSTargetValuesToModel(targetValues []instana.DNSFilterTargetValue) types.Set {
 	if targetValues != nil && len(targetValues) > 0 {
 		targetValueObjs := make([]attr.Value, len(targetValues))
 		for i, tv := range targetValues {
@@ -1575,7 +1575,7 @@ func (r *syntheticTestResource) mapDNSTargetValuesToModel(targetValues []restapi
 }
 
 // mapSSLCertificateConfigToModel maps SSL Certificate configuration to model
-func (r *syntheticTestResource) mapSSLCertificateConfigToModel(config restapi.SyntheticTestConfig) *SSLCertificateConfigModel {
+func (r *syntheticTestResource) mapSSLCertificateConfigToModel(config instana.SyntheticTestConfig) *SSLCertificateConfigModel {
 	sslModel := &SSLCertificateConfigModel{
 		MarkSyntheticCall: types.BoolValue(config.MarkSyntheticCall),
 		Retries:           types.Int64Value(int64(config.Retries)),
@@ -1600,7 +1600,7 @@ func (r *syntheticTestResource) mapSSLCertificateConfigToModel(config restapi.Sy
 }
 
 // mapSSLValidationRulesToModel maps SSL validation rules to model
-func (r *syntheticTestResource) mapSSLValidationRulesToModel(validationRules []restapi.SSLCertificateValidation) types.Set {
+func (r *syntheticTestResource) mapSSLValidationRulesToModel(validationRules []instana.SSLCertificateValidation) types.Set {
 	if validationRules != nil && len(validationRules) > 0 {
 		validationRuleObjs := make([]attr.Value, len(validationRules))
 		for i, vr := range validationRules {
@@ -1635,7 +1635,7 @@ func (r *syntheticTestResource) mapSSLValidationRulesToModel(validationRules []r
 }
 
 // mapWebpageActionConfigToModel maps Webpage Action configuration to model
-func (r *syntheticTestResource) mapWebpageActionConfigToModel(config restapi.SyntheticTestConfig) *WebpageActionConfigModel {
+func (r *syntheticTestResource) mapWebpageActionConfigToModel(config instana.SyntheticTestConfig) *WebpageActionConfigModel {
 	webpageActionModel := &WebpageActionConfigModel{
 		MarkSyntheticCall: types.BoolValue(config.MarkSyntheticCall),
 		Retries:           types.Int64Value(int64(config.Retries)),
@@ -1653,7 +1653,7 @@ func (r *syntheticTestResource) mapWebpageActionConfigToModel(config restapi.Syn
 }
 
 // mapWebpageScriptConfigToModel maps Webpage Script configuration to model
-func (r *syntheticTestResource) mapWebpageScriptConfigToModel(config restapi.SyntheticTestConfig) *WebpageScriptConfigModel {
+func (r *syntheticTestResource) mapWebpageScriptConfigToModel(config instana.SyntheticTestConfig) *WebpageScriptConfigModel {
 	webpageScriptModel := &WebpageScriptConfigModel{
 		MarkSyntheticCall: types.BoolValue(config.MarkSyntheticCall),
 		Retries:           types.Int64Value(int64(config.Retries)),

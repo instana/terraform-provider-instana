@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/instana-go-client/instana"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/instana/terraform-provider-instana/internal/util"
 	"github.com/stretchr/testify/assert"
@@ -96,7 +96,7 @@ func TestGetRestResource(t *testing.T) {
 
 func TestResourceImpl_GetID(t *testing.T) {
 	resource := &applicationAlertConfigResourceImpl{}
-	data := &restapi.ApplicationAlertConfig{
+	data := &instana.ApplicationAlertConfig{
 		ID: "test-id-123",
 	}
 
@@ -106,7 +106,7 @@ func TestResourceImpl_GetID(t *testing.T) {
 
 func TestResourceImpl_SetID(t *testing.T) {
 	resource := &applicationAlertConfigResourceImpl{}
-	data := &restapi.ApplicationAlertConfig{}
+	data := &instana.ApplicationAlertConfig{}
 
 	resource.SetID(data, "new-id-456")
 	assert.Equal(t, "new-id-456", data.ID)
@@ -141,9 +141,9 @@ func TestMapStateToDataObject_BasicConfig(t *testing.T) {
 	assert.Equal(t, "test-id", result.ID)
 	assert.Equal(t, "Test Alert", result.Name)
 	assert.Equal(t, "Test Description", result.Description)
-	assert.Equal(t, restapi.BoundaryScope("ALL"), result.BoundaryScope)
-	assert.Equal(t, restapi.ApplicationAlertEvaluationType("PER_AP"), result.EvaluationType)
-	assert.Equal(t, restapi.Granularity(600000), result.Granularity)
+	assert.Equal(t, instana.BoundaryScope("ALL"), result.BoundaryScope)
+	assert.Equal(t, instana.ApplicationAlertEvaluationType("PER_AP"), result.EvaluationType)
+	assert.Equal(t, instana.Granularity(600000), result.Granularity)
 	assert.False(t, result.IncludeInternal)
 	assert.False(t, result.IncludeSynthetic)
 	assert.False(t, result.Triggering)
@@ -312,7 +312,7 @@ func TestUpdateState_BasicConfig(t *testing.T) {
 	ctx := context.Background()
 	resource := &applicationAlertConfigResourceImpl{}
 
-	data := &restapi.ApplicationAlertConfig{
+	data := &instana.ApplicationAlertConfig{
 		ID:               "test-id",
 		Name:             "Test Alert",
 		Description:      "Test Description",
@@ -323,8 +323,8 @@ func TestUpdateState_BasicConfig(t *testing.T) {
 		IncludeSynthetic: false,
 		Triggering:       false,
 		AlertChannelIDs:  []string{},
-		Applications:     map[string]restapi.IncludedApplication{},
-		Rules:            []restapi.ApplicationAlertRuleWithThresholds{},
+		Applications:     map[string]instana.IncludedApplication{},
+		Rules:            []instana.ApplicationAlertRuleWithThresholds{},
 	}
 
 	state := &tfsdk.State{
@@ -348,7 +348,7 @@ func TestUpdateState_WithGracePeriod(t *testing.T) {
 	resource := &applicationAlertConfigResourceImpl{}
 
 	gracePeriod := int64(300000)
-	data := &restapi.ApplicationAlertConfig{
+	data := &instana.ApplicationAlertConfig{
 		ID:               "test-id",
 		Name:             "Test Alert",
 		Description:      "Test Description",
@@ -360,8 +360,8 @@ func TestUpdateState_WithGracePeriod(t *testing.T) {
 		IncludeSynthetic: false,
 		Triggering:       false,
 		AlertChannelIDs:  []string{},
-		Applications:     map[string]restapi.IncludedApplication{},
-		Rules:            []restapi.ApplicationAlertRuleWithThresholds{},
+		Applications:     map[string]instana.IncludedApplication{},
+		Rules:            []instana.ApplicationAlertRuleWithThresholds{},
 	}
 
 	state := &tfsdk.State{
@@ -383,7 +383,7 @@ func TestUpdateState_WithApplications(t *testing.T) {
 	ctx := context.Background()
 	resource := &applicationAlertConfigResourceImpl{}
 
-	data := &restapi.ApplicationAlertConfig{
+	data := &instana.ApplicationAlertConfig{
 		ID:               "test-id",
 		Name:             "Test Alert",
 		Description:      "Test Description",
@@ -394,15 +394,15 @@ func TestUpdateState_WithApplications(t *testing.T) {
 		IncludeSynthetic: false,
 		Triggering:       false,
 		AlertChannelIDs:  []string{},
-		Applications: map[string]restapi.IncludedApplication{
+		Applications: map[string]instana.IncludedApplication{
 			"app-1": {
 				ApplicationID: "app-1",
 				Inclusive:     true,
-				Services: map[string]restapi.IncludedService{
+				Services: map[string]instana.IncludedService{
 					"svc-1": {
 						ServiceID: "svc-1",
 						Inclusive: true,
-						Endpoints: map[string]restapi.IncludedEndpoint{
+						Endpoints: map[string]instana.IncludedEndpoint{
 							"ep-1": {
 								EndpointID: "ep-1",
 								Inclusive:  true,
@@ -412,7 +412,7 @@ func TestUpdateState_WithApplications(t *testing.T) {
 				},
 			},
 		},
-		Rules: []restapi.ApplicationAlertRuleWithThresholds{},
+		Rules: []instana.ApplicationAlertRuleWithThresholds{},
 	}
 
 	state := &tfsdk.State{
@@ -435,7 +435,7 @@ func TestUpdateState_WithTimeThreshold(t *testing.T) {
 		ctx := context.Background()
 		resource := &applicationAlertConfigResourceImpl{}
 
-		data := &restapi.ApplicationAlertConfig{
+		data := &instana.ApplicationAlertConfig{
 			ID:               "test-id",
 			Name:             "Test Alert",
 			Description:      "Test Description",
@@ -446,9 +446,9 @@ func TestUpdateState_WithTimeThreshold(t *testing.T) {
 			IncludeSynthetic: false,
 			Triggering:       false,
 			AlertChannelIDs:  []string{},
-			Applications:     map[string]restapi.IncludedApplication{},
-			Rules:            []restapi.ApplicationAlertRuleWithThresholds{},
-			TimeThreshold: &restapi.ApplicationAlertTimeThreshold{
+			Applications:     map[string]instana.IncludedApplication{},
+			Rules:            []instana.ApplicationAlertRuleWithThresholds{},
+			TimeThreshold: &instana.ApplicationAlertTimeThreshold{
 				Type:       "requestImpact",
 				TimeWindow: 600000,
 				Requests:   100,
@@ -556,7 +556,7 @@ func TestUpdateState_WithAlertChannels(t *testing.T) {
 	ctx := context.Background()
 	resource := &applicationAlertConfigResourceImpl{}
 
-	data := &restapi.ApplicationAlertConfig{
+	data := &instana.ApplicationAlertConfig{
 		ID:               "test-id",
 		Name:             "Test Alert",
 		Description:      "Test Description",
@@ -571,8 +571,8 @@ func TestUpdateState_WithAlertChannels(t *testing.T) {
 			"warning":  {"channel-1", "channel-2"},
 			"critical": {"channel-3"},
 		},
-		Applications: map[string]restapi.IncludedApplication{},
-		Rules:        []restapi.ApplicationAlertRuleWithThresholds{},
+		Applications: map[string]instana.IncludedApplication{},
+		Rules:        []instana.ApplicationAlertRuleWithThresholds{},
 	}
 
 	state := &tfsdk.State{
@@ -795,10 +795,10 @@ func TestMapStateToDataObject_WithStaticThreshold(t *testing.T) {
 	require.False(t, diags.HasError())
 	require.NotNil(t, result)
 	require.Len(t, result.Rules, 1)
-	require.Contains(t, result.Rules[0].Thresholds, restapi.WarningSeverity)
-	assert.Equal(t, "staticThreshold", result.Rules[0].Thresholds[restapi.WarningSeverity].Type)
-	require.NotNil(t, result.Rules[0].Thresholds[restapi.WarningSeverity].Value)
-	assert.Equal(t, float64(100), *result.Rules[0].Thresholds[restapi.WarningSeverity].Value)
+	require.Contains(t, result.Rules[0].Thresholds, instana.WarningSeverity)
+	assert.Equal(t, "staticThreshold", result.Rules[0].Thresholds[instana.WarningSeverity].Type)
+	require.NotNil(t, result.Rules[0].Thresholds[instana.WarningSeverity].Value)
+	assert.Equal(t, float64(100), *result.Rules[0].Thresholds[instana.WarningSeverity].Value)
 }
 
 // Test UpdateState with rules containing thresholds
@@ -808,7 +808,7 @@ func TestUpdateState_WithRulesAndThresholds(t *testing.T) {
 
 	// Test with static threshold
 	value := float64(100)
-	data := &restapi.ApplicationAlertConfig{
+	data := &instana.ApplicationAlertConfig{
 		ID:               "test-id",
 		Name:             "Test Alert",
 		Description:      "Test Description",
@@ -819,17 +819,17 @@ func TestUpdateState_WithRulesAndThresholds(t *testing.T) {
 		IncludeSynthetic: false,
 		Triggering:       false,
 		AlertChannelIDs:  []string{},
-		Applications:     map[string]restapi.IncludedApplication{},
-		Rules: []restapi.ApplicationAlertRuleWithThresholds{
+		Applications:     map[string]instana.IncludedApplication{},
+		Rules: []instana.ApplicationAlertRuleWithThresholds{
 			{
-				Rule: &restapi.ApplicationAlertRule{
+				Rule: &instana.ApplicationAlertRule{
 					AlertType:   ApplicationAlertConfigFieldRuleErrorRate,
 					MetricName:  "errors",
 					Aggregation: "sum",
 				},
 				ThresholdOperator: ">",
-				Thresholds: map[restapi.AlertSeverity]restapi.ThresholdRule{
-					restapi.WarningSeverity: {
+				Thresholds: map[instana.AlertSeverity]instana.ThresholdRule{
+					instana.WarningSeverity: {
 						Type:  "staticThreshold",
 						Value: &value,
 					},
@@ -862,7 +862,7 @@ func TestUpdateState_WithCustomPayloadFields(t *testing.T) {
 	ctx := context.Background()
 	resource := &applicationAlertConfigResourceImpl{}
 
-	data := &restapi.ApplicationAlertConfig{
+	data := &instana.ApplicationAlertConfig{
 		ID:               "test-id",
 		Name:             "Test Alert",
 		Description:      "Test Description",
@@ -873,11 +873,11 @@ func TestUpdateState_WithCustomPayloadFields(t *testing.T) {
 		IncludeSynthetic: false,
 		Triggering:       false,
 		AlertChannelIDs:  []string{},
-		Applications:     map[string]restapi.IncludedApplication{},
-		Rules:            []restapi.ApplicationAlertRuleWithThresholds{},
-		CustomerPayloadFields: []restapi.CustomPayloadField[any]{
+		Applications:     map[string]instana.IncludedApplication{},
+		Rules:            []instana.ApplicationAlertRuleWithThresholds{},
+		CustomerPayloadFields: []instana.CustomPayloadField[any]{
 			{
-				Type:  restapi.StaticStringCustomPayloadType,
+				Type:  instana.StaticStringCustomPayloadType,
 				Key:   "field1",
 				Value: "value1",
 			},
@@ -905,16 +905,16 @@ func TestUpdateState_WithTagFilterExpression(t *testing.T) {
 
 	entityType := "entity.type"
 	serviceValue := "service"
-	equalsOp := restapi.EqualsOperator
+	equalsOp := instana.EqualsOperator
 
-	tagFilter := &restapi.TagFilter{
-		Type:     restapi.TagFilterExpressionType,
+	tagFilter := &instana.TagFilter{
+		Type:     instana.TagFilterExpressionType,
 		Name:     &entityType,
 		Operator: &equalsOp,
 		Value:    &serviceValue,
 	}
 
-	data := &restapi.ApplicationAlertConfig{
+	data := &instana.ApplicationAlertConfig{
 		ID:                  "test-id",
 		Name:                "Test Alert",
 		Description:         "Test Description",
@@ -925,8 +925,8 @@ func TestUpdateState_WithTagFilterExpression(t *testing.T) {
 		IncludeSynthetic:    false,
 		Triggering:          false,
 		AlertChannelIDs:     []string{},
-		Applications:        map[string]restapi.IncludedApplication{},
-		Rules:               []restapi.ApplicationAlertRuleWithThresholds{},
+		Applications:        map[string]instana.IncludedApplication{},
+		Rules:               []instana.ApplicationAlertRuleWithThresholds{},
 		TagFilterExpression: tagFilter,
 	}
 
@@ -949,12 +949,12 @@ func TestUpdateState_WithTagFilterExpression(t *testing.T) {
 func TestUpdateState_WithAllTimeThresholdTypes(t *testing.T) {
 	tests := []struct {
 		name          string
-		timeThreshold *restapi.ApplicationAlertTimeThreshold
+		timeThreshold *instana.ApplicationAlertTimeThreshold
 		checkFunc     func(*testing.T, ApplicationAlertConfigModel)
 	}{
 		{
 			name: "violations_in_period",
-			timeThreshold: &restapi.ApplicationAlertTimeThreshold{
+			timeThreshold: &instana.ApplicationAlertTimeThreshold{
 				Type:       "violationsInPeriod",
 				TimeWindow: 600000,
 				Violations: 5,
@@ -968,7 +968,7 @@ func TestUpdateState_WithAllTimeThresholdTypes(t *testing.T) {
 		},
 		{
 			name: "violations_in_sequence",
-			timeThreshold: &restapi.ApplicationAlertTimeThreshold{
+			timeThreshold: &instana.ApplicationAlertTimeThreshold{
 				Type:       "violationsInSequence",
 				TimeWindow: 600000,
 			},
@@ -985,7 +985,7 @@ func TestUpdateState_WithAllTimeThresholdTypes(t *testing.T) {
 			ctx := context.Background()
 			resource := &applicationAlertConfigResourceImpl{}
 
-			data := &restapi.ApplicationAlertConfig{
+			data := &instana.ApplicationAlertConfig{
 				ID:               "test-id",
 				Name:             "Test Alert",
 				Description:      "Test Description",
@@ -996,8 +996,8 @@ func TestUpdateState_WithAllTimeThresholdTypes(t *testing.T) {
 				IncludeSynthetic: false,
 				Triggering:       false,
 				AlertChannelIDs:  []string{},
-				Applications:     map[string]restapi.IncludedApplication{},
-				Rules:            []restapi.ApplicationAlertRuleWithThresholds{},
+				Applications:     map[string]instana.IncludedApplication{},
+				Rules:            []instana.ApplicationAlertRuleWithThresholds{},
 				TimeThreshold:    tt.timeThreshold,
 			}
 
@@ -1021,11 +1021,11 @@ func TestUpdateState_WithAllTimeThresholdTypes(t *testing.T) {
 func TestUpdateState_WithAllRuleTypes(t *testing.T) {
 	tests := []struct {
 		name string
-		rule *restapi.ApplicationAlertRule
+		rule *instana.ApplicationAlertRule
 	}{
 		{
 			name: "errors_rule",
-			rule: &restapi.ApplicationAlertRule{
+			rule: &instana.ApplicationAlertRule{
 				AlertType:   ApplicationAlertConfigFieldRuleErrors,
 				MetricName:  "errors",
 				Aggregation: "sum",
@@ -1033,18 +1033,18 @@ func TestUpdateState_WithAllRuleTypes(t *testing.T) {
 		},
 		{
 			name: "logs_rule",
-			rule: &restapi.ApplicationAlertRule{
+			rule: &instana.ApplicationAlertRule{
 				AlertType:   ApplicationAlertConfigFieldRuleLogs,
 				MetricName:  "logs",
 				Aggregation: "sum",
-				Level:       ptr(restapi.LogLevelError),
+				Level:       ptr(instana.LogLevelError),
 				Message:     ptr("test message"),
-				Operator:    ptr(restapi.ContainsOperator),
+				Operator:    ptr(instana.ContainsOperator),
 			},
 		},
 		{
 			name: "slowness_rule",
-			rule: &restapi.ApplicationAlertRule{
+			rule: &instana.ApplicationAlertRule{
 				AlertType:   ApplicationAlertConfigFieldRuleSlowness,
 				MetricName:  "latency",
 				Aggregation: "mean",
@@ -1052,7 +1052,7 @@ func TestUpdateState_WithAllRuleTypes(t *testing.T) {
 		},
 		{
 			name: "status_code_rule",
-			rule: &restapi.ApplicationAlertRule{
+			rule: &instana.ApplicationAlertRule{
 				AlertType:       ApplicationAlertConfigFieldRuleStatusCode,
 				MetricName:      "statusCode",
 				Aggregation:     "sum",
@@ -1062,7 +1062,7 @@ func TestUpdateState_WithAllRuleTypes(t *testing.T) {
 		},
 		{
 			name: "throughput_rule",
-			rule: &restapi.ApplicationAlertRule{
+			rule: &instana.ApplicationAlertRule{
 				AlertType:   ApplicationAlertConfigFieldRuleThroughput,
 				MetricName:  "calls",
 				Aggregation: "sum",
@@ -1075,7 +1075,7 @@ func TestUpdateState_WithAllRuleTypes(t *testing.T) {
 			ctx := context.Background()
 			resource := &applicationAlertConfigResourceImpl{}
 
-			data := &restapi.ApplicationAlertConfig{
+			data := &instana.ApplicationAlertConfig{
 				ID:               "test-id",
 				Name:             "Test Alert",
 				Description:      "Test Description",
@@ -1086,12 +1086,12 @@ func TestUpdateState_WithAllRuleTypes(t *testing.T) {
 				IncludeSynthetic: false,
 				Triggering:       false,
 				AlertChannelIDs:  []string{},
-				Applications:     map[string]restapi.IncludedApplication{},
-				Rules: []restapi.ApplicationAlertRuleWithThresholds{
+				Applications:     map[string]instana.IncludedApplication{},
+				Rules: []instana.ApplicationAlertRuleWithThresholds{
 					{
 						Rule:              tt.rule,
 						ThresholdOperator: ">",
-						Thresholds:        map[restapi.AlertSeverity]restapi.ThresholdRule{},
+						Thresholds:        map[instana.AlertSeverity]instana.ThresholdRule{},
 					},
 				},
 			}
@@ -1280,7 +1280,7 @@ func TestWrapperMapStateToDataObject_WithState(t *testing.T) {
 	require.NotNil(t, result)
 	assert.Equal(t, "test-id-2", result.ID)
 	assert.Equal(t, "Test Alert 2", result.Name)
-	assert.Equal(t, restapi.BoundaryScope("INBOUND"), result.BoundaryScope)
+	assert.Equal(t, instana.BoundaryScope("INBOUND"), result.BoundaryScope)
 	assert.True(t, result.IncludeInternal)
 	assert.True(t, result.IncludeSynthetic)
 	assert.True(t, result.Triggering)
@@ -1295,7 +1295,7 @@ func TestWrapperUpdateState(t *testing.T) {
 		Schema: resource.MetaData().Schema,
 	}
 
-	data := &restapi.ApplicationAlertConfig{
+	data := &instana.ApplicationAlertConfig{
 		ID:               "test-id",
 		Name:             "Test Alert",
 		Description:      "Test Description",
@@ -1306,8 +1306,8 @@ func TestWrapperUpdateState(t *testing.T) {
 		IncludeSynthetic: false,
 		Triggering:       false,
 		AlertChannelIDs:  []string{},
-		Applications:     map[string]restapi.IncludedApplication{},
-		Rules:            []restapi.ApplicationAlertRuleWithThresholds{},
+		Applications:     map[string]instana.IncludedApplication{},
+		Rules:            []instana.ApplicationAlertRuleWithThresholds{},
 	}
 
 	diags := resource.UpdateState(ctx, state, nil, data)
@@ -1406,7 +1406,7 @@ func TestMapStateToDataObject_AllBoundaryScopes(t *testing.T) {
 			result, diags := resource.MapStateToDataObject(ctx, state)
 			require.False(t, diags.HasError())
 			require.NotNil(t, result)
-			assert.Equal(t, restapi.BoundaryScope(scope), result.BoundaryScope)
+			assert.Equal(t, instana.BoundaryScope(scope), result.BoundaryScope)
 		})
 	}
 }
@@ -1531,10 +1531,10 @@ func TestMapStateToDataObject_WithCriticalThreshold(t *testing.T) {
 	require.False(t, diags.HasError())
 	require.NotNil(t, result)
 	require.Len(t, result.Rules, 1)
-	require.Contains(t, result.Rules[0].Thresholds, restapi.CriticalSeverity)
-	assert.Equal(t, "staticThreshold", result.Rules[0].Thresholds[restapi.CriticalSeverity].Type)
-	require.NotNil(t, result.Rules[0].Thresholds[restapi.CriticalSeverity].Value)
-	assert.Equal(t, float64(200), *result.Rules[0].Thresholds[restapi.CriticalSeverity].Value)
+	require.Contains(t, result.Rules[0].Thresholds, instana.CriticalSeverity)
+	assert.Equal(t, "staticThreshold", result.Rules[0].Thresholds[instana.CriticalSeverity].Type)
+	require.NotNil(t, result.Rules[0].Thresholds[instana.CriticalSeverity].Value)
+	assert.Equal(t, float64(200), *result.Rules[0].Thresholds[instana.CriticalSeverity].Value)
 }
 
 // Test MapStateToDataObject with both warning and critical thresholds
@@ -1585,10 +1585,10 @@ func TestMapStateToDataObject_WithBothThresholds(t *testing.T) {
 	require.False(t, diags.HasError())
 	require.NotNil(t, result)
 	require.Len(t, result.Rules, 1)
-	require.Contains(t, result.Rules[0].Thresholds, restapi.WarningSeverity)
-	require.Contains(t, result.Rules[0].Thresholds, restapi.CriticalSeverity)
-	assert.Equal(t, float64(100), *result.Rules[0].Thresholds[restapi.WarningSeverity].Value)
-	assert.Equal(t, float64(200), *result.Rules[0].Thresholds[restapi.CriticalSeverity].Value)
+	require.Contains(t, result.Rules[0].Thresholds, instana.WarningSeverity)
+	require.Contains(t, result.Rules[0].Thresholds, instana.CriticalSeverity)
+	assert.Equal(t, float64(100), *result.Rules[0].Thresholds[instana.WarningSeverity].Value)
+	assert.Equal(t, float64(200), *result.Rules[0].Thresholds[instana.CriticalSeverity].Value)
 }
 
 // Test MapStateToDataObject with null granularity
@@ -1617,7 +1617,7 @@ func TestMapStateToDataObject_WithNullGranularity(t *testing.T) {
 	require.False(t, diags.HasError())
 	require.NotNil(t, result)
 	// Granularity should be 0 when null
-	assert.Equal(t, restapi.Granularity(0), result.Granularity)
+	assert.Equal(t, instana.Granularity(0), result.Granularity)
 }
 
 // Test MapStateToDataObject with empty tag filter
@@ -1724,16 +1724,16 @@ func TestMapStateToDataObject_WithAdaptiveBaselineThreshold(t *testing.T) {
 	require.False(t, diags.HasError())
 	require.NotNil(t, result)
 	require.Len(t, result.Rules, 1)
-	require.Contains(t, result.Rules[0].Thresholds, restapi.WarningSeverity)
+	require.Contains(t, result.Rules[0].Thresholds, instana.WarningSeverity)
 
-	threshold := result.Rules[0].Thresholds[restapi.WarningSeverity]
+	threshold := result.Rules[0].Thresholds[instana.WarningSeverity]
 	assert.Equal(t, "adaptiveBaseline", threshold.Type)
 	require.NotNil(t, threshold.DeviationFactor)
 	assert.Equal(t, float32(2.0), *threshold.DeviationFactor)
 	require.NotNil(t, threshold.Adaptability)
 	assert.Equal(t, float32(0.5), *threshold.Adaptability)
 	require.NotNil(t, threshold.Seasonality)
-	assert.Equal(t, restapi.ThresholdSeasonality("DAILY"), *threshold.Seasonality)
+	assert.Equal(t, instana.ThresholdSeasonality("DAILY"), *threshold.Seasonality)
 }
 
 // Test MapStateToDataObject with adaptive baseline critical threshold
@@ -1781,16 +1781,16 @@ func TestMapStateToDataObject_WithAdaptiveBaselineCriticalThreshold(t *testing.T
 	require.False(t, diags.HasError())
 	require.NotNil(t, result)
 	require.Len(t, result.Rules, 1)
-	require.Contains(t, result.Rules[0].Thresholds, restapi.CriticalSeverity)
+	require.Contains(t, result.Rules[0].Thresholds, instana.CriticalSeverity)
 
-	threshold := result.Rules[0].Thresholds[restapi.CriticalSeverity]
+	threshold := result.Rules[0].Thresholds[instana.CriticalSeverity]
 	assert.Equal(t, "adaptiveBaseline", threshold.Type)
 	require.NotNil(t, threshold.DeviationFactor)
 	assert.Equal(t, float32(3.0), *threshold.DeviationFactor)
 	require.NotNil(t, threshold.Adaptability)
 	assert.Equal(t, float32(0.8), *threshold.Adaptability)
 	require.NotNil(t, threshold.Seasonality)
-	assert.Equal(t, restapi.ThresholdSeasonality("WEEKLY"), *threshold.Seasonality)
+	assert.Equal(t, instana.ThresholdSeasonality("WEEKLY"), *threshold.Seasonality)
 }
 
 // Test UpdateState with adaptive baseline threshold
@@ -1800,9 +1800,9 @@ func TestUpdateState_WithAdaptiveBaselineThreshold(t *testing.T) {
 
 	deviationFactor := float32(2.0)
 	adaptability := float32(0.5)
-	seasonality := restapi.ThresholdSeasonality("DAILY")
+	seasonality := instana.ThresholdSeasonality("DAILY")
 
-	data := &restapi.ApplicationAlertConfig{
+	data := &instana.ApplicationAlertConfig{
 		ID:               "test-id",
 		Name:             "Test Alert",
 		Description:      "Test Description",
@@ -1813,17 +1813,17 @@ func TestUpdateState_WithAdaptiveBaselineThreshold(t *testing.T) {
 		IncludeSynthetic: false,
 		Triggering:       false,
 		AlertChannelIDs:  []string{},
-		Applications:     map[string]restapi.IncludedApplication{},
-		Rules: []restapi.ApplicationAlertRuleWithThresholds{
+		Applications:     map[string]instana.IncludedApplication{},
+		Rules: []instana.ApplicationAlertRuleWithThresholds{
 			{
-				Rule: &restapi.ApplicationAlertRule{
+				Rule: &instana.ApplicationAlertRule{
 					AlertType:   ApplicationAlertConfigFieldRuleErrorRate,
 					MetricName:  "errors",
 					Aggregation: "sum",
 				},
 				ThresholdOperator: ">",
-				Thresholds: map[restapi.AlertSeverity]restapi.ThresholdRule{
-					restapi.WarningSeverity: {
+				Thresholds: map[instana.AlertSeverity]instana.ThresholdRule{
+					instana.WarningSeverity: {
 						Type:            "adaptiveBaseline",
 						DeviationFactor: &deviationFactor,
 						Adaptability:    &adaptability,
@@ -1864,9 +1864,9 @@ func TestUpdateState_WithMixedThresholds(t *testing.T) {
 	warningValue := float64(100)
 	criticalDeviationFactor := float32(3.0)
 	criticalAdaptability := float32(0.8)
-	criticalSeasonality := restapi.ThresholdSeasonality("WEEKLY")
+	criticalSeasonality := instana.ThresholdSeasonality("WEEKLY")
 
-	data := &restapi.ApplicationAlertConfig{
+	data := &instana.ApplicationAlertConfig{
 		ID:               "test-id",
 		Name:             "Test Alert",
 		Description:      "Test Description",
@@ -1877,21 +1877,21 @@ func TestUpdateState_WithMixedThresholds(t *testing.T) {
 		IncludeSynthetic: false,
 		Triggering:       false,
 		AlertChannelIDs:  []string{},
-		Applications:     map[string]restapi.IncludedApplication{},
-		Rules: []restapi.ApplicationAlertRuleWithThresholds{
+		Applications:     map[string]instana.IncludedApplication{},
+		Rules: []instana.ApplicationAlertRuleWithThresholds{
 			{
-				Rule: &restapi.ApplicationAlertRule{
+				Rule: &instana.ApplicationAlertRule{
 					AlertType:   ApplicationAlertConfigFieldRuleThroughput,
 					MetricName:  "calls",
 					Aggregation: "sum",
 				},
 				ThresholdOperator: ">",
-				Thresholds: map[restapi.AlertSeverity]restapi.ThresholdRule{
-					restapi.WarningSeverity: {
+				Thresholds: map[instana.AlertSeverity]instana.ThresholdRule{
+					instana.WarningSeverity: {
 						Type:  "staticThreshold",
 						Value: &warningValue,
 					},
-					restapi.CriticalSeverity: {
+					instana.CriticalSeverity: {
 						Type:            "adaptiveBaseline",
 						DeviationFactor: &criticalDeviationFactor,
 						Adaptability:    &criticalAdaptability,
@@ -1974,9 +1974,9 @@ func TestMapStateToDataObject_WithNullAdaptiveBaselineFields(t *testing.T) {
 	require.False(t, diags.HasError())
 	require.NotNil(t, result)
 	require.Len(t, result.Rules, 1)
-	require.Contains(t, result.Rules[0].Thresholds, restapi.WarningSeverity)
+	require.Contains(t, result.Rules[0].Thresholds, instana.WarningSeverity)
 
-	threshold := result.Rules[0].Thresholds[restapi.WarningSeverity]
+	threshold := result.Rules[0].Thresholds[instana.WarningSeverity]
 	assert.Equal(t, "adaptiveBaseline", threshold.Type)
 	// Null fields are converted to zero values by the shared mapping function
 	require.NotNil(t, threshold.DeviationFactor)
@@ -1984,7 +1984,7 @@ func TestMapStateToDataObject_WithNullAdaptiveBaselineFields(t *testing.T) {
 	require.NotNil(t, threshold.Adaptability)
 	assert.Equal(t, float32(0), *threshold.Adaptability)
 	require.NotNil(t, threshold.Seasonality)
-	assert.Equal(t, restapi.ThresholdSeasonality(""), *threshold.Seasonality)
+	assert.Equal(t, instana.ThresholdSeasonality(""), *threshold.Seasonality)
 }
 
 // Test UpdateState with null adaptive baseline fields
@@ -1992,7 +1992,7 @@ func TestUpdateState_WithNullAdaptiveBaselineFields(t *testing.T) {
 	ctx := context.Background()
 	resource := &applicationAlertConfigResourceImpl{}
 
-	data := &restapi.ApplicationAlertConfig{
+	data := &instana.ApplicationAlertConfig{
 		ID:               "test-id",
 		Name:             "Test Alert",
 		Description:      "Test Description",
@@ -2003,17 +2003,17 @@ func TestUpdateState_WithNullAdaptiveBaselineFields(t *testing.T) {
 		IncludeSynthetic: false,
 		Triggering:       false,
 		AlertChannelIDs:  []string{},
-		Applications:     map[string]restapi.IncludedApplication{},
-		Rules: []restapi.ApplicationAlertRuleWithThresholds{
+		Applications:     map[string]instana.IncludedApplication{},
+		Rules: []instana.ApplicationAlertRuleWithThresholds{
 			{
-				Rule: &restapi.ApplicationAlertRule{
+				Rule: &instana.ApplicationAlertRule{
 					AlertType:   ApplicationAlertConfigFieldRuleErrorRate,
 					MetricName:  "errors",
 					Aggregation: "sum",
 				},
 				ThresholdOperator: ">",
-				Thresholds: map[restapi.AlertSeverity]restapi.ThresholdRule{
-					restapi.WarningSeverity: {
+				Thresholds: map[instana.AlertSeverity]instana.ThresholdRule{
+					instana.WarningSeverity: {
 						Type:            "adaptiveBaseline",
 						DeviationFactor: nil,
 						Adaptability:    nil,
@@ -2098,22 +2098,22 @@ func TestMapStateToDataObject_WithBothAdaptiveBaselineThresholds(t *testing.T) {
 	require.False(t, diags.HasError())
 	require.NotNil(t, result)
 	require.Len(t, result.Rules, 1)
-	require.Contains(t, result.Rules[0].Thresholds, restapi.WarningSeverity)
-	require.Contains(t, result.Rules[0].Thresholds, restapi.CriticalSeverity)
+	require.Contains(t, result.Rules[0].Thresholds, instana.WarningSeverity)
+	require.Contains(t, result.Rules[0].Thresholds, instana.CriticalSeverity)
 
 	// Check warning threshold
-	warningThreshold := result.Rules[0].Thresholds[restapi.WarningSeverity]
+	warningThreshold := result.Rules[0].Thresholds[instana.WarningSeverity]
 	assert.Equal(t, "adaptiveBaseline", warningThreshold.Type)
 	assert.Equal(t, float32(1.5), *warningThreshold.DeviationFactor)
 	assert.Equal(t, float32(0.3), *warningThreshold.Adaptability)
-	assert.Equal(t, restapi.ThresholdSeasonality("DAILY"), *warningThreshold.Seasonality)
+	assert.Equal(t, instana.ThresholdSeasonality("DAILY"), *warningThreshold.Seasonality)
 
 	// Check critical threshold
-	criticalThreshold := result.Rules[0].Thresholds[restapi.CriticalSeverity]
+	criticalThreshold := result.Rules[0].Thresholds[instana.CriticalSeverity]
 	assert.Equal(t, "adaptiveBaseline", criticalThreshold.Type)
 	assert.Equal(t, float32(2.5), *criticalThreshold.DeviationFactor)
 	assert.Equal(t, float32(0.6), *criticalThreshold.Adaptability)
-	assert.Equal(t, restapi.ThresholdSeasonality("WEEKLY"), *criticalThreshold.Seasonality)
+	assert.Equal(t, instana.ThresholdSeasonality("WEEKLY"), *criticalThreshold.Seasonality)
 }
 
 // Test UpdateState with empty applications
@@ -2121,7 +2121,7 @@ func TestUpdateState_WithEmptyApplications(t *testing.T) {
 	ctx := context.Background()
 	resource := &applicationAlertConfigResourceImpl{}
 
-	data := &restapi.ApplicationAlertConfig{
+	data := &instana.ApplicationAlertConfig{
 		ID:               "test-id",
 		Name:             "Test Alert",
 		Description:      "Test Description",
@@ -2132,8 +2132,8 @@ func TestUpdateState_WithEmptyApplications(t *testing.T) {
 		IncludeSynthetic: false,
 		Triggering:       false,
 		AlertChannelIDs:  []string{},
-		Applications:     map[string]restapi.IncludedApplication{},
-		Rules:            []restapi.ApplicationAlertRuleWithThresholds{},
+		Applications:     map[string]instana.IncludedApplication{},
+		Rules:            []instana.ApplicationAlertRuleWithThresholds{},
 	}
 
 	state := &tfsdk.State{
@@ -2155,7 +2155,7 @@ func TestUpdateState_WithEmptyAlertChannels(t *testing.T) {
 	ctx := context.Background()
 	resource := &applicationAlertConfigResourceImpl{}
 
-	data := &restapi.ApplicationAlertConfig{
+	data := &instana.ApplicationAlertConfig{
 		ID:               "test-id",
 		Name:             "Test Alert",
 		Description:      "Test Description",
@@ -2167,8 +2167,8 @@ func TestUpdateState_WithEmptyAlertChannels(t *testing.T) {
 		Triggering:       false,
 		AlertChannelIDs:  []string{},
 		AlertChannels:    map[string][]string{},
-		Applications:     map[string]restapi.IncludedApplication{},
-		Rules:            []restapi.ApplicationAlertRuleWithThresholds{},
+		Applications:     map[string]instana.IncludedApplication{},
+		Rules:            []instana.ApplicationAlertRuleWithThresholds{},
 	}
 
 	state := &tfsdk.State{
@@ -2193,7 +2193,7 @@ func TestUpdateState_WithNullTagFilter(t *testing.T) {
 	ctx := context.Background()
 	resource := &applicationAlertConfigResourceImpl{}
 
-	data := &restapi.ApplicationAlertConfig{
+	data := &instana.ApplicationAlertConfig{
 		ID:                  "test-id",
 		Name:                "Test Alert",
 		Description:         "Test Description",
@@ -2204,8 +2204,8 @@ func TestUpdateState_WithNullTagFilter(t *testing.T) {
 		IncludeSynthetic:    false,
 		Triggering:          false,
 		AlertChannelIDs:     []string{},
-		Applications:        map[string]restapi.IncludedApplication{},
-		Rules:               []restapi.ApplicationAlertRuleWithThresholds{},
+		Applications:        map[string]instana.IncludedApplication{},
+		Rules:               []instana.ApplicationAlertRuleWithThresholds{},
 		TagFilterExpression: nil,
 	}
 
@@ -2360,7 +2360,7 @@ func TestUpdateState_EnabledField(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			apiData := &restapi.ApplicationAlertConfig{
+			apiData := &instana.ApplicationAlertConfig{
 				ID:               "test-id",
 				Name:             "Test Alert",
 				Description:      "Test Description",
@@ -2371,9 +2371,9 @@ func TestUpdateState_EnabledField(t *testing.T) {
 				IncludeSynthetic: false,
 				Triggering:       false,
 				Enabled:          tt.apiEnabled,
-				Applications:     map[string]restapi.IncludedApplication{},
+				Applications:     map[string]instana.IncludedApplication{},
 				AlertChannelIDs:  []string{},
-				Rules:            []restapi.ApplicationAlertRuleWithThresholds{},
+				Rules:            []instana.ApplicationAlertRuleWithThresholds{},
 			}
 
 			state := tfsdk.State{

@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/instana-go-client/instana"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -63,11 +63,11 @@ func TestUpdateState_ApplicationTimeBased_Basic(t *testing.T) {
 	appID := "app-123"
 	boundaryScope := "ALL"
 
-	data := &restapi.SliConfig{
+	data := &instana.SliConfig{
 		ID:                         "sli-id-1",
 		Name:                       "Test SLI",
 		InitialEvaluationTimestamp: 1234567890,
-		SliEntity: restapi.SliEntity{
+		SliEntity: instana.SliEntity{
 			Type:          "application",
 			ApplicationID: &appID,
 			BoundaryScope: &boundaryScope,
@@ -103,11 +103,11 @@ func TestUpdateState_ApplicationTimeBased_WithServiceAndEndpoint(t *testing.T) {
 	serviceID := "service-456"
 	endpointID := "endpoint-789"
 
-	data := &restapi.SliConfig{
+	data := &instana.SliConfig{
 		ID:                         "sli-id-1",
 		Name:                       "Test SLI",
 		InitialEvaluationTimestamp: 1234567890,
-		SliEntity: restapi.SliEntity{
+		SliEntity: instana.SliEntity{
 			Type:          "application",
 			ApplicationID: &appID,
 			BoundaryScope: &boundaryScope,
@@ -139,16 +139,16 @@ func TestUpdateState_ApplicationTimeBased_WithMetricConfiguration(t *testing.T) 
 	appID := "app-123"
 	boundaryScope := "ALL"
 
-	data := &restapi.SliConfig{
+	data := &instana.SliConfig{
 		ID:                         "sli-id-1",
 		Name:                       "Test SLI",
 		InitialEvaluationTimestamp: 1234567890,
-		MetricConfiguration: &restapi.MetricConfiguration{
+		MetricConfiguration: &instana.MetricConfiguration{
 			Name:        "latency",
 			Aggregation: "P95",
 			Threshold:   500.5,
 		},
-		SliEntity: restapi.SliEntity{
+		SliEntity: instana.SliEntity{
 			Type:          "application",
 			ApplicationID: &appID,
 			BoundaryScope: &boundaryScope,
@@ -181,19 +181,19 @@ func TestUpdateState_ApplicationEventBased_Basic(t *testing.T) {
 	appID := "app-123"
 	boundaryScope := "ALL"
 
-	goodFilter := restapi.NewLogicalAndTagFilter([]*restapi.TagFilter{
-		restapi.NewStringTagFilter(restapi.TagFilterEntityNotApplicable, "call.http.status", restapi.EqualsOperator, "200"),
+	goodFilter := instana.NewLogicalAndTagFilter([]*instana.TagFilter{
+		instana.NewStringTagFilter(instana.TagFilterEntityNotApplicable, "call.http.status", instana.EqualsOperator, "200"),
 	})
 
-	badFilter := restapi.NewLogicalAndTagFilter([]*restapi.TagFilter{
-		restapi.NewStringTagFilter(restapi.TagFilterEntityNotApplicable, "call.http.status", restapi.EqualsOperator, "500"),
+	badFilter := instana.NewLogicalAndTagFilter([]*instana.TagFilter{
+		instana.NewStringTagFilter(instana.TagFilterEntityNotApplicable, "call.http.status", instana.EqualsOperator, "500"),
 	})
 
-	data := &restapi.SliConfig{
+	data := &instana.SliConfig{
 		ID:                         "sli-id-1",
 		Name:                       "Test SLI Availability",
 		InitialEvaluationTimestamp: 1234567890,
-		SliEntity: restapi.SliEntity{
+		SliEntity: instana.SliEntity{
 			Type:                      "availability",
 			ApplicationID:             &appID,
 			BoundaryScope:             &boundaryScope,
@@ -230,19 +230,19 @@ func TestUpdateState_ApplicationEventBased_WithIncludeFlags(t *testing.T) {
 	includeInternal := true
 	includeSynthetic := false
 
-	goodFilter := restapi.NewLogicalAndTagFilter([]*restapi.TagFilter{
-		restapi.NewStringTagFilter(restapi.TagFilterEntityNotApplicable, "call.http.status", restapi.EqualsOperator, "200"),
+	goodFilter := instana.NewLogicalAndTagFilter([]*instana.TagFilter{
+		instana.NewStringTagFilter(instana.TagFilterEntityNotApplicable, "call.http.status", instana.EqualsOperator, "200"),
 	})
 
-	badFilter := restapi.NewLogicalAndTagFilter([]*restapi.TagFilter{
-		restapi.NewStringTagFilter(restapi.TagFilterEntityNotApplicable, "call.http.status", restapi.EqualsOperator, "500"),
+	badFilter := instana.NewLogicalAndTagFilter([]*instana.TagFilter{
+		instana.NewStringTagFilter(instana.TagFilterEntityNotApplicable, "call.http.status", instana.EqualsOperator, "500"),
 	})
 
-	data := &restapi.SliConfig{
+	data := &instana.SliConfig{
 		ID:                         "sli-id-1",
 		Name:                       "Test SLI Availability",
 		InitialEvaluationTimestamp: 1234567890,
-		SliEntity: restapi.SliEntity{
+		SliEntity: instana.SliEntity{
 			Type:                      "availability",
 			ApplicationID:             &appID,
 			BoundaryScope:             &boundaryScope,
@@ -276,19 +276,19 @@ func TestUpdateState_ApplicationEventBased_WithNullIncludeFlags(t *testing.T) {
 	appID := "app-123"
 	boundaryScope := "ALL"
 
-	goodFilter := restapi.NewLogicalAndTagFilter([]*restapi.TagFilter{
-		restapi.NewStringTagFilter(restapi.TagFilterEntityNotApplicable, "call.http.status", restapi.EqualsOperator, "200"),
+	goodFilter := instana.NewLogicalAndTagFilter([]*instana.TagFilter{
+		instana.NewStringTagFilter(instana.TagFilterEntityNotApplicable, "call.http.status", instana.EqualsOperator, "200"),
 	})
 
-	badFilter := restapi.NewLogicalAndTagFilter([]*restapi.TagFilter{
-		restapi.NewStringTagFilter(restapi.TagFilterEntityNotApplicable, "call.http.status", restapi.EqualsOperator, "500"),
+	badFilter := instana.NewLogicalAndTagFilter([]*instana.TagFilter{
+		instana.NewStringTagFilter(instana.TagFilterEntityNotApplicable, "call.http.status", instana.EqualsOperator, "500"),
 	})
 
-	data := &restapi.SliConfig{
+	data := &instana.SliConfig{
 		ID:                         "sli-id-1",
 		Name:                       "Test SLI Availability",
 		InitialEvaluationTimestamp: 1234567890,
-		SliEntity: restapi.SliEntity{
+		SliEntity: instana.SliEntity{
 			Type:                      "availability",
 			ApplicationID:             &appID,
 			BoundaryScope:             &boundaryScope,
@@ -325,19 +325,19 @@ func TestUpdateState_WebsiteEventBased_Basic(t *testing.T) {
 	websiteID := "website-123"
 	beaconType := "pageLoad"
 
-	goodFilter := restapi.NewLogicalAndTagFilter([]*restapi.TagFilter{
-		restapi.NewStringTagFilter(restapi.TagFilterEntityNotApplicable, "beacon.page.name", restapi.EqualsOperator, "home"),
+	goodFilter := instana.NewLogicalAndTagFilter([]*instana.TagFilter{
+		instana.NewStringTagFilter(instana.TagFilterEntityNotApplicable, "beacon.page.name", instana.EqualsOperator, "home"),
 	})
 
-	badFilter := restapi.NewLogicalAndTagFilter([]*restapi.TagFilter{
-		restapi.NewStringTagFilter(restapi.TagFilterEntityNotApplicable, "beacon.error", restapi.EqualsOperator, "true"),
+	badFilter := instana.NewLogicalAndTagFilter([]*instana.TagFilter{
+		instana.NewStringTagFilter(instana.TagFilterEntityNotApplicable, "beacon.error", instana.EqualsOperator, "true"),
 	})
 
-	data := &restapi.SliConfig{
+	data := &instana.SliConfig{
 		ID:                         "sli-id-1",
 		Name:                       "Test Website SLI",
 		InitialEvaluationTimestamp: 1234567890,
-		SliEntity: restapi.SliEntity{
+		SliEntity: instana.SliEntity{
 			Type:                      "websiteEventBased",
 			WebsiteId:                 &websiteID,
 			BeaconType:                &beaconType,
@@ -374,20 +374,20 @@ func TestUpdateState_WebsiteTimeBased_Basic(t *testing.T) {
 	websiteID := "website-123"
 	beaconType := "pageLoad"
 
-	filterExpr := restapi.NewLogicalAndTagFilter([]*restapi.TagFilter{
-		restapi.NewStringTagFilter(restapi.TagFilterEntityNotApplicable, "beacon.page.name", restapi.EqualsOperator, "home"),
+	filterExpr := instana.NewLogicalAndTagFilter([]*instana.TagFilter{
+		instana.NewStringTagFilter(instana.TagFilterEntityNotApplicable, "beacon.page.name", instana.EqualsOperator, "home"),
 	})
 
-	data := &restapi.SliConfig{
+	data := &instana.SliConfig{
 		ID:                         "sli-id-1",
 		Name:                       "Test Website Time SLI",
 		InitialEvaluationTimestamp: 1234567890,
-		MetricConfiguration: &restapi.MetricConfiguration{
+		MetricConfiguration: &instana.MetricConfiguration{
 			Name:        "beacon.page.load.time",
 			Aggregation: "P95",
 			Threshold:   2000.0,
 		},
-		SliEntity: restapi.SliEntity{
+		SliEntity: instana.SliEntity{
 			Type:             "websiteTimeBased",
 			WebsiteId:        &websiteID,
 			BeaconType:       &beaconType,
@@ -420,16 +420,16 @@ func TestUpdateState_WebsiteTimeBased_WithoutFilterExpression(t *testing.T) {
 	websiteID := "website-123"
 	beaconType := "httpRequest"
 
-	data := &restapi.SliConfig{
+	data := &instana.SliConfig{
 		ID:                         "sli-id-1",
 		Name:                       "Test Website Time SLI",
 		InitialEvaluationTimestamp: 1234567890,
-		MetricConfiguration: &restapi.MetricConfiguration{
+		MetricConfiguration: &instana.MetricConfiguration{
 			Name:        "beacon.http.duration",
 			Aggregation: "MEAN",
 			Threshold:   1000.0,
 		},
-		SliEntity: restapi.SliEntity{
+		SliEntity: instana.SliEntity{
 			Type:             "websiteTimeBased",
 			WebsiteId:        &websiteID,
 			BeaconType:       &beaconType,
@@ -458,11 +458,11 @@ func TestUpdateState_UnsupportedEntityType(t *testing.T) {
 	ctx := context.Background()
 	resource := NewSliConfigResourceHandle()
 
-	data := &restapi.SliConfig{
+	data := &instana.SliConfig{
 		ID:                         "sli-id-1",
 		Name:                       "Test SLI",
 		InitialEvaluationTimestamp: 1234567890,
-		SliEntity: restapi.SliEntity{
+		SliEntity: instana.SliEntity{
 			Type: "unsupported_type",
 		},
 	}
@@ -482,12 +482,12 @@ func TestUpdateState_WithoutMetricConfiguration(t *testing.T) {
 	appID := "app-123"
 	boundaryScope := "ALL"
 
-	data := &restapi.SliConfig{
+	data := &instana.SliConfig{
 		ID:                         "sli-id-1",
 		Name:                       "Test SLI",
 		InitialEvaluationTimestamp: 1234567890,
 		MetricConfiguration:        nil,
-		SliEntity: restapi.SliEntity{
+		SliEntity: instana.SliEntity{
 			Type:          "application",
 			ApplicationID: &appID,
 			BoundaryScope: &boundaryScope,
@@ -997,15 +997,15 @@ func TestUpdateState_ApplicationEventBased_WithNullGoodEventFilter(t *testing.T)
 	appID := "app-123"
 	boundaryScope := "ALL"
 
-	badFilter := restapi.NewLogicalAndTagFilter([]*restapi.TagFilter{
-		restapi.NewStringTagFilter(restapi.TagFilterEntityNotApplicable, "call.http.status", restapi.EqualsOperator, "500"),
+	badFilter := instana.NewLogicalAndTagFilter([]*instana.TagFilter{
+		instana.NewStringTagFilter(instana.TagFilterEntityNotApplicable, "call.http.status", instana.EqualsOperator, "500"),
 	})
 
-	data := &restapi.SliConfig{
+	data := &instana.SliConfig{
 		ID:                         "sli-id-1",
 		Name:                       "Test SLI Availability",
 		InitialEvaluationTimestamp: 1234567890,
-		SliEntity: restapi.SliEntity{
+		SliEntity: instana.SliEntity{
 			Type:                      "availability",
 			ApplicationID:             &appID,
 			BoundaryScope:             &boundaryScope,
@@ -1037,15 +1037,15 @@ func TestUpdateState_ApplicationEventBased_WithNullBadEventFilter(t *testing.T) 
 	appID := "app-123"
 	boundaryScope := "ALL"
 
-	goodFilter := restapi.NewLogicalAndTagFilter([]*restapi.TagFilter{
-		restapi.NewStringTagFilter(restapi.TagFilterEntityNotApplicable, "call.http.status", restapi.EqualsOperator, "200"),
+	goodFilter := instana.NewLogicalAndTagFilter([]*instana.TagFilter{
+		instana.NewStringTagFilter(instana.TagFilterEntityNotApplicable, "call.http.status", instana.EqualsOperator, "200"),
 	})
 
-	data := &restapi.SliConfig{
+	data := &instana.SliConfig{
 		ID:                         "sli-id-1",
 		Name:                       "Test SLI Availability",
 		InitialEvaluationTimestamp: 1234567890,
-		SliEntity: restapi.SliEntity{
+		SliEntity: instana.SliEntity{
 			Type:                      "availability",
 			ApplicationID:             &appID,
 			BoundaryScope:             &boundaryScope,
@@ -1077,15 +1077,15 @@ func TestUpdateState_WebsiteEventBased_WithNullGoodEventFilter(t *testing.T) {
 	websiteID := "website-123"
 	beaconType := "pageLoad"
 
-	badFilter := restapi.NewLogicalAndTagFilter([]*restapi.TagFilter{
-		restapi.NewStringTagFilter(restapi.TagFilterEntityNotApplicable, "beacon.error", restapi.EqualsOperator, "true"),
+	badFilter := instana.NewLogicalAndTagFilter([]*instana.TagFilter{
+		instana.NewStringTagFilter(instana.TagFilterEntityNotApplicable, "beacon.error", instana.EqualsOperator, "true"),
 	})
 
-	data := &restapi.SliConfig{
+	data := &instana.SliConfig{
 		ID:                         "sli-id-1",
 		Name:                       "Test Website SLI",
 		InitialEvaluationTimestamp: 1234567890,
-		SliEntity: restapi.SliEntity{
+		SliEntity: instana.SliEntity{
 			Type:                      "websiteEventBased",
 			WebsiteId:                 &websiteID,
 			BeaconType:                &beaconType,
@@ -1117,15 +1117,15 @@ func TestUpdateState_WebsiteEventBased_WithNullBadEventFilter(t *testing.T) {
 	websiteID := "website-123"
 	beaconType := "pageLoad"
 
-	goodFilter := restapi.NewLogicalAndTagFilter([]*restapi.TagFilter{
-		restapi.NewStringTagFilter(restapi.TagFilterEntityNotApplicable, "beacon.page.name", restapi.EqualsOperator, "home"),
+	goodFilter := instana.NewLogicalAndTagFilter([]*instana.TagFilter{
+		instana.NewStringTagFilter(instana.TagFilterEntityNotApplicable, "beacon.page.name", instana.EqualsOperator, "home"),
 	})
 
-	data := &restapi.SliConfig{
+	data := &instana.SliConfig{
 		ID:                         "sli-id-1",
 		Name:                       "Test Website SLI",
 		InitialEvaluationTimestamp: 1234567890,
-		SliEntity: restapi.SliEntity{
+		SliEntity: instana.SliEntity{
 			Type:                      "websiteEventBased",
 			WebsiteId:                 &websiteID,
 			BeaconType:                &beaconType,

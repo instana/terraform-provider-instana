@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/instana-go-client/instana"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -88,12 +88,12 @@ func TestMapStateToDataObject_BasicConfig(t *testing.T) {
 
 	assert.Equal(t, "test-id", result.ID)
 	assert.Equal(t, "Test Application", result.Label)
-	assert.Equal(t, restapi.ApplicationConfigScope("INCLUDE_NO_DOWNSTREAM"), result.Scope)
-	assert.Equal(t, restapi.BoundaryScope("DEFAULT"), result.BoundaryScope)
+	assert.Equal(t, instana.ApplicationConfigScope("INCLUDE_NO_DOWNSTREAM"), result.Scope)
+	assert.Equal(t, instana.BoundaryScope("DEFAULT"), result.BoundaryScope)
 	assert.Nil(t, result.TagFilterExpression)
 	require.Len(t, result.AccessRules, 1)
-	assert.Equal(t, restapi.AccessType("READ"), result.AccessRules[0].AccessType)
-	assert.Equal(t, restapi.RelationType("USER"), result.AccessRules[0].RelationType)
+	assert.Equal(t, instana.AccessType("READ"), result.AccessRules[0].AccessType)
+	assert.Equal(t, instana.RelationType("USER"), result.AccessRules[0].RelationType)
 	assert.Nil(t, result.AccessRules[0].RelatedID)
 }
 
@@ -124,12 +124,12 @@ func TestMapStateToDataObject_WithTagFilter(t *testing.T) {
 
 	assert.Equal(t, "test-id", result.ID)
 	assert.Equal(t, "Test Application", result.Label)
-	assert.Equal(t, restapi.ApplicationConfigScope("INCLUDE_ALL_DOWNSTREAM"), result.Scope)
-	assert.Equal(t, restapi.BoundaryScope("ALL"), result.BoundaryScope)
+	assert.Equal(t, instana.ApplicationConfigScope("INCLUDE_ALL_DOWNSTREAM"), result.Scope)
+	assert.Equal(t, instana.BoundaryScope("ALL"), result.BoundaryScope)
 	require.NotNil(t, result.TagFilterExpression)
 	require.Len(t, result.AccessRules, 1)
-	assert.Equal(t, restapi.AccessType("READ_WRITE"), result.AccessRules[0].AccessType)
-	assert.Equal(t, restapi.RelationType("ROLE"), result.AccessRules[0].RelationType)
+	assert.Equal(t, instana.AccessType("READ_WRITE"), result.AccessRules[0].AccessType)
+	assert.Equal(t, instana.RelationType("ROLE"), result.AccessRules[0].RelationType)
 	require.NotNil(t, result.AccessRules[0].RelatedID)
 	assert.Equal(t, "user-123", *result.AccessRules[0].RelatedID)
 }
@@ -172,20 +172,20 @@ func TestMapStateToDataObject_WithMultipleAccessRules(t *testing.T) {
 	require.Len(t, result.AccessRules, 3)
 
 	// Check first rule
-	assert.Equal(t, restapi.AccessType("READ"), result.AccessRules[0].AccessType)
-	assert.Equal(t, restapi.RelationType("USER"), result.AccessRules[0].RelationType)
+	assert.Equal(t, instana.AccessType("READ"), result.AccessRules[0].AccessType)
+	assert.Equal(t, instana.RelationType("USER"), result.AccessRules[0].RelationType)
 	require.NotNil(t, result.AccessRules[0].RelatedID)
 	assert.Equal(t, "user-1", *result.AccessRules[0].RelatedID)
 
 	// Check second rule
-	assert.Equal(t, restapi.AccessType("READ_WRITE"), result.AccessRules[1].AccessType)
-	assert.Equal(t, restapi.RelationType("ROLE"), result.AccessRules[1].RelationType)
+	assert.Equal(t, instana.AccessType("READ_WRITE"), result.AccessRules[1].AccessType)
+	assert.Equal(t, instana.RelationType("ROLE"), result.AccessRules[1].RelationType)
 	require.NotNil(t, result.AccessRules[1].RelatedID)
 	assert.Equal(t, "user-2", *result.AccessRules[1].RelatedID)
 
 	// Check third rule
-	assert.Equal(t, restapi.AccessType("READ_WRITE"), result.AccessRules[2].AccessType)
-	assert.Equal(t, restapi.RelationType("USER"), result.AccessRules[2].RelationType)
+	assert.Equal(t, instana.AccessType("READ_WRITE"), result.AccessRules[2].AccessType)
+	assert.Equal(t, instana.RelationType("USER"), result.AccessRules[2].RelationType)
 	assert.Nil(t, result.AccessRules[2].RelatedID)
 }
 
@@ -302,15 +302,15 @@ func TestUpdateState_BasicConfig(t *testing.T) {
 	ctx := context.Background()
 	resource := &applicationConfigResource{}
 
-	data := &restapi.ApplicationConfig{
+	data := &instana.ApplicationConfig{
 		ID:            "test-id",
 		Label:         "Test Application",
-		Scope:         restapi.ApplicationConfigScopeIncludeNoDownstream,
-		BoundaryScope: restapi.BoundaryScopeDefault,
-		AccessRules: []restapi.AccessRule{
+		Scope:         instana.ApplicationConfigScopeIncludeNoDownstream,
+		BoundaryScope: instana.BoundaryScopeDefault,
+		AccessRules: []instana.AccessRule{
 			{
-				AccessType:   restapi.AccessTypeRead,
-				RelationType: restapi.RelationTypeUser,
+				AccessType:   instana.AccessTypeRead,
+				RelationType: instana.RelationTypeUser,
 				RelatedID:    nil,
 			},
 		},
@@ -361,25 +361,25 @@ func TestUpdateState_WithTagFilter(t *testing.T) {
 
 	entityType := "entity.type"
 	serviceValue := "service"
-	equalsOp := restapi.EqualsOperator
+	equalsOp := instana.EqualsOperator
 
-	tagFilter := &restapi.TagFilter{
-		Type:     restapi.TagFilterExpressionType,
+	tagFilter := &instana.TagFilter{
+		Type:     instana.TagFilterExpressionType,
 		Name:     &entityType,
 		Operator: &equalsOp,
 		Value:    &serviceValue,
 	}
 
-	data := &restapi.ApplicationConfig{
+	data := &instana.ApplicationConfig{
 		ID:                  "test-id",
 		Label:               "Test Application",
-		Scope:               restapi.ApplicationConfigScopeIncludeAllDownstream,
-		BoundaryScope:       restapi.BoundaryScopeAll,
+		Scope:               instana.ApplicationConfigScopeIncludeAllDownstream,
+		BoundaryScope:       instana.BoundaryScopeAll,
 		TagFilterExpression: tagFilter,
-		AccessRules: []restapi.AccessRule{
+		AccessRules: []instana.AccessRule{
 			{
-				AccessType:   restapi.AccessTypeReadWrite,
-				RelationType: restapi.RelationTypeRole,
+				AccessType:   instana.AccessTypeReadWrite,
+				RelationType: instana.RelationTypeRole,
 				RelatedID:    ptr("user-123"),
 			},
 		},
@@ -432,25 +432,25 @@ func TestUpdateState_WithMultipleAccessRules(t *testing.T) {
 	ctx := context.Background()
 	resource := &applicationConfigResource{}
 
-	data := &restapi.ApplicationConfig{
+	data := &instana.ApplicationConfig{
 		ID:            "test-id",
 		Label:         "Test Application",
-		Scope:         restapi.ApplicationConfigScopeIncludeNoDownstream,
-		BoundaryScope: restapi.BoundaryScopeInbound,
-		AccessRules: []restapi.AccessRule{
+		Scope:         instana.ApplicationConfigScopeIncludeNoDownstream,
+		BoundaryScope: instana.BoundaryScopeInbound,
+		AccessRules: []instana.AccessRule{
 			{
-				AccessType:   restapi.AccessTypeRead,
-				RelationType: restapi.RelationTypeUser,
+				AccessType:   instana.AccessTypeRead,
+				RelationType: instana.RelationTypeUser,
 				RelatedID:    ptr("user-1"),
 			},
 			{
-				AccessType:   restapi.AccessTypeReadWrite,
-				RelationType: restapi.RelationTypeRole,
+				AccessType:   instana.AccessTypeReadWrite,
+				RelationType: instana.RelationTypeRole,
 				RelatedID:    ptr("user-2"),
 			},
 			{
-				AccessType:   restapi.AccessTypeReadWrite,
-				RelationType: restapi.RelationTypeUser,
+				AccessType:   instana.AccessTypeReadWrite,
+				RelationType: instana.RelationTypeUser,
 				RelatedID:    nil,
 			},
 		},
@@ -505,12 +505,12 @@ func TestUpdateState_WithEmptyAccessRules(t *testing.T) {
 	ctx := context.Background()
 	resource := &applicationConfigResource{}
 
-	data := &restapi.ApplicationConfig{
+	data := &instana.ApplicationConfig{
 		ID:            "test-id",
 		Label:         "Test Application",
-		Scope:         restapi.ApplicationConfigScopeIncludeNoDownstream,
-		BoundaryScope: restapi.BoundaryScopeDefault,
-		AccessRules:   []restapi.AccessRule{},
+		Scope:         instana.ApplicationConfigScopeIncludeNoDownstream,
+		BoundaryScope: instana.BoundaryScopeDefault,
+		AccessRules:   []instana.AccessRule{},
 	}
 
 	state := &tfsdk.State{
@@ -547,16 +547,16 @@ func TestUpdateState_WithNullTagFilter(t *testing.T) {
 	ctx := context.Background()
 	resource := &applicationConfigResource{}
 
-	data := &restapi.ApplicationConfig{
+	data := &instana.ApplicationConfig{
 		ID:                  "test-id",
 		Label:               "Test Application",
-		Scope:               restapi.ApplicationConfigScopeIncludeNoDownstream,
-		BoundaryScope:       restapi.BoundaryScopeDefault,
+		Scope:               instana.ApplicationConfigScopeIncludeNoDownstream,
+		BoundaryScope:       instana.BoundaryScopeDefault,
 		TagFilterExpression: nil,
-		AccessRules: []restapi.AccessRule{
+		AccessRules: []instana.AccessRule{
 			{
-				AccessType:   restapi.AccessTypeRead,
-				RelationType: restapi.RelationTypeUser,
+				AccessType:   instana.AccessTypeRead,
+				RelationType: instana.RelationTypeUser,
 				RelatedID:    nil,
 			},
 		},
@@ -623,7 +623,7 @@ func TestMapStateToDataObject_AllScopes(t *testing.T) {
 			result, diags := resource.MapStateToDataObject(ctx, nil, &state)
 			require.False(t, diags.HasError())
 			require.NotNil(t, result)
-			assert.Equal(t, restapi.ApplicationConfigScope(scope), result.Scope)
+			assert.Equal(t, instana.ApplicationConfigScope(scope), result.Scope)
 		})
 	}
 }
@@ -656,7 +656,7 @@ func TestMapStateToDataObject_AllBoundaryScopes(t *testing.T) {
 			result, diags := resource.MapStateToDataObject(ctx, nil, &state)
 			require.False(t, diags.HasError())
 			require.NotNil(t, result)
-			assert.Equal(t, restapi.BoundaryScope(boundaryScope), result.BoundaryScope)
+			assert.Equal(t, instana.BoundaryScope(boundaryScope), result.BoundaryScope)
 		})
 	}
 }
@@ -690,7 +690,7 @@ func TestMapStateToDataObject_AllAccessTypes(t *testing.T) {
 			require.False(t, diags.HasError())
 			require.NotNil(t, result)
 			require.Len(t, result.AccessRules, 1)
-			assert.Equal(t, restapi.AccessType(accessType), result.AccessRules[0].AccessType)
+			assert.Equal(t, instana.AccessType(accessType), result.AccessRules[0].AccessType)
 		})
 	}
 }
@@ -724,7 +724,7 @@ func TestMapStateToDataObject_AllRelationTypes(t *testing.T) {
 			require.False(t, diags.HasError())
 			require.NotNil(t, result)
 			require.Len(t, result.AccessRules, 1)
-			assert.Equal(t, restapi.RelationType(relationType), result.AccessRules[0].RelationType)
+			assert.Equal(t, instana.RelationType(relationType), result.AccessRules[0].RelationType)
 		})
 	}
 }
@@ -762,7 +762,7 @@ func TestMapAccessRulesToState_EmptyRules(t *testing.T) {
 	ctx := context.Background()
 	resource := &applicationConfigResource{}
 
-	result, diags := resource.mapAccessRulesToState(ctx, []restapi.AccessRule{})
+	result, diags := resource.mapAccessRulesToState(ctx, []instana.AccessRule{})
 	require.False(t, diags.HasError())
 	if !result.IsNull() {
 		rules := getAccessRulesFromList(t, ctx, result)
@@ -774,15 +774,15 @@ func TestMapAccessRulesToState_WithRules(t *testing.T) {
 	ctx := context.Background()
 	resource := &applicationConfigResource{}
 
-	accessRules := []restapi.AccessRule{
+	accessRules := []instana.AccessRule{
 		{
-			AccessType:   restapi.AccessTypeRead,
-			RelationType: restapi.RelationTypeUser,
+			AccessType:   instana.AccessTypeRead,
+			RelationType: instana.RelationTypeUser,
 			RelatedID:    ptr("user-1"),
 		},
 		{
-			AccessType:   restapi.AccessTypeReadWrite,
-			RelationType: restapi.RelationTypeRole,
+			AccessType:   instana.AccessTypeReadWrite,
+			RelationType: instana.RelationTypeRole,
 			RelatedID:    nil,
 		},
 	}
@@ -834,21 +834,21 @@ func TestMapAccessRulesFromState_WithRules(t *testing.T) {
 	require.False(t, diags.HasError())
 	require.Len(t, result, 2)
 
-	assert.Equal(t, restapi.AccessTypeRead, result[0].AccessType)
-	assert.Equal(t, restapi.RelationTypeUser, result[0].RelationType)
+	assert.Equal(t, instana.AccessTypeRead, result[0].AccessType)
+	assert.Equal(t, instana.RelationTypeUser, result[0].RelationType)
 	require.NotNil(t, result[0].RelatedID)
 	assert.Equal(t, "user-1", *result[0].RelatedID)
 
-	assert.Equal(t, restapi.AccessTypeReadWrite, result[1].AccessType)
-	assert.Equal(t, restapi.RelationTypeRole, result[1].RelationType)
+	assert.Equal(t, instana.AccessTypeReadWrite, result[1].AccessType)
+	assert.Equal(t, instana.RelationTypeRole, result[1].RelationType)
 	assert.Nil(t, result[1].RelatedID)
 }
 
 func TestUpdateState_AllScopes(t *testing.T) {
-	scopes := []restapi.ApplicationConfigScope{
-		restapi.ApplicationConfigScopeIncludeNoDownstream,
-		restapi.ApplicationConfigScopeIncludeImmediateDownstreamDatabaseAndMessaging,
-		restapi.ApplicationConfigScopeIncludeAllDownstream,
+	scopes := []instana.ApplicationConfigScope{
+		instana.ApplicationConfigScopeIncludeNoDownstream,
+		instana.ApplicationConfigScopeIncludeImmediateDownstreamDatabaseAndMessaging,
+		instana.ApplicationConfigScopeIncludeAllDownstream,
 	}
 
 	for _, scope := range scopes {
@@ -856,15 +856,15 @@ func TestUpdateState_AllScopes(t *testing.T) {
 			ctx := context.Background()
 			resource := &applicationConfigResource{}
 
-			data := &restapi.ApplicationConfig{
+			data := &instana.ApplicationConfig{
 				ID:            "test-id",
 				Label:         "Test Application",
 				Scope:         scope,
-				BoundaryScope: restapi.BoundaryScopeDefault,
-				AccessRules: []restapi.AccessRule{
+				BoundaryScope: instana.BoundaryScopeDefault,
+				AccessRules: []instana.AccessRule{
 					{
-						AccessType:   restapi.AccessTypeRead,
-						RelationType: restapi.RelationTypeUser,
+						AccessType:   instana.AccessTypeRead,
+						RelationType: instana.RelationTypeUser,
 						RelatedID:    nil,
 					},
 				},
@@ -902,10 +902,10 @@ func TestUpdateState_AllScopes(t *testing.T) {
 }
 
 func TestUpdateState_AllBoundaryScopes(t *testing.T) {
-	boundaryScopes := []restapi.BoundaryScope{
-		restapi.BoundaryScopeAll,
-		restapi.BoundaryScopeInbound,
-		restapi.BoundaryScopeDefault,
+	boundaryScopes := []instana.BoundaryScope{
+		instana.BoundaryScopeAll,
+		instana.BoundaryScopeInbound,
+		instana.BoundaryScopeDefault,
 	}
 
 	for _, boundaryScope := range boundaryScopes {
@@ -913,15 +913,15 @@ func TestUpdateState_AllBoundaryScopes(t *testing.T) {
 			ctx := context.Background()
 			resource := &applicationConfigResource{}
 
-			data := &restapi.ApplicationConfig{
+			data := &instana.ApplicationConfig{
 				ID:            "test-id",
 				Label:         "Test Application",
-				Scope:         restapi.ApplicationConfigScopeIncludeNoDownstream,
+				Scope:         instana.ApplicationConfigScopeIncludeNoDownstream,
 				BoundaryScope: boundaryScope,
-				AccessRules: []restapi.AccessRule{
+				AccessRules: []instana.AccessRule{
 					{
-						AccessType:   restapi.AccessTypeRead,
-						RelationType: restapi.RelationTypeUser,
+						AccessType:   instana.AccessTypeRead,
+						RelationType: instana.RelationTypeUser,
 						RelatedID:    nil,
 					},
 				},
