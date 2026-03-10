@@ -14,8 +14,9 @@ require (
 	github.com/rs/xid v1.5.0
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/mock v0.6.0
-	gopkg.in/resty.v1 v1.12.0
 )
+
+replace github.com/instana/instana-go-client => ../instana-go-client
 
 require (
 	github.com/agext/levenshtein v1.2.3 // indirect
@@ -59,7 +60,6 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251202230838-ff82c1b0f217 // indirect
 	google.golang.org/grpc v1.79.1 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
+	gopkg.in/resty.v1 v1.12.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/instana/instana-go-client => ../instana-go-client

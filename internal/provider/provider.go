@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"strings"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/instana-go-client/instana"
 	"github.com/instana/terraform-provider-instana/internal/datasources"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/resources/alertingchannel"
@@ -38,7 +40,6 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/resources/team"
 	"github.com/instana/terraform-provider-instana/internal/resources/websitealertconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/websitemonitoringconfig"
-	"github.com/instana/instana-go-client/instana"
 )
 
 // Ensure the implementation satisfies the expected interfaces
@@ -158,7 +159,9 @@ func (p *InstanaProvider) Configure(ctx context.Context, req provider.ConfigureR
 	}
 
 	// Create a new Instana client using the configuration values
-	instanaAPI := instana.NewInstanaAPI(apiToken, endpoint, skipTlsVerify)
+	// Pass the provider version as user agent for tracking
+	userAgent := fmt.Sprintf("Terraform/%s", p.version)
+	instanaAPI := instana.NewInstanaAPIWithUserAgent(apiToken, endpoint, skipTlsVerify, userAgent)
 
 	// Make the Instana client available during DataSource and Resource Configure methods
 	resp.DataSourceData = &instana.ProviderMeta{
