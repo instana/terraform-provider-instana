@@ -24,63 +24,62 @@ tasks:
           #!/usr/bin/env bash
           set -e
           
-          echo "Fetching variables from SPS Environment Properties..."
+          # 1. Fetch Variables from SPS Properties
           export GITHUB_TOKEN=$(get_env GHP_PAT)
           export GPG_FINGERPRINT=$(get_env GPG_FINGERPRINT)
           export GPG_PRIVATE_KEY=$(get_env GPG_PRIVATE_KEY)
           export GPG_PASSPHRASE=$(get_env GPG_PASSPHRASE)
           export TAG=$(get_env TAG)
           
-          # 1. Identity Setup
+          # 2. Tooling Install & Path Alignment
+          echo "Hardening GPG environment..."
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update && apt-get install -y gnupg2 gpg-agent curl golang-go
+          
+          # FIX: Map gpg-agent to the specific path the system is complaining about
+          AGENT_PATH=$(which gpg-agent || echo "/usr/bin/gpg-agent")
+          if [ ! -f /usr/bin/gpg-agent ]; then
+              ln -s "$AGENT_PATH" /usr/bin/gpg-agent || true
+          fi
+          
+          # 3. Identity Setup
           git config --global user.email "instanacd@instana.com"
           git config --global user.name "instanacd"
           
-          # 2. Fix GPG Environment
-          # Ensure gpg-agent is installed and available
-          apt-get update && apt-get install -y gnupg2 gpg-agent
-          
-          echo "Verifying GPG and Goreleaser installation..."
-          gpg --version
-          goreleaser --version
-          
-          # 3. Configure GPG Agent for Non-Interactive Signing
-          # This resolves the 'Configuration error' and 'No agent running' issues
+          # 4. GPG Configuration for Automation
+          export GPG_TTY=$(tty || echo "/dev/tty")
           mkdir -p ~/.gnupg
           chmod 700 ~/.gnupg
-          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
-          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
           
-          # Force start the agent
-          gpg-connect-agent /bye
+          # Force GPG to use loopback mode (essential for non-interactive passphrase entry)
+          echo "pinentry-mode loopback" > ~/.gnupg/gpg.conf
+          echo "allow-loopback-pinentry" > ~/.gnupg/gpg-agent.conf
           
-          # 4. Import GPG Key
-          echo "Importing GPG Key..."
+          # Reset and restart the daemon
+          gpgconf --kill gpg-agent || true
+          gpg-agent --daemon --allow-loopback-pinentry
+          
+          # 5. Import Private Key
+          echo "Importing GPG Private Key for $GPG_FINGERPRINT..."
           echo "$GPG_PRIVATE_KEY" | gpg --batch --import
           
-          # 5. Semantic Versioning Validation
-          echo "Validating semantic versioning format for release tag: $TAG"
-          semver_regex='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((0|[1-9][0-9]*|[0-9A-Za-z-][0-9A-Za-z-]*)(\.(0|[1-9][0-9]*|[0-9A-Za-z-][0-9A-Za-z-]*))*))?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$'
-          if [[ $TAG =~ $semver_regex ]]; then
-              echo "Valid SemVer. Proceeding with release process..."
-          else
-              echo "Invalid release version format: $TAG. Please adhere to semantic versioning syntax"
-              exit 1
+          # 6. Ensure GoReleaser is present
+          if ! command -v goreleaser &> /dev/null; then
+              echo "Installing GoReleaser..."
+              curl -sfL https://goreleaser.com/static/run | bash -s -- --version v2.0.0
+              mv ./goreleaser /usr/local/bin/goreleaser
           fi
           
-          # 6. Ensure Tag Does Not Already Exist
-          echo "Ensuring release version v$TAG does not already exist..."
-          export RELEASE_VERSION="v$TAG"
-          if git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_VERSION" >/dev/null 2>&1; then
-              echo "Release version $RELEASE_VERSION already exists. Aborting release..."
-              exit 1
+          # 7. Semantic Version Validation
+          if [[ ! $TAG =~ ^[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+              echo "Error: TAG '$TAG' does not follow SemVer (X.Y.Z)."; exit 1
           fi
           
-          # 7. Execution
-          # For Terraform Registry, we need a real release, not a snapshot.
-          # We'll run the full release command. Goreleaser uses GPG_FINGERPRINT and 
-          # GPG_PASSPHRASE from the env automatically.
-          echo "Starting GoReleaser..."
-          goreleaser release --clean
+          # 8. THE DRY RUN
+          # This builds binaries and signs them locally to verify the GPG setup works,
+          # but it will NOT create a GitHub release or touch the Terraform Registry.
+          echo "Executing GoReleaser Dry Run (Snapshot)..."
+          goreleaser release --snapshot --skip=publish --clean
 
       - name: unit-test
         when: false
