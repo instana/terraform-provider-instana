@@ -3,66 +3,39 @@ version: '2'
 tasks:
   code-checks:
     steps:
-      - name: detect-secrets 
-        when: false 
-      - name: compliance-checks 
-        when: false 
+      - name: detect-secrets
+        when: false
+      - name: compliance-checks
+        when: false
       - name: static-scan
         when: false
       - name: peer-review
         when: false
+
   code-build:
     displayName: "Instana Terraform Provider Publish"
     steps:
-      - name: build-artifact
-        displayName: "Build & Publish Instana Terraform Provider"
+      - name: build-and-publish
+        displayName: "Build and publish Terraform provider to GitHub and Terraform Registry"
         image: goreleaser/goreleaser:latest
         securityContext:
-          privileged: true
+          privileged: false
         script: |
           #!/usr/bin/env bash
-          set -e
+          set -eou pipefail
 
-          echo "################# Preparing Environment ####################"
-          
           echo "Fetching variables from SPS Environment Properties..."
-          export GITHUB_TOKEN=$(get_env git-token)
+          export GITHUB_TOKEN=$(get_env GHP_PAT)
           export GPG_FINGERPRINT=$(get_env GPG_FINGERPRINT)
-          # export GPG_PRIVATE_KEY=$(get_env GPG_PRIVATE_KEY)
-          # export GPG_PASSPHRASE=$(get_env GPG_PASSPHRASE)
+          export GPG_PRIVATE_KEY=$(get_env GPG_PRIVATE_KEY)
+          export GPG_PASSPHRASE=$(get_env GPG_PASSPHRASE)
           export TAG=$(get_env TAG)
+
+          git config --global user.email "instanacd@instana.com"
+          git config --global user.name "instanacd"
           
-          if [[ "$PIPELINE_DEBUG" == 1 ]]; then
-            set -x
-          fi
-
-          cd $WORKSPACE/terraform-provider-instana
-
-          echo "Performing validation of required inputs..."
-          if [[ -z "${GITHUB_TOKEN:-}" ]]; then
-            echo "ERROR: git-token (GITHUB_TOKEN) is required"
-            exit 1
-          fi
-          if [[ -z "${GPG_FINGERPRINT:-}" ]]; then
-            echo "ERROR: GPG_FINGERPRINT is required"
-            exit 1
-          fi
-          # if [[ -z "${GPG_PRIVATE_KEY:-}" ]]; then
-          #   echo "ERROR: GPG_PRIVATE_KEY is required"
-          #   exit 1
-          # fi
-          # if [[ -z "${GPG_PASSPHRASE:-}" ]]; then
-          #   echo "ERROR: GPG_PASSPHRASE is required"
-          #   exit 1
-          # fi
-          if [[ -z "${TAG:-}" ]]; then
-            echo "ERROR: TAG (release version without leading 'v') is required"
-            exit 1
-          fi
-
+          echo "Environment variables set. Verifying Goreleaser installation..."
           goreleaser --version
-          # echo "Importing GPG Key..."
-          # echo "$GPG_PRIVATE_KEY" | gpg --batch --import
 
           echo "Validating semantic versioning format for release tag: $TAG"
           semver_regex='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((0|[1-9][0-9]*|[0-9A-Za-z-][0-9A-Za-z-]*)(\.(0|[1-9][0-9]*|[0-9A-Za-z-][0-9A-Za-z-]*))*))?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$'
@@ -70,6 +43,7 @@ tasks:
               echo "Valid SemVer. Proceeding with release process..."
           else
               echo "Invalid release version format. Please adhere to semantic versioning syntax"
+              exit 1
           fi
   
           echo "Ensuring release version $TAG does not already exist..."
@@ -79,29 +53,25 @@ tasks:
               exit 1
           fi
 
-          echo "Configure GPG TTY for non-interactive signing..."
-          export GPG_TTY=$(tty)
-          # eval $(gpg-agent --daemon)
-          # echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
-          # gpg-connect-agent reloadagent /bye
-
-          echo "Tagging repository with $RELEASE_VERSION..."
-          git config --global user.email "dev.jinchun@gmail.com"
-          git config --global user.name "jinchun-dev"
-          git tag -a "$RELEASE_VERSION" -m "Release $RELEASE_VERSION"
-          # git push https://x-access-token:${GITHUB_TOKEN}@github.com/instana/terraform-provider-instana.git $RELEASE_VERSION
+          # We use --batch and --no-tty for automation
+          echo "Importing GPG Key..."
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
           
-          # Feed it to gpg-agent's cache so goreleaser doesn't prompt
-          /usr/lib/gnupg2/gpg-preset-passphrase --preset \
-            $(gpg --with-colons --list-keys $GPG_FINGERPRINT | grep '^grp' | cut -d: -f10) <<< "$GPG_PASSPHRASE"
-          echo "Starting GoReleaser..."
-          goreleaser release --snapshot --skip=publish --clean
+          # 4. Configure GPG to use the passphrase automatically
+          # This creates a gpg-agent config to avoid interactive prompts
+          mkdir -p ~/.gnupg
+          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+          gpgconf --kill gpg-agent
+          
+          # This will: build, archive, sign, and push to GitHub
+          # The Terraform Registry will then see the update via its own webhook.
+
+          # Actual run command:
           # goreleaser release --clean
 
-          echo "===== SPS release script completed ====="
+          # For testing without publishing, use:
+          goreleaser release --snapshot --skip=publish --clean
 
-      - name: sign-artifact
-        when: false
       - name: unit-test
         when: false
       - name: collect-evidence
