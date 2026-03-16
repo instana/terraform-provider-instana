@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -15,11 +16,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/shared/rest"
+	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
 	"github.com/instana/terraform-provider-instana/internal/util"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // ============================================================================
@@ -134,7 +135,7 @@ func (r *applicationConfigResource) MetaData() *resourcehandle.ResourceMetaData 
 }
 
 // GetRestResource returns the REST resource for application configs
-func (r *applicationConfigResource) GetRestResource(api instana.InstanaAPI) instana.RestResource[*instana.ApplicationConfig] {
+func (r *applicationConfigResource) GetRestResource(api instana.InstanaAPI) rest.RestResource[*instana.ApplicationConfig] {
 	return api.ApplicationConfigs()
 }
 

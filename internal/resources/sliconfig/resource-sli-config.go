@@ -14,8 +14,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/shared/rest"
+	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
 	"github.com/instana/terraform-provider-instana/internal/util"
 )
@@ -334,7 +335,7 @@ func (r *sliConfigResource) MetaData() *resourcehandle.ResourceMetaData {
 	return &r.metaData
 }
 
-func (r *sliConfigResource) GetRestResource(api instana.InstanaAPI) instana.RestResource[*instana.SliConfig] {
+func (r *sliConfigResource) GetRestResource(api instana.InstanaAPI) rest.RestResource[*instana.SliConfig] {
 	return api.SliConfigs()
 }
 

@@ -13,8 +13,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/shared/rest"
+	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/util"
 )
 
@@ -128,7 +129,7 @@ func (r *groupResource) MetaData() *resourcehandle.ResourceMetaData {
 	return &r.metaData
 }
 
-func (r *groupResource) GetRestResource(api instana.InstanaAPI) instana.RestResource[*instana.Group] {
+func (r *groupResource) GetRestResource(api instana.InstanaAPI) rest.RestResource[*instana.Group] {
 	return api.Groups()
 }
 

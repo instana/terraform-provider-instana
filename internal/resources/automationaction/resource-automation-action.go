@@ -16,8 +16,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/shared/rest"
+	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 )
 
@@ -385,7 +386,7 @@ func (r *automationActionResource) MetaData() *resourcehandle.ResourceMetaData {
 }
 
 // GetRestResource returns the REST resource for automation actions
-func (r *automationActionResource) GetRestResource(api instana.InstanaAPI) instana.RestResource[*instana.AutomationAction] {
+func (r *automationActionResource) GetRestResource(api instana.InstanaAPI) rest.RestResource[*instana.AutomationAction] {
 	return api.AutomationActions()
 }
 

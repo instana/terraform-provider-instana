@@ -6,15 +6,16 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/instana-go-client/instana"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/instana/instana-go-client/shared/rest"
+	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 )
 
 // NewSloCorrectionConfigResourceHandle creates the resource handle for SLO Correction Config
@@ -195,7 +196,7 @@ func (r *sloCorrectionConfigResource) MetaData() *resourcehandle.ResourceMetaDat
 	return &r.metaData
 }
 
-func (r *sloCorrectionConfigResource) GetRestResource(api instana.InstanaAPI) instana.RestResource[*instana.SloCorrectionConfig] {
+func (r *sloCorrectionConfigResource) GetRestResource(api instana.InstanaAPI) rest.RestResource[*instana.SloCorrectionConfig] {
 	return api.SloCorrectionConfig()
 }
 

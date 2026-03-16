@@ -6,8 +6,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/shared/rest"
+	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/instana/terraform-provider-instana/testutils"
 	"github.com/stretchr/testify/assert"
@@ -74,7 +75,7 @@ type mockSyntheticAlertAPI struct {
 	testutils.MockInstanaAPI
 }
 
-func (m *mockSyntheticAlertAPI) SyntheticAlertConfigs() instana.RestResource[*instana.SyntheticAlertConfig] {
+func (m *mockSyntheticAlertAPI) SyntheticAlertConfigs() rest.RestResource[*instana.SyntheticAlertConfig] {
 	return &mockSyntheticAlertConfigRestResource{}
 }
 

@@ -13,8 +13,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/shared/rest"
+	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
 	"github.com/instana/terraform-provider-instana/internal/util"
@@ -296,7 +297,7 @@ func (r *syntheticAlertConfigResource) MetaData() *resourcehandle.ResourceMetaDa
 	return &r.metaData
 }
 
-func (r *syntheticAlertConfigResource) GetRestResource(api instana.InstanaAPI) instana.RestResource[*instana.SyntheticAlertConfig] {
+func (r *syntheticAlertConfigResource) GetRestResource(api instana.InstanaAPI) rest.RestResource[*instana.SyntheticAlertConfig] {
 	return api.SyntheticAlertConfigs()
 }
 

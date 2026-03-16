@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	instana "github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/shared/rest"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
 )
@@ -136,7 +137,7 @@ func (r *maintenanceWindowConfigResource) MetaData() *resourcehandle.ResourceMet
 }
 
 // GetRestResource returns the REST resource for maintenance window configurations
-func (r *maintenanceWindowConfigResource) GetRestResource(api instana.InstanaAPI) instana.RestResource[*instana.MaintenanceWindowConfig] {
+func (r *maintenanceWindowConfigResource) GetRestResource(api instana.InstanaAPI) rest.RestResource[*instana.MaintenanceWindowConfig] {
 	return api.MaintenanceWindowConfigs()
 }
 

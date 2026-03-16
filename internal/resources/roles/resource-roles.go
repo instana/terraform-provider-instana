@@ -13,8 +13,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/shared/rest"
+	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 )
 
 // NewRoleResourceHandle creates the resource handle for RBAC Roles
@@ -83,7 +84,7 @@ func (r *roleResource) MetaData() *resourcehandle.ResourceMetaData {
 	return &r.metaData
 }
 
-func (r *roleResource) GetRestResource(api instana.InstanaAPI) instana.RestResource[*instana.Role] {
+func (r *roleResource) GetRestResource(api instana.InstanaAPI) rest.RestResource[*instana.Role] {
 	return api.Roles()
 }
 

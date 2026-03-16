@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	instana "github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/shared/rest"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/instana/terraform-provider-instana/testutils"
@@ -26,7 +27,7 @@ type mockMobileAlertAPI struct {
 	testutils.MockInstanaAPI
 }
 
-func (m *mockMobileAlertAPI) MobileAlertConfig() instana.RestResource[*instana.MobileAlertConfig] {
+func (m *mockMobileAlertAPI) MobileAlertConfig() rest.RestResource[*instana.MobileAlertConfig] {
 	return nil
 }
 

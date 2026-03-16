@@ -6,8 +6,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/shared/rest"
+	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/instana/terraform-provider-instana/internal/util"
 	"github.com/instana/terraform-provider-instana/testutils"
@@ -75,7 +76,7 @@ type mockWebsiteAlertAPI struct {
 	testutils.MockInstanaAPI
 }
 
-func (m *mockWebsiteAlertAPI) WebsiteAlertConfig() instana.RestResource[*instana.WebsiteAlertConfig] {
+func (m *mockWebsiteAlertAPI) WebsiteAlertConfig() rest.RestResource[*instana.WebsiteAlertConfig] {
 	return &mockWebsiteAlertConfigRestResource{}
 }
 

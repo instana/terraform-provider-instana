@@ -20,6 +20,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	instana "github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/shared/rest"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
@@ -254,7 +255,7 @@ func (r *mobileAlertConfigResource) MetaData() *resourcehandle.ResourceMetaData 
 }
 
 // GetRestResource returns the REST resource for mobile alert configurations from the Instana API
-func (r *mobileAlertConfigResource) GetRestResource(api instana.InstanaAPI) instana.RestResource[*instana.MobileAlertConfig] {
+func (r *mobileAlertConfigResource) GetRestResource(api instana.InstanaAPI) rest.RestResource[*instana.MobileAlertConfig] {
 	return api.MobileAlertConfig()
 }
 

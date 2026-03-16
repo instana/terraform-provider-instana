@@ -6,8 +6,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/shared/rest"
+	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -70,7 +71,7 @@ type mockSloCorrectionAPI struct {
 	testutils.MockInstanaAPI
 }
 
-func (m *mockSloCorrectionAPI) SloCorrectionConfig() instana.RestResource[*instana.SloCorrectionConfig] {
+func (m *mockSloCorrectionAPI) SloCorrectionConfig() rest.RestResource[*instana.SloCorrectionConfig] {
 	return &mockSloCorrectionConfigRestResource{}
 }
 
