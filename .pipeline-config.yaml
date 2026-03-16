@@ -23,7 +23,7 @@ tasks:
         script: |
           #!/usr/bin/env bash
           set -e
-      
+          
           echo "Fetching variables from SPS Environment Properties..."
           export GITHUB_TOKEN=$(get_env GHP_PAT)
           export GPG_FINGERPRINT=$(get_env GPG_FINGERPRINT)
@@ -31,61 +31,50 @@ tasks:
           export GPG_PASSPHRASE=$(get_env GPG_PASSPHRASE)
           export TAG=$(get_env TAG)
           
-          # 1. Identity Setup
+          echo "Detecting package manager and installing GPG..."
+          if command -v apk &> /dev/null; then
+              apk add --no-cache gnupg gpg-agent curl go
+          elif command -v microdnf &> /dev/null; then
+              microdnf install -y gnupg2 gpgme curl golang
+          elif command -v apt-get &> /dev/null; then
+              apt-get update && apt-get install -y gnupg2 gpg-agent curl golang-go
+          fi
+          
           git config --global user.email "instanacd@instana.com"
           git config --global user.name "instanacd"
           
-          # 2. Dynamic Package Installer (Fixes 'apt-get not found')
-          echo "Detecting package manager and installing GPG..."
-          if command -v microdnf &> /dev/null; then
-              microdnf install -y gnupg2 gpgme curl golang
-          elif command -v dnf &> /dev/null; then
-              dnf install -y gnupg2 gpgme curl golang
-          elif command -v yum &> /dev/null; then
-              yum install -y gnupg2 curl golang
-          elif command -v apk &> /dev/null; then
-              apk add --no-cache gnupg gpg-agent curl go
-          elif command -v apt-get &> /dev/null; then
-              apt-get update && apt-get install -y gnupg2 gpg-agent curl golang-go
-          else
-              echo "Warning: No known package manager found. Proceeding with existing binaries..."
-          fi
-          
-          # 3. Path Fix for GPG Agent (Fixes 'gpg-agent not found')
           AGENT_PATH=$(which gpg-agent || which gpg-agent2 || echo "/usr/bin/gpg-agent")
           if [ ! -f /usr/bin/gpg-agent ] && [ -f "$AGENT_PATH" ]; then
               ln -s "$AGENT_PATH" /usr/bin/gpg-agent || true
           fi
           
-          # 4. GPG Configuration for Automation
           export GPG_TTY=$(tty || echo "/dev/tty")
           mkdir -p ~/.gnupg
           chmod 700 ~/.gnupg
           echo "pinentry-mode loopback" > ~/.gnupg/gpg.conf
           echo "allow-loopback-pinentry" > ~/.gnupg/gpg-agent.conf
+          echo "disable-scdaemon" >> ~/.gnupg/gpg-agent.conf
           
-          # Start the agent daemon
           gpgconf --kill gpg-agent || true
           gpg-agent --daemon --allow-loopback-pinentry || true
           
-          # 5. Import Private Key
           echo "Importing GPG Private Key..."
           echo "$GPG_PRIVATE_KEY" | gpg --batch --import
           
-          # 6. Ensure GoReleaser is present
           if ! command -v goreleaser &> /dev/null; then
               echo "Installing GoReleaser..."
               curl -sfL [https://goreleaser.com/static/run](https://goreleaser.com/static/run) | bash -s -- --version v2.0.0
               mv ./goreleaser /usr/local/bin/goreleaser || mv ./goreleaser /usr/bin/goreleaser
           fi
           
-          # 7. Semantic Version Validation
-          if [[ ! $TAG =~ ^[0-9]+\.[0-9]+\.[0-9]+ ]]; then
-              echo "Error: TAG '$TAG' is not valid SemVer."; exit 1
+          echo "Validating TAG: $TAG"
+          if echo "$TAG" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+'; then
+              echo "Tag is valid."
+          else
+              echo "Error: TAG '$TAG' is not valid SemVer (X.Y.Z)."; exit 1
           fi
           
-          # 8. THE DRY RUN
-          echo "Executing GoReleaser Dry Run (Snapshot)..."
+          echo "Executing GoReleaser Dry Run..."
           goreleaser release --snapshot --skip=publish --clean
 
       - name: unit-test
