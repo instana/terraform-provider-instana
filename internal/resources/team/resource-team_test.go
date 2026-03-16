@@ -6,8 +6,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/shared/tagfilter"
+	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -675,7 +676,7 @@ func TestUpdateState(t *testing.T) {
 			Scope: &instana.TeamScope{
 				RestrictedApplicationFilter: &instana.RestrictedApplicationFilter{
 					TagFilterExpression: instana.NewStringTagFilter(
-						instana.TagFilterEntityNotApplicable,
+						tagfilter.TagFilterEntityNotApplicable,
 						"entity.type",
 						instana.EqualsOperator,
 						"service",

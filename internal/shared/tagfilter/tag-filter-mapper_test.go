@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/shared/tagfilter"
 	. "github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
 	"github.com/stretchr/testify/require"
 )
@@ -34,7 +35,7 @@ func TestShouldReturnErrorWhenMappingAnInvalidTagFilterExpressionToNormalizedStr
 
 func TestShouldReturnStringWhenMappingAValidTagFilterExpressionToNormalizedString(t *testing.T) {
 	value := int64(1234)
-	input := instana.NewNumberTagFilter(instana.TagFilterEntityDestination, tagFilterName, instana.EqualsOperator, value)
+	input := instana.NewNumberTagFilter(tagfilter.TagFilterEntityDestination, tagFilterName, instana.EqualsOperator, value)
 
 	result, err := MapTagFilterToNormalizedString(input)
 

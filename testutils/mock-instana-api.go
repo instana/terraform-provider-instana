@@ -1,7 +1,7 @@
 package testutils
 
 import (
-	"github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/api"
 	"github.com/instana/instana-go-client/shared/rest"
 )
 
@@ -11,137 +11,137 @@ import (
 type MockInstanaAPI struct{}
 
 // CustomEventSpecifications mock implementation
-func (m *MockInstanaAPI) CustomEventSpecifications() rest.RestResource[*instana.CustomEventSpecification] {
+func (m *MockInstanaAPI) CustomEventSpecifications() rest.RestResource[*api.CustomEventSpecification] {
 	return nil
 }
 
 // BuiltinEventSpecifications mock implementation
-func (m *MockInstanaAPI) BuiltinEventSpecifications() instana.ReadOnlyRestResource[*instana.BuiltinEventSpecification] {
+func (m *MockInstanaAPI) BuiltinEventSpecifications() rest.ReadOnlyRestResource[*api.BuiltinEventSpecification] {
 	return nil
 }
 
 // APITokens mock implementation
-func (m *MockInstanaAPI) APITokens() rest.RestResource[*instana.APIToken] {
+func (m *MockInstanaAPI) APITokens() rest.RestResource[*api.APIToken] {
 	return nil
 }
 
 // ApplicationConfigs mock implementation
-func (m *MockInstanaAPI) ApplicationConfigs() rest.RestResource[*instana.ApplicationConfig] {
+func (m *MockInstanaAPI) ApplicationConfigs() rest.RestResource[*api.ApplicationConfig] {
 	return nil
 }
 
 // ApplicationAlertConfigs mock implementation
-func (m *MockInstanaAPI) ApplicationAlertConfigs() rest.RestResource[*instana.ApplicationAlertConfig] {
+func (m *MockInstanaAPI) ApplicationAlertConfigs() rest.RestResource[*api.ApplicationAlertConfig] {
 	return nil
 }
 
 // GlobalApplicationAlertConfigs mock implementation
-func (m *MockInstanaAPI) GlobalApplicationAlertConfigs() rest.RestResource[*instana.ApplicationAlertConfig] {
+func (m *MockInstanaAPI) GlobalApplicationAlertConfigs() rest.RestResource[*api.ApplicationAlertConfig] {
 	return nil
 }
 
 // AlertingChannels mock implementation
-func (m *MockInstanaAPI) AlertingChannels() rest.RestResource[*instana.AlertingChannel] {
+func (m *MockInstanaAPI) AlertingChannels() rest.RestResource[*api.AlertingChannel] {
 	return nil
 }
 
 // AlertingConfigurations mock implementation
-func (m *MockInstanaAPI) AlertingConfigurations() rest.RestResource[*instana.AlertingConfiguration] {
+func (m *MockInstanaAPI) AlertingConfigurations() rest.RestResource[*api.AlertingConfiguration] {
 	return nil
 }
 
 // SliConfigs mock implementation
-func (m *MockInstanaAPI) SliConfigs() rest.RestResource[*instana.SliConfig] {
+func (m *MockInstanaAPI) SliConfigs() rest.RestResource[*api.SliConfig] {
 	return nil
 }
 
 // SloConfigs mock implementation
-func (m *MockInstanaAPI) SloConfigs() rest.RestResource[*instana.SloConfig] {
+func (m *MockInstanaAPI) SloConfigs() rest.RestResource[*api.SloConfig] {
 	return nil
 }
 
 // SloAlertConfig mock implementation
-func (m *MockInstanaAPI) SloAlertConfig() rest.RestResource[*instana.SloAlertConfig] {
+func (m *MockInstanaAPI) SloAlertConfig() rest.RestResource[*api.SloAlertConfig] {
 	return nil
 }
 
 // SloCorrectionConfig mock implementation
-func (m *MockInstanaAPI) SloCorrectionConfig() rest.RestResource[*instana.SloCorrectionConfig] {
+func (m *MockInstanaAPI) SloCorrectionConfig() rest.RestResource[*api.SloCorrectionConfig] {
 	return nil
 }
 
 // WebsiteMonitoringConfig mock implementation
-func (m *MockInstanaAPI) WebsiteMonitoringConfig() rest.RestResource[*instana.WebsiteMonitoringConfig] {
+func (m *MockInstanaAPI) WebsiteMonitoringConfig() rest.RestResource[*api.WebsiteMonitoringConfig] {
 	return nil
 }
 
 // WebsiteAlertConfig mock implementation
-func (m *MockInstanaAPI) WebsiteAlertConfig() rest.RestResource[*instana.WebsiteAlertConfig] {
+func (m *MockInstanaAPI) WebsiteAlertConfig() rest.RestResource[*api.WebsiteAlertConfig] {
 	return nil
 }
 
 // InfraAlertConfig mock implementation
-func (m *MockInstanaAPI) InfraAlertConfig() rest.RestResource[*instana.InfraAlertConfig] {
+func (m *MockInstanaAPI) InfraAlertConfig() rest.RestResource[*api.InfraAlertConfig] {
 	return nil
 }
 
 // Teams mock implementation
-func (m *MockInstanaAPI) Teams() rest.RestResource[*instana.Team] {
+func (m *MockInstanaAPI) Teams() rest.RestResource[*api.Team] {
 	return nil
 }
 
 // Groups mock implementation
-func (m *MockInstanaAPI) Groups() rest.RestResource[*instana.Group] {
+func (m *MockInstanaAPI) Groups() rest.RestResource[*api.Group] {
 	return nil
 }
 
 // Roles mock implementation
-func (m *MockInstanaAPI) Roles() rest.RestResource[*instana.Role] {
+func (m *MockInstanaAPI) Roles() rest.RestResource[*api.Role] {
 	return nil
 }
 
 // CustomDashboards mock implementation
-func (m *MockInstanaAPI) CustomDashboards() rest.RestResource[*instana.CustomDashboard] {
+func (m *MockInstanaAPI) CustomDashboards() rest.RestResource[*api.CustomDashboard] {
 	return nil
 }
 
 // SyntheticTest mock implementation
-func (m *MockInstanaAPI) SyntheticTest() rest.RestResource[*instana.SyntheticTest] {
+func (m *MockInstanaAPI) SyntheticTest() rest.RestResource[*api.SyntheticTest] {
 	return nil
 }
 
 // SyntheticLocation mock implementation
-func (m *MockInstanaAPI) SyntheticLocation() instana.ReadOnlyRestResource[*instana.SyntheticLocation] {
+func (m *MockInstanaAPI) SyntheticLocation() rest.ReadOnlyRestResource[*api.SyntheticLocation] {
 	return nil
 }
 
 // SyntheticAlertConfigs mock implementation
-func (m *MockInstanaAPI) SyntheticAlertConfigs() rest.RestResource[*instana.SyntheticAlertConfig] {
+func (m *MockInstanaAPI) SyntheticAlertConfigs() rest.RestResource[*api.SyntheticAlertConfig] {
 	return nil
 }
 
 // AutomationActions mock implementation
-func (m *MockInstanaAPI) AutomationActions() rest.RestResource[*instana.AutomationAction] {
+func (m *MockInstanaAPI) AutomationActions() rest.RestResource[*api.AutomationAction] {
 	return nil
 }
 
 // AutomationPolicies mock implementation
-func (m *MockInstanaAPI) AutomationPolicies() rest.RestResource[*instana.AutomationPolicy] {
+func (m *MockInstanaAPI) AutomationPolicies() rest.RestResource[*api.AutomationPolicy] {
 	return nil
 }
 
 // HostAgents mock implementation
-func (m *MockInstanaAPI) HostAgents() instana.ReadOnlyRestResource[*instana.HostAgent] {
+func (m *MockInstanaAPI) HostAgents() rest.ReadOnlyRestResource[*api.HostAgent] {
 	return nil
 }
 
 // Users mock implementation
-func (m *MockInstanaAPI) Users() instana.ReadOnlyRestResource[*instana.User] {
+func (m *MockInstanaAPI) Users() rest.ReadOnlyRestResource[*api.User] {
 	return nil
 }
 
 // LogAlertConfig mock implementation
-func (m *MockInstanaAPI) LogAlertConfig() rest.RestResource[*instana.LogAlertConfig] {
+func (m *MockInstanaAPI) LogAlertConfig() rest.RestResource[*api.LogAlertConfig] {
 	return nil
 }
 
@@ -151,11 +151,11 @@ func (m *MockInstanaAPI) MobileAppConfig() restapi.RestResource[*restapi.MobileA
 }
 
 // MobileAlertConfig mock implementation
-func (m *MockInstanaAPI) MobileAlertConfig() rest.RestResource[*instana.MobileAlertConfig] {
+func (m *MockInstanaAPI) MobileAlertConfig() rest.RestResource[*api.MobileAlertConfig] {
 	return nil
 }
 
 // MaintenanceWindowConfigs mock implementation
-func (m *MockInstanaAPI) MaintenanceWindowConfigs() rest.RestResource[*instana.MaintenanceWindowConfig] {
+func (m *MockInstanaAPI) MaintenanceWindowConfigs() rest.RestResource[*api.MaintenanceWindow] {
 	return nil
 }

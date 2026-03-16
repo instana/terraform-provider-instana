@@ -7,7 +7,7 @@ import (
 
 	"github.com/alecthomas/participle"
 	"github.com/alecthomas/participle/lexer"
-	"github.com/instana/instana-go-client/instana"
+	tag "github.com/instana/instana-go-client/shared/tagfilter"
 )
 
 // ExpressionRenderer interface definition to render an expression in its normalized form
@@ -20,16 +20,16 @@ type EntityOrigin interface {
 	//Key returns the key of the entity origin
 	Key() string
 	//TagFilterEntity returns the Instana API Ta Filter Entity
-	TagFilterEntity() instana.TagFilterEntity
+	TagFilterEntity() tag.TagFilterEntity
 }
 
-func newEntityOrigin(key string, tagFilterEntity instana.TagFilterEntity) EntityOrigin {
+func newEntityOrigin(key string, tagFilterEntity tag.TagFilterEntity) EntityOrigin {
 	return &baseEntityOrigin{key: key, tagFilterEntity: tagFilterEntity}
 }
 
 type baseEntityOrigin struct {
 	key             string
-	tagFilterEntity instana.TagFilterEntity
+	tagFilterEntity tag.TagFilterEntity
 }
 
 // Key interface implementation of EntityOrigin
@@ -38,24 +38,24 @@ func (o *baseEntityOrigin) Key() string {
 }
 
 // TagFilterEntity interface implementation of EntityOrigin
-func (o *baseEntityOrigin) TagFilterEntity() instana.TagFilterEntity {
+func (o *baseEntityOrigin) TagFilterEntity() tag.TagFilterEntity {
 	return o.tagFilterEntity
 }
 
 var (
 	//EntityOriginSource constant value for the EntityOrigin source
-	EntityOriginSource = newEntityOrigin("src", instana.TagFilterEntitySource)
+	EntityOriginSource = newEntityOrigin("src", tag.TagFilterEntitySource)
 	//EntityOriginDestination constant value for the EntityOrigin destination
-	EntityOriginDestination = newEntityOrigin("dest", instana.TagFilterEntityDestination)
+	EntityOriginDestination = newEntityOrigin("dest", tag.TagFilterEntityDestination)
 	//EntityOriginNotApplicable constant value when no EntityOrigin is applicable
-	EntityOriginNotApplicable = newEntityOrigin("na", instana.TagFilterEntityNotApplicable)
+	EntityOriginNotApplicable = newEntityOrigin("na", tag.TagFilterEntityNotApplicable)
 )
 
 // EntityOrigins custom type for a slice of entity origins
 type EntityOrigins []EntityOrigin
 
 // ForInstanaAPIEntity returns the EntityOrigin for its corresponding TagFilterEntity from the Instana API
-func (origins EntityOrigins) ForInstanaAPIEntity(input instana.TagFilterEntity) EntityOrigin {
+func (origins EntityOrigins) ForInstanaAPIEntity(input tag.TagFilterEntity) EntityOrigin {
 	for _, o := range origins {
 		if o.TagFilterEntity() == input {
 			return o
@@ -285,7 +285,7 @@ func (f *parserImpl) Parse(expression string) (*FilterExpression, error) {
 }
 
 // ParseExpression parses the given expression string and returns the tag filter model
-func ParseExpression(expression string) (*instana.TagFilter, error) {
+func ParseExpression(expression string) (*tag.TagFilter, error) {
 	parser := NewParser()
 	mapper := NewMapper()
 
@@ -298,7 +298,7 @@ func ParseExpression(expression string) (*instana.TagFilter, error) {
 }
 
 // RenderExpression renders the given tag filter model as a string
-func RenderExpression(filter *instana.TagFilter) string {
+func RenderExpression(filter *tag.TagFilter) string {
 	if filter == nil {
 		return ""
 	}

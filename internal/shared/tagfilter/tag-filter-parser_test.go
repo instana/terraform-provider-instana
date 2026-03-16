@@ -7,6 +7,7 @@ import (
 	"github.com/instana/terraform-provider-instana/utils"
 
 	"github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/shared/tagfilter"
 	"github.com/stretchr/testify/require"
 
 	. "github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
@@ -1101,7 +1102,7 @@ func TestShouldHandleRoundTripConversionWithSingleQuotesInValue(t *testing.T) {
 
 	// Original API model with single quotes in the value
 	originalAPIModel := instana.NewStringTagFilter(
-		instana.TagFilterEntityNotApplicable,
+		tagfilter.TagFilterEntityNotApplicable,
 		"log.exception.type",
 		instana.EqualsOperator,
 		"<class 'ConnectionResetError'>",
@@ -1134,5 +1135,5 @@ func TestShouldHandleRoundTripConversionWithSingleQuotesInValue(t *testing.T) {
 	require.Equal(t, "log.exception.type", *convertedAPIModel.Name)
 	require.Equal(t, instana.EqualsOperator, *convertedAPIModel.Operator)
 	require.Equal(t, "<class 'ConnectionResetError'>", *convertedAPIModel.StringValue)
-	require.Equal(t, instana.TagFilterEntityNotApplicable, *convertedAPIModel.Entity)
+	require.Equal(t, tagfilter.TagFilterEntityNotApplicable, *convertedAPIModel.Entity)
 }

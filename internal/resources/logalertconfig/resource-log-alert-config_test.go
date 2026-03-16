@@ -8,8 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/shared/tagfilter"
+	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -151,8 +152,8 @@ func TestUpdateState_WithTagFilter(t *testing.T) {
 
 	// Create a tag filter using AND logic with two expressions
 	tagFilter := instana.NewLogicalAndTagFilter([]*instana.TagFilter{
-		instana.NewStringTagFilter(instana.TagFilterEntityNotApplicable, "entity.type", instana.EqualsOperator, "log"),
-		instana.NewStringTagFilter(instana.TagFilterEntityNotApplicable, "service.name", instana.EqualsOperator, "test-service"),
+		instana.NewStringTagFilter(tagfilter.TagFilterEntityNotApplicable, "entity.type", instana.EqualsOperator, "log"),
+		instana.NewStringTagFilter(tagfilter.TagFilterEntityNotApplicable, "service.name", instana.EqualsOperator, "test-service"),
 	})
 
 	data := &instana.LogAlertConfig{

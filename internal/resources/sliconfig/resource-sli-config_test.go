@@ -7,8 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/shared/tagfilter"
+	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -182,11 +183,11 @@ func TestUpdateState_ApplicationEventBased_Basic(t *testing.T) {
 	boundaryScope := "ALL"
 
 	goodFilter := instana.NewLogicalAndTagFilter([]*instana.TagFilter{
-		instana.NewStringTagFilter(instana.TagFilterEntityNotApplicable, "call.http.status", instana.EqualsOperator, "200"),
+		instana.NewStringTagFilter(tagfilter.TagFilterEntityNotApplicable, "call.http.status", instana.EqualsOperator, "200"),
 	})
 
 	badFilter := instana.NewLogicalAndTagFilter([]*instana.TagFilter{
-		instana.NewStringTagFilter(instana.TagFilterEntityNotApplicable, "call.http.status", instana.EqualsOperator, "500"),
+		instana.NewStringTagFilter(tagfilter.TagFilterEntityNotApplicable, "call.http.status", instana.EqualsOperator, "500"),
 	})
 
 	data := &instana.SliConfig{
@@ -231,11 +232,11 @@ func TestUpdateState_ApplicationEventBased_WithIncludeFlags(t *testing.T) {
 	includeSynthetic := false
 
 	goodFilter := instana.NewLogicalAndTagFilter([]*instana.TagFilter{
-		instana.NewStringTagFilter(instana.TagFilterEntityNotApplicable, "call.http.status", instana.EqualsOperator, "200"),
+		instana.NewStringTagFilter(tagfilter.TagFilterEntityNotApplicable, "call.http.status", instana.EqualsOperator, "200"),
 	})
 
 	badFilter := instana.NewLogicalAndTagFilter([]*instana.TagFilter{
-		instana.NewStringTagFilter(instana.TagFilterEntityNotApplicable, "call.http.status", instana.EqualsOperator, "500"),
+		instana.NewStringTagFilter(tagfilter.TagFilterEntityNotApplicable, "call.http.status", instana.EqualsOperator, "500"),
 	})
 
 	data := &instana.SliConfig{
@@ -277,11 +278,11 @@ func TestUpdateState_ApplicationEventBased_WithNullIncludeFlags(t *testing.T) {
 	boundaryScope := "ALL"
 
 	goodFilter := instana.NewLogicalAndTagFilter([]*instana.TagFilter{
-		instana.NewStringTagFilter(instana.TagFilterEntityNotApplicable, "call.http.status", instana.EqualsOperator, "200"),
+		instana.NewStringTagFilter(tagfilter.TagFilterEntityNotApplicable, "call.http.status", instana.EqualsOperator, "200"),
 	})
 
 	badFilter := instana.NewLogicalAndTagFilter([]*instana.TagFilter{
-		instana.NewStringTagFilter(instana.TagFilterEntityNotApplicable, "call.http.status", instana.EqualsOperator, "500"),
+		instana.NewStringTagFilter(tagfilter.TagFilterEntityNotApplicable, "call.http.status", instana.EqualsOperator, "500"),
 	})
 
 	data := &instana.SliConfig{
@@ -326,11 +327,11 @@ func TestUpdateState_WebsiteEventBased_Basic(t *testing.T) {
 	beaconType := "pageLoad"
 
 	goodFilter := instana.NewLogicalAndTagFilter([]*instana.TagFilter{
-		instana.NewStringTagFilter(instana.TagFilterEntityNotApplicable, "beacon.page.name", instana.EqualsOperator, "home"),
+		instana.NewStringTagFilter(tagfilter.TagFilterEntityNotApplicable, "beacon.page.name", instana.EqualsOperator, "home"),
 	})
 
 	badFilter := instana.NewLogicalAndTagFilter([]*instana.TagFilter{
-		instana.NewStringTagFilter(instana.TagFilterEntityNotApplicable, "beacon.error", instana.EqualsOperator, "true"),
+		instana.NewStringTagFilter(tagfilter.TagFilterEntityNotApplicable, "beacon.error", instana.EqualsOperator, "true"),
 	})
 
 	data := &instana.SliConfig{
@@ -375,7 +376,7 @@ func TestUpdateState_WebsiteTimeBased_Basic(t *testing.T) {
 	beaconType := "pageLoad"
 
 	filterExpr := instana.NewLogicalAndTagFilter([]*instana.TagFilter{
-		instana.NewStringTagFilter(instana.TagFilterEntityNotApplicable, "beacon.page.name", instana.EqualsOperator, "home"),
+		instana.NewStringTagFilter(tagfilter.TagFilterEntityNotApplicable, "beacon.page.name", instana.EqualsOperator, "home"),
 	})
 
 	data := &instana.SliConfig{
@@ -998,7 +999,7 @@ func TestUpdateState_ApplicationEventBased_WithNullGoodEventFilter(t *testing.T)
 	boundaryScope := "ALL"
 
 	badFilter := instana.NewLogicalAndTagFilter([]*instana.TagFilter{
-		instana.NewStringTagFilter(instana.TagFilterEntityNotApplicable, "call.http.status", instana.EqualsOperator, "500"),
+		instana.NewStringTagFilter(tagfilter.TagFilterEntityNotApplicable, "call.http.status", instana.EqualsOperator, "500"),
 	})
 
 	data := &instana.SliConfig{
@@ -1038,7 +1039,7 @@ func TestUpdateState_ApplicationEventBased_WithNullBadEventFilter(t *testing.T) 
 	boundaryScope := "ALL"
 
 	goodFilter := instana.NewLogicalAndTagFilter([]*instana.TagFilter{
-		instana.NewStringTagFilter(instana.TagFilterEntityNotApplicable, "call.http.status", instana.EqualsOperator, "200"),
+		instana.NewStringTagFilter(tagfilter.TagFilterEntityNotApplicable, "call.http.status", instana.EqualsOperator, "200"),
 	})
 
 	data := &instana.SliConfig{
@@ -1078,7 +1079,7 @@ func TestUpdateState_WebsiteEventBased_WithNullGoodEventFilter(t *testing.T) {
 	beaconType := "pageLoad"
 
 	badFilter := instana.NewLogicalAndTagFilter([]*instana.TagFilter{
-		instana.NewStringTagFilter(instana.TagFilterEntityNotApplicable, "beacon.error", instana.EqualsOperator, "true"),
+		instana.NewStringTagFilter(tagfilter.TagFilterEntityNotApplicable, "beacon.error", instana.EqualsOperator, "true"),
 	})
 
 	data := &instana.SliConfig{
@@ -1118,7 +1119,7 @@ func TestUpdateState_WebsiteEventBased_WithNullBadEventFilter(t *testing.T) {
 	beaconType := "pageLoad"
 
 	goodFilter := instana.NewLogicalAndTagFilter([]*instana.TagFilter{
-		instana.NewStringTagFilter(instana.TagFilterEntityNotApplicable, "beacon.page.name", instana.EqualsOperator, "home"),
+		instana.NewStringTagFilter(tagfilter.TagFilterEntityNotApplicable, "beacon.page.name", instana.EqualsOperator, "home"),
 	})
 
 	data := &instana.SliConfig{

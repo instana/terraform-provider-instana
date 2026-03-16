@@ -7,7 +7,7 @@ package mocks
 import (
 	reflect "reflect"
 
-	instana "github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/api"
 	"github.com/instana/instana-go-client/shared/rest"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -36,10 +36,10 @@ func (m *MockInstanaAPI) EXPECT() *MockInstanaAPIMockRecorder {
 }
 
 // APITokens mocks base method.
-func (m *MockInstanaAPI) APITokens() rest.RestResource[*instana.APIToken] {
+func (m *MockInstanaAPI) APITokens() rest.RestResource[*api.APIToken] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "APITokens")
-	ret0, _ := ret[0].(rest.RestResource[*instana.APIToken])
+	ret0, _ := ret[0].(rest.RestResource[*api.APIToken])
 	return ret0
 }
 
@@ -50,10 +50,10 @@ func (mr *MockInstanaAPIMockRecorder) APITokens() *gomock.Call {
 }
 
 // AlertingChannels mocks base method.
-func (m *MockInstanaAPI) AlertingChannels() rest.RestResource[*instana.AlertingChannel] {
+func (m *MockInstanaAPI) AlertingChannels() rest.RestResource[*api.AlertingChannel] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AlertingChannels")
-	ret0, _ := ret[0].(rest.RestResource[*instana.AlertingChannel])
+	ret0, _ := ret[0].(rest.RestResource[*api.AlertingChannel])
 	return ret0
 }
 
@@ -64,10 +64,10 @@ func (mr *MockInstanaAPIMockRecorder) AlertingChannels() *gomock.Call {
 }
 
 // AlertingConfigurations mocks base method.
-func (m *MockInstanaAPI) AlertingConfigurations() rest.RestResource[*instana.AlertingConfiguration] {
+func (m *MockInstanaAPI) AlertingConfigurations() rest.RestResource[*api.AlertingConfiguration] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AlertingConfigurations")
-	ret0, _ := ret[0].(rest.RestResource[*instana.AlertingConfiguration])
+	ret0, _ := ret[0].(rest.RestResource[*api.AlertingConfiguration])
 	return ret0
 }
 
@@ -78,10 +78,10 @@ func (mr *MockInstanaAPIMockRecorder) AlertingConfigurations() *gomock.Call {
 }
 
 // ApplicationAlertConfigs mocks base method.
-func (m *MockInstanaAPI) ApplicationAlertConfigs() rest.RestResource[*instana.ApplicationAlertConfig] {
+func (m *MockInstanaAPI) ApplicationAlertConfigs() rest.RestResource[*api.ApplicationAlertConfig] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ApplicationAlertConfigs")
-	ret0, _ := ret[0].(rest.RestResource[*instana.ApplicationAlertConfig])
+	ret0, _ := ret[0].(rest.RestResource[*api.ApplicationAlertConfig])
 	return ret0
 }
 
@@ -92,10 +92,10 @@ func (mr *MockInstanaAPIMockRecorder) ApplicationAlertConfigs() *gomock.Call {
 }
 
 // ApplicationConfigs mocks base method.
-func (m *MockInstanaAPI) ApplicationConfigs() rest.RestResource[*instana.ApplicationConfig] {
+func (m *MockInstanaAPI) ApplicationConfigs() rest.RestResource[*api.ApplicationConfig] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ApplicationConfigs")
-	ret0, _ := ret[0].(rest.RestResource[*instana.ApplicationConfig])
+	ret0, _ := ret[0].(rest.RestResource[*api.ApplicationConfig])
 	return ret0
 }
 
@@ -106,10 +106,10 @@ func (mr *MockInstanaAPIMockRecorder) ApplicationConfigs() *gomock.Call {
 }
 
 // BuiltinEventSpecifications mocks base method.
-func (m *MockInstanaAPI) BuiltinEventSpecifications() instana.ReadOnlyRestResource[*instana.BuiltinEventSpecification] {
+func (m *MockInstanaAPI) BuiltinEventSpecifications() rest.ReadOnlyRestResource[*api.BuiltinEventSpecification] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BuiltinEventSpecifications")
-	ret0, _ := ret[0].(instana.ReadOnlyRestResource[*instana.BuiltinEventSpecification])
+	ret0, _ := ret[0].(rest.ReadOnlyRestResource[*api.BuiltinEventSpecification])
 	return ret0
 }
 
@@ -120,10 +120,10 @@ func (mr *MockInstanaAPIMockRecorder) BuiltinEventSpecifications() *gomock.Call 
 }
 
 // CustomDashboards mocks base method.
-func (m *MockInstanaAPI) CustomDashboards() rest.RestResource[*instana.CustomDashboard] {
+func (m *MockInstanaAPI) CustomDashboards() rest.RestResource[*api.CustomDashboard] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CustomDashboards")
-	ret0, _ := ret[0].(rest.RestResource[*instana.CustomDashboard])
+	ret0, _ := ret[0].(rest.RestResource[*api.CustomDashboard])
 	return ret0
 }
 
@@ -134,10 +134,10 @@ func (mr *MockInstanaAPIMockRecorder) CustomDashboards() *gomock.Call {
 }
 
 // CustomEventSpecifications mocks base method.
-func (m *MockInstanaAPI) CustomEventSpecifications() rest.RestResource[*instana.CustomEventSpecification] {
+func (m *MockInstanaAPI) CustomEventSpecifications() rest.RestResource[*api.CustomEventSpecification] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CustomEventSpecifications")
-	ret0, _ := ret[0].(rest.RestResource[*instana.CustomEventSpecification])
+	ret0, _ := ret[0].(rest.RestResource[*api.CustomEventSpecification])
 	return ret0
 }
 
@@ -148,10 +148,10 @@ func (mr *MockInstanaAPIMockRecorder) CustomEventSpecifications() *gomock.Call {
 }
 
 // GlobalApplicationAlertConfigs mocks base method.
-func (m *MockInstanaAPI) GlobalApplicationAlertConfigs() rest.RestResource[*instana.ApplicationAlertConfig] {
+func (m *MockInstanaAPI) GlobalApplicationAlertConfigs() rest.RestResource[*api.ApplicationAlertConfig] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GlobalApplicationAlertConfigs")
-	ret0, _ := ret[0].(rest.RestResource[*instana.ApplicationAlertConfig])
+	ret0, _ := ret[0].(rest.RestResource[*api.ApplicationAlertConfig])
 	return ret0
 }
 
@@ -162,10 +162,10 @@ func (mr *MockInstanaAPIMockRecorder) GlobalApplicationAlertConfigs() *gomock.Ca
 }
 
 // Groups mocks base method.
-func (m *MockInstanaAPI) Groups() rest.RestResource[*instana.Group] {
+func (m *MockInstanaAPI) Groups() rest.RestResource[*api.Group] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Groups")
-	ret0, _ := ret[0].(rest.RestResource[*instana.Group])
+	ret0, _ := ret[0].(rest.RestResource[*api.Group])
 	return ret0
 }
 
@@ -176,10 +176,10 @@ func (mr *MockInstanaAPIMockRecorder) Groups() *gomock.Call {
 }
 
 // SliConfigs mocks base method.
-func (m *MockInstanaAPI) SliConfigs() rest.RestResource[*instana.SliConfig] {
+func (m *MockInstanaAPI) SliConfigs() rest.RestResource[*api.SliConfig] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SliConfigs")
-	ret0, _ := ret[0].(rest.RestResource[*instana.SliConfig])
+	ret0, _ := ret[0].(rest.RestResource[*api.SliConfig])
 	return ret0
 }
 
@@ -190,10 +190,10 @@ func (mr *MockInstanaAPIMockRecorder) SliConfigs() *gomock.Call {
 }
 
 // SloConfigs mocks base method.
-func (m *MockInstanaAPI) SloConfigs() rest.RestResource[*instana.SloConfig] {
+func (m *MockInstanaAPI) SloConfigs() rest.RestResource[*api.SloConfig] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SloConfigs")
-	ret0, _ := ret[0].(rest.RestResource[*instana.SloConfig])
+	ret0, _ := ret[0].(rest.RestResource[*api.SloConfig])
 	return ret0
 }
 
@@ -204,10 +204,10 @@ func (mr *MockInstanaAPIMockRecorder) SloConfigs() *gomock.Call {
 }
 
 // SloAlertConfig mocks base method.
-func (m *MockInstanaAPI) SloAlertConfig() rest.RestResource[*instana.SloAlertConfig] {
+func (m *MockInstanaAPI) SloAlertConfig() rest.RestResource[*api.SloAlertConfig] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SloAlertConfig")
-	ret0, _ := ret[0].(rest.RestResource[*instana.SloAlertConfig])
+	ret0, _ := ret[0].(rest.RestResource[*api.SloAlertConfig])
 	return ret0
 }
 
@@ -218,10 +218,10 @@ func (mr *MockInstanaAPIMockRecorder) SloAlertConfig() *gomock.Call {
 }
 
 // SloCorrectionConfig mocks base method.
-func (m *MockInstanaAPI) SloCorrectionConfig() rest.RestResource[*instana.SloCorrectionConfig] {
+func (m *MockInstanaAPI) SloCorrectionConfig() rest.RestResource[*api.SloCorrectionConfig] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SloCorrectionConfig")
-	ret0, _ := ret[0].(rest.RestResource[*instana.SloCorrectionConfig])
+	ret0, _ := ret[0].(rest.RestResource[*api.SloCorrectionConfig])
 	return ret0
 }
 
@@ -232,10 +232,10 @@ func (mr *MockInstanaAPIMockRecorder) SloCorrectionConfig() *gomock.Call {
 }
 
 // SyntheticLocation mocks base method.
-func (m *MockInstanaAPI) SyntheticLocation() instana.ReadOnlyRestResource[*instana.SyntheticLocation] {
+func (m *MockInstanaAPI) SyntheticLocation() rest.ReadOnlyRestResource[*api.SyntheticLocation] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SyntheticLocation")
-	ret0, _ := ret[0].(instana.ReadOnlyRestResource[*instana.SyntheticLocation])
+	ret0, _ := ret[0].(rest.ReadOnlyRestResource[*api.SyntheticLocation])
 	return ret0
 }
 
@@ -246,10 +246,10 @@ func (mr *MockInstanaAPIMockRecorder) SyntheticLocation() *gomock.Call {
 }
 
 // SyntheticTest mocks base method.
-func (m *MockInstanaAPI) SyntheticTest() rest.RestResource[*instana.SyntheticTest] {
+func (m *MockInstanaAPI) SyntheticTest() rest.RestResource[*api.SyntheticTest] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SyntheticTest")
-	ret0, _ := ret[0].(rest.RestResource[*instana.SyntheticTest])
+	ret0, _ := ret[0].(rest.RestResource[*api.SyntheticTest])
 	return ret0
 }
 
@@ -260,10 +260,10 @@ func (mr *MockInstanaAPIMockRecorder) SyntheticTest() *gomock.Call {
 }
 
 // WebsiteAlertConfig mocks base method.
-func (m *MockInstanaAPI) WebsiteAlertConfig() rest.RestResource[*instana.WebsiteAlertConfig] {
+func (m *MockInstanaAPI) WebsiteAlertConfig() rest.RestResource[*api.WebsiteAlertConfig] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "WebsiteAlertConfig")
-	ret0, _ := ret[0].(rest.RestResource[*instana.WebsiteAlertConfig])
+	ret0, _ := ret[0].(rest.RestResource[*api.WebsiteAlertConfig])
 	return ret0
 }
 
@@ -274,10 +274,10 @@ func (mr *MockInstanaAPIMockRecorder) WebsiteAlertConfig() *gomock.Call {
 }
 
 // MobileAlertConfig mocks base method.
-func (m *MockInstanaAPI) MobileAlertConfig() rest.RestResource[*instana.MobileAlertConfig] {
+func (m *MockInstanaAPI) MobileAlertConfig() rest.RestResource[*api.MobileAlertConfig] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "MobileAlertConfig")
-	ret0, _ := ret[0].(rest.RestResource[*instana.MobileAlertConfig])
+	ret0, _ := ret[0].(rest.RestResource[*api.MobileAlertConfig])
 	return ret0
 }
 
@@ -288,10 +288,10 @@ func (mr *MockInstanaAPIMockRecorder) MobileAlertConfig() *gomock.Call {
 }
 
 // WebsiteMonitoringConfig mocks base method.
-func (m *MockInstanaAPI) WebsiteMonitoringConfig() rest.RestResource[*instana.WebsiteMonitoringConfig] {
+func (m *MockInstanaAPI) WebsiteMonitoringConfig() rest.RestResource[*api.WebsiteMonitoringConfig] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "WebsiteMonitoringConfig")
-	ret0, _ := ret[0].(rest.RestResource[*instana.WebsiteMonitoringConfig])
+	ret0, _ := ret[0].(rest.RestResource[*api.WebsiteMonitoringConfig])
 	return ret0
 }
 
@@ -301,34 +301,34 @@ func (mr *MockInstanaAPIMockRecorder) WebsiteMonitoringConfig() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WebsiteMonitoringConfig", reflect.TypeOf((*MockInstanaAPI)(nil).WebsiteMonitoringConfig))
 }
 
-func (m *MockInstanaAPI) InfraAlertConfig() rest.RestResource[*instana.InfraAlertConfig] {
+func (m *MockInstanaAPI) InfraAlertConfig() rest.RestResource[*api.InfraAlertConfig] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InfraAlertConfig")
-	ret0, _ := ret[0].(rest.RestResource[*instana.InfraAlertConfig])
+	ret0, _ := ret[0].(rest.RestResource[*api.InfraAlertConfig])
 	return ret0
 }
 
 // AutomationActions mocks base method.
-func (m *MockInstanaAPI) AutomationActions() rest.RestResource[*instana.AutomationAction] {
+func (m *MockInstanaAPI) AutomationActions() rest.RestResource[*api.AutomationAction] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AutomationAction")
-	ret0, _ := ret[0].(rest.RestResource[*instana.AutomationAction])
+	ret0, _ := ret[0].(rest.RestResource[*api.AutomationAction])
 	return ret0
 }
 
 // AutomationPolicies mocks base method.
-func (m *MockInstanaAPI) AutomationPolicies() rest.RestResource[*instana.AutomationPolicy] {
+func (m *MockInstanaAPI) AutomationPolicies() rest.RestResource[*api.AutomationPolicy] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AutomationPolicy")
-	ret0, _ := ret[0].(rest.RestResource[*instana.AutomationPolicy])
+	ret0, _ := ret[0].(rest.RestResource[*api.AutomationPolicy])
 	return ret0
 }
 
 // HostAgents mocks base method.
-func (m *MockInstanaAPI) HostAgents() instana.ReadOnlyRestResource[*instana.HostAgent] {
+func (m *MockInstanaAPI) HostAgents() rest.ReadOnlyRestResource[*api.HostAgent] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HostAgent")
-	ret0, _ := ret[0].(instana.ReadOnlyRestResource[*instana.HostAgent])
+	ret0, _ := ret[0].(rest.ReadOnlyRestResource[*api.HostAgent])
 	return ret0
 }
 
@@ -351,10 +351,10 @@ func (mr *MockInstanaAPIMockRecorder) HostAgents() *gomock.Call {
 }
 
 // LogAlertConfig mocks base method.
-func (m *MockInstanaAPI) LogAlertConfig() rest.RestResource[*instana.LogAlertConfig] {
+func (m *MockInstanaAPI) LogAlertConfig() rest.RestResource[*api.LogAlertConfig] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "LogAlertConfig")
-	ret0, _ := ret[0].(rest.RestResource[*instana.LogAlertConfig])
+	ret0, _ := ret[0].(rest.RestResource[*api.LogAlertConfig])
 	return ret0
 }
 
@@ -365,10 +365,10 @@ func (mr *MockInstanaAPIMockRecorder) LogAlertConfig() *gomock.Call {
 }
 
 // Teams mocks base method.
-func (m *MockInstanaAPI) Teams() rest.RestResource[*instana.Team] {
+func (m *MockInstanaAPI) Teams() rest.RestResource[*api.Team] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Teams")
-	ret0, _ := ret[0].(rest.RestResource[*instana.Team])
+	ret0, _ := ret[0].(rest.RestResource[*api.Team])
 	return ret0
 }
 
@@ -379,10 +379,10 @@ func (mr *MockInstanaAPIMockRecorder) Teams() *gomock.Call {
 }
 
 // Roles mocks base method.
-func (m *MockInstanaAPI) Roles() rest.RestResource[*instana.Role] {
+func (m *MockInstanaAPI) Roles() rest.RestResource[*api.Role] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Roles")
-	ret0, _ := ret[0].(rest.RestResource[*instana.Role])
+	ret0, _ := ret[0].(rest.RestResource[*api.Role])
 	return ret0
 }
 
@@ -393,10 +393,10 @@ func (mr *MockInstanaAPIMockRecorder) Roles() *gomock.Call {
 }
 
 // Users mocks base method.
-func (m *MockInstanaAPI) Users() instana.ReadOnlyRestResource[*instana.User] {
+func (m *MockInstanaAPI) Users() rest.ReadOnlyRestResource[*api.User] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Users")
-	ret0, _ := ret[0].(instana.ReadOnlyRestResource[*instana.User])
+	ret0, _ := ret[0].(rest.ReadOnlyRestResource[*api.User])
 	return ret0
 }
 
@@ -407,10 +407,10 @@ func (mr *MockInstanaAPIMockRecorder) Users() *gomock.Call {
 }
 
 // SyntheticAlertConfigs mocks base method.
-func (m *MockInstanaAPI) SyntheticAlertConfigs() rest.RestResource[*instana.SyntheticAlertConfig] {
+func (m *MockInstanaAPI) SyntheticAlertConfigs() rest.RestResource[*api.SyntheticAlertConfig] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SyntheticAlertConfigs")
-	ret0, _ := ret[0].(rest.RestResource[*instana.SyntheticAlertConfig])
+	ret0, _ := ret[0].(rest.RestResource[*api.SyntheticAlertConfig])
 	return ret0
 }
 

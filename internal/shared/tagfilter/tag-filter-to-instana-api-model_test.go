@@ -7,6 +7,7 @@ import (
 	"github.com/instana/terraform-provider-instana/utils"
 
 	"github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/shared/tagfilter"
 	. "github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
 	"github.com/stretchr/testify/require"
 )
@@ -42,7 +43,7 @@ func createTestShouldMapStringComparisonToRepresentationOfInstanaAPI(operator in
 			},
 		}
 
-		expectedResult := instana.NewStringTagFilter(instana.TagFilterEntityDestination, entitySpecKey, operator, "value")
+		expectedResult := instana.NewStringTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, operator, "value")
 		runTestCaseForMappingToAPI(expr, expectedResult, t)
 	}
 }
@@ -66,7 +67,7 @@ func createTestShouldMapNumberComparisonToRepresentationOfInstanaAPI(operator in
 			},
 		}
 
-		expectedResult := instana.NewNumberTagFilter(instana.TagFilterEntityDestination, entitySpecKey, operator, numberValue)
+		expectedResult := instana.NewNumberTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, operator, numberValue)
 		runTestCaseForMappingToAPI(expr, expectedResult, t)
 	}
 }
@@ -90,7 +91,7 @@ func createTestShouldMapBooleanComparisonToRepresentationOfInstanaAPI(operator i
 			},
 		}
 
-		expectedResult := instana.NewBooleanTagFilter(instana.TagFilterEntityDestination, entitySpecKey, operator, boolValue)
+		expectedResult := instana.NewBooleanTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, operator, boolValue)
 		runTestCaseForMappingToAPI(expr, expectedResult, t)
 	}
 }
@@ -115,7 +116,7 @@ func createTestShouldMapTagComparisonToRepresentationOfInstanaAPI(operator insta
 			},
 		}
 
-		expectedResult := instana.NewTagTagFilter(instana.TagFilterEntityDestination, entitySpecKey, operator, key, value)
+		expectedResult := instana.NewTagTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, operator, key, value)
 		runTestCaseForMappingToAPI(expr, expectedResult, t)
 	}
 }
@@ -139,7 +140,7 @@ func TestShouldMapTagComparisonToRepresentationOfInstanaAPIUsingAStringValue(t *
 		},
 	}
 
-	expectedResult := instana.NewTagTagFilter(instana.TagFilterEntityDestination, entitySpecKey, instana.EqualsOperator, key, value)
+	expectedResult := instana.NewTagTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, instana.EqualsOperator, key, value)
 	runTestCaseForMappingToAPI(expr, expectedResult, t)
 }
 
@@ -162,7 +163,7 @@ func TestShouldMapTagComparisonToRepresentationOfInstanaAPIUsingANumberValue(t *
 		},
 	}
 
-	expectedResult := instana.NewTagTagFilter(instana.TagFilterEntityDestination, entitySpecKey, instana.EqualsOperator, key, "1234")
+	expectedResult := instana.NewTagTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, instana.EqualsOperator, key, "1234")
 	runTestCaseForMappingToAPI(expr, expectedResult, t)
 }
 
@@ -185,7 +186,7 @@ func TestShouldMapTagComparisonToRepresentationOfInstanaAPIUsingABooleanValue(t 
 		},
 	}
 
-	expectedResult := instana.NewTagTagFilter(instana.TagFilterEntityDestination, entitySpecKey, instana.EqualsOperator, key, "true")
+	expectedResult := instana.NewTagTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, instana.EqualsOperator, key, "true")
 	runTestCaseForMappingToAPI(expr, expectedResult, t)
 }
 
@@ -212,7 +213,7 @@ func createTestShouldMapUnaryOperatorToRepresentationOfInstanaAPI(operatorName i
 			},
 		}
 
-		expectedResult := instana.NewUnaryTagFilter(instana.TagFilterEntityDestination, entitySpecKey, operatorName)
+		expectedResult := instana.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, operatorName)
 		runTestCaseForMappingToAPI(expr, expectedResult, t)
 	}
 }
@@ -237,7 +238,7 @@ func TestShouldMapLogicalAndExpression(t *testing.T) {
 		},
 	}
 
-	expectedPrimaryExpression := instana.NewUnaryTagFilter(instana.TagFilterEntityDestination, entitySpecKey, instana.IsEmptyOperator)
+	expectedPrimaryExpression := instana.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, instana.IsEmptyOperator)
 	expectedResult := instana.NewLogicalAndTagFilter([]*instana.TagFilter{expectedPrimaryExpression, expectedPrimaryExpression})
 	runTestCaseForMappingToAPI(expr, expectedResult, t)
 }
@@ -266,7 +267,7 @@ func TestShouldMapLogicalAndExpressionWithNestedAnd(t *testing.T) {
 		},
 	}
 
-	expectedPrimaryExpression := instana.NewUnaryTagFilter(instana.TagFilterEntityDestination, entitySpecKey, instana.IsEmptyOperator)
+	expectedPrimaryExpression := instana.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, instana.IsEmptyOperator)
 	expectedResult := instana.NewLogicalAndTagFilter([]*instana.TagFilter{expectedPrimaryExpression, expectedPrimaryExpression, expectedPrimaryExpression})
 	runTestCaseForMappingToAPI(expr, expectedResult, t)
 }
@@ -300,7 +301,7 @@ func TestShouldMapLogicalAndExpressionWithNestedOrInBrackets(t *testing.T) {
 		},
 	}
 
-	expectedPrimaryExpression := instana.NewUnaryTagFilter(instana.TagFilterEntityDestination, entitySpecKey, instana.IsEmptyOperator)
+	expectedPrimaryExpression := instana.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, instana.IsEmptyOperator)
 	expectedOrExpression := instana.NewLogicalOrTagFilter([]*instana.TagFilter{expectedPrimaryExpression, expectedPrimaryExpression})
 	expectedResult := instana.NewLogicalAndTagFilter([]*instana.TagFilter{expectedPrimaryExpression, expectedOrExpression})
 	runTestCaseForMappingToAPI(expr, expectedResult, t)
@@ -328,7 +329,7 @@ func TestShouldMapLogicalOrExpression(t *testing.T) {
 		},
 	}
 
-	expectedPrimaryExpression := instana.NewUnaryTagFilter(instana.TagFilterEntityDestination, entitySpecKey, instana.IsEmptyOperator)
+	expectedPrimaryExpression := instana.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, instana.IsEmptyOperator)
 	expectedResult := instana.NewLogicalOrTagFilter([]*instana.TagFilter{expectedPrimaryExpression, expectedPrimaryExpression})
 	runTestCaseForMappingToAPI(expr, expectedResult, t)
 }
@@ -361,7 +362,7 @@ func TestShouldMapLogicalOrExpressionWithNestedOr(t *testing.T) {
 		},
 	}
 
-	expectedPrimaryExpression := instana.NewUnaryTagFilter(instana.TagFilterEntityDestination, entitySpecKey, instana.IsEmptyOperator)
+	expectedPrimaryExpression := instana.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, instana.IsEmptyOperator)
 	expectedResult := instana.NewLogicalOrTagFilter([]*instana.TagFilter{expectedPrimaryExpression, expectedPrimaryExpression, expectedPrimaryExpression})
 	runTestCaseForMappingToAPI(expr, expectedResult, t)
 }
@@ -399,7 +400,7 @@ func TestShouldMapLogicalOrExpressionWithNestedAndInBrackets(t *testing.T) {
 		},
 	}
 
-	expectedPrimaryExpression := instana.NewUnaryTagFilter(instana.TagFilterEntityDestination, entitySpecKey, instana.IsEmptyOperator)
+	expectedPrimaryExpression := instana.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, instana.IsEmptyOperator)
 	expectedAndExpression := instana.NewLogicalAndTagFilter([]*instana.TagFilter{expectedPrimaryExpression, expectedPrimaryExpression})
 	expectedResult := instana.NewLogicalOrTagFilter([]*instana.TagFilter{expectedPrimaryExpression, expectedAndExpression})
 	runTestCaseForMappingToAPI(expr, expectedResult, t)
