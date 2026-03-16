@@ -19,7 +19,7 @@ tasks:
         displayName: "Build and publish Terraform provider to GitHub and Terraform Registry"
         image: goreleaser/goreleaser:latest
         securityContext:
-          privileged: false
+          privileged: true
         script: |
           #!/usr/bin/env bash
           set -eou pipefail
