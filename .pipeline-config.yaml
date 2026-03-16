@@ -22,7 +22,7 @@ tasks:
           privileged: true
         script: |
           #!/usr/bin/env bash
-          set -eou pipefail
+          set -e
 
           echo "Fetching variables from SPS Environment Properties..."
           export GITHUB_TOKEN=$(get_env GHP_PAT)
