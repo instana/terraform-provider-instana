@@ -15,7 +15,7 @@ tasks:
   code-build:
     displayName: "Instana Terraform Provider Publish"
     steps:
-      - name: build-and-publish
+      - name: build-artifact
         displayName: "Build and publish Terraform provider to GitHub and Terraform Registry"
         image: goreleaser/goreleaser:latest
         securityContext:
