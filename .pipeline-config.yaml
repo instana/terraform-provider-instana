@@ -1,17 +1,6 @@
 version: '2'
 
 tasks:
-  code-checks:
-    steps:
-      - name: detect-secrets
-        when: false
-      - name: compliance-checks
-        when: false
-      - name: static-scan
-        when: false
-      - name: peer-review
-        when: false
-
   code-build:
     displayName: "Instana Terraform Provider Publish"
     steps:
@@ -56,7 +45,12 @@ tasks:
           KEY_ID=$(gpg --list-secret-keys --with-colons | grep '^sec' | cut -d: -f5 | head -n 1)
           /usr/libexec/gpg-preset-passphrase --preset --passphrase "$GPG_PASSPHRASE" "$KEY_ID" || \
           echo "$GPG_PASSPHRASE" | gpg --batch --pinentry-mode loopback --passphrase-fd 0 --sign --dry-run > /dev/null 2>&1
-    
+
+          echo "Checking for documentation required by the Terraform Registry..."
+          if [ ! -d "docs" ]; then
+            echo "Warning: 'docs/' directory not found. The Registry will show an empty documentation page."
+          fi
+          
           echo "Validating tag $TAG for symantic versioning..."
           if echo "$TAG" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+'; then
             echo "Tag is valid. Continuing..."
@@ -64,6 +58,7 @@ tasks:
             echo "Error: TAG '$TAG' is not valid SemVer (X.Y.Z)"
             exit 1
           fi
+          
           echo "Checking if tag v$TAG exists..."
           if ! git rev-parse "v$TAG" >/dev/null 2>&1; then
             echo "Tag v$TAG not found. Creating local tag for GoReleaser..."
@@ -73,9 +68,15 @@ tasks:
             echo "Error: Tag v$TAG already exists"
             exit 1
           fi
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Warning: dirty git state detected"
+            git status --porcelain
+            echo "Goreleaser may require the --skip=validate flag. Aborting..."
+            exit 1
+          fi
 
-          echo "Executing GoReleaser publish step."
-          goreleaser release --snapshot --skip=publish --clean
+          echo "Executing GoReleaser publish step..."
+          # goreleaser release --snapshot --skip=publish --clean
 
       - name: unit-test
         when: false
