@@ -31,9 +31,10 @@ tasks:
           export GPG_PASSPHRASE=$(get_env GPG_PASSPHRASE)
           export TAG=$(get_env TAG)
     
-          echo "Identity setup..."
+          echo "Git setup..."
           git config --global user.email "instanacd@instana.com"
           git config --global user.name "instanacd"
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@[github.com/instana/terraform-provider-instana.git](https://github.com/instana/terraform-provider-instana.git)
     
           echo "GPG setup..."
           if command -v apk &> /dev/null; then
@@ -72,8 +73,7 @@ tasks:
             echo "Error: Tag v$TAG already exists"
             exit 1
           fi
-          # 8. THE DRY RUN
-          # We pass the GPG_PASSPHRASE as an env var specifically for GoReleaser's GPG logic
+
           echo "Executing GoReleaser publish step."
           goreleaser release --snapshot --skip=publish --clean
 
