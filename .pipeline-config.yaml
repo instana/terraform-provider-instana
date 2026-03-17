@@ -24,48 +24,54 @@ tasks:
           #!/usr/bin/env bash
           set -e
     
-          echo "Fetching variables from SPS Environment Properties."
+          echo "Fetching variables from SPS Environment Properties..."
           export GITHUB_TOKEN=$(get_env GHP_PAT)
           export GPG_FINGERPRINT=$(get_env GPG_FINGERPRINT)
           export GPG_PRIVATE_KEY=$(get_env GPG_PRIVATE_KEY)
           export GPG_PASSPHRASE=$(get_env GPG_PASSPHRASE)
           export TAG=$(get_env TAG)
     
-          echo "Identity setup."
+          echo "Identity setup..."
           git config --global user.email "instanacd@instana.com"
           git config --global user.name "instanacd"
     
-          echo "GPG setup."
+          echo "GPG setup..."
           if command -v apk &> /dev/null; then
-                    apk add --no-cache gnupg gpg-agent
+            apk add --no-cache gnupg gpg-agent
           fi
     
-          echo "GPG Configuration - force loopback for passphrase."
           export GPG_TTY=$(tty || echo "/dev/tty")
           mkdir -p ~/.gnupg
           chmod 700 ~/.gnupg
           echo "pinentry-mode loopback" > ~/.gnupg/gpg.conf
           echo "allow-loopback-pinentry" > ~/.gnupg/gpg-agent.conf
           echo "disable-scdaemon" >> ~/.gnupg/gpg-agent.conf
-    
-          echo "Starting the GPG daemon."
           gpgconf --kill gpg-agent || true
           gpg-agent --daemon --allow-loopback-pinentry || true
-          echo "Importing GPG Private Key."
+          
+          echo "Importing GPG Private Key..."
           echo "$GPG_PRIVATE_KEY" | gpg --batch --import
     
-          echo "Pre-loading GPG passphrase into agent cache."
           KEY_ID=$(gpg --list-secret-keys --with-colons | grep '^sec' | cut -d: -f5 | head -n 1)
           /usr/libexec/gpg-preset-passphrase --preset --passphrase "$GPG_PASSPHRASE" "$KEY_ID" || \
           echo "$GPG_PASSPHRASE" | gpg --batch --pinentry-mode loopback --passphrase-fd 0 --sign --dry-run > /dev/null 2>&1
     
-          echo "Validating TAG for symantic versioning: $TAG"
+          echo "Validating tag $TAG for symantic versioning..."
           if echo "$TAG" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+'; then
-                    echo "Tag is valid."
+            echo "Tag is valid. Continuing..."
           else
-                    echo "Error: TAG '$TAG' is not valid SemVer (X.Y.Z)."; exit 1
+            echo "Error: TAG '$TAG' is not valid SemVer (X.Y.Z)"
+            exit 1
           fi
-    
+          echo "Checking if tag v$TAG exists..."
+          if ! git rev-parse "v$TAG" >/dev/null 2>&1; then
+            echo "Tag v$TAG not found. Creating local tag for GoReleaser..."
+            git tag -a "v$TAG" -m "Release v$TAG"
+            # git push origin "v$TAG"
+          else
+            echo "Error: Tag v$TAG already exists"
+            exit 1
+          fi
           # 8. THE DRY RUN
           # We pass the GPG_PASSPHRASE as an env var specifically for GoReleaser's GPG logic
           echo "Executing GoReleaser publish step."
