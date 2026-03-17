@@ -11,14 +11,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/instana-go-client/instana"
+	restapi "github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/client"
 	"github.com/instana/instana-go-client/shared/rest"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/util"
 )
 
 // NewAPITokenResourceHandle creates the resource handle for API Tokens
-func NewAPITokenResourceHandle() resourcehandle.ResourceHandle[*instana.APIToken] {
+func NewAPITokenResourceHandle() resourcehandle.ResourceHandle[*restapi.APIToken] {
 	internalIDFieldName := APITokenFieldInternalID
 	return &apiTokenResource{
 		metaData: resourcehandle.ResourceMetaData{
@@ -503,7 +504,7 @@ func (r *apiTokenResource) MetaData() *resourcehandle.ResourceMetaData {
 }
 
 // GetRestResource returns the REST resource for API tokens
-func (r *apiTokenResource) GetRestResource(api instana.InstanaAPI) rest.RestResource[*instana.APIToken] {
+func (r *apiTokenResource) GetRestResource(api client.InstanaAPI) rest.RestResource[*restapi.APIToken] {
 	return api.APITokens()
 }
 
@@ -520,7 +521,7 @@ func (r *apiTokenResource) SetComputedFields(ctx context.Context, plan *tfsdk.Pl
 // ============================================================================
 
 // UpdateState updates the Terraform state with the API token data from the API
-func (r *apiTokenResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiToken *instana.APIToken) diag.Diagnostics {
+func (r *apiTokenResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiToken *restapi.APIToken) diag.Diagnostics {
 	// Create base model with core fields
 	model := APITokenModel{
 		ID:                  types.StringValue(apiToken.ID),
@@ -543,7 +544,7 @@ func (r *apiTokenResource) UpdateState(ctx context.Context, state *tfsdk.State, 
 }
 
 // mapPermissionsToModel maps basic permissions from API to model
-func (r *apiTokenResource) mapPermissionsToModel(apiToken *instana.APIToken, model *APITokenModel) {
+func (r *apiTokenResource) mapPermissionsToModel(apiToken *restapi.APIToken, model *APITokenModel) {
 	model.CanConfigureServiceMapping = types.BoolValue(apiToken.CanConfigureServiceMapping)
 	model.CanConfigureEumApplications = types.BoolValue(apiToken.CanConfigureEumApplications)
 	model.CanConfigureMobileAppMonitoring = types.BoolValue(apiToken.CanConfigureMobileAppMonitoring)
@@ -578,7 +579,7 @@ func (r *apiTokenResource) mapPermissionsToModel(apiToken *instana.APIToken, mod
 }
 
 // mapScopeLimitationsToModel maps scope limitations from API to model
-func (r *apiTokenResource) mapScopeLimitationsToModel(apiToken *instana.APIToken, model *APITokenModel) {
+func (r *apiTokenResource) mapScopeLimitationsToModel(apiToken *restapi.APIToken, model *APITokenModel) {
 	model.LimitedApplicationsScope = types.BoolValue(apiToken.LimitedApplicationsScope)
 	model.LimitedBizOpsScope = types.BoolValue(apiToken.LimitedBizOpsScope)
 	model.LimitedWebsitesScope = types.BoolValue(apiToken.LimitedWebsitesScope)
@@ -604,7 +605,7 @@ func (r *apiTokenResource) mapScopeLimitationsToModel(apiToken *instana.APIToken
 }
 
 // mapAdditionalPermissionsToModel maps additional permissions from API to model
-func (r *apiTokenResource) mapAdditionalPermissionsToModel(apiToken *instana.APIToken, model *APITokenModel) {
+func (r *apiTokenResource) mapAdditionalPermissionsToModel(apiToken *restapi.APIToken, model *APITokenModel) {
 	model.CanConfigurePersonalAPITokens = types.BoolValue(apiToken.CanConfigurePersonalAPITokens)
 	model.CanConfigureDatabaseManagement = types.BoolValue(apiToken.CanConfigureDatabaseManagement)
 	model.CanConfigureAutomationActions = types.BoolValue(apiToken.CanConfigureAutomationActions)
@@ -644,7 +645,7 @@ func (r *apiTokenResource) mapAdditionalPermissionsToModel(apiToken *instana.API
 // ============================================================================
 
 // MapStateToDataObject converts Terraform state to API object
-func (r *apiTokenResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*instana.APIToken, diag.Diagnostics) {
+func (r *apiTokenResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.APIToken, diag.Diagnostics) {
 	// Get model from plan or state
 	model, diags := r.getAPITokenModelFromPlanOrState(ctx, plan, state)
 	if diags.HasError() {
@@ -652,7 +653,7 @@ func (r *apiTokenResource) MapStateToDataObject(ctx context.Context, plan *tfsdk
 	}
 
 	// Create base API token with core fields
-	apiToken := &instana.APIToken{
+	apiToken := &restapi.APIToken{
 		ID:                  model.ID.ValueString(),
 		AccessGrantingToken: model.AccessGrantingToken.ValueString(),
 		InternalID:          model.InternalID.ValueString(),
@@ -686,7 +687,7 @@ func (r *apiTokenResource) getAPITokenModelFromPlanOrState(ctx context.Context, 
 }
 
 // mapPermissionsFromModel maps basic permissions from model to API object
-func (r *apiTokenResource) mapPermissionsFromModel(model APITokenModel, apiToken *instana.APIToken) {
+func (r *apiTokenResource) mapPermissionsFromModel(model APITokenModel, apiToken *restapi.APIToken) {
 	apiToken.CanConfigureServiceMapping = model.CanConfigureServiceMapping.ValueBool()
 	apiToken.CanConfigureEumApplications = model.CanConfigureEumApplications.ValueBool()
 	apiToken.CanConfigureMobileAppMonitoring = model.CanConfigureMobileAppMonitoring.ValueBool()
@@ -721,7 +722,7 @@ func (r *apiTokenResource) mapPermissionsFromModel(model APITokenModel, apiToken
 }
 
 // mapScopeLimitationsFromModel maps scope limitations from model to API object
-func (r *apiTokenResource) mapScopeLimitationsFromModel(model APITokenModel, apiToken *instana.APIToken) {
+func (r *apiTokenResource) mapScopeLimitationsFromModel(model APITokenModel, apiToken *restapi.APIToken) {
 	apiToken.LimitedApplicationsScope = model.LimitedApplicationsScope.ValueBool()
 	apiToken.LimitedBizOpsScope = model.LimitedBizOpsScope.ValueBool()
 	apiToken.LimitedWebsitesScope = model.LimitedWebsitesScope.ValueBool()
@@ -747,7 +748,7 @@ func (r *apiTokenResource) mapScopeLimitationsFromModel(model APITokenModel, api
 }
 
 // mapAdditionalPermissionsFromModel maps additional permissions from model to API object
-func (r *apiTokenResource) mapAdditionalPermissionsFromModel(model APITokenModel, apiToken *instana.APIToken) {
+func (r *apiTokenResource) mapAdditionalPermissionsFromModel(model APITokenModel, apiToken *restapi.APIToken) {
 	apiToken.CanConfigurePersonalAPITokens = model.CanConfigurePersonalAPITokens.ValueBool()
 	apiToken.CanConfigureDatabaseManagement = model.CanConfigureDatabaseManagement.ValueBool()
 	apiToken.CanConfigureAutomationActions = model.CanConfigureAutomationActions.ValueBool()

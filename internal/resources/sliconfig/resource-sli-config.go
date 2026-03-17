@@ -14,15 +14,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/client"
 	"github.com/instana/instana-go-client/shared/rest"
+	tag "github.com/instana/instana-go-client/shared/tagfilter"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
 	"github.com/instana/terraform-provider-instana/internal/util"
 )
 
 // NewSliConfigResourceHandle creates the resource handle for SLI configuration
-func NewSliConfigResourceHandle() resourcehandle.ResourceHandle[*instana.SliConfig] {
+func NewSliConfigResourceHandle() resourcehandle.ResourceHandle[*api.SliConfig] {
 	return &sliConfigResource{
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:  ResourceInstanaSliConfig,
@@ -335,7 +337,7 @@ func (r *sliConfigResource) MetaData() *resourcehandle.ResourceMetaData {
 	return &r.metaData
 }
 
-func (r *sliConfigResource) GetRestResource(api instana.InstanaAPI) rest.RestResource[*instana.SliConfig] {
+func (r *sliConfigResource) GetRestResource(api client.InstanaAPI) rest.RestResource[*api.SliConfig] {
 	return api.SliConfigs()
 }
 
@@ -343,7 +345,7 @@ func (r *sliConfigResource) SetComputedFields(_ context.Context, _ *tfsdk.Plan) 
 	return nil
 }
 
-func (r *sliConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, sliConfig *instana.SliConfig) diag.Diagnostics {
+func (r *sliConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, sliConfig *api.SliConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var model SliConfigModel
 	if plan != nil {
@@ -373,7 +375,7 @@ func (r *sliConfigResource) UpdateState(ctx context.Context, state *tfsdk.State,
 }
 
 // mapMetricConfigurationToState converts API metric configuration to state model
-func (r *sliConfigResource) mapMetricConfigurationToState(metricConfig *instana.MetricConfiguration) *MetricConfigurationModel {
+func (r *sliConfigResource) mapMetricConfigurationToState(metricConfig *api.MetricConfiguration) *MetricConfigurationModel {
 	return &MetricConfigurationModel{
 		MetricName:  types.StringValue(metricConfig.Name),
 		Aggregation: types.StringValue(metricConfig.Aggregation),
@@ -382,7 +384,7 @@ func (r *sliConfigResource) mapMetricConfigurationToState(metricConfig *instana.
 }
 
 // mapSliEntityToState routes SLI entity mapping based on entity type
-func (r *sliConfigResource) mapSliEntityToState(sliEntity instana.SliEntity) (*SliEntityModel, diag.Diagnostics) {
+func (r *sliConfigResource) mapSliEntityToState(sliEntity api.SliEntity) (*SliEntityModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	sliEntityModel := &SliEntityModel{}
 
@@ -419,7 +421,7 @@ func (r *sliConfigResource) mapSliEntityToState(sliEntity instana.SliEntity) (*S
 }
 
 // mapApplicationTimeBasedToState converts application time-based entity to state model
-func (r *sliConfigResource) mapApplicationTimeBasedToState(sliEntity instana.SliEntity) *ApplicationTimeBasedModel {
+func (r *sliConfigResource) mapApplicationTimeBasedToState(sliEntity api.SliEntity) *ApplicationTimeBasedModel {
 	return &ApplicationTimeBasedModel{
 		ApplicationID: util.SetStringPointerToState(sliEntity.ApplicationID),
 		BoundaryScope: util.SetStringPointerToState(sliEntity.BoundaryScope),
@@ -429,7 +431,7 @@ func (r *sliConfigResource) mapApplicationTimeBasedToState(sliEntity instana.Sli
 }
 
 // mapApplicationEventBasedToState converts application event-based entity to state model
-func (r *sliConfigResource) mapApplicationEventBasedToState(sliEntity instana.SliEntity) (*ApplicationEventBasedModel, diag.Diagnostics) {
+func (r *sliConfigResource) mapApplicationEventBasedToState(sliEntity api.SliEntity) (*ApplicationEventBasedModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	model := &ApplicationEventBasedModel{
@@ -460,7 +462,7 @@ func (r *sliConfigResource) mapApplicationEventBasedToState(sliEntity instana.Sl
 }
 
 // mapWebsiteEventBasedToState converts website event-based entity to state model
-func (r *sliConfigResource) mapWebsiteEventBasedToState(sliEntity instana.SliEntity) (*WebsiteEventBasedModel, diag.Diagnostics) {
+func (r *sliConfigResource) mapWebsiteEventBasedToState(sliEntity api.SliEntity) (*WebsiteEventBasedModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	model := &WebsiteEventBasedModel{
@@ -486,7 +488,7 @@ func (r *sliConfigResource) mapWebsiteEventBasedToState(sliEntity instana.SliEnt
 }
 
 // mapWebsiteTimeBasedToState converts website time-based entity to state model
-func (r *sliConfigResource) mapWebsiteTimeBasedToState(sliEntity instana.SliEntity) (*WebsiteTimeBasedModel, diag.Diagnostics) {
+func (r *sliConfigResource) mapWebsiteTimeBasedToState(sliEntity api.SliEntity) (*WebsiteTimeBasedModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	model := &WebsiteTimeBasedModel{
@@ -505,7 +507,7 @@ func (r *sliConfigResource) mapWebsiteTimeBasedToState(sliEntity instana.SliEnti
 }
 
 // mapTagFilterToString converts tag filter to normalized string representation
-func (r *sliConfigResource) mapTagFilterToString(tagFilter *instana.TagFilter, context string) (types.String, error) {
+func (r *sliConfigResource) mapTagFilterToString(tagFilter *tag.TagFilter, context string) (types.String, error) {
 	if tagFilter == nil {
 		return types.StringNull(), nil
 	}
@@ -526,7 +528,7 @@ func (r *sliConfigResource) mapBooleanPointerToState(value *bool, defaultValue b
 	return types.BoolValue(defaultValue)
 }
 
-func (r *sliConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*instana.SliConfig, diag.Diagnostics) {
+func (r *sliConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*api.SliConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var model SliConfigModel
 
@@ -535,7 +537,7 @@ func (r *sliConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsd
 		return nil, diags
 	}
 
-	sliConfig := &instana.SliConfig{
+	sliConfig := &api.SliConfig{
 		ID:                         r.extractIDFromModel(model),
 		Name:                       model.Name.ValueString(),
 		InitialEvaluationTimestamp: r.extractInitialEvaluationTimestamp(model),
@@ -580,12 +582,12 @@ func (r *sliConfigResource) extractInitialEvaluationTimestamp(model SliConfigMod
 }
 
 // mapMetricConfigurationFromState converts state metric configuration to API model
-func (r *sliConfigResource) mapMetricConfigurationFromState(metricConfig *MetricConfigurationModel) *instana.MetricConfiguration {
+func (r *sliConfigResource) mapMetricConfigurationFromState(metricConfig *MetricConfigurationModel) *api.MetricConfiguration {
 	if metricConfig == nil {
 		return nil
 	}
 
-	return &instana.MetricConfiguration{
+	return &api.MetricConfiguration{
 		Name:        metricConfig.MetricName.ValueString(),
 		Aggregation: metricConfig.Aggregation.ValueString(),
 		Threshold:   metricConfig.Threshold.ValueFloat64(),
@@ -593,9 +595,9 @@ func (r *sliConfigResource) mapMetricConfigurationFromState(metricConfig *Metric
 }
 
 // mapSliEntityFromState routes SLI entity mapping from state based on entity type
-func (r *sliConfigResource) mapSliEntityFromState(sliEntityModel *SliEntityModel) (instana.SliEntity, error) {
+func (r *sliConfigResource) mapSliEntityFromState(sliEntityModel *SliEntityModel) (api.SliEntity, error) {
 	if sliEntityModel == nil {
-		return instana.SliEntity{}, nil
+		return api.SliEntity{}, nil
 	}
 
 	if sliEntityModel.ApplicationTimeBased != nil {
@@ -614,15 +616,15 @@ func (r *sliConfigResource) mapSliEntityFromState(sliEntityModel *SliEntityModel
 		return r.mapWebsiteTimeBasedFromState(sliEntityModel.WebsiteTimeBased)
 	}
 
-	return instana.SliEntity{}, nil
+	return api.SliEntity{}, nil
 }
 
 // mapApplicationTimeBasedFromState converts application time-based state model to API entity
-func (r *sliConfigResource) mapApplicationTimeBasedFromState(model *ApplicationTimeBasedModel) (instana.SliEntity, error) {
+func (r *sliConfigResource) mapApplicationTimeBasedFromState(model *ApplicationTimeBasedModel) (api.SliEntity, error) {
 	applicationID := model.ApplicationID.ValueString()
 	boundaryScope := model.BoundaryScope.ValueString()
 
-	entity := instana.SliEntity{
+	entity := api.SliEntity{
 		Type:          SliEntityTypeApplication,
 		ApplicationID: &applicationID,
 		BoundaryScope: &boundaryScope,
@@ -642,18 +644,18 @@ func (r *sliConfigResource) mapApplicationTimeBasedFromState(model *ApplicationT
 }
 
 // mapApplicationEventBasedFromState converts application event-based state model to API entity
-func (r *sliConfigResource) mapApplicationEventBasedFromState(model *ApplicationEventBasedModel) (instana.SliEntity, error) {
+func (r *sliConfigResource) mapApplicationEventBasedFromState(model *ApplicationEventBasedModel) (api.SliEntity, error) {
 	applicationID := model.ApplicationID.ValueString()
 	boundaryScope := model.BoundaryScope.ValueString()
 
-	entity := instana.SliEntity{
+	entity := api.SliEntity{
 		Type:          SliEntityTypeAvailability,
 		ApplicationID: &applicationID,
 		BoundaryScope: &boundaryScope,
 	}
 
 	if err := r.mapEventFilterExpressions(&entity, model.BadEventFilterExpression, model.GoodEventFilterExpression); err != nil {
-		return instana.SliEntity{}, err
+		return api.SliEntity{}, err
 	}
 
 	r.mapOptionalBooleanFields(&entity, model.IncludeInternal, model.IncludeSynthetic)
@@ -662,29 +664,29 @@ func (r *sliConfigResource) mapApplicationEventBasedFromState(model *Application
 }
 
 // mapWebsiteEventBasedFromState converts website event-based state model to API entity
-func (r *sliConfigResource) mapWebsiteEventBasedFromState(model *WebsiteEventBasedModel) (instana.SliEntity, error) {
+func (r *sliConfigResource) mapWebsiteEventBasedFromState(model *WebsiteEventBasedModel) (api.SliEntity, error) {
 	websiteID := model.WebsiteID.ValueString()
 	beaconType := model.BeaconType.ValueString()
 
-	entity := instana.SliEntity{
+	entity := api.SliEntity{
 		Type:       SliEntityTypeWebsiteEventBased,
 		WebsiteId:  &websiteID,
 		BeaconType: &beaconType,
 	}
 
 	if err := r.mapEventFilterExpressions(&entity, model.BadEventFilterExpression, model.GoodEventFilterExpression); err != nil {
-		return instana.SliEntity{}, err
+		return api.SliEntity{}, err
 	}
 
 	return entity, nil
 }
 
 // mapWebsiteTimeBasedFromState converts website time-based state model to API entity
-func (r *sliConfigResource) mapWebsiteTimeBasedFromState(model *WebsiteTimeBasedModel) (instana.SliEntity, error) {
+func (r *sliConfigResource) mapWebsiteTimeBasedFromState(model *WebsiteTimeBasedModel) (api.SliEntity, error) {
 	websiteID := model.WebsiteID.ValueString()
 	beaconType := model.BeaconType.ValueString()
 
-	entity := instana.SliEntity{
+	entity := api.SliEntity{
 		Type:       SliEntityTypeWebsiteTimeBased,
 		WebsiteId:  &websiteID,
 		BeaconType: &beaconType,
@@ -693,7 +695,7 @@ func (r *sliConfigResource) mapWebsiteTimeBasedFromState(model *WebsiteTimeBased
 	if !model.FilterExpression.IsNull() {
 		filterExpression, err := r.parseTagFilterString(model.FilterExpression.ValueString(), ErrMsgFilterExpressionContext)
 		if err != nil {
-			return instana.SliEntity{}, err
+			return api.SliEntity{}, err
 		}
 		entity.FilterExpression = filterExpression
 	}
@@ -702,7 +704,7 @@ func (r *sliConfigResource) mapWebsiteTimeBasedFromState(model *WebsiteTimeBased
 }
 
 // mapEventFilterExpressions maps bad and good event filter expressions to entity
-func (r *sliConfigResource) mapEventFilterExpressions(entity *instana.SliEntity, badFilter, goodFilter types.String) error {
+func (r *sliConfigResource) mapEventFilterExpressions(entity *api.SliEntity, badFilter, goodFilter types.String) error {
 	if !badFilter.IsNull() {
 		badEventFilter, err := r.parseTagFilterString(badFilter.ValueString(), ErrMsgBadEventFilterContext)
 		if err != nil {
@@ -723,7 +725,7 @@ func (r *sliConfigResource) mapEventFilterExpressions(entity *instana.SliEntity,
 }
 
 // mapOptionalBooleanFields maps optional boolean fields to entity
-func (r *sliConfigResource) mapOptionalBooleanFields(entity *instana.SliEntity, includeInternal, includeSynthetic types.Bool) {
+func (r *sliConfigResource) mapOptionalBooleanFields(entity *api.SliEntity, includeInternal, includeSynthetic types.Bool) {
 	if !includeInternal.IsNull() {
 		value := includeInternal.ValueBool()
 		entity.IncludeInternal = &value
@@ -736,7 +738,7 @@ func (r *sliConfigResource) mapOptionalBooleanFields(entity *instana.SliEntity, 
 }
 
 // parseTagFilterString parses a tag filter string into API model
-func (r *sliConfigResource) parseTagFilterString(input, context string) (*instana.TagFilter, error) {
+func (r *sliConfigResource) parseTagFilterString(input, context string) (*tag.TagFilter, error) {
 	parser := tagfilter.NewParser()
 	expr, err := parser.Parse(input)
 	if err != nil {

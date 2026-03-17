@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/api"
 )
 
 // Common models for automation actions
@@ -200,7 +200,7 @@ func MapTagsFromState(ctx context.Context, tagsSet types.Set) (interface{}, diag
 }
 
 // MapInputParametersToState maps input parameters from API to Terraform state
-func MapInputParametersToState(ctx context.Context, parameters []instana.Parameter) []ParameterModel {
+func MapInputParametersToState(ctx context.Context, parameters []api.Parameter) []ParameterModel {
 	if len(parameters) == 0 {
 		return nil
 	}
@@ -222,16 +222,16 @@ func MapInputParametersToState(ctx context.Context, parameters []instana.Paramet
 }
 
 // MapInputParametersFromState maps input parameters from Terraform state to API
-func MapInputParametersFromState(ctx context.Context, model AutomationActionModel) ([]instana.Parameter, diag.Diagnostics) {
+func MapInputParametersFromState(ctx context.Context, model AutomationActionModel) ([]api.Parameter, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if len(model.InputParameter) == 0 {
 		return nil, diags
 	}
 
-	parameters := make([]instana.Parameter, len(model.InputParameter))
+	parameters := make([]api.Parameter, len(model.InputParameter))
 	for i, param := range model.InputParameter {
-		parameters[i] = instana.Parameter{
+		parameters[i] = api.Parameter{
 			Name:        param.Name.ValueString(),
 			Description: param.Description.ValueString(),
 			Label:       param.Label.ValueString(),
@@ -246,7 +246,7 @@ func MapInputParametersFromState(ctx context.Context, model AutomationActionMode
 }
 
 // MapInputParametersToMap converts input parameters to a map for policy actions
-func MapInputParametersToMap(ctx context.Context, inputParams []instana.Parameter) types.Map {
+func MapInputParametersToMap(ctx context.Context, inputParams []api.Parameter) types.Map {
 	if len(inputParams) == 0 {
 		return types.MapNull(types.StringType)
 	}
@@ -260,9 +260,9 @@ func MapInputParametersToMap(ctx context.Context, inputParams []instana.Paramete
 }
 
 // MapInputParametersFromMap converts a map to input parameter values for API
-func MapInputParametersFromMap(ctx context.Context, inputParamsMap types.Map) ([]instana.InputParameterValue, diag.Diagnostics) {
+func MapInputParametersFromMap(ctx context.Context, inputParamsMap types.Map) ([]api.InputParameterValue, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	var inputParams []instana.InputParameterValue
+	var inputParams []api.InputParameterValue
 
 	if inputParamsMap.IsNull() {
 		return inputParams, diags
@@ -274,9 +274,9 @@ func MapInputParametersFromMap(ctx context.Context, inputParamsMap types.Map) ([
 		return inputParams, diags
 	}
 
-	inputParams = make([]instana.InputParameterValue, 0, len(elements))
+	inputParams = make([]api.InputParameterValue, 0, len(elements))
 	for name, value := range elements {
-		inputParams = append(inputParams, instana.InputParameterValue{
+		inputParams = append(inputParams, api.InputParameterValue{
 			Name:  name,
 			Value: value,
 		})
@@ -619,7 +619,7 @@ func GetAutomationActionSchemaAttributes() map[string]schema.Attribute {
 // Type-specific field mapping functions
 
 // MapActionTypeFieldsToState maps action type-specific fields from API to state
-func MapActionTypeFieldsToState(ctx context.Context, action *instana.AutomationAction, model *AutomationActionModel) {
+func MapActionTypeFieldsToState(ctx context.Context, action *api.AutomationAction, model *AutomationActionModel) {
 	switch action.Type {
 	case ActionTypeScript:
 		scriptConfig := MapScriptFieldsToState(action)
@@ -649,7 +649,7 @@ func MapActionTypeFieldsToState(ctx context.Context, action *instana.AutomationA
 }
 
 // GetFieldValue retrieves a field value from an automation action
-func GetFieldValue(action *instana.AutomationAction, fieldName string) string {
+func GetFieldValue(action *api.AutomationAction, fieldName string) string {
 	for _, v := range action.Fields {
 		if v.Name == fieldName {
 			return v.Value
@@ -659,7 +659,7 @@ func GetFieldValue(action *instana.AutomationAction, fieldName string) string {
 }
 
 // GetBoolFieldValueOrDefault retrieves a boolean field value or returns default
-func GetBoolFieldValueOrDefault(action *instana.AutomationAction, fieldName string, defaultValue bool) bool {
+func GetBoolFieldValueOrDefault(action *api.AutomationAction, fieldName string, defaultValue bool) bool {
 	valueStr := GetFieldValue(action, fieldName)
 	if valueStr == "" {
 		return defaultValue
@@ -668,19 +668,19 @@ func GetBoolFieldValueOrDefault(action *instana.AutomationAction, fieldName stri
 }
 
 // MapScriptFieldsToState maps script-specific fields to state
-func MapScriptFieldsToState(action *instana.AutomationAction) ScriptModel {
+func MapScriptFieldsToState(action *api.AutomationAction) ScriptModel {
 	scriptModel := ScriptModel{
-		Content: types.StringValue(GetFieldValue(action, instana.ScriptSshFieldName)),
+		Content: types.StringValue(GetFieldValue(action, api.ScriptSshFieldName)),
 	}
 
-	interpreter := GetFieldValue(action, instana.SubtypeFieldName)
+	interpreter := GetFieldValue(action, api.SubtypeFieldName)
 	if interpreter != "" {
 		scriptModel.Interpreter = types.StringValue(interpreter)
 	} else {
 		scriptModel.Interpreter = types.StringNull()
 	}
 
-	timeout := GetFieldValue(action, instana.TimeoutFieldName)
+	timeout := GetFieldValue(action, api.TimeoutFieldName)
 	if timeout != "" {
 		scriptModel.Timeout = types.StringValue(timeout)
 	} else {
@@ -698,13 +698,13 @@ func MapScriptFieldsToState(action *instana.AutomationAction) ScriptModel {
 }
 
 // MapHttpFieldsToState maps HTTP-specific fields to state
-func MapHttpFieldsToState(action *instana.AutomationAction) HttpModel {
+func MapHttpFieldsToState(action *api.AutomationAction) HttpModel {
 	httpModel := HttpModel{
-		Host:   types.StringValue(GetFieldValue(action, instana.HttpHostFieldName)),
-		Method: types.StringValue(GetFieldValue(action, instana.HttpMethodFieldName)),
+		Host:   types.StringValue(GetFieldValue(action, api.HttpHostFieldName)),
+		Method: types.StringValue(GetFieldValue(action, api.HttpMethodFieldName)),
 	}
 
-	body := GetFieldValue(action, instana.HttpBodyFieldName)
+	body := GetFieldValue(action, api.HttpBodyFieldName)
 	if body != "" {
 		httpModel.Body = types.StringValue(body)
 	} else {
@@ -712,14 +712,14 @@ func MapHttpFieldsToState(action *instana.AutomationAction) HttpModel {
 	}
 
 	// Only set IgnoreCertErrors if the field is present in the API response
-	ignoreCertErrorsValue := GetFieldValue(action, instana.HttpIgnoreCertErrorsFieldName)
+	ignoreCertErrorsValue := GetFieldValue(action, api.HttpIgnoreCertErrorsFieldName)
 	if ignoreCertErrorsValue != "" {
 		httpModel.IgnoreCertErrors = types.BoolValue(ignoreCertErrorsValue == "true")
 	} else {
 		httpModel.IgnoreCertErrors = types.BoolNull()
 	}
 
-	timeout := GetFieldValue(action, instana.TimeoutFieldName)
+	timeout := GetFieldValue(action, api.TimeoutFieldName)
 	if timeout != "" {
 		httpModel.Timeout = types.StringValue(timeout)
 	} else {
@@ -750,7 +750,7 @@ func MapHttpFieldsToState(action *instana.AutomationAction) HttpModel {
 }
 
 // MapAuthFieldsToState maps authentication fields to state
-func MapAuthFieldsToState(action *instana.AutomationAction) *AuthModel {
+func MapAuthFieldsToState(action *api.AutomationAction) *AuthModel {
 	authData := GetFieldValue(action, "authen")
 	if authData == "" {
 		return nil
@@ -795,8 +795,8 @@ func MapAuthFieldsToState(action *instana.AutomationAction) *AuthModel {
 }
 
 // MapHeadersToState maps HTTP headers to state
-func MapHeadersToState(action *instana.AutomationAction) types.Map {
-	headersData := GetFieldValue(action, instana.HttpHeaderFieldName)
+func MapHeadersToState(action *api.AutomationAction) types.Map {
+	headersData := GetFieldValue(action, api.HttpHeaderFieldName)
 	if headersData == "" || headersData == "{}" {
 		return types.MapNull(types.StringType)
 	}
@@ -823,14 +823,14 @@ func MapHeadersToState(action *instana.AutomationAction) types.Map {
 }
 
 // MapManualFieldsToState maps manual action fields to state
-func MapManualFieldsToState(action *instana.AutomationAction) ManualModel {
+func MapManualFieldsToState(action *api.AutomationAction) ManualModel {
 	return ManualModel{
 		Content: types.StringValue(GetFieldValue(action, "content")),
 	}
 }
 
 // MapJiraFieldsToState maps Jira-specific fields to state
-func MapJiraFieldsToState(action *instana.AutomationAction) JiraModel {
+func MapJiraFieldsToState(action *api.AutomationAction) JiraModel {
 	jiraModel := JiraModel{}
 
 	if project := GetFieldValue(action, "project"); project != "" {
@@ -885,7 +885,7 @@ func MapJiraFieldsToState(action *instana.AutomationAction) JiraModel {
 }
 
 // MapGitHubFieldsToState maps GitHub-specific fields to state
-func MapGitHubFieldsToState(action *instana.AutomationAction) GitHubModel {
+func MapGitHubFieldsToState(action *api.AutomationAction) GitHubModel {
 	githubModel := GitHubModel{}
 
 	if owner := GetFieldValue(action, "owner"); owner != "" {
@@ -940,14 +940,14 @@ func MapGitHubFieldsToState(action *instana.AutomationAction) GitHubModel {
 }
 
 // MapDocLinkFieldsToState maps documentation link fields to state
-func MapDocLinkFieldsToState(action *instana.AutomationAction) DocLinkModel {
+func MapDocLinkFieldsToState(action *api.AutomationAction) DocLinkModel {
 	return DocLinkModel{
 		Url: types.StringValue(GetFieldValue(action, "url")),
 	}
 }
 
 // MapGitLabFieldsToState maps GitLab-specific fields to state
-func MapGitLabFieldsToState(action *instana.AutomationAction) GitLabModel {
+func MapGitLabFieldsToState(action *api.AutomationAction) GitLabModel {
 	gitlabModel := GitLabModel{}
 
 	if projectId := GetFieldValue(action, "projectId"); projectId != "" {
@@ -996,7 +996,7 @@ func MapGitLabFieldsToState(action *instana.AutomationAction) GitLabModel {
 }
 
 // MapAnsibleFieldsToState maps Ansible-specific fields to state
-func MapAnsibleFieldsToState(action *instana.AutomationAction) AnsibleModel {
+func MapAnsibleFieldsToState(action *api.AutomationAction) AnsibleModel {
 	ansibleModel := AnsibleModel{}
 
 	if workflowId := GetFieldValue(action, "workflowId"); workflowId != "" {
@@ -1033,10 +1033,10 @@ func MapAnsibleFieldsToState(action *instana.AutomationAction) AnsibleModel {
 }
 
 // MapActionTypeAndFieldsFromState determines action type and maps type-specific fields from state to API
-func MapActionTypeAndFieldsFromState(ctx context.Context, model AutomationActionModel) (string, []instana.Field, diag.Diagnostics) {
+func MapActionTypeAndFieldsFromState(ctx context.Context, model AutomationActionModel) (string, []api.Field, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var actionType string
-	var fields []instana.Field
+	var fields []api.Field
 
 	// Check which action type is configured
 	if model.Script != nil && !model.Script.Content.IsNull() {
@@ -1078,13 +1078,13 @@ func MapActionTypeAndFieldsFromState(ctx context.Context, model AutomationAction
 
 // Helper functions to map fields from state to API
 
-func mapScriptFieldsFromState(scriptModel ScriptModel) []instana.Field {
-	fields := make([]instana.Field, 0)
+func mapScriptFieldsFromState(scriptModel ScriptModel) []api.Field {
+	fields := make([]api.Field, 0)
 
 	// Content is required
-	fields = append(fields, instana.Field{
-		Name:        instana.ScriptSshFieldName,
-		Description: instana.ScriptSshFieldDescription,
+	fields = append(fields, api.Field{
+		Name:        api.ScriptSshFieldName,
+		Description: api.ScriptSshFieldDescription,
 		Value:       scriptModel.Content.ValueString(),
 		Encoding:    Base64Encoding,
 		Secured:     false,
@@ -1092,9 +1092,9 @@ func mapScriptFieldsFromState(scriptModel ScriptModel) []instana.Field {
 
 	// Interpreter is optional
 	if !scriptModel.Interpreter.IsNull() {
-		fields = append(fields, instana.Field{
-			Name:        instana.SubtypeFieldName,
-			Description: instana.SubtypeFieldDescription,
+		fields = append(fields, api.Field{
+			Name:        api.SubtypeFieldName,
+			Description: api.SubtypeFieldDescription,
 			Value:       scriptModel.Interpreter.ValueString(),
 			Encoding:    AsciiEncoding,
 			Secured:     false,
@@ -1103,9 +1103,9 @@ func mapScriptFieldsFromState(scriptModel ScriptModel) []instana.Field {
 
 	// Timeout is optional
 	if !scriptModel.Timeout.IsNull() {
-		fields = append(fields, instana.Field{
-			Name:        instana.TimeoutFieldName,
-			Description: instana.TimeoutFieldDescription,
+		fields = append(fields, api.Field{
+			Name:        api.TimeoutFieldName,
+			Description: api.TimeoutFieldDescription,
 			Value:       scriptModel.Timeout.ValueString(),
 			Encoding:    AsciiEncoding,
 			Secured:     false,
@@ -1114,7 +1114,7 @@ func mapScriptFieldsFromState(scriptModel ScriptModel) []instana.Field {
 
 	// Source is optional
 	if !scriptModel.Source.IsNull() {
-		fields = append(fields, instana.Field{
+		fields = append(fields, api.Field{
 			Name:        "source",
 			Description: "The source of the script",
 			Value:       scriptModel.Source.ValueString(),
@@ -1126,22 +1126,22 @@ func mapScriptFieldsFromState(scriptModel ScriptModel) []instana.Field {
 	return fields
 }
 
-func mapHttpFieldsFromState(ctx context.Context, httpModel HttpModel) ([]instana.Field, diag.Diagnostics) {
+func mapHttpFieldsFromState(ctx context.Context, httpModel HttpModel) ([]api.Field, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	fields := make([]instana.Field, 0)
+	fields := make([]api.Field, 0)
 
 	// Host and method are required
-	fields = append(fields, instana.Field{
-		Name:        instana.HttpHostFieldName,
-		Description: instana.HttpHostFieldDescription,
+	fields = append(fields, api.Field{
+		Name:        api.HttpHostFieldName,
+		Description: api.HttpHostFieldDescription,
 		Value:       httpModel.Host.ValueString(),
 		Encoding:    AsciiEncoding,
 		Secured:     false,
 	})
 
-	fields = append(fields, instana.Field{
-		Name:        instana.HttpMethodFieldName,
-		Description: instana.HttpMethodFieldDescription,
+	fields = append(fields, api.Field{
+		Name:        api.HttpMethodFieldName,
+		Description: api.HttpMethodFieldDescription,
 		Value:       httpModel.Method.ValueString(),
 		Encoding:    AsciiEncoding,
 		Secured:     false,
@@ -1149,9 +1149,9 @@ func mapHttpFieldsFromState(ctx context.Context, httpModel HttpModel) ([]instana
 
 	// Body is optional
 	if !httpModel.Body.IsNull() {
-		fields = append(fields, instana.Field{
-			Name:        instana.HttpBodyFieldName,
-			Description: instana.HttpBodyFieldDescription,
+		fields = append(fields, api.Field{
+			Name:        api.HttpBodyFieldName,
+			Description: api.HttpBodyFieldDescription,
 			Value:       httpModel.Body.ValueString(),
 			Encoding:    AsciiEncoding,
 			Secured:     false,
@@ -1160,9 +1160,9 @@ func mapHttpFieldsFromState(ctx context.Context, httpModel HttpModel) ([]instana
 
 	// IgnoreCertErrors is optional
 	if !httpModel.IgnoreCertErrors.IsNull() {
-		fields = append(fields, instana.Field{
-			Name:        instana.HttpIgnoreCertErrorsFieldName,
-			Description: instana.HttpIgnoreCertErrorsFieldDescription,
+		fields = append(fields, api.Field{
+			Name:        api.HttpIgnoreCertErrorsFieldName,
+			Description: api.HttpIgnoreCertErrorsFieldDescription,
 			Value:       fmt.Sprintf("%t", httpModel.IgnoreCertErrors.ValueBool()),
 			Encoding:    AsciiEncoding,
 			Secured:     false,
@@ -1171,9 +1171,9 @@ func mapHttpFieldsFromState(ctx context.Context, httpModel HttpModel) ([]instana
 
 	// Timeout is optional
 	if !httpModel.Timeout.IsNull() {
-		fields = append(fields, instana.Field{
-			Name:        instana.TimeoutFieldName,
-			Description: instana.TimeoutFieldDescription,
+		fields = append(fields, api.Field{
+			Name:        api.TimeoutFieldName,
+			Description: api.TimeoutFieldDescription,
 			Value:       httpModel.Timeout.ValueString(),
 			Encoding:    AsciiEncoding,
 			Secured:     false,
@@ -1182,7 +1182,7 @@ func mapHttpFieldsFromState(ctx context.Context, httpModel HttpModel) ([]instana
 
 	// Language is optional
 	if !httpModel.Language.IsNull() {
-		fields = append(fields, instana.Field{
+		fields = append(fields, api.Field{
 			Name:        "language",
 			Description: "The language for the HTTP request",
 			Value:       httpModel.Language.ValueString(),
@@ -1193,7 +1193,7 @@ func mapHttpFieldsFromState(ctx context.Context, httpModel HttpModel) ([]instana
 
 	// Content Type is optional
 	if !httpModel.ContentType.IsNull() {
-		fields = append(fields, instana.Field{
+		fields = append(fields, api.Field{
 			Name:        "content_type",
 			Description: "The content type for the HTTP request",
 			Value:       httpModel.ContentType.ValueString(),
@@ -1213,7 +1213,7 @@ func mapHttpFieldsFromState(ctx context.Context, httpModel HttpModel) ([]instana
 		return nil, diags
 	}
 
-	fields = append(fields, instana.Field{
+	fields = append(fields, api.Field{
 		Name:        "authen",
 		Description: "Authentication for the HTTPS request",
 		Value:       string(authJson),
@@ -1238,9 +1238,9 @@ func mapHttpFieldsFromState(ctx context.Context, httpModel HttpModel) ([]instana
 			return nil, diags
 		}
 
-		fields = append(fields, instana.Field{
-			Name:        instana.HttpHeaderFieldName,
-			Description: instana.HttpHeaderFieldDescription,
+		fields = append(fields, api.Field{
+			Name:        api.HttpHeaderFieldName,
+			Description: api.HttpHeaderFieldDescription,
 			Value:       string(headersJson),
 			Encoding:    AsciiEncoding,
 			Secured:     false,
@@ -1282,8 +1282,8 @@ func mapAuthFromState(auth *AuthModel) map[string]string {
 	return map[string]string{"type": "noAuth"}
 }
 
-func mapManualFieldsFromState(manualModel ManualModel) []instana.Field {
-	return []instana.Field{
+func mapManualFieldsFromState(manualModel ManualModel) []api.Field {
+	return []api.Field{
 		{
 			Name:        "content",
 			Description: "Content for manual action",
@@ -1294,70 +1294,70 @@ func mapManualFieldsFromState(manualModel ManualModel) []instana.Field {
 	}
 }
 
-func mapJiraFieldsFromState(jiraModel JiraModel) []instana.Field {
-	fields := make([]instana.Field, 0)
+func mapJiraFieldsFromState(jiraModel JiraModel) []api.Field {
+	fields := make([]api.Field, 0)
 
 	if !jiraModel.Project.IsNull() {
-		fields = append(fields, instana.Field{Name: "project", Description: "jira project", Value: jiraModel.Project.ValueString(), Encoding: AsciiEncoding})
+		fields = append(fields, api.Field{Name: "project", Description: "jira project", Value: jiraModel.Project.ValueString(), Encoding: AsciiEncoding})
 	}
 	if !jiraModel.Operation.IsNull() {
-		fields = append(fields, instana.Field{Name: "ticketActionType", Description: "jira ticket type", Value: jiraModel.Operation.ValueString(), Encoding: AsciiEncoding})
+		fields = append(fields, api.Field{Name: "ticketActionType", Description: "jira ticket type", Value: jiraModel.Operation.ValueString(), Encoding: AsciiEncoding})
 	}
 	if !jiraModel.IssueType.IsNull() {
-		fields = append(fields, instana.Field{Name: "issue_type", Description: "jira issue type", Value: jiraModel.IssueType.ValueString(), Encoding: AsciiEncoding})
+		fields = append(fields, api.Field{Name: "issue_type", Description: "jira issue type", Value: jiraModel.IssueType.ValueString(), Encoding: AsciiEncoding})
 	}
 	if !jiraModel.Description.IsNull() {
-		fields = append(fields, instana.Field{Name: "body", Description: "jira issue description", Value: jiraModel.Description.ValueString(), Encoding: AsciiEncoding})
+		fields = append(fields, api.Field{Name: "body", Description: "jira issue description", Value: jiraModel.Description.ValueString(), Encoding: AsciiEncoding})
 	}
 	if !jiraModel.Assignee.IsNull() {
-		fields = append(fields, instana.Field{Name: "assignee", Description: "jira issue assignee", Value: jiraModel.Assignee.ValueString(), Encoding: AsciiEncoding})
+		fields = append(fields, api.Field{Name: "assignee", Description: "jira issue assignee", Value: jiraModel.Assignee.ValueString(), Encoding: AsciiEncoding})
 	}
 	if !jiraModel.Title.IsNull() {
-		fields = append(fields, instana.Field{Name: "summary", Description: "jira issue summary", Value: jiraModel.Title.ValueString(), Encoding: AsciiEncoding})
+		fields = append(fields, api.Field{Name: "summary", Description: "jira issue summary", Value: jiraModel.Title.ValueString(), Encoding: AsciiEncoding})
 	}
 	if !jiraModel.Labels.IsNull() {
-		fields = append(fields, instana.Field{Name: "labels", Description: "jira issue labels", Value: jiraModel.Labels.ValueString(), Encoding: AsciiEncoding})
+		fields = append(fields, api.Field{Name: "labels", Description: "jira issue labels", Value: jiraModel.Labels.ValueString(), Encoding: AsciiEncoding})
 	}
 	if !jiraModel.Comment.IsNull() {
-		fields = append(fields, instana.Field{Name: "comment", Description: "jira issue comment", Value: jiraModel.Comment.ValueString(), Encoding: AsciiEncoding})
+		fields = append(fields, api.Field{Name: "comment", Description: "jira issue comment", Value: jiraModel.Comment.ValueString(), Encoding: AsciiEncoding})
 	}
 
 	return fields
 }
 
-func mapGitHubFieldsFromState(githubModel GitHubModel) []instana.Field {
-	fields := make([]instana.Field, 0)
+func mapGitHubFieldsFromState(githubModel GitHubModel) []api.Field {
+	fields := make([]api.Field, 0)
 
 	if !githubModel.Owner.IsNull() {
-		fields = append(fields, instana.Field{Name: "owner", Description: "github issue owner/repo", Value: githubModel.Owner.ValueString(), Encoding: AsciiEncoding})
+		fields = append(fields, api.Field{Name: "owner", Description: "github issue owner/repo", Value: githubModel.Owner.ValueString(), Encoding: AsciiEncoding})
 	}
 	if !githubModel.Repo.IsNull() {
-		fields = append(fields, instana.Field{Name: "repo", Description: "github issue repo", Value: githubModel.Repo.ValueString(), Encoding: AsciiEncoding})
+		fields = append(fields, api.Field{Name: "repo", Description: "github issue repo", Value: githubModel.Repo.ValueString(), Encoding: AsciiEncoding})
 	}
 	if !githubModel.Title.IsNull() {
-		fields = append(fields, instana.Field{Name: "title", Description: "github issue title", Value: githubModel.Title.ValueString(), Encoding: AsciiEncoding})
+		fields = append(fields, api.Field{Name: "title", Description: "github issue title", Value: githubModel.Title.ValueString(), Encoding: AsciiEncoding})
 	}
 	if !githubModel.Body.IsNull() {
-		fields = append(fields, instana.Field{Name: "body", Description: "github issue body", Value: githubModel.Body.ValueString(), Encoding: AsciiEncoding})
+		fields = append(fields, api.Field{Name: "body", Description: "github issue body", Value: githubModel.Body.ValueString(), Encoding: AsciiEncoding})
 	}
 	if !githubModel.Operation.IsNull() {
-		fields = append(fields, instana.Field{Name: "ticketType", Description: "github issue type", Value: githubModel.Operation.ValueString(), Encoding: AsciiEncoding})
+		fields = append(fields, api.Field{Name: "ticketType", Description: "github issue type", Value: githubModel.Operation.ValueString(), Encoding: AsciiEncoding})
 	}
 	if !githubModel.Assignees.IsNull() {
-		fields = append(fields, instana.Field{Name: "assignees", Description: "github issue assignees", Value: githubModel.Assignees.ValueString(), Encoding: AsciiEncoding})
+		fields = append(fields, api.Field{Name: "assignees", Description: "github issue assignees", Value: githubModel.Assignees.ValueString(), Encoding: AsciiEncoding})
 	}
 	if !githubModel.Labels.IsNull() {
-		fields = append(fields, instana.Field{Name: "labels", Description: "github issue labels", Value: githubModel.Labels.ValueString(), Encoding: AsciiEncoding})
+		fields = append(fields, api.Field{Name: "labels", Description: "github issue labels", Value: githubModel.Labels.ValueString(), Encoding: AsciiEncoding})
 	}
 	if !githubModel.Comment.IsNull() {
-		fields = append(fields, instana.Field{Name: "comment", Description: "github issue comment", Value: githubModel.Comment.ValueString(), Encoding: AsciiEncoding})
+		fields = append(fields, api.Field{Name: "comment", Description: "github issue comment", Value: githubModel.Comment.ValueString(), Encoding: AsciiEncoding})
 	}
 
 	return fields
 }
 
-func mapDocLinkFieldsFromState(docLinkModel DocLinkModel) []instana.Field {
-	return []instana.Field{
+func mapDocLinkFieldsFromState(docLinkModel DocLinkModel) []api.Field {
+	return []api.Field{
 		{
 			Name:        "url",
 			Description: "URL to remediation documentation",
@@ -1367,51 +1367,51 @@ func mapDocLinkFieldsFromState(docLinkModel DocLinkModel) []instana.Field {
 	}
 }
 
-func mapGitLabFieldsFromState(gitlabModel GitLabModel) []instana.Field {
-	fields := make([]instana.Field, 0)
+func mapGitLabFieldsFromState(gitlabModel GitLabModel) []api.Field {
+	fields := make([]api.Field, 0)
 
 	if !gitlabModel.ProjectId.IsNull() {
-		fields = append(fields, instana.Field{Name: "projectId", Description: "gitlab projectId", Value: gitlabModel.ProjectId.ValueString(), Encoding: AsciiEncoding})
+		fields = append(fields, api.Field{Name: "projectId", Description: "gitlab projectId", Value: gitlabModel.ProjectId.ValueString(), Encoding: AsciiEncoding})
 	}
 	if !gitlabModel.Title.IsNull() {
-		fields = append(fields, instana.Field{Name: "title", Description: "gitlab issue title", Value: gitlabModel.Title.ValueString(), Encoding: AsciiEncoding})
+		fields = append(fields, api.Field{Name: "title", Description: "gitlab issue title", Value: gitlabModel.Title.ValueString(), Encoding: AsciiEncoding})
 	}
 	if !gitlabModel.Description.IsNull() {
-		fields = append(fields, instana.Field{Name: "body", Description: "gitlab issue description", Value: gitlabModel.Description.ValueString(), Encoding: AsciiEncoding})
+		fields = append(fields, api.Field{Name: "body", Description: "gitlab issue description", Value: gitlabModel.Description.ValueString(), Encoding: AsciiEncoding})
 	}
 	if !gitlabModel.Operation.IsNull() {
-		fields = append(fields, instana.Field{Name: "ticketActionType", Description: "gitlab ticket type", Value: gitlabModel.Operation.ValueString(), Encoding: AsciiEncoding})
+		fields = append(fields, api.Field{Name: "ticketActionType", Description: "gitlab ticket type", Value: gitlabModel.Operation.ValueString(), Encoding: AsciiEncoding})
 	}
 	if !gitlabModel.Labels.IsNull() {
-		fields = append(fields, instana.Field{Name: "labels", Description: "gitlab issue labels", Value: gitlabModel.Labels.ValueString(), Encoding: AsciiEncoding})
+		fields = append(fields, api.Field{Name: "labels", Description: "gitlab issue labels", Value: gitlabModel.Labels.ValueString(), Encoding: AsciiEncoding})
 	}
 	if !gitlabModel.IssueType.IsNull() {
-		fields = append(fields, instana.Field{Name: "issue_type", Description: "gitlab issue type", Value: gitlabModel.IssueType.ValueString(), Encoding: AsciiEncoding})
+		fields = append(fields, api.Field{Name: "issue_type", Description: "gitlab issue type", Value: gitlabModel.IssueType.ValueString(), Encoding: AsciiEncoding})
 	}
 	if !gitlabModel.Comment.IsNull() {
-		fields = append(fields, instana.Field{Name: "comment", Description: "gitlab issue comment", Value: gitlabModel.Comment.ValueString(), Encoding: AsciiEncoding})
+		fields = append(fields, api.Field{Name: "comment", Description: "gitlab issue comment", Value: gitlabModel.Comment.ValueString(), Encoding: AsciiEncoding})
 	}
 
 	return fields
 }
 
-func mapAnsibleFieldsFromState(ansibleModel AnsibleModel) []instana.Field {
-	fields := make([]instana.Field, 0)
+func mapAnsibleFieldsFromState(ansibleModel AnsibleModel) []api.Field {
+	fields := make([]api.Field, 0)
 
 	if !ansibleModel.WorkflowId.IsNull() {
-		fields = append(fields, instana.Field{Name: "workflowId", Description: "The workflow ID", Value: ansibleModel.WorkflowId.ValueString(), Encoding: AsciiEncoding})
+		fields = append(fields, api.Field{Name: "workflowId", Description: "The workflow ID", Value: ansibleModel.WorkflowId.ValueString(), Encoding: AsciiEncoding})
 	}
 	if !ansibleModel.AnsibleUrl.IsNull() {
-		fields = append(fields, instana.Field{Name: "ansibleUrl", Description: "The ansible url", Value: ansibleModel.AnsibleUrl.ValueString(), Encoding: AsciiEncoding})
+		fields = append(fields, api.Field{Name: "ansibleUrl", Description: "The ansible url", Value: ansibleModel.AnsibleUrl.ValueString(), Encoding: AsciiEncoding})
 	}
 	if !ansibleModel.HostId.IsNull() {
-		fields = append(fields, instana.Field{Name: "hostId", Description: "The host ID from which this action is created", Value: ansibleModel.HostId.ValueString(), Encoding: AsciiEncoding})
+		fields = append(fields, api.Field{Name: "hostId", Description: "The host ID from which this action is created", Value: ansibleModel.HostId.ValueString(), Encoding: AsciiEncoding})
 	}
 	if !ansibleModel.PlaybookId.IsNull() {
-		fields = append(fields, instana.Field{Name: "playbookId", Description: "The playbook ID", Value: ansibleModel.PlaybookId.ValueString(), Encoding: AsciiEncoding})
+		fields = append(fields, api.Field{Name: "playbookId", Description: "The playbook ID", Value: ansibleModel.PlaybookId.ValueString(), Encoding: AsciiEncoding})
 	}
 	if !ansibleModel.PlaybookFileName.IsNull() {
-		fields = append(fields, instana.Field{Name: "playbookFileName", Description: "The playbook filename", Value: ansibleModel.PlaybookFileName.ValueString(), Encoding: AsciiEncoding})
+		fields = append(fields, api.Field{Name: "playbookFileName", Description: "The playbook filename", Value: ansibleModel.PlaybookFileName.ValueString(), Encoding: AsciiEncoding})
 	}
 
 	return fields

@@ -13,13 +13,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/client"
 	"github.com/instana/instana-go-client/shared/rest"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 )
 
 // NewSloCorrectionConfigResourceHandle creates the resource handle for SLO Correction Config
-func NewSloCorrectionConfigResourceHandle() resourcehandle.ResourceHandle[*instana.SloCorrectionConfig] {
+func NewSloCorrectionConfigResourceHandle() resourcehandle.ResourceHandle[*api.SloCorrectionConfig] {
 	resource := &sloCorrectionConfigResource{}
 	return resource.initialize()
 }
@@ -196,15 +197,15 @@ func (r *sloCorrectionConfigResource) MetaData() *resourcehandle.ResourceMetaDat
 	return &r.metaData
 }
 
-func (r *sloCorrectionConfigResource) GetRestResource(api instana.InstanaAPI) rest.RestResource[*instana.SloCorrectionConfig] {
-	return api.SloCorrectionConfig()
+func (r *sloCorrectionConfigResource) GetRestResource(api client.InstanaAPI) rest.RestResource[*api.SloCorrectionConfig] {
+	return api.SloCorrectionConfigs()
 }
 
 func (r *sloCorrectionConfigResource) SetComputedFields(_ context.Context, _ *tfsdk.Plan) diag.Diagnostics {
 	return nil
 }
 
-func (r *sloCorrectionConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*instana.SloCorrectionConfig, diag.Diagnostics) {
+func (r *sloCorrectionConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*api.SloCorrectionConfig, diag.Diagnostics) {
 	model, diags := r.extractModelFromState(ctx, plan, state)
 	if diags.HasError() {
 		return nil, diags
@@ -251,15 +252,15 @@ func (r *sloCorrectionConfigResource) extractModelFromState(ctx context.Context,
 }
 
 // mapSchedulingFromModel converts scheduling model to API scheduling object
-func (r *sloCorrectionConfigResource) mapSchedulingFromModel(model *SloCorrectionConfigModel) (instana.Scheduling, diag.Diagnostics) {
+func (r *sloCorrectionConfigResource) mapSchedulingFromModel(model *SloCorrectionConfigModel) (api.Scheduling, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	var scheduling instana.Scheduling
+	var scheduling api.Scheduling
 
 	if model.Scheduling == nil {
 		return scheduling, diags
 	}
 
-	scheduling = instana.Scheduling{
+	scheduling = api.Scheduling{
 		StartTime:    model.Scheduling.StartTime.ValueInt64(),
 		Duration:     int(model.Scheduling.Duration.ValueInt64()),
 		DurationUnit: r.convertDurationUnitToAPI(model.Scheduling.DurationUnit.ValueString()),
@@ -274,8 +275,8 @@ func (r *sloCorrectionConfigResource) mapSchedulingFromModel(model *SloCorrectio
 }
 
 // convertDurationUnitToAPI converts duration unit string to API format (uppercase)
-func (r *sloCorrectionConfigResource) convertDurationUnitToAPI(unit string) instana.DurationUnit {
-	return instana.DurationUnit(strings.ToUpper(unit))
+func (r *sloCorrectionConfigResource) convertDurationUnitToAPI(unit string) api.DurationUnit {
+	return api.DurationUnit(strings.ToUpper(unit))
 }
 
 // extractSloIdsFromModel extracts SLO IDs from the model
@@ -305,11 +306,11 @@ func (r *sloCorrectionConfigResource) extractTagsFromModel(ctx context.Context, 
 // buildAPIObjectFromModel constructs the API object from model and extracted data
 func (r *sloCorrectionConfigResource) buildAPIObjectFromModel(
 	model *SloCorrectionConfigModel,
-	scheduling instana.Scheduling,
+	scheduling api.Scheduling,
 	sloIds []string,
 	tags []string,
-) *instana.SloCorrectionConfig {
-	return &instana.SloCorrectionConfig{
+) *api.SloCorrectionConfig {
+	return &api.SloCorrectionConfig{
 		ID:          model.ID.ValueString(),
 		Name:        model.Name.ValueString(),
 		Description: model.Description.ValueString(),
@@ -320,7 +321,7 @@ func (r *sloCorrectionConfigResource) buildAPIObjectFromModel(
 	}
 }
 
-func (r *sloCorrectionConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *instana.SloCorrectionConfig) diag.Diagnostics {
+func (r *sloCorrectionConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *api.SloCorrectionConfig) diag.Diagnostics {
 	model := r.buildModelFromAPIObject(apiObject)
 
 	schedulingModel, schedulingDiags := r.mapSchedulingToModel(apiObject.Scheduling)
@@ -350,7 +351,7 @@ func (r *sloCorrectionConfigResource) UpdateState(ctx context.Context, state *tf
 }
 
 // buildModelFromAPIObject creates a model with basic fields from API object
-func (r *sloCorrectionConfigResource) buildModelFromAPIObject(apiObject *instana.SloCorrectionConfig) SloCorrectionConfigModel {
+func (r *sloCorrectionConfigResource) buildModelFromAPIObject(apiObject *api.SloCorrectionConfig) SloCorrectionConfigModel {
 	return SloCorrectionConfigModel{
 		ID:          types.StringValue(apiObject.ID),
 		Name:        types.StringValue(apiObject.Name),
@@ -360,7 +361,7 @@ func (r *sloCorrectionConfigResource) buildModelFromAPIObject(apiObject *instana
 }
 
 // mapSchedulingToModel converts API scheduling to model scheduling
-func (r *sloCorrectionConfigResource) mapSchedulingToModel(scheduling instana.Scheduling) (*SchedulingModel, diag.Diagnostics) {
+func (r *sloCorrectionConfigResource) mapSchedulingToModel(scheduling api.Scheduling) (*SchedulingModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	recurrentRuleValue := r.buildRecurrentRuleValue(scheduling.RecurrentRule)

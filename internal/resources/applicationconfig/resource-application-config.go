@@ -16,8 +16,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/client"
 	"github.com/instana/instana-go-client/shared/rest"
+	tag "github.com/instana/instana-go-client/shared/tagfilter"
+	models "github.com/instana/instana-go-client/shared/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
 	"github.com/instana/terraform-provider-instana/internal/util"
@@ -28,7 +31,7 @@ import (
 // ============================================================================
 
 // NewApplicationConfigResourceHandle creates the resource handle for Application Configuration
-func NewApplicationConfigResourceHandle() resourcehandle.ResourceHandle[*instana.ApplicationConfig] {
+func NewApplicationConfigResourceHandle() resourcehandle.ResourceHandle[*api.ApplicationConfig] {
 	return &applicationConfigResource{
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName: ResourceInstanaApplicationConfig,
@@ -49,19 +52,19 @@ func NewApplicationConfigResourceHandle() resourcehandle.ResourceHandle[*instana
 					ApplicationConfigFieldScope: schema.StringAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     stringdefault.StaticString(string(instana.ApplicationConfigScopeIncludeNoDownstream)),
+						Default:     stringdefault.StaticString(string(api.ApplicationConfigScopeIncludeNoDownstream)),
 						Description: ApplicationConfigDescScope,
 						Validators: []validator.String{
-							stringvalidator.OneOf(instana.SupportedApplicationConfigScopes.ToStringSlice()...),
+							stringvalidator.OneOf(api.SupportedApplicationConfigScopes.ToStringSlice()...),
 						},
 					},
 					ApplicationConfigFieldBoundaryScope: schema.StringAttribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     stringdefault.StaticString(string(instana.BoundaryScopeDefault)),
+						Default:     stringdefault.StaticString(string(models.BoundaryScopeDefault)),
 						Description: ApplicationConfigDescBoundaryScope,
 						Validators: []validator.String{
-							stringvalidator.OneOf(instana.SupportedApplicationConfigBoundaryScopes.ToStringSlice()...),
+							stringvalidator.OneOf(models.SupportedApplicationConfigBoundaryScopes.ToStringSlice()...),
 						},
 					},
 					ApplicationConfigFieldTagFilter: schema.StringAttribute{
@@ -89,7 +92,7 @@ func NewApplicationConfigResourceHandle() resourcehandle.ResourceHandle[*instana
 										stringplanmodifier.UseStateForUnknown(),
 									},
 									Validators: []validator.String{
-										stringvalidator.OneOf(instana.SupportedAccessTypes.ToStringSlice()...),
+										stringvalidator.OneOf(models.SupportedAccessTypes.ToStringSlice()...),
 									},
 								},
 								ApplicationConfigFieldRelatedID: schema.StringAttribute{
@@ -108,7 +111,7 @@ func NewApplicationConfigResourceHandle() resourcehandle.ResourceHandle[*instana
 										stringplanmodifier.UseStateForUnknown(),
 									},
 									Validators: []validator.String{
-										stringvalidator.OneOf(instana.SupportedRelationTypes.ToStringSlice()...),
+										stringvalidator.OneOf(models.SupportedRelationTypes.ToStringSlice()...),
 									},
 								},
 							},
@@ -135,7 +138,7 @@ func (r *applicationConfigResource) MetaData() *resourcehandle.ResourceMetaData 
 }
 
 // GetRestResource returns the REST resource for application configs
-func (r *applicationConfigResource) GetRestResource(api instana.InstanaAPI) rest.RestResource[*instana.ApplicationConfig] {
+func (r *applicationConfigResource) GetRestResource(api client.InstanaAPI) rest.RestResource[*api.ApplicationConfig] {
 	return api.ApplicationConfigs()
 }
 
@@ -149,7 +152,7 @@ func (r *applicationConfigResource) SetComputedFields(_ context.Context, _ *tfsd
 // ============================================================================
 
 // UpdateState converts API data object to Terraform state
-func (r *applicationConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, config *instana.ApplicationConfig) diag.Diagnostics {
+func (r *applicationConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, config *api.ApplicationConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var model ApplicationConfigModel
 
@@ -185,7 +188,7 @@ func (r *applicationConfigResource) UpdateState(ctx context.Context, state *tfsd
 }
 
 // mapTagFilterToState handles tag filter normalization and mapping to state
-func (r *applicationConfigResource) mapTagFilterToState(config *instana.ApplicationConfig, model *ApplicationConfigModel) diag.Diagnostics {
+func (r *applicationConfigResource) mapTagFilterToState(config *api.ApplicationConfig, model *ApplicationConfigModel) diag.Diagnostics {
 	if config.TagFilterExpression != nil {
 		normalizedTagFilterString, err := tagfilter.MapTagFilterToNormalizedString(config.TagFilterExpression)
 		if err != nil {
@@ -204,7 +207,7 @@ func (r *applicationConfigResource) mapTagFilterToState(config *instana.Applicat
 }
 
 // mapAccessRulesToState converts access rules from API to state format
-func (r *applicationConfigResource) mapAccessRulesToState(ctx context.Context, accessRules []instana.AccessRule) (types.List, diag.Diagnostics) {
+func (r *applicationConfigResource) mapAccessRulesToState(ctx context.Context, accessRules []models.AccessRule) (types.List, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// If there are no access rules, return an empty list
@@ -248,7 +251,7 @@ func (r *applicationConfigResource) mapAccessRulesToState(ctx context.Context, a
 // ============================================================================
 
 // MapStateToDataObject converts Terraform state to API data object
-func (r *applicationConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*instana.ApplicationConfig, diag.Diagnostics) {
+func (r *applicationConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*api.ApplicationConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var model ApplicationConfigModel
 
@@ -280,11 +283,11 @@ func (r *applicationConfigResource) MapStateToDataObject(ctx context.Context, pl
 		return nil, diags
 	}
 
-	return &instana.ApplicationConfig{
+	return &api.ApplicationConfig{
 		ID:                  id,
 		Label:               model.Label.ValueString(),
-		Scope:               instana.ApplicationConfigScope(model.Scope.ValueString()),
-		BoundaryScope:       instana.BoundaryScope(model.BoundaryScope.ValueString()),
+		Scope:               api.ApplicationConfigScope(model.Scope.ValueString()),
+		BoundaryScope:       models.BoundaryScope(model.BoundaryScope.ValueString()),
 		TagFilterExpression: tagFilter,
 		AccessRules:         accessRules,
 	}, diags
@@ -299,7 +302,7 @@ func (r *applicationConfigResource) extractID(model *ApplicationConfigModel) str
 }
 
 // mapTagFilterFromState parses and converts tag filter from state to API format
-func (r *applicationConfigResource) mapTagFilterFromState(model *ApplicationConfigModel) (*instana.TagFilter, diag.Diagnostics) {
+func (r *applicationConfigResource) mapTagFilterFromState(model *ApplicationConfigModel) (*tag.TagFilter, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if model.TagFilter.IsNull() {
@@ -322,12 +325,12 @@ func (r *applicationConfigResource) mapTagFilterFromState(model *ApplicationConf
 }
 
 // mapAccessRulesFromState converts access rules from state to API format
-func (r *applicationConfigResource) mapAccessRulesFromState(ctx context.Context, accessRulesList types.List) ([]instana.AccessRule, diag.Diagnostics) {
+func (r *applicationConfigResource) mapAccessRulesFromState(ctx context.Context, accessRulesList types.List) ([]models.AccessRule, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// If the list is null or unknown, return empty slice
 	if accessRulesList.IsNull() || accessRulesList.IsUnknown() {
-		return []instana.AccessRule{}, diags
+		return []models.AccessRule{}, diags
 	}
 
 	// Convert types.List to []AccessRuleModel
@@ -339,7 +342,7 @@ func (r *applicationConfigResource) mapAccessRulesFromState(ctx context.Context,
 
 	// If there are no access rules, return an empty slice
 	if len(accessRulesModels) == 0 {
-		return []instana.AccessRule{}, diags
+		return []models.AccessRule{}, diags
 	}
 
 	// Validate required fields
@@ -362,11 +365,11 @@ func (r *applicationConfigResource) mapAccessRulesFromState(ctx context.Context,
 		return nil, diags
 	}
 
-	accessRules := make([]instana.AccessRule, len(accessRulesModels))
+	accessRules := make([]models.AccessRule, len(accessRulesModels))
 	for i, model := range accessRulesModels {
-		rule := instana.AccessRule{
-			AccessType:   instana.AccessType(model.AccessType.ValueString()),
-			RelationType: instana.RelationType(model.RelationType.ValueString()),
+		rule := models.AccessRule{
+			AccessType:   models.AccessType(model.AccessType.ValueString()),
+			RelationType: models.RelationType(model.RelationType.ValueString()),
 		}
 
 		// Handle related ID (optional)
