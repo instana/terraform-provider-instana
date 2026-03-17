@@ -16,7 +16,7 @@ tasks:
     displayName: "Instana Terraform Provider Publish"
     steps:
       - name: build-artifact
-        displayName: "Build and publish Terraform provider to GitHub and Terraform Registry"
+        displayName: "Build and publish to the Terraform Registry"
         image: goreleaser/goreleaser:latest
         securityContext:
           privileged: true
@@ -24,24 +24,23 @@ tasks:
           #!/usr/bin/env bash
           set -e
     
-          echo "Fetching variables from SPS Environment Properties..."
+          echo "Fetching variables from SPS Environment Properties."
           export GITHUB_TOKEN=$(get_env GHP_PAT)
           export GPG_FINGERPRINT=$(get_env GPG_FINGERPRINT)
           export GPG_PRIVATE_KEY=$(get_env GPG_PRIVATE_KEY)
           export GPG_PASSPHRASE=$(get_env GPG_PASSPHRASE)
           export TAG=$(get_env TAG)
     
-          # 1. Identity Setup
+          echo "Identity setup."
           git config --global user.email "instanacd@instana.com"
           git config --global user.name "instanacd"
     
-          # 2. GPG Setup (Alpine/goreleaser image)
+          echo "GPG setup."
           if command -v apk &> /dev/null; then
                     apk add --no-cache gnupg gpg-agent
           fi
     
-          # 3. GPG Configuration - FORCE Loopback for Passphrase
-          # This tells GPG to never ask the user and only look at the caller (GoReleaser/Script)
+          echo "GPG Configuration - force loopback for passphrase."
           export GPG_TTY=$(tty || echo "/dev/tty")
           mkdir -p ~/.gnupg
           chmod 700 ~/.gnupg
@@ -49,24 +48,18 @@ tasks:
           echo "allow-loopback-pinentry" > ~/.gnupg/gpg-agent.conf
           echo "disable-scdaemon" >> ~/.gnupg/gpg-agent.conf
     
-          # 4. Start the agent daemon
+          echo "Starting the GPG daemon."
           gpgconf --kill gpg-agent || true
           gpg-agent --daemon --allow-loopback-pinentry || true
-    
-          # 5. Import Private Key
-          echo "Importing GPG Private Key..."
+          echo "Importing GPG Private Key."
           echo "$GPG_PRIVATE_KEY" | gpg --batch --import
     
-          # 6. Preset the Passphrase into the Cache (The "Magic" Fix)
-          # Since GoReleaser can't prompt, we pre-load the agent cache with the passphrase
-          # for the fingerprint. This satisfies the agent before GoReleaser even starts.
-          echo "Pre-loading GPG passphrase into agent cache..."
+          echo "Pre-loading GPG passphrase into agent cache."
           KEY_ID=$(gpg --list-secret-keys --with-colons | grep '^sec' | cut -d: -f5 | head -n 1)
           /usr/libexec/gpg-preset-passphrase --preset --passphrase "$GPG_PASSPHRASE" "$KEY_ID" || \
           echo "$GPG_PASSPHRASE" | gpg --batch --pinentry-mode loopback --passphrase-fd 0 --sign --dry-run > /dev/null 2>&1
     
-          # 7. Semantic Version Validation
-          echo "Validating TAG: $TAG"
+          echo "Validating TAG for symantic versioning: $TAG"
           if echo "$TAG" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+'; then
                     echo "Tag is valid."
           else
@@ -75,7 +68,7 @@ tasks:
     
           # 8. THE DRY RUN
           # We pass the GPG_PASSPHRASE as an env var specifically for GoReleaser's GPG logic
-          echo "Executing GoReleaser Dry Run..."
+          echo "Executing GoReleaser publish step."
           goreleaser release --snapshot --skip=publish --clean
 
       - name: unit-test
