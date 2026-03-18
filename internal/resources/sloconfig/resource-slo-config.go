@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/client"
 	"github.com/instana/instana-go-client/shared/rest"
 	tag "github.com/instana/instana-go-client/shared/tagfilter"
 	common "github.com/instana/instana-go-client/shared/types"
@@ -47,7 +48,7 @@ func (r *sloConfigResource) MetaData() *resourcehandle.ResourceMetaData {
 	return &r.metaData
 }
 
-func (r *sloConfigResource) GetRestResource(api api.InstanaAPI) rest.RestResource[*api.SloConfig] {
+func (r *sloConfigResource) GetRestResource(api client.InstanaAPI) rest.RestResource[*api.SloConfig] {
 	return api.SloConfigs()
 }
 

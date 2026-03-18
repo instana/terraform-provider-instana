@@ -1,6 +1,6 @@
 package logalertconfig
 
-import "github.com/instana/instana-go-client/instana"
+import common "github.com/instana/instana-go-client/shared/types"
 
 // ResourceInstanaLogAlertConfig the name of the terraform-provider-instana resource to manage log alert configurations
 const ResourceInstanaLogAlertConfig = "log_alert_config"
@@ -70,7 +70,7 @@ const (
 	// EmptyString represents an empty string value
 	EmptyString = ""
 	// DefaultGranularity represents the default granularity value
-	DefaultGranularity = int64(instana.Granularity600000)
+	DefaultGranularity = int64(common.Granularity600000)
 )
 
 // Resource description constants

@@ -318,7 +318,7 @@ func (d *AlertingChannelDataSource) Configure(_ context.Context, req datasource.
 		return
 	}
 
-	providerMeta, ok := req.ProviderData.(*api.ProviderMeta)
+	providerMeta, ok := req.ProviderData.(*shared.ProviderMeta)
 	if !ok {
 		resp.Diagnostics.AddError(
 			AlertingChannelErrUnexpectedConfigureType,
@@ -327,7 +327,7 @@ func (d *AlertingChannelDataSource) Configure(_ context.Context, req datasource.
 		return
 	}
 
-	d.instanaAPI = d.instanaAPI
+	d.instanaAPI = providerMeta.InstanaAPI
 }
 
 func (d *AlertingChannelDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {

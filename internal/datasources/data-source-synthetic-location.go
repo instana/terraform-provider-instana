@@ -7,7 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/client"
+	"github.com/instana/terraform-provider-instana/internal/shared"
 )
 
 // Constants are now defined in data-source-synthetic-location-constants.go
@@ -26,7 +28,7 @@ func NewSyntheticLocationDataSource() datasource.DataSource {
 }
 
 type syntheticLocationDataSource struct {
-	instanaAPI instana.InstanaAPI
+	instanaAPI client.InstanaAPI
 }
 
 func (d *syntheticLocationDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -63,7 +65,7 @@ func (d *syntheticLocationDataSource) Configure(_ context.Context, req datasourc
 		return
 	}
 
-	providerMeta, ok := req.ProviderData.(*instana.ProviderMeta)
+	providerMeta, ok := req.ProviderData.(*shared.ProviderMeta)
 	if !ok {
 		resp.Diagnostics.AddError(
 			SyntheticLocationErrUnexpectedConfigureType,
@@ -83,7 +85,7 @@ func (d *syntheticLocationDataSource) Read(ctx context.Context, req datasource.R
 	}
 
 	// Get all synthetic locations
-	syntheticLocations, err := d.instanaAPI.SyntheticLocation().GetAll()
+	syntheticLocations, err := d.instanaAPI.SyntheticLocations().GetAll()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			SyntheticLocationErrReadingLocations,
@@ -96,7 +98,7 @@ func (d *syntheticLocationDataSource) Read(ctx context.Context, req datasource.R
 	label := data.Label.ValueString()
 	locationType := data.LocationType.ValueString()
 
-	var matchingLocation *instana.SyntheticLocation
+	var matchingLocation *api.SyntheticLocation
 	for _, location := range *syntheticLocations {
 		if location.Label == label && location.LocationType == locationType {
 			matchingLocation = location

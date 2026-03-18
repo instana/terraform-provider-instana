@@ -18,8 +18,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	instana "github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/client"
 	"github.com/instana/instana-go-client/shared/rest"
+	tag "github.com/instana/instana-go-client/shared/tagfilter"
+	common "github.com/instana/instana-go-client/shared/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
@@ -27,7 +30,7 @@ import (
 )
 
 // NewLogAlertConfigResourceHandle creates the resource handle for Log Alert Configuration
-func NewLogAlertConfigResourceHandle() resourcehandle.ResourceHandle[*instana.LogAlertConfig] {
+func NewLogAlertConfigResourceHandle() resourcehandle.ResourceHandle[*api.LogAlertConfig] {
 	return &logAlertConfigResource{
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:  ResourceInstanaLogAlertConfig,
@@ -70,16 +73,16 @@ func buildLogAlertConfigSchema() schema.Schema {
 			LogAlertConfigFieldGranularity: schema.Int64Attribute{
 				Optional:    true,
 				Computed:    true,
-				Default:     int64default.StaticInt64(int64(instana.Granularity60000)),
+				Default:     int64default.StaticInt64(int64(common.Granularity60000)),
 				Description: LogAlertConfigDescGranularity,
 				Validators: []validator.Int64{
 					int64validator.OneOf(
-						int64(instana.Granularity60000),
-						int64(instana.Granularity300000),
-						int64(instana.Granularity600000),
-						int64(instana.Granularity900000),
-						int64(instana.Granularity1200000),
-						int64(instana.Granularity1800000),
+						int64(common.Granularity60000),
+						int64(common.Granularity300000),
+						int64(common.Granularity600000),
+						int64(common.Granularity900000),
+						int64(common.Granularity1200000),
+						int64(common.Granularity1800000),
 					),
 				},
 			},
@@ -167,7 +170,7 @@ func buildRulesSchema() schema.SingleNestedAttribute {
 				Computed:    true,
 				Description: LogAlertConfigDescAggregation,
 				Validators: []validator.String{
-					stringvalidator.OneOf(string(instana.SumAggregation)),
+					stringvalidator.OneOf(string(common.SumAggregation)),
 				},
 			},
 			LogAlertConfigFieldThresholdOperator: schema.StringAttribute{
@@ -220,8 +223,8 @@ func (r *logAlertConfigResource) MetaData() *resourcehandle.ResourceMetaData {
 	return &r.metaData
 }
 
-func (r *logAlertConfigResource) GetRestResource(api instana.InstanaAPI) rest.RestResource[*instana.LogAlertConfig] {
-	return api.LogAlertConfig()
+func (r *logAlertConfigResource) GetRestResource(api client.InstanaAPI) rest.RestResource[*api.LogAlertConfig] {
+	return api.LogAlertConfigs()
 }
 
 func (r *logAlertConfigResource) SetComputedFields(_ context.Context, _ *tfsdk.Plan) diag.Diagnostics {
@@ -229,7 +232,7 @@ func (r *logAlertConfigResource) SetComputedFields(_ context.Context, _ *tfsdk.P
 }
 
 // UpdateState updates the Terraform state with data from the API response
-func (r *logAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, config *instana.LogAlertConfig) diag.Diagnostics {
+func (r *logAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, config *api.LogAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	var model LogAlertConfigModel
@@ -290,7 +293,7 @@ func (r *logAlertConfigResource) mapGracePeriodToModel(gracePeriod int64) types.
 }
 
 // mapTagFilterToModel converts API tag filter to model representation
-func (r *logAlertConfigResource) mapTagFilterToModel(tagFilterExpression *instana.TagFilter) (types.String, diag.Diagnostics) {
+func (r *logAlertConfigResource) mapTagFilterToModel(tagFilterExpression *tag.TagFilter) (types.String, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if tagFilterExpression == nil {
@@ -310,7 +313,7 @@ func (r *logAlertConfigResource) mapTagFilterToModel(tagFilterExpression *instan
 }
 
 // mapGroupByToModel converts API group by to model representation
-func (r *logAlertConfigResource) mapGroupByToModel(groupBy []instana.GroupByTag) ([]GroupByModel, diag.Diagnostics) {
+func (r *logAlertConfigResource) mapGroupByToModel(groupBy []api.GroupByTag) ([]GroupByModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if len(groupBy) == 0 {
@@ -337,7 +340,7 @@ func (r *logAlertConfigResource) mapGroupByKeyToModel(key string) types.String {
 }
 
 // mapAlertChannelsToModel converts API alert channels to model representation
-func (r *logAlertConfigResource) mapAlertChannelsToModel(ctx context.Context, alertChannels map[instana.AlertSeverity][]string) (*AlertChannelsModel, diag.Diagnostics) {
+func (r *logAlertConfigResource) mapAlertChannelsToModel(ctx context.Context, alertChannels map[common.AlertSeverity][]string) (*AlertChannelsModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if len(alertChannels) == 0 {
@@ -346,11 +349,11 @@ func (r *logAlertConfigResource) mapAlertChannelsToModel(ctx context.Context, al
 
 	model := &AlertChannelsModel{}
 
-	warningChannels, warningDiags := r.mapSeverityChannelsToModel(ctx, alertChannels, instana.WarningSeverity)
+	warningChannels, warningDiags := r.mapSeverityChannelsToModel(ctx, alertChannels, common.WarningSeverity)
 	diags.Append(warningDiags...)
 	model.Warning = warningChannels
 
-	criticalChannels, criticalDiags := r.mapSeverityChannelsToModel(ctx, alertChannels, instana.CriticalSeverity)
+	criticalChannels, criticalDiags := r.mapSeverityChannelsToModel(ctx, alertChannels, common.CriticalSeverity)
 	diags.Append(criticalDiags...)
 	model.Critical = criticalChannels
 
@@ -358,7 +361,7 @@ func (r *logAlertConfigResource) mapAlertChannelsToModel(ctx context.Context, al
 }
 
 // mapSeverityChannelsToModel converts alert channels for a specific severity to model representation
-func (r *logAlertConfigResource) mapSeverityChannelsToModel(ctx context.Context, alertChannels map[instana.AlertSeverity][]string, severity instana.AlertSeverity) (types.Set, diag.Diagnostics) {
+func (r *logAlertConfigResource) mapSeverityChannelsToModel(ctx context.Context, alertChannels map[common.AlertSeverity][]string, severity common.AlertSeverity) (types.Set, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	channels, exists := alertChannels[severity]
@@ -372,7 +375,7 @@ func (r *logAlertConfigResource) mapSeverityChannelsToModel(ctx context.Context,
 }
 
 // mapTimeThresholdToModel converts API time threshold to model representation
-func (r *logAlertConfigResource) mapTimeThresholdToModel(apiTimeThreshold *instana.LogTimeThreshold) *TimeThresholdModel {
+func (r *logAlertConfigResource) mapTimeThresholdToModel(apiTimeThreshold *api.LogTimeThreshold) *TimeThresholdModel {
 	if apiTimeThreshold == nil {
 		return nil
 	}
@@ -389,7 +392,7 @@ func (r *logAlertConfigResource) mapTimeThresholdToModel(apiTimeThreshold *insta
 }
 
 // mapRulesToModel converts API rules to model representation
-func (r *logAlertConfigResource) mapRulesToModel(rules []instana.RuleWithThreshold[instana.LogAlertRule]) (*LogAlertRuleModel, diag.Diagnostics) {
+func (r *logAlertConfigResource) mapRulesToModel(rules []common.RuleWithThreshold[api.LogAlertRule]) (*LogAlertRuleModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if len(rules) == 0 {
@@ -419,22 +422,22 @@ func (r *logAlertConfigResource) convertAlertTypeToSchema(alertType string) stri
 }
 
 // mapAggregationToModel converts aggregation to model representation
-func (r *logAlertConfigResource) mapAggregationToModel(aggregation instana.Aggregation) types.String {
+func (r *logAlertConfigResource) mapAggregationToModel(aggregation common.Aggregation) types.String {
 	if aggregation != EmptyString {
 		return types.StringValue(string(aggregation))
 	}
-	return types.StringValue(string(instana.SumAggregation))
+	return types.StringValue(string(common.SumAggregation))
 }
 
 // mapThresholdsToModel converts API thresholds to model representation
-func (r *logAlertConfigResource) mapThresholdsToModel(thresholds map[instana.AlertSeverity]instana.ThresholdRule) *ThresholdModel {
+func (r *logAlertConfigResource) mapThresholdsToModel(thresholds map[common.AlertSeverity]common.ThresholdRule) *ThresholdModel {
 	thresholdModel := &ThresholdModel{}
 
-	if warningThreshold, hasWarning := thresholds[instana.WarningSeverity]; hasWarning {
+	if warningThreshold, hasWarning := thresholds[common.WarningSeverity]; hasWarning {
 		thresholdModel.Warning = r.createThresholdModel(warningThreshold)
 	}
 
-	if criticalThreshold, hasCritical := thresholds[instana.CriticalSeverity]; hasCritical {
+	if criticalThreshold, hasCritical := thresholds[common.CriticalSeverity]; hasCritical {
 		thresholdModel.Critical = r.createThresholdModel(criticalThreshold)
 	}
 
@@ -442,7 +445,7 @@ func (r *logAlertConfigResource) mapThresholdsToModel(thresholds map[instana.Ale
 }
 
 // createThresholdModel creates a threshold model from API threshold rule
-func (r *logAlertConfigResource) createThresholdModel(threshold instana.ThresholdRule) *shared.ThresholdTypeModel {
+func (r *logAlertConfigResource) createThresholdModel(threshold common.ThresholdRule) *shared.ThresholdTypeModel {
 	// Handle adaptive baseline
 	if threshold.Type == "adaptiveBaseline" {
 		return &shared.ThresholdTypeModel{
@@ -472,7 +475,7 @@ func (r *logAlertConfigResource) createThresholdModel(threshold instana.Threshol
 }
 
 // MapStateToDataObject maps Terraform state/plan to API LogAlertConfig object
-func (r *logAlertConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*instana.LogAlertConfig, diag.Diagnostics) {
+func (r *logAlertConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*api.LogAlertConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	model, modelDiags := r.extractModelFromPlanOrState(ctx, plan, state)
@@ -481,7 +484,7 @@ func (r *logAlertConfigResource) MapStateToDataObject(ctx context.Context, plan 
 		return nil, diags
 	}
 
-	config := &instana.LogAlertConfig{
+	config := &api.LogAlertConfig{
 		ID:          r.extractConfigID(model),
 		Name:        model.Name.ValueString(),
 		Description: model.Description.ValueString(),
@@ -537,11 +540,11 @@ func (r *logAlertConfigResource) extractConfigID(model LogAlertConfigModel) stri
 }
 
 // extractGranularity extracts granularity from the model with default value
-func (r *logAlertConfigResource) extractGranularity(granularity types.Int64) instana.Granularity {
+func (r *logAlertConfigResource) extractGranularity(granularity types.Int64) common.Granularity {
 	if !granularity.IsNull() {
-		return instana.Granularity(granularity.ValueInt64())
+		return common.Granularity(granularity.ValueInt64())
 	}
-	return instana.Granularity600000
+	return common.Granularity600000
 }
 
 // extractGracePeriod extracts grace period from the model
@@ -553,7 +556,7 @@ func (r *logAlertConfigResource) extractGracePeriod(gracePeriod types.Int64) int
 }
 
 // mapModelTagFilterToAPI converts model tag filter to API representation
-func (r *logAlertConfigResource) mapModelTagFilterToAPI(tagFilter types.String) (*instana.TagFilter, diag.Diagnostics) {
+func (r *logAlertConfigResource) mapModelTagFilterToAPI(tagFilter types.String) (*tag.TagFilter, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if tagFilter.IsNull() {
@@ -575,16 +578,16 @@ func (r *logAlertConfigResource) mapModelTagFilterToAPI(tagFilter types.String) 
 }
 
 // mapModelGroupByToAPI converts model group by to API representation
-func (r *logAlertConfigResource) mapModelGroupByToAPI(ctx context.Context, groupByModels []GroupByModel) ([]instana.GroupByTag, diag.Diagnostics) {
+func (r *logAlertConfigResource) mapModelGroupByToAPI(ctx context.Context, groupByModels []GroupByModel) ([]api.GroupByTag, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if len(groupByModels) == 0 {
-		return []instana.GroupByTag{}, diags
+		return []api.GroupByTag{}, diags
 	}
 
-	result := make([]instana.GroupByTag, len(groupByModels))
+	result := make([]api.GroupByTag, len(groupByModels))
 	for i, model := range groupByModels {
-		result[i] = instana.GroupByTag{
+		result[i] = api.GroupByTag{
 			TagName: model.TagName.ValueString(),
 			Key:     r.extractGroupByKey(model.Key),
 		}
@@ -602,9 +605,9 @@ func (r *logAlertConfigResource) extractGroupByKey(key types.String) string {
 }
 
 // mapModelAlertChannelsToAPI converts model alert channels to API representation
-func (r *logAlertConfigResource) mapModelAlertChannelsToAPI(ctx context.Context, alertChannelsModel *AlertChannelsModel) (map[instana.AlertSeverity][]string, diag.Diagnostics) {
+func (r *logAlertConfigResource) mapModelAlertChannelsToAPI(ctx context.Context, alertChannelsModel *AlertChannelsModel) (map[common.AlertSeverity][]string, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	alertChannels := make(map[instana.AlertSeverity][]string)
+	alertChannels := make(map[common.AlertSeverity][]string)
 
 	if alertChannelsModel == nil {
 		return alertChannels, diags
@@ -616,14 +619,14 @@ func (r *logAlertConfigResource) mapModelAlertChannelsToAPI(ctx context.Context,
 		warningChannels = []string{}
 	}
 
-	alertChannels[instana.WarningSeverity] = warningChannels
+	alertChannels[common.WarningSeverity] = warningChannels
 
 	criticalChannels, criticalDiags := r.extractChannelsForSeverity(ctx, alertChannelsModel.Critical)
 	diags.Append(criticalDiags...)
 	if criticalChannels == nil {
 		criticalChannels = []string{}
 	}
-	alertChannels[instana.CriticalSeverity] = criticalChannels
+	alertChannels[common.CriticalSeverity] = criticalChannels
 
 	return alertChannels, diags
 }
@@ -642,7 +645,7 @@ func (r *logAlertConfigResource) extractChannelsForSeverity(ctx context.Context,
 }
 
 // mapModelTimeThresholdToAPI converts model time threshold to API representation
-func (r *logAlertConfigResource) mapModelTimeThresholdToAPI(timeThresholdModel *TimeThresholdModel) *instana.LogTimeThreshold {
+func (r *logAlertConfigResource) mapModelTimeThresholdToAPI(timeThresholdModel *TimeThresholdModel) *api.LogTimeThreshold {
 	if timeThresholdModel == nil || timeThresholdModel.ViolationsInSequence == nil {
 		return nil
 	}
@@ -652,31 +655,31 @@ func (r *logAlertConfigResource) mapModelTimeThresholdToAPI(timeThresholdModel *
 		return nil
 	}
 
-	return &instana.LogTimeThreshold{
+	return &api.LogTimeThreshold{
 		Type:       TimeThresholdTypeViolationsInSequence,
 		TimeWindow: violationsModel.TimeWindow.ValueInt64(),
 	}
 }
 
 // mapModelRulesToAPI converts model rules to API representation
-func (r *logAlertConfigResource) mapModelRulesToAPI(ruleModel *LogAlertRuleModel) ([]instana.RuleWithThreshold[instana.LogAlertRule], diag.Diagnostics) {
+func (r *logAlertConfigResource) mapModelRulesToAPI(ruleModel *LogAlertRuleModel) ([]common.RuleWithThreshold[api.LogAlertRule], diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if ruleModel == nil {
-		return []instana.RuleWithThreshold[instana.LogAlertRule]{}, diags
+		return []common.RuleWithThreshold[api.LogAlertRule]{}, diags
 	}
 
-	logAlertRule := instana.LogAlertRule{
+	logAlertRule := api.LogAlertRule{
 		MetricName:  ruleModel.MetricName.ValueString(),
 		AlertType:   r.convertAlertTypeToAPI(ruleModel.AlertType.ValueString()),
 		Aggregation: r.extractAggregation(ruleModel.Aggregation),
 	}
 
-	thresholdOperator := instana.ThresholdOperator(ruleModel.ThresholdOperator.ValueString())
+	thresholdOperator := common.ThresholdOperator(ruleModel.ThresholdOperator.ValueString())
 	thresholdMap, thresholdDiags := r.mapModelThresholdsToAPI(ruleModel.Threshold)
 	diags.Append(thresholdDiags...)
 
-	result := []instana.RuleWithThreshold[instana.LogAlertRule]{
+	result := []common.RuleWithThreshold[api.LogAlertRule]{
 		{
 			ThresholdOperator: thresholdOperator,
 			Rule:              logAlertRule,
@@ -696,17 +699,17 @@ func (r *logAlertConfigResource) convertAlertTypeToAPI(alertType string) string 
 }
 
 // extractAggregation extracts aggregation from the model
-func (r *logAlertConfigResource) extractAggregation(aggregation types.String) instana.Aggregation {
+func (r *logAlertConfigResource) extractAggregation(aggregation types.String) common.Aggregation {
 	if !aggregation.IsNull() {
-		return instana.Aggregation(aggregation.ValueString())
+		return common.Aggregation(aggregation.ValueString())
 	}
 	return EmptyString
 }
 
 // mapModelThresholdsToAPI converts model thresholds to API representation
-func (r *logAlertConfigResource) mapModelThresholdsToAPI(thresholdModel *ThresholdModel) (map[instana.AlertSeverity]instana.ThresholdRule, diag.Diagnostics) {
+func (r *logAlertConfigResource) mapModelThresholdsToAPI(thresholdModel *ThresholdModel) (map[common.AlertSeverity]common.ThresholdRule, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	thresholdMap := make(map[instana.AlertSeverity]instana.ThresholdRule)
+	thresholdMap := make(map[common.AlertSeverity]common.ThresholdRule)
 
 	if thresholdModel == nil {
 		return thresholdMap, diags
@@ -716,7 +719,7 @@ func (r *logAlertConfigResource) mapModelThresholdsToAPI(thresholdModel *Thresho
 		warningRule, warningDiags := r.convertThresholdModelToAPI(thresholdModel.Warning)
 		diags.Append(warningDiags...)
 		if warningRule != nil {
-			thresholdMap[instana.WarningSeverity] = *warningRule
+			thresholdMap[common.WarningSeverity] = *warningRule
 		}
 	}
 
@@ -724,7 +727,7 @@ func (r *logAlertConfigResource) mapModelThresholdsToAPI(thresholdModel *Thresho
 		criticalRule, criticalDiags := r.convertThresholdModelToAPI(thresholdModel.Critical)
 		diags.Append(criticalDiags...)
 		if criticalRule != nil {
-			thresholdMap[instana.CriticalSeverity] = *criticalRule
+			thresholdMap[common.CriticalSeverity] = *criticalRule
 		}
 	}
 
@@ -732,7 +735,7 @@ func (r *logAlertConfigResource) mapModelThresholdsToAPI(thresholdModel *Thresho
 }
 
 // convertThresholdModelToAPI converts a threshold model to API representation
-func (r *logAlertConfigResource) convertThresholdModelToAPI(threshold *shared.ThresholdTypeModel) (*instana.ThresholdRule, diag.Diagnostics) {
+func (r *logAlertConfigResource) convertThresholdModelToAPI(threshold *shared.ThresholdTypeModel) (*common.ThresholdRule, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if threshold == nil {
@@ -743,7 +746,7 @@ func (r *logAlertConfigResource) convertThresholdModelToAPI(threshold *shared.Th
 	if threshold.Static != nil && !threshold.Static.Value.IsNull() {
 		valueFloat := threshold.Static.Value.ValueFloat64()
 		rounded := math.Round(valueFloat*100) / 100
-		return &instana.ThresholdRule{
+		return &common.ThresholdRule{
 			Type:  ThresholdTypeStatic,
 			Value: &rounded,
 		}, diags
@@ -751,7 +754,7 @@ func (r *logAlertConfigResource) convertThresholdModelToAPI(threshold *shared.Th
 
 	// Handle adaptive baseline threshold
 	if threshold.AdaptiveBaseline != nil {
-		seasonality := instana.ThresholdSeasonality(threshold.AdaptiveBaseline.Seasonality.ValueString())
+		seasonality := common.ThresholdSeasonality(threshold.AdaptiveBaseline.Seasonality.ValueString())
 		deviationFactorVal := threshold.AdaptiveBaseline.DeviationFactor.ValueFloat64()
 		adaptabilityVal := threshold.AdaptiveBaseline.Adaptability.ValueFloat64()
 
@@ -764,7 +767,7 @@ func (r *logAlertConfigResource) convertThresholdModelToAPI(threshold *shared.Th
 		parsedAdapt, _ := strconv.ParseFloat(formattedAdapt, 64)
 		adaptability := float32(parsedAdapt)
 
-		return &instana.ThresholdRule{
+		return &common.ThresholdRule{
 			Type:            "adaptiveBaseline",
 			Seasonality:     &seasonality,
 			DeviationFactor: &deviationFactor,

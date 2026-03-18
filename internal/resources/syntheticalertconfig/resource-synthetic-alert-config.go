@@ -13,8 +13,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/client"
 	"github.com/instana/instana-go-client/shared/rest"
+	tag "github.com/instana/instana-go-client/shared/tagfilter"
+	common "github.com/instana/instana-go-client/shared/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
@@ -22,7 +25,7 @@ import (
 )
 
 // NewSyntheticAlertConfigResourceHandle creates the resource handle for Synthetic Alert Configuration
-func NewSyntheticAlertConfigResourceHandle() resourcehandle.ResourceHandle[*instana.SyntheticAlertConfig] {
+func NewSyntheticAlertConfigResourceHandle() resourcehandle.ResourceHandle[*api.SyntheticAlertConfig] {
 	resource := &syntheticAlertConfigResource{}
 	return resource.initialize()
 }
@@ -297,7 +300,7 @@ func (r *syntheticAlertConfigResource) MetaData() *resourcehandle.ResourceMetaDa
 	return &r.metaData
 }
 
-func (r *syntheticAlertConfigResource) GetRestResource(api instana.InstanaAPI) rest.RestResource[*instana.SyntheticAlertConfig] {
+func (r *syntheticAlertConfigResource) GetRestResource(api client.InstanaAPI) rest.RestResource[*api.SyntheticAlertConfig] {
 	return api.SyntheticAlertConfigs()
 }
 
@@ -305,7 +308,7 @@ func (r *syntheticAlertConfigResource) SetComputedFields(_ context.Context, _ *t
 	return nil
 }
 
-func (r *syntheticAlertConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*instana.SyntheticAlertConfig, diag.Diagnostics) {
+func (r *syntheticAlertConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*api.SyntheticAlertConfig, diag.Diagnostics) {
 	model, diags := r.extractModelFromState(ctx, plan, state)
 	if diags.HasError() {
 		return nil, diags
@@ -370,15 +373,15 @@ func (r *syntheticAlertConfigResource) extractModelFromState(ctx context.Context
 }
 
 // mapRuleFromModel converts rule model to API rule object
-func (r *syntheticAlertConfigResource) mapRuleFromModel(model *SyntheticAlertConfigModel) (instana.SyntheticAlertRule, diag.Diagnostics) {
+func (r *syntheticAlertConfigResource) mapRuleFromModel(model *SyntheticAlertConfigModel) (api.SyntheticAlertRule, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	var rule instana.SyntheticAlertRule
+	var rule api.SyntheticAlertRule
 
 	if model.Rule == nil {
 		return rule, diags
 	}
 
-	rule = instana.SyntheticAlertRule{
+	rule = api.SyntheticAlertRule{
 		AlertType:  model.Rule.AlertType.ValueString(),
 		MetricName: model.Rule.MetricName.ValueString(),
 	}
@@ -391,15 +394,15 @@ func (r *syntheticAlertConfigResource) mapRuleFromModel(model *SyntheticAlertCon
 }
 
 // mapTimeThresholdFromModel converts time threshold model to API time threshold object
-func (r *syntheticAlertConfigResource) mapTimeThresholdFromModel(model *SyntheticAlertConfigModel) (instana.SyntheticAlertTimeThreshold, diag.Diagnostics) {
+func (r *syntheticAlertConfigResource) mapTimeThresholdFromModel(model *SyntheticAlertConfigModel) (api.SyntheticAlertTimeThreshold, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	var timeThreshold instana.SyntheticAlertTimeThreshold
+	var timeThreshold api.SyntheticAlertTimeThreshold
 
 	if model.TimeThreshold == nil {
 		return timeThreshold, diags
 	}
 
-	timeThreshold = instana.SyntheticAlertTimeThreshold{
+	timeThreshold = api.SyntheticAlertTimeThreshold{
 		Type:            model.TimeThreshold.Type.ValueString(),
 		ViolationsCount: int(model.TimeThreshold.ViolationsCount.ValueInt64()),
 	}
@@ -442,7 +445,7 @@ func (r *syntheticAlertConfigResource) extractAlertChannelIdsFromModel(ctx conte
 }
 
 // mapTagFilterFromModel converts tag filter model to API tag filter object
-func (r *syntheticAlertConfigResource) mapTagFilterFromModel(model *SyntheticAlertConfigModel) (*instana.TagFilter, diag.Diagnostics) {
+func (r *syntheticAlertConfigResource) mapTagFilterFromModel(model *SyntheticAlertConfigModel) (*tag.TagFilter, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if r.hasTagFilterValue(model) {
@@ -458,7 +461,7 @@ func (r *syntheticAlertConfigResource) hasTagFilterValue(model *SyntheticAlertCo
 }
 
 // parseTagFilterExpression parses the tag filter expression string
-func (r *syntheticAlertConfigResource) parseTagFilterExpression(expression string, diags *diag.Diagnostics) (*instana.TagFilter, diag.Diagnostics) {
+func (r *syntheticAlertConfigResource) parseTagFilterExpression(expression string, diags *diag.Diagnostics) (*tag.TagFilter, diag.Diagnostics) {
 	tagFilter, err := mapTagFilterExpressionFromSchema(expression)
 	if err != nil {
 		diags.AddError(
@@ -471,19 +474,19 @@ func (r *syntheticAlertConfigResource) parseTagFilterExpression(expression strin
 }
 
 // createDefaultTagFilter creates a default tag filter with AND operator
-func (r *syntheticAlertConfigResource) createDefaultTagFilter() *instana.TagFilter {
-	operator := instana.LogicalOperatorType(TagFilterLogicalOperatorAnd)
-	return &instana.TagFilter{
+func (r *syntheticAlertConfigResource) createDefaultTagFilter() *tag.TagFilter {
+	operator := common.LogicalOperatorType(TagFilterLogicalOperatorAnd)
+	return &tag.TagFilter{
 		Type:            TagFilterTypeExpression,
 		LogicalOperator: &operator,
-		Elements:        []*instana.TagFilter{},
+		Elements:        []*tag.TagFilter{},
 	}
 }
 
 // extractCustomPayloadFieldsFromModel extracts custom payload fields from the model
-func (r *syntheticAlertConfigResource) extractCustomPayloadFieldsFromModel(ctx context.Context, model *SyntheticAlertConfigModel) ([]instana.CustomPayloadField[any], diag.Diagnostics) {
+func (r *syntheticAlertConfigResource) extractCustomPayloadFieldsFromModel(ctx context.Context, model *SyntheticAlertConfigModel) ([]common.CustomPayloadField[any], diag.Diagnostics) {
 	var diags diag.Diagnostics
-	var customPayloadFields []instana.CustomPayloadField[any]
+	var customPayloadFields []common.CustomPayloadField[any]
 
 	if !model.CustomPayloadFields.IsNull() {
 		customPayloadFields, diags = shared.MapCustomPayloadFieldsToAPIObject(ctx, model.CustomPayloadFields)
@@ -495,14 +498,14 @@ func (r *syntheticAlertConfigResource) extractCustomPayloadFieldsFromModel(ctx c
 // buildAPIObjectFromModel constructs the API object from model and extracted data
 func (r *syntheticAlertConfigResource) buildAPIObjectFromModel(
 	model *SyntheticAlertConfigModel,
-	rule instana.SyntheticAlertRule,
-	timeThreshold instana.SyntheticAlertTimeThreshold,
+	rule api.SyntheticAlertRule,
+	timeThreshold api.SyntheticAlertTimeThreshold,
 	syntheticTestIds []string,
 	alertChannelIds []string,
-	tagFilter *instana.TagFilter,
-	customPayloadFields []instana.CustomPayloadField[any],
-) *instana.SyntheticAlertConfig {
-	syntheticAlertConfig := &instana.SyntheticAlertConfig{
+	tagFilter *tag.TagFilter,
+	customPayloadFields []common.CustomPayloadField[any],
+) *api.SyntheticAlertConfig {
+	syntheticAlertConfig := &api.SyntheticAlertConfig{
 		ID:                    model.ID.ValueString(),
 		Name:                  model.Name.ValueString(),
 		Description:           model.Description.ValueString(),
@@ -519,7 +522,7 @@ func (r *syntheticAlertConfigResource) buildAPIObjectFromModel(
 }
 
 // setOptionalFieldsOnAPIObject sets optional fields on the API object
-func (r *syntheticAlertConfigResource) setOptionalFieldsOnAPIObject(apiObject *instana.SyntheticAlertConfig, model *SyntheticAlertConfigModel) {
+func (r *syntheticAlertConfigResource) setOptionalFieldsOnAPIObject(apiObject *api.SyntheticAlertConfig, model *SyntheticAlertConfigModel) {
 	if !model.Severity.IsNull() {
 		apiObject.Severity = int(model.Severity.ValueInt64())
 	}
@@ -529,7 +532,7 @@ func (r *syntheticAlertConfigResource) setOptionalFieldsOnAPIObject(apiObject *i
 	}
 }
 
-func (r *syntheticAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *instana.SyntheticAlertConfig) diag.Diagnostics {
+func (r *syntheticAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *api.SyntheticAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var model SyntheticAlertConfigModel
 	if plan != nil {
@@ -597,7 +600,7 @@ func (r *syntheticAlertConfigResource) mapGracePeriodToState(gracePeriod int64) 
 }
 
 // mapTagFilterToState converts tag filter expression to state value
-func (r *syntheticAlertConfigResource) mapTagFilterToState(tagFilterExpression *instana.TagFilter) (types.String, diag.Diagnostics) {
+func (r *syntheticAlertConfigResource) mapTagFilterToState(tagFilterExpression *tag.TagFilter) (types.String, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if tagFilterExpression == nil {
@@ -621,7 +624,7 @@ func (r *syntheticAlertConfigResource) mapTagFilterToState(tagFilterExpression *
 }
 
 // mapRuleToModel converts API rule to model rule
-func (r *syntheticAlertConfigResource) mapRuleToModel(rule instana.SyntheticAlertRule) *SyntheticAlertRuleModel {
+func (r *syntheticAlertConfigResource) mapRuleToModel(rule api.SyntheticAlertRule) *SyntheticAlertRuleModel {
 	aggregationValue := r.buildAggregationValue(rule.Aggregation)
 
 	return &SyntheticAlertRuleModel{
@@ -640,7 +643,7 @@ func (r *syntheticAlertConfigResource) buildAggregationValue(aggregation string)
 }
 
 // mapTimeThresholdToModel converts API time threshold to model time threshold
-func (r *syntheticAlertConfigResource) mapTimeThresholdToModel(timeThreshold instana.SyntheticAlertTimeThreshold) *SyntheticAlertTimeThresholdModel {
+func (r *syntheticAlertConfigResource) mapTimeThresholdToModel(timeThreshold api.SyntheticAlertTimeThreshold) *SyntheticAlertTimeThresholdModel {
 	return &SyntheticAlertTimeThresholdModel{
 		Type:            types.StringValue(timeThreshold.Type),
 		ViolationsCount: types.Int64Value(int64(timeThreshold.ViolationsCount)),
@@ -658,11 +661,11 @@ func (r *syntheticAlertConfigResource) mapAlertChannelIdsToState(ctx context.Con
 }
 
 // mapCustomPayloadFieldsToState converts custom payload fields to Terraform list
-func (r *syntheticAlertConfigResource) mapCustomPayloadFieldsToState(ctx context.Context, customPayloadFields []instana.CustomPayloadField[any]) (types.List, diag.Diagnostics) {
+func (r *syntheticAlertConfigResource) mapCustomPayloadFieldsToState(ctx context.Context, customPayloadFields []common.CustomPayloadField[any]) (types.List, diag.Diagnostics) {
 	return shared.CustomPayloadFieldsToTerraform(ctx, customPayloadFields)
 }
 
-func mapTagFilterExpressionFromSchema(input string) (*instana.TagFilter, error) {
+func mapTagFilterExpressionFromSchema(input string) (*tag.TagFilter, error) {
 	parser := tagfilter.NewParser()
 	expr, err := parser.Parse(input)
 	if err != nil {

@@ -226,7 +226,7 @@ func (r *customDashboardResource) MapStateToDataObject(ctx context.Context, plan
 // ============================================================================
 
 // mapAccessRulesFromState converts access rule models from state to API format
-func (r *customDashboardResource) mapAccessRulesFromState(accessRuleModels []AccessRuleModel) []api.AccessRule {
+func (r *customDashboardResource) mapAccessRulesFromState(accessRuleModels []AccessRuleModel) []model.AccessRule {
 	if len(accessRuleModels) == 0 {
 		return nil
 	}

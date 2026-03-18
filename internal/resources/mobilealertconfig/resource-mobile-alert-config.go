@@ -19,8 +19,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	instana "github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/client"
 	"github.com/instana/instana-go-client/shared/rest"
+	tag "github.com/instana/instana-go-client/shared/tagfilter"
+	common "github.com/instana/instana-go-client/shared/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
@@ -28,7 +31,7 @@ import (
 )
 
 // NewMobileAlertConfigResourceHandle creates the resource handle for Mobile Alert Configs
-func NewMobileAlertConfigResourceHandle() resourcehandle.ResourceHandle[*instana.MobileAlertConfig] {
+func NewMobileAlertConfigResourceHandle() resourcehandle.ResourceHandle[*api.MobileAlertConfig] {
 	return &mobileAlertConfigResource{
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName: ResourceInstanaMobileAlertConfig,
@@ -255,8 +258,8 @@ func (r *mobileAlertConfigResource) MetaData() *resourcehandle.ResourceMetaData 
 }
 
 // GetRestResource returns the REST resource for mobile alert configurations from the Instana API
-func (r *mobileAlertConfigResource) GetRestResource(api instana.InstanaAPI) rest.RestResource[*instana.MobileAlertConfig] {
-	return api.MobileAlertConfig()
+func (r *mobileAlertConfigResource) GetRestResource(api client.InstanaAPI) rest.RestResource[*api.MobileAlertConfig] {
+	return api.MobileAlertConfigs()
 }
 
 // SetComputedFields sets computed fields in the plan (currently no computed fields need to be set)
@@ -265,7 +268,7 @@ func (r *mobileAlertConfigResource) SetComputedFields(_ context.Context, _ *tfsd
 }
 
 // MapStateToDataObject converts Terraform state/plan to API data object for mobile alert configuration
-func (r *mobileAlertConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*instana.MobileAlertConfig, diag.Diagnostics) {
+func (r *mobileAlertConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*api.MobileAlertConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var model MobileAlertConfigModel
 
@@ -323,7 +326,7 @@ func (r *mobileAlertConfigResource) MapStateToDataObject(ctx context.Context, pl
 	}
 
 	// Create API object
-	return &instana.MobileAlertConfig{
+	return &api.MobileAlertConfig{
 		ID:                  model.ID.ValueString(),
 		Name:                model.Name.ValueString(),
 		Description:         model.Description.ValueString(),
@@ -332,7 +335,7 @@ func (r *mobileAlertConfigResource) MapStateToDataObject(ctx context.Context, pl
 		Enabled:             util.SetBoolPointerFromState(model.Enabled),
 		TagFilterExpression: tagFilter,
 		AlertChannels:       alertChannels,
-		Granularity:         instana.Granularity(model.Granularity.ValueInt64()),
+		Granularity:         common.Granularity(model.Granularity.ValueInt64()),
 		GracePeriod:         gracePeriod,
 		CustomPayloadFields: customPayloadFields,
 		Rules:               rules,
@@ -341,7 +344,7 @@ func (r *mobileAlertConfigResource) MapStateToDataObject(ctx context.Context, pl
 }
 
 // mapTagFilterToAPI maps tag filter expression from model to API
-func (r *mobileAlertConfigResource) mapTagFilterToAPI(model MobileAlertConfigModel) (*instana.TagFilter, diag.Diagnostics) {
+func (r *mobileAlertConfigResource) mapTagFilterToAPI(model MobileAlertConfigModel) (*tag.TagFilter, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if !model.TagFilter.IsNull() && !model.TagFilter.IsUnknown() {
@@ -356,11 +359,11 @@ func (r *mobileAlertConfigResource) mapTagFilterToAPI(model MobileAlertConfigMod
 	}
 
 	// Return default tag filter
-	operator := instana.LogicalOperatorType(MobileAlertConfigLogicalOperatorAND)
-	return &instana.TagFilter{
+	operator := common.LogicalOperatorType(MobileAlertConfigLogicalOperatorAND)
+	return &tag.TagFilter{
 		Type:            MobileAlertConfigTagFilterTypeExpression,
 		LogicalOperator: &operator,
-		Elements:        []*instana.TagFilter{},
+		Elements:        []*tag.TagFilter{},
 	}, diags
 }
 
@@ -384,9 +387,9 @@ func (r *mobileAlertConfigResource) mapAlertChannelsToAPI(ctx context.Context, m
 }
 
 // mapCustomPayloadFieldsToAPI maps custom payload fields from model to API
-func (r *mobileAlertConfigResource) mapCustomPayloadFieldsToAPI(ctx context.Context, model MobileAlertConfigModel) ([]instana.CustomPayloadField[any], diag.Diagnostics) {
+func (r *mobileAlertConfigResource) mapCustomPayloadFieldsToAPI(ctx context.Context, model MobileAlertConfigModel) ([]common.CustomPayloadField[any], diag.Diagnostics) {
 	var diags diag.Diagnostics
-	customPayloadFields := make([]instana.CustomPayloadField[any], 0)
+	customPayloadFields := make([]common.CustomPayloadField[any], 0)
 
 	if !model.CustomPayloadFields.IsNull() && !model.CustomPayloadFields.IsUnknown() {
 		var payloadDiags diag.Diagnostics
@@ -398,9 +401,9 @@ func (r *mobileAlertConfigResource) mapCustomPayloadFieldsToAPI(ctx context.Cont
 }
 
 // mapRulesCollectionToAPI maps the rules collection from model to API
-func (r *mobileAlertConfigResource) mapRulesCollectionToAPI(ctx context.Context, model MobileAlertConfigModel) ([]instana.MobileAppAlertRuleWithThresholds, diag.Diagnostics) {
+func (r *mobileAlertConfigResource) mapRulesCollectionToAPI(ctx context.Context, model MobileAlertConfigModel) ([]api.MobileAppAlertRuleWithThresholds, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	rules := make([]instana.MobileAppAlertRuleWithThresholds, 0)
+	rules := make([]api.MobileAppAlertRuleWithThresholds, 0)
 
 	if len(model.Rules) == 0 {
 		return rules, diags
@@ -422,7 +425,7 @@ func (r *mobileAlertConfigResource) mapRulesCollectionToAPI(ctx context.Context,
 				return nil, diags
 			}
 
-			rules = append(rules, instana.MobileAppAlertRuleWithThresholds{
+			rules = append(rules, api.MobileAppAlertRuleWithThresholds{
 				Rule:              mobileAlertRule,
 				ThresholdOperator: ruleModel.ThresholdOperator.ValueString(),
 				Thresholds:        thresholdMap,
@@ -434,16 +437,16 @@ func (r *mobileAlertConfigResource) mapRulesCollectionToAPI(ctx context.Context,
 }
 
 // mapSingleRuleFromCollection maps a single rule from the rules collection
-func (r *mobileAlertConfigResource) mapSingleRuleFromCollection(ctx context.Context, ruleModel MobileRuleWithThresholdModel) (*instana.MobileAppAlertRule, diag.Diagnostics) {
+func (r *mobileAlertConfigResource) mapSingleRuleFromCollection(ctx context.Context, ruleModel MobileRuleWithThresholdModel) (*api.MobileAppAlertRule, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if ruleModel.Rule == nil {
 		return nil, diags
 	}
 
-	var aggregationPtr *instana.Aggregation
+	var aggregationPtr *common.Aggregation
 	if !ruleModel.Rule.Aggregation.IsNull() && !ruleModel.Rule.Aggregation.IsUnknown() {
-		aggregation := instana.Aggregation(ruleModel.Rule.Aggregation.ValueString())
+		aggregation := common.Aggregation(ruleModel.Rule.Aggregation.ValueString())
 		aggregationPtr = &aggregation
 	}
 
@@ -465,7 +468,7 @@ func (r *mobileAlertConfigResource) mapSingleRuleFromCollection(ctx context.Cont
 		customEventNamePtr = &customEventName
 	}
 
-	return &instana.MobileAppAlertRule{
+	return &api.MobileAppAlertRule{
 		AlertType:       ruleModel.Rule.AlertType.ValueString(),
 		MetricName:      ruleModel.Rule.MetricName.ValueString(),
 		Aggregation:     aggregationPtr,
@@ -476,7 +479,7 @@ func (r *mobileAlertConfigResource) mapSingleRuleFromCollection(ctx context.Cont
 }
 
 // mapTimeThresholdFromModel converts the time threshold configuration from the Terraform model to the API representation
-func (r *mobileAlertConfigResource) mapTimeThresholdFromModel(ctx context.Context, model MobileAlertConfigModel) (*instana.MobileAppTimeThreshold, diag.Diagnostics) {
+func (r *mobileAlertConfigResource) mapTimeThresholdFromModel(ctx context.Context, model MobileAlertConfigModel) (*api.MobileAppTimeThreshold, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Validate time threshold is provided
@@ -505,8 +508,8 @@ func (r *mobileAlertConfigResource) mapTimeThresholdFromModel(ctx context.Contex
 func (r *mobileAlertConfigResource) mapUserImpactTimeThreshold(
 	userImpactModel *MobileUserImpactOfViolationsInSequenceModel,
 	diags diag.Diagnostics,
-) (*instana.MobileAppTimeThreshold, diag.Diagnostics) {
-	threshold := &instana.MobileAppTimeThreshold{
+) (*api.MobileAppTimeThreshold, diag.Diagnostics) {
+	threshold := &api.MobileAppTimeThreshold{
 		Type: MobileAlertConfigTimeThresholdTypeUserImpactOfViolationsInSequence,
 	}
 
@@ -531,8 +534,8 @@ func (r *mobileAlertConfigResource) mapUserImpactTimeThreshold(
 func (r *mobileAlertConfigResource) mapViolationsInPeriodTimeThreshold(
 	violationsInPeriodModel *MobileViolationsInPeriodModel,
 	diags diag.Diagnostics,
-) (*instana.MobileAppTimeThreshold, diag.Diagnostics) {
-	threshold := &instana.MobileAppTimeThreshold{
+) (*api.MobileAppTimeThreshold, diag.Diagnostics) {
+	threshold := &api.MobileAppTimeThreshold{
 		Type: MobileAlertConfigTimeThresholdTypeViolationsInPeriod,
 	}
 
@@ -549,8 +552,8 @@ func (r *mobileAlertConfigResource) mapViolationsInPeriodTimeThreshold(
 func (r *mobileAlertConfigResource) mapViolationsInSequenceTimeThreshold(
 	violationsInSequenceModel *MobileViolationsInSequenceModel,
 	diags diag.Diagnostics,
-) (*instana.MobileAppTimeThreshold, diag.Diagnostics) {
-	threshold := &instana.MobileAppTimeThreshold{
+) (*api.MobileAppTimeThreshold, diag.Diagnostics) {
+	threshold := &api.MobileAppTimeThreshold{
 		Type: MobileAlertConfigTimeThresholdTypeViolationsInSequence,
 	}
 
@@ -592,7 +595,7 @@ func (r *mobileAlertConfigResource) mapOptionalInt64ToInt32Field(field types.Int
 }
 
 // UpdateState updates the Terraform state with values from the API response
-func (r *mobileAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *instana.MobileAlertConfig) diag.Diagnostics {
+func (r *mobileAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *api.MobileAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var model MobileAlertConfigModel
 
@@ -653,7 +656,7 @@ func (r *mobileAlertConfigResource) UpdateState(ctx context.Context, state *tfsd
 }
 
 // mapTagFilterExpressionToState maps tag filter expression from API to state
-func (r *mobileAlertConfigResource) mapTagFilterExpressionToState(model *MobileAlertConfigModel, apiObject *instana.MobileAlertConfig) diag.Diagnostics {
+func (r *mobileAlertConfigResource) mapTagFilterExpressionToState(model *MobileAlertConfigModel, apiObject *api.MobileAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	if apiObject.TagFilterExpression != nil {
@@ -674,7 +677,7 @@ func (r *mobileAlertConfigResource) mapTagFilterExpressionToState(model *MobileA
 }
 
 // mapAlertChannelsToState maps alert channels from API to state
-func (r *mobileAlertConfigResource) mapAlertChannelsToState(ctx context.Context, model *MobileAlertConfigModel, apiObject *instana.MobileAlertConfig) {
+func (r *mobileAlertConfigResource) mapAlertChannelsToState(ctx context.Context, model *MobileAlertConfigModel, apiObject *api.MobileAlertConfig) {
 	if len(apiObject.AlertChannels) > 0 {
 		// Get the original keys from the plan/state to preserve their case
 		var originalKeys map[string]bool
@@ -718,7 +721,7 @@ func (r *mobileAlertConfigResource) mapAlertChannelsToState(ctx context.Context,
 }
 
 // mapCustomPayloadFieldsToState maps custom payload fields from API to state
-func (r *mobileAlertConfigResource) mapCustomPayloadFieldsToState(ctx context.Context, model *MobileAlertConfigModel, apiObject *instana.MobileAlertConfig) diag.Diagnostics {
+func (r *mobileAlertConfigResource) mapCustomPayloadFieldsToState(ctx context.Context, model *MobileAlertConfigModel, apiObject *api.MobileAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	customPayloadFieldsList, payloadDiags := shared.CustomPayloadFieldsToTerraform(ctx, apiObject.CustomPayloadFields)
@@ -730,7 +733,7 @@ func (r *mobileAlertConfigResource) mapCustomPayloadFieldsToState(ctx context.Co
 	return diags
 }
 
-func (r *mobileAlertConfigResource) mapTimeThresholdToState(timeThreshold instana.MobileAppTimeThreshold) *MobileAlertTimeThresholdModel {
+func (r *mobileAlertConfigResource) mapTimeThresholdToState(timeThreshold api.MobileAppTimeThreshold) *MobileAlertTimeThresholdModel {
 	mobileTimeThresholdModel := MobileAlertTimeThresholdModel{}
 	switch timeThreshold.Type {
 	case MobileAlertConfigTimeThresholdTypeViolationsInSequence:
@@ -753,7 +756,7 @@ func (r *mobileAlertConfigResource) mapTimeThresholdToState(timeThreshold instan
 	return &mobileTimeThresholdModel
 }
 
-func (r *mobileAlertConfigResource) mapRuleToState(ctx context.Context, rule *instana.MobileAppAlertRule) *MobileAlertRuleModel {
+func (r *mobileAlertConfigResource) mapRuleToState(ctx context.Context, rule *api.MobileAppAlertRule) *MobileAlertRuleModel {
 	// For optional+computed fields, we don't set them to null if API returns nil
 	// This prevents drift during import when these fields are not specified in config
 	return &MobileAlertRuleModel{
@@ -766,12 +769,12 @@ func (r *mobileAlertConfigResource) mapRuleToState(ctx context.Context, rule *in
 	}
 }
 
-func (r *mobileAlertConfigResource) mapRulesToState(ctx context.Context, apiObject *instana.MobileAlertConfig) []MobileRuleWithThresholdModel {
+func (r *mobileAlertConfigResource) mapRulesToState(ctx context.Context, apiObject *api.MobileAlertConfig) []MobileRuleWithThresholdModel {
 	rules := apiObject.Rules
 	var rulesModel []MobileRuleWithThresholdModel
 	for _, i := range rules {
-		warningThreshold, isWarningThresholdPresent := i.Thresholds[instana.WarningSeverity]
-		criticalThreshold, isCriticalThresholdPresent := i.Thresholds[instana.CriticalSeverity]
+		warningThreshold, isWarningThresholdPresent := i.Thresholds[common.WarningSeverity]
+		criticalThreshold, isCriticalThresholdPresent := i.Thresholds[common.CriticalSeverity]
 
 		thresholdPluginModel := shared.ThresholdAllPluginModel{
 			Warning:  shared.MapAllThresholdPluginToState(ctx, &warningThreshold, isWarningThresholdPresent),

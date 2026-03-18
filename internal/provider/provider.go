@@ -40,6 +40,7 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/resources/team"
 	"github.com/instana/terraform-provider-instana/internal/resources/websitealertconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/websitemonitoringconfig"
+	"github.com/instana/terraform-provider-instana/internal/shared"
 )
 
 // Ensure the implementation satisfies the expected interfaces
@@ -164,10 +165,10 @@ func (p *InstanaProvider) Configure(ctx context.Context, req provider.ConfigureR
 	instanaAPI := instana.NewInstanaAPIWithUserAgent(apiToken, endpoint, skipTlsVerify, userAgent)
 
 	// Make the Instana client available during DataSource and Resource Configure methods
-	resp.DataSourceData = &instana.ProviderMeta{
+	resp.DataSourceData = &shared.ProviderMeta{
 		InstanaAPI: instanaAPI,
 	}
-	resp.ResourceData = &instana.ProviderMeta{
+	resp.ResourceData = &shared.ProviderMeta{
 		InstanaAPI: instanaAPI,
 	}
 }

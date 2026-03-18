@@ -8,8 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/instana-go-client/instana"
+	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
+	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/instana/terraform-provider-instana/internal/util"
 )
 
@@ -30,7 +31,7 @@ type TerraformResource interface {
 
 type terraformResourceImpl[T instana.InstanaDataObject] struct {
 	resourceHandle resourcehandle.ResourceHandle[T]
-	providerMeta   *instana.ProviderMeta
+	providerMeta   *shared.ProviderMeta
 }
 
 // Metadata returns the resource type name
@@ -51,7 +52,7 @@ func (r *terraformResourceImpl[T]) Configure(_ context.Context, req resource.Con
 		return
 	}
 
-	providerMeta, ok := req.ProviderData.(*instana.ProviderMeta)
+	providerMeta, ok := req.ProviderData.(*shared.ProviderMeta)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
