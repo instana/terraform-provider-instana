@@ -1,7 +1,5 @@
 package restapi
 
-import "log"
-
 // NewMobileAppConfigRestResource creates a new REST resource for the mobile app config
 func NewMobileAppConfigRestResource(unmarshaller JSONUnmarshaller[*MobileAppConfig], client RestClient) RestResource[*MobileAppConfig] {
 	return &mobileAppConfigRestResource{

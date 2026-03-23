@@ -2,30 +2,15 @@
 
 Resource to configure mobile applications in Instana for Mobile App Monitoring.
 
-API Documentation: <https://instana.github.io/openapi/#tag/Mobile-App-Configuration>
+API Documentation: [Instana REST API - Mobile App Config](https://developer.ibm.com/apis/catalog/instana--instana-rest-api/api/API--instana--instana-rest-api-documentation#postMobileAppConfig)
 
 ## Example Usage
 
-### Basic Mobile App Configuration
+### Mobile App Configuration
 
 ```hcl
 resource "instana_mobile_app_config" "example" {
   name = "my-mobile-app"
-}
-```
-
-### Multiple Mobile App Configurations
-
-#### Multi-Platform Setup
-```hcl
-# iOS application
-resource "instana_mobile_app_config" "ios_app" {
-  name = "ecommerce-ios"
-}
-
-# Android application
-resource "instana_mobile_app_config" "android_app" {
-  name = "ecommerce-android"
 }
 ```
 
@@ -168,7 +153,6 @@ After creating a mobile app configuration:
 
 The `id` of the mobile app configuration is used when:
 - Creating alert configurations for the mobile app
-- Creating SLO configurations for the mobile app
 - Referencing the mobile app in other Instana resources
 
 ### Naming Best Practices
@@ -227,36 +211,3 @@ resource "instana_mobile_app_config" "managed_externally" {
 6. **Consistent Naming**: Follow a consistent naming convention across your organization
 7. **Version Control**: Track mobile app configurations in version control
 8. **Regular Review**: Periodically review and clean up unused mobile app configurations
-
-### Common Use Cases
-
-**Development Workflow:**
-```hcl
-# Development environment
-resource "instana_mobile_app_config" "dev" {
-  name = "myapp-dev"
-}
-
-# Staging environment
-resource "instana_mobile_app_config" "staging" {
-  name = "myapp-staging"
-}
-
-# Production environment
-resource "instana_mobile_app_config" "prod" {
-  name = "myapp-prod"
-}
-```
-
-**Platform-Specific Monitoring:**
-```hcl
-# iOS production app
-resource "instana_mobile_app_config" "ios_prod" {
-  name = "myapp-ios-prod"
-}
-
-# Android production app
-resource "instana_mobile_app_config" "android_prod" {
-  name = "myapp-android-prod"
-}
-```
