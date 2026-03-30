@@ -3,11 +3,14 @@ package group
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
@@ -92,12 +95,11 @@ func buildPermissionSetAttributes() map[string]schema.Attribute {
 			Optional:    true,
 			Description: GroupDescPermissionSetPermissions,
 			ElementType: types.StringType,
-			//Validation removed to support instana roles expansion
-			// Validators: []validator.Set{
-			// 	setvalidator.ValueStringsAre(
-			// 		stringvalidator.OneOf(restapi.SupportedInstanaPermissions.ToStringSlice()...),
-			// 	),
-			// },
+			Validators: []validator.Set{
+				setvalidator.ValueStringsAre(
+					stringvalidator.OneOf(restapi.SupportedInstanaPermissions.ToStringSlice()...),
+				),
+			},
 		},
 	}
 }
