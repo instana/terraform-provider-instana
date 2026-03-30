@@ -1,5 +1,17 @@
 # Changelog
 
+## [v6.3.0](https://github.com/instana/terraform-provider-instana/tree/v6.3.0) (2026-03-30)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v6.2.0...v6.3.0)
+
+**Implemented enhancements:**
+
+- Added support for Mobile App Configuration resource for Mobile App Monitoring
+
+**Merged pull requests:**
+
+- Mobile app config resource [\#77](https://github.com/instana/terraform-provider-instana/pull/77) ([BlessyElza](https://github.com/BlessyElza))
+
 ## [v6.2.0](https://github.com/instana/terraform-provider-instana/tree/v6.2.0) (2026-03-09)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v6.1.2...v6.2.0)
