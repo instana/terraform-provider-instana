@@ -6,8 +6,9 @@ import (
 
 	"github.com/instana/terraform-provider-instana/utils"
 
-	"github.com/instana/instana-go-client/instana"
 	"github.com/instana/instana-go-client/shared/tagfilter"
+	tag "github.com/instana/instana-go-client/shared/tagfilter"
+	common "github.com/instana/instana-go-client/shared/types"
 	"github.com/stretchr/testify/require"
 
 	. "github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
@@ -33,7 +34,7 @@ func TestShouldParseStringComparisonExpression(t *testing.T) {
 					Primary: &PrimaryExpression{
 						Comparison: &ComparisonExpression{
 							Entity:      &EntitySpec{Identifier: keyEntityName},
-							Operator:    Operator(instana.EqualsOperator),
+							Operator:    Operator(common.EqualsOperator),
 							StringValue: utils.StringPtr("foo"),
 						},
 					},
@@ -54,7 +55,7 @@ func TestShouldParseNumberComparisonExpression(t *testing.T) {
 					Primary: &PrimaryExpression{
 						Comparison: &ComparisonExpression{
 							Entity:      &EntitySpec{Identifier: keyEntityName},
-							Operator:    Operator(instana.EqualsOperator),
+							Operator:    Operator(common.EqualsOperator),
 							NumberValue: utils.Int64Ptr(int64(123)),
 						},
 					},
@@ -75,7 +76,7 @@ func TestShouldParseBoolComparisonExpression(t *testing.T) {
 					Primary: &PrimaryExpression{
 						Comparison: &ComparisonExpression{
 							Entity:       &EntitySpec{Identifier: keyEntityName},
-							Operator:     Operator(instana.EqualsOperator),
+							Operator:     Operator(common.EqualsOperator),
 							BooleanValue: utils.BoolPtr(true),
 						},
 					},
@@ -96,7 +97,7 @@ func TestShouldParseStringTagComparisonExpression(t *testing.T) {
 					Primary: &PrimaryExpression{
 						Comparison: &ComparisonExpression{
 							Entity:      &EntitySpec{Identifier: keyAgentTags, TagKey: utils.StringPtr("key")},
-							Operator:    Operator(instana.EqualsOperator),
+							Operator:    Operator(common.EqualsOperator),
 							StringValue: utils.StringPtr("value"),
 						},
 					},
@@ -117,7 +118,7 @@ func TestShouldParseStringTagComparisonExpressionWithTagAsStringValue(t *testing
 					Primary: &PrimaryExpression{
 						Comparison: &ComparisonExpression{
 							Entity:      &EntitySpec{Identifier: keyAgentTags, TagKey: utils.StringPtr("ns:key")},
-							Operator:    Operator(instana.EqualsOperator),
+							Operator:    Operator(common.EqualsOperator),
 							StringValue: utils.StringPtr("value"),
 						},
 					},
@@ -138,7 +139,7 @@ func TestShouldParseNumberTagComparisonExpression(t *testing.T) {
 					Primary: &PrimaryExpression{
 						Comparison: &ComparisonExpression{
 							Entity:      &EntitySpec{Identifier: keyAgentTags, TagKey: utils.StringPtr("key")},
-							Operator:    Operator(instana.EqualsOperator),
+							Operator:    Operator(common.EqualsOperator),
 							NumberValue: utils.Int64Ptr(1234),
 						},
 					},
@@ -159,7 +160,7 @@ func TestShouldParseBooleanTagComparisonExpression(t *testing.T) {
 					Primary: &PrimaryExpression{
 						Comparison: &ComparisonExpression{
 							Entity:       &EntitySpec{Identifier: keyAgentTags, TagKey: utils.StringPtr("key")},
-							Operator:     Operator(instana.EqualsOperator),
+							Operator:     Operator(common.EqualsOperator),
 							BooleanValue: utils.BoolPtr(true),
 						},
 					},
@@ -172,8 +173,8 @@ func TestShouldParseBooleanTagComparisonExpression(t *testing.T) {
 }
 
 func TestShouldHandlePrecedenceWhenParseExpressions(t *testing.T) {
-	logicalAnd := Operator(instana.LogicalAnd)
-	logicalOr := Operator(instana.LogicalOr)
+	logicalAnd := Operator(common.LogicalAnd)
+	logicalOr := Operator(common.LogicalOr)
 	expression := "entity.name EQUALS 'foo' OR entity.name EQUALS 'bar' AND agent.tag:key EQUALS 'value'"
 	expectedResult := &FilterExpression{
 		Expression: &LogicalOrExpression{
@@ -182,7 +183,7 @@ func TestShouldHandlePrecedenceWhenParseExpressions(t *testing.T) {
 					Primary: &PrimaryExpression{
 						Comparison: &ComparisonExpression{
 							Entity:      &EntitySpec{Identifier: keyEntityName},
-							Operator:    Operator(instana.EqualsOperator),
+							Operator:    Operator(common.EqualsOperator),
 							StringValue: utils.StringPtr("foo"),
 						},
 					},
@@ -195,7 +196,7 @@ func TestShouldHandlePrecedenceWhenParseExpressions(t *testing.T) {
 						Primary: &PrimaryExpression{
 							Comparison: &ComparisonExpression{
 								Entity:      &EntitySpec{Identifier: keyEntityName},
-								Operator:    Operator(instana.EqualsOperator),
+								Operator:    Operator(common.EqualsOperator),
 								StringValue: utils.StringPtr("bar"),
 							},
 						},
@@ -206,7 +207,7 @@ func TestShouldHandlePrecedenceWhenParseExpressions(t *testing.T) {
 							Primary: &PrimaryExpression{
 								Comparison: &ComparisonExpression{
 									Entity:      &EntitySpec{Identifier: keyAgentTags, TagKey: utils.StringPtr("key")},
-									Operator:    Operator(instana.EqualsOperator),
+									Operator:    Operator(common.EqualsOperator),
 									StringValue: utils.StringPtr("value"),
 								},
 							},
@@ -221,8 +222,8 @@ func TestShouldHandlePrecedenceWhenParseExpressions(t *testing.T) {
 }
 
 func TestShouldParseExpressionStartingWithABracketExpression(t *testing.T) {
-	logicalAnd := Operator(instana.LogicalAnd)
-	logicalOr := Operator(instana.LogicalOr)
+	logicalAnd := Operator(common.LogicalAnd)
+	logicalOr := Operator(common.LogicalOr)
 	expression := "( entity.name EQUALS 'foo' OR entity.name EQUALS 'bar' ) AND agent.tag:key EQUALS 'value'"
 	expectedResult := &FilterExpression{
 		Expression: &LogicalOrExpression{
@@ -234,7 +235,7 @@ func TestShouldParseExpressionStartingWithABracketExpression(t *testing.T) {
 								Primary: &PrimaryExpression{
 									Comparison: &ComparisonExpression{
 										Entity:      &EntitySpec{Identifier: keyEntityName},
-										Operator:    Operator(instana.EqualsOperator),
+										Operator:    Operator(common.EqualsOperator),
 										StringValue: utils.StringPtr("foo"),
 									},
 								},
@@ -247,7 +248,7 @@ func TestShouldParseExpressionStartingWithABracketExpression(t *testing.T) {
 									Primary: &PrimaryExpression{
 										Comparison: &ComparisonExpression{
 											Entity:      &EntitySpec{Identifier: keyEntityName},
-											Operator:    Operator(instana.EqualsOperator),
+											Operator:    Operator(common.EqualsOperator),
 											StringValue: utils.StringPtr("bar"),
 										},
 									},
@@ -262,7 +263,7 @@ func TestShouldParseExpressionStartingWithABracketExpression(t *testing.T) {
 						Primary: &PrimaryExpression{
 							Comparison: &ComparisonExpression{
 								Entity:      &EntitySpec{Identifier: keyAgentTags, TagKey: utils.StringPtr("key")},
-								Operator:    Operator(instana.EqualsOperator),
+								Operator:    Operator(common.EqualsOperator),
 								StringValue: utils.StringPtr("value"),
 							},
 						},
@@ -276,8 +277,8 @@ func TestShouldParseExpressionStartingWithABracketExpression(t *testing.T) {
 }
 
 func TestShouldParseExpressionEndingWithABracketExpression(t *testing.T) {
-	logicalAnd := Operator(instana.LogicalAnd)
-	logicalOr := Operator(instana.LogicalOr)
+	logicalAnd := Operator(common.LogicalAnd)
+	logicalOr := Operator(common.LogicalOr)
 	expression := "agent.tag:key EQUALS 'value' AND ( entity.name EQUALS 'foo' OR entity.name EQUALS 'bar' )"
 	expectedResult := &FilterExpression{
 		Expression: &LogicalOrExpression{
@@ -286,7 +287,7 @@ func TestShouldParseExpressionEndingWithABracketExpression(t *testing.T) {
 					Primary: &PrimaryExpression{
 						Comparison: &ComparisonExpression{
 							Entity:      &EntitySpec{Identifier: keyAgentTags, TagKey: utils.StringPtr("key")},
-							Operator:    Operator(instana.EqualsOperator),
+							Operator:    Operator(common.EqualsOperator),
 							StringValue: utils.StringPtr("value"),
 						},
 					},
@@ -300,7 +301,7 @@ func TestShouldParseExpressionEndingWithABracketExpression(t *testing.T) {
 									Primary: &PrimaryExpression{
 										Comparison: &ComparisonExpression{
 											Entity:      &EntitySpec{Identifier: keyEntityName},
-											Operator:    Operator(instana.EqualsOperator),
+											Operator:    Operator(common.EqualsOperator),
 											StringValue: utils.StringPtr("foo"),
 										},
 									},
@@ -313,7 +314,7 @@ func TestShouldParseExpressionEndingWithABracketExpression(t *testing.T) {
 										Primary: &PrimaryExpression{
 											Comparison: &ComparisonExpression{
 												Entity:      &EntitySpec{Identifier: keyEntityName},
-												Operator:    Operator(instana.EqualsOperator),
+												Operator:    Operator(common.EqualsOperator),
 												StringValue: utils.StringPtr("bar"),
 											},
 										},
@@ -333,8 +334,8 @@ func TestShouldParseExpressionEndingWithABracketExpression(t *testing.T) {
 func TestShouldSuccessfullyParseComplexExpression(t *testing.T) {
 	expression := "entity.name CONTAINS 'foo bar' OR entity.kind EQUALS 234 AND entity.type EQUALS true AND ( span.name NOT_EMPTY OR span.id@src NOT_EQUAL  '1234' )"
 
-	logicalAnd := Operator(instana.LogicalAnd)
-	logicalOr := Operator(instana.LogicalOr)
+	logicalAnd := Operator(common.LogicalAnd)
+	logicalOr := Operator(common.LogicalOr)
 	expectedResult := &FilterExpression{
 		Expression: &LogicalOrExpression{
 			Left: &LogicalAndExpression{
@@ -342,7 +343,7 @@ func TestShouldSuccessfullyParseComplexExpression(t *testing.T) {
 					Primary: &PrimaryExpression{
 						Comparison: &ComparisonExpression{
 							Entity:      &EntitySpec{Identifier: keyEntityName},
-							Operator:    Operator(instana.ContainsOperator),
+							Operator:    Operator(common.ContainsOperator),
 							StringValue: utils.StringPtr("foo bar"),
 						},
 					},
@@ -355,7 +356,7 @@ func TestShouldSuccessfullyParseComplexExpression(t *testing.T) {
 						Primary: &PrimaryExpression{
 							Comparison: &ComparisonExpression{
 								Entity:      &EntitySpec{Identifier: keyEntityKind},
-								Operator:    Operator(instana.EqualsOperator),
+								Operator:    Operator(common.EqualsOperator),
 								NumberValue: utils.Int64Ptr(int64(234)),
 							},
 						},
@@ -366,7 +367,7 @@ func TestShouldSuccessfullyParseComplexExpression(t *testing.T) {
 							Primary: &PrimaryExpression{
 								Comparison: &ComparisonExpression{
 									Entity:       &EntitySpec{Identifier: keyEntityType},
-									Operator:     Operator(instana.EqualsOperator),
+									Operator:     Operator(common.EqualsOperator),
 									BooleanValue: utils.BoolPtr(true),
 								},
 							},
@@ -380,7 +381,7 @@ func TestShouldSuccessfullyParseComplexExpression(t *testing.T) {
 											Primary: &PrimaryExpression{
 												UnaryOperation: &UnaryOperationExpression{
 													Entity:   &EntitySpec{Identifier: "span.name"},
-													Operator: Operator(instana.NotEmptyOperator),
+													Operator: Operator(common.NotEmptyOperator),
 												},
 											},
 										},
@@ -392,7 +393,7 @@ func TestShouldSuccessfullyParseComplexExpression(t *testing.T) {
 												Primary: &PrimaryExpression{
 													Comparison: &ComparisonExpression{
 														Entity:      &EntitySpec{Identifier: "span.id", Origin: utils.StringPtr(EntityOriginSource.Key())},
-														Operator:    Operator(instana.NotEqualOperator),
+														Operator:    Operator(common.NotEqualOperator),
 														StringValue: utils.StringPtr("1234"),
 													},
 												},
@@ -414,7 +415,7 @@ func TestShouldSuccessfullyParseComplexExpression(t *testing.T) {
 func TestShouldParseKeywordsCaseInsensitive(t *testing.T) {
 	expression := "entity.name CONTAINS 'foo' and entity.type EQUALS 'bar'"
 
-	logicalAnd := Operator(instana.LogicalAnd)
+	logicalAnd := Operator(common.LogicalAnd)
 	expectedResult := &FilterExpression{
 		Expression: &LogicalOrExpression{
 			Left: &LogicalAndExpression{
@@ -422,7 +423,7 @@ func TestShouldParseKeywordsCaseInsensitive(t *testing.T) {
 					Primary: &PrimaryExpression{
 						Comparison: &ComparisonExpression{
 							Entity:      &EntitySpec{Identifier: keyEntityName},
-							Operator:    Operator(instana.ContainsOperator),
+							Operator:    Operator(common.ContainsOperator),
 							StringValue: utils.StringPtr("foo"),
 						},
 					},
@@ -433,7 +434,7 @@ func TestShouldParseKeywordsCaseInsensitive(t *testing.T) {
 						Primary: &PrimaryExpression{
 							Comparison: &ComparisonExpression{
 								Entity:      &EntitySpec{Identifier: keyEntityType},
-								Operator:    Operator(instana.EqualsOperator),
+								Operator:    Operator(common.EqualsOperator),
 								StringValue: utils.StringPtr("bar"),
 							},
 						},
@@ -447,12 +448,12 @@ func TestShouldParseKeywordsCaseInsensitive(t *testing.T) {
 }
 
 func TestShouldParseAllSupportedComparisonOperators(t *testing.T) {
-	for _, o := range instana.SupportedComparisonOperators {
+	for _, o := range common.SupportedComparisonOperators {
 		t.Run(fmt.Sprintf("TestShouldParseComparisionOperator%s", string(o)), createTestCaseForParsingSupportedComparisonOperators(o))
 	}
 }
 
-func createTestCaseForParsingSupportedComparisonOperators(operator instana.ExpressionOperator) func(*testing.T) {
+func createTestCaseForParsingSupportedComparisonOperators(operator common.ExpressionOperator) func(*testing.T) {
 	return func(t *testing.T) {
 		expression := fmt.Sprintf("entity.name %s 'foo'", string(operator))
 
@@ -477,12 +478,12 @@ func createTestCaseForParsingSupportedComparisonOperators(operator instana.Expre
 }
 
 func TestShouldParseAllSupportedUnaryOperators(t *testing.T) {
-	for _, o := range instana.SupportedUnaryExpressionOperators {
+	for _, o := range common.SupportedUnaryExpressionOperators {
 		t.Run(fmt.Sprintf("TestShouldParseUnaryOperator%s", string(o)), createTestCaseForParsingSupportedUnaryOperators(o))
 	}
 }
 
-func createTestCaseForParsingSupportedUnaryOperators(operator instana.ExpressionOperator) func(*testing.T) {
+func createTestCaseForParsingSupportedUnaryOperators(operator common.ExpressionOperator) func(*testing.T) {
 	return func(t *testing.T) {
 		expression := fmt.Sprintf("entity.name %s", string(operator))
 
@@ -516,7 +517,7 @@ func TestShouldParseFullySpecifiedUnaryTagFilter(t *testing.T) {
 					Primary: &PrimaryExpression{
 						UnaryOperation: &UnaryOperationExpression{
 							Entity:   &EntitySpec{Identifier: keyAgentTags, TagKey: utils.StringPtr("stage"), Origin: utils.StringPtr(EntityOriginDestination.Key())},
-							Operator: Operator(instana.NotEmptyOperator),
+							Operator: Operator(common.NotEmptyOperator),
 						},
 					},
 				},
@@ -537,7 +538,7 @@ func TestShouldParseComparisonOperationsCaseInsensitive(t *testing.T) {
 					Primary: &PrimaryExpression{
 						Comparison: &ComparisonExpression{
 							Entity:      &EntitySpec{Identifier: keyEntityName},
-							Operator:    Operator(instana.EqualsOperator),
+							Operator:    Operator(common.EqualsOperator),
 							StringValue: utils.StringPtr("foo"),
 						},
 					},
@@ -559,7 +560,7 @@ func TestShouldParseUnaryOperationsCaseInsensitive(t *testing.T) {
 					Primary: &PrimaryExpression{
 						UnaryOperation: &UnaryOperationExpression{
 							Entity:   &EntitySpec{Identifier: keyEntityName},
-							Operator: Operator(instana.NotEmptyOperator),
+							Operator: Operator(common.NotEmptyOperator),
 						},
 					},
 				},
@@ -580,7 +581,7 @@ func TestShouldParseIdentifiersWithDashes(t *testing.T) {
 					Primary: &PrimaryExpression{
 						Comparison: &ComparisonExpression{
 							Entity:      &EntitySpec{Identifier: "call.http.header.x-example-foo"},
-							Operator:    Operator(instana.EqualsOperator),
+							Operator:    Operator(common.EqualsOperator),
 							StringValue: utils.StringPtr("test"),
 						},
 					},
@@ -602,7 +603,7 @@ func TestShouldParseIdentifierWithSlashes(t *testing.T) {
 					Primary: &PrimaryExpression{
 						Comparison: &ComparisonExpression{
 							Entity:      &EntitySpec{Identifier: "kubernetes.pod.label.foo/bar"},
-							Operator:    Operator(instana.EqualsOperator),
+							Operator:    Operator(common.EqualsOperator),
 							StringValue: utils.StringPtr("test"),
 						},
 					},
@@ -624,7 +625,7 @@ func TestShouldParseEntityOriginFromComparisonExpression(t *testing.T) {
 					Primary: &PrimaryExpression{
 						Comparison: &ComparisonExpression{
 							Entity:      &EntitySpec{Identifier: keyEntityName, Origin: utils.StringPtr(EntityOriginSource.Key())},
-							Operator:    Operator(instana.EqualsOperator),
+							Operator:    Operator(common.EqualsOperator),
 							StringValue: utils.StringPtr("test"),
 						},
 					},
@@ -646,7 +647,7 @@ func TestShouldParseEntityOriginFromUnaryExpression(t *testing.T) {
 					Primary: &PrimaryExpression{
 						UnaryOperation: &UnaryOperationExpression{
 							Entity:   &EntitySpec{Identifier: keyEntityName, Origin: utils.StringPtr(EntityOriginSource.Key())},
-							Operator: Operator(instana.NotEmptyOperator),
+							Operator: Operator(common.NotEmptyOperator),
 						},
 					},
 				},
@@ -666,7 +667,7 @@ func TestShouldParseStringWithEscapedSingleQuotes(t *testing.T) {
 					Primary: &PrimaryExpression{
 						Comparison: &ComparisonExpression{
 							Entity:      &EntitySpec{Identifier: "log.exception.type", Origin: utils.StringPtr(EntityOriginNotApplicable.Key())},
-							Operator:    Operator(instana.EqualsOperator),
+							Operator:    Operator(common.EqualsOperator),
 							StringValue: utils.StringPtr("<class 'ConnectionResetError'>"),
 						},
 					},
@@ -686,7 +687,7 @@ func TestShouldRenderStringWithSingleQuotesEscaped(t *testing.T) {
 					Primary: &PrimaryExpression{
 						Comparison: &ComparisonExpression{
 							Entity:      &EntitySpec{Identifier: "log.exception.type", Origin: utils.StringPtr(EntityOriginNotApplicable.Key())},
-							Operator:    Operator(instana.EqualsOperator),
+							Operator:    Operator(common.EqualsOperator),
 							StringValue: utils.StringPtr("<class 'ConnectionResetError'>"),
 						},
 					},
@@ -733,7 +734,7 @@ func TestShouldRenderComplexExpressionInNormalizedForm(t *testing.T) {
 func TestShouldRenderLogicalOrExpression(t *testing.T) {
 	expectedResult := "foo@dest EQUALS 'bar' OR foo@dest CONTAINS 'bar'"
 
-	logicalOr := Operator(instana.LogicalOr)
+	logicalOr := Operator(common.LogicalOr)
 	sut := &FilterExpression{
 		Expression: &LogicalOrExpression{
 			Left: &LogicalAndExpression{
@@ -741,7 +742,7 @@ func TestShouldRenderLogicalOrExpression(t *testing.T) {
 					Primary: &PrimaryExpression{
 						Comparison: &ComparisonExpression{
 							Entity:      &EntitySpec{Identifier: "foo", Origin: utils.StringPtr(EntityOriginDestination.Key())},
-							Operator:    Operator(instana.EqualsOperator),
+							Operator:    Operator(common.EqualsOperator),
 							StringValue: utils.StringPtr("bar"),
 						},
 					},
@@ -754,7 +755,7 @@ func TestShouldRenderLogicalOrExpression(t *testing.T) {
 						Primary: &PrimaryExpression{
 							Comparison: &ComparisonExpression{
 								Entity:      &EntitySpec{Identifier: "foo", Origin: utils.StringPtr(EntityOriginDestination.Key())},
-								Operator:    Operator(instana.ContainsOperator),
+								Operator:    Operator(common.ContainsOperator),
 								StringValue: utils.StringPtr("bar"),
 							},
 						},
@@ -772,7 +773,7 @@ func TestShouldRenderLogicalOrExpression(t *testing.T) {
 func TestShouldRenderLogicalAndExpression(t *testing.T) {
 	expectedResult := "foo@dest EQUALS 'bar' AND foo@dest CONTAINS 'bar'"
 
-	logicalAnd := Operator(instana.LogicalAnd)
+	logicalAnd := Operator(common.LogicalAnd)
 	sut := &FilterExpression{
 		Expression: &LogicalOrExpression{
 			Left: &LogicalAndExpression{
@@ -780,7 +781,7 @@ func TestShouldRenderLogicalAndExpression(t *testing.T) {
 					Primary: &PrimaryExpression{
 						Comparison: &ComparisonExpression{
 							Entity:      &EntitySpec{Identifier: "foo", Origin: utils.StringPtr(EntityOriginDestination.Key())},
-							Operator:    Operator(instana.EqualsOperator),
+							Operator:    Operator(common.EqualsOperator),
 							StringValue: utils.StringPtr("bar"),
 						},
 					},
@@ -791,7 +792,7 @@ func TestShouldRenderLogicalAndExpression(t *testing.T) {
 						Primary: &PrimaryExpression{
 							Comparison: &ComparisonExpression{
 								Entity:      &EntitySpec{Identifier: "foo", Origin: utils.StringPtr(EntityOriginDestination.Key())},
-								Operator:    Operator(instana.ContainsOperator),
+								Operator:    Operator(common.ContainsOperator),
 								StringValue: utils.StringPtr("bar"),
 							},
 						},
@@ -808,8 +809,8 @@ func TestShouldRenderLogicalAndExpression(t *testing.T) {
 func TestShouldRenderBracketExpression(t *testing.T) {
 	expectedResult := "(foo@dest EQUALS 'bar' OR foo@dest CONTAINS 'bar') AND bar@dest EQUALS 'value'"
 
-	logicalOr := Operator(instana.LogicalAnd)
-	logicalAnd := Operator(instana.LogicalAnd)
+	logicalOr := Operator(common.LogicalAnd)
+	logicalAnd := Operator(common.LogicalAnd)
 	sut := &FilterExpression{
 		Expression: &LogicalOrExpression{
 			Left: &LogicalAndExpression{
@@ -820,7 +821,7 @@ func TestShouldRenderBracketExpression(t *testing.T) {
 								Primary: &PrimaryExpression{
 									Comparison: &ComparisonExpression{
 										Entity:      &EntitySpec{Identifier: "foo", Origin: utils.StringPtr(EntityOriginDestination.Key())},
-										Operator:    Operator(instana.EqualsOperator),
+										Operator:    Operator(common.EqualsOperator),
 										StringValue: utils.StringPtr("bar"),
 									},
 								},
@@ -833,7 +834,7 @@ func TestShouldRenderBracketExpression(t *testing.T) {
 									Primary: &PrimaryExpression{
 										Comparison: &ComparisonExpression{
 											Entity:      &EntitySpec{Identifier: "foo", Origin: utils.StringPtr(EntityOriginDestination.Key())},
-											Operator:    Operator(instana.ContainsOperator),
+											Operator:    Operator(common.ContainsOperator),
 											StringValue: utils.StringPtr("bar"),
 										},
 									},
@@ -848,7 +849,7 @@ func TestShouldRenderBracketExpression(t *testing.T) {
 						Primary: &PrimaryExpression{
 							Comparison: &ComparisonExpression{
 								Entity:      &EntitySpec{Identifier: "bar", Origin: utils.StringPtr(EntityOriginDestination.Key())},
-								Operator:    Operator(instana.EqualsOperator),
+								Operator:    Operator(common.EqualsOperator),
 								StringValue: utils.StringPtr("value"),
 							},
 						},
@@ -870,7 +871,7 @@ func TestShouldRenderPrimaryStringComparisonExpression(t *testing.T) {
 					Primary: &PrimaryExpression{
 						Comparison: &ComparisonExpression{
 							Entity:      &EntitySpec{Identifier: keyEntityName, Origin: utils.StringPtr(EntityOriginDestination.Key())},
-							Operator:    Operator(instana.EqualsOperator),
+							Operator:    Operator(common.EqualsOperator),
 							StringValue: utils.StringPtr(valueMyValue),
 						},
 					},
@@ -892,7 +893,7 @@ func TestShouldRenderPrimaryNumberComparisonExpression(t *testing.T) {
 					Primary: &PrimaryExpression{
 						Comparison: &ComparisonExpression{
 							Entity:      &EntitySpec{Identifier: keyEntityName, Origin: utils.StringPtr(EntityOriginDestination.Key())},
-							Operator:    Operator(instana.EqualsOperator),
+							Operator:    Operator(common.EqualsOperator),
 							NumberValue: utils.Int64Ptr(int64(1234)),
 						},
 					},
@@ -914,7 +915,7 @@ func TestShouldRenderPrimaryBooleanComparisonExpression(t *testing.T) {
 					Primary: &PrimaryExpression{
 						Comparison: &ComparisonExpression{
 							Entity:       &EntitySpec{Identifier: keyEntityName, Origin: utils.StringPtr(EntityOriginDestination.Key())},
-							Operator:     Operator(instana.EqualsOperator),
+							Operator:     Operator(common.EqualsOperator),
 							BooleanValue: utils.BoolPtr(true),
 						},
 					},
@@ -936,7 +937,7 @@ func TestShouldRenderPrimaryTagComparisonExpression(t *testing.T) {
 					Primary: &PrimaryExpression{
 						Comparison: &ComparisonExpression{
 							Entity:      &EntitySpec{Identifier: keyEntityName, TagKey: utils.StringPtr("key"), Origin: utils.StringPtr(EntityOriginDestination.Key())},
-							Operator:    Operator(instana.EqualsOperator),
+							Operator:    Operator(common.EqualsOperator),
 							StringValue: utils.StringPtr("value"),
 						},
 					},
@@ -958,7 +959,7 @@ func TestShouldRenderPrimaryTagComparisonExpressionWithString(t *testing.T) {
 					Primary: &PrimaryExpression{
 						Comparison: &ComparisonExpression{
 							Entity:      &EntitySpec{Identifier: keyEntityName, TagKey: utils.StringPtr("ns:key"), Origin: utils.StringPtr(EntityOriginDestination.Key())},
-							Operator:    Operator(instana.EqualsOperator),
+							Operator:    Operator(common.EqualsOperator),
 							StringValue: utils.StringPtr("value"),
 						},
 					},
@@ -982,7 +983,7 @@ func TestShouldRenderUnaryOperationExpression(t *testing.T) {
 					Primary: &PrimaryExpression{
 						UnaryOperation: &UnaryOperationExpression{
 							Entity:   &EntitySpec{Identifier: "foo", Origin: utils.StringPtr(EntityOriginDestination.Key())},
-							Operator: Operator(instana.IsEmptyOperator),
+							Operator: Operator(common.IsEmptyOperator),
 						},
 					},
 				},
@@ -1008,7 +1009,7 @@ func TestShouldReturnEntityOriginDestinationAsFallbackValueWhenKeyIsNotValid(t *
 }
 
 func TestShouldGetEntityOriginByInstanaAPIEntity(t *testing.T) {
-	for _, e := range instana.SupportedTagFilterEntities {
+	for _, e := range tag.SupportedTagFilterEntities {
 		t.Run(fmt.Sprintf("TestShouldGetEntityOriginForInstanaAPIEntity%s", e), func(t *testing.T) {
 			require.Equal(t, e, SupportedEntityOrigins.ForInstanaAPIEntity(e).TagFilterEntity())
 		})
@@ -1101,10 +1102,10 @@ func TestShouldHandleRoundTripConversionWithSingleQuotesInValue(t *testing.T) {
 	// caused parsing errors during round-trip conversion (API -> Model -> String -> Parse -> API)
 
 	// Original API model with single quotes in the value
-	originalAPIModel := instana.NewStringTagFilter(
+	originalAPIModel := tag.NewStringTagFilter(
 		tagfilter.TagFilterEntityNotApplicable,
 		"log.exception.type",
-		instana.EqualsOperator,
+		common.EqualsOperator,
 		"<class 'ConnectionResetError'>",
 	)
 
@@ -1131,9 +1132,9 @@ func TestShouldHandleRoundTripConversionWithSingleQuotesInValue(t *testing.T) {
 	require.NotNil(t, convertedAPIModel)
 
 	// Step 5: Verify the round-trip conversion preserved the original value
-	require.Equal(t, instana.TagFilterType, convertedAPIModel.GetType())
+	require.Equal(t, tag.TagFilterType, convertedAPIModel.GetType())
 	require.Equal(t, "log.exception.type", *convertedAPIModel.Name)
-	require.Equal(t, instana.EqualsOperator, *convertedAPIModel.Operator)
+	require.Equal(t, common.EqualsOperator, *convertedAPIModel.Operator)
 	require.Equal(t, "<class 'ConnectionResetError'>", *convertedAPIModel.StringValue)
 	require.Equal(t, tagfilter.TagFilterEntityNotApplicable, *convertedAPIModel.Entity)
 }

@@ -8,8 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/instana-go-client/api"
+	common "github.com/instana/instana-go-client/shared/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/instana-go-client/instana"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -52,15 +53,15 @@ func TestMapAccessRulesToState(t *testing.T) {
 
 	t.Run("with access rules", func(t *testing.T) {
 		relatedID := "user-123"
-		accessRules := []instana.AccessRule{
+		accessRules := []common.AccessRule{
 			{
-				AccessType:   instana.AccessTypeRead,
-				RelationType: instana.RelationTypeUser,
+				AccessType:   common.AccessTypeRead,
+				RelationType: common.RelationTypeUser,
 				RelatedID:    &relatedID,
 			},
 			{
-				AccessType:   instana.AccessTypeReadWrite,
-				RelationType: instana.RelationTypeGlobal,
+				AccessType:   common.AccessTypeReadWrite,
+				RelationType: common.RelationTypeGlobal,
 				RelatedID:    nil,
 			},
 		}
@@ -78,7 +79,7 @@ func TestMapAccessRulesToState(t *testing.T) {
 	})
 
 	t.Run("with empty access rules", func(t *testing.T) {
-		models := resource.mapAccessRulesToState([]instana.AccessRule{})
+		models := resource.mapAccessRulesToState([]common.AccessRule{})
 		assert.Nil(t, models)
 	})
 
@@ -108,13 +109,13 @@ func TestMapAccessRulesFromState(t *testing.T) {
 		accessRules := resource.mapAccessRulesFromState(models)
 		require.Len(t, accessRules, 2)
 
-		assert.Equal(t, instana.AccessTypeRead, accessRules[0].AccessType)
-		assert.Equal(t, instana.RelationTypeUser, accessRules[0].RelationType)
+		assert.Equal(t, common.AccessTypeRead, accessRules[0].AccessType)
+		assert.Equal(t, common.RelationTypeUser, accessRules[0].RelationType)
 		require.NotNil(t, accessRules[0].RelatedID)
 		assert.Equal(t, "user-123", *accessRules[0].RelatedID)
 
-		assert.Equal(t, instana.AccessTypeReadWrite, accessRules[1].AccessType)
-		assert.Equal(t, instana.RelationTypeGlobal, accessRules[1].RelationType)
+		assert.Equal(t, common.AccessTypeReadWrite, accessRules[1].AccessType)
+		assert.Equal(t, common.RelationTypeGlobal, accessRules[1].RelationType)
 		assert.Nil(t, accessRules[1].RelatedID)
 	})
 
@@ -150,14 +151,14 @@ func TestUpdateState(t *testing.T) {
 		resource := &customDashboardResource{}
 
 		widgets := json.RawMessage(`[{"type":"chart","data":"test"}]`)
-		dashboard := &instana.CustomDashboard{
+		dashboard := &api.CustomDashboard{
 			ID:      "dashboard-123",
 			Title:   "Updated Dashboard",
 			Widgets: widgets,
-			AccessRules: []instana.AccessRule{
+			AccessRules: []common.AccessRule{
 				{
-					AccessType:   instana.AccessTypeRead,
-					RelationType: instana.RelationTypeUser,
+					AccessType:   common.AccessTypeRead,
+					RelationType: common.RelationTypeUser,
 					RelatedID:    stringPtr("user-456"),
 				},
 			},
@@ -203,14 +204,14 @@ func TestUpdateState(t *testing.T) {
 
 		widgets := json.RawMessage(`[{"type":"chart","data":"test"}]`)
 		relatedID := "user-789"
-		dashboard := &instana.CustomDashboard{
+		dashboard := &api.CustomDashboard{
 			ID:      "dashboard-456",
 			Title:   "Test Dashboard",
 			Widgets: widgets,
-			AccessRules: []instana.AccessRule{
+			AccessRules: []common.AccessRule{
 				{
-					AccessType:   instana.AccessTypeReadWrite,
-					RelationType: instana.RelationTypeApiToken,
+					AccessType:   common.AccessTypeReadWrite,
+					RelationType: common.RelationTypeApiToken,
 					RelatedID:    &relatedID,
 				},
 			},
@@ -243,11 +244,11 @@ func TestUpdateState(t *testing.T) {
 		resource := &customDashboardResource{}
 
 		widgets := json.RawMessage(`[]`)
-		dashboard := &instana.CustomDashboard{
+		dashboard := &api.CustomDashboard{
 			ID:          "dashboard-789",
 			Title:       "Simple Dashboard",
 			Widgets:     widgets,
-			AccessRules: []instana.AccessRule{},
+			AccessRules: []common.AccessRule{},
 		}
 
 		handle := NewCustomDashboardResourceHandle()
@@ -272,7 +273,7 @@ func TestUpdateState(t *testing.T) {
 
 		// Create invalid JSON that will fail canonicalization
 		widgets := json.RawMessage(`invalid json`)
-		dashboard := &instana.CustomDashboard{
+		dashboard := &api.CustomDashboard{
 			ID:      "dashboard-error",
 			Title:   "Error Dashboard",
 			Widgets: widgets,
@@ -296,19 +297,19 @@ func TestUpdateState(t *testing.T) {
 
 		relatedID1 := "user-123"
 		relatedID2 := "role-456"
-		dashboard := &instana.CustomDashboard{
+		dashboard := &api.CustomDashboard{
 			ID:      "dashboard-multi",
 			Title:   "Multi Access Dashboard",
 			Widgets: json.RawMessage(`[]`),
-			AccessRules: []instana.AccessRule{
+			AccessRules: []common.AccessRule{
 				{
-					AccessType:   instana.AccessTypeRead,
-					RelationType: instana.RelationTypeUser,
+					AccessType:   common.AccessTypeRead,
+					RelationType: common.RelationTypeUser,
 					RelatedID:    &relatedID1,
 				},
 				{
-					AccessType:   instana.AccessTypeReadWrite,
-					RelationType: instana.RelationTypeRole,
+					AccessType:   common.AccessTypeReadWrite,
+					RelationType: common.RelationTypeRole,
 					RelatedID:    &relatedID2,
 				},
 			},
@@ -386,8 +387,8 @@ func TestMapStateToDataObject(t *testing.T) {
 		assert.Equal(t, "Test Dashboard", dashboard.Title)
 		assert.NotNil(t, dashboard.Widgets)
 		require.Len(t, dashboard.AccessRules, 2)
-		assert.Equal(t, instana.AccessTypeRead, dashboard.AccessRules[0].AccessType)
-		assert.Equal(t, instana.RelationTypeUser, dashboard.AccessRules[0].RelationType)
+		assert.Equal(t, common.AccessTypeRead, dashboard.AccessRules[0].AccessType)
+		assert.Equal(t, common.RelationTypeUser, dashboard.AccessRules[0].RelationType)
 		assert.Equal(t, "user-123", *dashboard.AccessRules[0].RelatedID)
 	})
 
@@ -414,8 +415,8 @@ func TestMapStateToDataObject(t *testing.T) {
 		assert.Equal(t, "State Dashboard", dashboard.Title)
 		assert.Contains(t, string(dashboard.Widgets), "widgets")
 		require.Len(t, dashboard.AccessRules, 1)
-		assert.Equal(t, instana.AccessTypeReadWrite, dashboard.AccessRules[0].AccessType)
-		assert.Equal(t, instana.RelationTypeTeam, dashboard.AccessRules[0].RelationType)
+		assert.Equal(t, common.AccessTypeReadWrite, dashboard.AccessRules[0].AccessType)
+		assert.Equal(t, common.RelationTypeTeam, dashboard.AccessRules[0].RelationType)
 	})
 
 	t.Run("with null ID", func(t *testing.T) {
@@ -485,7 +486,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		require.NotNil(t, dashboard)
 
 		require.Len(t, dashboard.AccessRules, 1)
-		assert.Equal(t, instana.RelationTypeGlobal, dashboard.AccessRules[0].RelationType)
+		assert.Equal(t, common.RelationTypeGlobal, dashboard.AccessRules[0].RelationType)
 		assert.Nil(t, dashboard.AccessRules[0].RelatedID)
 	})
 
@@ -568,11 +569,11 @@ func TestMapStateToDataObject(t *testing.T) {
 		require.NotNil(t, dashboard)
 
 		require.Len(t, dashboard.AccessRules, 5)
-		assert.Equal(t, instana.RelationTypeUser, dashboard.AccessRules[0].RelationType)
-		assert.Equal(t, instana.RelationTypeApiToken, dashboard.AccessRules[1].RelationType)
-		assert.Equal(t, instana.RelationTypeRole, dashboard.AccessRules[2].RelationType)
-		assert.Equal(t, instana.RelationTypeTeam, dashboard.AccessRules[3].RelationType)
-		assert.Equal(t, instana.RelationTypeGlobal, dashboard.AccessRules[4].RelationType)
+		assert.Equal(t, common.RelationTypeUser, dashboard.AccessRules[0].RelationType)
+		assert.Equal(t, common.RelationTypeApiToken, dashboard.AccessRules[1].RelationType)
+		assert.Equal(t, common.RelationTypeRole, dashboard.AccessRules[2].RelationType)
+		assert.Equal(t, common.RelationTypeTeam, dashboard.AccessRules[3].RelationType)
+		assert.Equal(t, common.RelationTypeGlobal, dashboard.AccessRules[4].RelationType)
 	})
 
 	t.Run("error when neither plan nor state provided", func(t *testing.T) {
@@ -593,7 +594,7 @@ func TestGetRestResource(t *testing.T) {
 
 	// The method should be callable (even if we can't test the return value without a mock)
 	// This ensures the interface is properly implemented
-	var _ resourcehandle.ResourceHandle[*instana.CustomDashboard] = resource
+	var _ resourcehandle.ResourceHandle[*api.CustomDashboard] = resource
 }
 
 func TestSchemaValidation(t *testing.T) {

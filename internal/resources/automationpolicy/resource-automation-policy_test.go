@@ -8,8 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/instana-go-client/api"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/instana-go-client/instana"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -205,7 +205,7 @@ func TestMapStateToDataObject_WithScheduling(t *testing.T) {
 	assert.Equal(t, "Trigger Description", result.Trigger.Description)
 	assert.Equal(t, int64(1609459200000), result.Trigger.Scheduling.StartTime)
 	assert.Equal(t, 60, result.Trigger.Scheduling.Duration)
-	assert.Equal(t, instana.DurationUnit("MINUTE"), result.Trigger.Scheduling.DurationUnit)
+	assert.Equal(t, api.DurationUnit("MINUTE"), result.Trigger.Scheduling.DurationUnit)
 	assert.Equal(t, "FREQ=DAILY", result.Trigger.Scheduling.RecurrentRule)
 	assert.True(t, result.Trigger.Scheduling.Recurrent)
 }
@@ -381,34 +381,34 @@ func TestUpdateState_BasicPolicy(t *testing.T) {
 	ctx := context.Background()
 	resource := &automationPolicyResource{}
 
-	data := &instana.AutomationPolicy{
+	data := &api.AutomationPolicy{
 		ID:          "test-id",
 		Name:        "Test Policy",
 		Description: "Test Description",
 		Tags:        nil,
-		Trigger: instana.Trigger{
+		Trigger: api.Trigger{
 			Id:   "trigger-123",
 			Type: "customEvent",
 		},
-		TypeConfigurations: []instana.TypeConfiguration{
+		TypeConfigurations: []api.TypeConfiguration{
 			{
 				Name:      "manual",
-				Condition: &instana.Condition{Query: ""},
-				Runnable: instana.Runnable{
+				Condition: &api.Condition{Query: ""},
+				Runnable: api.Runnable{
 					Id:   "action-123",
 					Type: "action",
-					RunConfiguration: instana.RunConfiguration{
-						Actions: []instana.AutomationActionPolicy{
+					RunConfiguration: api.RunConfiguration{
+						Actions: []api.AutomationActionPolicy{
 							{
-								Action: instana.AutomationAction{
+								Action: api.AutomationAction{
 									ID:          "action-123",
 									Name:        "Test Action",
 									Description: "Action Description",
 									Type:        "manual",
-									Fields: []instana.Field{
+									Fields: []api.Field{
 										{Name: "content", Value: "Manual content"},
 									},
-									InputParameters: []instana.Parameter{},
+									InputParameters: []api.Parameter{},
 								},
 								AgentId: "",
 							},
@@ -457,21 +457,21 @@ func TestUpdateState_WithTags(t *testing.T) {
 	ctx := context.Background()
 	resource := &automationPolicyResource{}
 
-	data := &instana.AutomationPolicy{
+	data := &api.AutomationPolicy{
 		ID:          "test-id",
 		Name:        "Test Policy",
 		Description: "Test Description",
 		Tags:        []interface{}{"tag1", "tag2", "tag3"},
-		Trigger: instana.Trigger{
+		Trigger: api.Trigger{
 			Id:   "trigger-123",
 			Type: "builtinEvent",
 		},
-		TypeConfigurations: []instana.TypeConfiguration{
+		TypeConfigurations: []api.TypeConfiguration{
 			{
 				Name: "manual",
-				Runnable: instana.Runnable{
-					RunConfiguration: instana.RunConfiguration{
-						Actions: []instana.AutomationActionPolicy{
+				Runnable: api.Runnable{
+					RunConfiguration: api.RunConfiguration{
+						Actions: []api.AutomationActionPolicy{
 							{
 								Action: createMinimalRestAPIAction(),
 							},
@@ -520,17 +520,17 @@ func TestUpdateState_WithScheduling(t *testing.T) {
 	ctx := context.Background()
 	resource := &automationPolicyResource{}
 
-	data := &instana.AutomationPolicy{
+	data := &api.AutomationPolicy{
 		ID:          "test-id",
 		Name:        "Test Policy",
 		Description: "Test Description",
 		Tags:        nil,
-		Trigger: instana.Trigger{
+		Trigger: api.Trigger{
 			Id:          "trigger-123",
 			Type:        "schedule",
 			Name:        "Scheduled Trigger",
 			Description: "Trigger Description",
-			Scheduling: instana.Scheduling{
+			Scheduling: api.Scheduling{
 				StartTime:     1609459200000,
 				Duration:      60,
 				DurationUnit:  "MINUTE",
@@ -538,15 +538,15 @@ func TestUpdateState_WithScheduling(t *testing.T) {
 				Recurrent:     true,
 			},
 		},
-		TypeConfigurations: []instana.TypeConfiguration{
+		TypeConfigurations: []api.TypeConfiguration{
 			{
 				Name: "automatic",
-				Condition: &instana.Condition{
+				Condition: &api.Condition{
 					Query: "entity.type:service",
 				},
-				Runnable: instana.Runnable{
-					RunConfiguration: instana.RunConfiguration{
-						Actions: []instana.AutomationActionPolicy{
+				Runnable: api.Runnable{
+					RunConfiguration: api.RunConfiguration{
+						Actions: []api.AutomationActionPolicy{
 							{
 								Action: createMinimalRestAPIAction(),
 							},
@@ -702,13 +702,13 @@ func TestMapTriggerToState(t *testing.T) {
 
 	tests := []struct {
 		name         string
-		trigger      *instana.Trigger
+		trigger      *api.Trigger
 		expectedID   string
 		expectedType string
 	}{
 		{
 			name: "basic trigger",
-			trigger: &instana.Trigger{
+			trigger: &api.Trigger{
 				Id:   "trigger-123",
 				Type: "customEvent",
 			},
@@ -717,7 +717,7 @@ func TestMapTriggerToState(t *testing.T) {
 		},
 		{
 			name: "trigger with name and description",
-			trigger: &instana.Trigger{
+			trigger: &api.Trigger{
 				Id:          "trigger-456",
 				Type:        "builtinEvent",
 				Name:        "Test Trigger",
@@ -728,10 +728,10 @@ func TestMapTriggerToState(t *testing.T) {
 		},
 		{
 			name: "trigger with scheduling",
-			trigger: &instana.Trigger{
+			trigger: &api.Trigger{
 				Id:   "trigger-789",
 				Type: "schedule",
-				Scheduling: instana.Scheduling{
+				Scheduling: api.Scheduling{
 					StartTime:     1609459200000,
 					Duration:      60,
 					DurationUnit:  "MINUTE",
@@ -872,15 +872,15 @@ func TestMapTypeConfigurationsToState(t *testing.T) {
 	ctx := context.Background()
 	resource := &automationPolicyResource{}
 
-	typeConfigs := []instana.TypeConfiguration{
+	typeConfigs := []api.TypeConfiguration{
 		{
 			Name: "manual",
-			Condition: &instana.Condition{
+			Condition: &api.Condition{
 				Query: "entity.type:service",
 			},
-			Runnable: instana.Runnable{
-				RunConfiguration: instana.RunConfiguration{
-					Actions: []instana.AutomationActionPolicy{
+			Runnable: api.Runnable{
+				RunConfiguration: api.RunConfiguration{
+					Actions: []api.AutomationActionPolicy{
 						{
 							Action:  createMinimalRestAPIAction(),
 							AgentId: "agent-123",
@@ -932,21 +932,21 @@ func TestMapActionsToState(t *testing.T) {
 	ctx := context.Background()
 	resource := &automationPolicyResource{}
 
-	runnable := &instana.Runnable{
-		RunConfiguration: instana.RunConfiguration{
-			Actions: []instana.AutomationActionPolicy{
+	runnable := &api.Runnable{
+		RunConfiguration: api.RunConfiguration{
+			Actions: []api.AutomationActionPolicy{
 				{
 					Action:  createMinimalRestAPIAction(),
 					AgentId: "agent-123",
 				},
 				{
-					Action: instana.AutomationAction{
+					Action: api.AutomationAction{
 						ID:              "action-456",
 						Name:            "Second Action",
 						Description:     "Second Description",
 						Type:            "manual",
-						Fields:          []instana.Field{{Name: "content", Value: "Content"}},
-						InputParameters: []instana.Parameter{},
+						Fields:          []api.Field{{Name: "content", Value: "Content"}},
+						InputParameters: []api.Parameter{},
 					},
 					AgentId: "",
 				},
@@ -1016,20 +1016,20 @@ func TestUpdateState_AllTriggerTypes(t *testing.T) {
 			ctx := context.Background()
 			resource := &automationPolicyResource{}
 
-			data := &instana.AutomationPolicy{
+			data := &api.AutomationPolicy{
 				ID:          "test-id",
 				Name:        "Test Policy",
 				Description: "Test Description",
-				Trigger: instana.Trigger{
+				Trigger: api.Trigger{
 					Id:   "trigger-123",
 					Type: triggerType,
 				},
-				TypeConfigurations: []instana.TypeConfiguration{
+				TypeConfigurations: []api.TypeConfiguration{
 					{
 						Name: "manual",
-						Runnable: instana.Runnable{
-							RunConfiguration: instana.RunConfiguration{
-								Actions: []instana.AutomationActionPolicy{
+						Runnable: api.Runnable{
+							RunConfiguration: api.RunConfiguration{
+								Actions: []api.AutomationActionPolicy{
 									{
 										Action: createMinimalRestAPIAction(),
 									},
@@ -1077,20 +1077,20 @@ func TestUpdateState_AllPolicyTypes(t *testing.T) {
 			ctx := context.Background()
 			resource := &automationPolicyResource{}
 
-			data := &instana.AutomationPolicy{
+			data := &api.AutomationPolicy{
 				ID:          "test-id",
 				Name:        "Test Policy",
 				Description: "Test Description",
-				Trigger: instana.Trigger{
+				Trigger: api.Trigger{
 					Id:   "trigger-123",
 					Type: "customEvent",
 				},
-				TypeConfigurations: []instana.TypeConfiguration{
+				TypeConfigurations: []api.TypeConfiguration{
 					{
 						Name: policyType,
-						Runnable: instana.Runnable{
-							RunConfiguration: instana.RunConfiguration{
-								Actions: []instana.AutomationActionPolicy{
+						Runnable: api.Runnable{
+							RunConfiguration: api.RunConfiguration{
+								Actions: []api.AutomationActionPolicy{
 									{
 										Action: createMinimalRestAPIAction(),
 									},
@@ -1133,7 +1133,7 @@ func TestUpdateState_AllPolicyTypes(t *testing.T) {
 func TestMapTriggerToState_EmptyOptionalFields(t *testing.T) {
 	resource := &automationPolicyResource{}
 
-	trigger := &instana.Trigger{
+	trigger := &api.Trigger{
 		Id:          "trigger-123",
 		Type:        "customEvent",
 		Name:        "",
@@ -1151,7 +1151,7 @@ func TestMapTriggerToState_EmptyOptionalFields(t *testing.T) {
 func TestMapTriggerToState_WithNewValues(t *testing.T) {
 	resource := &automationPolicyResource{}
 
-	trigger := &instana.Trigger{
+	trigger := &api.Trigger{
 		Id:   "trigger-new",
 		Type: "builtinEvent",
 	}
@@ -1167,13 +1167,13 @@ func TestMapTypeConfigurationsToState_WithoutCondition(t *testing.T) {
 	ctx := context.Background()
 	resource := &automationPolicyResource{}
 
-	typeConfigs := []instana.TypeConfiguration{
+	typeConfigs := []api.TypeConfiguration{
 		{
 			Name:      "manual",
 			Condition: nil,
-			Runnable: instana.Runnable{
-				RunConfiguration: instana.RunConfiguration{
-					Actions: []instana.AutomationActionPolicy{
+			Runnable: api.Runnable{
+				RunConfiguration: api.RunConfiguration{
+					Actions: []api.AutomationActionPolicy{
 						{
 							Action: createMinimalRestAPIAction(),
 						},
@@ -1193,15 +1193,15 @@ func TestMapTypeConfigurationsToState_WithEmptyCondition(t *testing.T) {
 	ctx := context.Background()
 	resource := &automationPolicyResource{}
 
-	typeConfigs := []instana.TypeConfiguration{
+	typeConfigs := []api.TypeConfiguration{
 		{
 			Name: "automatic",
-			Condition: &instana.Condition{
+			Condition: &api.Condition{
 				Query: "",
 			},
-			Runnable: instana.Runnable{
-				RunConfiguration: instana.RunConfiguration{
-					Actions: []instana.AutomationActionPolicy{
+			Runnable: api.Runnable{
+				RunConfiguration: api.RunConfiguration{
+					Actions: []api.AutomationActionPolicy{
 						{
 							Action: createMinimalRestAPIAction(),
 						},
@@ -1247,16 +1247,16 @@ func createMinimalManualAction() shared.AutomationActionModel {
 	}
 }
 
-func createMinimalRestAPIAction() instana.AutomationAction {
-	return instana.AutomationAction{
+func createMinimalRestAPIAction() api.AutomationAction {
+	return api.AutomationAction{
 		ID:          "action-123",
 		Name:        "Test Action",
 		Description: "Action Description",
 		Type:        "manual",
-		Fields: []instana.Field{
+		Fields: []api.Field{
 			{Name: "content", Value: "Manual content"},
 		},
-		InputParameters: []instana.Parameter{},
+		InputParameters: []api.Parameter{},
 	}
 }
 
@@ -1302,21 +1302,21 @@ func TestUpdateState_WithPlan(t *testing.T) {
 	require.False(t, diags.HasError())
 
 	// API response data
-	data := &instana.AutomationPolicy{
+	data := &api.AutomationPolicy{
 		ID:          "test-id",
 		Name:        "Test Policy",
 		Description: "Test Description",
 		Tags:        []interface{}{"tag1"},
-		Trigger: instana.Trigger{
+		Trigger: api.Trigger{
 			Id:   "trigger-123",
 			Type: "builtinEvent",
 		},
-		TypeConfigurations: []instana.TypeConfiguration{
+		TypeConfigurations: []api.TypeConfiguration{
 			{
 				Name: "automatic",
-				Runnable: instana.Runnable{
-					RunConfiguration: instana.RunConfiguration{
-						Actions: []instana.AutomationActionPolicy{
+				Runnable: api.Runnable{
+					RunConfiguration: api.RunConfiguration{
+						Actions: []api.AutomationActionPolicy{
 							{
 								Action: createMinimalRestAPIAction(),
 							},
@@ -1359,15 +1359,15 @@ func TestUpdateState_ErrorInPlanGet(t *testing.T) {
 		},
 	}
 
-	data := &instana.AutomationPolicy{
+	data := &api.AutomationPolicy{
 		ID:          "test-id",
 		Name:        "Test Policy",
 		Description: "Test Description",
-		Trigger: instana.Trigger{
+		Trigger: api.Trigger{
 			Id:   "trigger-123",
 			Type: "customEvent",
 		},
-		TypeConfigurations: []instana.TypeConfiguration{},
+		TypeConfigurations: []api.TypeConfiguration{},
 	}
 
 	state := &tfsdk.State{
@@ -1556,15 +1556,15 @@ func TestUpdateState_WithSchedulingEmptyFields(t *testing.T) {
 	ctx := context.Background()
 	resource := &automationPolicyResource{}
 
-	data := &instana.AutomationPolicy{
+	data := &api.AutomationPolicy{
 		ID:          "test-id",
 		Name:        "Test Policy",
 		Description: "Test Description",
 		Tags:        nil,
-		Trigger: instana.Trigger{
+		Trigger: api.Trigger{
 			Id:   "trigger-123",
 			Type: "schedule",
-			Scheduling: instana.Scheduling{
+			Scheduling: api.Scheduling{
 				StartTime:     1609459200000,
 				Duration:      60,
 				DurationUnit:  "",
@@ -1572,12 +1572,12 @@ func TestUpdateState_WithSchedulingEmptyFields(t *testing.T) {
 				Recurrent:     false,
 			},
 		},
-		TypeConfigurations: []instana.TypeConfiguration{
+		TypeConfigurations: []api.TypeConfiguration{
 			{
 				Name: "manual",
-				Runnable: instana.Runnable{
-					RunConfiguration: instana.RunConfiguration{
-						Actions: []instana.AutomationActionPolicy{
+				Runnable: api.Runnable{
+					RunConfiguration: api.RunConfiguration{
+						Actions: []api.AutomationActionPolicy{
 							{
 								Action: createMinimalRestAPIAction(),
 							},
@@ -1622,10 +1622,10 @@ func TestUpdateState_WithSchedulingEmptyFields(t *testing.T) {
 func TestMapTriggerToState_WithSchedulingZeroStartTime(t *testing.T) {
 	resource := &automationPolicyResource{}
 
-	trigger := &instana.Trigger{
+	trigger := &api.Trigger{
 		Id:   "trigger-123",
 		Type: "schedule",
-		Scheduling: instana.Scheduling{
+		Scheduling: api.Scheduling{
 			StartTime: 0, // Zero start time should not create scheduling
 		},
 	}
@@ -1640,20 +1640,20 @@ func TestMapActionsToState_WithTags(t *testing.T) {
 	ctx := context.Background()
 	resource := &automationPolicyResource{}
 
-	runnable := &instana.Runnable{
-		RunConfiguration: instana.RunConfiguration{
-			Actions: []instana.AutomationActionPolicy{
+	runnable := &api.Runnable{
+		RunConfiguration: api.RunConfiguration{
+			Actions: []api.AutomationActionPolicy{
 				{
-					Action: instana.AutomationAction{
+					Action: api.AutomationAction{
 						ID:          "action-123",
 						Name:        "Test Action",
 						Description: "Action Description",
 						Type:        "manual",
 						Tags:        []interface{}{"tag1", "tag2"},
-						Fields: []instana.Field{
+						Fields: []api.Field{
 							{Name: "content", Value: "Manual content"},
 						},
-						InputParameters: []instana.Parameter{},
+						InputParameters: []api.Parameter{},
 					},
 					AgentId: "agent-123",
 				},
@@ -1671,19 +1671,19 @@ func TestMapActionsToState_WithInputParameters(t *testing.T) {
 	ctx := context.Background()
 	resource := &automationPolicyResource{}
 
-	runnable := &instana.Runnable{
-		RunConfiguration: instana.RunConfiguration{
-			Actions: []instana.AutomationActionPolicy{
+	runnable := &api.Runnable{
+		RunConfiguration: api.RunConfiguration{
+			Actions: []api.AutomationActionPolicy{
 				{
-					Action: instana.AutomationAction{
+					Action: api.AutomationAction{
 						ID:          "action-123",
 						Name:        "Test Action",
 						Description: "Action Description",
 						Type:        "manual",
-						Fields: []instana.Field{
+						Fields: []api.Field{
 							{Name: "content", Value: "Manual content"},
 						},
-						InputParameters: []instana.Parameter{
+						InputParameters: []api.Parameter{
 							{
 								Name:        "param1",
 								Description: "Parameter 1",
@@ -1712,21 +1712,21 @@ func TestUpdateState_NullTags(t *testing.T) {
 	ctx := context.Background()
 	resource := &automationPolicyResource{}
 
-	data := &instana.AutomationPolicy{
+	data := &api.AutomationPolicy{
 		ID:          "test-id",
 		Name:        "Test Policy",
 		Description: "Test Description",
 		Tags:        nil,
-		Trigger: instana.Trigger{
+		Trigger: api.Trigger{
 			Id:   "trigger-123",
 			Type: "customEvent",
 		},
-		TypeConfigurations: []instana.TypeConfiguration{
+		TypeConfigurations: []api.TypeConfiguration{
 			{
 				Name: "manual",
-				Runnable: instana.Runnable{
-					RunConfiguration: instana.RunConfiguration{
-						Actions: []instana.AutomationActionPolicy{
+				Runnable: api.Runnable{
+					RunConfiguration: api.RunConfiguration{
+						Actions: []api.AutomationActionPolicy{
 							{
 								Action: createMinimalRestAPIAction(),
 							},

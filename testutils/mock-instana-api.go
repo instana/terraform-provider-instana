@@ -61,27 +61,27 @@ func (m *MockInstanaAPI) SloConfigs() rest.RestResource[*api.SloConfig] {
 }
 
 // SloAlertConfig mock implementation
-func (m *MockInstanaAPI) SloAlertConfig() rest.RestResource[*api.SloAlertConfig] {
+func (m *MockInstanaAPI) SloAlertConfigs() rest.RestResource[*api.SloAlertConfig] {
 	return nil
 }
 
 // SloCorrectionConfig mock implementation
-func (m *MockInstanaAPI) SloCorrectionConfig() rest.RestResource[*api.SloCorrectionConfig] {
+func (m *MockInstanaAPI) SloCorrectionConfigs() rest.RestResource[*api.SloCorrectionConfig] {
 	return nil
 }
 
 // WebsiteMonitoringConfig mock implementation
-func (m *MockInstanaAPI) WebsiteMonitoringConfig() rest.RestResource[*api.WebsiteMonitoringConfig] {
+func (m *MockInstanaAPI) WebsiteMonitoringConfigs() rest.RestResource[*api.WebsiteMonitoringConfig] {
 	return nil
 }
 
 // WebsiteAlertConfig mock implementation
-func (m *MockInstanaAPI) WebsiteAlertConfig() rest.RestResource[*api.WebsiteAlertConfig] {
+func (m *MockInstanaAPI) WebsiteAlertConfigs() rest.RestResource[*api.WebsiteAlertConfig] {
 	return nil
 }
 
 // InfraAlertConfig mock implementation
-func (m *MockInstanaAPI) InfraAlertConfig() rest.RestResource[*api.InfraAlertConfig] {
+func (m *MockInstanaAPI) InfraAlertConfigs() rest.RestResource[*api.InfraAlertConfig] {
 	return nil
 }
 
@@ -106,12 +106,12 @@ func (m *MockInstanaAPI) CustomDashboards() rest.RestResource[*api.CustomDashboa
 }
 
 // SyntheticTest mock implementation
-func (m *MockInstanaAPI) SyntheticTest() rest.RestResource[*api.SyntheticTest] {
+func (m *MockInstanaAPI) SyntheticTests() rest.RestResource[*api.SyntheticTest] {
 	return nil
 }
 
 // SyntheticLocation mock implementation
-func (m *MockInstanaAPI) SyntheticLocation() rest.ReadOnlyRestResource[*api.SyntheticLocation] {
+func (m *MockInstanaAPI) SyntheticLocations() rest.ReadOnlyRestResource[*api.SyntheticLocation] {
 	return nil
 }
 
@@ -141,7 +141,7 @@ func (m *MockInstanaAPI) Users() rest.ReadOnlyRestResource[*api.User] {
 }
 
 // LogAlertConfig mock implementation
-func (m *MockInstanaAPI) LogAlertConfig() rest.RestResource[*api.LogAlertConfig] {
+func (m *MockInstanaAPI) LogAlertConfigs() rest.RestResource[*api.LogAlertConfig] {
 	return nil
 }
 
@@ -151,7 +151,7 @@ func (m *MockInstanaAPI) MobileAppConfig() restapi.RestResource[*restapi.MobileA
 }
 
 // MobileAlertConfig mock implementation
-func (m *MockInstanaAPI) MobileAlertConfig() rest.RestResource[*api.MobileAlertConfig] {
+func (m *MockInstanaAPI) MobileAlertConfigs() rest.RestResource[*api.MobileAlertConfig] {
 	return nil
 }
 

@@ -7,8 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/instana-go-client/api"
+	common "github.com/instana/instana-go-client/shared/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/instana-go-client/instana"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -52,16 +53,16 @@ func TestUpdateState(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("basic configuration", func(t *testing.T) {
-		apiConfig := &instana.AlertingConfiguration{
+		apiConfig := &api.AlertingConfiguration{
 			ID:             "test-id",
 			AlertName:      "test-alert",
 			IntegrationIDs: []string{"integration-1", "integration-2"},
-			EventFilteringConfiguration: instana.EventFilteringConfiguration{
+			EventFilteringConfiguration: api.EventFilteringConfiguration{
 				Query:      nil,
 				RuleIDs:    []string{},
-				EventTypes: []instana.AlertEventType{},
+				EventTypes: []api.AlertEventType{},
 			},
-			CustomerPayloadFields: []instana.CustomPayloadField[any]{},
+			CustomerPayloadFields: []common.CustomPayloadField[any]{},
 		}
 
 		handle := NewAlertingConfigResourceHandle()
@@ -86,16 +87,16 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("with event filter query", func(t *testing.T) {
 		query := "entity.type:host"
-		apiConfig := &instana.AlertingConfiguration{
+		apiConfig := &api.AlertingConfiguration{
 			ID:             "test-id",
 			AlertName:      "test-alert",
 			IntegrationIDs: []string{"integration-1"},
-			EventFilteringConfiguration: instana.EventFilteringConfiguration{
+			EventFilteringConfiguration: api.EventFilteringConfiguration{
 				Query:      &query,
 				RuleIDs:    []string{},
-				EventTypes: []instana.AlertEventType{},
+				EventTypes: []api.AlertEventType{},
 			},
-			CustomerPayloadFields: []instana.CustomPayloadField[any]{},
+			CustomerPayloadFields: []common.CustomPayloadField[any]{},
 		}
 
 		handle := NewAlertingConfigResourceHandle()
@@ -113,16 +114,16 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("with event types", func(t *testing.T) {
-		apiConfig := &instana.AlertingConfiguration{
+		apiConfig := &api.AlertingConfiguration{
 			ID:             "test-id",
 			AlertName:      "test-alert",
 			IntegrationIDs: []string{"integration-1"},
-			EventFilteringConfiguration: instana.EventFilteringConfiguration{
+			EventFilteringConfiguration: api.EventFilteringConfiguration{
 				Query:      nil,
 				RuleIDs:    []string{},
-				EventTypes: []instana.AlertEventType{instana.CriticalAlertEventType, instana.WarningAlertEventType},
+				EventTypes: []api.AlertEventType{api.CriticalAlertEventType, api.WarningAlertEventType},
 			},
-			CustomerPayloadFields: []instana.CustomPayloadField[any]{},
+			CustomerPayloadFields: []common.CustomPayloadField[any]{},
 		}
 
 		handle := NewAlertingConfigResourceHandle()
@@ -145,16 +146,16 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("with rule IDs", func(t *testing.T) {
-		apiConfig := &instana.AlertingConfiguration{
+		apiConfig := &api.AlertingConfiguration{
 			ID:             "test-id",
 			AlertName:      "test-alert",
 			IntegrationIDs: []string{"integration-1"},
-			EventFilteringConfiguration: instana.EventFilteringConfiguration{
+			EventFilteringConfiguration: api.EventFilteringConfiguration{
 				Query:      nil,
 				RuleIDs:    []string{"rule-1", "rule-2"},
-				EventTypes: []instana.AlertEventType{},
+				EventTypes: []api.AlertEventType{},
 			},
-			CustomerPayloadFields: []instana.CustomPayloadField[any]{},
+			CustomerPayloadFields: []common.CustomPayloadField[any]{},
 		}
 
 		handle := NewAlertingConfigResourceHandle()
@@ -176,18 +177,18 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("with custom payload fields", func(t *testing.T) {
-		apiConfig := &instana.AlertingConfiguration{
+		apiConfig := &api.AlertingConfiguration{
 			ID:             "test-id",
 			AlertName:      "test-alert",
 			IntegrationIDs: []string{"integration-1"},
-			EventFilteringConfiguration: instana.EventFilteringConfiguration{
+			EventFilteringConfiguration: api.EventFilteringConfiguration{
 				Query:      nil,
 				RuleIDs:    []string{},
-				EventTypes: []instana.AlertEventType{},
+				EventTypes: []api.AlertEventType{},
 			},
-			CustomerPayloadFields: []instana.CustomPayloadField[any]{
+			CustomerPayloadFields: []common.CustomPayloadField[any]{
 				{
-					Type:  instana.StaticStringCustomPayloadType,
+					Type:  common.StaticStringCustomPayloadType,
 					Key:   "static_key",
 					Value: "static_value",
 				},
@@ -308,8 +309,8 @@ func TestMapStateToDataObject(t *testing.T) {
 		require.False(t, diags.HasError())
 		require.NotNil(t, config)
 		assert.Len(t, config.EventFilteringConfiguration.EventTypes, 2)
-		assert.Contains(t, config.EventFilteringConfiguration.EventTypes, instana.CriticalAlertEventType)
-		assert.Contains(t, config.EventFilteringConfiguration.EventTypes, instana.WarningAlertEventType)
+		assert.Contains(t, config.EventFilteringConfiguration.EventTypes, api.CriticalAlertEventType)
+		assert.Contains(t, config.EventFilteringConfiguration.EventTypes, api.WarningAlertEventType)
 	})
 
 	t.Run("with rule IDs", func(t *testing.T) {
@@ -372,27 +373,27 @@ func TestConvertEventTypesToHarmonizedStringRepresentation(t *testing.T) {
 
 	testCases := []struct {
 		name     string
-		input    []instana.AlertEventType
+		input    []api.AlertEventType
 		expected []string
 	}{
 		{
 			name:     "empty slice",
-			input:    []instana.AlertEventType{},
+			input:    []api.AlertEventType{},
 			expected: []string{},
 		},
 		{
 			name:     "single event type",
-			input:    []instana.AlertEventType{instana.CriticalAlertEventType},
+			input:    []api.AlertEventType{api.CriticalAlertEventType},
 			expected: []string{"critical"},
 		},
 		{
 			name:     "multiple event types",
-			input:    []instana.AlertEventType{instana.CriticalAlertEventType, instana.WarningAlertEventType, instana.IncidentAlertEventType},
+			input:    []api.AlertEventType{api.CriticalAlertEventType, api.WarningAlertEventType, api.IncidentAlertEventType},
 			expected: []string{"critical", "warning", "incident"},
 		},
 		{
 			name:     "all supported event types",
-			input:    instana.SupportedAlertEventTypes,
+			input:    api.SupportedAlertEventTypes,
 			expected: []string{"incident", "critical", "warning", "change", "online", "offline", "none", "agent_monitoring_issue"},
 		},
 	}
@@ -411,27 +412,27 @@ func TestReadEventTypesFromStrings(t *testing.T) {
 	testCases := []struct {
 		name     string
 		input    []string
-		expected []instana.AlertEventType
+		expected []api.AlertEventType
 	}{
 		{
 			name:     "empty slice",
 			input:    []string{},
-			expected: []instana.AlertEventType{},
+			expected: []api.AlertEventType{},
 		},
 		{
 			name:     "single event type",
 			input:    []string{"critical"},
-			expected: []instana.AlertEventType{instana.CriticalAlertEventType},
+			expected: []api.AlertEventType{api.CriticalAlertEventType},
 		},
 		{
 			name:     "multiple event types",
 			input:    []string{"critical", "warning", "incident"},
-			expected: []instana.AlertEventType{instana.CriticalAlertEventType, instana.WarningAlertEventType, instana.IncidentAlertEventType},
+			expected: []api.AlertEventType{api.CriticalAlertEventType, api.WarningAlertEventType, api.IncidentAlertEventType},
 		},
 		{
 			name:     "mixed case input",
 			input:    []string{"CRITICAL", "Warning", "incident"},
-			expected: []instana.AlertEventType{instana.CriticalAlertEventType, instana.WarningAlertEventType, instana.IncidentAlertEventType},
+			expected: []api.AlertEventType{api.CriticalAlertEventType, api.WarningAlertEventType, api.IncidentAlertEventType},
 		},
 	}
 
@@ -458,13 +459,13 @@ func TestConvertSupportedEventTypesToStringSlice(t *testing.T) {
 	}
 
 	assert.Equal(t, expected, result)
-	assert.Equal(t, len(instana.SupportedAlertEventTypes), len(result))
+	assert.Equal(t, len(api.SupportedAlertEventTypes), len(result))
 }
 
 func TestSupportedEventTypes(t *testing.T) {
 	// Test that the supportedEventTypes variable is properly initialized
 	assert.NotEmpty(t, supportedEventTypes)
-	assert.Equal(t, len(instana.SupportedAlertEventTypes), len(supportedEventTypes))
+	assert.Equal(t, len(api.SupportedAlertEventTypes), len(supportedEventTypes))
 
 	// Verify all expected event types are present
 	expectedTypes := []string{
@@ -599,7 +600,7 @@ func TestMapStateToDataObjectWithDynamicCustomPayloadFields(t *testing.T) {
 		require.NotNil(t, config)
 		assert.Len(t, config.CustomerPayloadFields, 2)
 		assert.Equal(t, "key1", config.CustomerPayloadFields[0].Key)
-		assert.Equal(t, instana.DynamicCustomPayloadType, config.CustomerPayloadFields[0].Type)
+		assert.Equal(t, common.DynamicCustomPayloadType, config.CustomerPayloadFields[0].Type)
 	})
 }
 
@@ -609,20 +610,20 @@ func TestUpdateStateWithComplexCustomPayloadFields(t *testing.T) {
 
 	t.Run("with dynamic custom payload fields", func(t *testing.T) {
 		dynamicKey := "dynamic_key"
-		apiConfig := &instana.AlertingConfiguration{
+		apiConfig := &api.AlertingConfiguration{
 			ID:             "test-id",
 			AlertName:      "test-alert",
 			IntegrationIDs: []string{"integration-1"},
-			EventFilteringConfiguration: instana.EventFilteringConfiguration{
+			EventFilteringConfiguration: api.EventFilteringConfiguration{
 				Query:      nil,
 				RuleIDs:    []string{},
-				EventTypes: []instana.AlertEventType{},
+				EventTypes: []api.AlertEventType{},
 			},
-			CustomerPayloadFields: []instana.CustomPayloadField[any]{
+			CustomerPayloadFields: []common.CustomPayloadField[any]{
 				{
-					Type: instana.DynamicCustomPayloadType,
+					Type: common.DynamicCustomPayloadType,
 					Key:  "dynamic_field",
-					Value: instana.DynamicCustomPayloadFieldValue{
+					Value: common.DynamicCustomPayloadFieldValue{
 						Key:     &dynamicKey,
 						TagName: "test_tag",
 					},
@@ -728,16 +729,16 @@ func TestUpdateStateWithAllEventTypes(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("with all supported event types", func(t *testing.T) {
-		apiConfig := &instana.AlertingConfiguration{
+		apiConfig := &api.AlertingConfiguration{
 			ID:             "test-id",
 			AlertName:      "test-alert-all-types",
 			IntegrationIDs: []string{"integration-1"},
-			EventFilteringConfiguration: instana.EventFilteringConfiguration{
+			EventFilteringConfiguration: api.EventFilteringConfiguration{
 				Query:      nil,
 				RuleIDs:    []string{},
-				EventTypes: instana.SupportedAlertEventTypes,
+				EventTypes: api.SupportedAlertEventTypes,
 			},
-			CustomerPayloadFields: []instana.CustomPayloadField[any]{},
+			CustomerPayloadFields: []common.CustomPayloadField[any]{},
 		}
 
 		handle := NewAlertingConfigResourceHandle()
@@ -755,7 +756,7 @@ func TestUpdateStateWithAllEventTypes(t *testing.T) {
 		var eventTypes []string
 		diags = model.EventFilterEventTypes.ElementsAs(ctx, &eventTypes, false)
 		require.False(t, diags.HasError())
-		assert.Len(t, eventTypes, len(instana.SupportedAlertEventTypes))
+		assert.Len(t, eventTypes, len(api.SupportedAlertEventTypes))
 
 		// Verify all event types are present
 		for _, expectedType := range supportedEventTypes {
@@ -766,25 +767,25 @@ func TestUpdateStateWithAllEventTypes(t *testing.T) {
 	t.Run("with mixed payload fields and all filters", func(t *testing.T) {
 		query := "entity.type:host"
 		dynamicKey := "dynamic_key"
-		apiConfig := &instana.AlertingConfiguration{
+		apiConfig := &api.AlertingConfiguration{
 			ID:             "test-id",
 			AlertName:      "test-alert-mixed",
 			IntegrationIDs: []string{"integration-1", "integration-2"},
-			EventFilteringConfiguration: instana.EventFilteringConfiguration{
+			EventFilteringConfiguration: api.EventFilteringConfiguration{
 				Query:      &query,
 				RuleIDs:    []string{"rule-1", "rule-2", "rule-3"},
-				EventTypes: []instana.AlertEventType{instana.CriticalAlertEventType, instana.WarningAlertEventType, instana.IncidentAlertEventType},
+				EventTypes: []api.AlertEventType{api.CriticalAlertEventType, api.WarningAlertEventType, api.IncidentAlertEventType},
 			},
-			CustomerPayloadFields: []instana.CustomPayloadField[any]{
+			CustomerPayloadFields: []common.CustomPayloadField[any]{
 				{
-					Type:  instana.StaticStringCustomPayloadType,
+					Type:  common.StaticStringCustomPayloadType,
 					Key:   "static_key",
 					Value: "static_value",
 				},
 				{
-					Type: instana.DynamicCustomPayloadType,
+					Type: common.DynamicCustomPayloadType,
 					Key:  "dynamic_field",
-					Value: instana.DynamicCustomPayloadFieldValue{
+					Value: common.DynamicCustomPayloadFieldValue{
 						Key:     &dynamicKey,
 						TagName: "test_tag",
 					},

@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	instana "github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/api"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -51,13 +51,13 @@ func TestUpdateState(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("one-time maintenance window", func(t *testing.T) {
-		apiConfig := &instana.MaintenanceWindowConfig{
+		apiConfig := &api.MaintenanceWindow{
 			ID:    "test-id",
 			Name:  "test-maintenance",
 			Query: "entity.type:host",
-			Scheduling: &instana.MaintenanceScheduling{
+			Scheduling: &api.MaintenanceScheduling{
 				Start: 1698938631036,
-				Duration: &instana.MaintenanceDuration{
+				Duration: &api.MaintenanceDuration{
 					Amount: 2,
 					Unit:   "HOURS",
 				},
@@ -85,13 +85,13 @@ func TestUpdateState(t *testing.T) {
 	t.Run("recurrent maintenance window", func(t *testing.T) {
 		rrule := "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA;COUNT=10"
 		timezoneId := "America/New_York"
-		apiConfig := &instana.MaintenanceWindowConfig{
+		apiConfig := &api.MaintenanceWindow{
 			ID:    "test-id",
 			Name:  "test-maintenance",
 			Query: "",
-			Scheduling: &instana.MaintenanceScheduling{
+			Scheduling: &api.MaintenanceScheduling{
 				Start: 1683827571245,
-				Duration: &instana.MaintenanceDuration{
+				Duration: &api.MaintenanceDuration{
 					Amount: 2,
 					Unit:   "HOURS",
 				},
@@ -119,13 +119,13 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("with tag filter expression enabled", func(t *testing.T) {
 		enabled := true
-		apiConfig := &instana.MaintenanceWindowConfig{
+		apiConfig := &api.MaintenanceWindow{
 			ID:    "test-id",
 			Name:  "test-maintenance",
 			Query: "",
-			Scheduling: &instana.MaintenanceScheduling{
+			Scheduling: &api.MaintenanceScheduling{
 				Start: 1698938631036,
-				Duration: &instana.MaintenanceDuration{
+				Duration: &api.MaintenanceDuration{
 					Amount: 1,
 					Unit:   "DAYS",
 				},

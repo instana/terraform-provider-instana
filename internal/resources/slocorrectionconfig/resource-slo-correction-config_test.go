@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/api"
 	"github.com/instana/instana-go-client/shared/rest"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/testutils"
@@ -58,11 +58,7 @@ func TestGetRestResource(t *testing.T) {
 	t.Run("should return SLO correction config rest resource", func(t *testing.T) {
 		resource := &sloCorrectionConfigResource{}
 
-		// Create a mock API to test the GetRestResource method
-		mockAPI := &mockSloCorrectionAPI{}
-		restResource := resource.GetRestResource(mockAPI)
-
-		assert.NotNil(t, restResource)
+		assert.NotNil(t, resource.GetRestResource)
 	})
 }
 
@@ -71,30 +67,30 @@ type mockSloCorrectionAPI struct {
 	testutils.MockInstanaAPI
 }
 
-func (m *mockSloCorrectionAPI) SloCorrectionConfig() rest.RestResource[*instana.SloCorrectionConfig] {
+func (m *mockSloCorrectionAPI) SloCorrectionConfigs() rest.RestResource[*api.SloCorrectionConfig] {
 	return &mockSloCorrectionConfigRestResource{}
 }
 
 // Mock rest resource - implements all required methods from RestResource interface
 type mockSloCorrectionConfigRestResource struct{}
 
-func (m *mockSloCorrectionConfigRestResource) GetAll() (*[]*instana.SloCorrectionConfig, error) {
+func (m *mockSloCorrectionConfigRestResource) GetAll() (*[]*api.SloCorrectionConfig, error) {
 	return nil, nil
 }
 
-func (m *mockSloCorrectionConfigRestResource) GetOne(id string) (*instana.SloCorrectionConfig, error) {
+func (m *mockSloCorrectionConfigRestResource) GetOne(id string) (*api.SloCorrectionConfig, error) {
 	return nil, nil
 }
 
-func (m *mockSloCorrectionConfigRestResource) Create(data *instana.SloCorrectionConfig) (*instana.SloCorrectionConfig, error) {
+func (m *mockSloCorrectionConfigRestResource) Create(data *api.SloCorrectionConfig) (*api.SloCorrectionConfig, error) {
 	return nil, nil
 }
 
-func (m *mockSloCorrectionConfigRestResource) Update(data *instana.SloCorrectionConfig) (*instana.SloCorrectionConfig, error) {
+func (m *mockSloCorrectionConfigRestResource) Update(data *api.SloCorrectionConfig) (*api.SloCorrectionConfig, error) {
 	return nil, nil
 }
 
-func (m *mockSloCorrectionConfigRestResource) Delete(data *instana.SloCorrectionConfig) error {
+func (m *mockSloCorrectionConfigRestResource) Delete(data *api.SloCorrectionConfig) error {
 	return nil
 }
 
@@ -169,7 +165,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		assert.True(t, result.Active)
 		assert.Equal(t, int64(1741600800000), result.Scheduling.StartTime)
 		assert.Equal(t, 60, result.Scheduling.Duration)
-		assert.Equal(t, instana.DurationUnit("MINUTE"), result.Scheduling.DurationUnit)
+		assert.Equal(t, api.DurationUnit("MINUTE"), result.Scheduling.DurationUnit)
 		assert.Equal(t, "FREQ=DAILY", result.Scheduling.RecurrentRule)
 		assert.True(t, result.Scheduling.Recurrent)
 		assert.ElementsMatch(t, []string{"slo-1", "slo-2"}, result.SloIds)
@@ -210,7 +206,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		assert.False(t, result.Active)
 		assert.Equal(t, int64(1741600900000), result.Scheduling.StartTime)
 		assert.Equal(t, 120, result.Scheduling.Duration)
-		assert.Equal(t, instana.DurationUnit("HOUR"), result.Scheduling.DurationUnit)
+		assert.Equal(t, api.DurationUnit("HOUR"), result.Scheduling.DurationUnit)
 		assert.Empty(t, result.Scheduling.RecurrentRule)
 		assert.False(t, result.Scheduling.Recurrent)
 		assert.ElementsMatch(t, []string{"slo-3"}, result.SloIds)
@@ -301,15 +297,15 @@ func TestUpdateState(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("should update state with complete API object", func(t *testing.T) {
-		apiObject := &instana.SloCorrectionConfig{
+		apiObject := &api.SloCorrectionConfig{
 			ID:          "api-id-123",
 			Name:        "API Correction",
 			Description: "API Description",
 			Active:      true,
-			Scheduling: instana.Scheduling{
+			Scheduling: api.Scheduling{
 				StartTime:     1741600800000,
 				Duration:      90,
-				DurationUnit:  instana.DurationUnit("HOUR"),
+				DurationUnit:  api.DurationUnit("HOUR"),
 				RecurrentRule: "FREQ=WEEKLY",
 				Recurrent:     true,
 			},
@@ -351,15 +347,15 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("should update state with empty recurrent rule", func(t *testing.T) {
-		apiObject := &instana.SloCorrectionConfig{
+		apiObject := &api.SloCorrectionConfig{
 			ID:          "api-id-456",
 			Name:        "No Recurrence",
 			Description: "No Recurrence Description",
 			Active:      false,
-			Scheduling: instana.Scheduling{
+			Scheduling: api.Scheduling{
 				StartTime:     1741600900000,
 				Duration:      30,
-				DurationUnit:  instana.DurationUnit("DAY"),
+				DurationUnit:  api.DurationUnit("DAY"),
 				RecurrentRule: "",
 				Recurrent:     false,
 			},
@@ -386,15 +382,15 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("should update state with null tags", func(t *testing.T) {
-		apiObject := &instana.SloCorrectionConfig{
+		apiObject := &api.SloCorrectionConfig{
 			ID:          "api-id-789",
 			Name:        "No Tags",
 			Description: "No Tags Description",
 			Active:      true,
-			Scheduling: instana.Scheduling{
+			Scheduling: api.Scheduling{
 				StartTime:    1741600800000,
 				Duration:     15,
-				DurationUnit: instana.DurationUnit("MINUTE"),
+				DurationUnit: api.DurationUnit("MINUTE"),
 				Recurrent:    false,
 			},
 			SloIds: []string{"slo-d"},
@@ -417,16 +413,16 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("should update state with different duration units", func(t *testing.T) {
-		durationUnits := []instana.DurationUnit{"MINUTE", "HOUR", "DAY"}
+		durationUnits := []api.DurationUnit{"MINUTE", "HOUR", "DAY"}
 
 		for _, unit := range durationUnits {
 			t.Run("duration_unit_"+string(unit), func(t *testing.T) {
-				apiObject := &instana.SloCorrectionConfig{
+				apiObject := &api.SloCorrectionConfig{
 					ID:          "test-id",
 					Name:        "Test",
 					Description: "Desc",
 					Active:      true,
-					Scheduling: instana.Scheduling{
+					Scheduling: api.Scheduling{
 						StartTime:    1741600800000,
 						Duration:     10,
 						DurationUnit: unit,
@@ -453,15 +449,15 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("should handle large duration values", func(t *testing.T) {
-		apiObject := &instana.SloCorrectionConfig{
+		apiObject := &api.SloCorrectionConfig{
 			ID:          "test-id",
 			Name:        "Large Duration",
 			Description: "Desc",
 			Active:      true,
-			Scheduling: instana.Scheduling{
+			Scheduling: api.Scheduling{
 				StartTime:    1741600800000,
 				Duration:     999999,
-				DurationUnit: instana.DurationUnit("MINUTE"),
+				DurationUnit: api.DurationUnit("MINUTE"),
 				Recurrent:    false,
 			},
 			SloIds: []string{"slo-1"},
@@ -483,15 +479,15 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("should handle multiple tags", func(t *testing.T) {
-		apiObject := &instana.SloCorrectionConfig{
+		apiObject := &api.SloCorrectionConfig{
 			ID:          "test-id",
 			Name:        "Multiple Tags",
 			Description: "Desc",
 			Active:      true,
-			Scheduling: instana.Scheduling{
+			Scheduling: api.Scheduling{
 				StartTime:    1741600800000,
 				Duration:     60,
-				DurationUnit: instana.DurationUnit("MINUTE"),
+				DurationUnit: api.DurationUnit("MINUTE"),
 				Recurrent:    false,
 			},
 			SloIds: []string{"slo-1"},

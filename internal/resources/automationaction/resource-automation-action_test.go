@@ -8,8 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/instana-go-client/api"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/instana-go-client/instana"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -89,7 +89,7 @@ func TestMapStateToDataObject_ScriptAction(t *testing.T) {
 	require.NotEmpty(t, result.Fields)
 
 	// Verify script fields
-	contentField := findField(result.Fields, instana.ScriptSshFieldName)
+	contentField := findField(result.Fields, api.ScriptSshFieldName)
 	require.NotNil(t, contentField)
 	assert.Equal(t, "echo 'Hello World'", contentField.Value)
 	assert.Equal(t, shared.Base64Encoding, contentField.Encoding)
@@ -128,11 +128,11 @@ func TestMapStateToDataObject_HttpAction(t *testing.T) {
 	assert.Equal(t, shared.ActionTypeHttp, result.Type)
 
 	// Verify HTTP fields
-	hostField := findField(result.Fields, instana.HttpHostFieldName)
+	hostField := findField(result.Fields, api.HttpHostFieldName)
 	require.NotNil(t, hostField)
 	assert.Equal(t, "https://example.com/api", hostField.Value)
 
-	methodField := findField(result.Fields, instana.HttpMethodFieldName)
+	methodField := findField(result.Fields, api.HttpMethodFieldName)
 	require.NotNil(t, methodField)
 	assert.Equal(t, "POST", methodField.Value)
 }
@@ -267,7 +267,7 @@ func TestMapStateToDataObject_HttpActionWithHeaders(t *testing.T) {
 	require.False(t, diags.HasError())
 	require.NotNil(t, result)
 
-	headerField := findField(result.Fields, instana.HttpHeaderFieldName)
+	headerField := findField(result.Fields, api.HttpHeaderFieldName)
 	require.NotNil(t, headerField)
 	assert.Contains(t, headerField.Value, "Content-Type")
 	assert.Contains(t, headerField.Value, "X-Custom")
@@ -560,33 +560,33 @@ func TestUpdateState_ScriptAction(t *testing.T) {
 	ctx := context.Background()
 	resource := &automationActionResource{}
 
-	data := &instana.AutomationAction{
+	data := &api.AutomationAction{
 		ID:          "test-id",
 		Name:        "Test Script Action",
 		Description: "Test Description",
 		Type:        shared.ActionTypeScript,
 		Tags:        []interface{}{"tag1", "tag2"},
-		Fields: []instana.Field{
+		Fields: []api.Field{
 			{
-				Name:        instana.ScriptSshFieldName,
-				Description: instana.ScriptSshFieldDescription,
+				Name:        api.ScriptSshFieldName,
+				Description: api.ScriptSshFieldDescription,
 				Value:       "echo 'Hello'",
 				Encoding:    shared.Base64Encoding,
 			},
 			{
-				Name:        instana.SubtypeFieldName,
-				Description: instana.SubtypeFieldDescription,
+				Name:        api.SubtypeFieldName,
+				Description: api.SubtypeFieldDescription,
 				Value:       "bash",
 				Encoding:    shared.AsciiEncoding,
 			},
 			{
-				Name:        instana.TimeoutFieldName,
-				Description: instana.TimeoutFieldDescription,
+				Name:        api.TimeoutFieldName,
+				Description: api.TimeoutFieldDescription,
 				Value:       "60",
 				Encoding:    shared.AsciiEncoding,
 			},
 		},
-		InputParameters: []instana.Parameter{},
+		InputParameters: []api.Parameter{},
 	}
 
 	state := &tfsdk.State{
@@ -614,28 +614,28 @@ func TestUpdateState_HttpAction(t *testing.T) {
 	ctx := context.Background()
 	resource := &automationActionResource{}
 
-	data := &instana.AutomationAction{
+	data := &api.AutomationAction{
 		ID:          "test-id",
 		Name:        "Test HTTP Action",
 		Description: "Test Description",
 		Type:        shared.ActionTypeHttp,
 		Tags:        nil,
-		Fields: []instana.Field{
+		Fields: []api.Field{
 			{
-				Name:        instana.HttpHostFieldName,
-				Description: instana.HttpHostFieldDescription,
+				Name:        api.HttpHostFieldName,
+				Description: api.HttpHostFieldDescription,
 				Value:       "https://example.com",
 				Encoding:    shared.AsciiEncoding,
 			},
 			{
-				Name:        instana.HttpMethodFieldName,
-				Description: instana.HttpMethodFieldDescription,
+				Name:        api.HttpMethodFieldName,
+				Description: api.HttpMethodFieldDescription,
 				Value:       "POST",
 				Encoding:    shared.AsciiEncoding,
 			},
 			{
-				Name:        instana.HttpBodyFieldName,
-				Description: instana.HttpBodyFieldDescription,
+				Name:        api.HttpBodyFieldName,
+				Description: api.HttpBodyFieldDescription,
 				Value:       `{"key":"value"}`,
 				Encoding:    shared.AsciiEncoding,
 			},
@@ -646,7 +646,7 @@ func TestUpdateState_HttpAction(t *testing.T) {
 				Encoding:    shared.AsciiEncoding,
 			},
 		},
-		InputParameters: []instana.Parameter{},
+		InputParameters: []api.Parameter{},
 	}
 
 	state := &tfsdk.State{
@@ -672,19 +672,19 @@ func TestUpdateState_WithTags(t *testing.T) {
 	ctx := context.Background()
 	resource := &automationActionResource{}
 
-	data := &instana.AutomationAction{
+	data := &api.AutomationAction{
 		ID:          "test-id",
 		Name:        "Test Action",
 		Description: "Test Description",
 		Type:        AutomationActionTypeManual,
 		Tags:        []interface{}{"tag1", "tag2", "tag3"},
-		Fields: []instana.Field{
+		Fields: []api.Field{
 			{
 				Name:  AutomationActionFieldContent,
 				Value: "Manual content",
 			},
 		},
-		InputParameters: []instana.Parameter{},
+		InputParameters: []api.Parameter{},
 	}
 
 	state := &tfsdk.State{
@@ -711,19 +711,19 @@ func TestUpdateState_WithInputParameters(t *testing.T) {
 	ctx := context.Background()
 	resource := &automationActionResource{}
 
-	data := &instana.AutomationAction{
+	data := &api.AutomationAction{
 		ID:          "test-id",
 		Name:        "Test Action",
 		Description: "Test Description",
 		Type:        AutomationActionTypeManual,
 		Tags:        nil,
-		Fields: []instana.Field{
+		Fields: []api.Field{
 			{
 				Name:  AutomationActionFieldContent,
 				Value: "Manual content",
 			},
 		},
-		InputParameters: []instana.Parameter{
+		InputParameters: []api.Parameter{
 			{
 				Name:        "param1",
 				Description: "Parameter 1",
@@ -942,7 +942,7 @@ func TestMapActionTypeAndFields_AllHTTPMethods(t *testing.T) {
 			require.False(t, diags.HasError())
 			require.NotNil(t, result)
 
-			methodField := findField(result.Fields, instana.HttpMethodFieldName)
+			methodField := findField(result.Fields, api.HttpMethodFieldName)
 			require.NotNil(t, methodField)
 			assert.Equal(t, method, methodField.Value)
 		})
@@ -1041,19 +1041,19 @@ func TestUpdateState_NullTags(t *testing.T) {
 	ctx := context.Background()
 	resource := &automationActionResource{}
 
-	data := &instana.AutomationAction{
+	data := &api.AutomationAction{
 		ID:          "test-id",
 		Name:        "Test Action",
 		Description: "Test Description",
 		Type:        AutomationActionTypeManual,
 		Tags:        nil,
-		Fields: []instana.Field{
+		Fields: []api.Field{
 			{
 				Name:  AutomationActionFieldContent,
 				Value: "Manual content",
 			},
 		},
-		InputParameters: []instana.Parameter{},
+		InputParameters: []api.Parameter{},
 	}
 
 	state := &tfsdk.State{
@@ -1075,14 +1075,14 @@ func TestUpdateState_EmptyInputParameters(t *testing.T) {
 	ctx := context.Background()
 	resource := &automationActionResource{}
 
-	data := &instana.AutomationAction{
+	data := &api.AutomationAction{
 		ID:              "test-id",
 		Name:            "Test Action",
 		Description:     "Test Description",
 		Type:            AutomationActionTypeManual,
 		Tags:            nil,
-		Fields:          []instana.Field{{Name: AutomationActionFieldContent, Value: "Manual content"}},
-		InputParameters: []instana.Parameter{},
+		Fields:          []api.Field{{Name: AutomationActionFieldContent, Value: "Manual content"}},
+		InputParameters: []api.Parameter{},
 	}
 
 	state := &tfsdk.State{
@@ -1147,14 +1147,14 @@ func TestMapActionTypeAndFields_ScriptWithAllFields(t *testing.T) {
 	assert.Equal(t, shared.ActionTypeScript, result.Type)
 
 	// Verify all fields are present
-	contentField := findField(result.Fields, instana.ScriptSshFieldName)
+	contentField := findField(result.Fields, api.ScriptSshFieldName)
 	require.NotNil(t, contentField)
 
-	interpreterField := findField(result.Fields, instana.SubtypeFieldName)
+	interpreterField := findField(result.Fields, api.SubtypeFieldName)
 	require.NotNil(t, interpreterField)
 	assert.Equal(t, "bash", interpreterField.Value)
 
-	timeoutField := findField(result.Fields, instana.TimeoutFieldName)
+	timeoutField := findField(result.Fields, api.TimeoutFieldName)
 	require.NotNil(t, timeoutField)
 	assert.Equal(t, "120", timeoutField.Value)
 
@@ -1194,15 +1194,15 @@ func TestMapActionTypeAndFields_HttpWithAllOptionalFields(t *testing.T) {
 	assert.Equal(t, shared.ActionTypeHttp, result.Type)
 
 	// Verify optional fields
-	bodyField := findField(result.Fields, instana.HttpBodyFieldName)
+	bodyField := findField(result.Fields, api.HttpBodyFieldName)
 	require.NotNil(t, bodyField)
 	assert.Equal(t, `{"test":"data"}`, bodyField.Value)
 
-	ignoreCertField := findField(result.Fields, instana.HttpIgnoreCertErrorsFieldName)
+	ignoreCertField := findField(result.Fields, api.HttpIgnoreCertErrorsFieldName)
 	require.NotNil(t, ignoreCertField)
 	assert.Equal(t, "true", ignoreCertField.Value)
 
-	timeoutField := findField(result.Fields, instana.TimeoutFieldName)
+	timeoutField := findField(result.Fields, api.TimeoutFieldName)
 	require.NotNil(t, timeoutField)
 	assert.Equal(t, "30", timeoutField.Value)
 
@@ -1220,37 +1220,37 @@ func TestUpdateState_AllActionTypes(t *testing.T) {
 	tests := []struct {
 		name       string
 		actionType string
-		fields     []instana.Field
+		fields     []api.Field
 	}{
 		{
 			name:       "Manual",
 			actionType: AutomationActionTypeManual,
-			fields:     []instana.Field{{Name: AutomationActionFieldContent, Value: "Manual content"}},
+			fields:     []api.Field{{Name: AutomationActionFieldContent, Value: "Manual content"}},
 		},
 		{
 			name:       "Jira",
 			actionType: AutomationActionTypeJira,
-			fields:     []instana.Field{{Name: AutomationActionFieldProject, Value: "PROJ"}},
+			fields:     []api.Field{{Name: AutomationActionFieldProject, Value: "PROJ"}},
 		},
 		{
 			name:       "GitHub",
 			actionType: AutomationActionTypeGitHub,
-			fields:     []instana.Field{{Name: AutomationActionFieldOwner, Value: "owner"}},
+			fields:     []api.Field{{Name: AutomationActionFieldOwner, Value: "owner"}},
 		},
 		{
 			name:       "DocLink",
 			actionType: AutomationActionTypeDocLink,
-			fields:     []instana.Field{{Name: AutomationActionFieldUrl, Value: "https://docs.example.com"}},
+			fields:     []api.Field{{Name: AutomationActionFieldUrl, Value: "https://docs.example.com"}},
 		},
 		{
 			name:       "GitLab",
 			actionType: AutomationActionTypeGitLab,
-			fields:     []instana.Field{{Name: AutomationActionAPIFieldProjectId, Value: "123"}},
+			fields:     []api.Field{{Name: AutomationActionAPIFieldProjectId, Value: "123"}},
 		},
 		{
 			name:       "Ansible",
 			actionType: AutomationActionTypeAnsible,
-			fields:     []instana.Field{{Name: AutomationActionAPIFieldWorkflowId, Value: "workflow-123"}},
+			fields:     []api.Field{{Name: AutomationActionAPIFieldWorkflowId, Value: "workflow-123"}},
 		},
 	}
 
@@ -1259,14 +1259,14 @@ func TestUpdateState_AllActionTypes(t *testing.T) {
 			ctx := context.Background()
 			resource := &automationActionResource{}
 
-			data := &instana.AutomationAction{
+			data := &api.AutomationAction{
 				ID:              "test-id",
 				Name:            "Test Action",
 				Description:     "Test Description",
 				Type:            tt.actionType,
 				Tags:            nil,
 				Fields:          tt.fields,
-				InputParameters: []instana.Parameter{},
+				InputParameters: []api.Parameter{},
 			}
 
 			state := &tfsdk.State{
@@ -1286,7 +1286,7 @@ func TestUpdateState_AllActionTypes(t *testing.T) {
 	}
 }
 
-func findField(fields []instana.Field, name string) *instana.Field {
+func findField(fields []api.Field, name string) *api.Field {
 	for _, field := range fields {
 		if field.Name == name {
 			return &field
@@ -1394,7 +1394,7 @@ func TestMapActionTypeAndFields_HTTPAuthNoAuth(t *testing.T) {
 			assert.Equal(t, shared.ActionTypeHttp, actionType)
 
 			// Find auth field
-			var authField *instana.Field
+			var authField *api.Field
 			for i := range fields {
 				if fields[i].Name == AutomationActionAPIFieldAuthen {
 					authField = &fields[i]
@@ -1433,9 +1433,9 @@ func TestMapActionTypeAndFields_HTTPWithHeaders(t *testing.T) {
 	assert.Equal(t, shared.ActionTypeHttp, actionType)
 
 	// Find headers field
-	var headersField *instana.Field
+	var headersField *api.Field
 	for i := range fields {
-		if fields[i].Name == instana.HttpHeaderFieldName {
+		if fields[i].Name == api.HttpHeaderFieldName {
 			headersField = &fields[i]
 			break
 		}
@@ -1728,15 +1728,15 @@ func TestUpdateState_WithInterfaceTags(t *testing.T) {
 		Schema: getTestSchema(),
 	}
 
-	automationAction := &instana.AutomationAction{
+	automationAction := &api.AutomationAction{
 		ID:          "test-id",
 		Name:        "Test Action",
 		Description: "Test Description",
 		Type:        shared.ActionTypeScript,
 		Tags:        []interface{}{"tag1", "tag2"}, // interface{} slice
-		Fields: []instana.Field{
+		Fields: []api.Field{
 			{
-				Name:     instana.ScriptSshFieldName,
+				Name:     api.ScriptSshFieldName,
 				Value:    "echo 'test'",
 				Encoding: shared.Base64Encoding,
 			},
@@ -1803,7 +1803,7 @@ func TestMapActionTypeAndFields_HTTPWithEmptyAuth(t *testing.T) {
 	assert.Equal(t, shared.ActionTypeHttp, actionType)
 
 	// Find auth field and verify it's noAuth
-	var authField *instana.Field
+	var authField *api.Field
 	for i := range fields {
 		if fields[i].Name == AutomationActionAPIFieldAuthen {
 			authField = &fields[i]
@@ -1837,7 +1837,7 @@ func TestMapActionTypeAndFields_HTTPWithNullBasicAuthFields(t *testing.T) {
 	assert.Equal(t, shared.ActionTypeHttp, actionType)
 
 	// Should default to noAuth when username is null
-	var authField *instana.Field
+	var authField *api.Field
 	for i := range fields {
 		if fields[i].Name == AutomationActionAPIFieldAuthen {
 			authField = &fields[i]
@@ -1870,7 +1870,7 @@ func TestMapActionTypeAndFields_HTTPWithNullTokenField(t *testing.T) {
 	assert.Equal(t, shared.ActionTypeHttp, actionType)
 
 	// Should default to noAuth when bearer token is null
-	var authField *instana.Field
+	var authField *api.Field
 	for i := range fields {
 		if fields[i].Name == AutomationActionAPIFieldAuthen {
 			authField = &fields[i]
@@ -1905,7 +1905,7 @@ func TestMapActionTypeAndFields_HTTPWithNullApiKeyField(t *testing.T) {
 	assert.Equal(t, shared.ActionTypeHttp, actionType)
 
 	// Should default to noAuth when API key is null
-	var authField *instana.Field
+	var authField *api.Field
 	for i := range fields {
 		if fields[i].Name == AutomationActionAPIFieldAuthen {
 			authField = &fields[i]

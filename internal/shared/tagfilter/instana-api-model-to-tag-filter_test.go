@@ -8,7 +8,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/instana/instana-go-client/shared/tagfilter"
+	tag "github.com/instana/instana-go-client/shared/tagfilter"
+	common "github.com/instana/instana-go-client/shared/types"
 	. "github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
 )
 
@@ -19,11 +20,11 @@ const (
 )
 
 func TestShouldMapEmptyTagFilterExpressionFromInstanaAPI(t *testing.T) {
-	for _, operator := range typ.SupportedLogicalOperatorTypes {
+	for _, operator := range common.SupportedLogicalOperatorTypes {
 		t.Run(fmt.Sprintf("TestShouldMapEmpty%sTagFilterExpressionFromInstnaAPI", string(operator)), func(t *testing.T) {
 			op := operator
-			expression := &tagfilter.TagFilter{
-				Type:            tagfilter.TagFilterExpressionType,
+			expression := &tag.TagFilter{
+				Type:            tag.TagFilterExpressionType,
 				LogicalOperator: &op,
 			}
 
@@ -34,11 +35,11 @@ func TestShouldMapEmptyTagFilterExpressionFromInstanaAPI(t *testing.T) {
 
 func TestShouldMapStringTagFilterFromInstanaAPI(t *testing.T) {
 	value := "value"
-	input := tagfilter.NewStringTagFilter(tagfilter.TagFilterEntityDestination, tagFilterName, tagfilter.EqualsOperator, value)
+	input := tag.NewStringTagFilter(tag.TagFilterEntityDestination, tagFilterName, common.EqualsOperator, value)
 
 	comparison := &ComparisonExpression{
 		Entity:      &EntitySpec{Identifier: tagFilterName, Origin: utils.StringPtr(EntityOriginDestination.Key())},
-		Operator:    Operator(tagfilter.EqualsOperator),
+		Operator:    Operator(common.EqualsOperator),
 		StringValue: &value,
 	}
 
@@ -47,11 +48,11 @@ func TestShouldMapStringTagFilterFromInstanaAPI(t *testing.T) {
 
 func TestShouldMapNumberTagFilterFromInstanaAPI(t *testing.T) {
 	value := int64(1234)
-	input := tagfilter.NewNumberTagFilter(tagfilter.TagFilterEntityDestination, tagFilterName, tagfilter.EqualsOperator, value)
+	input := tag.NewNumberTagFilter(tag.TagFilterEntityDestination, tagFilterName, common.EqualsOperator, value)
 
 	comparison := &ComparisonExpression{
 		Entity:      &EntitySpec{Identifier: tagFilterName, Origin: utils.StringPtr(EntityOriginDestination.Key())},
-		Operator:    Operator(tagfilter.EqualsOperator),
+		Operator:    Operator(common.EqualsOperator),
 		NumberValue: &value,
 	}
 
@@ -60,11 +61,11 @@ func TestShouldMapNumberTagFilterFromInstanaAPI(t *testing.T) {
 
 func TestShouldMapBooleanTagFilterFromInstanaAPI(t *testing.T) {
 	value := true
-	input := tagfilter.NewBooleanTagFilter(tagfilter.TagFilterEntityDestination, tagFilterName, tagfilter.EqualsOperator, value)
+	input := tag.NewBooleanTagFilter(tag.TagFilterEntityDestination, tagFilterName, common.EqualsOperator, value)
 
 	comparison := &ComparisonExpression{
 		Entity:       &EntitySpec{Identifier: tagFilterName, Origin: utils.StringPtr(EntityOriginDestination.Key())},
-		Operator:     Operator(tagfilter.EqualsOperator),
+		Operator:     Operator(common.EqualsOperator),
 		BooleanValue: &value,
 	}
 
@@ -74,18 +75,18 @@ func TestShouldMapBooleanTagFilterFromInstanaAPI(t *testing.T) {
 func TestShouldMapComparisonTagFilterWithTagKeyValueFromInstanaAPI(t *testing.T) {
 	key := "key"
 	value := "value"
-	input := tagfilter.NewTagTagFilter(tagfilter.TagFilterEntityDestination, tagFilterName, tagfilter.EqualsOperator, key, value)
+	input := tag.NewTagTagFilter(tag.TagFilterEntityDestination, tagFilterName, common.EqualsOperator, key, value)
 
 	comparison := &ComparisonExpression{
 		Entity:      &EntitySpec{Identifier: tagFilterName, TagKey: &key, Origin: utils.StringPtr(EntityOriginDestination.Key())},
-		Operator:    Operator(tagfilter.EqualsOperator),
+		Operator:    Operator(common.EqualsOperator),
 		StringValue: &value,
 	}
 
 	testMappingOfTagFilterFromInstanaApi(input, comparison, t)
 }
 
-func testMappingOfTagFilterFromInstanaApi(tagFilter *tagfilter.TagFilter, comparison *ComparisonExpression, t *testing.T) {
+func testMappingOfTagFilterFromInstanaApi(tagFilter *tag.TagFilter, comparison *ComparisonExpression, t *testing.T) {
 	expectedResult := &FilterExpression{
 		Expression: &LogicalOrExpression{
 			Left: &LogicalAndExpression{
@@ -100,15 +101,15 @@ func testMappingOfTagFilterFromInstanaApi(tagFilter *tagfilter.TagFilter, compar
 }
 
 func TestShouldMapAllSupportedComparisonOperatorsFromInstanaAPI(t *testing.T) {
-	for _, v := range tagfilter.SupportedComparisonOperators {
+	for _, v := range common.SupportedComparisonOperators {
 		t.Run(fmt.Sprintf("test mapping of %s", v), testMappingOfSupportedComparisonOperatorsFromInstanaAPI(v))
 	}
 }
 
-func testMappingOfSupportedComparisonOperatorsFromInstanaAPI(operator tagfilter.ExpressionOperator) func(t *testing.T) {
+func testMappingOfSupportedComparisonOperatorsFromInstanaAPI(operator common.ExpressionOperator) func(t *testing.T) {
 	return func(t *testing.T) {
 		value := "value"
-		input := tagfilter.NewStringTagFilter(tagfilter.TagFilterEntityDestination, tagFilterName, operator, value)
+		input := tag.NewStringTagFilter(tag.TagFilterEntityDestination, tagFilterName, operator, value)
 
 		expectedResult := &FilterExpression{
 			Expression: &LogicalOrExpression{
@@ -132,7 +133,7 @@ func testMappingOfSupportedComparisonOperatorsFromInstanaAPI(operator tagfilter.
 
 func TestShouldFailToMapTagFilterFromInstanaAPIWhenOperatorIsNotSupported(t *testing.T) {
 	value := "value"
-	input := tagfilter.NewStringTagFilter(tagfilter.TagFilterEntityDestination, tagFilterName, "FOO", value)
+	input := tag.NewStringTagFilter(tag.TagFilterEntityDestination, tagFilterName, "FOO", value)
 
 	mapper := NewMapper()
 	_, err := mapper.FromAPIModel(input)
@@ -143,14 +144,14 @@ func TestShouldFailToMapTagFilterFromInstanaAPIWhenOperatorIsNotSupported(t *tes
 }
 
 func TestShouldMapAllSupportedUnaryOperationsFromInstanaAPI(t *testing.T) {
-	for _, v := range tagfilter.SupportedUnaryExpressionOperators {
+	for _, v := range common.SupportedUnaryExpressionOperators {
 		t.Run(fmt.Sprintf("test mapping of %s ", v), testMappingOfSupportedUnaryOperationFromInstanaAPI(v))
 	}
 }
 
-func testMappingOfSupportedUnaryOperationFromInstanaAPI(operator tagfilter.ExpressionOperator) func(t *testing.T) {
+func testMappingOfSupportedUnaryOperationFromInstanaAPI(operator common.ExpressionOperator) func(t *testing.T) {
 	return func(t *testing.T) {
-		input := tagfilter.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, tagFilterName, operator)
+		input := tag.NewUnaryTagFilter(tag.TagFilterEntityDestination, tagFilterName, operator)
 
 		expectedResult := &FilterExpression{
 			Expression: &LogicalOrExpression{
@@ -173,7 +174,7 @@ func testMappingOfSupportedUnaryOperationFromInstanaAPI(operator tagfilter.Expre
 
 func TestShouldMapUnaryTagFilterWithTagKeyFromInstanaAPI(t *testing.T) {
 	key := "key"
-	input := tagfilter.NewUnaryTagFilterWithTagKey(tagfilter.TagFilterEntityDestination, tagFilterName, &key, tagfilter.NotEmptyOperator)
+	input := tag.NewUnaryTagFilterWithTagKey(tag.TagFilterEntityDestination, tagFilterName, &key, common.NotEmptyOperator)
 
 	expectedResult := &FilterExpression{
 		Expression: &LogicalOrExpression{
@@ -182,7 +183,7 @@ func TestShouldMapUnaryTagFilterWithTagKeyFromInstanaAPI(t *testing.T) {
 					Primary: &PrimaryExpression{
 						UnaryOperation: &UnaryOperationExpression{
 							Entity:   &EntitySpec{Identifier: tagFilterName, TagKey: &key, Origin: utils.StringPtr(EntityOriginDestination.Key())},
-							Operator: Operator(tagfilter.NotEmptyOperator),
+							Operator: Operator(common.NotEmptyOperator),
 						},
 					},
 				},
@@ -194,7 +195,7 @@ func TestShouldMapUnaryTagFilterWithTagKeyFromInstanaAPI(t *testing.T) {
 }
 
 func TestShouldFailToMapTagFilterFromInstanaAPIWhenUnaryOperationIsNotSupported(t *testing.T) {
-	input := tagfilter.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, tagFilterName, "FOO")
+	input := tag.NewUnaryTagFilter(tag.TagFilterEntityDestination, tagFilterName, "FOO")
 
 	mapper := NewMapper()
 	_, err := mapper.FromAPIModel(input)
@@ -206,8 +207,8 @@ func TestShouldFailToMapTagFilterFromInstanaAPIWhenUnaryOperationIsNotSupported(
 
 func TestShouldFailToMapTagFilterExpressionElementFromInstanaAPIWhenTypeIsMissing(t *testing.T) {
 	name := tagFilterName
-	operator := tagfilter.ExpressionOperator("FOO")
-	input := &tagfilter.TagFilter{
+	operator := common.ExpressionOperator("FOO")
+	input := &tag.TagFilter{
 		Name:     &name,
 		Operator: &operator,
 	}
@@ -220,11 +221,11 @@ func TestShouldFailToMapTagFilterExpressionElementFromInstanaAPIWhenTypeIsMissin
 }
 
 func TestShouldMapLogicalAndWithTwoPrimaryExpressionsFromInstanaAPI(t *testing.T) {
-	operator := Operator(tagfilter.IsEmptyOperator)
-	and := Operator(tagfilter.LogicalAnd)
-	primaryExpression1 := tagfilter.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, "name1", tagfilter.IsEmptyOperator)
-	primaryExpression2 := tagfilter.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, "name2", tagfilter.IsEmptyOperator)
-	input := tagfilter.NewLogicalAndTagFilter([]*tagfilter.TagFilter{primaryExpression1, primaryExpression2})
+	operator := Operator(common.IsEmptyOperator)
+	and := Operator(common.LogicalAnd)
+	primaryExpression1 := tag.NewUnaryTagFilter(tag.TagFilterEntityDestination, "name1", common.IsEmptyOperator)
+	primaryExpression2 := tag.NewUnaryTagFilter(tag.TagFilterEntityDestination, "name2", common.IsEmptyOperator)
+	input := tag.NewLogicalAndTagFilter([]*tag.TagFilter{primaryExpression1, primaryExpression2})
 
 	expectedResult := &FilterExpression{
 		Expression: &LogicalOrExpression{
@@ -262,12 +263,12 @@ func TestShouldMapLogicalAndWithTwoPrimaryExpressionsFromInstanaAPI(t *testing.T
 }
 
 func TestShouldMapLogicalAndWithThreePrimaryExpressionsFromInstanaAPI(t *testing.T) {
-	operator := Operator(tagfilter.IsEmptyOperator)
-	and := Operator(tagfilter.LogicalAnd)
-	primaryExpression1 := tagfilter.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, "name1", tagfilter.IsEmptyOperator)
-	primaryExpression2 := tagfilter.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, "name2", tagfilter.IsEmptyOperator)
-	primaryExpression3 := tagfilter.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, "name3", tagfilter.IsEmptyOperator)
-	input := tagfilter.NewLogicalAndTagFilter([]*tagfilter.TagFilter{primaryExpression1, primaryExpression2, primaryExpression3})
+	operator := Operator(common.IsEmptyOperator)
+	and := Operator(common.LogicalAnd)
+	primaryExpression1 := tag.NewUnaryTagFilter(tag.TagFilterEntityDestination, "name1", common.IsEmptyOperator)
+	primaryExpression2 := tag.NewUnaryTagFilter(tag.TagFilterEntityDestination, "name2", common.IsEmptyOperator)
+	primaryExpression3 := tag.NewUnaryTagFilter(tag.TagFilterEntityDestination, "name3", common.IsEmptyOperator)
+	input := tag.NewLogicalAndTagFilter([]*tag.TagFilter{primaryExpression1, primaryExpression2, primaryExpression3})
 
 	expectedResult := &FilterExpression{
 		Expression: &LogicalOrExpression{
@@ -316,12 +317,12 @@ func TestShouldMapLogicalAndWithThreePrimaryExpressionsFromInstanaAPI(t *testing
 }
 
 func TestShouldMapLogicalAndWithTwoElementsFromInstanaAPIWhereTheFirstElementIsAPrimaryExpressionAndTheSecondElementIsAnotherLogicalAnd(t *testing.T) {
-	operator := Operator(tagfilter.IsEmptyOperator)
-	and := Operator(tagfilter.LogicalAnd)
-	primaryExpression1 := tagfilter.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, tagFilterName, tagfilter.IsEmptyOperator)
-	primaryExpression2 := tagfilter.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, "name2", tagfilter.IsEmptyOperator)
-	nestedAnd := tagfilter.NewLogicalAndTagFilter([]*tagfilter.TagFilter{primaryExpression2, primaryExpression2})
-	input := tagfilter.NewLogicalAndTagFilter([]*tagfilter.TagFilter{primaryExpression1, nestedAnd})
+	operator := Operator(common.IsEmptyOperator)
+	and := Operator(common.LogicalAnd)
+	primaryExpression1 := tag.NewUnaryTagFilter(tag.TagFilterEntityDestination, tagFilterName, common.IsEmptyOperator)
+	primaryExpression2 := tag.NewUnaryTagFilter(tag.TagFilterEntityDestination, "name2", common.IsEmptyOperator)
+	nestedAnd := tag.NewLogicalAndTagFilter([]*tag.TagFilter{primaryExpression2, primaryExpression2})
+	input := tag.NewLogicalAndTagFilter([]*tag.TagFilter{primaryExpression1, nestedAnd})
 
 	expectedResult := &FilterExpression{
 		Expression: &LogicalOrExpression{
@@ -376,13 +377,13 @@ func TestShouldMapLogicalAndWithTwoElementsFromInstanaAPIWhereTheFirstElementIsA
 }
 
 func TestShouldMapLogicalAndWithTwoElementsFromInstanaAPIWhereTheFirstElementIsAPrimaryExpressionAndTheSecondElementIsALogicalOr(t *testing.T) {
-	operator := Operator(tagfilter.IsEmptyOperator)
-	and := Operator(tagfilter.LogicalAnd)
-	or := Operator(tagfilter.LogicalOr)
-	primaryExpression1 := tagfilter.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, tagFilterName, tagfilter.IsEmptyOperator)
-	primaryExpression2 := tagfilter.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, "name2", tagfilter.IsEmptyOperator)
-	nestedOr := tagfilter.NewLogicalOrTagFilter([]*tagfilter.TagFilter{primaryExpression2, primaryExpression2})
-	input := tagfilter.NewLogicalAndTagFilter([]*tagfilter.TagFilter{primaryExpression1, nestedOr})
+	operator := Operator(common.IsEmptyOperator)
+	and := Operator(common.LogicalAnd)
+	or := Operator(common.LogicalOr)
+	primaryExpression1 := tag.NewUnaryTagFilter(tag.TagFilterEntityDestination, tagFilterName, common.IsEmptyOperator)
+	primaryExpression2 := tag.NewUnaryTagFilter(tag.TagFilterEntityDestination, "name2", common.IsEmptyOperator)
+	nestedOr := tag.NewLogicalOrTagFilter([]*tag.TagFilter{primaryExpression2, primaryExpression2})
+	input := tag.NewLogicalAndTagFilter([]*tag.TagFilter{primaryExpression1, nestedOr})
 
 	expectedResult := &FilterExpression{
 		Expression: &LogicalOrExpression{
@@ -439,8 +440,8 @@ func TestShouldMapLogicalAndWithTwoElementsFromInstanaAPIWhereTheFirstElementIsA
 }
 
 func TestShouldUnwrapLogicalAndFromInstanaAPIWhenOnlyOneElementIsProvided(t *testing.T) {
-	primaryExpression := tagfilter.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, tagFilterName, tagfilter.IsEmptyOperator)
-	input := tagfilter.NewLogicalAndTagFilter([]*tagfilter.TagFilter{primaryExpression})
+	primaryExpression := tag.NewUnaryTagFilter(tag.TagFilterEntityDestination, tagFilterName, common.IsEmptyOperator)
+	input := tag.NewLogicalAndTagFilter([]*tag.TagFilter{primaryExpression})
 
 	expectedResult := &FilterExpression{
 		Expression: &LogicalOrExpression{
@@ -449,7 +450,7 @@ func TestShouldUnwrapLogicalAndFromInstanaAPIWhenOnlyOneElementIsProvided(t *tes
 					Primary: &PrimaryExpression{
 						UnaryOperation: &UnaryOperationExpression{
 							Entity:   &EntitySpec{Identifier: tagFilterName, Origin: utils.StringPtr(EntityOriginDestination.Key())},
-							Operator: Operator(tagfilter.IsEmptyOperator),
+							Operator: Operator(common.IsEmptyOperator),
 						},
 					},
 				},
@@ -465,11 +466,11 @@ func TestShouldUnwrapLogicalAndFromInstanaAPIWhenOnlyOneElementIsProvided(t *tes
 }
 
 func TestShouldMapLogicalOrWithTwoPrimaryExpressionsFromInstanaAPI(t *testing.T) {
-	operator := Operator(tagfilter.IsEmptyOperator)
-	or := Operator(tagfilter.LogicalOr)
-	primaryExpression1 := tagfilter.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, "name1", tagfilter.IsEmptyOperator)
-	primaryExpression2 := tagfilter.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, "name2", tagfilter.IsEmptyOperator)
-	input := tagfilter.NewLogicalOrTagFilter([]*tagfilter.TagFilter{primaryExpression1, primaryExpression2})
+	operator := Operator(common.IsEmptyOperator)
+	or := Operator(common.LogicalOr)
+	primaryExpression1 := tag.NewUnaryTagFilter(tag.TagFilterEntityDestination, "name1", common.IsEmptyOperator)
+	primaryExpression2 := tag.NewUnaryTagFilter(tag.TagFilterEntityDestination, "name2", common.IsEmptyOperator)
+	input := tag.NewLogicalOrTagFilter([]*tag.TagFilter{primaryExpression1, primaryExpression2})
 
 	expectedResult := &FilterExpression{
 		Expression: &LogicalOrExpression{
@@ -509,12 +510,12 @@ func TestShouldMapLogicalOrWithTwoPrimaryExpressionsFromInstanaAPI(t *testing.T)
 }
 
 func TestShouldMapLogicalOrWithThreePrimaryExpressionsFromInstanaAPI(t *testing.T) {
-	operator := Operator(tagfilter.IsEmptyOperator)
-	or := Operator(tagfilter.LogicalOr)
-	primaryExpression1 := tagfilter.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, "name1", tagfilter.IsEmptyOperator)
-	primaryExpression2 := tagfilter.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, "name2", tagfilter.IsEmptyOperator)
-	primaryExpression3 := tagfilter.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, "name3", tagfilter.IsEmptyOperator)
-	input := tagfilter.NewLogicalOrTagFilter([]*tagfilter.TagFilter{primaryExpression1, primaryExpression2, primaryExpression3})
+	operator := Operator(common.IsEmptyOperator)
+	or := Operator(common.LogicalOr)
+	primaryExpression1 := tag.NewUnaryTagFilter(tag.TagFilterEntityDestination, "name1", common.IsEmptyOperator)
+	primaryExpression2 := tag.NewUnaryTagFilter(tag.TagFilterEntityDestination, "name2", common.IsEmptyOperator)
+	primaryExpression3 := tag.NewUnaryTagFilter(tag.TagFilterEntityDestination, "name3", common.IsEmptyOperator)
+	input := tag.NewLogicalOrTagFilter([]*tag.TagFilter{primaryExpression1, primaryExpression2, primaryExpression3})
 
 	expectedResult := &FilterExpression{
 		Expression: &LogicalOrExpression{Left: &LogicalAndExpression{Left: &BracketExpression{Bracket: &LogicalOrExpression{
@@ -561,12 +562,12 @@ func TestShouldMapLogicalOrWithThreePrimaryExpressionsFromInstanaAPI(t *testing.
 }
 
 func TestShouldMapLogicalOrWithTwoElementsFromInstanaAPIWhereFirstElementIsALogicalAndAndTheOtherElementIsPrimaryExpression(t *testing.T) {
-	operator := Operator(tagfilter.IsEmptyOperator)
-	or := Operator(tagfilter.LogicalOr)
-	and := Operator(tagfilter.LogicalAnd)
-	primaryExpression := tagfilter.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, tagFilterName, tagfilter.IsEmptyOperator)
-	nestedAnd := tagfilter.NewLogicalAndTagFilter([]*tagfilter.TagFilter{primaryExpression, primaryExpression})
-	input := tagfilter.NewLogicalOrTagFilter([]*tagfilter.TagFilter{nestedAnd, primaryExpression})
+	operator := Operator(common.IsEmptyOperator)
+	or := Operator(common.LogicalOr)
+	and := Operator(common.LogicalAnd)
+	primaryExpression := tag.NewUnaryTagFilter(tag.TagFilterEntityDestination, tagFilterName, common.IsEmptyOperator)
+	nestedAnd := tag.NewLogicalAndTagFilter([]*tag.TagFilter{primaryExpression, primaryExpression})
+	input := tag.NewLogicalOrTagFilter([]*tag.TagFilter{nestedAnd, primaryExpression})
 
 	expectedResult := &FilterExpression{
 		Expression: &LogicalOrExpression{Left: &LogicalAndExpression{Left: &BracketExpression{Bracket: &LogicalOrExpression{
@@ -617,11 +618,11 @@ func TestShouldMapLogicalOrWithTwoElementsFromInstanaAPIWhereFirstElementIsALogi
 }
 
 func TestShouldMapLogicalOrWithTwoElementsFromInstanaAPIWhereFirstElementIsAPrimaryExpressionAndTheOtherElementIsALogicalOr(t *testing.T) {
-	operator := Operator(tagfilter.IsEmptyOperator)
-	or := Operator(tagfilter.LogicalOr)
-	primaryExpression := tagfilter.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, tagFilterName, tagfilter.IsEmptyOperator)
-	nestedOr := tagfilter.NewLogicalOrTagFilter([]*tagfilter.TagFilter{primaryExpression, primaryExpression})
-	input := tagfilter.NewLogicalOrTagFilter([]*tagfilter.TagFilter{primaryExpression, nestedOr})
+	operator := Operator(common.IsEmptyOperator)
+	or := Operator(common.LogicalOr)
+	primaryExpression := tag.NewUnaryTagFilter(tag.TagFilterEntityDestination, tagFilterName, common.IsEmptyOperator)
+	nestedOr := tag.NewLogicalOrTagFilter([]*tag.TagFilter{primaryExpression, primaryExpression})
+	input := tag.NewLogicalOrTagFilter([]*tag.TagFilter{primaryExpression, nestedOr})
 
 	expectedResult := &FilterExpression{
 		Expression: &LogicalOrExpression{Left: &LogicalAndExpression{Left: &BracketExpression{Bracket: &LogicalOrExpression{
@@ -668,12 +669,12 @@ func TestShouldMapLogicalOrWithTwoElementsFromInstanaAPIWhereFirstElementIsAPrim
 }
 
 func TestShouldMapLogicalOrWithTwoElementsWhereFirstElementIsAPrimaryExpressionAndTheOtherElementIsALogicalAnd(t *testing.T) {
-	operator := Operator(tagfilter.IsEmptyOperator)
-	or := Operator(tagfilter.LogicalOr)
-	and := Operator(tagfilter.LogicalAnd)
-	primaryExpression := tagfilter.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, tagFilterName, tagfilter.IsEmptyOperator)
-	nestedAnd := tagfilter.NewLogicalAndTagFilter([]*tagfilter.TagFilter{primaryExpression, primaryExpression})
-	input := tagfilter.NewLogicalOrTagFilter([]*tagfilter.TagFilter{primaryExpression, nestedAnd})
+	operator := Operator(common.IsEmptyOperator)
+	or := Operator(common.LogicalOr)
+	and := Operator(common.LogicalAnd)
+	primaryExpression := tag.NewUnaryTagFilter(tag.TagFilterEntityDestination, tagFilterName, common.IsEmptyOperator)
+	nestedAnd := tag.NewLogicalAndTagFilter([]*tag.TagFilter{primaryExpression, primaryExpression})
+	input := tag.NewLogicalOrTagFilter([]*tag.TagFilter{primaryExpression, nestedAnd})
 
 	expectedResult := &FilterExpression{
 		Expression: &LogicalOrExpression{Left: &LogicalAndExpression{Left: &BracketExpression{Bracket: &LogicalOrExpression{
@@ -718,9 +719,9 @@ func TestShouldMapLogicalOrWithTwoElementsWhereFirstElementIsAPrimaryExpressionA
 }
 
 func TestShouldFailToMapLogicalOrWhenFirstElementIsALogicalOrExpression(t *testing.T) {
-	primaryExpression := tagfilter.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, tagFilterName, tagfilter.IsEmptyOperator)
-	nestedOr := tagfilter.NewLogicalOrTagFilter([]*tagfilter.TagFilter{primaryExpression, primaryExpression})
-	input := tagfilter.NewLogicalOrTagFilter([]*tagfilter.TagFilter{nestedOr, primaryExpression})
+	primaryExpression := tag.NewUnaryTagFilter(tag.TagFilterEntityDestination, tagFilterName, common.IsEmptyOperator)
+	nestedOr := tag.NewLogicalOrTagFilter([]*tag.TagFilter{primaryExpression, primaryExpression})
+	input := tag.NewLogicalOrTagFilter([]*tag.TagFilter{nestedOr, primaryExpression})
 
 	mapper := NewMapper()
 	_, err := mapper.FromAPIModel(input)
@@ -730,8 +731,8 @@ func TestShouldFailToMapLogicalOrWhenFirstElementIsALogicalOrExpression(t *testi
 }
 
 func TestShouldFailToMapLogicalOrWhenOnlyOneElementIsProvided(t *testing.T) {
-	primaryExpression := tagfilter.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, tagFilterName, tagfilter.IsEmptyOperator)
-	input := tagfilter.NewLogicalOrTagFilter([]*tagfilter.TagFilter{primaryExpression})
+	primaryExpression := tag.NewUnaryTagFilter(tag.TagFilterEntityDestination, tagFilterName, common.IsEmptyOperator)
+	input := tag.NewLogicalOrTagFilter([]*tag.TagFilter{primaryExpression})
 
 	mapper := NewMapper()
 	_, err := mapper.FromAPIModel(input)
@@ -741,12 +742,12 @@ func TestShouldFailToMapLogicalOrWhenOnlyOneElementIsProvided(t *testing.T) {
 }
 
 func TestShouldFailToMapTagFilterExpressionFromInstanaAPIWhenLogicalOperatorIsNotValid(t *testing.T) {
-	primaryExpression := tagfilter.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, tagFilterName, tagfilter.IsEmptyOperator)
-	operator := tagfilter.LogicalOperatorType("FOO")
-	input := &tagfilter.TagFilter{
-		Type:            tagfilter.TagFilterExpressionType,
+	primaryExpression := tag.NewUnaryTagFilter(tag.TagFilterEntityDestination, tagFilterName, common.IsEmptyOperator)
+	operator := common.LogicalOperatorType("FOO")
+	input := &tag.TagFilter{
+		Type:            tag.TagFilterExpressionType,
 		LogicalOperator: &operator,
-		Elements:        []*tagfilter.TagFilter{primaryExpression, primaryExpression},
+		Elements:        []*tag.TagFilter{primaryExpression, primaryExpression},
 	}
 
 	mapper := NewMapper()
@@ -759,9 +760,9 @@ func TestShouldFailToMapTagFilterExpressionFromInstanaAPIWhenLogicalOperatorIsNo
 func TestShouldReturnMappingErrorWhenAnyElementOfTagFilterExpressionIsNotValid(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		t.Run(fmt.Sprintf("TestShouldReturnMappingErrorWhenElement%dOfTagFilterExpressionIsNotValid", i), func(t *testing.T) {
-			invalidElement := tagfilter.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, tagFilterName, "INVALID")
-			validElement := tagfilter.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, tagFilterName, tagfilter.IsEmptyOperator)
-			elements := make([]*tagfilter.TagFilter, 5)
+			invalidElement := tag.NewUnaryTagFilter(tag.TagFilterEntityDestination, tagFilterName, "INVALID")
+			validElement := tag.NewUnaryTagFilter(tag.TagFilterEntityDestination, tagFilterName, common.IsEmptyOperator)
+			elements := make([]*tag.TagFilter, 5)
 			for j := 0; j < 5; j++ {
 				if j == i {
 					elements[j] = invalidElement
@@ -769,7 +770,7 @@ func TestShouldReturnMappingErrorWhenAnyElementOfTagFilterExpressionIsNotValid(t
 					elements[j] = validElement
 				}
 			}
-			input := tagfilter.NewLogicalOrTagFilter(elements)
+			input := tag.NewLogicalOrTagFilter(elements)
 
 			mapper := NewMapper()
 			_, err := mapper.FromAPIModel(input)
@@ -781,7 +782,7 @@ func TestShouldReturnMappingErrorWhenAnyElementOfTagFilterExpressionIsNotValid(t
 	}
 }
 
-func runTestCaseForMappingFromAPI(input *tagfilter.TagFilter, expectedResult *FilterExpression, t *testing.T) {
+func runTestCaseForMappingFromAPI(input *tag.TagFilter, expectedResult *FilterExpression, t *testing.T) {
 	mapper := NewMapper()
 	result, err := mapper.FromAPIModel(input)
 

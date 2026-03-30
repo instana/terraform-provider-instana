@@ -6,8 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/instana-go-client/api"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/instana-go-client/instana"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -58,11 +58,11 @@ func TestUpdateState(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("basic group without members or permissions", func(t *testing.T) {
-		group := &instana.Group{
+		group := &api.Group{
 			ID:            "test-id",
 			Name:          "test-group",
-			Members:       []instana.APIMember{},
-			PermissionSet: instana.APIPermissionSetWithRoles{},
+			Members:       []api.APIMember{},
+			PermissionSet: api.APIPermissionSetWithRoles{},
 		}
 
 		handle := NewGroupResourceHandle()
@@ -85,10 +85,10 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("group with members", func(t *testing.T) {
 		email := "user@example.com"
-		group := &instana.Group{
+		group := &api.Group{
 			ID:   "test-id",
 			Name: "test-group",
-			Members: []instana.APIMember{
+			Members: []api.APIMember{
 				{
 					UserID: "user-1",
 					Email:  &email,
@@ -98,7 +98,7 @@ func TestUpdateState(t *testing.T) {
 					Email:  nil,
 				},
 			},
-			PermissionSet: instana.APIPermissionSetWithRoles{},
+			PermissionSet: api.APIPermissionSetWithRoles{},
 		}
 
 		handle := NewGroupResourceHandle()
@@ -121,12 +121,12 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("group with application IDs", func(t *testing.T) {
-		group := &instana.Group{
+		group := &api.Group{
 			ID:      "test-id",
 			Name:    "test-group",
-			Members: []instana.APIMember{},
-			PermissionSet: instana.APIPermissionSetWithRoles{
-				ApplicationIDs: []instana.ScopeBinding{
+			Members: []api.APIMember{},
+			PermissionSet: api.APIPermissionSetWithRoles{
+				ApplicationIDs: []api.ScopeBinding{
 					{ScopeID: "app-1"},
 					{ScopeID: "app-2"},
 				},
@@ -152,12 +152,12 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("group with infra DFQ filter", func(t *testing.T) {
-		group := &instana.Group{
+		group := &api.Group{
 			ID:      "test-id",
 			Name:    "test-group",
-			Members: []instana.APIMember{},
-			PermissionSet: instana.APIPermissionSetWithRoles{
-				InfraDFQFilter: &instana.ScopeBinding{
+			Members: []api.APIMember{},
+			PermissionSet: api.APIPermissionSetWithRoles{
+				InfraDFQFilter: &api.ScopeBinding{
 					ScopeID: "entity.type:host",
 				},
 			},
@@ -180,16 +180,16 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("group with empty infra DFQ filter", func(t *testing.T) {
-		group := &instana.Group{
+		group := &api.Group{
 			ID:      "test-id",
 			Name:    "test-group",
-			Members: []instana.APIMember{},
-			PermissionSet: instana.APIPermissionSetWithRoles{
-				InfraDFQFilter: &instana.ScopeBinding{
+			Members: []api.APIMember{},
+			PermissionSet: api.APIPermissionSetWithRoles{
+				InfraDFQFilter: &api.ScopeBinding{
 					ScopeID: "",
 				},
-				Permissions: []instana.InstanaPermission{
-					instana.PermissionCanViewLogs,
+				Permissions: []api.InstanaPermission{
+					api.PermissionCanViewLogs,
 				},
 			},
 		}
@@ -211,12 +211,12 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("group with kubernetes cluster UUIDs", func(t *testing.T) {
-		group := &instana.Group{
+		group := &api.Group{
 			ID:      "test-id",
 			Name:    "test-group",
-			Members: []instana.APIMember{},
-			PermissionSet: instana.APIPermissionSetWithRoles{
-				KubernetesClusterUUIDs: []instana.ScopeBinding{
+			Members: []api.APIMember{},
+			PermissionSet: api.APIPermissionSetWithRoles{
+				KubernetesClusterUUIDs: []api.ScopeBinding{
 					{ScopeID: "k8s-cluster-1"},
 					{ScopeID: "k8s-cluster-2"},
 				},
@@ -241,12 +241,12 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("group with kubernetes namespace UIDs", func(t *testing.T) {
-		group := &instana.Group{
+		group := &api.Group{
 			ID:      "test-id",
 			Name:    "test-group",
-			Members: []instana.APIMember{},
-			PermissionSet: instana.APIPermissionSetWithRoles{
-				KubernetesNamespaceUIDs: []instana.ScopeBinding{
+			Members: []api.APIMember{},
+			PermissionSet: api.APIPermissionSetWithRoles{
+				KubernetesNamespaceUIDs: []api.ScopeBinding{
 					{ScopeID: "k8s-ns-1"},
 					{ScopeID: "k8s-ns-2"},
 				},
@@ -271,12 +271,12 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("group with mobile app IDs", func(t *testing.T) {
-		group := &instana.Group{
+		group := &api.Group{
 			ID:      "test-id",
 			Name:    "test-group",
-			Members: []instana.APIMember{},
-			PermissionSet: instana.APIPermissionSetWithRoles{
-				MobileAppIDs: []instana.ScopeBinding{
+			Members: []api.APIMember{},
+			PermissionSet: api.APIPermissionSetWithRoles{
+				MobileAppIDs: []api.ScopeBinding{
 					{ScopeID: "mobile-app-1"},
 					{ScopeID: "mobile-app-2"},
 				},
@@ -301,12 +301,12 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("group with website IDs", func(t *testing.T) {
-		group := &instana.Group{
+		group := &api.Group{
 			ID:      "test-id",
 			Name:    "test-group",
-			Members: []instana.APIMember{},
-			PermissionSet: instana.APIPermissionSetWithRoles{
-				WebsiteIDs: []instana.ScopeBinding{
+			Members: []api.APIMember{},
+			PermissionSet: api.APIPermissionSetWithRoles{
+				WebsiteIDs: []api.ScopeBinding{
 					{ScopeID: "website-1"},
 					{ScopeID: "website-2"},
 				},
@@ -331,14 +331,14 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("group with permissions", func(t *testing.T) {
-		group := &instana.Group{
+		group := &api.Group{
 			ID:      "test-id",
 			Name:    "test-group",
-			Members: []instana.APIMember{},
-			PermissionSet: instana.APIPermissionSetWithRoles{
-				Permissions: []instana.InstanaPermission{
-					instana.PermissionCanConfigureApplications,
-					instana.PermissionCanViewLogs,
+			Members: []api.APIMember{},
+			PermissionSet: api.APIPermissionSetWithRoles{
+				Permissions: []api.InstanaPermission{
+					api.PermissionCanConfigureApplications,
+					api.PermissionCanViewLogs,
 				},
 			},
 		}
@@ -362,33 +362,33 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("group with all permission set fields", func(t *testing.T) {
-		group := &instana.Group{
+		group := &api.Group{
 			ID:   "test-id",
 			Name: "test-group",
-			Members: []instana.APIMember{
+			Members: []api.APIMember{
 				{UserID: "user-1"},
 			},
-			PermissionSet: instana.APIPermissionSetWithRoles{
-				ApplicationIDs: []instana.ScopeBinding{
+			PermissionSet: api.APIPermissionSetWithRoles{
+				ApplicationIDs: []api.ScopeBinding{
 					{ScopeID: "app-1"},
 				},
-				InfraDFQFilter: &instana.ScopeBinding{
+				InfraDFQFilter: &api.ScopeBinding{
 					ScopeID: "entity.type:host",
 				},
-				KubernetesClusterUUIDs: []instana.ScopeBinding{
+				KubernetesClusterUUIDs: []api.ScopeBinding{
 					{ScopeID: "k8s-cluster-1"},
 				},
-				KubernetesNamespaceUIDs: []instana.ScopeBinding{
+				KubernetesNamespaceUIDs: []api.ScopeBinding{
 					{ScopeID: "k8s-ns-1"},
 				},
-				MobileAppIDs: []instana.ScopeBinding{
+				MobileAppIDs: []api.ScopeBinding{
 					{ScopeID: "mobile-app-1"},
 				},
-				WebsiteIDs: []instana.ScopeBinding{
+				WebsiteIDs: []api.ScopeBinding{
 					{ScopeID: "website-1"},
 				},
-				Permissions: []instana.InstanaPermission{
-					instana.PermissionCanConfigureApplications,
+				Permissions: []api.InstanaPermission{
+					api.PermissionCanConfigureApplications,
 				},
 			},
 		}
@@ -678,8 +678,8 @@ func TestMapStateToDataObject(t *testing.T) {
 		require.NotNil(t, group)
 
 		assert.Len(t, group.PermissionSet.Permissions, 2)
-		assert.Equal(t, instana.PermissionCanConfigureApplications, group.PermissionSet.Permissions[0])
-		assert.Equal(t, instana.PermissionCanViewLogs, group.PermissionSet.Permissions[1])
+		assert.Equal(t, api.PermissionCanConfigureApplications, group.PermissionSet.Permissions[0])
+		assert.Equal(t, api.PermissionCanViewLogs, group.PermissionSet.Permissions[1])
 	})
 
 	t.Run("group with all permission set fields", func(t *testing.T) {
@@ -745,36 +745,36 @@ func TestRoundTripConversion(t *testing.T) {
 
 	t.Run("state to API and back to state", func(t *testing.T) {
 		email := "user@example.com"
-		originalGroup := &instana.Group{
+		originalGroup := &api.Group{
 			ID:   "test-id",
 			Name: "test-group",
-			Members: []instana.APIMember{
+			Members: []api.APIMember{
 				{
 					UserID: "user-1",
 					Email:  &email,
 				},
 			},
-			PermissionSet: instana.APIPermissionSetWithRoles{
-				ApplicationIDs: []instana.ScopeBinding{
+			PermissionSet: api.APIPermissionSetWithRoles{
+				ApplicationIDs: []api.ScopeBinding{
 					{ScopeID: "app-1"},
 				},
-				InfraDFQFilter: &instana.ScopeBinding{
+				InfraDFQFilter: &api.ScopeBinding{
 					ScopeID: "entity.type:host",
 				},
-				KubernetesClusterUUIDs: []instana.ScopeBinding{
+				KubernetesClusterUUIDs: []api.ScopeBinding{
 					{ScopeID: "k8s-cluster-1"},
 				},
-				KubernetesNamespaceUIDs: []instana.ScopeBinding{
+				KubernetesNamespaceUIDs: []api.ScopeBinding{
 					{ScopeID: "k8s-ns-1"},
 				},
-				MobileAppIDs: []instana.ScopeBinding{
+				MobileAppIDs: []api.ScopeBinding{
 					{ScopeID: "mobile-app-1"},
 				},
-				WebsiteIDs: []instana.ScopeBinding{
+				WebsiteIDs: []api.ScopeBinding{
 					{ScopeID: "website-1"},
 				},
-				Permissions: []instana.InstanaPermission{
-					instana.PermissionCanConfigureApplications,
+				Permissions: []api.InstanaPermission{
+					api.PermissionCanConfigureApplications,
 				},
 			},
 		}
@@ -858,11 +858,11 @@ func TestEdgeCases(t *testing.T) {
 	})
 
 	t.Run("nil infra DFQ filter", func(t *testing.T) {
-		group := &instana.Group{
+		group := &api.Group{
 			ID:      "test-id",
 			Name:    "test-group",
-			Members: []instana.APIMember{},
-			PermissionSet: instana.APIPermissionSetWithRoles{
+			Members: []api.APIMember{},
+			PermissionSet: api.APIPermissionSetWithRoles{
 				InfraDFQFilter: nil,
 			},
 		}

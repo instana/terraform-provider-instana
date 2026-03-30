@@ -8,8 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/instana-go-client/api"
+	tag "github.com/instana/instana-go-client/shared/tagfilter"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/instana-go-client/instana"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -712,7 +713,7 @@ func TestMapTagFilterFromState(t *testing.T) {
 
 		assert.False(t, diags.HasError())
 		assert.NotNil(t, result)
-		assert.Equal(t, instana.TagFilterExpressionElementType("EXPRESSION"), result.Type)
+		assert.Equal(t, tag.TagFilterExpressionElementType("EXPRESSION"), result.Type)
 	})
 
 	t.Run("should return error for invalid filter expression", func(t *testing.T) {
@@ -737,12 +738,12 @@ func TestUpdateState(t *testing.T) {
 		includeSynthetic := false
 		aggregation := "MEAN"
 
-		apiObject := &instana.SloConfig{
+		apiObject := &api.SloConfig{
 			ID:     "test-id",
 			Name:   "Test SLO",
 			Target: 99.5,
 			Tags:   []string{"tag1", "tag2"},
-			Entity: instana.SloEntity{
+			Entity: api.SloEntity{
 				Type:             SloConfigApplicationEntity,
 				ApplicationID:    &appID,
 				BoundaryScope:    &boundaryScope,
@@ -750,13 +751,13 @@ func TestUpdateState(t *testing.T) {
 				IncludeInternal:  &includeInternal,
 				IncludeSynthetic: &includeSynthetic,
 			},
-			Indicator: instana.SloIndicator{
+			Indicator: api.SloIndicator{
 				Blueprint:   SloConfigAPIIndicatorBlueprintLatency,
 				Type:        SloConfigAPIIndicatorMeasurementTypeTimeBased,
 				Threshold:   100.0,
 				Aggregation: &aggregation,
 			},
-			TimeWindow: instana.SloTimeWindow{
+			TimeWindow: api.SloTimeWindow{
 				Type:         SloConfigRollingTimeWindow,
 				Duration:     7,
 				DurationUnit: "day",
@@ -780,26 +781,26 @@ func TestUpdateState(t *testing.T) {
 		appID := "app-123"
 		boundaryScope := "ALL"
 
-		apiObject := &instana.SloConfig{
+		apiObject := &api.SloConfig{
 			ID:     "test-id",
 			Name:   "Test SLO",
 			Target: 99.5,
-			RbacTags: []instana.RbacTag{
+			RbacTags: []api.RbacTag{
 				{DisplayName: "Team A", ID: "team-a"},
 				{DisplayName: "Team B", ID: "team-b"},
 			},
-			Entity: instana.SloEntity{
+			Entity: api.SloEntity{
 				Type:          SloConfigApplicationEntity,
 				ApplicationID: &appID,
 				BoundaryScope: &boundaryScope,
 			},
-			Indicator: instana.SloIndicator{
+			Indicator: api.SloIndicator{
 				Blueprint:   SloConfigAPIIndicatorBlueprintLatency,
 				Type:        SloConfigAPIIndicatorMeasurementTypeTimeBased,
 				Threshold:   100.0,
 				Aggregation: &aggregation,
 			},
-			TimeWindow: instana.SloTimeWindow{
+			TimeWindow: api.SloTimeWindow{
 				Type:         SloConfigRollingTimeWindow,
 				Duration:     7,
 				DurationUnit: "day",
@@ -827,8 +828,8 @@ func TestMapEntityToState(t *testing.T) {
 		includeInternal := true
 		includeSynthetic := false
 
-		apiObject := &instana.SloConfig{
-			Entity: instana.SloEntity{
+		apiObject := &api.SloConfig{
+			Entity: api.SloEntity{
 				Type:             SloConfigApplicationEntity,
 				ApplicationID:    &appID,
 				BoundaryScope:    &boundaryScope,
@@ -851,8 +852,8 @@ func TestMapEntityToState(t *testing.T) {
 		websiteID := "website-123"
 		beaconType := "pageLoad"
 
-		apiObject := &instana.SloConfig{
-			Entity: instana.SloEntity{
+		apiObject := &api.SloConfig{
+			Entity: api.SloEntity{
 				Type:       SloConfigWebsiteEntity,
 				WebsiteId:  &websiteID,
 				BeaconType: &beaconType,
@@ -868,8 +869,8 @@ func TestMapEntityToState(t *testing.T) {
 	})
 
 	t.Run("should map synthetic entity to state", func(t *testing.T) {
-		apiObject := &instana.SloConfig{
-			Entity: instana.SloEntity{
+		apiObject := &api.SloConfig{
+			Entity: api.SloEntity{
 				Type:             SloConfigSyntheticEntity,
 				SyntheticTestIDs: []interface{}{"test-1", "test-2"},
 			},
@@ -884,8 +885,8 @@ func TestMapEntityToState(t *testing.T) {
 	})
 
 	t.Run("should return error for unsupported entity type", func(t *testing.T) {
-		apiObject := &instana.SloConfig{
-			Entity: instana.SloEntity{
+		apiObject := &api.SloConfig{
+			Entity: api.SloEntity{
 				Type: "unsupported",
 			},
 		}
@@ -901,8 +902,8 @@ func TestMapIndicatorToState(t *testing.T) {
 
 	t.Run("should map time-based latency indicator to state", func(t *testing.T) {
 		aggregation := "MEAN"
-		apiObject := &instana.SloConfig{
-			Indicator: instana.SloIndicator{
+		apiObject := &api.SloConfig{
+			Indicator: api.SloIndicator{
 				Blueprint:   SloConfigAPIIndicatorBlueprintLatency,
 				Type:        SloConfigAPIIndicatorMeasurementTypeTimeBased,
 				Threshold:   100.0,
@@ -918,8 +919,8 @@ func TestMapIndicatorToState(t *testing.T) {
 	})
 
 	t.Run("should map event-based latency indicator to state", func(t *testing.T) {
-		apiObject := &instana.SloConfig{
-			Indicator: instana.SloIndicator{
+		apiObject := &api.SloConfig{
+			Indicator: api.SloIndicator{
 				Blueprint: SloConfigAPIIndicatorBlueprintLatency,
 				Type:      SloConfigAPIIndicatorMeasurementTypeEventBased,
 				Threshold: 200.0,
@@ -935,8 +936,8 @@ func TestMapIndicatorToState(t *testing.T) {
 
 	t.Run("should map time-based availability indicator to state", func(t *testing.T) {
 		aggregation := "P95"
-		apiObject := &instana.SloConfig{
-			Indicator: instana.SloIndicator{
+		apiObject := &api.SloConfig{
+			Indicator: api.SloIndicator{
 				Blueprint:   SloConfigAPIIndicatorBlueprintAvailability,
 				Type:        SloConfigAPIIndicatorMeasurementTypeTimeBased,
 				Threshold:   99.9,
@@ -951,8 +952,8 @@ func TestMapIndicatorToState(t *testing.T) {
 	})
 
 	t.Run("should map event-based availability indicator to state", func(t *testing.T) {
-		apiObject := &instana.SloConfig{
-			Indicator: instana.SloIndicator{
+		apiObject := &api.SloConfig{
+			Indicator: api.SloIndicator{
 				Blueprint: SloConfigAPIIndicatorBlueprintAvailability,
 				Type:      SloConfigAPIIndicatorMeasurementTypeEventBased,
 			},
@@ -967,8 +968,8 @@ func TestMapIndicatorToState(t *testing.T) {
 	t.Run("should map traffic indicator to state", func(t *testing.T) {
 		trafficType := "all"
 		aggregation := "MEAN"
-		apiObject := &instana.SloConfig{
-			Indicator: instana.SloIndicator{
+		apiObject := &api.SloConfig{
+			Indicator: api.SloIndicator{
 				Blueprint:   SloConfigAPIIndicatorBlueprintTraffic,
 				Type:        SloConfigAPIIndicatorMeasurementTypeTimeBased,
 				TrafficType: &trafficType,
@@ -984,11 +985,11 @@ func TestMapIndicatorToState(t *testing.T) {
 	})
 
 	t.Run("should map custom indicator to state", func(t *testing.T) {
-		goodFilter := &instana.TagFilter{Type: "EXPRESSION"}
-		badFilter := &instana.TagFilter{Type: "EXPRESSION"}
+		goodFilter := &tag.TagFilter{Type: "EXPRESSION"}
+		badFilter := &tag.TagFilter{Type: "EXPRESSION"}
 
-		apiObject := &instana.SloConfig{
-			Indicator: instana.SloIndicator{
+		apiObject := &api.SloConfig{
+			Indicator: api.SloIndicator{
 				Blueprint:                 SloConfigAPIIndicatorBlueprintCustom,
 				Type:                      SloConfigAPIIndicatorMeasurementTypeEventBased,
 				GoodEventFilterExpression: goodFilter,
@@ -1003,8 +1004,8 @@ func TestMapIndicatorToState(t *testing.T) {
 	})
 
 	t.Run("should return error for unsupported indicator type", func(t *testing.T) {
-		apiObject := &instana.SloConfig{
-			Indicator: instana.SloIndicator{
+		apiObject := &api.SloConfig{
+			Indicator: api.SloIndicator{
 				Blueprint: "unsupported",
 				Type:      "unsupported",
 			},
@@ -1024,8 +1025,8 @@ func TestMapIndicatorToState_Saturation(t *testing.T) {
 		operator := ">="
 		metricName := "cpu.sys"
 
-		apiObject := &instana.SloConfig{
-			Indicator: instana.SloIndicator{
+		apiObject := &api.SloConfig{
+			Indicator: api.SloIndicator{
 				Blueprint:   SloConfigAPIIndicatorBlueprintSaturation,
 				Type:        SloConfigAPIIndicatorMeasurementTypeTimeBased,
 				Threshold:   0.75,
@@ -1049,8 +1050,8 @@ func TestMapIndicatorToState_Saturation(t *testing.T) {
 		operator := "<"
 		metricName := "cpu.sys"
 
-		apiObject := &instana.SloConfig{
-			Indicator: instana.SloIndicator{
+		apiObject := &api.SloConfig{
+			Indicator: api.SloIndicator{
 				Blueprint:  SloConfigAPIIndicatorBlueprintSaturation,
 				Type:       SloConfigAPIIndicatorMeasurementTypeEventBased,
 				Threshold:  0.85,
@@ -1073,8 +1074,8 @@ func TestMapTimeWindowToState(t *testing.T) {
 	resource := &sloConfigResource{}
 
 	t.Run("should map rolling time window to state", func(t *testing.T) {
-		apiObject := &instana.SloConfig{
-			TimeWindow: instana.SloTimeWindow{
+		apiObject := &api.SloConfig{
+			TimeWindow: api.SloTimeWindow{
 				Type:         SloConfigRollingTimeWindow,
 				Duration:     7,
 				DurationUnit: "day",
@@ -1093,8 +1094,8 @@ func TestMapTimeWindowToState(t *testing.T) {
 	})
 
 	t.Run("should map rolling time window without timezone", func(t *testing.T) {
-		apiObject := &instana.SloConfig{
-			TimeWindow: instana.SloTimeWindow{
+		apiObject := &api.SloConfig{
+			TimeWindow: api.SloTimeWindow{
 				Type:         SloConfigRollingTimeWindow,
 				Duration:     30,
 				DurationUnit: "day",
@@ -1110,8 +1111,8 @@ func TestMapTimeWindowToState(t *testing.T) {
 	})
 
 	t.Run("should map fixed time window to state", func(t *testing.T) {
-		apiObject := &instana.SloConfig{
-			TimeWindow: instana.SloTimeWindow{
+		apiObject := &api.SloConfig{
+			TimeWindow: api.SloTimeWindow{
 				Type:         SloConfigFixedTimeWindow,
 				Duration:     1,
 				DurationUnit: "week",
@@ -1132,8 +1133,8 @@ func TestMapTimeWindowToState(t *testing.T) {
 	})
 
 	t.Run("should return error for unsupported time window type", func(t *testing.T) {
-		apiObject := &instana.SloConfig{
-			TimeWindow: instana.SloTimeWindow{
+		apiObject := &api.SloConfig{
+			TimeWindow: api.SloTimeWindow{
 				Type: "unsupported",
 			},
 		}
@@ -1155,7 +1156,7 @@ func TestMapApplicationEntityToState(t *testing.T) {
 		includeInternal := true
 		includeSynthetic := false
 
-		entity := instana.SloEntity{
+		entity := api.SloEntity{
 			ApplicationID:    &appID,
 			BoundaryScope:    &boundaryScope,
 			ServiceID:        &serviceID,
@@ -1179,7 +1180,7 @@ func TestMapApplicationEntityToState(t *testing.T) {
 		appID := "app-123"
 		boundaryScope := "ALL"
 
-		entity := instana.SloEntity{
+		entity := api.SloEntity{
 			ApplicationID: &appID,
 			BoundaryScope: &boundaryScope,
 		}
@@ -1199,7 +1200,7 @@ func TestMapWebsiteEntityToState(t *testing.T) {
 		websiteID := "website-123"
 		beaconType := "pageLoad"
 
-		entity := instana.SloEntity{
+		entity := api.SloEntity{
 			WebsiteId:  &websiteID,
 			BeaconType: &beaconType,
 		}
@@ -1216,7 +1217,7 @@ func TestMapSyntheticEntityToState(t *testing.T) {
 	resource := &sloConfigResource{}
 
 	t.Run("should map synthetic entity with test IDs", func(t *testing.T) {
-		entity := instana.SloEntity{
+		entity := api.SloEntity{
 			SyntheticTestIDs: []interface{}{"test-1", "test-2", "test-3"},
 		}
 
@@ -1229,7 +1230,7 @@ func TestMapSyntheticEntityToState(t *testing.T) {
 	})
 
 	t.Run("should handle empty test IDs", func(t *testing.T) {
-		entity := instana.SloEntity{
+		entity := api.SloEntity{
 			SyntheticTestIDs: []interface{}{},
 		}
 
@@ -1242,7 +1243,7 @@ func TestMapSyntheticEntityToState(t *testing.T) {
 	})
 
 	t.Run("should handle non-string test IDs gracefully", func(t *testing.T) {
-		entity := instana.SloEntity{
+		entity := api.SloEntity{
 			SyntheticTestIDs: []interface{}{"test-1", 123, "test-3"},
 		}
 
@@ -1470,8 +1471,8 @@ func TestMapIndicatorToStateWithTrafficOperator(t *testing.T) {
 	t.Run("should map traffic indicator with operator to state", func(t *testing.T) {
 		trafficType := "all"
 		operator := ">="
-		apiObject := &instana.SloConfig{
-			Indicator: instana.SloIndicator{
+		apiObject := &api.SloConfig{
+			Indicator: api.SloIndicator{
 				Blueprint:   SloConfigAPIIndicatorBlueprintTraffic,
 				Type:        SloConfigAPIIndicatorMeasurementTypeTimeBased,
 				TrafficType: &trafficType,
@@ -1601,23 +1602,23 @@ func TestUpdateStateWithEmptyTags(t *testing.T) {
 		appID := "app-123"
 		boundaryScope := "ALL"
 
-		apiObject := &instana.SloConfig{
+		apiObject := &api.SloConfig{
 			ID:     "test-id",
 			Name:   "Test SLO",
 			Target: 99.5,
 			Tags:   nil,
-			Entity: instana.SloEntity{
+			Entity: api.SloEntity{
 				Type:          SloConfigApplicationEntity,
 				ApplicationID: &appID,
 				BoundaryScope: &boundaryScope,
 			},
-			Indicator: instana.SloIndicator{
+			Indicator: api.SloIndicator{
 				Blueprint:   SloConfigAPIIndicatorBlueprintLatency,
 				Type:        SloConfigAPIIndicatorMeasurementTypeTimeBased,
 				Threshold:   100.0,
 				Aggregation: &aggregation,
 			},
-			TimeWindow: instana.SloTimeWindow{
+			TimeWindow: api.SloTimeWindow{
 				Type:         SloConfigRollingTimeWindow,
 				Duration:     7,
 				DurationUnit: "day",
@@ -1691,20 +1692,20 @@ func TestUpdateStateWithMappingErrors(t *testing.T) {
 		ctx := context.Background()
 		aggregation := "MEAN"
 
-		apiObject := &instana.SloConfig{
+		apiObject := &api.SloConfig{
 			ID:     "test-id",
 			Name:   "Test SLO",
 			Target: 99.5,
-			Entity: instana.SloEntity{
+			Entity: api.SloEntity{
 				Type: "unsupported_type",
 			},
-			Indicator: instana.SloIndicator{
+			Indicator: api.SloIndicator{
 				Blueprint:   SloConfigAPIIndicatorBlueprintLatency,
 				Type:        SloConfigAPIIndicatorMeasurementTypeTimeBased,
 				Threshold:   100.0,
 				Aggregation: &aggregation,
 			},
-			TimeWindow: instana.SloTimeWindow{
+			TimeWindow: api.SloTimeWindow{
 				Type:         SloConfigRollingTimeWindow,
 				Duration:     7,
 				DurationUnit: "day",
@@ -1725,20 +1726,20 @@ func TestUpdateStateWithMappingErrors(t *testing.T) {
 		appID := "app-123"
 		boundaryScope := "ALL"
 
-		apiObject := &instana.SloConfig{
+		apiObject := &api.SloConfig{
 			ID:     "test-id",
 			Name:   "Test SLO",
 			Target: 99.5,
-			Entity: instana.SloEntity{
+			Entity: api.SloEntity{
 				Type:          SloConfigApplicationEntity,
 				ApplicationID: &appID,
 				BoundaryScope: &boundaryScope,
 			},
-			Indicator: instana.SloIndicator{
+			Indicator: api.SloIndicator{
 				Blueprint: "unsupported_blueprint",
 				Type:      "unsupported_type",
 			},
-			TimeWindow: instana.SloTimeWindow{
+			TimeWindow: api.SloTimeWindow{
 				Type:         SloConfigRollingTimeWindow,
 				Duration:     7,
 				DurationUnit: "day",
@@ -1760,22 +1761,22 @@ func TestUpdateStateWithMappingErrors(t *testing.T) {
 		boundaryScope := "ALL"
 		aggregation := "MEAN"
 
-		apiObject := &instana.SloConfig{
+		apiObject := &api.SloConfig{
 			ID:     "test-id",
 			Name:   "Test SLO",
 			Target: 99.5,
-			Entity: instana.SloEntity{
+			Entity: api.SloEntity{
 				Type:          SloConfigApplicationEntity,
 				ApplicationID: &appID,
 				BoundaryScope: &boundaryScope,
 			},
-			Indicator: instana.SloIndicator{
+			Indicator: api.SloIndicator{
 				Blueprint:   SloConfigAPIIndicatorBlueprintLatency,
 				Type:        SloConfigAPIIndicatorMeasurementTypeTimeBased,
 				Threshold:   100.0,
 				Aggregation: &aggregation,
 			},
-			TimeWindow: instana.SloTimeWindow{
+			TimeWindow: api.SloTimeWindow{
 				Type: "unsupported_window_type",
 			},
 		}
