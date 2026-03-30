@@ -2,7 +2,7 @@
 
 Resource to configure websites in Instana for Real User Monitoring (RUM).
 
-API Documentation: <https://instana.github.io/openapi/#tag/Website-Configuration
+API Documentation: [Website Monitoring Rest API](https://developer.ibm.com/apis/catalog/instana--instana-rest-api/api/API--instana--instana-rest-api-documentation#createWebsite)
 
  **⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)**
 

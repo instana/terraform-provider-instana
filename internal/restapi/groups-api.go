@@ -114,6 +114,8 @@ const (
 	PermissionCanConfigureSubtraces = InstanaPermission("CAN_CONFIGURE_SUBTRACES")
 	//PermissionCanConfigureLLM const for Instana permission CAN_CONFIGURE_LLM
 	PermissionCanConfigureLLM = InstanaPermission("CAN_CONFIGURE_LLM")
+	//PermissionCanConfigureLLMModelPrice const for Instana permission CAN_CONFIGURE_LLM_MODEL_PRICE
+	PermissionCanConfigureLLMModelPrice = InstanaPermission("CAN_CONFIGURE_LLM_MODEL_PRICE")
 	//PermissionCanConfigureBizOps const for Instana permission CAN_CONFIGURE_BIZOPS
 	PermissionCanConfigureBizOps = InstanaPermission("CAN_CONFIGURE_BIZOPS")
 	//PermissionCanConfigureAutomationPolicies const for Instana permission CAN_CONFIGURE_AUTOMATION_POLICIES
@@ -233,6 +235,7 @@ var SupportedInstanaPermissions = InstanaPermissions{
 	PermissionCanConfigureSyntheticCredentials,
 	PermissionCanConfigureSubtraces,
 	PermissionCanConfigureLLM,
+	PermissionCanConfigureLLMModelPrice,
 	PermissionCanConfigureBizOps,
 	PermissionCanConfigureAutomationPolicies,
 	PermissionCanConfigureAutomationActions,

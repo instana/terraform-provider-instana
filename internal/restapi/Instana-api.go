@@ -43,6 +43,7 @@ type InstanaAPI interface {
 	SloCorrectionConfig() RestResource[*SloCorrectionConfig]
 	WebsiteMonitoringConfig() RestResource[*WebsiteMonitoringConfig]
 	WebsiteAlertConfig() RestResource[*WebsiteAlertConfig]
+	MobileAppConfig() RestResource[*MobileAppConfig]
 	MobileAlertConfig() RestResource[*MobileAlertConfig]
 	InfraAlertConfig() RestResource[*InfraAlertConfig]
 	Groups() RestResource[*Group]
@@ -132,6 +133,10 @@ func (api *baseInstanaAPI) WebsiteMonitoringConfig() RestResource[*WebsiteMonito
 
 func (api *baseInstanaAPI) WebsiteAlertConfig() RestResource[*WebsiteAlertConfig] {
 	return NewCreatePOSTUpdatePOSTRestResource(WebsiteAlertConfigResourcePath, NewCustomPayloadFieldsUnmarshallerAdapter(NewDefaultJSONUnmarshaller(&WebsiteAlertConfig{})), api.client)
+}
+
+func (api *baseInstanaAPI) MobileAppConfig() RestResource[*MobileAppConfig] {
+	return NewMobileAppConfigRestResource(NewDefaultJSONUnmarshaller(&MobileAppConfig{}), api.client)
 }
 
 func (api *baseInstanaAPI) MobileAlertConfig() RestResource[*MobileAlertConfig] {
