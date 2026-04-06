@@ -312,6 +312,7 @@ func buildDNSSchema() schema.SingleNestedAttribute {
 	}
 	attrs[SyntheticTestFieldPort] = schema.Int64Attribute{
 		Optional:    true,
+		Computed:    true,
 		Description: SyntheticTestDescPortNumber,
 	}
 	attrs[SyntheticTestFieldTransport] = schema.StringAttribute{
