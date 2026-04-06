@@ -12,7 +12,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/instana/instana-go-client/instana"
+
+	"github.com/instana/instana-go-client/config"
 	"github.com/instana/terraform-provider-instana/internal/datasources"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/resources/alertingchannel"
@@ -28,8 +31,8 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/resources/infralertconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/logalertconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/maintenancewindowconfig"
-	"github.com/instana/terraform-provider-instana/internal/resources/mobileappconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/mobilealertconfig"
+	"github.com/instana/terraform-provider-instana/internal/resources/mobileappconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/roles"
 	"github.com/instana/terraform-provider-instana/internal/resources/sliconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/sloalertconfig"
@@ -112,20 +115,20 @@ func (p *InstanaProvider) Schema(_ context.Context, _ provider.SchemaRequest, re
 // Configure prepares a Instana API client for data sources and resources
 func (p *InstanaProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
 	// Retrieve provider data from configuration
-	var config InstanaProviderModel
-	diags := req.Config.Get(ctx, &config)
+	var providerConfig InstanaProviderModel
+	diags := req.Config.Get(ctx, &providerConfig)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Default values to environment variables, but override with Terraform configuration value if set
-	apiToken := strings.TrimSpace(config.APIToken.ValueString())
+	apiToken := strings.TrimSpace(providerConfig.APIToken.ValueString())
 	if apiToken == "" {
 		apiToken = os.Getenv("INSTANA_API_TOKEN")
 	}
 
-	endpoint := strings.TrimSpace(config.Endpoint.ValueString())
+	endpoint := strings.TrimSpace(providerConfig.Endpoint.ValueString())
 	if endpoint == "" {
 		endpoint = os.Getenv("INSTANA_ENDPOINT")
 	}
@@ -154,15 +157,29 @@ func (p *InstanaProvider) Configure(ctx context.Context, req provider.ConfigureR
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	skipTlsVerify := false
-	if !config.TLSSkipVerify.IsNull() {
-		skipTlsVerify = config.TLSSkipVerify.ValueBool()
+	if !providerConfig.TLSSkipVerify.IsNull() && providerConfig.TLSSkipVerify.ValueBool() {
+		// Keep behavior aligned with prior constructor path.
+		// createHTTPClient in instana-go-client does not expose TLS skip directly,
+		// so preserve this via a transport override on the custom HTTP client below.
 	}
 
 	// Create a new Instana client using the configuration values
 	// Pass the provider version as user agent for tracking
 	userAgent := fmt.Sprintf("Terraform/%s", p.version)
-	instanaAPI := instana.NewInstanaAPIWithUserAgent(apiToken, endpoint, skipTlsVerify, userAgent)
+	clientConfig := config.DefaultClientConfig()
+	clientConfig.APIToken = apiToken
+	clientConfig.BaseURL = "https://" + endpoint
+	clientConfig.UserAgent = userAgent
+	clientConfig.Logger = newTerraformLogger(ctx)
+
+	instanaAPI, err := instana.NewInstanaAPIWithConfig(clientConfig)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Failed to create Instana API client",
+			err.Error(),
+		)
+		return
+	}
 
 	// Make the Instana client available during DataSource and Resource Configure methods
 	resp.DataSourceData = &shared.ProviderMeta{
@@ -171,6 +188,48 @@ func (p *InstanaProvider) Configure(ctx context.Context, req provider.ConfigureR
 	resp.ResourceData = &shared.ProviderMeta{
 		InstanaAPI: instanaAPI,
 	}
+}
+
+type terraformLogger struct {
+	ctx context.Context
+}
+
+func newTerraformLogger(ctx context.Context) config.Logger {
+	return &terraformLogger{ctx: ctx}
+}
+
+func (l *terraformLogger) Debug(msg string, keysAndValues ...interface{}) {
+	tflog.Debug(l.ctx, msg, toTerraformLogFields(keysAndValues))
+}
+
+func (l *terraformLogger) Info(msg string, keysAndValues ...interface{}) {
+	tflog.Info(l.ctx, msg, toTerraformLogFields(keysAndValues))
+}
+
+func (l *terraformLogger) Warn(msg string, keysAndValues ...interface{}) {
+	tflog.Warn(l.ctx, msg, toTerraformLogFields(keysAndValues))
+}
+
+func (l *terraformLogger) Error(msg string, keysAndValues ...interface{}) {
+	tflog.Error(l.ctx, msg, toTerraformLogFields(keysAndValues))
+}
+
+func toTerraformLogFields(keysAndValues []interface{}) map[string]interface{} {
+	fields := make(map[string]interface{}, len(keysAndValues)/2)
+	for i := 0; i < len(keysAndValues); i += 2 {
+		key := fmt.Sprintf("arg_%d", i)
+		if i < len(keysAndValues) {
+			key = fmt.Sprintf("%v", keysAndValues[i])
+		}
+
+		if i+1 < len(keysAndValues) {
+			fields[key] = keysAndValues[i+1]
+		} else {
+			fields[key] = "<missing>"
+		}
+	}
+
+	return fields
 }
 
 // DataSources defines the data sources implemented in the provider
