@@ -146,7 +146,7 @@ func (m *MockInstanaAPI) LogAlertConfigs() rest.RestResource[*api.LogAlertConfig
 }
 
 // MobileAppConfig mock implementation
-func (m *MockInstanaAPI) MobileAppConfig() restapi.RestResource[*restapi.MobileAppConfig] {
+func (m *MockInstanaAPI) MobileAppConfig() rest.RestResource[*api.MobileAppConfig] {
 	return nil
 }
 

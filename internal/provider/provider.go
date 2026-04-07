@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"github.com/instana/instana-go-client/instana"
+	"github.com/instana/instana-go-client/client"
 
 	"github.com/instana/instana-go-client/config"
 	"github.com/instana/terraform-provider-instana/internal/datasources"
@@ -172,7 +172,7 @@ func (p *InstanaProvider) Configure(ctx context.Context, req provider.ConfigureR
 	clientConfig.UserAgent = userAgent
 	clientConfig.Logger = newTerraformLogger(ctx)
 
-	instanaAPI, err := instana.NewInstanaAPIWithConfig(clientConfig)
+	instanaAPI, err := client.NewInstanaAPIWithConfig(clientConfig)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Failed to create Instana API client",
@@ -280,7 +280,7 @@ func (p *InstanaProvider) Resources(_ context.Context) []func() resource.Resourc
 }
 
 // Helper function to wrap resource handles
-func addResouceHandle[T instana.InstanaDataObject](handleFunc func() resourcehandle.ResourceHandle[T]) func() resource.Resource {
+func addResouceHandle[T client.InstanaDataObject](handleFunc func() resourcehandle.ResourceHandle[T]) func() resource.Resource {
 	return func() resource.Resource {
 		return NewTerraformResource(handleFunc())
 	}

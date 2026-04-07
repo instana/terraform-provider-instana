@@ -48,7 +48,7 @@ func (s Severity) GetTerraformRepresentation() string  // <- Terraform-specific 
 ### 2. References to Old Package in Terraform Provider
 
 #### Status: ✅ CLEAN
-All references in terraform provider code have been updated to use `github.com/instana/instana-go-client/instana`.
+All references in terraform provider code have been updated to use `github.com/instana/instana-go-client/client`.
 
 The only remaining references to `internal/restapi` are:
 - Test files within `internal/restapi/` directory itself (expected, as we kept original files)
