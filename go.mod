@@ -11,12 +11,10 @@ require (
 	github.com/hashicorp/terraform-plugin-framework-validators v0.18.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.36.1
-	github.com/instana/instana-go-client v0.0.0
+	github.com/instana/instana-go-client v1.0.0
 	github.com/rs/xid v1.5.0
 	github.com/stretchr/testify v1.11.1
 )
-
-replace github.com/instana/instana-go-client => ../instana-go-client
 
 require (
 	github.com/agext/levenshtein v1.2.3 // indirect
