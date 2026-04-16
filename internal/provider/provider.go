@@ -2,7 +2,9 @@ package provider
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 
@@ -157,12 +159,6 @@ func (p *InstanaProvider) Configure(ctx context.Context, req provider.ConfigureR
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if !providerConfig.TLSSkipVerify.IsNull() && providerConfig.TLSSkipVerify.ValueBool() {
-		// Keep behavior aligned with prior constructor path.
-		// createHTTPClient in instana-go-client does not expose TLS skip directly,
-		// so preserve this via a transport override on the custom HTTP client below.
-	}
-
 	// Create a new Instana client using the configuration values
 	// Pass the provider version as user agent for tracking
 	userAgent := fmt.Sprintf("Terraform/%s", p.version)
@@ -171,6 +167,23 @@ func (p *InstanaProvider) Configure(ctx context.Context, req provider.ConfigureR
 	clientConfig.BaseURL = "https://" + endpoint
 	clientConfig.UserAgent = userAgent
 	clientConfig.Logger = newTerraformLogger(ctx)
+
+	// Handle TLS skip verify by creating a custom HTTP client with appropriate transport
+	if !providerConfig.TLSSkipVerify.IsNull() && providerConfig.TLSSkipVerify.ValueBool() {
+		// Create HTTP client with TLS skip verify enabled
+		transport := &http.Transport{
+			MaxIdleConns:        clientConfig.ConnectionPool.MaxIdleConnections,
+			MaxIdleConnsPerHost: clientConfig.ConnectionPool.MaxConnectionsPerHost,
+			IdleConnTimeout:     clientConfig.Timeout.IdleConnection,
+			DisableKeepAlives:   false,
+			TLSClientConfig:     &tls.Config{InsecureSkipVerify: true}, //nolint:gosec
+		}
+		clientConfig.HTTPClient = &http.Client{
+			Transport: transport,
+			Timeout:   clientConfig.Timeout.Request,
+		}
+		tflog.Warn(ctx, "TLS certificate verification is disabled - this should only be used in development/testing environments")
+	}
 
 	instanaAPI, err := client.NewInstanaAPIWithConfig(clientConfig)
 	if err != nil {
