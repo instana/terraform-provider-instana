@@ -1,5 +1,17 @@
 # Changelog
 
+## [v7.0.0](https://github.com/instana/terraform-provider-instana/tree/v7.0.0) (2026-04-20)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v6.3.0...v7.0.0)
+
+**changes:**
+
+- Extracted Instana API Client into a standalone Go library for better modularity and reusability
+
+**Merged pull requests:**
+
+- Extract Instana API Client into Standalone Go Library [\#78](https://github.com/instana/terraform-provider-instana/pull/78) ([georgekutty-1](https://github.com/georgekutty-1))
+
 ## [v6.3.0](https://github.com/instana/terraform-provider-instana/tree/v6.3.0) (2026-03-30)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v6.2.0...v6.3.0)
