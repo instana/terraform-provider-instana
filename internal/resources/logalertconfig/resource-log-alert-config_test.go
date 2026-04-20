@@ -8,8 +8,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/shared/tagfilter"
+	tag "github.com/instana/instana-go-client/shared/tagfilter"
+	common "github.com/instana/instana-go-client/shared/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -59,13 +62,13 @@ func TestUpdateState_BasicConfig(t *testing.T) {
 	ctx := context.Background()
 	resource := NewLogAlertConfigResourceHandle()
 
-	data := &restapi.LogAlertConfig{
+	data := &api.LogAlertConfig{
 		ID:            "test-id",
 		Name:          "Test Log Alert",
 		Description:   "Test Description",
 		Granularity:   600000,
-		AlertChannels: map[restapi.AlertSeverity][]string{},
-		Rules:         []restapi.RuleWithThreshold[restapi.LogAlertRule]{},
+		AlertChannels: map[common.AlertSeverity][]string{},
+		Rules:         []common.RuleWithThreshold[api.LogAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -90,14 +93,14 @@ func TestUpdateState_WithGracePeriod(t *testing.T) {
 	ctx := context.Background()
 	resource := NewLogAlertConfigResourceHandle()
 
-	data := &restapi.LogAlertConfig{
+	data := &api.LogAlertConfig{
 		ID:            "test-id",
 		Name:          "Test Log Alert",
 		Description:   "Test Description",
 		Granularity:   600000,
 		GracePeriod:   300000,
-		AlertChannels: map[restapi.AlertSeverity][]string{},
-		Rules:         []restapi.RuleWithThreshold[restapi.LogAlertRule]{},
+		AlertChannels: map[common.AlertSeverity][]string{},
+		Rules:         []common.RuleWithThreshold[api.LogAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -120,14 +123,14 @@ func TestUpdateState_WithZeroGracePeriod(t *testing.T) {
 	ctx := context.Background()
 	resource := NewLogAlertConfigResourceHandle()
 
-	data := &restapi.LogAlertConfig{
+	data := &api.LogAlertConfig{
 		ID:            "test-id",
 		Name:          "Test Log Alert",
 		Description:   "Test Description",
 		Granularity:   600000,
 		GracePeriod:   0,
-		AlertChannels: map[restapi.AlertSeverity][]string{},
-		Rules:         []restapi.RuleWithThreshold[restapi.LogAlertRule]{},
+		AlertChannels: map[common.AlertSeverity][]string{},
+		Rules:         []common.RuleWithThreshold[api.LogAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -150,19 +153,19 @@ func TestUpdateState_WithTagFilter(t *testing.T) {
 	resource := NewLogAlertConfigResourceHandle()
 
 	// Create a tag filter using AND logic with two expressions
-	tagFilter := restapi.NewLogicalAndTagFilter([]*restapi.TagFilter{
-		restapi.NewStringTagFilter(restapi.TagFilterEntityNotApplicable, "entity.type", restapi.EqualsOperator, "log"),
-		restapi.NewStringTagFilter(restapi.TagFilterEntityNotApplicable, "service.name", restapi.EqualsOperator, "test-service"),
+	tagFilter := tag.NewLogicalAndTagFilter([]*tag.TagFilter{
+		tag.NewStringTagFilter(tagfilter.TagFilterEntityNotApplicable, "entity.type", common.EqualsOperator, "log"),
+		tag.NewStringTagFilter(tagfilter.TagFilterEntityNotApplicable, "service.name", common.EqualsOperator, "test-service"),
 	})
 
-	data := &restapi.LogAlertConfig{
+	data := &api.LogAlertConfig{
 		ID:                  "test-id",
 		Name:                "Test Log Alert",
 		Description:         "Test Description",
 		Granularity:         600000,
 		TagFilterExpression: tagFilter,
-		AlertChannels:       map[restapi.AlertSeverity][]string{},
-		Rules:               []restapi.RuleWithThreshold[restapi.LogAlertRule]{},
+		AlertChannels:       map[common.AlertSeverity][]string{},
+		Rules:               []common.RuleWithThreshold[api.LogAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -187,17 +190,17 @@ func TestUpdateState_WithGroupBy(t *testing.T) {
 	ctx := context.Background()
 	resource := NewLogAlertConfigResourceHandle()
 
-	data := &restapi.LogAlertConfig{
+	data := &api.LogAlertConfig{
 		ID:          "test-id",
 		Name:        "Test Log Alert",
 		Description: "Test Description",
 		Granularity: 600000,
-		GroupBy: []restapi.GroupByTag{
+		GroupBy: []api.GroupByTag{
 			{TagName: "host.name", Key: ""},
 			{TagName: "service.name", Key: "key1"},
 		},
-		AlertChannels: map[restapi.AlertSeverity][]string{},
-		Rules:         []restapi.RuleWithThreshold[restapi.LogAlertRule]{},
+		AlertChannels: map[common.AlertSeverity][]string{},
+		Rules:         []common.RuleWithThreshold[api.LogAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -232,16 +235,16 @@ func TestUpdateState_WithAlertChannels(t *testing.T) {
 	ctx := context.Background()
 	resource := NewLogAlertConfigResourceHandle()
 
-	data := &restapi.LogAlertConfig{
+	data := &api.LogAlertConfig{
 		ID:          "test-id",
 		Name:        "Test Log Alert",
 		Description: "Test Description",
 		Granularity: 600000,
-		AlertChannels: map[restapi.AlertSeverity][]string{
-			restapi.WarningSeverity:  {"channel-1", "channel-2"},
-			restapi.CriticalSeverity: {"channel-3"},
+		AlertChannels: map[common.AlertSeverity][]string{
+			common.WarningSeverity:  {"channel-1", "channel-2"},
+			common.CriticalSeverity: {"channel-3"},
 		},
-		Rules: []restapi.RuleWithThreshold[restapi.LogAlertRule]{},
+		Rules: []common.RuleWithThreshold[api.LogAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -273,17 +276,17 @@ func TestUpdateState_WithTimeThreshold(t *testing.T) {
 	ctx := context.Background()
 	resource := NewLogAlertConfigResourceHandle()
 
-	data := &restapi.LogAlertConfig{
+	data := &api.LogAlertConfig{
 		ID:          "test-id",
 		Name:        "Test Log Alert",
 		Description: "Test Description",
 		Granularity: 600000,
-		TimeThreshold: &restapi.LogTimeThreshold{
+		TimeThreshold: &api.LogTimeThreshold{
 			Type:       "violationsInSequence",
 			TimeWindow: 300000,
 		},
-		AlertChannels: map[restapi.AlertSeverity][]string{},
-		Rules:         []restapi.RuleWithThreshold[restapi.LogAlertRule]{},
+		AlertChannels: map[common.AlertSeverity][]string{},
+		Rules:         []common.RuleWithThreshold[api.LogAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -321,32 +324,32 @@ func TestUpdateState_WithRulesAndThresholds(t *testing.T) {
 	warningValue := float64(100)
 	criticalValue := float64(200)
 
-	data := &restapi.LogAlertConfig{
+	data := &api.LogAlertConfig{
 		ID:          "test-id",
 		Name:        "Test Log Alert",
 		Description: "Test Description",
 		Granularity: 600000,
-		Rules: []restapi.RuleWithThreshold[restapi.LogAlertRule]{
+		Rules: []common.RuleWithThreshold[api.LogAlertRule]{
 			{
-				Rule: restapi.LogAlertRule{
+				Rule: api.LogAlertRule{
 					AlertType:   "logCount",
 					MetricName:  "log.count",
-					Aggregation: restapi.SumAggregation,
+					Aggregation: common.SumAggregation,
 				},
-				ThresholdOperator: restapi.ThresholdOperatorGreaterThan,
-				Thresholds: map[restapi.AlertSeverity]restapi.ThresholdRule{
-					restapi.WarningSeverity: {
+				ThresholdOperator: common.ThresholdOperatorGreaterThan,
+				Thresholds: map[common.AlertSeverity]common.ThresholdRule{
+					common.WarningSeverity: {
 						Type:  "staticThreshold",
 						Value: &warningValue,
 					},
-					restapi.CriticalSeverity: {
+					common.CriticalSeverity: {
 						Type:  "staticThreshold",
 						Value: &criticalValue,
 					},
 				},
 			},
 		},
-		AlertChannels: map[restapi.AlertSeverity][]string{},
+		AlertChannels: map[common.AlertSeverity][]string{},
 	}
 
 	state := &tfsdk.State{
@@ -364,8 +367,8 @@ func TestUpdateState_WithRulesAndThresholds(t *testing.T) {
 	require.NotNil(t, model.Rules)
 	assert.Equal(t, "log.count", model.Rules.MetricName.ValueString())
 	assert.Equal(t, LogAlertTypeLogCount, model.Rules.AlertType.ValueString())
-	assert.Equal(t, string(restapi.SumAggregation), model.Rules.Aggregation.ValueString())
-	assert.Equal(t, string(restapi.ThresholdOperatorGreaterThan), model.Rules.ThresholdOperator.ValueString())
+	assert.Equal(t, string(common.SumAggregation), model.Rules.Aggregation.ValueString())
+	assert.Equal(t, string(common.ThresholdOperatorGreaterThan), model.Rules.ThresholdOperator.ValueString())
 
 	require.NotNil(t, model.Rules.Threshold)
 	require.NotNil(t, model.Rules.Threshold.Warning)
@@ -381,20 +384,20 @@ func TestUpdateState_WithCustomPayloadFields(t *testing.T) {
 	ctx := context.Background()
 	resource := NewLogAlertConfigResourceHandle()
 
-	data := &restapi.LogAlertConfig{
+	data := &api.LogAlertConfig{
 		ID:          "test-id",
 		Name:        "Test Log Alert",
 		Description: "Test Description",
 		Granularity: 600000,
-		CustomerPayloadFields: []restapi.CustomPayloadField[any]{
+		CustomerPayloadFields: []common.CustomPayloadField[any]{
 			{
-				Type:  restapi.StaticStringCustomPayloadType,
+				Type:  common.StaticStringCustomPayloadType,
 				Key:   "field1",
 				Value: "value1",
 			},
 		},
-		AlertChannels: map[restapi.AlertSeverity][]string{},
-		Rules:         []restapi.RuleWithThreshold[restapi.LogAlertRule]{},
+		AlertChannels: map[common.AlertSeverity][]string{},
+		Rules:         []common.RuleWithThreshold[api.LogAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -432,7 +435,7 @@ func TestMapStateToDataObject_BasicConfig(t *testing.T) {
 	assert.Equal(t, "test-id", result.ID)
 	assert.Equal(t, "Test Log Alert", result.Name)
 	assert.Equal(t, "Test Description", result.Description)
-	assert.Equal(t, restapi.Granularity(600000), result.Granularity)
+	assert.Equal(t, common.Granularity(600000), result.Granularity)
 }
 
 func TestMapStateToDataObject_WithGracePeriod(t *testing.T) {
@@ -471,7 +474,7 @@ func TestMapStateToDataObject_WithNullGranularity(t *testing.T) {
 	result, diags := resource.MapStateToDataObject(ctx, nil, &state)
 	require.False(t, diags.HasError())
 	require.NotNil(t, result)
-	assert.Equal(t, restapi.Granularity600000, result.Granularity)
+	assert.Equal(t, common.Granularity600000, result.Granularity)
 }
 
 func TestMapStateToDataObject_WithTagFilter(t *testing.T) {
@@ -572,8 +575,8 @@ func TestMapStateToDataObject_WithAlertChannels(t *testing.T) {
 	require.False(t, diags.HasError())
 	require.NotNil(t, result)
 	require.Len(t, result.AlertChannels, 2)
-	assert.Len(t, result.AlertChannels[restapi.WarningSeverity], 2)
-	assert.Len(t, result.AlertChannels[restapi.CriticalSeverity], 1)
+	assert.Len(t, result.AlertChannels[common.WarningSeverity], 2)
+	assert.Len(t, result.AlertChannels[common.CriticalSeverity], 1)
 }
 
 func TestMapStateToDataObject_WithTimeThreshold(t *testing.T) {
@@ -615,8 +618,8 @@ func TestMapStateToDataObject_WithRules(t *testing.T) {
 		Rules: &LogAlertRuleModel{
 			MetricName:        types.StringValue("log.count"),
 			AlertType:         types.StringValue(LogAlertTypeLogCount),
-			Aggregation:       types.StringValue(string(restapi.SumAggregation)),
-			ThresholdOperator: types.StringValue(string(restapi.ThresholdOperatorGreaterThan)),
+			Aggregation:       types.StringValue(string(common.SumAggregation)),
+			ThresholdOperator: types.StringValue(string(common.ThresholdOperatorGreaterThan)),
 			Threshold: &ThresholdModel{
 				Warning: &shared.ThresholdTypeModel{
 					Static: &shared.StaticTypeModel{
@@ -641,27 +644,27 @@ func TestMapStateToDataObject_WithRules(t *testing.T) {
 	rule := result.Rules[0]
 	assert.Equal(t, "logCount", rule.Rule.AlertType)
 	assert.Equal(t, "log.count", rule.Rule.MetricName)
-	assert.Equal(t, restapi.SumAggregation, rule.Rule.Aggregation)
-	assert.Equal(t, restapi.ThresholdOperatorGreaterThan, rule.ThresholdOperator)
+	assert.Equal(t, common.SumAggregation, rule.Rule.Aggregation)
+	assert.Equal(t, common.ThresholdOperatorGreaterThan, rule.ThresholdOperator)
 
-	require.Contains(t, rule.Thresholds, restapi.WarningSeverity)
-	assert.Equal(t, float64(100), *rule.Thresholds[restapi.WarningSeverity].Value)
+	require.Contains(t, rule.Thresholds, common.WarningSeverity)
+	assert.Equal(t, float64(100), *rule.Thresholds[common.WarningSeverity].Value)
 
-	require.Contains(t, rule.Thresholds, restapi.CriticalSeverity)
-	assert.Equal(t, float64(200), *rule.Thresholds[restapi.CriticalSeverity].Value)
+	require.Contains(t, rule.Thresholds, common.CriticalSeverity)
+	assert.Equal(t, float64(200), *rule.Thresholds[common.CriticalSeverity].Value)
 }
 
 func TestUpdateState_WithEmptyAlertChannels(t *testing.T) {
 	ctx := context.Background()
 	resource := NewLogAlertConfigResourceHandle()
 
-	data := &restapi.LogAlertConfig{
+	data := &api.LogAlertConfig{
 		ID:            "test-id",
 		Name:          "Test Log Alert",
 		Description:   "Test Description",
 		Granularity:   600000,
-		AlertChannels: map[restapi.AlertSeverity][]string{},
-		Rules:         []restapi.RuleWithThreshold[restapi.LogAlertRule]{},
+		AlertChannels: map[common.AlertSeverity][]string{},
+		Rules:         []common.RuleWithThreshold[api.LogAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -683,14 +686,14 @@ func TestUpdateState_WithNullTagFilter(t *testing.T) {
 	ctx := context.Background()
 	resource := NewLogAlertConfigResourceHandle()
 
-	data := &restapi.LogAlertConfig{
+	data := &api.LogAlertConfig{
 		ID:                  "test-id",
 		Name:                "Test Log Alert",
 		Description:         "Test Description",
 		Granularity:         600000,
 		TagFilterExpression: nil,
-		AlertChannels:       map[restapi.AlertSeverity][]string{},
-		Rules:               []restapi.RuleWithThreshold[restapi.LogAlertRule]{},
+		AlertChannels:       map[common.AlertSeverity][]string{},
+		Rules:               []common.RuleWithThreshold[api.LogAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -712,14 +715,14 @@ func TestUpdateState_WithEmptyGroupBy(t *testing.T) {
 	ctx := context.Background()
 	resource := NewLogAlertConfigResourceHandle()
 
-	data := &restapi.LogAlertConfig{
+	data := &api.LogAlertConfig{
 		ID:            "test-id",
 		Name:          "Test Log Alert",
 		Description:   "Test Description",
 		Granularity:   600000,
-		GroupBy:       []restapi.GroupByTag{},
-		AlertChannels: map[restapi.AlertSeverity][]string{},
-		Rules:         []restapi.RuleWithThreshold[restapi.LogAlertRule]{},
+		GroupBy:       []api.GroupByTag{},
+		AlertChannels: map[common.AlertSeverity][]string{},
+		Rules:         []common.RuleWithThreshold[api.LogAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -741,14 +744,14 @@ func TestUpdateState_WithNullTimeThreshold(t *testing.T) {
 	ctx := context.Background()
 	resource := NewLogAlertConfigResourceHandle()
 
-	data := &restapi.LogAlertConfig{
+	data := &api.LogAlertConfig{
 		ID:            "test-id",
 		Name:          "Test Log Alert",
 		Description:   "Test Description",
 		Granularity:   600000,
 		TimeThreshold: nil,
-		AlertChannels: map[restapi.AlertSeverity][]string{},
-		Rules:         []restapi.RuleWithThreshold[restapi.LogAlertRule]{},
+		AlertChannels: map[common.AlertSeverity][]string{},
+		Rules:         []common.RuleWithThreshold[api.LogAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -770,17 +773,17 @@ func TestUpdateState_WithUnsupportedTimeThresholdType(t *testing.T) {
 	ctx := context.Background()
 	resource := NewLogAlertConfigResourceHandle()
 
-	data := &restapi.LogAlertConfig{
+	data := &api.LogAlertConfig{
 		ID:          "test-id",
 		Name:        "Test Log Alert",
 		Description: "Test Description",
 		Granularity: 600000,
-		TimeThreshold: &restapi.LogTimeThreshold{
+		TimeThreshold: &api.LogTimeThreshold{
 			Type:       "unsupportedType",
 			TimeWindow: 300000,
 		},
-		AlertChannels: map[restapi.AlertSeverity][]string{},
-		Rules:         []restapi.RuleWithThreshold[restapi.LogAlertRule]{},
+		AlertChannels: map[common.AlertSeverity][]string{},
+		Rules:         []common.RuleWithThreshold[api.LogAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -933,13 +936,13 @@ func TestUpdateState_WithEmptyRules(t *testing.T) {
 	ctx := context.Background()
 	resource := NewLogAlertConfigResourceHandle()
 
-	data := &restapi.LogAlertConfig{
+	data := &api.LogAlertConfig{
 		ID:            "test-id",
 		Name:          "Test Log Alert",
 		Description:   "Test Description",
 		Granularity:   600000,
-		AlertChannels: map[restapi.AlertSeverity][]string{},
-		Rules:         []restapi.RuleWithThreshold[restapi.LogAlertRule]{},
+		AlertChannels: map[common.AlertSeverity][]string{},
+		Rules:         []common.RuleWithThreshold[api.LogAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -963,28 +966,28 @@ func TestUpdateState_WithRulesWithoutAggregation(t *testing.T) {
 
 	warningValue := float64(100)
 
-	data := &restapi.LogAlertConfig{
+	data := &api.LogAlertConfig{
 		ID:          "test-id",
 		Name:        "Test Log Alert",
 		Description: "Test Description",
 		Granularity: 600000,
-		Rules: []restapi.RuleWithThreshold[restapi.LogAlertRule]{
+		Rules: []common.RuleWithThreshold[api.LogAlertRule]{
 			{
-				Rule: restapi.LogAlertRule{
+				Rule: api.LogAlertRule{
 					AlertType:  "logCount",
 					MetricName: "log.count",
 					// No Aggregation specified
 				},
-				ThresholdOperator: restapi.ThresholdOperatorGreaterThan,
-				Thresholds: map[restapi.AlertSeverity]restapi.ThresholdRule{
-					restapi.WarningSeverity: {
+				ThresholdOperator: common.ThresholdOperatorGreaterThan,
+				Thresholds: map[common.AlertSeverity]common.ThresholdRule{
+					common.WarningSeverity: {
 						Type:  "staticThreshold",
 						Value: &warningValue,
 					},
 				},
 			},
 		},
-		AlertChannels: map[restapi.AlertSeverity][]string{},
+		AlertChannels: map[common.AlertSeverity][]string{},
 	}
 
 	state := &tfsdk.State{
@@ -1001,7 +1004,7 @@ func TestUpdateState_WithRulesWithoutAggregation(t *testing.T) {
 
 	require.NotNil(t, model.Rules)
 	// Should default to SUM
-	assert.Equal(t, string(restapi.SumAggregation), model.Rules.Aggregation.ValueString())
+	assert.Equal(t, string(common.SumAggregation), model.Rules.Aggregation.ValueString())
 }
 
 func TestMapStateToDataObject_WithEmptyAlertChannelLists(t *testing.T) {
@@ -1029,8 +1032,8 @@ func TestMapStateToDataObject_WithEmptyAlertChannelLists(t *testing.T) {
 	require.NotNil(t, result)
 	// Production code always includes both severities with empty arrays
 	require.Len(t, result.AlertChannels, 2)
-	assert.Empty(t, result.AlertChannels[restapi.WarningSeverity])
-	assert.Empty(t, result.AlertChannels[restapi.CriticalSeverity])
+	assert.Empty(t, result.AlertChannels[common.WarningSeverity])
+	assert.Empty(t, result.AlertChannels[common.CriticalSeverity])
 }
 
 func TestMapStateToDataObject_WithNullID(t *testing.T) {
@@ -1062,7 +1065,7 @@ func TestMapTimeThresholdToModel_NilInput(t *testing.T) {
 func TestMapTimeThresholdToModel_UnsupportedType(t *testing.T) {
 	resource := &logAlertConfigResource{}
 
-	timeThreshold := &restapi.LogTimeThreshold{
+	timeThreshold := &api.LogTimeThreshold{
 		Type:       "unsupportedType",
 		TimeWindow: 300000,
 	}
@@ -1074,7 +1077,7 @@ func TestMapTimeThresholdToModel_UnsupportedType(t *testing.T) {
 func TestMapTimeThresholdToModel_ViolationsInSequence(t *testing.T) {
 	resource := &logAlertConfigResource{}
 
-	timeThreshold := &restapi.LogTimeThreshold{
+	timeThreshold := &api.LogTimeThreshold{
 		Type:       "violationsInSequence",
 		TimeWindow: 300000,
 	}
@@ -1109,15 +1112,15 @@ func TestUpdateState_WithSingleWarningAlertChannel(t *testing.T) {
 	ctx := context.Background()
 	resource := NewLogAlertConfigResourceHandle()
 
-	data := &restapi.LogAlertConfig{
+	data := &api.LogAlertConfig{
 		ID:          "test-id",
 		Name:        "Test Log Alert",
 		Description: "Test Description",
 		Granularity: 600000,
-		AlertChannels: map[restapi.AlertSeverity][]string{
-			restapi.WarningSeverity: {"channel-1"},
+		AlertChannels: map[common.AlertSeverity][]string{
+			common.WarningSeverity: {"channel-1"},
 		},
-		Rules: []restapi.RuleWithThreshold[restapi.LogAlertRule]{},
+		Rules: []common.RuleWithThreshold[api.LogAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -1141,15 +1144,15 @@ func TestUpdateState_WithSingleCriticalAlertChannel(t *testing.T) {
 	ctx := context.Background()
 	resource := NewLogAlertConfigResourceHandle()
 
-	data := &restapi.LogAlertConfig{
+	data := &api.LogAlertConfig{
 		ID:          "test-id",
 		Name:        "Test Log Alert",
 		Description: "Test Description",
 		Granularity: 600000,
-		AlertChannels: map[restapi.AlertSeverity][]string{
-			restapi.CriticalSeverity: {"channel-1"},
+		AlertChannels: map[common.AlertSeverity][]string{
+			common.CriticalSeverity: {"channel-1"},
 		},
-		Rules: []restapi.RuleWithThreshold[restapi.LogAlertRule]{},
+		Rules: []common.RuleWithThreshold[api.LogAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -1195,10 +1198,10 @@ func TestMapStateToDataObject_WithSingleWarningAlertChannel(t *testing.T) {
 	require.NotNil(t, result)
 	// Production code always includes both severities
 	require.Len(t, result.AlertChannels, 2)
-	assert.Contains(t, result.AlertChannels, restapi.WarningSeverity)
-	assert.Contains(t, result.AlertChannels, restapi.CriticalSeverity)
-	assert.Len(t, result.AlertChannels[restapi.WarningSeverity], 1)
-	assert.Empty(t, result.AlertChannels[restapi.CriticalSeverity])
+	assert.Contains(t, result.AlertChannels, common.WarningSeverity)
+	assert.Contains(t, result.AlertChannels, common.CriticalSeverity)
+	assert.Len(t, result.AlertChannels[common.WarningSeverity], 1)
+	assert.Empty(t, result.AlertChannels[common.CriticalSeverity])
 }
 
 func TestMapStateToDataObject_WithSingleCriticalAlertChannel(t *testing.T) {
@@ -1227,10 +1230,10 @@ func TestMapStateToDataObject_WithSingleCriticalAlertChannel(t *testing.T) {
 	require.NotNil(t, result)
 	// Production code always includes both severities
 	require.Len(t, result.AlertChannels, 2)
-	assert.Contains(t, result.AlertChannels, restapi.WarningSeverity)
-	assert.Contains(t, result.AlertChannels, restapi.CriticalSeverity)
-	assert.Empty(t, result.AlertChannels[restapi.WarningSeverity])
-	assert.Len(t, result.AlertChannels[restapi.CriticalSeverity], 1)
+	assert.Contains(t, result.AlertChannels, common.WarningSeverity)
+	assert.Contains(t, result.AlertChannels, common.CriticalSeverity)
+	assert.Empty(t, result.AlertChannels[common.WarningSeverity])
+	assert.Len(t, result.AlertChannels[common.CriticalSeverity], 1)
 }
 
 func TestMapStateToDataObject_WithRulesWithoutThreshold(t *testing.T) {
@@ -1246,8 +1249,8 @@ func TestMapStateToDataObject_WithRulesWithoutThreshold(t *testing.T) {
 		Rules: &LogAlertRuleModel{
 			MetricName:        types.StringValue("log.count"),
 			AlertType:         types.StringValue(LogAlertTypeLogCount),
-			Aggregation:       types.StringValue(string(restapi.SumAggregation)),
-			ThresholdOperator: types.StringValue(string(restapi.ThresholdOperatorGreaterThan)),
+			Aggregation:       types.StringValue(string(common.SumAggregation)),
+			ThresholdOperator: types.StringValue(string(common.ThresholdOperatorGreaterThan)),
 			Threshold:         nil,
 		},
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
@@ -1273,8 +1276,8 @@ func TestMapStateToDataObject_WithRulesWithOnlyWarningThreshold(t *testing.T) {
 		Rules: &LogAlertRuleModel{
 			MetricName:        types.StringValue("log.count"),
 			AlertType:         types.StringValue(LogAlertTypeLogCount),
-			Aggregation:       types.StringValue(string(restapi.SumAggregation)),
-			ThresholdOperator: types.StringValue(string(restapi.ThresholdOperatorGreaterThan)),
+			Aggregation:       types.StringValue(string(common.SumAggregation)),
+			ThresholdOperator: types.StringValue(string(common.ThresholdOperatorGreaterThan)),
 			Threshold: &ThresholdModel{
 				Warning: &shared.ThresholdTypeModel{
 					Static: &shared.StaticTypeModel{
@@ -1292,8 +1295,8 @@ func TestMapStateToDataObject_WithRulesWithOnlyWarningThreshold(t *testing.T) {
 	require.NotNil(t, result)
 	require.Len(t, result.Rules, 1)
 	require.Len(t, result.Rules[0].Thresholds, 1)
-	assert.Contains(t, result.Rules[0].Thresholds, restapi.WarningSeverity)
-	assert.NotContains(t, result.Rules[0].Thresholds, restapi.CriticalSeverity)
+	assert.Contains(t, result.Rules[0].Thresholds, common.WarningSeverity)
+	assert.NotContains(t, result.Rules[0].Thresholds, common.CriticalSeverity)
 }
 
 func TestMapStateToDataObject_WithRulesWithOnlyCriticalThreshold(t *testing.T) {
@@ -1309,8 +1312,8 @@ func TestMapStateToDataObject_WithRulesWithOnlyCriticalThreshold(t *testing.T) {
 		Rules: &LogAlertRuleModel{
 			MetricName:        types.StringValue("log.count"),
 			AlertType:         types.StringValue(LogAlertTypeLogCount),
-			Aggregation:       types.StringValue(string(restapi.SumAggregation)),
-			ThresholdOperator: types.StringValue(string(restapi.ThresholdOperatorGreaterThan)),
+			Aggregation:       types.StringValue(string(common.SumAggregation)),
+			ThresholdOperator: types.StringValue(string(common.ThresholdOperatorGreaterThan)),
 			Threshold: &ThresholdModel{
 				Warning: nil,
 				Critical: &shared.ThresholdTypeModel{
@@ -1328,8 +1331,8 @@ func TestMapStateToDataObject_WithRulesWithOnlyCriticalThreshold(t *testing.T) {
 	require.NotNil(t, result)
 	require.Len(t, result.Rules, 1)
 	require.Len(t, result.Rules[0].Thresholds, 1)
-	assert.NotContains(t, result.Rules[0].Thresholds, restapi.WarningSeverity)
-	assert.Contains(t, result.Rules[0].Thresholds, restapi.CriticalSeverity)
+	assert.NotContains(t, result.Rules[0].Thresholds, common.WarningSeverity)
+	assert.Contains(t, result.Rules[0].Thresholds, common.CriticalSeverity)
 }
 
 func TestMapStateToDataObject_WithRulesWithNullThresholdValues(t *testing.T) {
@@ -1345,8 +1348,8 @@ func TestMapStateToDataObject_WithRulesWithNullThresholdValues(t *testing.T) {
 		Rules: &LogAlertRuleModel{
 			MetricName:        types.StringValue("log.count"),
 			AlertType:         types.StringValue(LogAlertTypeLogCount),
-			Aggregation:       types.StringValue(string(restapi.SumAggregation)),
-			ThresholdOperator: types.StringValue(string(restapi.ThresholdOperatorGreaterThan)),
+			Aggregation:       types.StringValue(string(common.SumAggregation)),
+			ThresholdOperator: types.StringValue(string(common.ThresholdOperatorGreaterThan)),
 			Threshold: &ThresholdModel{
 				Warning: &shared.ThresholdTypeModel{
 					Static: &shared.StaticTypeModel{
@@ -1376,28 +1379,28 @@ func TestUpdateState_WithRulesWithOnlyWarningThreshold(t *testing.T) {
 
 	warningValue := float64(100)
 
-	data := &restapi.LogAlertConfig{
+	data := &api.LogAlertConfig{
 		ID:          "test-id",
 		Name:        "Test Log Alert",
 		Description: "Test Description",
 		Granularity: 600000,
-		Rules: []restapi.RuleWithThreshold[restapi.LogAlertRule]{
+		Rules: []common.RuleWithThreshold[api.LogAlertRule]{
 			{
-				Rule: restapi.LogAlertRule{
+				Rule: api.LogAlertRule{
 					AlertType:   "logCount",
 					MetricName:  "log.count",
-					Aggregation: restapi.SumAggregation,
+					Aggregation: common.SumAggregation,
 				},
-				ThresholdOperator: restapi.ThresholdOperatorGreaterThan,
-				Thresholds: map[restapi.AlertSeverity]restapi.ThresholdRule{
-					restapi.WarningSeverity: {
+				ThresholdOperator: common.ThresholdOperatorGreaterThan,
+				Thresholds: map[common.AlertSeverity]common.ThresholdRule{
+					common.WarningSeverity: {
 						Type:  "staticThreshold",
 						Value: &warningValue,
 					},
 				},
 			},
 		},
-		AlertChannels: map[restapi.AlertSeverity][]string{},
+		AlertChannels: map[common.AlertSeverity][]string{},
 	}
 
 	state := &tfsdk.State{
@@ -1424,28 +1427,28 @@ func TestUpdateState_WithRulesWithOnlyCriticalThreshold(t *testing.T) {
 
 	criticalValue := float64(200)
 
-	data := &restapi.LogAlertConfig{
+	data := &api.LogAlertConfig{
 		ID:          "test-id",
 		Name:        "Test Log Alert",
 		Description: "Test Description",
 		Granularity: 600000,
-		Rules: []restapi.RuleWithThreshold[restapi.LogAlertRule]{
+		Rules: []common.RuleWithThreshold[api.LogAlertRule]{
 			{
-				Rule: restapi.LogAlertRule{
+				Rule: api.LogAlertRule{
 					AlertType:   "logCount",
 					MetricName:  "log.count",
-					Aggregation: restapi.SumAggregation,
+					Aggregation: common.SumAggregation,
 				},
-				ThresholdOperator: restapi.ThresholdOperatorGreaterThan,
-				Thresholds: map[restapi.AlertSeverity]restapi.ThresholdRule{
-					restapi.CriticalSeverity: {
+				ThresholdOperator: common.ThresholdOperatorGreaterThan,
+				Thresholds: map[common.AlertSeverity]common.ThresholdRule{
+					common.CriticalSeverity: {
 						Type:  "staticThreshold",
 						Value: &criticalValue,
 					},
 				},
 			},
 		},
-		AlertChannels: map[restapi.AlertSeverity][]string{},
+		AlertChannels: map[common.AlertSeverity][]string{},
 	}
 
 	state := &tfsdk.State{
@@ -1480,7 +1483,7 @@ func TestMapStateToDataObject_WithNullAggregation(t *testing.T) {
 			MetricName:        types.StringValue("log.count"),
 			AlertType:         types.StringValue(LogAlertTypeLogCount),
 			Aggregation:       types.StringNull(),
-			ThresholdOperator: types.StringValue(string(restapi.ThresholdOperatorGreaterThan)),
+			ThresholdOperator: types.StringValue(string(common.ThresholdOperatorGreaterThan)),
 			Threshold: &ThresholdModel{
 				Warning: &shared.ThresholdTypeModel{
 					Static: &shared.StaticTypeModel{
@@ -1522,8 +1525,8 @@ func TestMapStateToDataObject_WithUnknownAlertChannels(t *testing.T) {
 	require.NotNil(t, result)
 	// Production code always includes both severities with empty arrays when unknown
 	require.Len(t, result.AlertChannels, 2)
-	assert.Empty(t, result.AlertChannels[restapi.WarningSeverity])
-	assert.Empty(t, result.AlertChannels[restapi.CriticalSeverity])
+	assert.Empty(t, result.AlertChannels[common.WarningSeverity])
+	assert.Empty(t, result.AlertChannels[common.CriticalSeverity])
 }
 
 func TestMapStateToDataObject_WithUnknownGroupBy(t *testing.T) {
@@ -1607,25 +1610,25 @@ func TestUpdateState_WithMultipleRules(t *testing.T) {
 	warningValue := float64(100)
 	criticalValue := float64(200)
 
-	data := &restapi.LogAlertConfig{
+	data := &api.LogAlertConfig{
 		ID:          "test-id",
 		Name:        "Test Log Alert",
 		Description: "Test Description",
 		Granularity: 600000,
-		Rules: []restapi.RuleWithThreshold[restapi.LogAlertRule]{
+		Rules: []common.RuleWithThreshold[api.LogAlertRule]{
 			{
-				Rule: restapi.LogAlertRule{
+				Rule: api.LogAlertRule{
 					AlertType:   "logCount",
 					MetricName:  "log.count",
-					Aggregation: restapi.SumAggregation,
+					Aggregation: common.SumAggregation,
 				},
-				ThresholdOperator: restapi.ThresholdOperatorGreaterThan,
-				Thresholds: map[restapi.AlertSeverity]restapi.ThresholdRule{
-					restapi.WarningSeverity: {
+				ThresholdOperator: common.ThresholdOperatorGreaterThan,
+				Thresholds: map[common.AlertSeverity]common.ThresholdRule{
+					common.WarningSeverity: {
 						Type:  "staticThreshold",
 						Value: &warningValue,
 					},
-					restapi.CriticalSeverity: {
+					common.CriticalSeverity: {
 						Type:  "staticThreshold",
 						Value: &criticalValue,
 					},
@@ -1633,21 +1636,21 @@ func TestUpdateState_WithMultipleRules(t *testing.T) {
 			},
 			// Second rule should be ignored since we only support single rule
 			{
-				Rule: restapi.LogAlertRule{
+				Rule: api.LogAlertRule{
 					AlertType:   "logCount",
 					MetricName:  "log.count2",
-					Aggregation: restapi.SumAggregation,
+					Aggregation: common.SumAggregation,
 				},
-				ThresholdOperator: restapi.ThresholdOperatorLessThan,
-				Thresholds: map[restapi.AlertSeverity]restapi.ThresholdRule{
-					restapi.WarningSeverity: {
+				ThresholdOperator: common.ThresholdOperatorLessThan,
+				Thresholds: map[common.AlertSeverity]common.ThresholdRule{
+					common.WarningSeverity: {
 						Type:  "staticThreshold",
 						Value: &warningValue,
 					},
 				},
 			},
 		},
-		AlertChannels: map[restapi.AlertSeverity][]string{},
+		AlertChannels: map[common.AlertSeverity][]string{},
 	}
 
 	state := &tfsdk.State{
@@ -1671,16 +1674,16 @@ func TestUpdateState_WithEmptyAlertChannelsMap(t *testing.T) {
 	ctx := context.Background()
 	resource := NewLogAlertConfigResourceHandle()
 
-	data := &restapi.LogAlertConfig{
+	data := &api.LogAlertConfig{
 		ID:          "test-id",
 		Name:        "Test Log Alert",
 		Description: "Test Description",
 		Granularity: 600000,
-		AlertChannels: map[restapi.AlertSeverity][]string{
-			restapi.WarningSeverity:  {},
-			restapi.CriticalSeverity: {},
+		AlertChannels: map[common.AlertSeverity][]string{
+			common.WarningSeverity:  {},
+			common.CriticalSeverity: {},
 		},
-		Rules: []restapi.RuleWithThreshold[restapi.LogAlertRule]{},
+		Rules: []common.RuleWithThreshold[api.LogAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -1761,16 +1764,16 @@ func TestUpdateState_WithEmptyWarningChannelList(t *testing.T) {
 	ctx := context.Background()
 	resource := NewLogAlertConfigResourceHandle()
 
-	data := &restapi.LogAlertConfig{
+	data := &api.LogAlertConfig{
 		ID:          "test-id",
 		Name:        "Test Log Alert",
 		Description: "Test Description",
 		Granularity: 600000,
-		AlertChannels: map[restapi.AlertSeverity][]string{
-			restapi.WarningSeverity:  {},
-			restapi.CriticalSeverity: {"channel-1"},
+		AlertChannels: map[common.AlertSeverity][]string{
+			common.WarningSeverity:  {},
+			common.CriticalSeverity: {"channel-1"},
 		},
-		Rules: []restapi.RuleWithThreshold[restapi.LogAlertRule]{},
+		Rules: []common.RuleWithThreshold[api.LogAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -1794,16 +1797,16 @@ func TestUpdateState_WithEmptyCriticalChannelList(t *testing.T) {
 	ctx := context.Background()
 	resource := NewLogAlertConfigResourceHandle()
 
-	data := &restapi.LogAlertConfig{
+	data := &api.LogAlertConfig{
 		ID:          "test-id",
 		Name:        "Test Log Alert",
 		Description: "Test Description",
 		Granularity: 600000,
-		AlertChannels: map[restapi.AlertSeverity][]string{
-			restapi.WarningSeverity:  {"channel-1"},
-			restapi.CriticalSeverity: {},
+		AlertChannels: map[common.AlertSeverity][]string{
+			common.WarningSeverity:  {"channel-1"},
+			common.CriticalSeverity: {},
 		},
-		Rules: []restapi.RuleWithThreshold[restapi.LogAlertRule]{},
+		Rules: []common.RuleWithThreshold[api.LogAlertRule]{},
 	}
 
 	state := &tfsdk.State{

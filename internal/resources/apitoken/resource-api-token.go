@@ -11,8 +11,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	restapi "github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/client"
+	"github.com/instana/instana-go-client/shared/rest"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/util"
 )
 
@@ -502,7 +504,7 @@ func (r *apiTokenResource) MetaData() *resourcehandle.ResourceMetaData {
 }
 
 // GetRestResource returns the REST resource for API tokens
-func (r *apiTokenResource) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.APIToken] {
+func (r *apiTokenResource) GetRestResource(api client.InstanaAPI) rest.RestResource[*restapi.APIToken] {
 	return api.APITokens()
 }
 

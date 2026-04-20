@@ -5,18 +5,20 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/client"
+	"github.com/instana/instana-go-client/shared/rest"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // NewWebsiteMonitoringConfigResourceHandle creates the resource handle for Website Monitoring Configurations
-func NewWebsiteMonitoringConfigResourceHandle() resourcehandle.ResourceHandle[*restapi.WebsiteMonitoringConfig] {
+func NewWebsiteMonitoringConfigResourceHandle() resourcehandle.ResourceHandle[*api.WebsiteMonitoringConfig] {
 	return &websiteMonitoringConfigResource{
 		metaData: createResourceMetaData(),
 	}
@@ -33,8 +35,8 @@ func (r *websiteMonitoringConfigResource) MetaData() *resourcehandle.ResourceMet
 }
 
 // GetRestResource returns the REST resource for the API
-func (r *websiteMonitoringConfigResource) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.WebsiteMonitoringConfig] {
-	return api.WebsiteMonitoringConfig()
+func (r *websiteMonitoringConfigResource) GetRestResource(api client.InstanaAPI) rest.RestResource[*api.WebsiteMonitoringConfig] {
+	return api.WebsiteMonitoringConfigs()
 }
 
 // SetComputedFields sets computed fields in the plan (no computed fields to set for this resource)
@@ -43,7 +45,7 @@ func (r *websiteMonitoringConfigResource) SetComputedFields(_ context.Context, _
 }
 
 // MapStateToDataObject maps Terraform state/plan to API data object
-func (r *websiteMonitoringConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.WebsiteMonitoringConfig, diag.Diagnostics) {
+func (r *websiteMonitoringConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*api.WebsiteMonitoringConfig, diag.Diagnostics) {
 	if err := validateMapStateToDataObjectInputs(ctx, plan, state); err != nil {
 		return nil, diag.Diagnostics{err}
 	}
@@ -63,7 +65,7 @@ func (r *websiteMonitoringConfigResource) MapStateToDataObject(ctx context.Conte
 }
 
 // UpdateState updates Terraform state with data from API object
-func (r *websiteMonitoringConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *restapi.WebsiteMonitoringConfig) diag.Diagnostics {
+func (r *websiteMonitoringConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *api.WebsiteMonitoringConfig) diag.Diagnostics {
 	if err := validateUpdateStateInputs(ctx, state, apiObject); err != nil {
 		return diag.Diagnostics{err}
 	}
@@ -145,7 +147,7 @@ func validateMapStateToDataObjectInputs(ctx context.Context, plan *tfsdk.Plan, s
 }
 
 // validateUpdateStateInputs validates inputs for UpdateState method
-func validateUpdateStateInputs(ctx context.Context, state *tfsdk.State, apiObject *restapi.WebsiteMonitoringConfig) diag.Diagnostic {
+func validateUpdateStateInputs(ctx context.Context, state *tfsdk.State, apiObject *api.WebsiteMonitoringConfig) diag.Diagnostic {
 	if ctx == nil {
 		return diag.NewErrorDiagnostic(WebsiteMonitoringConfigErrInvalidInput, WebsiteMonitoringConfigErrNilContext)
 	}
@@ -198,7 +200,7 @@ func extractModelFromState(ctx context.Context, state *tfsdk.State, model *Websi
 }
 
 // mapModelToAPIObject converts Terraform model to API object
-func mapModelToAPIObject(model *WebsiteMonitoringConfigModel) (*restapi.WebsiteMonitoringConfig, error) {
+func mapModelToAPIObject(model *WebsiteMonitoringConfigModel) (*api.WebsiteMonitoringConfig, error) {
 	if model == nil {
 		return nil, fmt.Errorf("model cannot be nil")
 	}
@@ -226,8 +228,8 @@ func validateModelFields(model *WebsiteMonitoringConfigModel) error {
 }
 
 // createAPIObjectFromModel creates API object from validated model
-func createAPIObjectFromModel(model *WebsiteMonitoringConfigModel) *restapi.WebsiteMonitoringConfig {
-	return &restapi.WebsiteMonitoringConfig{
+func createAPIObjectFromModel(model *WebsiteMonitoringConfigModel) *api.WebsiteMonitoringConfig {
+	return &api.WebsiteMonitoringConfig{
 		ID:   extractStringValue(model.ID),
 		Name: extractStringValue(model.Name),
 	}
@@ -242,7 +244,7 @@ func extractStringValue(value types.String) string {
 }
 
 // mapAPIObjectToModel converts API object to Terraform model
-func mapAPIObjectToModel(apiObject *restapi.WebsiteMonitoringConfig) *WebsiteMonitoringConfigModel {
+func mapAPIObjectToModel(apiObject *api.WebsiteMonitoringConfig) *WebsiteMonitoringConfigModel {
 	return &WebsiteMonitoringConfigModel{
 		ID:      createStringValue(apiObject.ID),
 		Name:    createStringValue(apiObject.Name),

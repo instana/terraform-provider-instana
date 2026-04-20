@@ -8,7 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/instana-go-client/client"
+	"github.com/instana/terraform-provider-instana/internal/shared"
 )
 
 // Constants are now defined in data-source-host-agents-constants.go
@@ -35,7 +36,7 @@ func NewHostAgentsDataSource() datasource.DataSource {
 }
 
 type hostAgentsDataSource struct {
-	instanaAPI restapi.InstanaAPI
+	instanaAPI client.InstanaAPI
 }
 
 func (d *hostAgentsDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -92,7 +93,7 @@ func (d *hostAgentsDataSource) Configure(_ context.Context, req datasource.Confi
 		return
 	}
 
-	providerMeta, ok := req.ProviderData.(*restapi.ProviderMeta)
+	providerMeta, ok := req.ProviderData.(*shared.ProviderMeta)
 	if !ok {
 		resp.Diagnostics.AddError(
 			HostAgentErrUnexpectedConfigureType,

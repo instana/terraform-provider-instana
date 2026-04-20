@@ -7,7 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/instana-go-client/client"
+	"github.com/instana/instana-go-client/shared/rest"
 )
 
 // ResourceMetaData the metadata of a terraform ResourceHandle
@@ -23,12 +24,12 @@ type ResourceMetaData struct {
 
 // ResourceHandle resource specific implementation which provides metadata and maps data from/to terraform state.
 // Together with TerraformResource terraform schema resources can be created
-type ResourceHandle[T restapi.InstanaDataObject] interface {
+type ResourceHandle[T client.InstanaDataObject] interface {
 	// MetaData returns the metadata of this ResourceHandle
 	MetaData() *ResourceMetaData
 
-	// GetRestResource provides the restapi.RestResource used by the ResourceHandle
-	GetRestResource(api restapi.InstanaAPI) restapi.RestResource[T]
+	// GetRestResource provides the client.RestResource used by the ResourceHandle
+	GetRestResource(api client.InstanaAPI) rest.RestResource[T]
 
 	// UpdateState updates the state of the resource with the input data from the Instana API
 	UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, obj T) diag.Diagnostics

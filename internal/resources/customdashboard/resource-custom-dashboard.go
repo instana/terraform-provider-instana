@@ -8,17 +8,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/client"
+	"github.com/instana/instana-go-client/shared/rest"
+	model "github.com/instana/instana-go-client/shared/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/util"
 	"github.com/instana/terraform-provider-instana/utils"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // ============================================================================
@@ -26,7 +29,7 @@ import (
 // ============================================================================
 
 // NewCustomDashboardResourceHandle creates the resource handle for Custom Dashboards
-func NewCustomDashboardResourceHandle() resourcehandle.ResourceHandle[*restapi.CustomDashboard] {
+func NewCustomDashboardResourceHandle() resourcehandle.ResourceHandle[*api.CustomDashboard] {
 	return &customDashboardResource{
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName: ResourceInstanaCustomDashboard,
@@ -58,7 +61,7 @@ func NewCustomDashboardResourceHandle() resourcehandle.ResourceHandle[*restapi.C
 									Required:    true,
 									Description: CustomDashboardDescAccessRuleAccessType,
 									Validators: []validator.String{
-										stringvalidator.OneOf(restapi.SupportedAccessTypes.ToStringSlice()...),
+										stringvalidator.OneOf(model.SupportedAccessTypes.ToStringSlice()...),
 									},
 								},
 								CustomDashboardFieldAccessRuleRelatedID: schema.StringAttribute{
@@ -72,7 +75,7 @@ func NewCustomDashboardResourceHandle() resourcehandle.ResourceHandle[*restapi.C
 									Required:    true,
 									Description: CustomDashboardDescAccessRuleRelationType,
 									Validators: []validator.String{
-										stringvalidator.OneOf(restapi.SupportedRelationTypes.ToStringSlice()...),
+										stringvalidator.OneOf(model.SupportedRelationTypes.ToStringSlice()...),
 									},
 								},
 							},
@@ -99,7 +102,7 @@ func (r *customDashboardResource) MetaData() *resourcehandle.ResourceMetaData {
 }
 
 // GetRestResource returns the REST resource for custom dashboards
-func (r *customDashboardResource) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.CustomDashboard] {
+func (r *customDashboardResource) GetRestResource(api client.InstanaAPI) rest.RestResource[*api.CustomDashboard] {
 	return api.CustomDashboards()
 }
 
@@ -113,7 +116,7 @@ func (r *customDashboardResource) SetComputedFields(_ context.Context, _ *tfsdk.
 // ============================================================================
 
 // UpdateState converts API data object to Terraform state
-func (r *customDashboardResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, dashboard *restapi.CustomDashboard) diag.Diagnostics {
+func (r *customDashboardResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, dashboard *api.CustomDashboard) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	var model CustomDashboardModel
@@ -157,7 +160,7 @@ func (r *customDashboardResource) UpdateState(ctx context.Context, state *tfsdk.
 }
 
 // mapAccessRulesToState converts access rules from API format to state models
-func (r *customDashboardResource) mapAccessRulesToState(accessRules []restapi.AccessRule) []AccessRuleModel {
+func (r *customDashboardResource) mapAccessRulesToState(accessRules []model.AccessRule) []AccessRuleModel {
 	if len(accessRules) == 0 {
 		return nil
 	}
@@ -179,7 +182,7 @@ func (r *customDashboardResource) mapAccessRulesToState(accessRules []restapi.Ac
 // ============================================================================
 
 // MapStateToDataObject converts Terraform state to API data object
-func (r *customDashboardResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.CustomDashboard, diag.Diagnostics) {
+func (r *customDashboardResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*api.CustomDashboard, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var model CustomDashboardModel
 
@@ -210,7 +213,7 @@ func (r *customDashboardResource) MapStateToDataObject(ctx context.Context, plan
 		widgets = json.RawMessage(normalizedWidgets)
 	}
 
-	return &restapi.CustomDashboard{
+	return &api.CustomDashboard{
 		ID:          id,
 		Title:       model.Title.ValueString(),
 		AccessRules: accessRules,
@@ -223,16 +226,16 @@ func (r *customDashboardResource) MapStateToDataObject(ctx context.Context, plan
 // ============================================================================
 
 // mapAccessRulesFromState converts access rule models from state to API format
-func (r *customDashboardResource) mapAccessRulesFromState(accessRuleModels []AccessRuleModel) []restapi.AccessRule {
+func (r *customDashboardResource) mapAccessRulesFromState(accessRuleModels []AccessRuleModel) []model.AccessRule {
 	if len(accessRuleModels) == 0 {
 		return nil
 	}
 
-	accessRules := make([]restapi.AccessRule, len(accessRuleModels))
+	accessRules := make([]model.AccessRule, len(accessRuleModels))
 	for i, ruleModel := range accessRuleModels {
-		rule := restapi.AccessRule{
-			AccessType:   restapi.AccessType(ruleModel.AccessType.ValueString()),
-			RelationType: restapi.RelationType(ruleModel.RelationType.ValueString()),
+		rule := model.AccessRule{
+			AccessType:   model.AccessType(ruleModel.AccessType.ValueString()),
+			RelationType: model.RelationType(ruleModel.RelationType.ValueString()),
 		}
 
 		// Handle related ID

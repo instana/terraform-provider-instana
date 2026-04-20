@@ -7,8 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/instana-go-client/api"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -217,7 +217,7 @@ func TestUpdateState(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("should update state with complete API object", func(t *testing.T) {
-		apiObject := &restapi.WebsiteMonitoringConfig{
+		apiObject := &api.WebsiteMonitoringConfig{
 			ID:      "api-id-789",
 			Name:    "API Website Config",
 			AppName: "api-app-name",
@@ -241,7 +241,7 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("should update state with minimal API object", func(t *testing.T) {
-		apiObject := &restapi.WebsiteMonitoringConfig{
+		apiObject := &api.WebsiteMonitoringConfig{
 			ID:      "minimal-id",
 			Name:    "Minimal Config",
 			AppName: "",
@@ -265,7 +265,7 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("should handle empty strings in API object", func(t *testing.T) {
-		apiObject := &restapi.WebsiteMonitoringConfig{
+		apiObject := &api.WebsiteMonitoringConfig{
 			ID:      "",
 			Name:    "",
 			AppName: "",
@@ -289,7 +289,7 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("should update state with special characters in name", func(t *testing.T) {
-		apiObject := &restapi.WebsiteMonitoringConfig{
+		apiObject := &api.WebsiteMonitoringConfig{
 			ID:      "special-id",
 			Name:    "Test Config with Special Chars: @#$%^&*()",
 			AppName: "special-app-123",
@@ -313,7 +313,7 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("should update state with unicode characters", func(t *testing.T) {
-		apiObject := &restapi.WebsiteMonitoringConfig{
+		apiObject := &api.WebsiteMonitoringConfig{
 			ID:      "unicode-id",
 			Name:    "测试配置 テスト設定",
 			AppName: "unicode-app",
@@ -470,7 +470,7 @@ func TestValidateUpdateStateInputs(t *testing.T) {
 		state := &tfsdk.State{
 			Schema: resource.MetaData().Schema,
 		}
-		apiObject := &restapi.WebsiteMonitoringConfig{
+		apiObject := &api.WebsiteMonitoringConfig{
 			ID:   "test-id",
 			Name: "Test Config",
 		}
@@ -482,7 +482,7 @@ func TestValidateUpdateStateInputs(t *testing.T) {
 	})
 
 	t.Run("should return error when state is nil", func(t *testing.T) {
-		apiObject := &restapi.WebsiteMonitoringConfig{
+		apiObject := &api.WebsiteMonitoringConfig{
 			ID:   "test-id",
 			Name: "Test Config",
 		}
@@ -620,7 +620,7 @@ func TestUpdateState_WithInvalidState(t *testing.T) {
 			Schema: wrongSchema,
 		}
 
-		apiObject := &restapi.WebsiteMonitoringConfig{
+		apiObject := &api.WebsiteMonitoringConfig{
 			ID:      "test-id",
 			Name:    "Test Config",
 			AppName: "test-app",

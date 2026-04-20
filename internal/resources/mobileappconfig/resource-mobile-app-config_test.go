@@ -7,8 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/instana-go-client/api"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -157,7 +157,7 @@ func TestUpdateState(t *testing.T) {
 			Schema: resource.metaData.Schema,
 		}
 
-		apiObject := &restapi.MobileAppConfig{
+		apiObject := &api.MobileAppConfig{
 			ID:   "test-id-456",
 			Name: "Updated Mobile App",
 		}
@@ -179,7 +179,7 @@ func TestUpdateState(t *testing.T) {
 			Schema: resource.metaData.Schema,
 		}
 
-		apiObject := &restapi.MobileAppConfig{
+		apiObject := &api.MobileAppConfig{
 			ID:   "test-id-456",
 			Name: "Updated Mobile App",
 		}
@@ -190,7 +190,7 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("should return error when state is nil", func(t *testing.T) {
-		apiObject := &restapi.MobileAppConfig{
+		apiObject := &api.MobileAppConfig{
 			ID:   "test-id-456",
 			Name: "Updated Mobile App",
 		}
@@ -259,7 +259,7 @@ func TestValidateModelFields(t *testing.T) {
 
 func TestMapAPIObjectToModel(t *testing.T) {
 	t.Run("should map API object to model", func(t *testing.T) {
-		apiObject := &restapi.MobileAppConfig{
+		apiObject := &api.MobileAppConfig{
 			ID:   "api-id-789",
 			Name: "API Mobile App",
 		}
@@ -272,7 +272,7 @@ func TestMapAPIObjectToModel(t *testing.T) {
 	})
 
 	t.Run("should handle empty values", func(t *testing.T) {
-		apiObject := &restapi.MobileAppConfig{
+		apiObject := &api.MobileAppConfig{
 			ID:   "",
 			Name: "",
 		}
@@ -284,4 +284,3 @@ func TestMapAPIObjectToModel(t *testing.T) {
 		assert.True(t, model.Name.IsNull())
 	})
 }
-

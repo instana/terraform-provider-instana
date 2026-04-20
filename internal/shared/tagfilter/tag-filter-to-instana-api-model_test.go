@@ -6,7 +6,9 @@ import (
 
 	"github.com/instana/terraform-provider-instana/utils"
 
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/instana-go-client/shared/tagfilter"
+	tag "github.com/instana/instana-go-client/shared/tagfilter"
+	common "github.com/instana/instana-go-client/shared/types"
 	. "github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
 	"github.com/stretchr/testify/require"
 )
@@ -16,7 +18,7 @@ const (
 )
 
 func TestShouldMapComparisonToRepresentationOfInstanaAPI(t *testing.T) {
-	for _, v := range restapi.SupportedComparisonOperators {
+	for _, v := range common.SupportedComparisonOperators {
 		t.Run(fmt.Sprintf("test comparison of string value using operatore %s", v), createTestShouldMapStringComparisonToRepresentationOfInstanaAPI(v))
 		t.Run(fmt.Sprintf("test comparison of number value using operatore of %s", v), createTestShouldMapNumberComparisonToRepresentationOfInstanaAPI(v))
 		t.Run(fmt.Sprintf("test comparison of boolean value using operatore of %s", v), createTestShouldMapBooleanComparisonToRepresentationOfInstanaAPI(v))
@@ -24,7 +26,7 @@ func TestShouldMapComparisonToRepresentationOfInstanaAPI(t *testing.T) {
 	}
 }
 
-func createTestShouldMapStringComparisonToRepresentationOfInstanaAPI(operator restapi.ExpressionOperator) func(*testing.T) {
+func createTestShouldMapStringComparisonToRepresentationOfInstanaAPI(operator common.ExpressionOperator) func(*testing.T) {
 	return func(t *testing.T) {
 		expr := &FilterExpression{
 			Expression: &LogicalOrExpression{
@@ -42,12 +44,12 @@ func createTestShouldMapStringComparisonToRepresentationOfInstanaAPI(operator re
 			},
 		}
 
-		expectedResult := restapi.NewStringTagFilter(restapi.TagFilterEntityDestination, entitySpecKey, operator, "value")
+		expectedResult := tag.NewStringTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, operator, "value")
 		runTestCaseForMappingToAPI(expr, expectedResult, t)
 	}
 }
 
-func createTestShouldMapNumberComparisonToRepresentationOfInstanaAPI(operator restapi.ExpressionOperator) func(*testing.T) {
+func createTestShouldMapNumberComparisonToRepresentationOfInstanaAPI(operator common.ExpressionOperator) func(*testing.T) {
 	numberValue := int64(1234)
 	return func(t *testing.T) {
 		expr := &FilterExpression{
@@ -66,12 +68,12 @@ func createTestShouldMapNumberComparisonToRepresentationOfInstanaAPI(operator re
 			},
 		}
 
-		expectedResult := restapi.NewNumberTagFilter(restapi.TagFilterEntityDestination, entitySpecKey, operator, numberValue)
+		expectedResult := tag.NewNumberTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, operator, numberValue)
 		runTestCaseForMappingToAPI(expr, expectedResult, t)
 	}
 }
 
-func createTestShouldMapBooleanComparisonToRepresentationOfInstanaAPI(operator restapi.ExpressionOperator) func(*testing.T) {
+func createTestShouldMapBooleanComparisonToRepresentationOfInstanaAPI(operator common.ExpressionOperator) func(*testing.T) {
 	boolValue := true
 	return func(t *testing.T) {
 		expr := &FilterExpression{
@@ -90,12 +92,12 @@ func createTestShouldMapBooleanComparisonToRepresentationOfInstanaAPI(operator r
 			},
 		}
 
-		expectedResult := restapi.NewBooleanTagFilter(restapi.TagFilterEntityDestination, entitySpecKey, operator, boolValue)
+		expectedResult := tag.NewBooleanTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, operator, boolValue)
 		runTestCaseForMappingToAPI(expr, expectedResult, t)
 	}
 }
 
-func createTestShouldMapTagComparisonToRepresentationOfInstanaAPI(operator restapi.ExpressionOperator) func(*testing.T) {
+func createTestShouldMapTagComparisonToRepresentationOfInstanaAPI(operator common.ExpressionOperator) func(*testing.T) {
 	key := "key"
 	value := "value"
 	return func(t *testing.T) {
@@ -115,7 +117,7 @@ func createTestShouldMapTagComparisonToRepresentationOfInstanaAPI(operator resta
 			},
 		}
 
-		expectedResult := restapi.NewTagTagFilter(restapi.TagFilterEntityDestination, entitySpecKey, operator, key, value)
+		expectedResult := tag.NewTagTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, operator, key, value)
 		runTestCaseForMappingToAPI(expr, expectedResult, t)
 	}
 }
@@ -130,7 +132,7 @@ func TestShouldMapTagComparisonToRepresentationOfInstanaAPIUsingAStringValue(t *
 					Primary: &PrimaryExpression{
 						Comparison: &ComparisonExpression{
 							Entity:      &EntitySpec{Identifier: entitySpecKey, TagKey: &key, Origin: utils.StringPtr(EntityOriginDestination.Key())},
-							Operator:    Operator(restapi.EqualsOperator),
+							Operator:    Operator(common.EqualsOperator),
 							StringValue: &value,
 						},
 					},
@@ -139,7 +141,7 @@ func TestShouldMapTagComparisonToRepresentationOfInstanaAPIUsingAStringValue(t *
 		},
 	}
 
-	expectedResult := restapi.NewTagTagFilter(restapi.TagFilterEntityDestination, entitySpecKey, restapi.EqualsOperator, key, value)
+	expectedResult := tag.NewTagTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, common.EqualsOperator, key, value)
 	runTestCaseForMappingToAPI(expr, expectedResult, t)
 }
 
@@ -153,7 +155,7 @@ func TestShouldMapTagComparisonToRepresentationOfInstanaAPIUsingANumberValue(t *
 					Primary: &PrimaryExpression{
 						Comparison: &ComparisonExpression{
 							Entity:      &EntitySpec{Identifier: entitySpecKey, TagKey: &key, Origin: utils.StringPtr(EntityOriginDestination.Key())},
-							Operator:    Operator(restapi.EqualsOperator),
+							Operator:    Operator(common.EqualsOperator),
 							NumberValue: &value,
 						},
 					},
@@ -162,7 +164,7 @@ func TestShouldMapTagComparisonToRepresentationOfInstanaAPIUsingANumberValue(t *
 		},
 	}
 
-	expectedResult := restapi.NewTagTagFilter(restapi.TagFilterEntityDestination, entitySpecKey, restapi.EqualsOperator, key, "1234")
+	expectedResult := tag.NewTagTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, common.EqualsOperator, key, "1234")
 	runTestCaseForMappingToAPI(expr, expectedResult, t)
 }
 
@@ -176,7 +178,7 @@ func TestShouldMapTagComparisonToRepresentationOfInstanaAPIUsingABooleanValue(t 
 					Primary: &PrimaryExpression{
 						Comparison: &ComparisonExpression{
 							Entity:       &EntitySpec{Identifier: entitySpecKey, TagKey: &key, Origin: utils.StringPtr(EntityOriginDestination.Key())},
-							Operator:     Operator(restapi.EqualsOperator),
+							Operator:     Operator(common.EqualsOperator),
 							BooleanValue: &value,
 						},
 					},
@@ -185,17 +187,17 @@ func TestShouldMapTagComparisonToRepresentationOfInstanaAPIUsingABooleanValue(t 
 		},
 	}
 
-	expectedResult := restapi.NewTagTagFilter(restapi.TagFilterEntityDestination, entitySpecKey, restapi.EqualsOperator, key, "true")
+	expectedResult := tag.NewTagTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, common.EqualsOperator, key, "true")
 	runTestCaseForMappingToAPI(expr, expectedResult, t)
 }
 
 func TestShouldMapUnaryOperatorToRepresentationOfInstanaAPI(t *testing.T) {
-	for _, v := range restapi.SupportedUnaryExpressionOperators {
+	for _, v := range common.SupportedUnaryExpressionOperators {
 		t.Run(fmt.Sprintf("test mapping of %s", v), createTestShouldMapUnaryOperatorToRepresentationOfInstanaAPI(v))
 	}
 }
 
-func createTestShouldMapUnaryOperatorToRepresentationOfInstanaAPI(operatorName restapi.ExpressionOperator) func(*testing.T) {
+func createTestShouldMapUnaryOperatorToRepresentationOfInstanaAPI(operatorName common.ExpressionOperator) func(*testing.T) {
 	return func(t *testing.T) {
 		expr := &FilterExpression{
 			Expression: &LogicalOrExpression{
@@ -212,17 +214,17 @@ func createTestShouldMapUnaryOperatorToRepresentationOfInstanaAPI(operatorName r
 			},
 		}
 
-		expectedResult := restapi.NewUnaryTagFilter(restapi.TagFilterEntityDestination, entitySpecKey, operatorName)
+		expectedResult := tag.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, operatorName)
 		runTestCaseForMappingToAPI(expr, expectedResult, t)
 	}
 }
 
 func TestShouldMapLogicalAndExpression(t *testing.T) {
-	logicalAnd := Operator(restapi.LogicalAnd)
+	logicalAnd := Operator(common.LogicalAnd)
 	primaryExpression := PrimaryExpression{
 		UnaryOperation: &UnaryOperationExpression{
 			Entity:   &EntitySpec{Identifier: entitySpecKey, Origin: utils.StringPtr(EntityOriginDestination.Key())},
-			Operator: Operator(restapi.IsEmptyOperator),
+			Operator: Operator(common.IsEmptyOperator),
 		},
 	}
 	expr := &FilterExpression{
@@ -237,17 +239,17 @@ func TestShouldMapLogicalAndExpression(t *testing.T) {
 		},
 	}
 
-	expectedPrimaryExpression := restapi.NewUnaryTagFilter(restapi.TagFilterEntityDestination, entitySpecKey, restapi.IsEmptyOperator)
-	expectedResult := restapi.NewLogicalAndTagFilter([]*restapi.TagFilter{expectedPrimaryExpression, expectedPrimaryExpression})
+	expectedPrimaryExpression := tag.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, common.IsEmptyOperator)
+	expectedResult := tag.NewLogicalAndTagFilter([]*tag.TagFilter{expectedPrimaryExpression, expectedPrimaryExpression})
 	runTestCaseForMappingToAPI(expr, expectedResult, t)
 }
 
 func TestShouldMapLogicalAndExpressionWithNestedAnd(t *testing.T) {
-	logicalAnd := Operator(restapi.LogicalAnd)
+	logicalAnd := Operator(common.LogicalAnd)
 	primaryExpression := PrimaryExpression{
 		UnaryOperation: &UnaryOperationExpression{
 			Entity:   &EntitySpec{Identifier: entitySpecKey, Origin: utils.StringPtr(EntityOriginDestination.Key())},
-			Operator: Operator(restapi.IsEmptyOperator),
+			Operator: Operator(common.IsEmptyOperator),
 		},
 	}
 	expr := &FilterExpression{
@@ -266,18 +268,18 @@ func TestShouldMapLogicalAndExpressionWithNestedAnd(t *testing.T) {
 		},
 	}
 
-	expectedPrimaryExpression := restapi.NewUnaryTagFilter(restapi.TagFilterEntityDestination, entitySpecKey, restapi.IsEmptyOperator)
-	expectedResult := restapi.NewLogicalAndTagFilter([]*restapi.TagFilter{expectedPrimaryExpression, expectedPrimaryExpression, expectedPrimaryExpression})
+	expectedPrimaryExpression := tag.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, common.IsEmptyOperator)
+	expectedResult := tag.NewLogicalAndTagFilter([]*tag.TagFilter{expectedPrimaryExpression, expectedPrimaryExpression, expectedPrimaryExpression})
 	runTestCaseForMappingToAPI(expr, expectedResult, t)
 }
 
 func TestShouldMapLogicalAndExpressionWithNestedOrInBrackets(t *testing.T) {
-	logicalAnd := Operator(restapi.LogicalAnd)
-	logicalOr := Operator(restapi.LogicalOr)
+	logicalAnd := Operator(common.LogicalAnd)
+	logicalOr := Operator(common.LogicalOr)
 	primaryExpression := PrimaryExpression{
 		UnaryOperation: &UnaryOperationExpression{
 			Entity:   &EntitySpec{Identifier: entitySpecKey, Origin: utils.StringPtr(EntityOriginDestination.Key())},
-			Operator: Operator(restapi.IsEmptyOperator),
+			Operator: Operator(common.IsEmptyOperator),
 		},
 	}
 	expr := &FilterExpression{
@@ -300,18 +302,18 @@ func TestShouldMapLogicalAndExpressionWithNestedOrInBrackets(t *testing.T) {
 		},
 	}
 
-	expectedPrimaryExpression := restapi.NewUnaryTagFilter(restapi.TagFilterEntityDestination, entitySpecKey, restapi.IsEmptyOperator)
-	expectedOrExpression := restapi.NewLogicalOrTagFilter([]*restapi.TagFilter{expectedPrimaryExpression, expectedPrimaryExpression})
-	expectedResult := restapi.NewLogicalAndTagFilter([]*restapi.TagFilter{expectedPrimaryExpression, expectedOrExpression})
+	expectedPrimaryExpression := tag.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, common.IsEmptyOperator)
+	expectedOrExpression := tag.NewLogicalOrTagFilter([]*tag.TagFilter{expectedPrimaryExpression, expectedPrimaryExpression})
+	expectedResult := tag.NewLogicalAndTagFilter([]*tag.TagFilter{expectedPrimaryExpression, expectedOrExpression})
 	runTestCaseForMappingToAPI(expr, expectedResult, t)
 }
 
 func TestShouldMapLogicalOrExpression(t *testing.T) {
-	logicalOr := Operator(restapi.LogicalOr)
+	logicalOr := Operator(common.LogicalOr)
 	primaryExpression := PrimaryExpression{
 		UnaryOperation: &UnaryOperationExpression{
 			Entity:   &EntitySpec{Identifier: entitySpecKey, Origin: utils.StringPtr(EntityOriginDestination.Key())},
-			Operator: Operator(restapi.IsEmptyOperator),
+			Operator: Operator(common.IsEmptyOperator),
 		},
 	}
 	expr := &FilterExpression{
@@ -328,17 +330,17 @@ func TestShouldMapLogicalOrExpression(t *testing.T) {
 		},
 	}
 
-	expectedPrimaryExpression := restapi.NewUnaryTagFilter(restapi.TagFilterEntityDestination, entitySpecKey, restapi.IsEmptyOperator)
-	expectedResult := restapi.NewLogicalOrTagFilter([]*restapi.TagFilter{expectedPrimaryExpression, expectedPrimaryExpression})
+	expectedPrimaryExpression := tag.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, common.IsEmptyOperator)
+	expectedResult := tag.NewLogicalOrTagFilter([]*tag.TagFilter{expectedPrimaryExpression, expectedPrimaryExpression})
 	runTestCaseForMappingToAPI(expr, expectedResult, t)
 }
 
 func TestShouldMapLogicalOrExpressionWithNestedOr(t *testing.T) {
-	logicalOr := Operator(restapi.LogicalOr)
+	logicalOr := Operator(common.LogicalOr)
 	primaryExpression := PrimaryExpression{
 		UnaryOperation: &UnaryOperationExpression{
 			Entity:   &EntitySpec{Identifier: entitySpecKey, Origin: utils.StringPtr(EntityOriginDestination.Key())},
-			Operator: Operator(restapi.IsEmptyOperator),
+			Operator: Operator(common.IsEmptyOperator),
 		},
 	}
 	expr := &FilterExpression{
@@ -361,18 +363,18 @@ func TestShouldMapLogicalOrExpressionWithNestedOr(t *testing.T) {
 		},
 	}
 
-	expectedPrimaryExpression := restapi.NewUnaryTagFilter(restapi.TagFilterEntityDestination, entitySpecKey, restapi.IsEmptyOperator)
-	expectedResult := restapi.NewLogicalOrTagFilter([]*restapi.TagFilter{expectedPrimaryExpression, expectedPrimaryExpression, expectedPrimaryExpression})
+	expectedPrimaryExpression := tag.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, common.IsEmptyOperator)
+	expectedResult := tag.NewLogicalOrTagFilter([]*tag.TagFilter{expectedPrimaryExpression, expectedPrimaryExpression, expectedPrimaryExpression})
 	runTestCaseForMappingToAPI(expr, expectedResult, t)
 }
 
 func TestShouldMapLogicalOrExpressionWithNestedAndInBrackets(t *testing.T) {
-	logicalOr := Operator(restapi.LogicalOr)
-	logicalAnd := Operator(restapi.LogicalAnd)
+	logicalOr := Operator(common.LogicalOr)
+	logicalAnd := Operator(common.LogicalAnd)
 	primaryExpression := PrimaryExpression{
 		UnaryOperation: &UnaryOperationExpression{
 			Entity:   &EntitySpec{Identifier: entitySpecKey, Origin: utils.StringPtr(EntityOriginDestination.Key())},
-			Operator: Operator(restapi.IsEmptyOperator),
+			Operator: Operator(common.IsEmptyOperator),
 		},
 	}
 	expr := &FilterExpression{
@@ -399,13 +401,13 @@ func TestShouldMapLogicalOrExpressionWithNestedAndInBrackets(t *testing.T) {
 		},
 	}
 
-	expectedPrimaryExpression := restapi.NewUnaryTagFilter(restapi.TagFilterEntityDestination, entitySpecKey, restapi.IsEmptyOperator)
-	expectedAndExpression := restapi.NewLogicalAndTagFilter([]*restapi.TagFilter{expectedPrimaryExpression, expectedPrimaryExpression})
-	expectedResult := restapi.NewLogicalOrTagFilter([]*restapi.TagFilter{expectedPrimaryExpression, expectedAndExpression})
+	expectedPrimaryExpression := tag.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, common.IsEmptyOperator)
+	expectedAndExpression := tag.NewLogicalAndTagFilter([]*tag.TagFilter{expectedPrimaryExpression, expectedPrimaryExpression})
+	expectedResult := tag.NewLogicalOrTagFilter([]*tag.TagFilter{expectedPrimaryExpression, expectedAndExpression})
 	runTestCaseForMappingToAPI(expr, expectedResult, t)
 }
 
-func runTestCaseForMappingToAPI(input *FilterExpression, expectedResult *restapi.TagFilter, t *testing.T) {
+func runTestCaseForMappingToAPI(input *FilterExpression, expectedResult *tag.TagFilter, t *testing.T) {
 	mapper := NewMapper()
 	result := mapper.ToAPIModel(input)
 

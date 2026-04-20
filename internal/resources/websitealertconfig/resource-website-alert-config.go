@@ -17,15 +17,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/client"
+	"github.com/instana/instana-go-client/shared/rest"
+	tag "github.com/instana/instana-go-client/shared/tagfilter"
+	common "github.com/instana/instana-go-client/shared/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
 	"github.com/instana/terraform-provider-instana/internal/util"
 )
 
 // NewWebsiteAlertConfigResourceHandle creates the resource handle for Website Alert Configs
-func NewWebsiteAlertConfigResourceHandle() resourcehandle.ResourceHandle[*restapi.WebsiteAlertConfig] {
+func NewWebsiteAlertConfigResourceHandle() resourcehandle.ResourceHandle[*api.WebsiteAlertConfig] {
 	return &websiteAlertConfigResource{
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName: ResourceInstanaWebsiteAlertConfig,
@@ -288,15 +292,15 @@ func (r *websiteAlertConfigResource) MetaData() *resourcehandle.ResourceMetaData
 	return &r.metaData
 }
 
-func (r *websiteAlertConfigResource) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.WebsiteAlertConfig] {
-	return api.WebsiteAlertConfig()
+func (r *websiteAlertConfigResource) GetRestResource(api client.InstanaAPI) rest.RestResource[*api.WebsiteAlertConfig] {
+	return api.WebsiteAlertConfigs()
 }
 
 func (r *websiteAlertConfigResource) SetComputedFields(_ context.Context, _ *tfsdk.Plan) diag.Diagnostics {
 	return nil
 }
 
-func (r *websiteAlertConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.WebsiteAlertConfig, diag.Diagnostics) {
+func (r *websiteAlertConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*api.WebsiteAlertConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var model WebsiteAlertConfigModel
 
@@ -347,7 +351,7 @@ func (r *websiteAlertConfigResource) MapStateToDataObject(ctx context.Context, p
 	}
 
 	// Create API object
-	return &restapi.WebsiteAlertConfig{
+	return &api.WebsiteAlertConfig{
 		ID:                    model.ID.ValueString(),
 		Name:                  model.Name.ValueString(),
 		Description:           model.Description.ValueString(),
@@ -357,7 +361,7 @@ func (r *websiteAlertConfigResource) MapStateToDataObject(ctx context.Context, p
 		WebsiteID:             model.WebsiteID.ValueString(),
 		TagFilterExpression:   tagFilter,
 		AlertChannelIDs:       alertChannelIDs,
-		Granularity:           restapi.Granularity(model.Granularity.ValueInt64()),
+		Granularity:           common.Granularity(model.Granularity.ValueInt64()),
 		CustomerPayloadFields: customPayloadFields,
 		TimeThreshold:         *timeThreshold,
 		Rules:                 rules,
@@ -365,7 +369,7 @@ func (r *websiteAlertConfigResource) MapStateToDataObject(ctx context.Context, p
 }
 
 // mapTagFilterToAPI maps tag filter expression from model to API
-func (r *websiteAlertConfigResource) mapTagFilterToAPI(model WebsiteAlertConfigModel) (*restapi.TagFilter, diag.Diagnostics) {
+func (r *websiteAlertConfigResource) mapTagFilterToAPI(model WebsiteAlertConfigModel) (*tag.TagFilter, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if !model.TagFilter.IsNull() && !model.TagFilter.IsUnknown() {
@@ -380,11 +384,11 @@ func (r *websiteAlertConfigResource) mapTagFilterToAPI(model WebsiteAlertConfigM
 	}
 
 	// Return default tag filter
-	operator := restapi.LogicalOperatorType(WebsiteAlertConfigLogicalOperatorAND)
-	return &restapi.TagFilter{
+	operator := common.LogicalOperatorType(WebsiteAlertConfigLogicalOperatorAND)
+	return &tag.TagFilter{
 		Type:            WebsiteAlertConfigTagFilterTypeExpression,
 		LogicalOperator: &operator,
-		Elements:        []*restapi.TagFilter{},
+		Elements:        []*tag.TagFilter{},
 	}, diags
 }
 
@@ -401,9 +405,9 @@ func (r *websiteAlertConfigResource) mapAlertChannelIDsToAPI(ctx context.Context
 }
 
 // mapCustomPayloadFieldsToAPI maps custom payload fields from model to API
-func (r *websiteAlertConfigResource) mapCustomPayloadFieldsToAPI(ctx context.Context, model WebsiteAlertConfigModel) ([]restapi.CustomPayloadField[any], diag.Diagnostics) {
+func (r *websiteAlertConfigResource) mapCustomPayloadFieldsToAPI(ctx context.Context, model WebsiteAlertConfigModel) ([]common.CustomPayloadField[any], diag.Diagnostics) {
 	var diags diag.Diagnostics
-	customPayloadFields := make([]restapi.CustomPayloadField[any], 0)
+	customPayloadFields := make([]common.CustomPayloadField[any], 0)
 
 	if !model.CustomPayloadFields.IsNull() && !model.CustomPayloadFields.IsUnknown() {
 		var payloadDiags diag.Diagnostics
@@ -415,9 +419,9 @@ func (r *websiteAlertConfigResource) mapCustomPayloadFieldsToAPI(ctx context.Con
 }
 
 // mapRulesCollectionToAPI maps the rules collection from model to API
-func (r *websiteAlertConfigResource) mapRulesCollectionToAPI(ctx context.Context, model WebsiteAlertConfigModel) ([]restapi.WebsiteAlertRuleWithThresholds, diag.Diagnostics) {
+func (r *websiteAlertConfigResource) mapRulesCollectionToAPI(ctx context.Context, model WebsiteAlertConfigModel) ([]api.WebsiteAlertRuleWithThresholds, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	rules := make([]restapi.WebsiteAlertRuleWithThresholds, 0)
+	rules := make([]api.WebsiteAlertRuleWithThresholds, 0)
 
 	if len(model.Rules) == 0 {
 		return rules, diags
@@ -439,7 +443,7 @@ func (r *websiteAlertConfigResource) mapRulesCollectionToAPI(ctx context.Context
 				return nil, diags
 			}
 
-			rules = append(rules, restapi.WebsiteAlertRuleWithThresholds{
+			rules = append(rules, api.WebsiteAlertRuleWithThresholds{
 				Rule:              websiteAlertRule,
 				ThresholdOperator: ruleModel.ThresholdOperator.ValueString(),
 				Thresholds:        thresholdMap,
@@ -451,7 +455,7 @@ func (r *websiteAlertConfigResource) mapRulesCollectionToAPI(ctx context.Context
 }
 
 // mapSingleRuleFromCollection maps a single rule from the rules collection
-func (r *websiteAlertConfigResource) mapSingleRuleFromCollection(ctx context.Context, ruleModel RuleWithThresholdPluginModel) (*restapi.WebsiteAlertRule, diag.Diagnostics) {
+func (r *websiteAlertConfigResource) mapSingleRuleFromCollection(ctx context.Context, ruleModel RuleWithThresholdPluginModel) (*api.WebsiteAlertRule, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if ruleModel.Rule == nil {
@@ -472,32 +476,32 @@ func (r *websiteAlertConfigResource) mapSingleRuleFromCollection(ctx context.Con
 	return nil, diags
 }
 
-func (r *websiteAlertConfigResource) mapThroughputRule(throughputModel WebsiteAlertRuleConfigModel) *restapi.WebsiteAlertRule {
-	var aggregationPtr *restapi.Aggregation
+func (r *websiteAlertConfigResource) mapThroughputRule(throughputModel WebsiteAlertRuleConfigModel) *api.WebsiteAlertRule {
+	var aggregationPtr *common.Aggregation
 	if !throughputModel.Aggregation.IsNull() && !throughputModel.Aggregation.IsUnknown() {
-		aggregation := restapi.Aggregation(throughputModel.Aggregation.ValueString())
+		aggregation := common.Aggregation(throughputModel.Aggregation.ValueString())
 		aggregationPtr = &aggregation
 	}
 
-	return &restapi.WebsiteAlertRule{
+	return &api.WebsiteAlertRule{
 		AlertType:   WebsiteAlertConfigAlertTypeThroughput,
 		MetricName:  throughputModel.MetricName.ValueString(),
 		Aggregation: aggregationPtr,
 	}
 }
 
-func (r *websiteAlertConfigResource) mapStatusCodeRule(statusCodeModel WebsiteAlertRuleConfigCompleteModel) *restapi.WebsiteAlertRule {
+func (r *websiteAlertConfigResource) mapStatusCodeRule(statusCodeModel WebsiteAlertRuleConfigCompleteModel) *api.WebsiteAlertRule {
 
-	var aggregationPtr *restapi.Aggregation
+	var aggregationPtr *common.Aggregation
 	if !statusCodeModel.Aggregation.IsNull() && !statusCodeModel.Aggregation.IsUnknown() {
-		aggregation := restapi.Aggregation(statusCodeModel.Aggregation.ValueString())
+		aggregation := common.Aggregation(statusCodeModel.Aggregation.ValueString())
 		aggregationPtr = &aggregation
 	}
 
-	operator := restapi.ExpressionOperator(statusCodeModel.Operator.ValueString())
+	operator := common.ExpressionOperator(statusCodeModel.Operator.ValueString())
 	value := statusCodeModel.Value.ValueString()
 
-	return &restapi.WebsiteAlertRule{
+	return &api.WebsiteAlertRule{
 		AlertType:   WebsiteAlertConfigAlertTypeStatusCode,
 		MetricName:  statusCodeModel.MetricName.ValueString(),
 		Aggregation: aggregationPtr,
@@ -506,22 +510,22 @@ func (r *websiteAlertConfigResource) mapStatusCodeRule(statusCodeModel WebsiteAl
 	}
 }
 
-func (r *websiteAlertConfigResource) mapSpecificJsErrorRule(specificJsErrorModel WebsiteAlertRuleConfigCompleteModel) *restapi.WebsiteAlertRule {
+func (r *websiteAlertConfigResource) mapSpecificJsErrorRule(specificJsErrorModel WebsiteAlertRuleConfigCompleteModel) *api.WebsiteAlertRule {
 
-	var aggregationPtr *restapi.Aggregation
+	var aggregationPtr *common.Aggregation
 	if !specificJsErrorModel.Aggregation.IsNull() && !specificJsErrorModel.Aggregation.IsUnknown() {
-		aggregation := restapi.Aggregation(specificJsErrorModel.Aggregation.ValueString())
+		aggregation := common.Aggregation(specificJsErrorModel.Aggregation.ValueString())
 		aggregationPtr = &aggregation
 	}
 
-	operator := restapi.ExpressionOperator(specificJsErrorModel.Operator.ValueString())
+	operator := common.ExpressionOperator(specificJsErrorModel.Operator.ValueString())
 	var valuePtr *string
 	if !specificJsErrorModel.Value.IsNull() && !specificJsErrorModel.Value.IsUnknown() {
 		value := specificJsErrorModel.Value.ValueString()
 		valuePtr = &value
 	}
 
-	return &restapi.WebsiteAlertRule{
+	return &api.WebsiteAlertRule{
 		AlertType:   WebsiteAlertConfigAlertTypeSpecificJsError,
 		MetricName:  specificJsErrorModel.MetricName.ValueString(),
 		Aggregation: aggregationPtr,
@@ -530,10 +534,10 @@ func (r *websiteAlertConfigResource) mapSpecificJsErrorRule(specificJsErrorModel
 	}
 }
 
-func (r *websiteAlertConfigResource) mapSlownessRule(slownessModel WebsiteAlertRuleConfigModel) *restapi.WebsiteAlertRule {
-	aggregation := restapi.Aggregation(slownessModel.Aggregation.ValueString())
+func (r *websiteAlertConfigResource) mapSlownessRule(slownessModel WebsiteAlertRuleConfigModel) *api.WebsiteAlertRule {
+	aggregation := common.Aggregation(slownessModel.Aggregation.ValueString())
 
-	return &restapi.WebsiteAlertRule{
+	return &api.WebsiteAlertRule{
 		AlertType:   WebsiteAlertConfigAlertTypeSlowness,
 		MetricName:  slownessModel.MetricName.ValueString(),
 		Aggregation: &aggregation,
@@ -542,7 +546,7 @@ func (r *websiteAlertConfigResource) mapSlownessRule(slownessModel WebsiteAlertR
 
 // mapTimeThresholdFromModel converts the time threshold configuration from the Terraform model to the API representation.
 // It validates that exactly one time threshold type is configured and returns appropriate diagnostics on error.
-func (r *websiteAlertConfigResource) mapTimeThresholdFromModel(ctx context.Context, model WebsiteAlertConfigModel) (*restapi.WebsiteTimeThreshold, diag.Diagnostics) {
+func (r *websiteAlertConfigResource) mapTimeThresholdFromModel(ctx context.Context, model WebsiteAlertConfigModel) (*api.WebsiteTimeThreshold, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Validate time threshold is provided
@@ -571,8 +575,8 @@ func (r *websiteAlertConfigResource) mapTimeThresholdFromModel(ctx context.Conte
 func (r *websiteAlertConfigResource) mapUserImpactTimeThreshold(
 	userImpactModel *WebsiteUserImpactOfViolationsInSequenceModel,
 	diags diag.Diagnostics,
-) (*restapi.WebsiteTimeThreshold, diag.Diagnostics) {
-	threshold := &restapi.WebsiteTimeThreshold{
+) (*api.WebsiteTimeThreshold, diag.Diagnostics) {
+	threshold := &api.WebsiteTimeThreshold{
 		Type: WebsiteAlertConfigTimeThresholdTypeUserImpact,
 	}
 
@@ -581,7 +585,7 @@ func (r *websiteAlertConfigResource) mapUserImpactTimeThreshold(
 
 	// Map impact measurement method
 	if !userImpactModel.ImpactMeasurementMethod.IsNull() && !userImpactModel.ImpactMeasurementMethod.IsUnknown() {
-		method := restapi.WebsiteImpactMeasurementMethod(userImpactModel.ImpactMeasurementMethod.ValueString())
+		method := api.WebsiteImpactMeasurementMethod(userImpactModel.ImpactMeasurementMethod.ValueString())
 		threshold.ImpactMeasurementMethod = &method
 	}
 
@@ -598,8 +602,8 @@ func (r *websiteAlertConfigResource) mapUserImpactTimeThreshold(
 func (r *websiteAlertConfigResource) mapViolationsInPeriodTimeThreshold(
 	violationsInPeriodModel *WebsiteViolationsInPeriodModel,
 	diags diag.Diagnostics,
-) (*restapi.WebsiteTimeThreshold, diag.Diagnostics) {
-	threshold := &restapi.WebsiteTimeThreshold{
+) (*api.WebsiteTimeThreshold, diag.Diagnostics) {
+	threshold := &api.WebsiteTimeThreshold{
 		Type: WebsiteAlertConfigTimeThresholdTypeViolationsInPeriod,
 	}
 
@@ -616,8 +620,8 @@ func (r *websiteAlertConfigResource) mapViolationsInPeriodTimeThreshold(
 func (r *websiteAlertConfigResource) mapViolationsInSequenceTimeThreshold(
 	violationsInSequenceModel *WebsiteViolationsInSequenceModel,
 	diags diag.Diagnostics,
-) (*restapi.WebsiteTimeThreshold, diag.Diagnostics) {
-	threshold := &restapi.WebsiteTimeThreshold{
+) (*api.WebsiteTimeThreshold, diag.Diagnostics) {
+	threshold := &api.WebsiteTimeThreshold{
 		Type: WebsiteAlertConfigTimeThresholdTypeViolationsInSequence,
 	}
 
@@ -657,7 +661,7 @@ func (r *websiteAlertConfigResource) mapOptionalInt64ToInt32Field(field types.In
 	return &value
 }
 
-func (r *websiteAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *restapi.WebsiteAlertConfig) diag.Diagnostics {
+func (r *websiteAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *api.WebsiteAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var model WebsiteAlertConfigModel
 	if plan != nil {
@@ -713,7 +717,7 @@ func (r *websiteAlertConfigResource) UpdateState(ctx context.Context, state *tfs
 }
 
 // mapTagFilterExpressionToState maps tag filter expression from API to state
-func (r *websiteAlertConfigResource) mapTagFilterExpressionToState(model *WebsiteAlertConfigModel, apiObject *restapi.WebsiteAlertConfig) diag.Diagnostics {
+func (r *websiteAlertConfigResource) mapTagFilterExpressionToState(model *WebsiteAlertConfigModel, apiObject *api.WebsiteAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	if apiObject.TagFilterExpression != nil {
@@ -734,7 +738,7 @@ func (r *websiteAlertConfigResource) mapTagFilterExpressionToState(model *Websit
 }
 
 // mapAlertChannelIDsToState maps alert channel IDs from API to state
-func (r *websiteAlertConfigResource) mapAlertChannelIDsToState(model *WebsiteAlertConfigModel, apiObject *restapi.WebsiteAlertConfig) {
+func (r *websiteAlertConfigResource) mapAlertChannelIDsToState(model *WebsiteAlertConfigModel, apiObject *api.WebsiteAlertConfig) {
 	if len(apiObject.AlertChannelIDs) > 0 {
 		alertChannelIDs := make([]attr.Value, len(apiObject.AlertChannelIDs))
 		for i, id := range apiObject.AlertChannelIDs {
@@ -747,7 +751,7 @@ func (r *websiteAlertConfigResource) mapAlertChannelIDsToState(model *WebsiteAle
 }
 
 // mapCustomPayloadFieldsToState maps custom payload fields from API to state
-func (r *websiteAlertConfigResource) mapCustomPayloadFieldsToState(ctx context.Context, model *WebsiteAlertConfigModel, apiObject *restapi.WebsiteAlertConfig) diag.Diagnostics {
+func (r *websiteAlertConfigResource) mapCustomPayloadFieldsToState(ctx context.Context, model *WebsiteAlertConfigModel, apiObject *api.WebsiteAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	customPayloadFieldsList, payloadDiags := shared.CustomPayloadFieldsToTerraform(ctx, apiObject.CustomerPayloadFields)
@@ -759,7 +763,7 @@ func (r *websiteAlertConfigResource) mapCustomPayloadFieldsToState(ctx context.C
 	return diags
 }
 
-func (r *websiteAlertConfigResource) mapTimeThresholdToState(timeThreshold restapi.WebsiteTimeThreshold) *WebsiteTimeThresholdModel {
+func (r *websiteAlertConfigResource) mapTimeThresholdToState(timeThreshold api.WebsiteTimeThreshold) *WebsiteTimeThresholdModel {
 	websiteTimeThresholdModel := WebsiteTimeThresholdModel{}
 	switch timeThreshold.Type {
 	case WebsiteAlertConfigTimeThresholdTypeViolationsInSequence:
@@ -782,7 +786,7 @@ func (r *websiteAlertConfigResource) mapTimeThresholdToState(timeThreshold resta
 	return &websiteTimeThresholdModel
 }
 
-func (r *websiteAlertConfigResource) mapRuleToState(ctx context.Context, rule *restapi.WebsiteAlertRule) *WebsiteAlertRuleModel {
+func (r *websiteAlertConfigResource) mapRuleToState(ctx context.Context, rule *api.WebsiteAlertRule) *WebsiteAlertRuleModel {
 	websiteAlertRuleModel := WebsiteAlertRuleModel{
 		Slowness:        nil,
 		SpecificJsError: nil,
@@ -825,12 +829,12 @@ func (r *websiteAlertConfigResource) mapRuleToState(ctx context.Context, rule *r
 
 }
 
-func (r *websiteAlertConfigResource) mapRulesToState(ctx context.Context, apiObject *restapi.WebsiteAlertConfig) []RuleWithThresholdPluginModel {
+func (r *websiteAlertConfigResource) mapRulesToState(ctx context.Context, apiObject *api.WebsiteAlertConfig) []RuleWithThresholdPluginModel {
 	rules := apiObject.Rules
 	var rulesModel []RuleWithThresholdPluginModel
 	for _, i := range rules {
-		warningThreshold, isWarningThresholdPresent := i.Thresholds[restapi.WarningSeverity]
-		criticalThreshold, isCriticalThresholdPresent := i.Thresholds[restapi.CriticalSeverity]
+		warningThreshold, isWarningThresholdPresent := i.Thresholds[common.WarningSeverity]
+		criticalThreshold, isCriticalThresholdPresent := i.Thresholds[common.CriticalSeverity]
 
 		thresholdPluginModel := shared.ThresholdAllPluginModel{
 			Warning:  shared.MapAllThresholdPluginToState(ctx, &warningThreshold, isWarningThresholdPresent),

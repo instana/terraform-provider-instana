@@ -6,19 +6,21 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/client"
+	"github.com/instana/instana-go-client/shared/rest"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // NewSloCorrectionConfigResourceHandle creates the resource handle for SLO Correction Config
-func NewSloCorrectionConfigResourceHandle() resourcehandle.ResourceHandle[*restapi.SloCorrectionConfig] {
+func NewSloCorrectionConfigResourceHandle() resourcehandle.ResourceHandle[*api.SloCorrectionConfig] {
 	resource := &sloCorrectionConfigResource{}
 	return resource.initialize()
 }
@@ -195,15 +197,15 @@ func (r *sloCorrectionConfigResource) MetaData() *resourcehandle.ResourceMetaDat
 	return &r.metaData
 }
 
-func (r *sloCorrectionConfigResource) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.SloCorrectionConfig] {
-	return api.SloCorrectionConfig()
+func (r *sloCorrectionConfigResource) GetRestResource(api client.InstanaAPI) rest.RestResource[*api.SloCorrectionConfig] {
+	return api.SloCorrectionConfigs()
 }
 
 func (r *sloCorrectionConfigResource) SetComputedFields(_ context.Context, _ *tfsdk.Plan) diag.Diagnostics {
 	return nil
 }
 
-func (r *sloCorrectionConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.SloCorrectionConfig, diag.Diagnostics) {
+func (r *sloCorrectionConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*api.SloCorrectionConfig, diag.Diagnostics) {
 	model, diags := r.extractModelFromState(ctx, plan, state)
 	if diags.HasError() {
 		return nil, diags
@@ -250,15 +252,15 @@ func (r *sloCorrectionConfigResource) extractModelFromState(ctx context.Context,
 }
 
 // mapSchedulingFromModel converts scheduling model to API scheduling object
-func (r *sloCorrectionConfigResource) mapSchedulingFromModel(model *SloCorrectionConfigModel) (restapi.Scheduling, diag.Diagnostics) {
+func (r *sloCorrectionConfigResource) mapSchedulingFromModel(model *SloCorrectionConfigModel) (api.Scheduling, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	var scheduling restapi.Scheduling
+	var scheduling api.Scheduling
 
 	if model.Scheduling == nil {
 		return scheduling, diags
 	}
 
-	scheduling = restapi.Scheduling{
+	scheduling = api.Scheduling{
 		StartTime:    model.Scheduling.StartTime.ValueInt64(),
 		Duration:     int(model.Scheduling.Duration.ValueInt64()),
 		DurationUnit: r.convertDurationUnitToAPI(model.Scheduling.DurationUnit.ValueString()),
@@ -273,8 +275,8 @@ func (r *sloCorrectionConfigResource) mapSchedulingFromModel(model *SloCorrectio
 }
 
 // convertDurationUnitToAPI converts duration unit string to API format (uppercase)
-func (r *sloCorrectionConfigResource) convertDurationUnitToAPI(unit string) restapi.DurationUnit {
-	return restapi.DurationUnit(strings.ToUpper(unit))
+func (r *sloCorrectionConfigResource) convertDurationUnitToAPI(unit string) api.DurationUnit {
+	return api.DurationUnit(strings.ToUpper(unit))
 }
 
 // extractSloIdsFromModel extracts SLO IDs from the model
@@ -304,11 +306,11 @@ func (r *sloCorrectionConfigResource) extractTagsFromModel(ctx context.Context, 
 // buildAPIObjectFromModel constructs the API object from model and extracted data
 func (r *sloCorrectionConfigResource) buildAPIObjectFromModel(
 	model *SloCorrectionConfigModel,
-	scheduling restapi.Scheduling,
+	scheduling api.Scheduling,
 	sloIds []string,
 	tags []string,
-) *restapi.SloCorrectionConfig {
-	return &restapi.SloCorrectionConfig{
+) *api.SloCorrectionConfig {
+	return &api.SloCorrectionConfig{
 		ID:          model.ID.ValueString(),
 		Name:        model.Name.ValueString(),
 		Description: model.Description.ValueString(),
@@ -319,7 +321,7 @@ func (r *sloCorrectionConfigResource) buildAPIObjectFromModel(
 	}
 }
 
-func (r *sloCorrectionConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *restapi.SloCorrectionConfig) diag.Diagnostics {
+func (r *sloCorrectionConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *api.SloCorrectionConfig) diag.Diagnostics {
 	model := r.buildModelFromAPIObject(apiObject)
 
 	schedulingModel, schedulingDiags := r.mapSchedulingToModel(apiObject.Scheduling)
@@ -349,7 +351,7 @@ func (r *sloCorrectionConfigResource) UpdateState(ctx context.Context, state *tf
 }
 
 // buildModelFromAPIObject creates a model with basic fields from API object
-func (r *sloCorrectionConfigResource) buildModelFromAPIObject(apiObject *restapi.SloCorrectionConfig) SloCorrectionConfigModel {
+func (r *sloCorrectionConfigResource) buildModelFromAPIObject(apiObject *api.SloCorrectionConfig) SloCorrectionConfigModel {
 	return SloCorrectionConfigModel{
 		ID:          types.StringValue(apiObject.ID),
 		Name:        types.StringValue(apiObject.Name),
@@ -359,7 +361,7 @@ func (r *sloCorrectionConfigResource) buildModelFromAPIObject(apiObject *restapi
 }
 
 // mapSchedulingToModel converts API scheduling to model scheduling
-func (r *sloCorrectionConfigResource) mapSchedulingToModel(scheduling restapi.Scheduling) (*SchedulingModel, diag.Diagnostics) {
+func (r *sloCorrectionConfigResource) mapSchedulingToModel(scheduling api.Scheduling) (*SchedulingModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	recurrentRuleValue := r.buildRecurrentRuleValue(scheduling.RecurrentRule)

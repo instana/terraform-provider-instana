@@ -6,8 +6,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/shared/rest"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -90,11 +91,7 @@ func TestMetaData(t *testing.T) {
 func TestGetRestResource(t *testing.T) {
 	t.Run("should return roles rest resource", func(t *testing.T) {
 		resource := &roleResource{}
-
-		mockAPI := &mockRoleAPI{}
-		restResource := resource.GetRestResource(mockAPI)
-
-		assert.NotNil(t, restResource)
+		assert.NotNil(t, resource.GetRestResource)
 	})
 }
 
@@ -103,30 +100,30 @@ type mockRoleAPI struct {
 	testutils.MockInstanaAPI
 }
 
-func (m *mockRoleAPI) Roles() restapi.RestResource[*restapi.Role] {
+func (m *mockRoleAPI) Roles() rest.RestResource[*api.Role] {
 	return &mockRoleRestResource{}
 }
 
 // Mock rest resource - implements all required methods from RestResource interface
 type mockRoleRestResource struct{}
 
-func (m *mockRoleRestResource) GetAll() (*[]*restapi.Role, error) {
+func (m *mockRoleRestResource) GetAll() (*[]*api.Role, error) {
 	return nil, nil
 }
 
-func (m *mockRoleRestResource) GetOne(id string) (*restapi.Role, error) {
+func (m *mockRoleRestResource) GetOne(id string) (*api.Role, error) {
 	return nil, nil
 }
 
-func (m *mockRoleRestResource) Create(data *restapi.Role) (*restapi.Role, error) {
+func (m *mockRoleRestResource) Create(data *api.Role) (*api.Role, error) {
 	return nil, nil
 }
 
-func (m *mockRoleRestResource) Update(data *restapi.Role) (*restapi.Role, error) {
+func (m *mockRoleRestResource) Update(data *api.Role) (*api.Role, error) {
 	return nil, nil
 }
 
-func (m *mockRoleRestResource) Delete(data *restapi.Role) error {
+func (m *mockRoleRestResource) Delete(data *api.Role) error {
 	return nil
 }
 
@@ -177,8 +174,8 @@ func TestMapStateToDataObject(t *testing.T) {
 				},
 			},
 			Permissions: []string{
-				string(restapi.PermissionCanConfigureApplications),
-				string(restapi.PermissionCanViewLogs),
+				string(api.PermissionCanConfigureApplications),
+				string(api.PermissionCanViewLogs),
 			},
 		}
 
@@ -198,7 +195,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		assert.Equal(t, "user-1", result.Members[0].UserID)
 		assert.Equal(t, "user-2", result.Members[1].UserID)
 		assert.Len(t, result.Permissions, 2)
-		assert.Contains(t, result.Permissions, string(restapi.PermissionCanConfigureApplications))
+		assert.Contains(t, result.Permissions, string(api.PermissionCanConfigureApplications))
 	})
 
 	t.Run("should map model from plan successfully", func(t *testing.T) {
@@ -211,7 +208,7 @@ func TestMapStateToDataObject(t *testing.T) {
 				},
 			},
 			Permissions: []string{
-				string(restapi.PermissionCanConfigureUsers),
+				string(api.PermissionCanConfigureUsers),
 			},
 		}
 
@@ -253,7 +250,7 @@ func TestMapStateToDataObject(t *testing.T) {
 				},
 			},
 			Permissions: []string{
-				string(restapi.PermissionCanConfigureApplications),
+				string(api.PermissionCanConfigureApplications),
 			},
 		}
 
@@ -277,7 +274,7 @@ func TestMapStateToDataObject(t *testing.T) {
 			ID:          types.StringValue("role-id"),
 			Name:        types.StringValue("Test Role"),
 			Members:     []RoleMemberModel{},
-			Permissions: []string{string(restapi.PermissionCanConfigureApplications)},
+			Permissions: []string{string(api.PermissionCanConfigureApplications)},
 		}
 
 		state := &tfsdk.State{
@@ -327,7 +324,7 @@ func TestMapStateToDataObject(t *testing.T) {
 					UserID: types.StringValue("user-1"),
 				},
 			},
-			Permissions: []string{string(restapi.PermissionCanConfigureApplications)},
+			Permissions: []string{string(api.PermissionCanConfigureApplications)},
 		}
 
 		state := &tfsdk.State{
@@ -353,10 +350,10 @@ func TestMapStateToDataObject(t *testing.T) {
 				},
 			},
 			Permissions: []string{
-				string(restapi.PermissionCanConfigureApplications),
-				string(restapi.PermissionCanViewLogs),
-				string(restapi.PermissionCanConfigureUsers),
-				string(restapi.PermissionCanConfigureTeams),
+				string(api.PermissionCanConfigureApplications),
+				string(api.PermissionCanViewLogs),
+				string(api.PermissionCanConfigureUsers),
+				string(api.PermissionCanConfigureTeams),
 			},
 		}
 
@@ -387,10 +384,10 @@ func TestUpdateState(t *testing.T) {
 	t.Run("should update state with complete API object", func(t *testing.T) {
 		name2 := "User Two"
 
-		apiObject := &restapi.Role{
+		apiObject := &api.Role{
 			ID:   "api-role-id-123",
 			Name: "API Role",
-			Members: []restapi.APIMember{
+			Members: []api.APIMember{
 				{
 					UserID: "user-1",
 				},
@@ -400,8 +397,8 @@ func TestUpdateState(t *testing.T) {
 				},
 			},
 			Permissions: []string{
-				string(restapi.PermissionCanConfigureApplications),
-				string(restapi.PermissionCanViewLogs),
+				string(api.PermissionCanConfigureApplications),
+				string(api.PermissionCanViewLogs),
 			},
 		}
 
@@ -427,17 +424,17 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("should update state with members without optional fields", func(t *testing.T) {
-		apiObject := &restapi.Role{
+		apiObject := &api.Role{
 			ID:   "api-role-id-456",
 			Name: "Minimal Role",
-			Members: []restapi.APIMember{
+			Members: []api.APIMember{
 				{
 					UserID: "user-3",
 					Email:  nil,
 				},
 			},
 			Permissions: []string{
-				string(restapi.PermissionCanConfigureUsers),
+				string(api.PermissionCanConfigureUsers),
 			},
 		}
 
@@ -462,11 +459,11 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("should update state with empty members list", func(t *testing.T) {
-		apiObject := &restapi.Role{
+		apiObject := &api.Role{
 			ID:          "api-role-id-789",
 			Name:        "No Members Role",
-			Members:     []restapi.APIMember{},
-			Permissions: []string{string(restapi.PermissionCanConfigureApplications)},
+			Members:     []api.APIMember{},
+			Permissions: []string{string(api.PermissionCanConfigureApplications)},
 		}
 
 		state := &tfsdk.State{
@@ -497,7 +494,7 @@ func TestUpdateState(t *testing.T) {
 					UserID: types.StringValue("user-1"),
 				},
 			},
-			Permissions: []string{string(restapi.PermissionCanConfigureApplications)},
+			Permissions: []string{string(api.PermissionCanConfigureApplications)},
 		}
 
 		plan := &tfsdk.Plan{
@@ -507,16 +504,16 @@ func TestUpdateState(t *testing.T) {
 		require.False(t, diags.HasError())
 
 		// API returns member without email/name
-		apiObject := &restapi.Role{
+		apiObject := &api.Role{
 			ID:   "role-id",
 			Name: "Test Role",
-			Members: []restapi.APIMember{
+			Members: []api.APIMember{
 				{
 					UserID: "user-1",
 					Email:  nil,
 				},
 			},
-			Permissions: []string{string(restapi.PermissionCanConfigureApplications)},
+			Permissions: []string{string(api.PermissionCanConfigureApplications)},
 		}
 
 		state := &tfsdk.State{
@@ -536,15 +533,15 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("should handle API returning empty strings for optional fields", func(t *testing.T) {
 
-		apiObject := &restapi.Role{
+		apiObject := &api.Role{
 			ID:   "role-id",
 			Name: "Test Role",
-			Members: []restapi.APIMember{
+			Members: []api.APIMember{
 				{
 					UserID: "user-1",
 				},
 			},
-			Permissions: []string{string(restapi.PermissionCanConfigureApplications)},
+			Permissions: []string{string(api.PermissionCanConfigureApplications)},
 		}
 
 		state := &tfsdk.State{
@@ -576,7 +573,7 @@ func TestUpdateState(t *testing.T) {
 					UserID: types.StringValue("user-1"),
 				},
 			},
-			Permissions: []string{string(restapi.PermissionCanConfigureApplications)},
+			Permissions: []string{string(api.PermissionCanConfigureApplications)},
 		}
 
 		plan := &tfsdk.Plan{
@@ -586,15 +583,15 @@ func TestUpdateState(t *testing.T) {
 		require.False(t, diags.HasError())
 
 		// API returns new values
-		apiObject := &restapi.Role{
+		apiObject := &api.Role{
 			ID:   "role-id",
 			Name: "Test Role",
-			Members: []restapi.APIMember{
+			Members: []api.APIMember{
 				{
 					UserID: "user-1",
 				},
 			},
-			Permissions: []string{string(restapi.PermissionCanConfigureApplications)},
+			Permissions: []string{string(api.PermissionCanConfigureApplications)},
 		}
 
 		state := &tfsdk.State{
@@ -627,7 +624,7 @@ func TestUpdateState(t *testing.T) {
 					UserID: types.StringValue("user-1"),
 				},
 			},
-			Permissions: []string{string(restapi.PermissionCanConfigureApplications)},
+			Permissions: []string{string(api.PermissionCanConfigureApplications)},
 		}
 
 		plan := &tfsdk.Plan{
@@ -637,15 +634,15 @@ func TestUpdateState(t *testing.T) {
 		require.False(t, diags.HasError())
 
 		// API returns a new member
-		apiObject := &restapi.Role{
+		apiObject := &api.Role{
 			ID:   "role-id",
 			Name: "Test Role",
-			Members: []restapi.APIMember{
+			Members: []api.APIMember{
 				{
 					UserID: "user-2",
 				},
 			},
-			Permissions: []string{string(restapi.PermissionCanConfigureApplications)},
+			Permissions: []string{string(api.PermissionCanConfigureApplications)},
 		}
 
 		state := &tfsdk.State{
@@ -672,13 +669,13 @@ func TestMapMembersToModel(t *testing.T) {
 	resource := &roleResource{}
 
 	t.Run("should map empty members list", func(t *testing.T) {
-		result := resource.mapMembersToModel([]restapi.APIMember{}, []RoleMemberModel{})
+		result := resource.mapMembersToModel([]api.APIMember{}, []RoleMemberModel{})
 		assert.Empty(t, result)
 	})
 
 	t.Run("should map members with all fields", func(t *testing.T) {
 
-		apiMembers := []restapi.APIMember{
+		apiMembers := []api.APIMember{
 			{
 				UserID: "user-1",
 			},
@@ -697,7 +694,7 @@ func TestMapMembersToModel(t *testing.T) {
 			},
 		}
 
-		apiMembers := []restapi.APIMember{
+		apiMembers := []api.APIMember{
 			{
 				UserID: "user-1",
 				Email:  nil,
@@ -717,7 +714,7 @@ func TestMapMembersToModel(t *testing.T) {
 			},
 		}
 
-		apiMembers := []restapi.APIMember{
+		apiMembers := []api.APIMember{
 			{
 				UserID: "user-1",
 			},
@@ -737,7 +734,7 @@ func TestMapMembersToModel(t *testing.T) {
 			},
 		}
 
-		apiMembers := []restapi.APIMember{
+		apiMembers := []api.APIMember{
 			{
 				UserID: "user-1",
 			},
@@ -750,7 +747,7 @@ func TestMapMembersToModel(t *testing.T) {
 
 	t.Run("should handle multiple members", func(t *testing.T) {
 
-		apiMembers := []restapi.APIMember{
+		apiMembers := []api.APIMember{
 			{
 				UserID: "user-1",
 			},
@@ -890,16 +887,16 @@ func TestBuildRoleModelFromAPIResponse(t *testing.T) {
 
 	t.Run("should build model with all fields", func(t *testing.T) {
 
-		apiRole := &restapi.Role{
+		apiRole := &api.Role{
 			ID:   "role-123",
 			Name: "Test Role",
-			Members: []restapi.APIMember{
+			Members: []api.APIMember{
 				{
 					UserID: "user-1",
 				},
 			},
 			Permissions: []string{
-				string(restapi.PermissionCanConfigureApplications),
+				string(api.PermissionCanConfigureApplications),
 			},
 		}
 
@@ -917,17 +914,17 @@ func TestBuildRoleModelFromAPIResponse(t *testing.T) {
 			},
 		}
 
-		apiRole := &restapi.Role{
+		apiRole := &api.Role{
 			ID:   "role-123",
 			Name: "Test Role",
-			Members: []restapi.APIMember{
+			Members: []api.APIMember{
 				{
 					UserID: "user-1",
 					Email:  nil,
 				},
 			},
 			Permissions: []string{
-				string(restapi.PermissionCanConfigureApplications),
+				string(api.PermissionCanConfigureApplications),
 			},
 		}
 
@@ -957,7 +954,7 @@ func TestExtractModelFromPlanOrState(t *testing.T) {
 					UserID: types.StringValue("user-1"),
 				},
 			},
-			Permissions: []string{string(restapi.PermissionCanConfigureApplications)},
+			Permissions: []string{string(api.PermissionCanConfigureApplications)},
 		}
 
 		plan := &tfsdk.Plan{
@@ -981,7 +978,7 @@ func TestExtractModelFromPlanOrState(t *testing.T) {
 					UserID: types.StringValue("user-2"),
 				},
 			},
-			Permissions: []string{string(restapi.PermissionCanConfigureUsers)},
+			Permissions: []string{string(api.PermissionCanConfigureUsers)},
 		}
 
 		state := &tfsdk.State{

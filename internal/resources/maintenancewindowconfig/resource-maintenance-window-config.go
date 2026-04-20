@@ -15,13 +15,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/client"
+	"github.com/instana/instana-go-client/shared/rest"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
 )
 
 // NewMaintenanceWindowConfigResourceHandle creates the resource handle for Maintenance Window Configuration
-func NewMaintenanceWindowConfigResourceHandle() resourcehandle.ResourceHandle[*restapi.MaintenanceWindowConfig] {
+func NewMaintenanceWindowConfigResourceHandle() resourcehandle.ResourceHandle[*api.MaintenanceWindow] {
 	return &maintenanceWindowConfigResource{
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName: ResourceInstanaMaintenanceWindowConfig,
@@ -136,7 +138,7 @@ func (r *maintenanceWindowConfigResource) MetaData() *resourcehandle.ResourceMet
 }
 
 // GetRestResource returns the REST resource for maintenance window configurations
-func (r *maintenanceWindowConfigResource) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.MaintenanceWindowConfig] {
+func (r *maintenanceWindowConfigResource) GetRestResource(api client.InstanaAPI) rest.RestResource[*api.MaintenanceWindow] {
 	return api.MaintenanceWindowConfigs()
 }
 
@@ -150,7 +152,7 @@ func (r *maintenanceWindowConfigResource) SetComputedFields(_ context.Context, _
 // ============================================================================
 
 // UpdateState updates the Terraform state with the maintenance window configuration data from the API
-func (r *maintenanceWindowConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, config *restapi.MaintenanceWindowConfig) diag.Diagnostics {
+func (r *maintenanceWindowConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, config *api.MaintenanceWindow) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	// Create base model
@@ -197,7 +199,7 @@ func (r *maintenanceWindowConfigResource) UpdateState(ctx context.Context, state
 }
 
 // mapSchedulingToModel maps the scheduling configuration to the model
-func (r *maintenanceWindowConfigResource) mapSchedulingToModel(ctx context.Context, scheduling *restapi.MaintenanceScheduling, model *MaintenanceWindowConfigModel) diag.Diagnostics {
+func (r *maintenanceWindowConfigResource) mapSchedulingToModel(ctx context.Context, scheduling *api.MaintenanceScheduling, model *MaintenanceWindowConfigModel) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	if scheduling == nil {
@@ -271,7 +273,7 @@ func (r *maintenanceWindowConfigResource) mapSchedulingToModel(ctx context.Conte
 // ============================================================================
 
 // MapStateToDataObject maps the Terraform state to the API data object
-func (r *maintenanceWindowConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.MaintenanceWindowConfig, diag.Diagnostics) {
+func (r *maintenanceWindowConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*api.MaintenanceWindow, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var model MaintenanceWindowConfigModel
 
@@ -289,7 +291,7 @@ func (r *maintenanceWindowConfigResource) MapStateToDataObject(ctx context.Conte
 	}
 
 	// Create base config
-	config := &restapi.MaintenanceWindowConfig{
+	config := &api.MaintenanceWindow{
 		ID:    model.ID.ValueString(),
 		Name:  model.Name.ValueString(),
 		Query: model.Query.ValueString(),
@@ -321,7 +323,7 @@ func (r *maintenanceWindowConfigResource) MapStateToDataObject(ctx context.Conte
 }
 
 // mapSchedulingFromModel maps the scheduling from the model to the API object
-func (r *maintenanceWindowConfigResource) mapSchedulingFromModel(ctx context.Context, schedulingObj types.Object, config *restapi.MaintenanceWindowConfig) diag.Diagnostics {
+func (r *maintenanceWindowConfigResource) mapSchedulingFromModel(ctx context.Context, schedulingObj types.Object, config *api.MaintenanceWindow) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	if schedulingObj.IsNull() {
@@ -344,13 +346,13 @@ func (r *maintenanceWindowConfigResource) mapSchedulingFromModel(ctx context.Con
 		return diags
 	}
 
-	duration := &restapi.MaintenanceDuration{
+	duration := &api.MaintenanceDuration{
 		Amount: durationModel.Amount.ValueInt64(),
 		Unit:   durationModel.Unit.ValueString(),
 	}
 
 	// Create scheduling
-	scheduling := &restapi.MaintenanceScheduling{
+	scheduling := &api.MaintenanceScheduling{
 		Start:    schedulingModel.Start.ValueInt64(),
 		Duration: duration,
 		Type:     schedulingModel.Type.ValueString(),

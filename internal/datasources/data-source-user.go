@@ -7,7 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/client"
+	"github.com/instana/terraform-provider-instana/internal/shared"
 )
 
 // DataSourceInstanaUser the name of the terraform-provider-instana data source to read user
@@ -26,7 +28,7 @@ func NewUserDataSource() datasource.DataSource {
 }
 
 type UserDataSource struct {
-	instanaAPI restapi.InstanaAPI
+	instanaAPI client.InstanaAPI
 }
 
 func (d *UserDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -58,11 +60,11 @@ func (d *UserDataSource) Configure(_ context.Context, req datasource.ConfigureRe
 		return
 	}
 
-	providerMeta, ok := req.ProviderData.(*restapi.ProviderMeta)
+	providerMeta, ok := req.ProviderData.(*shared.ProviderMeta)
 	if !ok {
 		resp.Diagnostics.AddError(
 			UserErrUnexpectedConfigureType,
-			fmt.Sprintf("Expected *restapi.ProviderMeta, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *instana.ProviderMeta, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 		return
 	}
@@ -91,7 +93,7 @@ func (d *UserDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	}
 
 	// Find the user with the matching email
-	var matchingUser *restapi.User
+	var matchingUser *api.User
 	for _, user := range *users {
 		if user.Email == email {
 			matchingUser = user

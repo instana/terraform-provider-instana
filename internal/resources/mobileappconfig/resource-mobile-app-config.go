@@ -5,18 +5,21 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/client"
+	"github.com/instana/instana-go-client/shared/rest"
+
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // NewMobileAppConfigResourceHandle creates the resource handle for Mobile App Configurations
-func NewMobileAppConfigResourceHandle() resourcehandle.ResourceHandle[*restapi.MobileAppConfig] {
+func NewMobileAppConfigResourceHandle() resourcehandle.ResourceHandle[*api.MobileAppConfig] {
 	return &mobileAppConfigResource{
 		metaData: createResourceMetaData(),
 	}
@@ -33,7 +36,7 @@ func (r *mobileAppConfigResource) MetaData() *resourcehandle.ResourceMetaData {
 }
 
 // GetRestResource returns the REST resource for the API
-func (r *mobileAppConfigResource) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.MobileAppConfig] {
+func (r *mobileAppConfigResource) GetRestResource(api client.InstanaAPI) rest.RestResource[*api.MobileAppConfig] {
 	return api.MobileAppConfig()
 }
 
@@ -43,7 +46,7 @@ func (r *mobileAppConfigResource) SetComputedFields(_ context.Context, _ *tfsdk.
 }
 
 // MapStateToDataObject maps Terraform state/plan to API data object
-func (r *mobileAppConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.MobileAppConfig, diag.Diagnostics) {
+func (r *mobileAppConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*api.MobileAppConfig, diag.Diagnostics) {
 	if err := validateMapStateToDataObjectInputs(ctx, plan, state); err != nil {
 		return nil, diag.Diagnostics{err}
 	}
@@ -63,7 +66,7 @@ func (r *mobileAppConfigResource) MapStateToDataObject(ctx context.Context, plan
 }
 
 // UpdateState updates Terraform state with data from API object
-func (r *mobileAppConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *restapi.MobileAppConfig) diag.Diagnostics {
+func (r *mobileAppConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *api.MobileAppConfig) diag.Diagnostics {
 	if err := validateUpdateStateInputs(ctx, state, apiObject); err != nil {
 		return diag.Diagnostics{err}
 	}
@@ -136,7 +139,7 @@ func validateMapStateToDataObjectInputs(ctx context.Context, plan *tfsdk.Plan, s
 }
 
 // validateUpdateStateInputs validates inputs for UpdateState method
-func validateUpdateStateInputs(ctx context.Context, state *tfsdk.State, apiObject *restapi.MobileAppConfig) diag.Diagnostic {
+func validateUpdateStateInputs(ctx context.Context, state *tfsdk.State, apiObject *api.MobileAppConfig) diag.Diagnostic {
 	if ctx == nil {
 		return diag.NewErrorDiagnostic(MobileAppConfigErrInvalidInput, MobileAppConfigErrNilContext)
 	}
@@ -189,7 +192,7 @@ func extractModelFromState(ctx context.Context, state *tfsdk.State, model *Mobil
 }
 
 // mapModelToAPIObject converts Terraform model to API object
-func mapModelToAPIObject(model *MobileAppConfigModel) (*restapi.MobileAppConfig, error) {
+func mapModelToAPIObject(model *MobileAppConfigModel) (*api.MobileAppConfig, error) {
 	if model == nil {
 		return nil, fmt.Errorf("model cannot be nil")
 	}
@@ -217,8 +220,8 @@ func validateModelFields(model *MobileAppConfigModel) error {
 }
 
 // createAPIObjectFromModel creates API object from validated model
-func createAPIObjectFromModel(model *MobileAppConfigModel) *restapi.MobileAppConfig {
-	return &restapi.MobileAppConfig{
+func createAPIObjectFromModel(model *MobileAppConfigModel) *api.MobileAppConfig {
+	return &api.MobileAppConfig{
 		ID:   extractStringValue(model.ID),
 		Name: extractStringValue(model.Name),
 	}
@@ -233,7 +236,7 @@ func extractStringValue(value types.String) string {
 }
 
 // mapAPIObjectToModel converts API object to Terraform model
-func mapAPIObjectToModel(apiObject *restapi.MobileAppConfig) *MobileAppConfigModel {
+func mapAPIObjectToModel(apiObject *api.MobileAppConfig) *MobileAppConfigModel {
 	return &MobileAppConfigModel{
 		ID:   createStringValue(apiObject.ID),
 		Name: createStringValue(apiObject.Name),
@@ -263,4 +266,3 @@ func (r *mobileAppConfigResource) GetStateUpgraders(ctx context.Context) map[int
 		1: resourcehandle.CreateStateUpgraderForVersion(1),
 	}
 }
-

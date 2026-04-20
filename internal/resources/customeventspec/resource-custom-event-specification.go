@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -14,11 +15,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/client"
+	"github.com/instana/instana-go-client/shared/rest"
+	tag "github.com/instana/instana-go-client/shared/tagfilter"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
 	"github.com/instana/terraform-provider-instana/internal/util"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // ============================================================================
@@ -26,7 +29,7 @@ import (
 // ============================================================================
 
 // NewCustomEventSpecificationResourceHandle creates the resource handle for Custom Event Specifications
-func NewCustomEventSpecificationResourceHandle() resourcehandle.ResourceHandle[*restapi.CustomEventSpecification] {
+func NewCustomEventSpecificationResourceHandle() resourcehandle.ResourceHandle[*api.CustomEventSpecification] {
 	return &customEventSpecificationResource{
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:  ResourceInstanaCustomEventSpecification,
@@ -50,7 +53,7 @@ func (r *customEventSpecificationResource) MetaData() *resourcehandle.ResourceMe
 }
 
 // GetRestResource returns the REST resource for custom event specifications
-func (r *customEventSpecificationResource) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.CustomEventSpecification] {
+func (r *customEventSpecificationResource) GetRestResource(api client.InstanaAPI) rest.RestResource[*api.CustomEventSpecification] {
 	return api.CustomEventSpecifications()
 }
 
@@ -331,7 +334,7 @@ func (r *customEventSpecificationResource) SetComputedFields(_ context.Context, 
 }
 
 // UpdateState converts API data object to Terraform state
-func (r *customEventSpecificationResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, spec *restapi.CustomEventSpecification) diag.Diagnostics {
+func (r *customEventSpecificationResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, spec *api.CustomEventSpecification) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var model CustomEventSpecificationModel
 	// Validate input
@@ -367,7 +370,7 @@ func (r *customEventSpecificationResource) UpdateState(ctx context.Context, stat
 }
 
 // buildRulesModel processes all rules and returns a RulesModel
-func (r *customEventSpecificationResource) buildRulesModel(rules []restapi.RuleSpecification, diags *diag.Diagnostics) *RulesModel {
+func (r *customEventSpecificationResource) buildRulesModel(rules []api.RuleSpecification, diags *diag.Diagnostics) *RulesModel {
 	rulesModel := &RulesModel{}
 
 	// Use a map for O(1) lookup to process only the first occurrence of each rule type
@@ -382,32 +385,32 @@ func (r *customEventSpecificationResource) buildRulesModel(rules []restapi.RuleS
 		}
 
 		switch rule.DType {
-		case restapi.EntityCountRuleType:
+		case api.EntityCountRuleType:
 			if r.isValidEntityCountRule(rule) {
 				rulesModel.EntityCount = r.buildEntityCountRule(rule)
 				processedTypes[rule.DType] = true
 			}
-		case restapi.EntityCountVerificationRuleType:
+		case api.EntityCountVerificationRuleType:
 			if r.isValidEntityCountVerificationRule(rule) {
 				rulesModel.EntityCountVerification = r.buildEntityCountVerificationRule(rule)
 				processedTypes[rule.DType] = true
 			}
-		case restapi.EntityVerificationRuleType:
+		case api.EntityVerificationRuleType:
 			if r.isValidEntityVerificationRule(rule) {
 				rulesModel.EntityVerification = r.buildEntityVerificationRule(rule)
 				processedTypes[rule.DType] = true
 			}
-		case restapi.HostAvailabilityRuleType:
+		case api.HostAvailabilityRuleType:
 			if r.isValidHostAvailabilityRule(rule) {
 				rulesModel.HostAvailability = r.buildHostAvailabilityRule(rule, diags)
 				processedTypes[rule.DType] = true
 			}
-		case restapi.SystemRuleType:
+		case api.SystemRuleType:
 			if r.isValidSystemRule(rule) {
 				rulesModel.System = r.buildSystemRule(rule)
 				processedTypes[rule.DType] = true
 			}
-		case restapi.ThresholdRuleType:
+		case api.ThresholdRuleType:
 			if r.isValidThresholdRule(rule) {
 				rulesModel.Threshold = r.buildThresholdRule(rule)
 				processedTypes[rule.DType] = true
@@ -419,35 +422,35 @@ func (r *customEventSpecificationResource) buildRulesModel(rules []restapi.RuleS
 }
 
 // Validation methods for each rule type
-func (r *customEventSpecificationResource) isValidEntityCountRule(rule *restapi.RuleSpecification) bool {
+func (r *customEventSpecificationResource) isValidEntityCountRule(rule *api.RuleSpecification) bool {
 	return rule.ConditionOperator != nil && rule.ConditionValue != nil
 }
 
-func (r *customEventSpecificationResource) isValidEntityCountVerificationRule(rule *restapi.RuleSpecification) bool {
+func (r *customEventSpecificationResource) isValidEntityCountVerificationRule(rule *api.RuleSpecification) bool {
 	return rule.ConditionOperator != nil && rule.ConditionValue != nil &&
 		rule.MatchingEntityType != nil && rule.MatchingOperator != nil && rule.MatchingEntityLabel != nil
 }
 
-func (r *customEventSpecificationResource) isValidEntityVerificationRule(rule *restapi.RuleSpecification) bool {
+func (r *customEventSpecificationResource) isValidEntityVerificationRule(rule *api.RuleSpecification) bool {
 	return rule.MatchingEntityType != nil && rule.MatchingOperator != nil &&
 		rule.MatchingEntityLabel != nil && rule.OfflineDuration != nil
 }
 
-func (r *customEventSpecificationResource) isValidHostAvailabilityRule(rule *restapi.RuleSpecification) bool {
+func (r *customEventSpecificationResource) isValidHostAvailabilityRule(rule *api.RuleSpecification) bool {
 	return rule.OfflineDuration != nil
 }
 
-func (r *customEventSpecificationResource) isValidSystemRule(rule *restapi.RuleSpecification) bool {
+func (r *customEventSpecificationResource) isValidSystemRule(rule *api.RuleSpecification) bool {
 	return rule.SystemRuleID != nil
 }
 
-func (r *customEventSpecificationResource) isValidThresholdRule(rule *restapi.RuleSpecification) bool {
+func (r *customEventSpecificationResource) isValidThresholdRule(rule *api.RuleSpecification) bool {
 	return rule.MetricName != nil && rule.Rollup != nil && rule.Window != nil &&
 		rule.Aggregation != nil && rule.ConditionOperator != nil && rule.ConditionValue != nil
 }
 
 // Builder methods for each rule type
-func (r *customEventSpecificationResource) buildEntityCountRule(rule *restapi.RuleSpecification) *EntityCountRuleModel {
+func (r *customEventSpecificationResource) buildEntityCountRule(rule *api.RuleSpecification) *EntityCountRuleModel {
 	return &EntityCountRuleModel{
 		Severity:          mapIntToSeverityString(rule.Severity),
 		ConditionOperator: util.SetStringPointerToState(rule.ConditionOperator),
@@ -455,7 +458,7 @@ func (r *customEventSpecificationResource) buildEntityCountRule(rule *restapi.Ru
 	}
 }
 
-func (r *customEventSpecificationResource) buildEntityCountVerificationRule(rule *restapi.RuleSpecification) *EntityCountVerificationRuleModel {
+func (r *customEventSpecificationResource) buildEntityCountVerificationRule(rule *api.RuleSpecification) *EntityCountVerificationRuleModel {
 	return &EntityCountVerificationRuleModel{
 		Severity:            mapIntToSeverityString(rule.Severity),
 		ConditionOperator:   util.SetStringPointerToState(rule.ConditionOperator),
@@ -466,7 +469,7 @@ func (r *customEventSpecificationResource) buildEntityCountVerificationRule(rule
 	}
 }
 
-func (r *customEventSpecificationResource) buildEntityVerificationRule(rule *restapi.RuleSpecification) *EntityVerificationRuleModel {
+func (r *customEventSpecificationResource) buildEntityVerificationRule(rule *api.RuleSpecification) *EntityVerificationRuleModel {
 	return &EntityVerificationRuleModel{
 		Severity:            mapIntToSeverityString(rule.Severity),
 		MatchingEntityType:  util.SetStringPointerToState(rule.MatchingEntityType),
@@ -476,7 +479,7 @@ func (r *customEventSpecificationResource) buildEntityVerificationRule(rule *res
 	}
 }
 
-func (r *customEventSpecificationResource) buildHostAvailabilityRule(rule *restapi.RuleSpecification, diags *diag.Diagnostics) *HostAvailabilityRuleModel {
+func (r *customEventSpecificationResource) buildHostAvailabilityRule(rule *api.RuleSpecification, diags *diag.Diagnostics) *HostAvailabilityRuleModel {
 	model := &HostAvailabilityRuleModel{
 		Severity:        mapIntToSeverityString(rule.Severity),
 		OfflineDuration: util.SetInt64PointerToState(rule.OfflineDuration),
@@ -500,14 +503,14 @@ func (r *customEventSpecificationResource) buildHostAvailabilityRule(rule *resta
 	return model
 }
 
-func (r *customEventSpecificationResource) buildSystemRule(rule *restapi.RuleSpecification) *SystemRuleModel {
+func (r *customEventSpecificationResource) buildSystemRule(rule *api.RuleSpecification) *SystemRuleModel {
 	return &SystemRuleModel{
 		Severity:     mapIntToSeverityString(rule.Severity),
 		SystemRuleID: util.SetStringPointerToState(rule.SystemRuleID),
 	}
 }
 
-func (r *customEventSpecificationResource) buildThresholdRule(rule *restapi.RuleSpecification) *ThresholdRuleModel {
+func (r *customEventSpecificationResource) buildThresholdRule(rule *api.RuleSpecification) *ThresholdRuleModel {
 	model := &ThresholdRuleModel{
 		Severity:          mapIntToSeverityString(rule.Severity),
 		MetricName:        util.SetStringPointerToState(rule.MetricName),
@@ -552,7 +555,7 @@ func mapIntToSeverityString(severity int) types.String {
 // ============================================================================
 
 // MapStateToDataObject converts Terraform state to API data object
-func (r *customEventSpecificationResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.CustomEventSpecification, diag.Diagnostics) {
+func (r *customEventSpecificationResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*api.CustomEventSpecification, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Extract model from plan or state
@@ -600,8 +603,8 @@ func (r *customEventSpecificationResource) extractModel(ctx context.Context, pla
 }
 
 // buildAPISpecification constructs the API specification from the model
-func (r *customEventSpecificationResource) buildAPISpecification(model *CustomEventSpecificationModel, diags *diag.Diagnostics) *restapi.CustomEventSpecification {
-	return &restapi.CustomEventSpecification{
+func (r *customEventSpecificationResource) buildAPISpecification(model *CustomEventSpecificationModel, diags *diag.Diagnostics) *api.CustomEventSpecification {
+	return &api.CustomEventSpecification{
 		ID:                  r.extractID(model),
 		Name:                model.Name.ValueString(),
 		EntityType:          model.EntityType.ValueString(),
@@ -642,13 +645,13 @@ func (r *customEventSpecificationResource) extractOptionalInt(value types.Int64)
 }
 
 // buildRulesFromModel converts model rules to API rule specifications
-func (r *customEventSpecificationResource) buildRulesFromModel(rulesModel *RulesModel, diags *diag.Diagnostics) []restapi.RuleSpecification {
+func (r *customEventSpecificationResource) buildRulesFromModel(rulesModel *RulesModel, diags *diag.Diagnostics) []api.RuleSpecification {
 	if rulesModel == nil {
 		return nil
 	}
 
 	// Pre-allocate slice with estimated capacity to reduce allocations
-	rules := make([]restapi.RuleSpecification, 0, 6)
+	rules := make([]api.RuleSpecification, 0, 6)
 
 	// Process each rule type using dedicated builder methods
 	if rulesModel.EntityCount != nil {
@@ -681,12 +684,12 @@ func (r *customEventSpecificationResource) buildRulesFromModel(rulesModel *Rules
 }
 
 // buildEntityCountRuleSpec creates an entity count rule specification
-func (r *customEventSpecificationResource) buildEntityCountRuleSpec(rule *EntityCountRuleModel) restapi.RuleSpecification {
+func (r *customEventSpecificationResource) buildEntityCountRuleSpec(rule *EntityCountRuleModel) api.RuleSpecification {
 	conditionOperator := rule.ConditionOperator.ValueString()
 	conditionValue := rule.ConditionValue.ValueFloat64()
 
-	return restapi.RuleSpecification{
-		DType:             restapi.EntityCountRuleType,
+	return api.RuleSpecification{
+		DType:             api.EntityCountRuleType,
 		Severity:          mapSeverityToInt(rule.Severity.ValueString()),
 		ConditionOperator: &conditionOperator,
 		ConditionValue:    &conditionValue,
@@ -694,15 +697,15 @@ func (r *customEventSpecificationResource) buildEntityCountRuleSpec(rule *Entity
 }
 
 // buildEntityCountVerificationRuleSpec creates an entity count verification rule specification
-func (r *customEventSpecificationResource) buildEntityCountVerificationRuleSpec(rule *EntityCountVerificationRuleModel) restapi.RuleSpecification {
+func (r *customEventSpecificationResource) buildEntityCountVerificationRuleSpec(rule *EntityCountVerificationRuleModel) api.RuleSpecification {
 	conditionOperator := rule.ConditionOperator.ValueString()
 	conditionValue := rule.ConditionValue.ValueFloat64()
 	matchingEntityType := rule.MatchingEntityType.ValueString()
 	matchingOperator := rule.MatchingOperator.ValueString()
 	matchingEntityLabel := rule.MatchingEntityLabel.ValueString()
 
-	return restapi.RuleSpecification{
-		DType:               restapi.EntityCountVerificationRuleType,
+	return api.RuleSpecification{
+		DType:               api.EntityCountVerificationRuleType,
 		Severity:            mapSeverityToInt(rule.Severity.ValueString()),
 		ConditionOperator:   &conditionOperator,
 		ConditionValue:      &conditionValue,
@@ -713,14 +716,14 @@ func (r *customEventSpecificationResource) buildEntityCountVerificationRuleSpec(
 }
 
 // buildEntityVerificationRuleSpec creates an entity verification rule specification
-func (r *customEventSpecificationResource) buildEntityVerificationRuleSpec(rule *EntityVerificationRuleModel) restapi.RuleSpecification {
+func (r *customEventSpecificationResource) buildEntityVerificationRuleSpec(rule *EntityVerificationRuleModel) api.RuleSpecification {
 	matchingEntityType := rule.MatchingEntityType.ValueString()
 	matchingOperator := rule.MatchingOperator.ValueString()
 	matchingEntityLabel := rule.MatchingEntityLabel.ValueString()
 	offlineDuration := int(rule.OfflineDuration.ValueInt64())
 
-	return restapi.RuleSpecification{
-		DType:               restapi.EntityVerificationRuleType,
+	return api.RuleSpecification{
+		DType:               api.EntityVerificationRuleType,
 		Severity:            mapSeverityToInt(rule.Severity.ValueString()),
 		MatchingEntityType:  &matchingEntityType,
 		MatchingOperator:    &matchingOperator,
@@ -731,11 +734,11 @@ func (r *customEventSpecificationResource) buildEntityVerificationRuleSpec(rule 
 
 // buildHostAvailabilityRuleSpec creates a host availability rule specification
 // Returns the specification and a boolean indicating success
-func (r *customEventSpecificationResource) buildHostAvailabilityRuleSpec(rule *HostAvailabilityRuleModel, diags *diag.Diagnostics) (restapi.RuleSpecification, bool) {
+func (r *customEventSpecificationResource) buildHostAvailabilityRuleSpec(rule *HostAvailabilityRuleModel, diags *diag.Diagnostics) (api.RuleSpecification, bool) {
 	offlineDuration := int(rule.OfflineDuration.ValueInt64())
 
-	spec := restapi.RuleSpecification{
-		DType:           restapi.HostAvailabilityRuleType,
+	spec := api.RuleSpecification{
+		DType:           api.HostAvailabilityRuleType,
 		Severity:        mapSeverityToInt(rule.Severity.ValueString()),
 		OfflineDuration: &offlineDuration,
 		CloseAfter:      r.extractOptionalInt(rule.CloseAfter),
@@ -749,7 +752,7 @@ func (r *customEventSpecificationResource) buildHostAvailabilityRuleSpec(rule *H
 				CustomEventSpecificationResourceErrParseTagFilter,
 				fmt.Sprintf(CustomEventSpecificationResourceErrParseTagFilterMsg, err),
 			)
-			return restapi.RuleSpecification{}, false
+			return api.RuleSpecification{}, false
 		}
 		spec.TagFilter = tagFilter
 	}
@@ -758,7 +761,7 @@ func (r *customEventSpecificationResource) buildHostAvailabilityRuleSpec(rule *H
 }
 
 // parseTagFilter parses a tag filter string into an API model
-func (r *customEventSpecificationResource) parseTagFilter(tagFilterStr string) (*restapi.TagFilter, error) {
+func (r *customEventSpecificationResource) parseTagFilter(tagFilterStr string) (*tag.TagFilter, error) {
 	parser := tagfilter.NewParser()
 	expr, err := parser.Parse(tagFilterStr)
 	if err != nil {
@@ -770,18 +773,18 @@ func (r *customEventSpecificationResource) parseTagFilter(tagFilterStr string) (
 }
 
 // buildSystemRuleSpec creates a system rule specification
-func (r *customEventSpecificationResource) buildSystemRuleSpec(rule *SystemRuleModel) restapi.RuleSpecification {
+func (r *customEventSpecificationResource) buildSystemRuleSpec(rule *SystemRuleModel) api.RuleSpecification {
 	systemRuleID := rule.SystemRuleID.ValueString()
 
-	return restapi.RuleSpecification{
-		DType:        restapi.SystemRuleType,
+	return api.RuleSpecification{
+		DType:        api.SystemRuleType,
 		Severity:     mapSeverityToInt(rule.Severity.ValueString()),
 		SystemRuleID: &systemRuleID,
 	}
 }
 
 // buildThresholdRuleSpec creates a threshold rule specification
-func (r *customEventSpecificationResource) buildThresholdRuleSpec(rule *ThresholdRuleModel) restapi.RuleSpecification {
+func (r *customEventSpecificationResource) buildThresholdRuleSpec(rule *ThresholdRuleModel) api.RuleSpecification {
 	metricName := rule.MetricName.ValueString()
 	rollup := int(rule.Rollup.ValueInt64())
 	window := int(rule.Window.ValueInt64())
@@ -789,8 +792,8 @@ func (r *customEventSpecificationResource) buildThresholdRuleSpec(rule *Threshol
 	conditionOperator := rule.ConditionOperator.ValueString()
 	conditionValue := rule.ConditionValue.ValueFloat64()
 
-	return restapi.RuleSpecification{
-		DType:             restapi.ThresholdRuleType,
+	return api.RuleSpecification{
+		DType:             api.ThresholdRuleType,
 		Severity:          mapSeverityToInt(rule.Severity.ValueString()),
 		MetricName:        &metricName,
 		Rollup:            &rollup,
@@ -803,12 +806,12 @@ func (r *customEventSpecificationResource) buildThresholdRuleSpec(rule *Threshol
 }
 
 // buildMetricPattern creates a metric pattern from the model
-func (r *customEventSpecificationResource) buildMetricPattern(pattern *MetricPatternModel) *restapi.MetricPattern {
+func (r *customEventSpecificationResource) buildMetricPattern(pattern *MetricPatternModel) *api.MetricPattern {
 	if pattern == nil {
 		return nil
 	}
 
-	return &restapi.MetricPattern{
+	return &api.MetricPattern{
 		Prefix:      pattern.Prefix.ValueString(),
 		Operator:    pattern.Operator.ValueString(),
 		Postfix:     r.extractOptionalString(pattern.Postfix),

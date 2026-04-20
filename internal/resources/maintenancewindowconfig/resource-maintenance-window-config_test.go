@@ -7,8 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/instana-go-client/api"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -51,13 +51,13 @@ func TestUpdateState(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("one-time maintenance window", func(t *testing.T) {
-		apiConfig := &restapi.MaintenanceWindowConfig{
+		apiConfig := &api.MaintenanceWindow{
 			ID:    "test-id",
 			Name:  "test-maintenance",
 			Query: "entity.type:host",
-			Scheduling: &restapi.MaintenanceScheduling{
+			Scheduling: &api.MaintenanceScheduling{
 				Start: 1698938631036,
-				Duration: &restapi.MaintenanceDuration{
+				Duration: &api.MaintenanceDuration{
 					Amount: 2,
 					Unit:   "HOURS",
 				},
@@ -85,13 +85,13 @@ func TestUpdateState(t *testing.T) {
 	t.Run("recurrent maintenance window", func(t *testing.T) {
 		rrule := "FREQ=WEEKLY;INTERVAL=2;BYDAY=SA;COUNT=10"
 		timezoneId := "America/New_York"
-		apiConfig := &restapi.MaintenanceWindowConfig{
+		apiConfig := &api.MaintenanceWindow{
 			ID:    "test-id",
 			Name:  "test-maintenance",
 			Query: "",
-			Scheduling: &restapi.MaintenanceScheduling{
+			Scheduling: &api.MaintenanceScheduling{
 				Start: 1683827571245,
-				Duration: &restapi.MaintenanceDuration{
+				Duration: &api.MaintenanceDuration{
 					Amount: 2,
 					Unit:   "HOURS",
 				},
@@ -119,13 +119,13 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("with tag filter expression enabled", func(t *testing.T) {
 		enabled := true
-		apiConfig := &restapi.MaintenanceWindowConfig{
+		apiConfig := &api.MaintenanceWindow{
 			ID:    "test-id",
 			Name:  "test-maintenance",
 			Query: "",
-			Scheduling: &restapi.MaintenanceScheduling{
+			Scheduling: &api.MaintenanceScheduling{
 				Start: 1698938631036,
-				Duration: &restapi.MaintenanceDuration{
+				Duration: &api.MaintenanceDuration{
 					Amount: 1,
 					Unit:   "DAYS",
 				},

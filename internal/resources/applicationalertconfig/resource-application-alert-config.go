@@ -18,20 +18,23 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/client"
+	"github.com/instana/instana-go-client/shared/rest"
+	common "github.com/instana/instana-go-client/shared/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
 	"github.com/instana/terraform-provider-instana/internal/util"
 )
 
 // NewApplicationAlertConfigResourceHandle creates the resource handle for Application Alert Configuration
-func NewApplicationAlertConfigResourceHandle() resourcehandle.ResourceHandle[*restapi.ApplicationAlertConfig] {
+func NewApplicationAlertConfigResourceHandle() resourcehandle.ResourceHandle[*api.ApplicationAlertConfig] {
 	return &applicationAlertConfigResource{
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName: ResourceInstanaApplicationAlertConfig,
 			Schema: schema.Schema{
-				Description: "This resource manages application alert configurations in Instana.",
+				Description: "This resource manages application alert configurations in api.",
 				Attributes: map[string]schema.Attribute{
 					ApplicationAlertConfigFieldID: schema.StringAttribute{
 						Computed:    true,
@@ -52,7 +55,7 @@ func NewApplicationAlertConfigResourceHandle() resourcehandle.ResourceHandle[*re
 						Required:    true,
 						Description: "The boundary scope of the application alert config",
 						Validators: []validator.String{
-							stringvalidator.OneOf(restapi.SupportedApplicationAlertConfigBoundaryScopes.ToStringSlice()...),
+							stringvalidator.OneOf(common.SupportedApplicationAlertConfigBoundaryScopes.ToStringSlice()...),
 						},
 					},
 					ApplicationAlertConfigFieldDescription: schema.StringAttribute{
@@ -66,7 +69,7 @@ func NewApplicationAlertConfigResourceHandle() resourcehandle.ResourceHandle[*re
 						Required:    true,
 						Description: "The evaluation type of the application alert config",
 						Validators: []validator.String{
-							stringvalidator.OneOf(restapi.SupportedApplicationAlertEvaluationTypes.ToStringSlice()...),
+							stringvalidator.OneOf(api.SupportedApplicationAlertEvaluationTypes.ToStringSlice()...),
 						},
 					},
 					ApplicationAlertConfigFieldGracePeriod: schema.Int64Attribute{
@@ -76,7 +79,7 @@ func NewApplicationAlertConfigResourceHandle() resourcehandle.ResourceHandle[*re
 					ApplicationAlertConfigFieldGranularity: schema.Int64Attribute{
 						Optional:    true,
 						Computed:    true,
-						Default:     int64default.StaticInt64(int64(restapi.Granularity600000)),
+						Default:     int64default.StaticInt64(int64(common.Granularity600000)),
 						Description: "The evaluation granularity used for detection of violations of the defined threshold. In other words, it defines the size of the tumbling window used",
 					},
 					ApplicationAlertConfigFieldIncludeInternal: schema.BoolAttribute{
@@ -154,7 +157,7 @@ func NewApplicationAlertConfigResourceHandle() resourcehandle.ResourceHandle[*re
 													Computed:    true,
 													Description: "The aggregation function of the application alert rule",
 													Validators: []validator.String{
-														stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
+														stringvalidator.OneOf(common.SupportedAggregations.ToStringSlice()...),
 													},
 												},
 											},
@@ -173,7 +176,7 @@ func NewApplicationAlertConfigResourceHandle() resourcehandle.ResourceHandle[*re
 													Computed:    true,
 													Description: "The aggregation function of the application alert rule",
 													Validators: []validator.String{
-														stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
+														stringvalidator.OneOf(common.SupportedAggregations.ToStringSlice()...),
 													},
 												},
 											},
@@ -192,7 +195,7 @@ func NewApplicationAlertConfigResourceHandle() resourcehandle.ResourceHandle[*re
 													Computed:    true,
 													Description: "The aggregation function of the application alert rule",
 													Validators: []validator.String{
-														stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
+														stringvalidator.OneOf(common.SupportedAggregations.ToStringSlice()...),
 													},
 												},
 												ApplicationAlertConfigFieldRuleLogsLevel: schema.StringAttribute{
@@ -200,7 +203,7 @@ func NewApplicationAlertConfigResourceHandle() resourcehandle.ResourceHandle[*re
 													Computed:    true,
 													Description: "The log level for which this rule applies to",
 													Validators: []validator.String{
-														stringvalidator.OneOf(restapi.SupportedLogLevels.ToStringSlice()...),
+														stringvalidator.OneOf(api.SupportedLogLevels.ToStringSlice()...),
 													},
 												},
 												ApplicationAlertConfigFieldRuleLogsMessage: schema.StringAttribute{
@@ -213,7 +216,7 @@ func NewApplicationAlertConfigResourceHandle() resourcehandle.ResourceHandle[*re
 													Computed:    true,
 													Description: "The operator which will be applied to evaluate this rule",
 													Validators: []validator.String{
-														stringvalidator.OneOf(restapi.SupportedExpressionOperators.ToStringSlice()...),
+														stringvalidator.OneOf(common.SupportedExpressionOperators.ToStringSlice()...),
 													},
 												},
 											},
@@ -232,7 +235,7 @@ func NewApplicationAlertConfigResourceHandle() resourcehandle.ResourceHandle[*re
 													Computed:    true,
 													Description: "The aggregation function of the application alert rule",
 													Validators: []validator.String{
-														stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
+														stringvalidator.OneOf(common.SupportedAggregations.ToStringSlice()...),
 													},
 												},
 											},
@@ -251,7 +254,7 @@ func NewApplicationAlertConfigResourceHandle() resourcehandle.ResourceHandle[*re
 													Computed:    true,
 													Description: "The aggregation function of the application alert rule",
 													Validators: []validator.String{
-														stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
+														stringvalidator.OneOf(common.SupportedAggregations.ToStringSlice()...),
 													},
 												},
 												ApplicationAlertConfigFieldRuleStatusCodeStart: schema.Int64Attribute{
@@ -280,7 +283,7 @@ func NewApplicationAlertConfigResourceHandle() resourcehandle.ResourceHandle[*re
 													Computed:    true,
 													Description: "The aggregation function of the application alert rule",
 													Validators: []validator.String{
-														stringvalidator.OneOf(restapi.SupportedAggregations.ToStringSlice()...),
+														stringvalidator.OneOf(common.SupportedAggregations.ToStringSlice()...),
 													},
 												},
 											},
@@ -403,7 +406,7 @@ func NewApplicationAlertConfigResourceHandle() resourcehandle.ResourceHandle[*re
 }
 
 // NewGlobalApplicationAlertConfigResourceHandle creates the resource handle for Global Application Alert Configuration
-func NewGlobalApplicationAlertConfigResourceHandle() resourcehandle.ResourceHandle[*restapi.ApplicationAlertConfig] {
+func NewGlobalApplicationAlertConfigResourceHandle() resourcehandle.ResourceHandle[*api.ApplicationAlertConfig] {
 	return &applicationAlertConfigResource{
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:  ResourceInstanaGlobalApplicationAlertConfig,
@@ -429,7 +432,7 @@ func (r *applicationAlertConfigResource) MetaData() *resourcehandle.ResourceMeta
 }
 
 // GetRestResource returns the appropriate REST resource based on whether this is a global config
-func (r *applicationAlertConfigResource) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.ApplicationAlertConfig] {
+func (r *applicationAlertConfigResource) GetRestResource(api client.InstanaAPI) rest.RestResource[*api.ApplicationAlertConfig] {
 	if r.isGlobal {
 		return api.GlobalApplicationAlertConfigs()
 	}
@@ -437,7 +440,7 @@ func (r *applicationAlertConfigResource) GetRestResource(api restapi.InstanaAPI)
 }
 
 // MapStateToDataObject converts Terraform state to API data object by delegating to the implementation
-func (r *applicationAlertConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.ApplicationAlertConfig, diag.Diagnostics) {
+func (r *applicationAlertConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*api.ApplicationAlertConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var model ApplicationAlertConfigModel
 
@@ -478,7 +481,7 @@ func (r *applicationAlertConfigResource) MapStateToDataObject(ctx context.Contex
 }
 
 // UpdateState updates Terraform state with API data by delegating to the implementation
-func (r *applicationAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, obj *restapi.ApplicationAlertConfig) diag.Diagnostics {
+func (r *applicationAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, obj *api.ApplicationAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	// Delegate to the resource implementation
@@ -502,7 +505,7 @@ func (r *applicationAlertConfigResource) SetComputedFields(ctx context.Context, 
 // ============================================================================
 
 // Resource interface for application alert config resources
-type Resource[T restapi.InstanaDataObject] interface {
+type Resource[T rest.InstanaDataObject] interface {
 	GetID(data T) string
 	SetID(data T, id string)
 	MapStateToDataObject(ctx context.Context, state tfsdk.State) (T, diag.Diagnostics)
@@ -510,7 +513,7 @@ type Resource[T restapi.InstanaDataObject] interface {
 }
 
 // NewResource creates a new resource implementation instance
-func (r *applicationAlertConfigResource) NewResource(ctx context.Context, api restapi.InstanaAPI) (Resource[*restapi.ApplicationAlertConfig], diag.Diagnostics) {
+func (r *applicationAlertConfigResource) NewResource(ctx context.Context, api client.InstanaAPI) (Resource[*api.ApplicationAlertConfig], diag.Diagnostics) {
 	return &applicationAlertConfigResourceImpl{
 		api:      api,
 		isGlobal: r.isGlobal,
@@ -523,17 +526,17 @@ func (r *applicationAlertConfigResource) NewResource(ctx context.Context, api re
 
 // applicationAlertConfigResourceImpl implements the Resource interface for ApplicationAlertConfig
 type applicationAlertConfigResourceImpl struct {
-	api      restapi.InstanaAPI
+	api      client.InstanaAPI
 	isGlobal bool
 }
 
 // GetID returns the ID from the API data object
-func (r *applicationAlertConfigResourceImpl) GetID(data *restapi.ApplicationAlertConfig) string {
+func (r *applicationAlertConfigResourceImpl) GetID(data *api.ApplicationAlertConfig) string {
 	return data.ID
 }
 
 // SetID sets the ID in the API data object
-func (r *applicationAlertConfigResourceImpl) SetID(data *restapi.ApplicationAlertConfig, id string) {
+func (r *applicationAlertConfigResourceImpl) SetID(data *api.ApplicationAlertConfig, id string) {
 	data.ID = id
 }
 
@@ -542,7 +545,7 @@ func (r *applicationAlertConfigResourceImpl) SetID(data *restapi.ApplicationAler
 // ============================================================================
 
 // MapStateToDataObject converts Terraform state to API data object
-func (r *applicationAlertConfigResourceImpl) MapStateToDataObject(ctx context.Context, state tfsdk.State) (*restapi.ApplicationAlertConfig, diag.Diagnostics) {
+func (r *applicationAlertConfigResourceImpl) MapStateToDataObject(ctx context.Context, state tfsdk.State) (*api.ApplicationAlertConfig, diag.Diagnostics) {
 	var model ApplicationAlertConfigModel
 	// Extract model from state
 	diags := state.Get(ctx, &model)
@@ -551,12 +554,12 @@ func (r *applicationAlertConfigResourceImpl) MapStateToDataObject(ctx context.Co
 	}
 
 	// Initialize result with basic fields
-	result := &restapi.ApplicationAlertConfig{
+	result := &api.ApplicationAlertConfig{
 		ID:               model.ID.ValueString(),
 		Name:             model.Name.ValueString(),
 		Description:      model.Description.ValueString(),
-		BoundaryScope:    restapi.BoundaryScope(model.BoundaryScope.ValueString()),
-		EvaluationType:   restapi.ApplicationAlertEvaluationType(model.EvaluationType.ValueString()),
+		BoundaryScope:    common.BoundaryScope(model.BoundaryScope.ValueString()),
+		EvaluationType:   api.ApplicationAlertEvaluationType(model.EvaluationType.ValueString()),
 		IncludeInternal:  model.IncludeInternal.ValueBool(),
 		IncludeSynthetic: model.IncludeSynthetic.ValueBool(),
 		Triggering:       model.Triggering.ValueBool(),
@@ -565,7 +568,7 @@ func (r *applicationAlertConfigResourceImpl) MapStateToDataObject(ctx context.Co
 	}
 	// Map granularity if present
 	if !model.Granularity.IsNull() && !model.Granularity.IsUnknown() {
-		result.Granularity = restapi.Granularity(model.Granularity.ValueInt64())
+		result.Granularity = common.Granularity(model.Granularity.ValueInt64())
 	}
 
 	// Map optional and complex fields
@@ -596,7 +599,7 @@ func (r *applicationAlertConfigResourceImpl) MapStateToDataObject(ctx context.Co
 }
 
 // mapTagFilter parses and maps tag filter expression
-func (r *applicationAlertConfigResourceImpl) mapTagFilter(model *ApplicationAlertConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
+func (r *applicationAlertConfigResourceImpl) mapTagFilter(model *ApplicationAlertConfigModel, result *api.ApplicationAlertConfig, diags *diag.Diagnostics) error {
 	if model.TagFilter.IsNull() || model.TagFilter.IsUnknown() {
 		return nil
 	}
@@ -619,7 +622,7 @@ func (r *applicationAlertConfigResourceImpl) mapTagFilter(model *ApplicationAler
 }
 
 // mapAlertChannels converts alert channels map from state to API format
-func (r *applicationAlertConfigResourceImpl) mapAlertChannels(ctx context.Context, model *ApplicationAlertConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) {
+func (r *applicationAlertConfigResourceImpl) mapAlertChannels(ctx context.Context, model *ApplicationAlertConfigModel, result *api.ApplicationAlertConfig, diags *diag.Diagnostics) {
 	if model.AlertChannels.IsNull() || model.AlertChannels.IsUnknown() {
 		return
 	}
@@ -637,9 +640,9 @@ func (r *applicationAlertConfigResourceImpl) mapAlertChannels(ctx context.Contex
 }
 
 // mapApplications converts application scope configuration
-func (r *applicationAlertConfigResourceImpl) mapApplications(model *ApplicationAlertConfigModel, result *restapi.ApplicationAlertConfig) {
+func (r *applicationAlertConfigResourceImpl) mapApplications(model *ApplicationAlertConfigModel, result *api.ApplicationAlertConfig) {
 	// Always initialize as empty map, never nil
-	result.Applications = make(map[string]restapi.IncludedApplication)
+	result.Applications = make(map[string]api.IncludedApplication)
 
 	if len(model.Applications) == 0 {
 		return
@@ -647,7 +650,7 @@ func (r *applicationAlertConfigResourceImpl) mapApplications(model *ApplicationA
 
 	for _, app := range model.Applications {
 		appID := app.ApplicationID.ValueString()
-		result.Applications[appID] = restapi.IncludedApplication{
+		result.Applications[appID] = api.IncludedApplication{
 			ApplicationID: appID,
 			Inclusive:     app.Inclusive.ValueBool(),
 			Services:      r.mapServices(app.Services),
@@ -656,15 +659,15 @@ func (r *applicationAlertConfigResourceImpl) mapApplications(model *ApplicationA
 }
 
 // mapServices converts service scope configuration
-func (r *applicationAlertConfigResourceImpl) mapServices(services []ServiceModel) map[string]restapi.IncludedService {
+func (r *applicationAlertConfigResourceImpl) mapServices(services []ServiceModel) map[string]api.IncludedService {
 	if len(services) == 0 {
 		return nil
 	}
 
-	result := make(map[string]restapi.IncludedService, len(services))
+	result := make(map[string]api.IncludedService, len(services))
 	for _, svc := range services {
 		svcID := svc.ServiceID.ValueString()
-		result[svcID] = restapi.IncludedService{
+		result[svcID] = api.IncludedService{
 			ServiceID: svcID,
 			Inclusive: svc.Inclusive.ValueBool(),
 			Endpoints: r.mapEndpoints(svc.Endpoints),
@@ -674,15 +677,15 @@ func (r *applicationAlertConfigResourceImpl) mapServices(services []ServiceModel
 }
 
 // mapEndpoints converts endpoint scope configuration
-func (r *applicationAlertConfigResourceImpl) mapEndpoints(endpoints []EndpointModel) map[string]restapi.IncludedEndpoint {
+func (r *applicationAlertConfigResourceImpl) mapEndpoints(endpoints []EndpointModel) map[string]api.IncludedEndpoint {
 	if len(endpoints) == 0 {
 		return nil
 	}
 
-	result := make(map[string]restapi.IncludedEndpoint, len(endpoints))
+	result := make(map[string]api.IncludedEndpoint, len(endpoints))
 	for _, ep := range endpoints {
 		epID := ep.EndpointID.ValueString()
-		result[epID] = restapi.IncludedEndpoint{
+		result[epID] = api.IncludedEndpoint{
 			EndpointID: epID,
 			Inclusive:  ep.Inclusive.ValueBool(),
 		}
@@ -691,7 +694,7 @@ func (r *applicationAlertConfigResourceImpl) mapEndpoints(endpoints []EndpointMo
 }
 
 // mapCustomPayloadFields converts custom payload fields from state to API format
-func (r *applicationAlertConfigResourceImpl) mapCustomPayloadFields(ctx context.Context, model *ApplicationAlertConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
+func (r *applicationAlertConfigResourceImpl) mapCustomPayloadFields(ctx context.Context, model *ApplicationAlertConfigModel, result *api.ApplicationAlertConfig, diags *diag.Diagnostics) error {
 	if model.CustomPayloadFields.IsNull() || model.CustomPayloadFields.IsUnknown() {
 		return nil
 	}
@@ -706,12 +709,12 @@ func (r *applicationAlertConfigResourceImpl) mapCustomPayloadFields(ctx context.
 }
 
 // mapRules converts alert rules with thresholds from state to API format
-func (r *applicationAlertConfigResourceImpl) mapRules(ctx context.Context, model *ApplicationAlertConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
+func (r *applicationAlertConfigResourceImpl) mapRules(ctx context.Context, model *ApplicationAlertConfigModel, result *api.ApplicationAlertConfig, diags *diag.Diagnostics) error {
 	if len(model.Rules) == 0 {
 		return nil
 	}
 
-	result.Rules = make([]restapi.ApplicationAlertRuleWithThresholds, len(model.Rules))
+	result.Rules = make([]api.ApplicationAlertRuleWithThresholds, len(model.Rules))
 	for i, ruleWithThreshold := range model.Rules {
 		if err := r.mapSingleRule(ctx, i, &ruleWithThreshold, result, diags); err != nil {
 			return err
@@ -757,8 +760,8 @@ func (r *applicationAlertConfigResourceImpl) validateRuleThresholds(index int, r
 }
 
 // mapSingleRule converts a single rule with its thresholds
-func (r *applicationAlertConfigResourceImpl) mapSingleRule(ctx context.Context, index int, ruleWithThreshold *RuleWithThresholdModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
-	result.Rules[index] = restapi.ApplicationAlertRuleWithThresholds{
+func (r *applicationAlertConfigResourceImpl) mapSingleRule(ctx context.Context, index int, ruleWithThreshold *RuleWithThresholdModel, result *api.ApplicationAlertConfig, diags *diag.Diagnostics) error {
+	result.Rules[index] = api.ApplicationAlertRuleWithThresholds{
 		ThresholdOperator: ruleWithThreshold.ThresholdOperator.ValueString(),
 	}
 
@@ -776,8 +779,8 @@ func (r *applicationAlertConfigResourceImpl) mapSingleRule(ctx context.Context, 
 }
 
 // mapRuleConfiguration maps the rule type and its specific configuration
-func (r *applicationAlertConfigResourceImpl) mapRuleConfiguration(index int, rule *RuleModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
-	result.Rules[index].Rule = &restapi.ApplicationAlertRule{}
+func (r *applicationAlertConfigResourceImpl) mapRuleConfiguration(index int, rule *RuleModel, result *api.ApplicationAlertConfig, diags *diag.Diagnostics) error {
+	result.Rules[index].Rule = &api.ApplicationAlertRule{}
 
 	// Map each rule type
 	if rule.ErrorRate != nil {
@@ -803,31 +806,31 @@ func (r *applicationAlertConfigResourceImpl) mapRuleConfiguration(index int, rul
 }
 
 // mapErrorRateRule maps error rate rule configuration to API format
-func (r *applicationAlertConfigResourceImpl) mapErrorRateRule(index int, errorRate *RuleConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
+func (r *applicationAlertConfigResourceImpl) mapErrorRateRule(index int, errorRate *RuleConfigModel, result *api.ApplicationAlertConfig, diags *diag.Diagnostics) error {
 	if errorRate.MetricName.IsNull() || errorRate.MetricName.IsUnknown() {
 		diags.AddError(ErrorMessageValidationError, fmt.Sprintf(ErrorMessageMetricNameRequired, "error rate"))
 		return errors.New(ErrorMessageMissingMetricName)
 	}
 	result.Rules[index].Rule.AlertType = APIAlertTypeErrorRate
 	result.Rules[index].Rule.MetricName = errorRate.MetricName.ValueString()
-	result.Rules[index].Rule.Aggregation = restapi.Aggregation(errorRate.Aggregation.ValueString())
+	result.Rules[index].Rule.Aggregation = common.Aggregation(errorRate.Aggregation.ValueString())
 	return nil
 }
 
 // mapErrorsRule maps errors rule configuration to API format
-func (r *applicationAlertConfigResourceImpl) mapErrorsRule(index int, errorsRule *RuleConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
+func (r *applicationAlertConfigResourceImpl) mapErrorsRule(index int, errorsRule *RuleConfigModel, result *api.ApplicationAlertConfig, diags *diag.Diagnostics) error {
 	if errorsRule.MetricName.IsNull() || errorsRule.MetricName.IsUnknown() {
 		diags.AddError(ErrorMessageValidationError, fmt.Sprintf(ErrorMessageMetricNameRequired, "error"))
 		return errors.New(ErrorMessageMissingMetricName)
 	}
 	result.Rules[index].Rule.AlertType = APIAlertTypeErrors
 	result.Rules[index].Rule.MetricName = errorsRule.MetricName.ValueString()
-	result.Rules[index].Rule.Aggregation = restapi.Aggregation(errorsRule.Aggregation.ValueString())
+	result.Rules[index].Rule.Aggregation = common.Aggregation(errorsRule.Aggregation.ValueString())
 	return nil
 }
 
 // mapLogsRule maps logs rule configuration with additional fields to API format
-func (r *applicationAlertConfigResourceImpl) mapLogsRule(index int, logs *LogsRuleModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
+func (r *applicationAlertConfigResourceImpl) mapLogsRule(index int, logs *LogsRuleModel, result *api.ApplicationAlertConfig, diags *diag.Diagnostics) error {
 	if logs.MetricName.IsNull() || logs.MetricName.IsUnknown() ||
 		logs.Level.IsNull() || logs.Level.IsUnknown() ||
 		logs.Operator.IsNull() || logs.Operator.IsUnknown() {
@@ -837,34 +840,34 @@ func (r *applicationAlertConfigResourceImpl) mapLogsRule(index int, logs *LogsRu
 
 	result.Rules[index].Rule.AlertType = APIAlertTypeLogs
 	result.Rules[index].Rule.MetricName = logs.MetricName.ValueString()
-	result.Rules[index].Rule.Aggregation = restapi.Aggregation(logs.Aggregation.ValueString())
+	result.Rules[index].Rule.Aggregation = common.Aggregation(logs.Aggregation.ValueString())
 
-	level := restapi.LogLevel(logs.Level.ValueString())
+	level := api.LogLevel(logs.Level.ValueString())
 	result.Rules[index].Rule.Level = &level
 
 	message := logs.Message.ValueString()
 	result.Rules[index].Rule.Message = &message
 
-	operator := restapi.ExpressionOperator(logs.Operator.ValueString())
+	operator := common.ExpressionOperator(logs.Operator.ValueString())
 	result.Rules[index].Rule.Operator = &operator
 
 	return nil
 }
 
 // mapSlownessRule maps slowness rule configuration to API format
-func (r *applicationAlertConfigResourceImpl) mapSlownessRule(index int, slowness *RuleConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
+func (r *applicationAlertConfigResourceImpl) mapSlownessRule(index int, slowness *RuleConfigModel, result *api.ApplicationAlertConfig, diags *diag.Diagnostics) error {
 	if slowness.MetricName.IsNull() || slowness.MetricName.IsUnknown() {
 		diags.AddError(ErrorMessageValidationError, fmt.Sprintf(ErrorMessageMetricNameRequired, "slowness"))
 		return errors.New(ErrorMessageMissingMetricName)
 	}
 	result.Rules[index].Rule.AlertType = APIAlertTypeSlowness
 	result.Rules[index].Rule.MetricName = slowness.MetricName.ValueString()
-	result.Rules[index].Rule.Aggregation = restapi.Aggregation(slowness.Aggregation.ValueString())
+	result.Rules[index].Rule.Aggregation = common.Aggregation(slowness.Aggregation.ValueString())
 	return nil
 }
 
 // mapStatusCodeRule maps status code rule configuration with range to API format
-func (r *applicationAlertConfigResourceImpl) mapStatusCodeRule(index int, statusCode *StatusCodeRuleModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
+func (r *applicationAlertConfigResourceImpl) mapStatusCodeRule(index int, statusCode *StatusCodeRuleModel, result *api.ApplicationAlertConfig, diags *diag.Diagnostics) error {
 	if statusCode.MetricName.IsNull() || statusCode.MetricName.IsUnknown() {
 		diags.AddError(ErrorMessageValidationError, fmt.Sprintf(ErrorMessageMetricNameRequired, "status code"))
 		return errors.New(ErrorMessageMissingMetricName)
@@ -872,7 +875,7 @@ func (r *applicationAlertConfigResourceImpl) mapStatusCodeRule(index int, status
 
 	result.Rules[index].Rule.AlertType = APIAlertTypeStatusCode
 	result.Rules[index].Rule.MetricName = statusCode.MetricName.ValueString()
-	result.Rules[index].Rule.Aggregation = restapi.Aggregation(statusCode.Aggregation.ValueString())
+	result.Rules[index].Rule.Aggregation = common.Aggregation(statusCode.Aggregation.ValueString())
 
 	statusCodeStart := int32(statusCode.StatusCodeStart.ValueInt64())
 	result.Rules[index].Rule.StatusCodeStart = &statusCodeStart
@@ -884,19 +887,19 @@ func (r *applicationAlertConfigResourceImpl) mapStatusCodeRule(index int, status
 }
 
 // mapThroughputRule maps throughput rule configuration to API format
-func (r *applicationAlertConfigResourceImpl) mapThroughputRule(index int, throughput *RuleConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
+func (r *applicationAlertConfigResourceImpl) mapThroughputRule(index int, throughput *RuleConfigModel, result *api.ApplicationAlertConfig, diags *diag.Diagnostics) error {
 	if throughput.MetricName.IsNull() || throughput.MetricName.IsUnknown() {
 		diags.AddError(ErrorMessageValidationError, fmt.Sprintf(ErrorMessageMetricNameRequired, "throughput"))
 		return errors.New(ErrorMessageMissingMetricName)
 	}
 	result.Rules[index].Rule.AlertType = APIAlertTypeThroughput
 	result.Rules[index].Rule.MetricName = throughput.MetricName.ValueString()
-	result.Rules[index].Rule.Aggregation = restapi.Aggregation(throughput.Aggregation.ValueString())
+	result.Rules[index].Rule.Aggregation = common.Aggregation(throughput.Aggregation.ValueString())
 	return nil
 }
 
 // mapThresholds converts threshold configurations for warning and critical severity levels using shared mapping
-func (r *applicationAlertConfigResourceImpl) mapThresholds(ctx context.Context, index int, thresholds *ApplicationThresholdModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) {
+func (r *applicationAlertConfigResourceImpl) mapThresholds(ctx context.Context, index int, thresholds *ApplicationThresholdModel, result *api.ApplicationAlertConfig, diags *diag.Diagnostics) {
 	// Convert ApplicationThresholdModel to shared.ThresholdAllPluginModel
 	sharedThresholds := &shared.ThresholdAllPluginModel{}
 
@@ -923,12 +926,12 @@ func (r *applicationAlertConfigResourceImpl) mapThresholds(ctx context.Context, 
 }
 
 // mapTimeThreshold converts time threshold configuration
-func (r *applicationAlertConfigResourceImpl) mapTimeThreshold(model *ApplicationAlertConfigModel, result *restapi.ApplicationAlertConfig, diags *diag.Diagnostics) error {
+func (r *applicationAlertConfigResourceImpl) mapTimeThreshold(model *ApplicationAlertConfigModel, result *api.ApplicationAlertConfig, diags *diag.Diagnostics) error {
 	if model.TimeThreshold == nil {
 		return nil
 	}
 
-	result.TimeThreshold = &restapi.ApplicationAlertTimeThreshold{}
+	result.TimeThreshold = &api.ApplicationAlertTimeThreshold{}
 
 	if model.TimeThreshold.RequestImpact != nil {
 		result.TimeThreshold.Type = TimeThresholdTypeRequestImpact
@@ -965,7 +968,7 @@ func extractGracePeriod(v types.Int64) *int64 {
 // ============================================================================
 
 // UpdateState converts API data object to Terraform state
-func (r *applicationAlertConfigResourceImpl) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
+func (r *applicationAlertConfigResourceImpl) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, data *api.ApplicationAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var model ApplicationAlertConfigModel
 	if plan != nil {
@@ -1039,7 +1042,7 @@ func (r *applicationAlertConfigResourceImpl) UpdateState(ctx context.Context, st
 }
 
 // updateGracePeriod handles grace period field mapping
-func (r *applicationAlertConfigResourceImpl) updateGracePeriod(model *ApplicationAlertConfigModel, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
+func (r *applicationAlertConfigResourceImpl) updateGracePeriod(model *ApplicationAlertConfigModel, data *api.ApplicationAlertConfig) diag.Diagnostics {
 	if data.GracePeriod != nil {
 		model.GracePeriod = util.SetInt64PointerToState(data.GracePeriod)
 	} else {
@@ -1049,7 +1052,7 @@ func (r *applicationAlertConfigResourceImpl) updateGracePeriod(model *Applicatio
 }
 
 // updateTagFilter handles tag filter normalization and mapping
-func (r *applicationAlertConfigResourceImpl) updateTagFilter(model *ApplicationAlertConfigModel, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
+func (r *applicationAlertConfigResourceImpl) updateTagFilter(model *ApplicationAlertConfigModel, data *api.ApplicationAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	if data.TagFilterExpression != nil {
@@ -1070,7 +1073,7 @@ func (r *applicationAlertConfigResourceImpl) updateTagFilter(model *ApplicationA
 }
 
 // updateAlertChannels handles alert channels mapping from API to state
-func (r *applicationAlertConfigResourceImpl) updateAlertChannels(ctx context.Context, model *ApplicationAlertConfigModel, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
+func (r *applicationAlertConfigResourceImpl) updateAlertChannels(ctx context.Context, model *ApplicationAlertConfigModel, data *api.ApplicationAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	// If alert channels already exist in plan or state, preserve them
@@ -1119,7 +1122,7 @@ func (r *applicationAlertConfigResourceImpl) updateAlertChannels(ctx context.Con
 }
 
 // updateApplications handles application scope mapping from API to state
-func (r *applicationAlertConfigResourceImpl) updateApplications(model *ApplicationAlertConfigModel, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
+func (r *applicationAlertConfigResourceImpl) updateApplications(model *ApplicationAlertConfigModel, data *api.ApplicationAlertConfig) diag.Diagnostics {
 	// If applications already exist in plan or state, preserve them
 	if len(model.Applications) != 0 {
 		return nil // keep the existing value to preserve existing state
@@ -1146,7 +1149,7 @@ func (r *applicationAlertConfigResourceImpl) updateApplications(model *Applicati
 }
 
 // mapServicesToModel converts services from API to model format
-func (r *applicationAlertConfigResourceImpl) mapServicesToModel(services map[string]restapi.IncludedService) []ServiceModel {
+func (r *applicationAlertConfigResourceImpl) mapServicesToModel(services map[string]api.IncludedService) []ServiceModel {
 	if len(services) == 0 {
 		return []ServiceModel{}
 	}
@@ -1165,7 +1168,7 @@ func (r *applicationAlertConfigResourceImpl) mapServicesToModel(services map[str
 }
 
 // mapEndpointsToModel converts endpoints from API to model format
-func (r *applicationAlertConfigResourceImpl) mapEndpointsToModel(endpoints map[string]restapi.IncludedEndpoint) []EndpointModel {
+func (r *applicationAlertConfigResourceImpl) mapEndpointsToModel(endpoints map[string]api.IncludedEndpoint) []EndpointModel {
 	if len(endpoints) == 0 {
 		return []EndpointModel{}
 	}
@@ -1183,7 +1186,7 @@ func (r *applicationAlertConfigResourceImpl) mapEndpointsToModel(endpoints map[s
 }
 
 // updateCustomPayloadFields handles custom payload fields mapping from API to state
-func (r *applicationAlertConfigResourceImpl) updateCustomPayloadFields(ctx context.Context, model *ApplicationAlertConfigModel, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
+func (r *applicationAlertConfigResourceImpl) updateCustomPayloadFields(ctx context.Context, model *ApplicationAlertConfigModel, data *api.ApplicationAlertConfig) diag.Diagnostics {
 	customPayloadFieldsList, payloadDiags := shared.CustomPayloadFieldsToTerraform(ctx, data.CustomerPayloadFields)
 	if payloadDiags.HasError() {
 		return payloadDiags
@@ -1193,7 +1196,7 @@ func (r *applicationAlertConfigResourceImpl) updateCustomPayloadFields(ctx conte
 }
 
 // updateRules handles rules mapping with thresholds from API to state
-func (r *applicationAlertConfigResourceImpl) updateRules(ctx context.Context, model *ApplicationAlertConfigModel, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
+func (r *applicationAlertConfigResourceImpl) updateRules(ctx context.Context, model *ApplicationAlertConfigModel, data *api.ApplicationAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	if len(data.Rules) == 0 {
@@ -1216,7 +1219,7 @@ func (r *applicationAlertConfigResourceImpl) updateRules(ctx context.Context, mo
 }
 
 // mapRuleToModel converts a single rule with thresholds to model format
-func (r *applicationAlertConfigResourceImpl) mapRuleToModel(ctx context.Context, ruleWithThreshold *restapi.ApplicationAlertRuleWithThresholds) (RuleWithThresholdModel, diag.Diagnostics) {
+func (r *applicationAlertConfigResourceImpl) mapRuleToModel(ctx context.Context, ruleWithThreshold *api.ApplicationAlertRuleWithThresholds) (RuleWithThresholdModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	ruleModel := r.createRuleModelByType(ruleWithThreshold.Rule)
@@ -1231,7 +1234,7 @@ func (r *applicationAlertConfigResourceImpl) mapRuleToModel(ctx context.Context,
 }
 
 // createRuleModelByType creates appropriate rule model based on alert type
-func (r *applicationAlertConfigResourceImpl) createRuleModelByType(rule *restapi.ApplicationAlertRule) RuleModel {
+func (r *applicationAlertConfigResourceImpl) createRuleModelByType(rule *api.ApplicationAlertRule) RuleModel {
 	ruleModel := RuleModel{}
 
 	switch rule.AlertType {
@@ -1281,14 +1284,14 @@ func (r *applicationAlertConfigResourceImpl) createRuleModelByType(rule *restapi
 }
 
 // mapThresholdsToModel converts threshold map to model format using shared mapping
-func (r *applicationAlertConfigResourceImpl) mapThresholdsToModel(ctx context.Context, thresholds map[restapi.AlertSeverity]restapi.ThresholdRule) *ApplicationThresholdModel {
+func (r *applicationAlertConfigResourceImpl) mapThresholdsToModel(ctx context.Context, thresholds map[common.AlertSeverity]common.ThresholdRule) *ApplicationThresholdModel {
 	if len(thresholds) == 0 {
 		return nil
 	}
 
 	thresholdModel := &ApplicationThresholdModel{}
 
-	if warningThreshold, ok := thresholds[restapi.WarningSeverity]; ok {
+	if warningThreshold, ok := thresholds[common.WarningSeverity]; ok {
 		// Use shared mapping function
 		sharedWarning := shared.MapAllThresholdPluginToState(ctx, &warningThreshold, true)
 		if sharedWarning != nil {
@@ -1300,7 +1303,7 @@ func (r *applicationAlertConfigResourceImpl) mapThresholdsToModel(ctx context.Co
 		}
 	}
 
-	if criticalThreshold, ok := thresholds[restapi.CriticalSeverity]; ok {
+	if criticalThreshold, ok := thresholds[common.CriticalSeverity]; ok {
 		// Use shared mapping function
 		sharedCritical := shared.MapAllThresholdPluginToState(ctx, &criticalThreshold, true)
 		if sharedCritical != nil {
@@ -1316,7 +1319,7 @@ func (r *applicationAlertConfigResourceImpl) mapThresholdsToModel(ctx context.Co
 }
 
 // updateTimeThreshold handles time threshold mapping from API to state
-func (r *applicationAlertConfigResourceImpl) updateTimeThreshold(model *ApplicationAlertConfigModel, data *restapi.ApplicationAlertConfig) diag.Diagnostics {
+func (r *applicationAlertConfigResourceImpl) updateTimeThreshold(model *ApplicationAlertConfigModel, data *api.ApplicationAlertConfig) diag.Diagnostics {
 	if data.TimeThreshold == nil {
 		model.TimeThreshold = nil
 		return nil

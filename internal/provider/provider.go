@@ -2,7 +2,11 @@ package provider
 
 import (
 	"context"
+	"crypto/tls"
+	"fmt"
+	"net/http"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -11,6 +15,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/instana/instana-go-client/client"
+
+	"github.com/instana/instana-go-client/config"
 	"github.com/instana/terraform-provider-instana/internal/datasources"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/resources/alertingchannel"
@@ -26,8 +34,8 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/resources/infralertconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/logalertconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/maintenancewindowconfig"
-	"github.com/instana/terraform-provider-instana/internal/resources/mobileappconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/mobilealertconfig"
+	"github.com/instana/terraform-provider-instana/internal/resources/mobileappconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/roles"
 	"github.com/instana/terraform-provider-instana/internal/resources/sliconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/sloalertconfig"
@@ -38,12 +46,21 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/resources/team"
 	"github.com/instana/terraform-provider-instana/internal/resources/websitealertconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/websitemonitoringconfig"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/terraform-provider-instana/internal/shared"
 )
 
 // Ensure the implementation satisfies the expected interfaces
 var (
 	_ provider.Provider = &InstanaProvider{}
+)
+
+// Pre-compiled regex patterns for sensitive data sanitization
+// Compiled once at package initialization for better performance
+var (
+	sensitiveDataPatterns = []*regexp.Regexp{
+		regexp.MustCompile(`(?i)(token|apitoken|api_token|authorization|bearer)[\s:=]+[^\s,}\]]+`),
+		regexp.MustCompile(`(?i)(password|passwd|pwd|secret|apikey|api_key)[\s:=]+[^\s,}\]]+`),
+	}
 )
 
 // SchemaFieldAPIToken the name of the provider configuration option for the api token
@@ -110,20 +127,20 @@ func (p *InstanaProvider) Schema(_ context.Context, _ provider.SchemaRequest, re
 // Configure prepares a Instana API client for data sources and resources
 func (p *InstanaProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
 	// Retrieve provider data from configuration
-	var config InstanaProviderModel
-	diags := req.Config.Get(ctx, &config)
+	var providerConfig InstanaProviderModel
+	diags := req.Config.Get(ctx, &providerConfig)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Default values to environment variables, but override with Terraform configuration value if set
-	apiToken := strings.TrimSpace(config.APIToken.ValueString())
+	apiToken := strings.TrimSpace(providerConfig.APIToken.ValueString())
 	if apiToken == "" {
 		apiToken = os.Getenv("INSTANA_API_TOKEN")
 	}
 
-	endpoint := strings.TrimSpace(config.Endpoint.ValueString())
+	endpoint := strings.TrimSpace(providerConfig.Endpoint.ValueString())
 	if endpoint == "" {
 		endpoint = os.Getenv("INSTANA_ENDPOINT")
 	}
@@ -152,21 +169,157 @@ func (p *InstanaProvider) Configure(ctx context.Context, req provider.ConfigureR
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	skipTlsVerify := false
-	if !config.TLSSkipVerify.IsNull() {
-		skipTlsVerify = config.TLSSkipVerify.ValueBool()
+	// Create a new Instana client using the configuration values
+	// Pass the provider version as user agent for tracking
+	userAgent := fmt.Sprintf("Terraform/%s", p.version)
+	clientConfig := config.DefaultClientConfig()
+	clientConfig.APIToken = apiToken
+	clientConfig.BaseURL = "https://" + endpoint
+	clientConfig.UserAgent = userAgent
+	clientConfig.Logger = newTerraformLogger(ctx)
+
+	// Handle TLS skip verify by creating a custom HTTP client with appropriate transport
+	if !providerConfig.TLSSkipVerify.IsNull() && providerConfig.TLSSkipVerify.ValueBool() {
+		// Create HTTP client with TLS skip verify enabled
+		transport := &http.Transport{
+			MaxIdleConns:        clientConfig.ConnectionPool.MaxIdleConnections,
+			MaxIdleConnsPerHost: clientConfig.ConnectionPool.MaxConnectionsPerHost,
+			IdleConnTimeout:     clientConfig.Timeout.IdleConnection,
+			DisableKeepAlives:   false,
+			TLSClientConfig:     &tls.Config{InsecureSkipVerify: true}, //nolint:gosec
+		}
+		clientConfig.HTTPClient = &http.Client{
+			Transport: transport,
+			Timeout:   clientConfig.Timeout.Request,
+		}
+		tflog.Warn(ctx, "TLS certificate verification is disabled - this should only be used in development/testing environments")
 	}
 
-	// Create a new Instana client using the configuration values
-	instanaAPI := restapi.NewInstanaAPI(apiToken, endpoint, skipTlsVerify)
+	instanaAPI, err := client.NewInstanaAPIWithConfig(clientConfig)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Failed to create Instana API client",
+			err.Error(),
+		)
+		return
+	}
 
 	// Make the Instana client available during DataSource and Resource Configure methods
-	resp.DataSourceData = &restapi.ProviderMeta{
+	resp.DataSourceData = &shared.ProviderMeta{
 		InstanaAPI: instanaAPI,
 	}
-	resp.ResourceData = &restapi.ProviderMeta{
+	resp.ResourceData = &shared.ProviderMeta{
 		InstanaAPI: instanaAPI,
 	}
+}
+
+type terraformLogger struct {
+	ctx context.Context
+}
+
+func newTerraformLogger(ctx context.Context) config.Logger {
+	return &terraformLogger{ctx: ctx}
+}
+
+func (l *terraformLogger) Debug(msg string, keysAndValues ...interface{}) {
+	sanitizedMsg := sanitizeSensitiveData(msg)
+	sanitizedFields := sanitizeLogFields(toTerraformLogFields(keysAndValues))
+	tflog.Debug(l.ctx, sanitizedMsg, sanitizedFields)
+}
+
+func (l *terraformLogger) Info(msg string, keysAndValues ...interface{}) {
+	sanitizedMsg := sanitizeSensitiveData(msg)
+	sanitizedFields := sanitizeLogFields(toTerraformLogFields(keysAndValues))
+	tflog.Info(l.ctx, sanitizedMsg, sanitizedFields)
+}
+
+func (l *terraformLogger) Warn(msg string, keysAndValues ...interface{}) {
+	sanitizedMsg := sanitizeSensitiveData(msg)
+	sanitizedFields := sanitizeLogFields(toTerraformLogFields(keysAndValues))
+	tflog.Warn(l.ctx, sanitizedMsg, sanitizedFields)
+}
+
+func (l *terraformLogger) Error(msg string, keysAndValues ...interface{}) {
+	sanitizedMsg := sanitizeSensitiveData(msg)
+	sanitizedFields := sanitizeLogFields(toTerraformLogFields(keysAndValues))
+	tflog.Error(l.ctx, sanitizedMsg, sanitizedFields)
+}
+
+func toTerraformLogFields(keysAndValues []interface{}) map[string]interface{} {
+	fields := make(map[string]interface{}, len(keysAndValues)/2)
+	for i := 0; i < len(keysAndValues); i += 2 {
+		key := fmt.Sprintf("arg_%d", i)
+		if i < len(keysAndValues) {
+			key = fmt.Sprintf("%v", keysAndValues[i])
+		}
+
+		if i+1 < len(keysAndValues) {
+			fields[key] = keysAndValues[i+1]
+		} else {
+			fields[key] = "<missing>"
+		}
+	}
+
+	return fields
+}
+
+// sanitizeSensitiveData redacts sensitive information from log messages.
+// It replaces patterns like "token: xxx", "apiToken: xxx", "password: xxx" with "[REDACTED]".
+//
+// Examples:
+//
+//	sanitizeSensitiveData("token: abc123") → "token: [REDACTED]"
+//	sanitizeSensitiveData("Using TOKEN: xyz") → "Using TOKEN: [REDACTED]"
+//	sanitizeSensitiveData("password: secret") → "password: [REDACTED]"
+//
+// The function is case-insensitive and matches common variations of sensitive keywords.
+// Uses pre-compiled regex patterns for optimal performance.
+func sanitizeSensitiveData(msg string) string {
+	sanitized := msg
+	for _, re := range sensitiveDataPatterns {
+		sanitized = re.ReplaceAllString(sanitized, "$1: [REDACTED]")
+	}
+	return sanitized
+}
+
+// sanitizeLogFields redacts sensitive information from log field values
+// It checks both field names and values for sensitive data
+func sanitizeLogFields(fields map[string]interface{}) map[string]interface{} {
+	if fields == nil {
+		return fields
+	}
+
+	// List of sensitive field names (case-insensitive check)
+	sensitiveKeys := []string{
+		"token", "apitoken", "api_token", "authorization", "bearer",
+		"password", "passwd", "pwd", "secret", "apikey", "api_key",
+	}
+
+	sanitized := make(map[string]interface{}, len(fields))
+	for k, v := range fields {
+		// Check if the key name indicates sensitive data
+		isSensitive := false
+		lowerKey := strings.ToLower(k)
+		for _, sensitiveKey := range sensitiveKeys {
+			if strings.Contains(lowerKey, sensitiveKey) {
+				isSensitive = true
+				break
+			}
+		}
+
+		if isSensitive {
+			sanitized[k] = "[REDACTED]"
+		} else {
+			// Also sanitize string values that might contain sensitive data
+			if strVal, ok := v.(string); ok {
+				sanitized[k] = sanitizeSensitiveData(strVal)
+			} else {
+				sanitized[k] = v
+			}
+		}
+	}
+
+	return sanitized
 }
 
 // DataSources defines the data sources implemented in the provider
@@ -217,7 +370,7 @@ func (p *InstanaProvider) Resources(_ context.Context) []func() resource.Resourc
 }
 
 // Helper function to wrap resource handles
-func addResouceHandle[T restapi.InstanaDataObject](handleFunc func() resourcehandle.ResourceHandle[T]) func() resource.Resource {
+func addResouceHandle[T client.InstanaDataObject](handleFunc func() resourcehandle.ResourceHandle[T]) func() resource.Resource {
 	return func() resource.Resource {
 		return NewTerraformResource(handleFunc())
 	}

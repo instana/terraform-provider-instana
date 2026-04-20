@@ -8,13 +8,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/instana-go-client/client"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/instana/terraform-provider-instana/internal/util"
 )
 
 // NewTerraformResource creates a new terraform resource for the given handle
-func NewTerraformResource[T restapi.InstanaDataObject](handle resourcehandle.ResourceHandle[T]) TerraformResource {
+func NewTerraformResource[T client.InstanaDataObject](handle resourcehandle.ResourceHandle[T]) TerraformResource {
 	return &terraformResourceImpl[T]{
 		resourceHandle: handle,
 	}
@@ -28,9 +29,9 @@ type TerraformResource interface {
 	resource.ResourceWithUpgradeState
 }
 
-type terraformResourceImpl[T restapi.InstanaDataObject] struct {
+type terraformResourceImpl[T client.InstanaDataObject] struct {
 	resourceHandle resourcehandle.ResourceHandle[T]
-	providerMeta   *restapi.ProviderMeta
+	providerMeta   *shared.ProviderMeta
 }
 
 // Metadata returns the resource type name
@@ -51,11 +52,11 @@ func (r *terraformResourceImpl[T]) Configure(_ context.Context, req resource.Con
 		return
 	}
 
-	providerMeta, ok := req.ProviderData.(*restapi.ProviderMeta)
+	providerMeta, ok := req.ProviderData.(*shared.ProviderMeta)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *restapi.ProviderMeta, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *client.ProviderMeta, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 		return
 	}
@@ -151,7 +152,7 @@ func (r *terraformResourceImpl[T]) Read(ctx context.Context, req resource.ReadRe
 	// Get the resource from the API
 	obj, err := r.resourceHandle.GetRestResource(r.providerMeta.InstanaAPI).GetOne(resourceID)
 	if err != nil {
-		if errors.Is(err, restapi.ErrEntityNotFound) {
+		if errors.Is(err, client.ErrEntityNotFound) {
 			// Resource no longer exists
 			resp.State.RemoveResource(ctx)
 			return

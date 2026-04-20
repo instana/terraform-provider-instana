@@ -33,7 +33,7 @@ const (
 	// AutomationActionErrUnexpectedConfigureType error message for unexpected configure type
 	AutomationActionErrUnexpectedConfigureType = "Unexpected Data Source Configure Type"
 	// AutomationActionErrUnexpectedConfigureTypeDetail error message detail for unexpected configure type
-	AutomationActionErrUnexpectedConfigureTypeDetail = "Expected *restapi.ProviderMeta, got: %T. Please report this issue to the provider developers."
+	AutomationActionErrUnexpectedConfigureTypeDetail = "Expected *instana.ProviderMeta, got: %T. Please report this issue to the provider developers."
 	// AutomationActionErrReadingActions error message for reading automation actions
 	AutomationActionErrReadingActions = "Error reading automation actions"
 	// AutomationActionErrReadingActionsDetail error message detail for reading automation actions

@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	model "github.com/instana/instana-go-client/shared/types"
 	"github.com/instana/terraform-provider-instana/internal/util"
 )
 
@@ -222,9 +222,9 @@ func AllThresholdAttributeSchema() schema.SingleNestedAttribute {
 }
 
 // used for static and adaptive types
-func MapThresholdsPluginFromState(ctx context.Context, thresholdStruct *ThresholdPluginModel) (map[restapi.AlertSeverity]restapi.ThresholdRule, diag.Diagnostics) {
+func MapThresholdsPluginFromState(ctx context.Context, thresholdStruct *ThresholdPluginModel) (map[model.AlertSeverity]model.ThresholdRule, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	thresholdMap := make(map[restapi.AlertSeverity]restapi.ThresholdRule)
+	thresholdMap := make(map[model.AlertSeverity]model.ThresholdRule)
 	if thresholdStruct != nil {
 		// Process warning threshold
 		if thresholdStruct.Warning != nil {
@@ -235,7 +235,7 @@ func MapThresholdsPluginFromState(ctx context.Context, thresholdStruct *Threshol
 			}
 
 			if warningThreshold != nil {
-				thresholdMap[restapi.WarningSeverity] = *warningThreshold
+				thresholdMap[model.WarningSeverity] = *warningThreshold
 			}
 		}
 
@@ -248,7 +248,7 @@ func MapThresholdsPluginFromState(ctx context.Context, thresholdStruct *Threshol
 			}
 
 			if criticalThreshold != nil {
-				thresholdMap[restapi.CriticalSeverity] = *criticalThreshold
+				thresholdMap[model.CriticalSeverity] = *criticalThreshold
 			}
 		}
 	}
@@ -256,7 +256,7 @@ func MapThresholdsPluginFromState(ctx context.Context, thresholdStruct *Threshol
 }
 
 // MapThresholdRulePluginFromState maps a threshold rule from Terraform state to API model - used for new plugin model using nestedAttribute
-func MapThresholdRulePluginFromState(ctx context.Context, thresholdObj *ThresholdTypeModel) (*restapi.ThresholdRule, diag.Diagnostics) {
+func MapThresholdRulePluginFromState(ctx context.Context, thresholdObj *ThresholdTypeModel) (*model.ThresholdRule, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if thresholdObj == nil {
@@ -268,7 +268,7 @@ func MapThresholdRulePluginFromState(ctx context.Context, thresholdObj *Threshol
 		staticVal := thresholdObj.Static
 		valueFloat := staticVal.Value.ValueFloat64()
 		rounded := math.Round(valueFloat*100) / 100
-		return &restapi.ThresholdRule{
+		return &model.ThresholdRule{
 			Type:  "staticThreshold",
 			Value: &rounded,
 			//Operator: staticVal.Operator.ValueStringPointer(),
@@ -278,12 +278,12 @@ func MapThresholdRulePluginFromState(ctx context.Context, thresholdObj *Threshol
 	// Check for adaptive baseline threshold
 	if thresholdObj.AdaptiveBaseline != nil {
 		adaptiveVal := thresholdObj.AdaptiveBaseline
-		seasonality := restapi.ThresholdSeasonality(adaptiveVal.Seasonality.ValueString())
+		seasonality := model.ThresholdSeasonality(adaptiveVal.Seasonality.ValueString())
 		deviationFactor := float32(util.RoundFloat64To2Decimals(adaptiveVal.DeviationFactor.ValueFloat64()))
 		adaptability := float32(util.RoundFloat64To2Decimals(adaptiveVal.Adaptability.ValueFloat64()))
 		// Note: Operator field is currently not used by the API but kept for future compatibility
 		//operator := util.SetStringPointerFromState(adaptiveVal.Operator)
-		return &restapi.ThresholdRule{
+		return &model.ThresholdRule{
 			Type:            "adaptiveBaseline",
 			Seasonality:     &seasonality,
 			DeviationFactor: &deviationFactor,
@@ -294,9 +294,9 @@ func MapThresholdRulePluginFromState(ctx context.Context, thresholdObj *Threshol
 	return nil, diags
 }
 
-func MapThresholdsAllPluginFromState(ctx context.Context, thresholdStruct *ThresholdAllPluginModel) (map[restapi.AlertSeverity]restapi.ThresholdRule, diag.Diagnostics) {
+func MapThresholdsAllPluginFromState(ctx context.Context, thresholdStruct *ThresholdAllPluginModel) (map[model.AlertSeverity]model.ThresholdRule, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	thresholdMap := make(map[restapi.AlertSeverity]restapi.ThresholdRule)
+	thresholdMap := make(map[model.AlertSeverity]model.ThresholdRule)
 	if thresholdStruct != nil {
 		// Process warning threshold
 		if thresholdStruct.Warning != nil {
@@ -308,7 +308,7 @@ func MapThresholdsAllPluginFromState(ctx context.Context, thresholdStruct *Thres
 			}
 
 			if warningThreshold != nil {
-				thresholdMap[restapi.WarningSeverity] = *warningThreshold
+				thresholdMap[model.WarningSeverity] = *warningThreshold
 			}
 		}
 
@@ -322,7 +322,7 @@ func MapThresholdsAllPluginFromState(ctx context.Context, thresholdStruct *Thres
 			}
 
 			if criticalThreshold != nil {
-				thresholdMap[restapi.CriticalSeverity] = *criticalThreshold
+				thresholdMap[model.CriticalSeverity] = *criticalThreshold
 			}
 		}
 	}
@@ -331,7 +331,7 @@ func MapThresholdsAllPluginFromState(ctx context.Context, thresholdStruct *Thres
 
 // used for static, adaptive and historic baseline types
 // MapThresholdRulePluginFromState maps a threshold rule from Terraform state to API model - used for new plugin model using nestedAttribute
-func MapThresholdRuleAllPluginFromState(ctx context.Context, thresholdObj *ThresholdAllTypeModel) (*restapi.ThresholdRule, diag.Diagnostics) {
+func MapThresholdRuleAllPluginFromState(ctx context.Context, thresholdObj *ThresholdAllTypeModel) (*model.ThresholdRule, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if thresholdObj == nil {
@@ -346,7 +346,7 @@ func MapThresholdRuleAllPluginFromState(ctx context.Context, thresholdObj *Thres
 
 		valueFloat := staticVal.Value.ValueFloat64()
 		rounded := math.Round(valueFloat*100) / 100
-		return &restapi.ThresholdRule{
+		return &model.ThresholdRule{
 			Type:  "staticThreshold",
 			Value: &rounded,
 			//Operator: operator,
@@ -357,12 +357,12 @@ func MapThresholdRuleAllPluginFromState(ctx context.Context, thresholdObj *Thres
 	if thresholdObj.AdaptiveBaseline != nil {
 
 		adaptiveVal := thresholdObj.AdaptiveBaseline
-		seasonality := restapi.ThresholdSeasonality(adaptiveVal.Seasonality.ValueString())
+		seasonality := model.ThresholdSeasonality(adaptiveVal.Seasonality.ValueString())
 		deviationFactor := float32(util.RoundFloat64To2Decimals(adaptiveVal.DeviationFactor.ValueFloat64()))
 		adaptability := float32(util.RoundFloat64To2Decimals(adaptiveVal.Adaptability.ValueFloat64()))
 		// Note: Operator field is currently not used by the API but kept for future compatibility
 		//operator := util.SetStringPointerFromState(adaptiveVal.Operator)
-		return &restapi.ThresholdRule{
+		return &model.ThresholdRule{
 			Type:            "adaptiveBaseline",
 			Seasonality:     &seasonality,
 			DeviationFactor: &deviationFactor,
@@ -377,7 +377,7 @@ func MapThresholdRuleAllPluginFromState(ctx context.Context, thresholdObj *Thres
 		baselineVal := thresholdObj.HistoricBaseline
 		// Note: Operator field is currently not used by the API but kept for future compatibility
 		//operator := util.SetStringPointerFromState(baselineVal.Operator)
-		seasonality := restapi.ThresholdSeasonality(baselineVal.Seasonality.ValueString())
+		seasonality := model.ThresholdSeasonality(baselineVal.Seasonality.ValueString())
 		deviationFactor := float32(util.RoundFloat64To2Decimals(baselineVal.Deviation.ValueFloat64()))
 
 		// Convert types.List to [][]float64
@@ -389,7 +389,7 @@ func MapThresholdRuleAllPluginFromState(ctx context.Context, thresholdObj *Thres
 			}
 		}
 
-		return &restapi.ThresholdRule{
+		return &model.ThresholdRule{
 			Type:            "historicBaseline",
 			Seasonality:     &seasonality,
 			DeviationFactor: &deviationFactor,
@@ -400,7 +400,7 @@ func MapThresholdRuleAllPluginFromState(ctx context.Context, thresholdObj *Thres
 	return nil, diags
 }
 
-func MapBaselineToState(threshold *restapi.ThresholdRule) (basetypes.ListValue, diag.Diagnostics) {
+func MapBaselineToState(threshold *model.ThresholdRule) (basetypes.ListValue, diag.Diagnostics) {
 	var baselineDiags diag.Diagnostics
 	baselineListValues := []attr.Value{}
 	for _, baselineArray := range *threshold.Baseline {
@@ -460,7 +460,7 @@ func MapBaselineFromState(ctx context.Context, baselineList types.List) (*[][]fl
 }
 
 // MapThresholdToState maps a threshold rule to a Terraform state representation - used for nested attribute instead of block object
-func MapThresholdPluginToState(ctx context.Context, threshold *restapi.ThresholdRule, dataPresent bool) *ThresholdTypeModel {
+func MapThresholdPluginToState(ctx context.Context, threshold *model.ThresholdRule, dataPresent bool) *ThresholdTypeModel {
 	thresholdTypeModel := ThresholdTypeModel{}
 	if !dataPresent {
 		return nil
@@ -503,7 +503,7 @@ func MapThresholdPluginToState(ctx context.Context, threshold *restapi.Threshold
 }
 
 // MapThresholdToState maps a threshold rule to a Terraform state representation - used for nested attribute instead of block object
-func MapAllThresholdPluginToState(ctx context.Context, threshold *restapi.ThresholdRule, dataPresent bool) *ThresholdAllTypeModel {
+func MapAllThresholdPluginToState(ctx context.Context, threshold *model.ThresholdRule, dataPresent bool) *ThresholdAllTypeModel {
 	thresholdTypeModel := ThresholdAllTypeModel{}
 	if dataPresent == false {
 		return nil

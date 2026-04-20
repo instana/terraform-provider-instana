@@ -8,7 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/client"
+	"github.com/instana/terraform-provider-instana/internal/shared"
 )
 
 // Constants are now defined in data-source-automation-action-constants.go
@@ -28,7 +30,7 @@ func NewAutomationActionDataSource() datasource.DataSource {
 }
 
 type automationActionDataSource struct {
-	instanaAPI restapi.InstanaAPI
+	instanaAPI client.InstanaAPI
 }
 
 func (d *automationActionDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -69,7 +71,7 @@ func (d *automationActionDataSource) Configure(_ context.Context, req datasource
 		return
 	}
 
-	providerMeta, ok := req.ProviderData.(*restapi.ProviderMeta)
+	providerMeta, ok := req.ProviderData.(*shared.ProviderMeta)
 	if !ok {
 		resp.Diagnostics.AddError(
 			AutomationActionErrUnexpectedConfigureType,
@@ -103,7 +105,7 @@ func (d *automationActionDataSource) Read(ctx context.Context, req datasource.Re
 	}
 
 	// Find the action with the matching name and type
-	var matchingAction *restapi.AutomationAction
+	var matchingAction *api.AutomationAction
 	for _, action := range *actions {
 		if action.Name == name && strings.EqualFold(action.Type, actionType) {
 			matchingAction = action

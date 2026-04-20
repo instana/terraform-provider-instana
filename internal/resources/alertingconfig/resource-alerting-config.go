@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
@@ -14,15 +15,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/client"
+	"github.com/instana/instana-go-client/shared/rest"
+	common "github.com/instana/instana-go-client/shared/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/instana/terraform-provider-instana/internal/util"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
 // NewAlertingConfigResourceHandle creates the resource handle for Alerting Configuration
-func NewAlertingConfigResourceHandle() resourcehandle.ResourceHandle[*restapi.AlertingConfiguration] {
+func NewAlertingConfigResourceHandle() resourcehandle.ResourceHandle[*api.AlertingConfiguration] {
 	return &alertingConfigResource{
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName: ResourceInstanaAlertingConfig,
@@ -115,7 +118,7 @@ func (r *alertingConfigResource) MetaData() *resourcehandle.ResourceMetaData {
 }
 
 // GetRestResource returns the REST resource for alerting configurations
-func (r *alertingConfigResource) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.AlertingConfiguration] {
+func (r *alertingConfigResource) GetRestResource(api client.InstanaAPI) rest.RestResource[*api.AlertingConfiguration] {
 	return api.AlertingConfigurations()
 }
 
@@ -129,7 +132,7 @@ func (r *alertingConfigResource) SetComputedFields(_ context.Context, _ *tfsdk.P
 // ============================================================================
 
 // UpdateState updates the Terraform state with the alerting configuration data from the API
-func (r *alertingConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, config *restapi.AlertingConfiguration) diag.Diagnostics {
+func (r *alertingConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, config *api.AlertingConfiguration) diag.Diagnostics {
 	// Create base model with ID and alert name
 	model := AlertingConfigModel{
 		ID:        types.StringValue(config.ID),
@@ -159,7 +162,7 @@ func (r *alertingConfigResource) UpdateState(ctx context.Context, state *tfsdk.S
 }
 
 // mapIntegrationIDs maps integration IDs from API to model
-func (r *alertingConfigResource) mapIntegrationIDs(ctx context.Context, config *restapi.AlertingConfiguration, model *AlertingConfigModel) diag.Diagnostics {
+func (r *alertingConfigResource) mapIntegrationIDs(ctx context.Context, config *api.AlertingConfiguration, model *AlertingConfigModel) diag.Diagnostics {
 	integrationIDs, diags := types.SetValueFrom(ctx, types.StringType, config.IntegrationIDs)
 	if !diags.HasError() {
 		model.IntegrationIDs = integrationIDs
@@ -168,7 +171,7 @@ func (r *alertingConfigResource) mapIntegrationIDs(ctx context.Context, config *
 }
 
 // mapEventFilteringConfig maps event filtering configuration from API to model
-func (r *alertingConfigResource) mapEventFilteringConfig(ctx context.Context, config *restapi.AlertingConfiguration, model *AlertingConfigModel) diag.Diagnostics {
+func (r *alertingConfigResource) mapEventFilteringConfig(ctx context.Context, config *api.AlertingConfiguration, model *AlertingConfigModel) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	// Set event filter query
@@ -212,7 +215,7 @@ func (r *alertingConfigResource) mapEventFilteringConfig(ctx context.Context, co
 }
 
 // mapCustomPayloadFields maps custom payload fields from API to model
-func (r *alertingConfigResource) mapCustomPayloadFields(ctx context.Context, config *restapi.AlertingConfiguration, model *AlertingConfigModel) diag.Diagnostics {
+func (r *alertingConfigResource) mapCustomPayloadFields(ctx context.Context, config *api.AlertingConfiguration, model *AlertingConfigModel) diag.Diagnostics {
 	customPayloadFieldsList, diags := shared.CustomPayloadFieldsToTerraform(ctx, config.CustomerPayloadFields)
 	if !diags.HasError() {
 		model.CustomPayloadFields = customPayloadFieldsList
@@ -222,7 +225,7 @@ func (r *alertingConfigResource) mapCustomPayloadFields(ctx context.Context, con
 
 // MapStateToDataObject converts Terraform state to API object
 // This method maps the Terraform configuration to the Instana API alerting configuration structure
-func (r *alertingConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.AlertingConfiguration, diag.Diagnostics) {
+func (r *alertingConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*api.AlertingConfiguration, diag.Diagnostics) {
 	// Get model from plan or state
 	model, diags := r.getConfigModelFromPlanOrState(ctx, plan, state)
 	if diags.HasError() {
@@ -254,7 +257,7 @@ func (r *alertingConfigResource) MapStateToDataObject(ctx context.Context, plan 
 		return nil, payloadDiags
 	}
 
-	return &restapi.AlertingConfiguration{
+	return &api.AlertingConfiguration{
 		ID:                          id,
 		AlertName:                   alertName,
 		IntegrationIDs:              integrationIDs,
@@ -290,7 +293,7 @@ func (r *alertingConfigResource) extractIntegrationIDs(ctx context.Context, mode
 }
 
 // extractEventFilteringConfig extracts event filtering configuration from the model
-func (r *alertingConfigResource) extractEventFilteringConfig(ctx context.Context, model AlertingConfigModel) (restapi.EventFilteringConfiguration, diag.Diagnostics) {
+func (r *alertingConfigResource) extractEventFilteringConfig(ctx context.Context, model AlertingConfigModel) (api.EventFilteringConfiguration, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Map event filter query
@@ -305,7 +308,7 @@ func (r *alertingConfigResource) extractEventFilteringConfig(ctx context.Context
 	if !model.EventFilterEventTypes.IsNull() {
 		diags.Append(model.EventFilterEventTypes.ElementsAs(ctx, &eventTypeStrs, false)...)
 		if diags.HasError() {
-			return restapi.EventFilteringConfiguration{}, diags
+			return api.EventFilteringConfiguration{}, diags
 		}
 	}
 	eventTypes := r.readEventTypesFromStrings(eventTypeStrs)
@@ -315,7 +318,7 @@ func (r *alertingConfigResource) extractEventFilteringConfig(ctx context.Context
 	if !model.EventFilterRuleIDs.IsNull() {
 		diags.Append(model.EventFilterRuleIDs.ElementsAs(ctx, &ruleIDs, false)...)
 		if diags.HasError() {
-			return restapi.EventFilteringConfiguration{}, diags
+			return api.EventFilteringConfiguration{}, diags
 		}
 	}
 
@@ -324,11 +327,11 @@ func (r *alertingConfigResource) extractEventFilteringConfig(ctx context.Context
 	if !model.EventFilterApplicationAlertIDs.IsNull() {
 		diags.Append(model.EventFilterApplicationAlertIDs.ElementsAs(ctx, &applicationAlertConfigIds, false)...)
 		if diags.HasError() {
-			return restapi.EventFilteringConfiguration{}, diags
+			return api.EventFilteringConfiguration{}, diags
 		}
 	}
 
-	return restapi.EventFilteringConfiguration{
+	return api.EventFilteringConfiguration{
 		Query:                     query,
 		RuleIDs:                   ruleIDs,
 		EventTypes:                eventTypes,
@@ -337,8 +340,8 @@ func (r *alertingConfigResource) extractEventFilteringConfig(ctx context.Context
 }
 
 // extractCustomPayloadFields extracts custom payload fields from the model
-func (r *alertingConfigResource) extractCustomPayloadFields(ctx context.Context, model AlertingConfigModel) ([]restapi.CustomPayloadField[any], diag.Diagnostics) {
-	var customerPayloadFields []restapi.CustomPayloadField[any]
+func (r *alertingConfigResource) extractCustomPayloadFields(ctx context.Context, model AlertingConfigModel) ([]common.CustomPayloadField[any], diag.Diagnostics) {
+	var customerPayloadFields []common.CustomPayloadField[any]
 	var diags diag.Diagnostics
 
 	if !model.CustomPayloadFields.IsNull() {
@@ -354,7 +357,7 @@ func (r *alertingConfigResource) extractCustomPayloadFields(ctx context.Context,
 
 // convertEventTypesToHarmonizedStringRepresentation converts event types to lowercase string representation
 // This ensures consistent representation of event types in Terraform state
-func (r *alertingConfigResource) convertEventTypesToHarmonizedStringRepresentation(input []restapi.AlertEventType) []string {
+func (r *alertingConfigResource) convertEventTypesToHarmonizedStringRepresentation(input []api.AlertEventType) []string {
 	result := make([]string, len(input))
 	for i, v := range input {
 		value := strings.ToLower(string(v))
@@ -365,11 +368,11 @@ func (r *alertingConfigResource) convertEventTypesToHarmonizedStringRepresentati
 
 // readEventTypesFromStrings converts string slice to AlertEventType slice
 // This method normalizes the input by converting to lowercase before creating the event type
-func (r *alertingConfigResource) readEventTypesFromStrings(input []string) []restapi.AlertEventType {
-	result := make([]restapi.AlertEventType, len(input))
+func (r *alertingConfigResource) readEventTypesFromStrings(input []string) []api.AlertEventType {
+	result := make([]api.AlertEventType, len(input))
 	for i, v := range input {
 		value := strings.ToLower(v)
-		result[i] = restapi.AlertEventType(value)
+		result[i] = api.AlertEventType(value)
 	}
 	return result
 }
@@ -384,8 +387,8 @@ var supportedEventTypes = convertSupportedEventTypesToStringSlice()
 // convertSupportedEventTypesToStringSlice converts the supported event types to a string slice
 // This is used for schema validation to ensure only valid event types are accepted
 func convertSupportedEventTypesToStringSlice() []string {
-	result := make([]string, len(restapi.SupportedAlertEventTypes))
-	for i, t := range restapi.SupportedAlertEventTypes {
+	result := make([]string, len(api.SupportedAlertEventTypes))
+	for i, t := range api.SupportedAlertEventTypes {
 		result[i] = string(t)
 	}
 	return result

@@ -6,8 +6,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/shared/rest"
+	tag "github.com/instana/instana-go-client/shared/tagfilter"
+	common "github.com/instana/instana-go-client/shared/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/instana/terraform-provider-instana/testutils"
 	"github.com/stretchr/testify/assert"
@@ -74,30 +77,30 @@ type mockSyntheticAlertAPI struct {
 	testutils.MockInstanaAPI
 }
 
-func (m *mockSyntheticAlertAPI) SyntheticAlertConfigs() restapi.RestResource[*restapi.SyntheticAlertConfig] {
+func (m *mockSyntheticAlertAPI) SyntheticAlertConfigs() rest.RestResource[*api.SyntheticAlertConfig] {
 	return &mockSyntheticAlertConfigRestResource{}
 }
 
 // Mock rest resource
 type mockSyntheticAlertConfigRestResource struct{}
 
-func (m *mockSyntheticAlertConfigRestResource) GetAll() (*[]*restapi.SyntheticAlertConfig, error) {
+func (m *mockSyntheticAlertConfigRestResource) GetAll() (*[]*api.SyntheticAlertConfig, error) {
 	return nil, nil
 }
 
-func (m *mockSyntheticAlertConfigRestResource) GetOne(id string) (*restapi.SyntheticAlertConfig, error) {
+func (m *mockSyntheticAlertConfigRestResource) GetOne(id string) (*api.SyntheticAlertConfig, error) {
 	return nil, nil
 }
 
-func (m *mockSyntheticAlertConfigRestResource) Create(data *restapi.SyntheticAlertConfig) (*restapi.SyntheticAlertConfig, error) {
+func (m *mockSyntheticAlertConfigRestResource) Create(data *api.SyntheticAlertConfig) (*api.SyntheticAlertConfig, error) {
 	return nil, nil
 }
 
-func (m *mockSyntheticAlertConfigRestResource) Update(data *restapi.SyntheticAlertConfig) (*restapi.SyntheticAlertConfig, error) {
+func (m *mockSyntheticAlertConfigRestResource) Update(data *api.SyntheticAlertConfig) (*api.SyntheticAlertConfig, error) {
 	return nil, nil
 }
 
-func (m *mockSyntheticAlertConfigRestResource) Delete(data *restapi.SyntheticAlertConfig) error {
+func (m *mockSyntheticAlertConfigRestResource) Delete(data *api.SyntheticAlertConfig) error {
 	return nil
 }
 
@@ -275,7 +278,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		assert.False(t, resultDiags.HasError())
 		assert.NotNil(t, result)
 		assert.NotNil(t, result.TagFilterExpression)
-		assert.Equal(t, restapi.TagFilterExpressionElementType(TagFilterTypeExpression), result.TagFilterExpression.Type)
+		assert.Equal(t, tag.TagFilterExpressionElementType(TagFilterTypeExpression), result.TagFilterExpression.Type)
 	})
 
 	t.Run("should parse tag filter expression", func(t *testing.T) {
@@ -403,30 +406,30 @@ func TestUpdateState(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("should update state with complete API object", func(t *testing.T) {
-		operator := restapi.LogicalOperatorType("AND")
-		apiObject := &restapi.SyntheticAlertConfig{
+		operator := common.LogicalOperatorType("AND")
+		apiObject := &api.SyntheticAlertConfig{
 			ID:               "api-id-123",
 			Name:             "API Alert",
 			Description:      "API Description",
 			SyntheticTestIds: []string{"test-a", "test-b"},
 			Severity:         5,
-			TagFilterExpression: &restapi.TagFilter{
+			TagFilterExpression: &tag.TagFilter{
 				Type:            TagFilterTypeExpression,
 				LogicalOperator: &operator,
-				Elements:        []*restapi.TagFilter{},
+				Elements:        []*tag.TagFilter{},
 			},
-			Rule: restapi.SyntheticAlertRule{
+			Rule: api.SyntheticAlertRule{
 				AlertType:   "failure",
 				MetricName:  "status",
 				Aggregation: "MEAN",
 			},
 			AlertChannelIds: []string{"channel-a", "channel-b"},
-			TimeThreshold: restapi.SyntheticAlertTimeThreshold{
+			TimeThreshold: api.SyntheticAlertTimeThreshold{
 				Type:            "violationsInSequence",
 				ViolationsCount: 5,
 			},
 			GracePeriod:           120000,
-			CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
+			CustomerPayloadFields: []common.CustomPayloadField[any]{},
 		}
 
 		state := &tfsdk.State{
@@ -467,29 +470,29 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("should update state with null grace period", func(t *testing.T) {
-		operator := restapi.LogicalOperatorType("AND")
-		apiObject := &restapi.SyntheticAlertConfig{
+		operator := common.LogicalOperatorType("AND")
+		apiObject := &api.SyntheticAlertConfig{
 			ID:               "api-id-456",
 			Name:             "No Grace Period",
 			Description:      "No Grace Period Description",
 			SyntheticTestIds: []string{"test-c"},
 			Severity:         10,
-			TagFilterExpression: &restapi.TagFilter{
+			TagFilterExpression: &tag.TagFilter{
 				Type:            TagFilterTypeExpression,
 				LogicalOperator: &operator,
-				Elements:        []*restapi.TagFilter{},
+				Elements:        []*tag.TagFilter{},
 			},
-			Rule: restapi.SyntheticAlertRule{
+			Rule: api.SyntheticAlertRule{
 				AlertType:  "failure",
 				MetricName: "status",
 			},
 			AlertChannelIds: []string{"channel-c"},
-			TimeThreshold: restapi.SyntheticAlertTimeThreshold{
+			TimeThreshold: api.SyntheticAlertTimeThreshold{
 				Type:            "violationsInSequence",
 				ViolationsCount: 1,
 			},
 			GracePeriod:           0,
-			CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
+			CustomerPayloadFields: []common.CustomPayloadField[any]{},
 		}
 
 		state := &tfsdk.State{
@@ -512,29 +515,29 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("should update state with null aggregation", func(t *testing.T) {
-		operator := restapi.LogicalOperatorType("AND")
-		apiObject := &restapi.SyntheticAlertConfig{
+		operator := common.LogicalOperatorType("AND")
+		apiObject := &api.SyntheticAlertConfig{
 			ID:               "api-id-789",
 			Name:             "No Aggregation",
 			Description:      "No Aggregation Description",
 			SyntheticTestIds: []string{"test-d"},
 			Severity:         5,
-			TagFilterExpression: &restapi.TagFilter{
+			TagFilterExpression: &tag.TagFilter{
 				Type:            TagFilterTypeExpression,
 				LogicalOperator: &operator,
-				Elements:        []*restapi.TagFilter{},
+				Elements:        []*tag.TagFilter{},
 			},
-			Rule: restapi.SyntheticAlertRule{
+			Rule: api.SyntheticAlertRule{
 				AlertType:   "failure",
 				MetricName:  "status",
 				Aggregation: "",
 			},
 			AlertChannelIds: []string{"channel-d"},
-			TimeThreshold: restapi.SyntheticAlertTimeThreshold{
+			TimeThreshold: api.SyntheticAlertTimeThreshold{
 				Type:            "violationsInSequence",
 				ViolationsCount: 2,
 			},
-			CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
+			CustomerPayloadFields: []common.CustomPayloadField[any]{},
 		}
 
 		state := &tfsdk.State{
@@ -560,28 +563,28 @@ func TestUpdateState(t *testing.T) {
 
 		for _, severity := range severities {
 			t.Run("severity_"+string(rune(severity)), func(t *testing.T) {
-				operator := restapi.LogicalOperatorType("AND")
-				apiObject := &restapi.SyntheticAlertConfig{
+				operator := common.LogicalOperatorType("AND")
+				apiObject := &api.SyntheticAlertConfig{
 					ID:               "test-id",
 					Name:             "Test",
 					Description:      "Desc",
 					SyntheticTestIds: []string{"test-1"},
 					Severity:         severity,
-					TagFilterExpression: &restapi.TagFilter{
+					TagFilterExpression: &tag.TagFilter{
 						Type:            TagFilterTypeExpression,
 						LogicalOperator: &operator,
-						Elements:        []*restapi.TagFilter{},
+						Elements:        []*tag.TagFilter{},
 					},
-					Rule: restapi.SyntheticAlertRule{
+					Rule: api.SyntheticAlertRule{
 						AlertType:  "failure",
 						MetricName: "status",
 					},
 					AlertChannelIds: []string{"channel-1"},
-					TimeThreshold: restapi.SyntheticAlertTimeThreshold{
+					TimeThreshold: api.SyntheticAlertTimeThreshold{
 						Type:            "violationsInSequence",
 						ViolationsCount: 1,
 					},
-					CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
+					CustomerPayloadFields: []common.CustomPayloadField[any]{},
 				}
 
 				state := &tfsdk.State{
@@ -605,28 +608,28 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("should handle multiple synthetic test IDs", func(t *testing.T) {
-		operator := restapi.LogicalOperatorType("AND")
-		apiObject := &restapi.SyntheticAlertConfig{
+		operator := common.LogicalOperatorType("AND")
+		apiObject := &api.SyntheticAlertConfig{
 			ID:               "test-id",
 			Name:             "Multiple Tests",
 			Description:      "Desc",
 			SyntheticTestIds: []string{"test-1", "test-2", "test-3", "test-4", "test-5"},
 			Severity:         5,
-			TagFilterExpression: &restapi.TagFilter{
+			TagFilterExpression: &tag.TagFilter{
 				Type:            TagFilterTypeExpression,
 				LogicalOperator: &operator,
-				Elements:        []*restapi.TagFilter{},
+				Elements:        []*tag.TagFilter{},
 			},
-			Rule: restapi.SyntheticAlertRule{
+			Rule: api.SyntheticAlertRule{
 				AlertType:  "failure",
 				MetricName: "status",
 			},
 			AlertChannelIds: []string{"channel-1"},
-			TimeThreshold: restapi.SyntheticAlertTimeThreshold{
+			TimeThreshold: api.SyntheticAlertTimeThreshold{
 				Type:            "violationsInSequence",
 				ViolationsCount: 1,
 			},
-			CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
+			CustomerPayloadFields: []common.CustomPayloadField[any]{},
 		}
 
 		state := &tfsdk.State{
@@ -652,28 +655,28 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("should handle multiple alert channel IDs", func(t *testing.T) {
-		operator := restapi.LogicalOperatorType("AND")
-		apiObject := &restapi.SyntheticAlertConfig{
+		operator := common.LogicalOperatorType("AND")
+		apiObject := &api.SyntheticAlertConfig{
 			ID:               "test-id",
 			Name:             "Multiple Channels",
 			Description:      "Desc",
 			SyntheticTestIds: []string{"test-1"},
 			Severity:         5,
-			TagFilterExpression: &restapi.TagFilter{
+			TagFilterExpression: &tag.TagFilter{
 				Type:            TagFilterTypeExpression,
 				LogicalOperator: &operator,
-				Elements:        []*restapi.TagFilter{},
+				Elements:        []*tag.TagFilter{},
 			},
-			Rule: restapi.SyntheticAlertRule{
+			Rule: api.SyntheticAlertRule{
 				AlertType:  "failure",
 				MetricName: "status",
 			},
 			AlertChannelIds: []string{"channel-1", "channel-2", "channel-3"},
-			TimeThreshold: restapi.SyntheticAlertTimeThreshold{
+			TimeThreshold: api.SyntheticAlertTimeThreshold{
 				Type:            "violationsInSequence",
 				ViolationsCount: 1,
 			},
-			CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
+			CustomerPayloadFields: []common.CustomPayloadField[any]{},
 		}
 
 		state := &tfsdk.State{
@@ -710,23 +713,23 @@ func TestUpdateStateWithNullTagFilter(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("should update state with null tag filter", func(t *testing.T) {
-		apiObject := &restapi.SyntheticAlertConfig{
+		apiObject := &api.SyntheticAlertConfig{
 			ID:                  "test-id",
 			Name:                "No Tag Filter",
 			Description:         "Desc",
 			SyntheticTestIds:    []string{"test-1"},
 			Severity:            5,
 			TagFilterExpression: nil,
-			Rule: restapi.SyntheticAlertRule{
+			Rule: api.SyntheticAlertRule{
 				AlertType:  "failure",
 				MetricName: "status",
 			},
 			AlertChannelIds: []string{"channel-1"},
-			TimeThreshold: restapi.SyntheticAlertTimeThreshold{
+			TimeThreshold: api.SyntheticAlertTimeThreshold{
 				Type:            "violationsInSequence",
 				ViolationsCount: 1,
 			},
-			CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
+			CustomerPayloadFields: []common.CustomPayloadField[any]{},
 		}
 
 		state := &tfsdk.State{

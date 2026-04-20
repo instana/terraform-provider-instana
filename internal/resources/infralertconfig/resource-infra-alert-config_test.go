@@ -8,9 +8,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/shared/rest"
+	tag "github.com/instana/instana-go-client/shared/tagfilter"
+	common "github.com/instana/instana-go-client/shared/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/shared"
+	"github.com/instana/terraform-provider-instana/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -55,18 +59,53 @@ func TestGetRestResource(t *testing.T) {
 	assert.NotNil(t, resource.GetRestResource)
 }
 
+// mockSyntheticAlertAPI extends the common mock to provide specific behavior for synthetic alert config tests
+type mockInfraAlertConfigResource struct {
+	testutils.MockInstanaAPI
+}
+
+func (m *mockInfraAlertConfigResource) SyntheticAlertConfigs() rest.RestResource[*api.InfraAlertConfig] {
+	return &mockInfraAlertConfigRestResource{}
+}
+
+// Mock rest resource
+type mockInfraAlertConfigRestResource struct{}
+
+func (m *mockInfraAlertConfigRestResource) GetAll() (*[]*api.InfraAlertConfig, error) {
+	return nil, nil
+}
+
+func (m *mockInfraAlertConfigRestResource) GetOne(id string) (*api.InfraAlertConfig, error) {
+	return nil, nil
+}
+
+func (m *mockInfraAlertConfigRestResource) Create(data *api.InfraAlertConfig) (*api.InfraAlertConfig, error) {
+	return nil, nil
+}
+
+func (m *mockInfraAlertConfigRestResource) Update(data *api.InfraAlertConfig) (*api.InfraAlertConfig, error) {
+	return nil, nil
+}
+
+func (m *mockInfraAlertConfigRestResource) Delete(data *api.InfraAlertConfig) error {
+	return nil
+}
+
+func (m *mockInfraAlertConfigRestResource) DeleteByID(id string) error {
+	return nil
+}
 func TestUpdateState_BasicConfig(t *testing.T) {
 	ctx := context.Background()
 	resource := NewInfraAlertConfigResourceHandle()
 
-	data := &restapi.InfraAlertConfig{
+	data := &api.InfraAlertConfig{
 		ID:             "test-id",
 		Name:           "Test Infra Alert",
 		Description:    "Test Description",
 		Granularity:    600000,
-		EvaluationType: restapi.EvaluationTypePerEntity,
-		AlertChannels:  map[restapi.AlertSeverity][]string{},
-		Rules:          []restapi.RuleWithThreshold[restapi.InfraAlertRule]{},
+		EvaluationType: api.EvaluationTypePerEntity,
+		AlertChannels:  map[common.AlertSeverity][]string{},
+		Rules:          []common.RuleWithThreshold[api.InfraAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -103,7 +142,7 @@ func TestUpdateState_BasicConfig(t *testing.T) {
 	assert.Equal(t, "Test Infra Alert", model.Name.ValueString())
 	assert.Equal(t, "Test Description", model.Description.ValueString())
 	assert.Equal(t, int64(600000), model.Granularity.ValueInt64())
-	assert.Equal(t, string(restapi.EvaluationTypePerEntity), model.EvaluationType.ValueString())
+	assert.Equal(t, string(api.EvaluationTypePerEntity), model.EvaluationType.ValueString())
 }
 
 func TestUpdateState_WithTagFilter(t *testing.T) {
@@ -112,24 +151,24 @@ func TestUpdateState_WithTagFilter(t *testing.T) {
 
 	entityType := "entity.type"
 	hostValue := "host"
-	equalsOp := restapi.EqualsOperator
+	equalsOp := common.EqualsOperator
 
-	tagFilter := &restapi.TagFilter{
-		Type:     restapi.TagFilterExpressionType,
+	tagFilter := &tag.TagFilter{
+		Type:     tag.TagFilterExpressionType,
 		Name:     &entityType,
 		Operator: &equalsOp,
 		Value:    &hostValue,
 	}
 
-	data := &restapi.InfraAlertConfig{
+	data := &api.InfraAlertConfig{
 		ID:                  "test-id",
 		Name:                "Test Infra Alert",
 		Description:         "Test Description",
 		Granularity:         600000,
-		EvaluationType:      restapi.EvaluationTypePerEntity,
+		EvaluationType:      api.EvaluationTypePerEntity,
 		TagFilterExpression: tagFilter,
-		AlertChannels:       map[restapi.AlertSeverity][]string{},
-		Rules:               []restapi.RuleWithThreshold[restapi.InfraAlertRule]{},
+		AlertChannels:       map[common.AlertSeverity][]string{},
+		Rules:               []common.RuleWithThreshold[api.InfraAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -165,15 +204,15 @@ func TestUpdateState_WithGroupBy(t *testing.T) {
 	ctx := context.Background()
 	resource := NewInfraAlertConfigResourceHandle()
 
-	data := &restapi.InfraAlertConfig{
+	data := &api.InfraAlertConfig{
 		ID:             "test-id",
 		Name:           "Test Infra Alert",
 		Description:    "Test Description",
 		Granularity:    600000,
-		EvaluationType: restapi.EvaluationTypePerEntity,
+		EvaluationType: api.EvaluationTypePerEntity,
 		GroupBy:        []string{"host.name", "zone"},
-		AlertChannels:  map[restapi.AlertSeverity][]string{},
-		Rules:          []restapi.RuleWithThreshold[restapi.InfraAlertRule]{},
+		AlertChannels:  map[common.AlertSeverity][]string{},
+		Rules:          []common.RuleWithThreshold[api.InfraAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -214,17 +253,17 @@ func TestUpdateState_WithAlertChannels(t *testing.T) {
 	ctx := context.Background()
 	resource := NewInfraAlertConfigResourceHandle()
 
-	data := &restapi.InfraAlertConfig{
+	data := &api.InfraAlertConfig{
 		ID:             "test-id",
 		Name:           "Test Infra Alert",
 		Description:    "Test Description",
 		Granularity:    600000,
-		EvaluationType: restapi.EvaluationTypePerEntity,
-		AlertChannels: map[restapi.AlertSeverity][]string{
-			restapi.WarningSeverity:  {"channel-1", "channel-2"},
-			restapi.CriticalSeverity: {"channel-3"},
+		EvaluationType: api.EvaluationTypePerEntity,
+		AlertChannels: map[common.AlertSeverity][]string{
+			common.WarningSeverity:  {"channel-1", "channel-2"},
+			common.CriticalSeverity: {"channel-3"},
 		},
-		Rules: []restapi.RuleWithThreshold[restapi.InfraAlertRule]{},
+		Rules: []common.RuleWithThreshold[api.InfraAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -257,18 +296,18 @@ func TestUpdateState_WithTimeThreshold(t *testing.T) {
 	ctx := context.Background()
 	resource := NewInfraAlertConfigResourceHandle()
 
-	data := &restapi.InfraAlertConfig{
+	data := &api.InfraAlertConfig{
 		ID:             "test-id",
 		Name:           "Test Infra Alert",
 		Description:    "Test Description",
 		Granularity:    600000,
-		EvaluationType: restapi.EvaluationTypePerEntity,
-		TimeThreshold: &restapi.InfraTimeThreshold{
+		EvaluationType: api.EvaluationTypePerEntity,
+		TimeThreshold: &api.InfraTimeThreshold{
 			Type:       "violationsInSequence",
 			TimeWindow: 300000,
 		},
-		AlertChannels: map[restapi.AlertSeverity][]string{},
-		Rules:         []restapi.RuleWithThreshold[restapi.InfraAlertRule]{},
+		AlertChannels: map[common.AlertSeverity][]string{},
+		Rules:         []common.RuleWithThreshold[api.InfraAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -293,21 +332,21 @@ func TestUpdateState_WithCustomPayloadFields(t *testing.T) {
 	ctx := context.Background()
 	resource := NewInfraAlertConfigResourceHandle()
 
-	data := &restapi.InfraAlertConfig{
+	data := &api.InfraAlertConfig{
 		ID:             "test-id",
 		Name:           "Test Infra Alert",
 		Description:    "Test Description",
 		Granularity:    600000,
-		EvaluationType: restapi.EvaluationTypePerEntity,
-		CustomerPayloadFields: []restapi.CustomPayloadField[any]{
+		EvaluationType: api.EvaluationTypePerEntity,
+		CustomerPayloadFields: []common.CustomPayloadField[any]{
 			{
-				Type:  restapi.StaticStringCustomPayloadType,
+				Type:  common.StaticStringCustomPayloadType,
 				Key:   "field1",
 				Value: "value1",
 			},
 		},
-		AlertChannels: map[restapi.AlertSeverity][]string{},
-		Rules:         []restapi.RuleWithThreshold[restapi.InfraAlertRule]{},
+		AlertChannels: map[common.AlertSeverity][]string{},
+		Rules:         []common.RuleWithThreshold[api.InfraAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -331,32 +370,32 @@ func TestUpdateState_WithRulesAndStaticThreshold(t *testing.T) {
 	resource := NewInfraAlertConfigResourceHandle()
 
 	value := float64(100)
-	data := &restapi.InfraAlertConfig{
+	data := &api.InfraAlertConfig{
 		ID:             "test-id",
 		Name:           "Test Infra Alert",
 		Description:    "Test Description",
 		Granularity:    600000,
-		EvaluationType: restapi.EvaluationTypePerEntity,
-		Rules: []restapi.RuleWithThreshold[restapi.InfraAlertRule]{
+		EvaluationType: api.EvaluationTypePerEntity,
+		Rules: []common.RuleWithThreshold[api.InfraAlertRule]{
 			{
-				Rule: restapi.InfraAlertRule{
+				Rule: api.InfraAlertRule{
 					AlertType:              "genericRule",
 					MetricName:             "cpu.usage",
 					EntityType:             "host",
-					Aggregation:            restapi.SumAggregation,
-					CrossSeriesAggregation: restapi.MeanAggregation,
+					Aggregation:            common.SumAggregation,
+					CrossSeriesAggregation: common.MeanAggregation,
 					Regex:                  false,
 				},
-				ThresholdOperator: restapi.ThresholdOperatorGreaterThan,
-				Thresholds: map[restapi.AlertSeverity]restapi.ThresholdRule{
-					restapi.WarningSeverity: {
+				ThresholdOperator: common.ThresholdOperatorGreaterThan,
+				Thresholds: map[common.AlertSeverity]common.ThresholdRule{
+					common.WarningSeverity: {
 						Type:  "staticThreshold",
 						Value: &value,
 					},
 				},
 			},
 		},
-		AlertChannels: map[restapi.AlertSeverity][]string{},
+		AlertChannels: map[common.AlertSeverity][]string{},
 	}
 
 	state := &tfsdk.State{
@@ -376,10 +415,10 @@ func TestUpdateState_WithRulesAndStaticThreshold(t *testing.T) {
 	require.NotNil(t, model.Rules.GenericRule)
 	assert.Equal(t, "cpu.usage", model.Rules.GenericRule.MetricName.ValueString())
 	assert.Equal(t, "host", model.Rules.GenericRule.EntityType.ValueString())
-	assert.Equal(t, string(restapi.SumAggregation), model.Rules.GenericRule.Aggregation.ValueString())
-	assert.Equal(t, string(restapi.MeanAggregation), model.Rules.GenericRule.CrossSeriesAggregation.ValueString())
+	assert.Equal(t, string(common.SumAggregation), model.Rules.GenericRule.Aggregation.ValueString())
+	assert.Equal(t, string(common.MeanAggregation), model.Rules.GenericRule.CrossSeriesAggregation.ValueString())
 	assert.False(t, model.Rules.GenericRule.Regex.ValueBool())
-	assert.Equal(t, string(restapi.ThresholdOperatorGreaterThan), model.Rules.GenericRule.ThresholdOperator.ValueString())
+	assert.Equal(t, string(common.ThresholdOperatorGreaterThan), model.Rules.GenericRule.ThresholdOperator.ValueString())
 
 	require.NotNil(t, model.Rules.GenericRule.ThresholdRule)
 	require.NotNil(t, model.Rules.GenericRule.ThresholdRule.Warning)
@@ -393,27 +432,27 @@ func TestUpdateState_WithRulesAndAdaptiveBaselineThreshold(t *testing.T) {
 
 	deviationFactor := float32(2.0)
 	adaptability := float32(0.5)
-	seasonality := restapi.ThresholdSeasonality("DAILY")
+	seasonality := common.ThresholdSeasonality("DAILY")
 
-	data := &restapi.InfraAlertConfig{
+	data := &api.InfraAlertConfig{
 		ID:             "test-id",
 		Name:           "Test Infra Alert",
 		Description:    "Test Description",
 		Granularity:    600000,
-		EvaluationType: restapi.EvaluationTypePerEntity,
-		Rules: []restapi.RuleWithThreshold[restapi.InfraAlertRule]{
+		EvaluationType: api.EvaluationTypePerEntity,
+		Rules: []common.RuleWithThreshold[api.InfraAlertRule]{
 			{
-				Rule: restapi.InfraAlertRule{
+				Rule: api.InfraAlertRule{
 					AlertType:              "genericRule",
 					MetricName:             "memory.usage",
 					EntityType:             "host",
-					Aggregation:            restapi.MeanAggregation,
-					CrossSeriesAggregation: restapi.MaxAggregation,
+					Aggregation:            common.MeanAggregation,
+					CrossSeriesAggregation: common.MaxAggregation,
 					Regex:                  true,
 				},
-				ThresholdOperator: restapi.ThresholdOperatorGreaterThan,
-				Thresholds: map[restapi.AlertSeverity]restapi.ThresholdRule{
-					restapi.CriticalSeverity: {
+				ThresholdOperator: common.ThresholdOperatorGreaterThan,
+				Thresholds: map[common.AlertSeverity]common.ThresholdRule{
+					common.CriticalSeverity: {
 						Type:            "adaptiveBaseline",
 						DeviationFactor: &deviationFactor,
 						Adaptability:    &adaptability,
@@ -422,7 +461,7 @@ func TestUpdateState_WithRulesAndAdaptiveBaselineThreshold(t *testing.T) {
 				},
 			},
 		},
-		AlertChannels: map[restapi.AlertSeverity][]string{},
+		AlertChannels: map[common.AlertSeverity][]string{},
 	}
 
 	state := &tfsdk.State{
@@ -459,7 +498,7 @@ func TestMapStateToDataObject_BasicConfig(t *testing.T) {
 		Name:               types.StringValue("Test Infra Alert"),
 		Description:        types.StringValue("Test Description"),
 		Granularity:        types.Int64Value(600000),
-		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		EvaluationType:     types.StringValue(string(api.EvaluationTypePerEntity)),
 		TagFilter:          types.StringNull(),
 		GroupBy:            types.SetNull(types.StringType),
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
@@ -472,8 +511,8 @@ func TestMapStateToDataObject_BasicConfig(t *testing.T) {
 	assert.Equal(t, "test-id", result.ID)
 	assert.Equal(t, "Test Infra Alert", result.Name)
 	assert.Equal(t, "Test Description", result.Description)
-	assert.Equal(t, restapi.Granularity(600000), result.Granularity)
-	assert.Equal(t, restapi.EvaluationTypePerEntity, result.EvaluationType)
+	assert.Equal(t, common.Granularity(600000), result.Granularity)
+	assert.Equal(t, api.EvaluationTypePerEntity, result.EvaluationType)
 }
 
 func TestMapStateToDataObject_WithTagFilter(t *testing.T) {
@@ -485,7 +524,7 @@ func TestMapStateToDataObject_WithTagFilter(t *testing.T) {
 		Name:               types.StringValue("Test Infra Alert"),
 		Description:        types.StringValue("Test Description"),
 		Granularity:        types.Int64Value(600000),
-		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		EvaluationType:     types.StringValue(string(api.EvaluationTypePerEntity)),
 		TagFilter:          types.StringValue("entity.type EQUALS 'host'"),
 		GroupBy:            types.SetNull(types.StringType),
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
@@ -506,7 +545,7 @@ func TestMapStateToDataObject_WithInvalidTagFilter(t *testing.T) {
 		Name:               types.StringValue("Test Infra Alert"),
 		Description:        types.StringValue("Test Description"),
 		Granularity:        types.Int64Value(600000),
-		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		EvaluationType:     types.StringValue(string(api.EvaluationTypePerEntity)),
 		TagFilter:          types.StringValue("invalid tag filter syntax"),
 		GroupBy:            types.SetNull(types.StringType),
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
@@ -530,7 +569,7 @@ func TestMapStateToDataObject_WithGroupBy(t *testing.T) {
 		Name:               types.StringValue("Test Infra Alert"),
 		Description:        types.StringValue("Test Description"),
 		Granularity:        types.Int64Value(600000),
-		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		EvaluationType:     types.StringValue(string(api.EvaluationTypePerEntity)),
 		TagFilter:          types.StringNull(),
 		GroupBy:            groupBySet,
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
@@ -561,7 +600,7 @@ func TestMapStateToDataObject_WithAlertChannels(t *testing.T) {
 		Name:           types.StringValue("Test Infra Alert"),
 		Description:    types.StringValue("Test Description"),
 		Granularity:    types.Int64Value(600000),
-		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		EvaluationType: types.StringValue(string(api.EvaluationTypePerEntity)),
 		TagFilter:      types.StringNull(),
 		GroupBy:        types.SetNull(types.StringType),
 		AlertChannels: &InfraAlertChannelsModel{
@@ -575,8 +614,8 @@ func TestMapStateToDataObject_WithAlertChannels(t *testing.T) {
 	require.False(t, diags.HasError())
 	require.NotNil(t, result)
 	require.Len(t, result.AlertChannels, 2)
-	assert.Len(t, result.AlertChannels[restapi.WarningSeverity], 2)
-	assert.Len(t, result.AlertChannels[restapi.CriticalSeverity], 1)
+	assert.Len(t, result.AlertChannels[common.WarningSeverity], 2)
+	assert.Len(t, result.AlertChannels[common.CriticalSeverity], 1)
 }
 
 func TestMapStateToDataObject_WithTimeThreshold(t *testing.T) {
@@ -588,7 +627,7 @@ func TestMapStateToDataObject_WithTimeThreshold(t *testing.T) {
 		Name:           types.StringValue("Test Infra Alert"),
 		Description:    types.StringValue("Test Description"),
 		Granularity:    types.Int64Value(600000),
-		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		EvaluationType: types.StringValue(string(api.EvaluationTypePerEntity)),
 		TagFilter:      types.StringNull(),
 		GroupBy:        types.SetNull(types.StringType),
 		TimeThreshold: &InfraTimeThresholdModel{
@@ -634,7 +673,7 @@ func TestMapStateToDataObject_WithCustomPayloadFields(t *testing.T) {
 		Name:               types.StringValue("Test Infra Alert"),
 		Description:        types.StringValue("Test Description"),
 		Granularity:        types.Int64Value(600000),
-		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		EvaluationType:     types.StringValue(string(api.EvaluationTypePerEntity)),
 		TagFilter:          types.StringNull(),
 		GroupBy:            types.SetNull(types.StringType),
 		CustomPayloadField: customPayloadFields,
@@ -658,17 +697,17 @@ func TestMapStateToDataObject_WithRulesAndStaticThreshold(t *testing.T) {
 		Name:           types.StringValue("Test Infra Alert"),
 		Description:    types.StringValue("Test Description"),
 		Granularity:    types.Int64Value(600000),
-		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		EvaluationType: types.StringValue(string(api.EvaluationTypePerEntity)),
 		TagFilter:      types.StringNull(),
 		GroupBy:        types.SetNull(types.StringType),
 		Rules: &InfraRulesModel{
 			GenericRule: &InfraGenericRuleModel{
 				MetricName:             types.StringValue("cpu.usage"),
 				EntityType:             types.StringValue("host"),
-				Aggregation:            types.StringValue(string(restapi.SumAggregation)),
-				CrossSeriesAggregation: types.StringValue(string(restapi.MeanAggregation)),
+				Aggregation:            types.StringValue(string(common.SumAggregation)),
+				CrossSeriesAggregation: types.StringValue(string(common.MeanAggregation)),
 				Regex:                  types.BoolValue(false),
-				ThresholdOperator:      types.StringValue(string(restapi.ThresholdOperatorGreaterThan)),
+				ThresholdOperator:      types.StringValue(string(common.ThresholdOperatorGreaterThan)),
 				ThresholdRule: &shared.ThresholdPluginModel{
 					Warning: &shared.ThresholdTypeModel{
 						Static: &shared.StaticTypeModel{
@@ -690,13 +729,13 @@ func TestMapStateToDataObject_WithRulesAndStaticThreshold(t *testing.T) {
 	assert.Equal(t, "genericRule", rule.Rule.AlertType)
 	assert.Equal(t, "cpu.usage", rule.Rule.MetricName)
 	assert.Equal(t, "host", rule.Rule.EntityType)
-	assert.Equal(t, restapi.SumAggregation, rule.Rule.Aggregation)
-	assert.Equal(t, restapi.MeanAggregation, rule.Rule.CrossSeriesAggregation)
+	assert.Equal(t, common.SumAggregation, rule.Rule.Aggregation)
+	assert.Equal(t, common.MeanAggregation, rule.Rule.CrossSeriesAggregation)
 	assert.False(t, rule.Rule.Regex)
-	assert.Equal(t, restapi.ThresholdOperatorGreaterThan, rule.ThresholdOperator)
+	assert.Equal(t, common.ThresholdOperatorGreaterThan, rule.ThresholdOperator)
 
-	require.Contains(t, rule.Thresholds, restapi.WarningSeverity)
-	threshold := rule.Thresholds[restapi.WarningSeverity]
+	require.Contains(t, rule.Thresholds, common.WarningSeverity)
+	threshold := rule.Thresholds[common.WarningSeverity]
 	assert.Equal(t, "staticThreshold", threshold.Type)
 	require.NotNil(t, threshold.Value)
 	assert.Equal(t, float64(100), *threshold.Value)
@@ -711,17 +750,17 @@ func TestMapStateToDataObject_WithRulesAndAdaptiveBaselineThreshold(t *testing.T
 		Name:           types.StringValue("Test Infra Alert"),
 		Description:    types.StringValue("Test Description"),
 		Granularity:    types.Int64Value(600000),
-		EvaluationType: types.StringValue(string(restapi.EvaluationTypeCustom)),
+		EvaluationType: types.StringValue(string(api.EvaluationTypeCustom)),
 		TagFilter:      types.StringNull(),
 		GroupBy:        types.SetNull(types.StringType),
 		Rules: &InfraRulesModel{
 			GenericRule: &InfraGenericRuleModel{
 				MetricName:             types.StringValue("memory.usage"),
 				EntityType:             types.StringValue("host"),
-				Aggregation:            types.StringValue(string(restapi.MeanAggregation)),
-				CrossSeriesAggregation: types.StringValue(string(restapi.MaxAggregation)),
+				Aggregation:            types.StringValue(string(common.MeanAggregation)),
+				CrossSeriesAggregation: types.StringValue(string(common.MaxAggregation)),
 				Regex:                  types.BoolValue(true),
-				ThresholdOperator:      types.StringValue(string(restapi.ThresholdOperatorGreaterThan)),
+				ThresholdOperator:      types.StringValue(string(common.ThresholdOperatorGreaterThan)),
 				ThresholdRule: &shared.ThresholdPluginModel{
 					Critical: &shared.ThresholdTypeModel{
 						AdaptiveBaseline: &shared.AdaptiveBaselineModel{
@@ -742,15 +781,15 @@ func TestMapStateToDataObject_WithRulesAndAdaptiveBaselineThreshold(t *testing.T
 	require.Len(t, result.Rules, 1)
 
 	rule := result.Rules[0]
-	require.Contains(t, rule.Thresholds, restapi.CriticalSeverity)
-	threshold := rule.Thresholds[restapi.CriticalSeverity]
+	require.Contains(t, rule.Thresholds, common.CriticalSeverity)
+	threshold := rule.Thresholds[common.CriticalSeverity]
 	assert.Equal(t, "adaptiveBaseline", threshold.Type)
 	require.NotNil(t, threshold.DeviationFactor)
 	assert.Equal(t, float32(2.0), *threshold.DeviationFactor)
 	require.NotNil(t, threshold.Adaptability)
 	assert.Equal(t, float32(0.5), *threshold.Adaptability)
 	require.NotNil(t, threshold.Seasonality)
-	assert.Equal(t, restapi.ThresholdSeasonality("DAILY"), *threshold.Seasonality)
+	assert.Equal(t, common.ThresholdSeasonality("DAILY"), *threshold.Seasonality)
 }
 
 func TestMapStateToDataObject_WithBothThresholds(t *testing.T) {
@@ -762,17 +801,17 @@ func TestMapStateToDataObject_WithBothThresholds(t *testing.T) {
 		Name:           types.StringValue("Test Infra Alert"),
 		Description:    types.StringValue("Test Description"),
 		Granularity:    types.Int64Value(600000),
-		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		EvaluationType: types.StringValue(string(api.EvaluationTypePerEntity)),
 		TagFilter:      types.StringNull(),
 		GroupBy:        types.SetNull(types.StringType),
 		Rules: &InfraRulesModel{
 			GenericRule: &InfraGenericRuleModel{
 				MetricName:             types.StringValue("disk.usage"),
 				EntityType:             types.StringValue("host"),
-				Aggregation:            types.StringValue(string(restapi.SumAggregation)),
-				CrossSeriesAggregation: types.StringValue(string(restapi.SumAggregation)),
+				Aggregation:            types.StringValue(string(common.SumAggregation)),
+				CrossSeriesAggregation: types.StringValue(string(common.SumAggregation)),
 				Regex:                  types.BoolValue(false),
-				ThresholdOperator:      types.StringValue(string(restapi.ThresholdOperatorGreaterThan)),
+				ThresholdOperator:      types.StringValue(string(common.ThresholdOperatorGreaterThan)),
 				ThresholdRule: &shared.ThresholdPluginModel{
 					Warning: &shared.ThresholdTypeModel{
 						Static: &shared.StaticTypeModel{
@@ -796,11 +835,11 @@ func TestMapStateToDataObject_WithBothThresholds(t *testing.T) {
 	require.Len(t, result.Rules, 1)
 
 	rule := result.Rules[0]
-	require.Contains(t, rule.Thresholds, restapi.WarningSeverity)
-	require.Contains(t, rule.Thresholds, restapi.CriticalSeverity)
+	require.Contains(t, rule.Thresholds, common.WarningSeverity)
+	require.Contains(t, rule.Thresholds, common.CriticalSeverity)
 
-	assert.Equal(t, float64(80), *rule.Thresholds[restapi.WarningSeverity].Value)
-	assert.Equal(t, float64(95), *rule.Thresholds[restapi.CriticalSeverity].Value)
+	assert.Equal(t, float64(80), *rule.Thresholds[common.WarningSeverity].Value)
+	assert.Equal(t, float64(95), *rule.Thresholds[common.CriticalSeverity].Value)
 }
 
 func TestMapStateToDataObject_WithEmptyTagFilter(t *testing.T) {
@@ -812,7 +851,7 @@ func TestMapStateToDataObject_WithEmptyTagFilter(t *testing.T) {
 		Name:               types.StringValue("Test Infra Alert"),
 		Description:        types.StringValue("Test Description"),
 		Granularity:        types.Int64Value(600000),
-		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		EvaluationType:     types.StringValue(string(api.EvaluationTypePerEntity)),
 		TagFilter:          types.StringValue(""),
 		GroupBy:            types.SetNull(types.StringType),
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
@@ -833,7 +872,7 @@ func TestMapStateToDataObject_WithNullGranularity(t *testing.T) {
 		Name:               types.StringValue("Test Infra Alert"),
 		Description:        types.StringValue("Test Description"),
 		Granularity:        types.Int64Null(),
-		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		EvaluationType:     types.StringValue(string(api.EvaluationTypePerEntity)),
 		TagFilter:          types.StringNull(),
 		GroupBy:            types.SetNull(types.StringType),
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
@@ -842,7 +881,7 @@ func TestMapStateToDataObject_WithNullGranularity(t *testing.T) {
 	result, diags := resource.MapStateToDataObject(ctx, nil, &state)
 	require.False(t, diags.HasError())
 	require.NotNil(t, result)
-	assert.Equal(t, restapi.Granularity(0), result.Granularity)
+	assert.Equal(t, common.Granularity(0), result.Granularity)
 }
 
 func TestMapStateToDataObject_FromPlan(t *testing.T) {
@@ -858,7 +897,7 @@ func TestMapStateToDataObject_FromPlan(t *testing.T) {
 		Name:               types.StringValue("Test Infra Alert"),
 		Description:        types.StringValue("Test Description"),
 		Granularity:        types.Int64Value(600000),
-		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		EvaluationType:     types.StringValue(string(api.EvaluationTypePerEntity)),
 		TagFilter:          types.StringNull(),
 		GroupBy:            types.SetNull(types.StringType),
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
@@ -878,14 +917,14 @@ func TestUpdateState_WithEmptyAlertChannels(t *testing.T) {
 	ctx := context.Background()
 	resource := NewInfraAlertConfigResourceHandle()
 
-	data := &restapi.InfraAlertConfig{
+	data := &api.InfraAlertConfig{
 		ID:             "test-id",
 		Name:           "Test Infra Alert",
 		Description:    "Test Description",
 		Granularity:    600000,
-		EvaluationType: restapi.EvaluationTypePerEntity,
-		AlertChannels:  map[restapi.AlertSeverity][]string{},
-		Rules:          []restapi.RuleWithThreshold[restapi.InfraAlertRule]{},
+		EvaluationType: api.EvaluationTypePerEntity,
+		AlertChannels:  map[common.AlertSeverity][]string{},
+		Rules:          []common.RuleWithThreshold[api.InfraAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -908,15 +947,15 @@ func TestUpdateState_WithNullTagFilter(t *testing.T) {
 	ctx := context.Background()
 	resource := NewInfraAlertConfigResourceHandle()
 
-	data := &restapi.InfraAlertConfig{
+	data := &api.InfraAlertConfig{
 		ID:                  "test-id",
 		Name:                "Test Infra Alert",
 		Description:         "Test Description",
 		Granularity:         600000,
-		EvaluationType:      restapi.EvaluationTypePerEntity,
+		EvaluationType:      api.EvaluationTypePerEntity,
 		TagFilterExpression: nil,
-		AlertChannels:       map[restapi.AlertSeverity][]string{},
-		Rules:               []restapi.RuleWithThreshold[restapi.InfraAlertRule]{},
+		AlertChannels:       map[common.AlertSeverity][]string{},
+		Rules:               []common.RuleWithThreshold[api.InfraAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -939,15 +978,15 @@ func TestUpdateState_WithEmptyGroupBy(t *testing.T) {
 	ctx := context.Background()
 	resource := NewInfraAlertConfigResourceHandle()
 
-	data := &restapi.InfraAlertConfig{
+	data := &api.InfraAlertConfig{
 		ID:             "test-id",
 		Name:           "Test Infra Alert",
 		Description:    "Test Description",
 		Granularity:    600000,
-		EvaluationType: restapi.EvaluationTypePerEntity,
+		EvaluationType: api.EvaluationTypePerEntity,
 		GroupBy:        []string{},
-		AlertChannels:  map[restapi.AlertSeverity][]string{},
-		Rules:          []restapi.RuleWithThreshold[restapi.InfraAlertRule]{},
+		AlertChannels:  map[common.AlertSeverity][]string{},
+		Rules:          []common.RuleWithThreshold[api.InfraAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -970,15 +1009,15 @@ func TestUpdateState_WithNullTimeThreshold(t *testing.T) {
 	ctx := context.Background()
 	resource := NewInfraAlertConfigResourceHandle()
 
-	data := &restapi.InfraAlertConfig{
+	data := &api.InfraAlertConfig{
 		ID:             "test-id",
 		Name:           "Test Infra Alert",
 		Description:    "Test Description",
 		Granularity:    600000,
-		EvaluationType: restapi.EvaluationTypePerEntity,
+		EvaluationType: api.EvaluationTypePerEntity,
 		TimeThreshold:  nil,
-		AlertChannels:  map[restapi.AlertSeverity][]string{},
-		Rules:          []restapi.RuleWithThreshold[restapi.InfraAlertRule]{},
+		AlertChannels:  map[common.AlertSeverity][]string{},
+		Rules:          []common.RuleWithThreshold[api.InfraAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -1001,18 +1040,18 @@ func TestUpdateState_WithUnsupportedTimeThresholdType(t *testing.T) {
 	ctx := context.Background()
 	resource := NewInfraAlertConfigResourceHandle()
 
-	data := &restapi.InfraAlertConfig{
+	data := &api.InfraAlertConfig{
 		ID:             "test-id",
 		Name:           "Test Infra Alert",
 		Description:    "Test Description",
 		Granularity:    600000,
-		EvaluationType: restapi.EvaluationTypePerEntity,
-		TimeThreshold: &restapi.InfraTimeThreshold{
+		EvaluationType: api.EvaluationTypePerEntity,
+		TimeThreshold: &api.InfraTimeThreshold{
 			Type:       "unsupportedType",
 			TimeWindow: 300000,
 		},
-		AlertChannels: map[restapi.AlertSeverity][]string{},
-		Rules:         []restapi.RuleWithThreshold[restapi.InfraAlertRule]{},
+		AlertChannels: map[common.AlertSeverity][]string{},
+		Rules:         []common.RuleWithThreshold[api.InfraAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -1041,7 +1080,7 @@ func TestMapStateToDataObject_WithNullTimeThreshold(t *testing.T) {
 		Name:               types.StringValue("Test Infra Alert"),
 		Description:        types.StringValue("Test Description"),
 		Granularity:        types.Int64Value(600000),
-		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		EvaluationType:     types.StringValue(string(api.EvaluationTypePerEntity)),
 		TagFilter:          types.StringNull(),
 		GroupBy:            types.SetNull(types.StringType),
 		TimeThreshold:      nil,
@@ -1063,7 +1102,7 @@ func TestMapStateToDataObject_WithNullAlertChannels(t *testing.T) {
 		Name:               types.StringValue("Test Infra Alert"),
 		Description:        types.StringValue("Test Description"),
 		Granularity:        types.Int64Value(600000),
-		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		EvaluationType:     types.StringValue(string(api.EvaluationTypePerEntity)),
 		TagFilter:          types.StringNull(),
 		GroupBy:            types.SetNull(types.StringType),
 		AlertChannels:      nil,
@@ -1085,7 +1124,7 @@ func TestMapStateToDataObject_WithNullRules(t *testing.T) {
 		Name:               types.StringValue("Test Infra Alert"),
 		Description:        types.StringValue("Test Description"),
 		Granularity:        types.Int64Value(600000),
-		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		EvaluationType:     types.StringValue(string(api.EvaluationTypePerEntity)),
 		TagFilter:          types.StringNull(),
 		GroupBy:            types.SetNull(types.StringType),
 		Rules:              nil,
@@ -1102,16 +1141,16 @@ func TestUpdateState_WithOnlyWarningAlertChannel(t *testing.T) {
 	ctx := context.Background()
 	resource := NewInfraAlertConfigResourceHandle()
 
-	data := &restapi.InfraAlertConfig{
+	data := &api.InfraAlertConfig{
 		ID:             "test-id",
 		Name:           "Test Infra Alert",
 		Description:    "Test Description",
 		Granularity:    600000,
-		EvaluationType: restapi.EvaluationTypePerEntity,
-		AlertChannels: map[restapi.AlertSeverity][]string{
-			restapi.WarningSeverity: {"channel-1"},
+		EvaluationType: api.EvaluationTypePerEntity,
+		AlertChannels: map[common.AlertSeverity][]string{
+			common.WarningSeverity: {"channel-1"},
 		},
-		Rules: []restapi.RuleWithThreshold[restapi.InfraAlertRule]{},
+		Rules: []common.RuleWithThreshold[api.InfraAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -1136,16 +1175,16 @@ func TestUpdateState_WithOnlyCriticalAlertChannel(t *testing.T) {
 	ctx := context.Background()
 	resource := NewInfraAlertConfigResourceHandle()
 
-	data := &restapi.InfraAlertConfig{
+	data := &api.InfraAlertConfig{
 		ID:             "test-id",
 		Name:           "Test Infra Alert",
 		Description:    "Test Description",
 		Granularity:    600000,
-		EvaluationType: restapi.EvaluationTypePerEntity,
-		AlertChannels: map[restapi.AlertSeverity][]string{
-			restapi.CriticalSeverity: {"channel-1"},
+		EvaluationType: api.EvaluationTypePerEntity,
+		AlertChannels: map[common.AlertSeverity][]string{
+			common.CriticalSeverity: {"channel-1"},
 		},
-		Rules: []restapi.RuleWithThreshold[restapi.InfraAlertRule]{},
+		Rules: []common.RuleWithThreshold[api.InfraAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -1179,7 +1218,7 @@ func TestMapStateToDataObject_WithOnlyWarningAlertChannel(t *testing.T) {
 		Name:           types.StringValue("Test Infra Alert"),
 		Description:    types.StringValue("Test Description"),
 		Granularity:    types.Int64Value(600000),
-		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		EvaluationType: types.StringValue(string(api.EvaluationTypePerEntity)),
 		TagFilter:      types.StringNull(),
 		GroupBy:        types.SetNull(types.StringType),
 		AlertChannels: &InfraAlertChannelsModel{
@@ -1193,16 +1232,16 @@ func TestMapStateToDataObject_WithOnlyWarningAlertChannel(t *testing.T) {
 	require.False(t, diags.HasError())
 	require.NotNil(t, result)
 	require.Len(t, result.AlertChannels, 2)
-	assert.Contains(t, result.AlertChannels, restapi.WarningSeverity)
-	assert.Contains(t, result.AlertChannels, restapi.CriticalSeverity)
-	assert.Len(t, result.AlertChannels[restapi.WarningSeverity], 1)
-	assert.Len(t, result.AlertChannels[restapi.CriticalSeverity], 0)
+	assert.Contains(t, result.AlertChannels, common.WarningSeverity)
+	assert.Contains(t, result.AlertChannels, common.CriticalSeverity)
+	assert.Len(t, result.AlertChannels[common.WarningSeverity], 1)
+	assert.Len(t, result.AlertChannels[common.CriticalSeverity], 0)
 }
 
 func TestMapStateToDataObject_AllEvaluationTypes(t *testing.T) {
-	evaluationTypes := []restapi.InfraAlertEvaluationType{
-		restapi.EvaluationTypePerEntity,
-		restapi.EvaluationTypeCustom,
+	evaluationTypes := []api.InfraAlertEvaluationType{
+		api.EvaluationTypePerEntity,
+		api.EvaluationTypeCustom,
 	}
 
 	for _, evalType := range evaluationTypes {
@@ -1239,7 +1278,7 @@ func TestMapTimeThresholdToModel_NilInput(t *testing.T) {
 func TestMapTimeThresholdToModel_UnsupportedType(t *testing.T) {
 	resource := &infraAlertConfigResource{}
 
-	timeThreshold := &restapi.InfraTimeThreshold{
+	timeThreshold := &api.InfraTimeThreshold{
 		Type:       "unsupportedType",
 		TimeWindow: 300000,
 	}
@@ -1251,7 +1290,7 @@ func TestMapTimeThresholdToModel_UnsupportedType(t *testing.T) {
 func TestMapTimeThresholdToModel_ViolationsInSequence(t *testing.T) {
 	resource := &infraAlertConfigResource{}
 
-	timeThreshold := &restapi.InfraTimeThreshold{
+	timeThreshold := &api.InfraTimeThreshold{
 		Type:       "violationsInSequence",
 		TimeWindow: 300000,
 	}
@@ -1295,14 +1334,14 @@ func TestUpdateState_WithEmptyRules(t *testing.T) {
 	ctx := context.Background()
 	resource := NewInfraAlertConfigResourceHandle()
 
-	data := &restapi.InfraAlertConfig{
+	data := &api.InfraAlertConfig{
 		ID:             "test-id",
 		Name:           "Test Infra Alert",
 		Description:    "Test Description",
 		Granularity:    600000,
-		EvaluationType: restapi.EvaluationTypePerEntity,
-		AlertChannels:  map[restapi.AlertSeverity][]string{},
-		Rules:          []restapi.RuleWithThreshold[restapi.InfraAlertRule]{},
+		EvaluationType: api.EvaluationTypePerEntity,
+		AlertChannels:  map[common.AlertSeverity][]string{},
+		Rules:          []common.RuleWithThreshold[api.InfraAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -1327,36 +1366,36 @@ func TestUpdateState_WithBothThresholds(t *testing.T) {
 
 	warningValue := float64(80)
 	criticalValue := float64(95)
-	data := &restapi.InfraAlertConfig{
+	data := &api.InfraAlertConfig{
 		ID:             "test-id",
 		Name:           "Test Infra Alert",
 		Description:    "Test Description",
 		Granularity:    600000,
-		EvaluationType: restapi.EvaluationTypePerEntity,
-		Rules: []restapi.RuleWithThreshold[restapi.InfraAlertRule]{
+		EvaluationType: api.EvaluationTypePerEntity,
+		Rules: []common.RuleWithThreshold[api.InfraAlertRule]{
 			{
-				Rule: restapi.InfraAlertRule{
+				Rule: api.InfraAlertRule{
 					AlertType:              "genericRule",
 					MetricName:             "disk.usage",
 					EntityType:             "host",
-					Aggregation:            restapi.SumAggregation,
-					CrossSeriesAggregation: restapi.SumAggregation,
+					Aggregation:            common.SumAggregation,
+					CrossSeriesAggregation: common.SumAggregation,
 					Regex:                  false,
 				},
-				ThresholdOperator: restapi.ThresholdOperatorGreaterThan,
-				Thresholds: map[restapi.AlertSeverity]restapi.ThresholdRule{
-					restapi.WarningSeverity: {
+				ThresholdOperator: common.ThresholdOperatorGreaterThan,
+				Thresholds: map[common.AlertSeverity]common.ThresholdRule{
+					common.WarningSeverity: {
 						Type:  "staticThreshold",
 						Value: &warningValue,
 					},
-					restapi.CriticalSeverity: {
+					common.CriticalSeverity: {
 						Type:  "staticThreshold",
 						Value: &criticalValue,
 					},
 				},
 			},
 		},
-		AlertChannels: map[restapi.AlertSeverity][]string{},
+		AlertChannels: map[common.AlertSeverity][]string{},
 	}
 
 	state := &tfsdk.State{
@@ -1388,7 +1427,7 @@ func TestMapStateToDataObject_WithEmptyCustomPayloadFields(t *testing.T) {
 		Name:               types.StringValue("Test Infra Alert"),
 		Description:        types.StringValue("Test Description"),
 		Granularity:        types.Int64Value(600000),
-		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		EvaluationType:     types.StringValue(string(api.EvaluationTypePerEntity)),
 		TagFilter:          types.StringNull(),
 		GroupBy:            types.SetNull(types.StringType),
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
@@ -1409,7 +1448,7 @@ func TestMapStateToDataObject_WithNullID(t *testing.T) {
 		Name:               types.StringValue("Test Infra Alert"),
 		Description:        types.StringValue("Test Description"),
 		Granularity:        types.Int64Value(600000),
-		EvaluationType:     types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		EvaluationType:     types.StringValue(string(api.EvaluationTypePerEntity)),
 		TagFilter:          types.StringNull(),
 		GroupBy:            types.SetNull(types.StringType),
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
@@ -1427,25 +1466,25 @@ func TestUpdateState_ErrorInTagFilterMapping(t *testing.T) {
 
 	// Create an invalid tag filter that will cause an error during mapping
 	invalidName := ""
-	equalsOp := restapi.EqualsOperator
+	equalsOp := common.EqualsOperator
 	hostValue := "host"
 
-	tagFilter := &restapi.TagFilter{
-		Type:     restapi.TagFilterExpressionType,
+	tagFilter := &tag.TagFilter{
+		Type:     tag.TagFilterExpressionType,
 		Name:     &invalidName,
 		Operator: &equalsOp,
 		Value:    &hostValue,
 	}
 
-	data := &restapi.InfraAlertConfig{
+	data := &api.InfraAlertConfig{
 		ID:                  "test-id",
 		Name:                "Test Infra Alert",
 		Description:         "Test Description",
 		Granularity:         600000,
-		EvaluationType:      restapi.EvaluationTypePerEntity,
+		EvaluationType:      api.EvaluationTypePerEntity,
 		TagFilterExpression: tagFilter,
-		AlertChannels:       map[restapi.AlertSeverity][]string{},
-		Rules:               []restapi.RuleWithThreshold[restapi.InfraAlertRule]{},
+		AlertChannels:       map[common.AlertSeverity][]string{},
+		Rules:               []common.RuleWithThreshold[api.InfraAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -1473,7 +1512,7 @@ func TestMapStateToDataObject_WithOnlyCriticalAlertChannel(t *testing.T) {
 		Name:           types.StringValue("Test Infra Alert"),
 		Description:    types.StringValue("Test Description"),
 		Granularity:    types.Int64Value(600000),
-		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		EvaluationType: types.StringValue(string(api.EvaluationTypePerEntity)),
 		TagFilter:      types.StringNull(),
 		GroupBy:        types.SetNull(types.StringType),
 		AlertChannels: &InfraAlertChannelsModel{
@@ -1487,25 +1526,25 @@ func TestMapStateToDataObject_WithOnlyCriticalAlertChannel(t *testing.T) {
 	require.False(t, diags.HasError())
 	require.NotNil(t, result)
 	require.Len(t, result.AlertChannels, 2)
-	assert.Contains(t, result.AlertChannels, restapi.CriticalSeverity)
-	assert.Contains(t, result.AlertChannels, restapi.WarningSeverity)
-	assert.Len(t, result.AlertChannels[restapi.CriticalSeverity], 1)
-	assert.Len(t, result.AlertChannels[restapi.WarningSeverity], 0)
+	assert.Contains(t, result.AlertChannels, common.CriticalSeverity)
+	assert.Contains(t, result.AlertChannels, common.WarningSeverity)
+	assert.Len(t, result.AlertChannels[common.CriticalSeverity], 1)
+	assert.Len(t, result.AlertChannels[common.WarningSeverity], 0)
 }
 
 func TestUpdateState_WithEmptyCustomPayloadFields(t *testing.T) {
 	ctx := context.Background()
 	resource := NewInfraAlertConfigResourceHandle()
 
-	data := &restapi.InfraAlertConfig{
+	data := &api.InfraAlertConfig{
 		ID:                    "test-id",
 		Name:                  "Test Infra Alert",
 		Description:           "Test Description",
 		Granularity:           600000,
-		EvaluationType:        restapi.EvaluationTypePerEntity,
-		CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
-		AlertChannels:         map[restapi.AlertSeverity][]string{},
-		Rules:                 []restapi.RuleWithThreshold[restapi.InfraAlertRule]{},
+		EvaluationType:        api.EvaluationTypePerEntity,
+		CustomerPayloadFields: []common.CustomPayloadField[any]{},
+		AlertChannels:         map[common.AlertSeverity][]string{},
+		Rules:                 []common.RuleWithThreshold[api.InfraAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -1537,7 +1576,7 @@ func TestMapStateToDataObject_WithEmptyAlertChannelLists(t *testing.T) {
 		Name:           types.StringValue("Test Infra Alert"),
 		Description:    types.StringValue("Test Description"),
 		Granularity:    types.Int64Value(600000),
-		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		EvaluationType: types.StringValue(string(api.EvaluationTypePerEntity)),
 		TagFilter:      types.StringNull(),
 		GroupBy:        types.SetNull(types.StringType),
 		AlertChannels: &InfraAlertChannelsModel{
@@ -1552,23 +1591,23 @@ func TestMapStateToDataObject_WithEmptyAlertChannelLists(t *testing.T) {
 	require.NotNil(t, result)
 	// Empty lists are added to the map as empty arrays
 	require.Len(t, result.AlertChannels, 2)
-	assert.Len(t, result.AlertChannels[restapi.WarningSeverity], 0)
-	assert.Len(t, result.AlertChannels[restapi.CriticalSeverity], 0)
+	assert.Len(t, result.AlertChannels[common.WarningSeverity], 0)
+	assert.Len(t, result.AlertChannels[common.CriticalSeverity], 0)
 }
 
 func TestUpdateState_WithEmptyGroupByList(t *testing.T) {
 	ctx := context.Background()
 	resource := NewInfraAlertConfigResourceHandle()
 
-	data := &restapi.InfraAlertConfig{
+	data := &api.InfraAlertConfig{
 		ID:             "test-id",
 		Name:           "Test Infra Alert",
 		Description:    "Test Description",
 		Granularity:    600000,
-		EvaluationType: restapi.EvaluationTypePerEntity,
+		EvaluationType: api.EvaluationTypePerEntity,
 		GroupBy:        nil,
-		AlertChannels:  map[restapi.AlertSeverity][]string{},
-		Rules:          []restapi.RuleWithThreshold[restapi.InfraAlertRule]{},
+		AlertChannels:  map[common.AlertSeverity][]string{},
+		Rules:          []common.RuleWithThreshold[api.InfraAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -1596,7 +1635,7 @@ func TestMapStateToDataObject_WithNullTimeWindowInTimeThreshold(t *testing.T) {
 		Name:           types.StringValue("Test Infra Alert"),
 		Description:    types.StringValue("Test Description"),
 		Granularity:    types.Int64Value(600000),
-		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		EvaluationType: types.StringValue(string(api.EvaluationTypePerEntity)),
 		TagFilter:      types.StringNull(),
 		GroupBy:        types.SetNull(types.StringType),
 		TimeThreshold: &InfraTimeThresholdModel{
@@ -1618,17 +1657,17 @@ func TestUpdateState_WithEmptyAlertChannelSeverities(t *testing.T) {
 	ctx := context.Background()
 	resource := NewInfraAlertConfigResourceHandle()
 
-	data := &restapi.InfraAlertConfig{
+	data := &api.InfraAlertConfig{
 		ID:             "test-id",
 		Name:           "Test Infra Alert",
 		Description:    "Test Description",
 		Granularity:    600000,
-		EvaluationType: restapi.EvaluationTypePerEntity,
-		AlertChannels: map[restapi.AlertSeverity][]string{
-			restapi.WarningSeverity:  {},
-			restapi.CriticalSeverity: {},
+		EvaluationType: api.EvaluationTypePerEntity,
+		AlertChannels: map[common.AlertSeverity][]string{
+			common.WarningSeverity:  {},
+			common.CriticalSeverity: {},
 		},
-		Rules: []restapi.RuleWithThreshold[restapi.InfraAlertRule]{},
+		Rules: []common.RuleWithThreshold[api.InfraAlertRule]{},
 	}
 
 	state := &tfsdk.State{
@@ -1659,17 +1698,17 @@ func TestMapStateToDataObject_WithRulesButNoThresholds(t *testing.T) {
 		Name:           types.StringValue("Test Infra Alert"),
 		Description:    types.StringValue("Test Description"),
 		Granularity:    types.Int64Value(600000),
-		EvaluationType: types.StringValue(string(restapi.EvaluationTypePerEntity)),
+		EvaluationType: types.StringValue(string(api.EvaluationTypePerEntity)),
 		TagFilter:      types.StringNull(),
 		GroupBy:        types.SetNull(types.StringType),
 		Rules: &InfraRulesModel{
 			GenericRule: &InfraGenericRuleModel{
 				MetricName:             types.StringValue("cpu.usage"),
 				EntityType:             types.StringValue("host"),
-				Aggregation:            types.StringValue(string(restapi.SumAggregation)),
-				CrossSeriesAggregation: types.StringValue(string(restapi.MeanAggregation)),
+				Aggregation:            types.StringValue(string(common.SumAggregation)),
+				CrossSeriesAggregation: types.StringValue(string(common.MeanAggregation)),
 				Regex:                  types.BoolValue(false),
-				ThresholdOperator:      types.StringValue(string(restapi.ThresholdOperatorGreaterThan)),
+				ThresholdOperator:      types.StringValue(string(common.ThresholdOperatorGreaterThan)),
 				ThresholdRule:          nil,
 			},
 		},

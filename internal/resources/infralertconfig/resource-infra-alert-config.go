@@ -17,15 +17,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/client"
+	"github.com/instana/instana-go-client/shared/rest"
+	tag "github.com/instana/instana-go-client/shared/tagfilter"
+	common "github.com/instana/instana-go-client/shared/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
 	"github.com/instana/terraform-provider-instana/internal/util"
 )
 
 // NewInfraAlertConfigResourceHandle creates a new instance of the infrastructure alert configuration resource
-func NewInfraAlertConfigResourceHandle() resourcehandle.ResourceHandle[*restapi.InfraAlertConfig] {
+func NewInfraAlertConfigResourceHandle() resourcehandle.ResourceHandle[*api.InfraAlertConfig] {
 	return &infraAlertConfigResource{
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:  ResourceInstanaInfraAlertConfig,
@@ -203,8 +207,8 @@ func (r *infraAlertConfigResource) MetaData() *resourcehandle.ResourceMetaData {
 	return &r.metaData
 }
 
-func (r *infraAlertConfigResource) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.InfraAlertConfig] {
-	return api.InfraAlertConfig()
+func (r *infraAlertConfigResource) GetRestResource(api client.InstanaAPI) rest.RestResource[*api.InfraAlertConfig] {
+	return api.InfraAlertConfigs()
 }
 
 func (r *infraAlertConfigResource) SetComputedFields(_ context.Context, _ *tfsdk.Plan) diag.Diagnostics {
@@ -212,7 +216,7 @@ func (r *infraAlertConfigResource) SetComputedFields(_ context.Context, _ *tfsdk
 }
 
 // UpdateState updates the Terraform state with data from the API response
-func (r *infraAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, resource *restapi.InfraAlertConfig) diag.Diagnostics {
+func (r *infraAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, resource *api.InfraAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var model InfraAlertConfigModel
 	if plan != nil {
@@ -260,7 +264,7 @@ func (r *infraAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk
 }
 
 // mapTagFilterToModel converts API tag filter to model representation
-func (r *infraAlertConfigResource) mapTagFilterToModel(tagFilterExpression *restapi.TagFilter) (types.String, diag.Diagnostics) {
+func (r *infraAlertConfigResource) mapTagFilterToModel(tagFilterExpression *tag.TagFilter) (types.String, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if tagFilterExpression == nil {
@@ -293,7 +297,7 @@ func (r *infraAlertConfigResource) mapGroupByToModel(groupBy []string) types.Set
 }
 
 // mapAlertChannelsToModel converts API alert channels to model representation
-func (r *infraAlertConfigResource) mapAlertChannelsToModel(ctx context.Context, alertChannels map[restapi.AlertSeverity][]string) (*InfraAlertChannelsModel, diag.Diagnostics) {
+func (r *infraAlertConfigResource) mapAlertChannelsToModel(ctx context.Context, alertChannels map[common.AlertSeverity][]string) (*InfraAlertChannelsModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// Always return a model structure with null lists to maintain consistency
@@ -310,11 +314,11 @@ func (r *infraAlertConfigResource) mapAlertChannelsToModel(ctx context.Context, 
 
 	// Only populate the lists if there are actual channels in the API response
 	if len(alertChannels) > 0 {
-		warningChannels, warningDiags := r.mapSeverityChannelsToModel(ctx, alertChannels, restapi.WarningSeverity)
+		warningChannels, warningDiags := r.mapSeverityChannelsToModel(ctx, alertChannels, common.WarningSeverity)
 		diags.Append(warningDiags...)
 		alertChannelsModel.Warning = warningChannels
 
-		criticalChannels, criticalDiags := r.mapSeverityChannelsToModel(ctx, alertChannels, restapi.CriticalSeverity)
+		criticalChannels, criticalDiags := r.mapSeverityChannelsToModel(ctx, alertChannels, common.CriticalSeverity)
 		diags.Append(criticalDiags...)
 		alertChannelsModel.Critical = criticalChannels
 	}
@@ -323,7 +327,7 @@ func (r *infraAlertConfigResource) mapAlertChannelsToModel(ctx context.Context, 
 }
 
 // mapSeverityChannelsToModel converts alert channels for a specific severity to model representation
-func (r *infraAlertConfigResource) mapSeverityChannelsToModel(ctx context.Context, alertChannels map[restapi.AlertSeverity][]string, severity restapi.AlertSeverity) (types.Set, diag.Diagnostics) {
+func (r *infraAlertConfigResource) mapSeverityChannelsToModel(ctx context.Context, alertChannels map[common.AlertSeverity][]string, severity common.AlertSeverity) (types.Set, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	channels, exists := alertChannels[severity]
@@ -337,7 +341,7 @@ func (r *infraAlertConfigResource) mapSeverityChannelsToModel(ctx context.Contex
 }
 
 // mapTimeThresholdToModel converts API time threshold to model representation
-func (r *infraAlertConfigResource) mapTimeThresholdToModel(apiTimeThreshold *restapi.InfraTimeThreshold) *InfraTimeThresholdModel {
+func (r *infraAlertConfigResource) mapTimeThresholdToModel(apiTimeThreshold *api.InfraTimeThreshold) *InfraTimeThresholdModel {
 	if apiTimeThreshold == nil {
 		return nil
 	}
@@ -354,7 +358,7 @@ func (r *infraAlertConfigResource) mapTimeThresholdToModel(apiTimeThreshold *res
 }
 
 // mapRulesToModel converts API rules to model representation
-func (r *infraAlertConfigResource) mapRulesToModel(ctx context.Context, rules []restapi.RuleWithThreshold[restapi.InfraAlertRule]) (*InfraRulesModel, diag.Diagnostics) {
+func (r *infraAlertConfigResource) mapRulesToModel(ctx context.Context, rules []common.RuleWithThreshold[api.InfraAlertRule]) (*InfraRulesModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if len(rules) == 0 {
@@ -380,14 +384,14 @@ func (r *infraAlertConfigResource) mapRulesToModel(ctx context.Context, rules []
 }
 
 // mapThresholdsToModel converts API thresholds to model representation
-func (r *infraAlertConfigResource) mapThresholdsToModel(ctx context.Context, thresholds map[restapi.AlertSeverity]restapi.ThresholdRule) *shared.ThresholdPluginModel {
+func (r *infraAlertConfigResource) mapThresholdsToModel(ctx context.Context, thresholds map[common.AlertSeverity]common.ThresholdRule) *shared.ThresholdPluginModel {
 	thresholdRuleModel := &shared.ThresholdPluginModel{}
 
-	if warningThreshold, hasWarning := thresholds[restapi.WarningSeverity]; hasWarning {
+	if warningThreshold, hasWarning := thresholds[common.WarningSeverity]; hasWarning {
 		thresholdRuleModel.Warning = shared.MapThresholdPluginToState(ctx, &warningThreshold, true)
 	}
 
-	if criticalThreshold, hasCritical := thresholds[restapi.CriticalSeverity]; hasCritical {
+	if criticalThreshold, hasCritical := thresholds[common.CriticalSeverity]; hasCritical {
 		thresholdRuleModel.Critical = shared.MapThresholdPluginToState(ctx, &criticalThreshold, true)
 	}
 
@@ -395,7 +399,7 @@ func (r *infraAlertConfigResource) mapThresholdsToModel(ctx context.Context, thr
 }
 
 // MapStateToDataObject maps Terraform state/plan to API InfraAlertConfig object
-func (r *infraAlertConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.InfraAlertConfig, diag.Diagnostics) {
+func (r *infraAlertConfigResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*api.InfraAlertConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	model, modelDiags := r.extractModelFromPlanOrState(ctx, plan, state)
@@ -404,12 +408,12 @@ func (r *infraAlertConfigResource) MapStateToDataObject(ctx context.Context, pla
 		return nil, diags
 	}
 
-	infraAlertConfig := &restapi.InfraAlertConfig{
+	infraAlertConfig := &api.InfraAlertConfig{
 		ID:             r.extractConfigID(model),
 		Name:           model.Name.ValueString(),
 		Description:    model.Description.ValueString(),
-		Granularity:    restapi.Granularity(model.Granularity.ValueInt64()),
-		EvaluationType: restapi.InfraAlertEvaluationType(model.EvaluationType.ValueString()),
+		Granularity:    common.Granularity(model.Granularity.ValueInt64()),
+		EvaluationType: api.InfraAlertEvaluationType(model.EvaluationType.ValueString()),
 		Triggering:     model.Triggering.ValueBool(),
 	}
 
@@ -461,7 +465,7 @@ func (r *infraAlertConfigResource) extractConfigID(model InfraAlertConfigModel) 
 }
 
 // mapModelTagFilterToAPI converts model tag filter to API representation
-func (r *infraAlertConfigResource) mapModelTagFilterToAPI(tagFilter types.String) (*restapi.TagFilter, diag.Diagnostics) {
+func (r *infraAlertConfigResource) mapModelTagFilterToAPI(tagFilter types.String) (*tag.TagFilter, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if tagFilter.IsNull() || tagFilter.ValueString() == EmptyString {
@@ -497,9 +501,9 @@ func (r *infraAlertConfigResource) mapModelGroupByToAPI(ctx context.Context, gro
 }
 
 // mapModelAlertChannelsToAPI converts model alert channels to API representation
-func (r *infraAlertConfigResource) mapModelAlertChannelsToAPI(ctx context.Context, alertChannelsModel *InfraAlertChannelsModel) (map[restapi.AlertSeverity][]string, diag.Diagnostics) {
+func (r *infraAlertConfigResource) mapModelAlertChannelsToAPI(ctx context.Context, alertChannelsModel *InfraAlertChannelsModel) (map[common.AlertSeverity][]string, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	alertChannels := make(map[restapi.AlertSeverity][]string)
+	alertChannels := make(map[common.AlertSeverity][]string)
 
 	if alertChannelsModel == nil {
 		return alertChannels, diags
@@ -512,14 +516,14 @@ func (r *infraAlertConfigResource) mapModelAlertChannelsToAPI(ctx context.Contex
 	if warningChannels == nil {
 		warningChannels = []string{}
 	}
-	alertChannels[restapi.WarningSeverity] = warningChannels
+	alertChannels[common.WarningSeverity] = warningChannels
 
 	criticalChannels, criticalDiags := r.extractChannelsForSeverity(ctx, alertChannelsModel.Critical)
 	diags.Append(criticalDiags...)
 	if criticalChannels == nil {
 		criticalChannels = []string{}
 	}
-	alertChannels[restapi.CriticalSeverity] = criticalChannels
+	alertChannels[common.CriticalSeverity] = criticalChannels
 
 	return alertChannels, diags
 }
@@ -538,7 +542,7 @@ func (r *infraAlertConfigResource) extractChannelsForSeverity(ctx context.Contex
 }
 
 // mapModelTimeThresholdToAPI converts model time threshold to API representation
-func (r *infraAlertConfigResource) mapModelTimeThresholdToAPI(timeThresholdModel *InfraTimeThresholdModel) *restapi.InfraTimeThreshold {
+func (r *infraAlertConfigResource) mapModelTimeThresholdToAPI(timeThresholdModel *InfraTimeThresholdModel) *api.InfraTimeThreshold {
 	if timeThresholdModel == nil || timeThresholdModel.ViolationsInSequence == nil {
 		return nil
 	}
@@ -548,19 +552,19 @@ func (r *infraAlertConfigResource) mapModelTimeThresholdToAPI(timeThresholdModel
 		return nil
 	}
 
-	return &restapi.InfraTimeThreshold{
+	return &api.InfraTimeThreshold{
 		Type:       TimeThresholdTypeViolationsInSequence,
 		TimeWindow: violationsModel.TimeWindow.ValueInt64(),
 	}
 }
 
 // mapModelCustomPayloadFieldsToAPI converts model custom payload fields to API representation
-func (r *infraAlertConfigResource) mapModelCustomPayloadFieldsToAPI(ctx context.Context, customPayloadField types.List) ([]restapi.CustomPayloadField[any], diag.Diagnostics) {
+func (r *infraAlertConfigResource) mapModelCustomPayloadFieldsToAPI(ctx context.Context, customPayloadField types.List) ([]common.CustomPayloadField[any], diag.Diagnostics) {
 	return shared.MapCustomPayloadFieldsToAPIObject(ctx, customPayloadField)
 }
 
 // mapModelRulesToAPI converts model rules to API representation
-func (r *infraAlertConfigResource) mapModelRulesToAPI(ctx context.Context, rulesModel *InfraRulesModel) ([]restapi.RuleWithThreshold[restapi.InfraAlertRule], diag.Diagnostics) {
+func (r *infraAlertConfigResource) mapModelRulesToAPI(ctx context.Context, rulesModel *InfraRulesModel) ([]common.RuleWithThreshold[api.InfraAlertRule], diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if rulesModel == nil || rulesModel.GenericRule == nil {
@@ -569,30 +573,30 @@ func (r *infraAlertConfigResource) mapModelRulesToAPI(ctx context.Context, rules
 
 	genericRuleModel := rulesModel.GenericRule
 
-	ruleWithThreshold := restapi.RuleWithThreshold[restapi.InfraAlertRule]{
-		ThresholdOperator: restapi.ThresholdOperator(genericRuleModel.ThresholdOperator.ValueString()),
-		Rule: restapi.InfraAlertRule{
+	ruleWithThreshold := common.RuleWithThreshold[api.InfraAlertRule]{
+		ThresholdOperator: common.ThresholdOperator(genericRuleModel.ThresholdOperator.ValueString()),
+		Rule: api.InfraAlertRule{
 			AlertType:              GenericRuleAlertType,
 			MetricName:             genericRuleModel.MetricName.ValueString(),
 			EntityType:             genericRuleModel.EntityType.ValueString(),
-			Aggregation:            restapi.Aggregation(genericRuleModel.Aggregation.ValueString()),
-			CrossSeriesAggregation: restapi.Aggregation(genericRuleModel.CrossSeriesAggregation.ValueString()),
+			Aggregation:            common.Aggregation(genericRuleModel.Aggregation.ValueString()),
+			CrossSeriesAggregation: common.Aggregation(genericRuleModel.CrossSeriesAggregation.ValueString()),
 			Regex:                  genericRuleModel.Regex.ValueBool(),
 		},
-		Thresholds: make(map[restapi.AlertSeverity]restapi.ThresholdRule),
+		Thresholds: make(map[common.AlertSeverity]common.ThresholdRule),
 	}
 
 	thresholds, thresholdDiags := r.mapModelThresholdsToAPI(ctx, genericRuleModel.ThresholdRule)
 	diags.Append(thresholdDiags...)
 	ruleWithThreshold.Thresholds = thresholds
 
-	return []restapi.RuleWithThreshold[restapi.InfraAlertRule]{ruleWithThreshold}, diags
+	return []common.RuleWithThreshold[api.InfraAlertRule]{ruleWithThreshold}, diags
 }
 
 // mapModelThresholdsToAPI converts model thresholds to API representation
-func (r *infraAlertConfigResource) mapModelThresholdsToAPI(ctx context.Context, thresholdRuleModel *shared.ThresholdPluginModel) (map[restapi.AlertSeverity]restapi.ThresholdRule, diag.Diagnostics) {
+func (r *infraAlertConfigResource) mapModelThresholdsToAPI(ctx context.Context, thresholdRuleModel *shared.ThresholdPluginModel) (map[common.AlertSeverity]common.ThresholdRule, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	thresholds := make(map[restapi.AlertSeverity]restapi.ThresholdRule)
+	thresholds := make(map[common.AlertSeverity]common.ThresholdRule)
 
 	if thresholdRuleModel == nil {
 		return thresholds, diags
@@ -602,7 +606,7 @@ func (r *infraAlertConfigResource) mapModelThresholdsToAPI(ctx context.Context, 
 		warningThreshold, warningDiags := shared.MapThresholdRulePluginFromState(ctx, thresholdRuleModel.Warning)
 		diags.Append(warningDiags...)
 		if warningThreshold != nil {
-			thresholds[restapi.WarningSeverity] = *warningThreshold
+			thresholds[common.WarningSeverity] = *warningThreshold
 		}
 	}
 
@@ -610,7 +614,7 @@ func (r *infraAlertConfigResource) mapModelThresholdsToAPI(ctx context.Context, 
 		criticalThreshold, criticalDiags := shared.MapThresholdRulePluginFromState(ctx, thresholdRuleModel.Critical)
 		diags.Append(criticalDiags...)
 		if criticalThreshold != nil {
-			thresholds[restapi.CriticalSeverity] = *criticalThreshold
+			thresholds[common.CriticalSeverity] = *criticalThreshold
 		}
 	}
 

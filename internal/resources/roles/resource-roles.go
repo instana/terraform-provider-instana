@@ -13,12 +13,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/client"
+	"github.com/instana/instana-go-client/shared/rest"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
 )
 
 // NewRoleResourceHandle creates the resource handle for RBAC Roles
-func NewRoleResourceHandle() resourcehandle.ResourceHandle[*restapi.Role] {
+func NewRoleResourceHandle() resourcehandle.ResourceHandle[*api.Role] {
 	return &roleResource{
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:  ResourceInstanaRole,
@@ -55,7 +57,7 @@ func buildRoleSchema() schema.Schema {
 				ElementType: types.StringType,
 				Validators: []validator.Set{
 					setvalidator.ValueStringsAre(
-						stringvalidator.OneOf(restapi.SupportedInstanaPermissions.ToStringSlice()...),
+						stringvalidator.OneOf(api.SupportedInstanaPermissions.ToStringSlice()...),
 					),
 				},
 			},
@@ -83,7 +85,7 @@ func (r *roleResource) MetaData() *resourcehandle.ResourceMetaData {
 	return &r.metaData
 }
 
-func (r *roleResource) GetRestResource(api restapi.InstanaAPI) restapi.RestResource[*restapi.Role] {
+func (r *roleResource) GetRestResource(api client.InstanaAPI) rest.RestResource[*api.Role] {
 	return api.Roles()
 }
 
@@ -92,7 +94,7 @@ func (r *roleResource) SetComputedFields(_ context.Context, _ *tfsdk.Plan) diag.
 }
 
 // UpdateState updates the Terraform state with data from the API response
-func (r *roleResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, role *restapi.Role) diag.Diagnostics {
+func (r *roleResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, role *api.Role) diag.Diagnostics {
 	// Get existing state/plan to preserve optional fields
 	var existingModel RoleModel
 	var diags diag.Diagnostics
@@ -112,7 +114,7 @@ func (r *roleResource) UpdateState(ctx context.Context, state *tfsdk.State, plan
 }
 
 // buildRoleModelFromAPIResponse constructs a RoleModel from the API Role response
-func (r *roleResource) buildRoleModelFromAPIResponse(role *restapi.Role, existingMembers []RoleMemberModel) RoleModel {
+func (r *roleResource) buildRoleModelFromAPIResponse(role *api.Role, existingMembers []RoleMemberModel) RoleModel {
 	model := RoleModel{
 		ID:          types.StringValue(role.ID),
 		Name:        types.StringValue(role.Name),
@@ -124,7 +126,7 @@ func (r *roleResource) buildRoleModelFromAPIResponse(role *restapi.Role, existin
 }
 
 // mapMembersToModel converts API members to model members
-func (r *roleResource) mapMembersToModel(apiMembers []restapi.APIMember, existingMembers []RoleMemberModel) []RoleMemberModel {
+func (r *roleResource) mapMembersToModel(apiMembers []api.APIMember, existingMembers []RoleMemberModel) []RoleMemberModel {
 	if len(apiMembers) == 0 {
 		return make([]RoleMemberModel, 0)
 	}
@@ -139,7 +141,7 @@ func (r *roleResource) mapMembersToModel(apiMembers []restapi.APIMember, existin
 }
 
 // MapStateToDataObject maps Terraform state/plan to API Role object
-func (r *roleResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*restapi.Role, diag.Diagnostics) {
+func (r *roleResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*api.Role, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	model, modelDiags := r.extractModelFromPlanOrState(ctx, plan, state)
@@ -148,7 +150,7 @@ func (r *roleResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Pla
 		return nil, diags
 	}
 
-	role := &restapi.Role{
+	role := &api.Role{
 		ID:          r.extractRoleID(model),
 		Name:        model.Name.ValueString(),
 		Members:     r.mapModelMembersToAPI(model.Members),
@@ -181,14 +183,14 @@ func (r *roleResource) extractRoleID(model RoleModel) string {
 }
 
 // mapModelMembersToAPI converts model members to API members
-func (r *roleResource) mapModelMembersToAPI(modelMembers []RoleMemberModel) []restapi.APIMember {
+func (r *roleResource) mapModelMembersToAPI(modelMembers []RoleMemberModel) []api.APIMember {
 	if len(modelMembers) == 0 {
-		return make([]restapi.APIMember, 0)
+		return make([]api.APIMember, 0)
 	}
 
-	apiMembers := make([]restapi.APIMember, 0, len(modelMembers))
+	apiMembers := make([]api.APIMember, 0, len(modelMembers))
 	for _, memberModel := range modelMembers {
-		apiMembers = append(apiMembers, restapi.APIMember{
+		apiMembers = append(apiMembers, api.APIMember{
 			UserID: memberModel.UserID.ValueString(),
 		})
 	}

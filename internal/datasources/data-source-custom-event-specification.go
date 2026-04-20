@@ -7,7 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	"github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/client"
+	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/instana/terraform-provider-instana/internal/util"
 )
 
@@ -31,7 +33,7 @@ func NewCustomEventSpecificationDataSource() datasource.DataSource {
 }
 
 type customEventSpecificationDataSource struct {
-	instanaAPI restapi.InstanaAPI
+	instanaAPI client.InstanaAPI
 }
 
 func (d *customEventSpecificationDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -83,7 +85,7 @@ func (d *customEventSpecificationDataSource) Configure(_ context.Context, req da
 		return
 	}
 
-	providerMeta, ok := req.ProviderData.(*restapi.ProviderMeta)
+	providerMeta, ok := req.ProviderData.(*shared.ProviderMeta)
 	if !ok {
 		resp.Diagnostics.AddError(
 			CustomEventSpecificationErrUnexpectedConfigureType,
@@ -117,7 +119,7 @@ func (d *customEventSpecificationDataSource) Read(ctx context.Context, req datas
 	}
 
 	// Find the specification with the matching name and entity type
-	var matchingSpec *restapi.CustomEventSpecification
+	var matchingSpec *api.CustomEventSpecification
 	for _, spec := range *specs {
 		if spec.Name == name && spec.EntityType == entityType {
 			matchingSpec = spec

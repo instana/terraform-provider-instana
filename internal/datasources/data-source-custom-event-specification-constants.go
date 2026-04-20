@@ -39,7 +39,7 @@ const (
 	// CustomEventSpecificationErrUnexpectedConfigureType error message for unexpected configure type
 	CustomEventSpecificationErrUnexpectedConfigureType = "Unexpected Data Source Configure Type"
 	// CustomEventSpecificationErrUnexpectedConfigureTypeDetail error message detail for unexpected configure type
-	CustomEventSpecificationErrUnexpectedConfigureTypeDetail = "Expected *restapi.ProviderMeta, got: %T. Please report this issue to the provider developers."
+	CustomEventSpecificationErrUnexpectedConfigureTypeDetail = "Expected *instana.ProviderMeta, got: %T. Please report this issue to the provider developers."
 	// CustomEventSpecificationErrReadingSpecs error message for reading custom event specifications
 	CustomEventSpecificationErrReadingSpecs = "Error reading custom event specifications"
 	// CustomEventSpecificationErrReadingSpecsDetail error message detail for reading custom event specifications

@@ -6,8 +6,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/instana-go-client/api"
+	"github.com/instana/instana-go-client/shared/rest"
+	tag "github.com/instana/instana-go-client/shared/tagfilter"
+	common "github.com/instana/instana-go-client/shared/types"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 	"github.com/instana/terraform-provider-instana/internal/util"
 	"github.com/instana/terraform-provider-instana/testutils"
@@ -75,30 +78,30 @@ type mockWebsiteAlertAPI struct {
 	testutils.MockInstanaAPI
 }
 
-func (m *mockWebsiteAlertAPI) WebsiteAlertConfig() restapi.RestResource[*restapi.WebsiteAlertConfig] {
+func (m *mockWebsiteAlertAPI) WebsiteAlertConfigs() rest.RestResource[*api.WebsiteAlertConfig] {
 	return &mockWebsiteAlertConfigRestResource{}
 }
 
 // Mock rest resource
 type mockWebsiteAlertConfigRestResource struct{}
 
-func (m *mockWebsiteAlertConfigRestResource) GetAll() (*[]*restapi.WebsiteAlertConfig, error) {
+func (m *mockWebsiteAlertConfigRestResource) GetAll() (*[]*api.WebsiteAlertConfig, error) {
 	return nil, nil
 }
 
-func (m *mockWebsiteAlertConfigRestResource) GetOne(id string) (*restapi.WebsiteAlertConfig, error) {
+func (m *mockWebsiteAlertConfigRestResource) GetOne(id string) (*api.WebsiteAlertConfig, error) {
 	return nil, nil
 }
 
-func (m *mockWebsiteAlertConfigRestResource) Create(data *restapi.WebsiteAlertConfig) (*restapi.WebsiteAlertConfig, error) {
+func (m *mockWebsiteAlertConfigRestResource) Create(data *api.WebsiteAlertConfig) (*api.WebsiteAlertConfig, error) {
 	return nil, nil
 }
 
-func (m *mockWebsiteAlertConfigRestResource) Update(data *restapi.WebsiteAlertConfig) (*restapi.WebsiteAlertConfig, error) {
+func (m *mockWebsiteAlertConfigRestResource) Update(data *api.WebsiteAlertConfig) (*api.WebsiteAlertConfig, error) {
 	return nil, nil
 }
 
-func (m *mockWebsiteAlertConfigRestResource) Delete(data *restapi.WebsiteAlertConfig) error {
+func (m *mockWebsiteAlertConfigRestResource) Delete(data *api.WebsiteAlertConfig) error {
 	return nil
 }
 
@@ -207,41 +210,41 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("should update state with multiple rules", func(t *testing.T) {
 		severity := 5
-		operator := restapi.LogicalOperatorType("AND")
-		aggregation := restapi.Aggregation("MEAN")
-		apiObject := &restapi.WebsiteAlertConfig{
+		operator := common.LogicalOperatorType("AND")
+		aggregation := common.Aggregation("MEAN")
+		apiObject := &api.WebsiteAlertConfig{
 			ID:          "api-id-multi",
 			Name:        "Multi Rule Alert",
 			Description: "Multi Rule Description",
 			Severity:    &severity,
 			Triggering:  true,
 			WebsiteID:   "website-multi",
-			TagFilterExpression: &restapi.TagFilter{
+			TagFilterExpression: &tag.TagFilter{
 				Type:            "EXPRESSION",
 				LogicalOperator: &operator,
-				Elements:        []*restapi.TagFilter{},
+				Elements:        []*tag.TagFilter{},
 			},
 			AlertChannelIDs: []string{"channel-f"},
 			Granularity:     600000,
-			TimeThreshold: restapi.WebsiteTimeThreshold{
+			TimeThreshold: api.WebsiteTimeThreshold{
 				Type:       "violationsInSequence",
 				TimeWindow: func() *int64 { v := int64(300000); return &v }(),
 			},
-			CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
-			Rules: []restapi.WebsiteAlertRuleWithThresholds{
+			CustomerPayloadFields: []common.CustomPayloadField[any]{},
+			Rules: []api.WebsiteAlertRuleWithThresholds{
 				{
-					Rule: &restapi.WebsiteAlertRule{
+					Rule: &api.WebsiteAlertRule{
 						AlertType:   "slowness",
 						MetricName:  "latency",
 						Aggregation: &aggregation,
 					},
 					ThresholdOperator: ">=",
-					Thresholds: map[restapi.AlertSeverity]restapi.ThresholdRule{
-						restapi.WarningSeverity: {
+					Thresholds: map[common.AlertSeverity]common.ThresholdRule{
+						common.WarningSeverity: {
 							Type:  "staticThreshold",
 							Value: func() *float64 { v := float64(1000); return &v }(),
 						},
-						restapi.CriticalSeverity: {
+						common.CriticalSeverity: {
 							Type:  "staticThreshold",
 							Value: func() *float64 { v := float64(2000); return &v }(),
 						},
@@ -277,8 +280,8 @@ func TestUpdateState(t *testing.T) {
 
 	t.Run("should update state with null tag filter", func(t *testing.T) {
 		severity := 5
-		aggregation := restapi.Aggregation("MEAN")
-		apiObject := &restapi.WebsiteAlertConfig{
+		aggregation := common.Aggregation("MEAN")
+		apiObject := &api.WebsiteAlertConfig{
 			ID:                  "api-id-no-tag",
 			Name:                "No Tag Filter",
 			Description:         "No Tag Filter Description",
@@ -288,21 +291,21 @@ func TestUpdateState(t *testing.T) {
 			TagFilterExpression: nil,
 			AlertChannelIDs:     []string{"channel-g"},
 			Granularity:         600000,
-			TimeThreshold: restapi.WebsiteTimeThreshold{
+			TimeThreshold: api.WebsiteTimeThreshold{
 				Type:       "violationsInSequence",
 				TimeWindow: func() *int64 { v := int64(300000); return &v }(),
 			},
-			CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
-			Rules: []restapi.WebsiteAlertRuleWithThresholds{
+			CustomerPayloadFields: []common.CustomPayloadField[any]{},
+			Rules: []api.WebsiteAlertRuleWithThresholds{
 				{
-					Rule: &restapi.WebsiteAlertRule{
+					Rule: &api.WebsiteAlertRule{
 						AlertType:   "slowness",
 						MetricName:  "latency",
 						Aggregation: &aggregation,
 					},
 					ThresholdOperator: ">=",
-					Thresholds: map[restapi.AlertSeverity]restapi.ThresholdRule{
-						restapi.WarningSeverity: {
+					Thresholds: map[common.AlertSeverity]common.ThresholdRule{
+						common.WarningSeverity: {
 							Type:  "staticThreshold",
 							Value: func() *float64 { v := float64(1000); return &v }(),
 						},
@@ -474,8 +477,8 @@ func TestUpdateState_InvalidSeverity(t *testing.T) {
 
 	t.Run("should return error for invalid severity from API", func(t *testing.T) {
 		invalidSeverity := 999
-		aggregation := restapi.Aggregation("MEAN")
-		apiObject := &restapi.WebsiteAlertConfig{
+		aggregation := common.Aggregation("MEAN")
+		apiObject := &api.WebsiteAlertConfig{
 			ID:          "api-id-invalid",
 			Name:        "Invalid Severity",
 			Description: "Invalid Severity Description",
@@ -483,21 +486,21 @@ func TestUpdateState_InvalidSeverity(t *testing.T) {
 			Triggering:  true,
 			WebsiteID:   "website-invalid",
 			Granularity: 600000,
-			TimeThreshold: restapi.WebsiteTimeThreshold{
+			TimeThreshold: api.WebsiteTimeThreshold{
 				Type:       "violationsInSequence",
 				TimeWindow: func() *int64 { v := int64(300000); return &v }(),
 			},
-			CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
-			Rules: []restapi.WebsiteAlertRuleWithThresholds{
+			CustomerPayloadFields: []common.CustomPayloadField[any]{},
+			Rules: []api.WebsiteAlertRuleWithThresholds{
 				{
-					Rule: &restapi.WebsiteAlertRule{
+					Rule: &api.WebsiteAlertRule{
 						AlertType:   "slowness",
 						MetricName:  "latency",
 						Aggregation: &aggregation,
 					},
 					ThresholdOperator: ">=",
-					Thresholds: map[restapi.AlertSeverity]restapi.ThresholdRule{
-						restapi.WarningSeverity: {
+					Thresholds: map[common.AlertSeverity]common.ThresholdRule{
+						common.WarningSeverity: {
 							Type:  "staticThreshold",
 							Value: func() *float64 { v := float64(1000); return &v }(),
 						},
@@ -830,8 +833,8 @@ func TestUpdateState_AllRuleTypes(t *testing.T) {
 
 	t.Run("should update state with throughput rule", func(t *testing.T) {
 		severity := 5
-		aggregation := restapi.Aggregation("SUM")
-		apiObject := &restapi.WebsiteAlertConfig{
+		aggregation := common.Aggregation("SUM")
+		apiObject := &api.WebsiteAlertConfig{
 			ID:          "api-id",
 			Name:        "Throughput Alert",
 			Description: "Throughput Description",
@@ -839,21 +842,21 @@ func TestUpdateState_AllRuleTypes(t *testing.T) {
 			Triggering:  true,
 			WebsiteID:   "website-1",
 			Granularity: 600000,
-			TimeThreshold: restapi.WebsiteTimeThreshold{
+			TimeThreshold: api.WebsiteTimeThreshold{
 				Type:       "violationsInSequence",
 				TimeWindow: func() *int64 { v := int64(300000); return &v }(),
 			},
-			CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
-			Rules: []restapi.WebsiteAlertRuleWithThresholds{
+			CustomerPayloadFields: []common.CustomPayloadField[any]{},
+			Rules: []api.WebsiteAlertRuleWithThresholds{
 				{
-					Rule: &restapi.WebsiteAlertRule{
+					Rule: &api.WebsiteAlertRule{
 						AlertType:   "throughput",
 						MetricName:  "beaconCount",
 						Aggregation: &aggregation,
 					},
 					ThresholdOperator: ">=",
-					Thresholds: map[restapi.AlertSeverity]restapi.ThresholdRule{
-						restapi.WarningSeverity: {
+					Thresholds: map[common.AlertSeverity]common.ThresholdRule{
+						common.WarningSeverity: {
 							Type:  "staticThreshold",
 							Value: func() *float64 { v := float64(100); return &v }(),
 						},
@@ -881,10 +884,10 @@ func TestUpdateState_AllRuleTypes(t *testing.T) {
 
 	t.Run("should update state with status code rule", func(t *testing.T) {
 		severity := 10
-		aggregation := restapi.Aggregation("SUM")
-		operator := restapi.ExpressionOperator("EQUALS")
+		aggregation := common.Aggregation("SUM")
+		operator := common.ExpressionOperator("EQUALS")
 		value := "500"
-		apiObject := &restapi.WebsiteAlertConfig{
+		apiObject := &api.WebsiteAlertConfig{
 			ID:          "api-id",
 			Name:        "Status Code Alert",
 			Description: "Status Code Description",
@@ -892,15 +895,15 @@ func TestUpdateState_AllRuleTypes(t *testing.T) {
 			Triggering:  false,
 			WebsiteID:   "website-1",
 			Granularity: 600000,
-			TimeThreshold: restapi.WebsiteTimeThreshold{
+			TimeThreshold: api.WebsiteTimeThreshold{
 				Type:       "violationsInPeriod",
 				TimeWindow: func() *int64 { v := int64(600000); return &v }(),
 				Violations: func() *int32 { v := int32(5); return &v }(),
 			},
-			CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
-			Rules: []restapi.WebsiteAlertRuleWithThresholds{
+			CustomerPayloadFields: []common.CustomPayloadField[any]{},
+			Rules: []api.WebsiteAlertRuleWithThresholds{
 				{
-					Rule: &restapi.WebsiteAlertRule{
+					Rule: &api.WebsiteAlertRule{
 						AlertType:   "statusCode",
 						MetricName:  "httpStatusCode",
 						Aggregation: &aggregation,
@@ -908,8 +911,8 @@ func TestUpdateState_AllRuleTypes(t *testing.T) {
 						Value:       &value,
 					},
 					ThresholdOperator: ">",
-					Thresholds: map[restapi.AlertSeverity]restapi.ThresholdRule{
-						restapi.CriticalSeverity: {
+					Thresholds: map[common.AlertSeverity]common.ThresholdRule{
+						common.CriticalSeverity: {
 							Type:  "staticThreshold",
 							Value: func() *float64 { v := float64(10); return &v }(),
 						},
@@ -938,10 +941,10 @@ func TestUpdateState_AllRuleTypes(t *testing.T) {
 
 	t.Run("should update state with specific js error rule", func(t *testing.T) {
 		severity := 5
-		aggregation := restapi.Aggregation("SUM")
-		operator := restapi.ExpressionOperator("CONTAINS")
+		aggregation := common.Aggregation("SUM")
+		operator := common.ExpressionOperator("CONTAINS")
 		value := "TypeError"
-		apiObject := &restapi.WebsiteAlertConfig{
+		apiObject := &api.WebsiteAlertConfig{
 			ID:          "api-id",
 			Name:        "JS Error Alert",
 			Description: "JS Error Description",
@@ -949,20 +952,20 @@ func TestUpdateState_AllRuleTypes(t *testing.T) {
 			Triggering:  true,
 			WebsiteID:   "website-1",
 			Granularity: 600000,
-			TimeThreshold: restapi.WebsiteTimeThreshold{
+			TimeThreshold: api.WebsiteTimeThreshold{
 				Type:       "userImpactOfViolationsInSequence",
 				TimeWindow: func() *int64 { v := int64(300000); return &v }(),
-				ImpactMeasurementMethod: func() *restapi.WebsiteImpactMeasurementMethod {
-					v := restapi.WebsiteImpactMeasurementMethod("AGGREGATED")
+				ImpactMeasurementMethod: func() *api.WebsiteImpactMeasurementMethod {
+					v := api.WebsiteImpactMeasurementMethod("AGGREGATED")
 					return &v
 				}(),
 				UserPercentage: func() *float64 { v := float64(10.5); return &v }(),
 				Users:          func() *int32 { v := int32(100); return &v }(),
 			},
-			CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
-			Rules: []restapi.WebsiteAlertRuleWithThresholds{
+			CustomerPayloadFields: []common.CustomPayloadField[any]{},
+			Rules: []api.WebsiteAlertRuleWithThresholds{
 				{
-					Rule: &restapi.WebsiteAlertRule{
+					Rule: &api.WebsiteAlertRule{
 						AlertType:   "specificJsError",
 						MetricName:  "jsErrors",
 						Aggregation: &aggregation,
@@ -970,8 +973,8 @@ func TestUpdateState_AllRuleTypes(t *testing.T) {
 						Value:       &value,
 					},
 					ThresholdOperator: ">=",
-					Thresholds: map[restapi.AlertSeverity]restapi.ThresholdRule{
-						restapi.WarningSeverity: {
+					Thresholds: map[common.AlertSeverity]common.ThresholdRule{
+						common.WarningSeverity: {
 							Type:  "staticThreshold",
 							Value: func() *float64 { v := float64(1); return &v }(),
 						},
@@ -1184,7 +1187,7 @@ func TestUpdateState_EnabledField(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			apiObject := &restapi.WebsiteAlertConfig{
+			apiObject := &api.WebsiteAlertConfig{
 				ID:          "test-id",
 				Name:        "Test Alert",
 				Description: "Test Description",
@@ -1192,12 +1195,12 @@ func TestUpdateState_EnabledField(t *testing.T) {
 				Enabled:     tt.apiEnabled,
 				WebsiteID:   "website-1",
 				Granularity: 600000,
-				TimeThreshold: restapi.WebsiteTimeThreshold{
+				TimeThreshold: api.WebsiteTimeThreshold{
 					Type:       "violationsInSequence",
 					TimeWindow: ptrInt64(300000),
 				},
-				CustomerPayloadFields: []restapi.CustomPayloadField[any]{},
-				Rules:                 []restapi.WebsiteAlertRuleWithThresholds{},
+				CustomerPayloadFields: []common.CustomPayloadField[any]{},
+				Rules:                 []api.WebsiteAlertRuleWithThresholds{},
 			}
 
 			state := &tfsdk.State{

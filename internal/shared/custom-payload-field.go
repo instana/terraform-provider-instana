@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	model "github.com/instana/instana-go-client/shared/types"
 	"github.com/instana/terraform-provider-instana/internal/util"
 )
 
@@ -115,7 +115,7 @@ func GetStaticOnlyCustomPayloadFieldsSchema() schema.ListNestedAttribute {
 
 // MapCustomPayloadFieldsToTerraform is a helper function to map custom payload fields from API objects to Terraform
 // This function delegates to the existing CustomPayloadFieldsToTerraform function in tfutils
-func CustomPayloadFieldsToTerraform(ctx context.Context, fields []restapi.CustomPayloadField[any]) (types.List, diag.Diagnostics) {
+func CustomPayloadFieldsToTerraform(ctx context.Context, fields []model.CustomPayloadField[any]) (types.List, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// If no fields, return null list
@@ -131,12 +131,12 @@ func CustomPayloadFieldsToTerraform(ctx context.Context, fields []restapi.Custom
 		tfField["key"] = types.StringValue(field.Key)
 
 		// Handle different field types
-		if field.Type == restapi.StaticStringCustomPayloadType {
+		if field.Type == model.StaticStringCustomPayloadType {
 			// Static string value
 			staticValue, ok := field.Value.(string)
 			if !ok {
 				// Try to convert from the custom type
-				if customValue, ok := field.Value.(restapi.StaticStringCustomPayloadFieldValue); ok {
+				if customValue, ok := field.Value.(model.StaticStringCustomPayloadFieldValue); ok {
 					staticValue = string(customValue)
 				} else {
 					diags.AddError(
@@ -149,9 +149,9 @@ func CustomPayloadFieldsToTerraform(ctx context.Context, fields []restapi.Custom
 			tfField["value"] = types.StringValue(staticValue)
 			// Use null for dynamic_value
 			tfField["dynamic_value"] = types.ObjectNull(GetDynamicValueType().AttrTypes)
-		} else if field.Type == restapi.DynamicCustomPayloadType {
+		} else if field.Type == model.DynamicCustomPayloadType {
 			// Dynamic value
-			dynamicValue, ok := field.Value.(restapi.DynamicCustomPayloadFieldValue)
+			dynamicValue, ok := field.Value.(model.DynamicCustomPayloadFieldValue)
 			if !ok {
 				diags.AddError(
 					"Error converting custom payload field",
@@ -194,12 +194,12 @@ func CustomPayloadFieldsToTerraform(ctx context.Context, fields []restapi.Custom
 }
 
 // MapCustomPayloadFieldsToAPIObject is a helper function to map custom payload fields from Terraform to API objects
-func MapCustomPayloadFieldsToAPIObject(ctx context.Context, customPayloadFieldsList types.List) ([]restapi.CustomPayloadField[any], diag.Diagnostics) {
+func MapCustomPayloadFieldsToAPIObject(ctx context.Context, customPayloadFieldsList types.List) ([]model.CustomPayloadField[any], diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// handle null/unknown
 	if customPayloadFieldsList.IsNull() || customPayloadFieldsList.IsUnknown() {
-		return []restapi.CustomPayloadField[any]{}, diags
+		return []model.CustomPayloadField[any]{}, diags
 	}
 
 	// Decode terraform list elements into our intermediate struct slice
@@ -209,7 +209,7 @@ func MapCustomPayloadFieldsToAPIObject(ctx context.Context, customPayloadFieldsL
 		return nil, diags
 	}
 
-	out := make([]restapi.CustomPayloadField[any], 0, len(elems))
+	out := make([]model.CustomPayloadField[any], 0, len(elems))
 
 	for idx, e := range elems {
 		// If dynamic_value present -> dynamic
@@ -251,7 +251,7 @@ func MapCustomPayloadFieldsToAPIObject(ctx context.Context, customPayloadFieldsL
 				return nil, diags
 			}
 
-			dynValue := restapi.DynamicCustomPayloadFieldValue{
+			dynValue := model.DynamicCustomPayloadFieldValue{
 				Key:     keyPtr,
 				TagName: tagName,
 			}
@@ -262,8 +262,8 @@ func MapCustomPayloadFieldsToAPIObject(ctx context.Context, customPayloadFieldsL
 				topKey = e.Key.ValueString()
 			}
 
-			out = append(out, restapi.CustomPayloadField[any]{
-				Type:  restapi.DynamicCustomPayloadType,
+			out = append(out, model.CustomPayloadField[any]{
+				Type:  model.DynamicCustomPayloadType,
 				Key:   topKey,
 				Value: any(dynValue),
 			})
@@ -272,8 +272,8 @@ func MapCustomPayloadFieldsToAPIObject(ctx context.Context, customPayloadFieldsL
 
 		// else if static value present
 		if !e.Value.IsNull() && !e.Value.IsUnknown() {
-			out = append(out, restapi.CustomPayloadField[any]{
-				Type:  restapi.StaticStringCustomPayloadType,
+			out = append(out, model.CustomPayloadField[any]{
+				Type:  model.StaticStringCustomPayloadType,
 				Key:   e.Key.ValueString(),
 				Value: any(e.Value.ValueString()),
 			})
@@ -292,12 +292,12 @@ func MapCustomPayloadFieldsToAPIObject(ctx context.Context, customPayloadFieldsL
 }
 
 // MapStaticOnlyCustomPayloadFieldsToAPIObject is a helper function to map static-only custom payload fields from Terraform to API objects
-func MapStaticOnlyCustomPayloadFieldsToAPIObject(ctx context.Context, customPayloadFieldsList types.List) ([]restapi.CustomPayloadField[any], diag.Diagnostics) {
+func MapStaticOnlyCustomPayloadFieldsToAPIObject(ctx context.Context, customPayloadFieldsList types.List) ([]model.CustomPayloadField[any], diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// handle null/unknown
 	if customPayloadFieldsList.IsNull() || customPayloadFieldsList.IsUnknown() {
-		return []restapi.CustomPayloadField[any]{}, diags
+		return []model.CustomPayloadField[any]{}, diags
 	}
 
 	// Define a simple model for static-only fields
@@ -313,7 +313,7 @@ func MapStaticOnlyCustomPayloadFieldsToAPIObject(ctx context.Context, customPayl
 		return nil, diags
 	}
 
-	out := make([]restapi.CustomPayloadField[any], 0, len(elems))
+	out := make([]model.CustomPayloadField[any], 0, len(elems))
 
 	for idx, e := range elems {
 		// Check if key and value are present
@@ -334,8 +334,8 @@ func MapStaticOnlyCustomPayloadFieldsToAPIObject(ctx context.Context, customPayl
 		}
 
 		// Add the static field to the output
-		out = append(out, restapi.CustomPayloadField[any]{
-			Type:  restapi.StaticStringCustomPayloadType,
+		out = append(out, model.CustomPayloadField[any]{
+			Type:  model.StaticStringCustomPayloadType,
 			Key:   e.Key.ValueString(),
 			Value: any(e.Value.ValueString()),
 		})
@@ -346,7 +346,7 @@ func MapStaticOnlyCustomPayloadFieldsToAPIObject(ctx context.Context, customPayl
 
 // StaticOnlyCustomPayloadFieldsToTerraform is a helper function to map custom payload fields from API objects to Terraform
 // This version only includes static string values and omits dynamic values
-func StaticOnlyCustomPayloadFieldsToTerraform(ctx context.Context, fields []restapi.CustomPayloadField[any]) (types.List, diag.Diagnostics) {
+func StaticOnlyCustomPayloadFieldsToTerraform(ctx context.Context, fields []model.CustomPayloadField[any]) (types.List, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	// If no fields, return null list
@@ -364,12 +364,12 @@ func StaticOnlyCustomPayloadFieldsToTerraform(ctx context.Context, fields []rest
 
 	for _, field := range fields {
 		// Only process static string fields
-		if field.Type == restapi.StaticStringCustomPayloadType {
+		if field.Type == model.StaticStringCustomPayloadType {
 			// Static string value
 			staticValue, ok := field.Value.(string)
 			if !ok {
 				// Try to convert from the custom type
-				if customValue, ok := field.Value.(restapi.StaticStringCustomPayloadFieldValue); ok {
+				if customValue, ok := field.Value.(model.StaticStringCustomPayloadFieldValue); ok {
 					staticValue = string(customValue)
 				} else {
 					diags.AddError(

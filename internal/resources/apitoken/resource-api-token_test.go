@@ -6,8 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/instana-go-client/api"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
-	"github.com/instana/terraform-provider-instana/internal/restapi"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -74,7 +74,7 @@ func TestUpdateState(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("basic API token", func(t *testing.T) {
-		apiToken := &restapi.APIToken{
+		apiToken := &api.APIToken{
 			ID:                  "test-id",
 			AccessGrantingToken: "test-access-token",
 			InternalID:          "test-internal-id",
@@ -100,7 +100,7 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("API token with permissions", func(t *testing.T) {
-		apiToken := &restapi.APIToken{
+		apiToken := &api.APIToken{
 			ID:                          "test-id",
 			AccessGrantingToken:         "test-access-token",
 			InternalID:                  "test-internal-id",
@@ -134,7 +134,7 @@ func TestUpdateState(t *testing.T) {
 	})
 
 	t.Run("API token with scope limitations", func(t *testing.T) {
-		apiToken := &restapi.APIToken{
+		apiToken := &api.APIToken{
 			ID:                         "test-id",
 			AccessGrantingToken:        "test-access-token",
 			InternalID:                 "test-internal-id",
@@ -428,7 +428,7 @@ func TestEdgeCases(t *testing.T) {
 	})
 
 	t.Run("all permissions false", func(t *testing.T) {
-		apiToken := &restapi.APIToken{
+		apiToken := &api.APIToken{
 			ID:                  "test-id",
 			AccessGrantingToken: "test-access-token",
 			InternalID:          "test-internal-id",
@@ -486,8 +486,8 @@ func createMockPlan(t *testing.T, ctx context.Context, model APITokenModel) *tfs
 	return plan
 }
 
-func createFullyPermissionedAPIToken() *restapi.APIToken {
-	return &restapi.APIToken{
+func createFullyPermissionedAPIToken() *api.APIToken {
+	return &api.APIToken{
 		ID:                                        "test-id",
 		AccessGrantingToken:                       "test-access-token",
 		InternalID:                                "test-internal-id",

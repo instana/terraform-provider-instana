@@ -3,15 +3,16 @@ package tagfilter_test
 import (
 	"testing"
 
-	"github.com/instana/terraform-provider-instana/internal/restapi"
+	tag "github.com/instana/instana-go-client/shared/tagfilter"
+	common "github.com/instana/instana-go-client/shared/types"
 	. "github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
 	"github.com/stretchr/testify/require"
 )
 
 func TestShouldReturnNilWhenMappingEmptyTagFilterExpressionToNormalizedString(t *testing.T) {
-	operatorType := restapi.LogicalOr
-	input := &restapi.TagFilter{
-		Type:            restapi.TagFilterExpressionType,
+	operatorType := common.LogicalOr
+	input := &tag.TagFilter{
+		Type:            tag.TagFilterExpressionType,
 		LogicalOperator: &operatorType,
 	}
 
@@ -22,8 +23,8 @@ func TestShouldReturnNilWhenMappingEmptyTagFilterExpressionToNormalizedString(t 
 }
 
 func TestShouldReturnErrorWhenMappingAnInvalidTagFilterExpressionToNormalizedString(t *testing.T) {
-	input := &restapi.TagFilter{
-		Type: restapi.TagFilterExpressionElementType("invalid"),
+	input := &tag.TagFilter{
+		Type: tag.TagFilterExpressionElementType("invalid"),
 	}
 
 	result, err := MapTagFilterToNormalizedString(input)
@@ -34,7 +35,7 @@ func TestShouldReturnErrorWhenMappingAnInvalidTagFilterExpressionToNormalizedStr
 
 func TestShouldReturnStringWhenMappingAValidTagFilterExpressionToNormalizedString(t *testing.T) {
 	value := int64(1234)
-	input := restapi.NewNumberTagFilter(restapi.TagFilterEntityDestination, tagFilterName, restapi.EqualsOperator, value)
+	input := tag.NewNumberTagFilter(tag.TagFilterEntityDestination, tagFilterName, common.EqualsOperator, value)
 
 	result, err := MapTagFilterToNormalizedString(input)
 
