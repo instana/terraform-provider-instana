@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -51,6 +52,15 @@ import (
 // Ensure the implementation satisfies the expected interfaces
 var (
 	_ provider.Provider = &InstanaProvider{}
+)
+
+// Pre-compiled regex patterns for sensitive data sanitization
+// Compiled once at package initialization for better performance
+var (
+	sensitiveDataPatterns = []*regexp.Regexp{
+		regexp.MustCompile(`(?i)(token|apitoken|api_token|authorization|bearer)[\s:=]+[^\s,}\]]+`),
+		regexp.MustCompile(`(?i)(password|passwd|pwd|secret|apikey|api_key)[\s:=]+[^\s,}\]]+`),
+	}
 )
 
 // SchemaFieldAPIToken the name of the provider configuration option for the api token
@@ -212,19 +222,27 @@ func newTerraformLogger(ctx context.Context) config.Logger {
 }
 
 func (l *terraformLogger) Debug(msg string, keysAndValues ...interface{}) {
-	tflog.Debug(l.ctx, msg, toTerraformLogFields(keysAndValues))
+	sanitizedMsg := sanitizeSensitiveData(msg)
+	sanitizedFields := sanitizeLogFields(toTerraformLogFields(keysAndValues))
+	tflog.Debug(l.ctx, sanitizedMsg, sanitizedFields)
 }
 
 func (l *terraformLogger) Info(msg string, keysAndValues ...interface{}) {
-	tflog.Info(l.ctx, msg, toTerraformLogFields(keysAndValues))
+	sanitizedMsg := sanitizeSensitiveData(msg)
+	sanitizedFields := sanitizeLogFields(toTerraformLogFields(keysAndValues))
+	tflog.Info(l.ctx, sanitizedMsg, sanitizedFields)
 }
 
 func (l *terraformLogger) Warn(msg string, keysAndValues ...interface{}) {
-	tflog.Warn(l.ctx, msg, toTerraformLogFields(keysAndValues))
+	sanitizedMsg := sanitizeSensitiveData(msg)
+	sanitizedFields := sanitizeLogFields(toTerraformLogFields(keysAndValues))
+	tflog.Warn(l.ctx, sanitizedMsg, sanitizedFields)
 }
 
 func (l *terraformLogger) Error(msg string, keysAndValues ...interface{}) {
-	tflog.Error(l.ctx, msg, toTerraformLogFields(keysAndValues))
+	sanitizedMsg := sanitizeSensitiveData(msg)
+	sanitizedFields := sanitizeLogFields(toTerraformLogFields(keysAndValues))
+	tflog.Error(l.ctx, sanitizedMsg, sanitizedFields)
 }
 
 func toTerraformLogFields(keysAndValues []interface{}) map[string]interface{} {
@@ -243,6 +261,65 @@ func toTerraformLogFields(keysAndValues []interface{}) map[string]interface{} {
 	}
 
 	return fields
+}
+
+// sanitizeSensitiveData redacts sensitive information from log messages.
+// It replaces patterns like "token: xxx", "apiToken: xxx", "password: xxx" with "[REDACTED]".
+//
+// Examples:
+//
+//	sanitizeSensitiveData("token: abc123") → "token: [REDACTED]"
+//	sanitizeSensitiveData("Using TOKEN: xyz") → "Using TOKEN: [REDACTED]"
+//	sanitizeSensitiveData("password: secret") → "password: [REDACTED]"
+//
+// The function is case-insensitive and matches common variations of sensitive keywords.
+// Uses pre-compiled regex patterns for optimal performance.
+func sanitizeSensitiveData(msg string) string {
+	sanitized := msg
+	for _, re := range sensitiveDataPatterns {
+		sanitized = re.ReplaceAllString(sanitized, "$1: [REDACTED]")
+	}
+	return sanitized
+}
+
+// sanitizeLogFields redacts sensitive information from log field values
+// It checks both field names and values for sensitive data
+func sanitizeLogFields(fields map[string]interface{}) map[string]interface{} {
+	if fields == nil {
+		return fields
+	}
+
+	// List of sensitive field names (case-insensitive check)
+	sensitiveKeys := []string{
+		"token", "apitoken", "api_token", "authorization", "bearer",
+		"password", "passwd", "pwd", "secret", "apikey", "api_key",
+	}
+
+	sanitized := make(map[string]interface{}, len(fields))
+	for k, v := range fields {
+		// Check if the key name indicates sensitive data
+		isSensitive := false
+		lowerKey := strings.ToLower(k)
+		for _, sensitiveKey := range sensitiveKeys {
+			if strings.Contains(lowerKey, sensitiveKey) {
+				isSensitive = true
+				break
+			}
+		}
+
+		if isSensitive {
+			sanitized[k] = "[REDACTED]"
+		} else {
+			// Also sanitize string values that might contain sensitive data
+			if strVal, ok := v.(string); ok {
+				sanitized[k] = sanitizeSensitiveData(strVal)
+			} else {
+				sanitized[k] = v
+			}
+		}
+	}
+
+	return sanitized
 }
 
 // DataSources defines the data sources implemented in the provider
