@@ -250,7 +250,7 @@ terraform output -json
 
 **Available Outputs:** (Add outputs.tf in each environment as needed)
 - `application_id` - Application configuration ID
-- `application_name` - Application name
+- `application_label` - Application name
 - `email_channel_id` - Email alert channel ID
 - `slack_channel_id` - Slack alert channel ID
 - `alert_ids` - Map of all alert configuration IDs
@@ -276,7 +276,7 @@ echo $INSTANA_ENDPOINT
 
 # Test API connectivity
 curl -H "Authorization: apiToken $INSTANA_API_TOKEN" \
-  https://$INSTANA_ENDPOINT/api/application-monitoring/applications
+  https://$INSTANA_ENDPOINT/api/application-monitoring/settings/application
 ```
 
 ### State Lock Issues
