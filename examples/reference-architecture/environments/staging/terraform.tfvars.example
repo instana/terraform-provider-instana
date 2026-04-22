@@ -1,0 +1,38 @@
+# Staging Environment Configuration
+# Copy this file to terraform.tfvars and update with your values
+# cp terraform.tfvars.example terraform.tfvars
+
+# Instana Provider Configuration
+# These can also be set via environment variables:
+# export INSTANA_API_TOKEN="your-token"
+# export INSTANA_ENDPOINT="your-tenant.instana.io"
+# instana_api_token = "your-api-token-here"
+# instana_endpoint  = "your-tenant.instana.io"
+
+# Application Configuration
+application_name        = "my-web-app"
+application_tag_filter  = "service.name@dest EQUALS 'web-service'"
+
+# Alert Configuration
+alert_email_addresses   = ["staging-team@example.com", "ops@example.com"]
+
+# Slack Configuration (Recommended for staging)
+create_slack_channel = true
+slack_webhook_url    = "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+slack_channel        = "#staging-alerts"
+
+# Thresholds (Production-like for staging)
+latency_threshold_warning  = 1500   # 1.5 seconds
+latency_threshold_critical = 3500   # 3.5 seconds
+error_rate_threshold       = 0.07   # 7% error rate
+log_threshold_warning      = 15
+log_threshold_critical     = 75
+
+# Throughput monitoring
+create_throughput_alert = true
+throughput_threshold    = 100
+
+# RBAC Configuration
+# developer_user_ids = ["user-id-1", "user-id-2"]
+# viewer_user_ids    = ["user-id-3", "user-id-4"]
+# admin_user_ids     = ["user-id-5"]

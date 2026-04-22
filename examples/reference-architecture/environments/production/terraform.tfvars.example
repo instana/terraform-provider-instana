@@ -1,0 +1,38 @@
+# Production Environment Configuration
+# Copy this file to terraform.tfvars and update with your values
+# cp terraform.tfvars.example terraform.tfvars
+
+# Instana Provider Configuration
+# These can also be set via environment variables:
+# export INSTANA_API_TOKEN="your-token"
+# export INSTANA_ENDPOINT="your-tenant.instana.io"
+# instana_api_token = "your-api-token-here"
+# instana_endpoint  = "your-tenant.instana.io"
+
+# Application Configuration
+application_name        = "my-web-app"
+application_tag_filter  = "service.name@dest EQUALS 'web-service'"
+
+# Alert Configuration
+alert_email_addresses   = ["ops@example.com", "oncall@example.com"]
+
+# Slack Configuration (Required for production)
+create_slack_channel = true
+slack_webhook_url    = "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+slack_channel        = "#production-alerts"
+
+# Thresholds (Strict for production)
+latency_threshold_warning  = 1000   # 1 second
+latency_threshold_critical = 3000   # 3 seconds
+error_rate_threshold       = 0.05   # 5% error rate
+log_threshold_warning      = 10
+log_threshold_critical     = 50
+
+# Throughput monitoring (enabled for production)
+create_throughput_alert = true
+throughput_threshold    = 100
+
+# RBAC Configuration (Required for production)
+developer_user_ids = ["user-id-1", "user-id-2"]
+viewer_user_ids    = ["user-id-3", "user-id-4"]
+admin_user_ids     = ["user-id-5"]
