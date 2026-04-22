@@ -1,4 +1,4 @@
-# Basic Instana Terraform Provider Example (Modular)
+# Basic Instana Terraform Provider Example
 
 This is a modular example of using the Instana Terraform provider (version >= 7.0.0) with S3 backend/local for state storage. Resources are organized into reusable modules for better maintainability and scalability.
 
