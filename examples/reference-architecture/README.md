@@ -107,9 +107,19 @@ examples/reference-architecture/
 
 ## Quick Start
 
-This example uses a multi-environment structure. Choose your target environment (dev, staging, or production) and follow these steps:
+### Step 0: Copy to Your Repository
+
+**Important:** This example is meant to be copied to your own repository where you manage your Terraform code.
+
+This approach allows you to:
+- Customize the configuration for your specific needs
+- Version control your infrastructure code
+- Manage secrets and sensitive data securely
+- Integrate with your CI/CD pipelines
 
 ### 1. Choose Your Environment
+
+After copying to your repository, choose your target environment:
 
 ```bash
 # Navigate to your target environment
