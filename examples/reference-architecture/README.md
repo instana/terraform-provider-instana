@@ -19,7 +19,7 @@ This example creates:
 ## Architecture
 
 ```
-examples/basic/
+examples/reference-architecture/
 ├── environments/              # Environment-specific configurations
 │   ├── dev/                  # Development environment
 │   │   ├── main.tf
