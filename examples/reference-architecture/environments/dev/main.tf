@@ -11,7 +11,7 @@ terraform {
 
   # S3 backend for state storage
   # Configure via: terraform init -backend-config=backend.hcl
-    backend "s3" {}  // comment out to use s3 local state storage
+    backend "s3" {}  // comment out to use local state storage
 }
 
 # Provider configuration
