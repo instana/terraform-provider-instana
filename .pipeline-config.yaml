@@ -69,7 +69,7 @@ tasks:
           if ! git rev-parse "v$TAG" >/dev/null 2>&1; then
             echo "Tag v$TAG not found. Creating local tag for GoReleaser..."
             git tag -a "v$TAG" -m "Release v$TAG"
-            # git push origin "v$TAG"
+            git push origin --dry-run "v$TAG"
           else
             echo "Error: Tag v$TAG already exists"
             exit 1
