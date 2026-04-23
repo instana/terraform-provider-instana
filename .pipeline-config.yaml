@@ -78,7 +78,7 @@ tasks:
           fi
 
           echo "Executing GoReleaser publish step..."
-          # goreleaser release --snapshot --skip=publish --clean
+          goreleaser release --snapshot --skip=publish --clean
 
       - name: unit-test
         when: false
