@@ -15,6 +15,9 @@ terraform {
 }
 
 # Provider configuration
+# Credentials can be set via:
+# 1. Environment variables: INSTANA_API_TOKEN and INSTANA_ENDPOINT (recommended)
+# 2. terraform.tfvars: instana_api_token and instana_endpoint
 provider "instana" {
   api_token = var.instana_api_token
   endpoint  = var.instana_endpoint
