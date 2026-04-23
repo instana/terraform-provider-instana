@@ -1,6 +1,22 @@
 version: '2'
 
 tasks:
+  pr-code-checks:
+    steps:
+      - name: compliance-checks
+        script: |
+          #!/usr/bin/env bash
+          echo "test"
+      - name: detect-secrets
+  pr-code-build:
+    steps:
+      - name: build-artifact
+        securityContext:
+          privileged: true
+        image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.53
+        script: |
+          #!/usr/bin/env bash
+          echo "test run"
   code-build:
     displayName: "Instana Terraform Provider Publish"
     steps:
