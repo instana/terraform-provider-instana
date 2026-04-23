@@ -82,6 +82,10 @@ tasks:
 
       - name: unit-test
         when: false
+      - name: sign-artifact
+        when: false
+      - name: scan-artifact
+        when: false
       - name: collect-evidence
         when: false
       - name: setup
