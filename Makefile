@@ -6,6 +6,7 @@ export GO111MODULE=on
 VERSION=$(shell git describe --tags --match "v*" --always --dirty)
 
 
+
 .PHONY: all
 all: build test vet lint fmt
 
