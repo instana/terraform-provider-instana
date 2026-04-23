@@ -109,7 +109,7 @@ examples/reference-architecture/
 
 ### Step 0: Copy to Your Repository
 
-**Important:** This example is meant to be copied to your own repository where you manage your Terraform code.
+**Important:** Copy this example to your own repository where you manage your Terraform code.
 
 This approach allows you to:
 - Customize the configuration for your specific needs
