@@ -1,0 +1,96 @@
+version: '2'
+
+tasks:
+  pr-code-checks:
+    steps:
+      - name: peer-review
+        when: false
+  code-build:
+    displayName: "Instana Terraform Provider Publish"
+    steps:
+      - name: build-artifact
+        displayName: "Build and publish to the Terraform Registry"
+        image: goreleaser/goreleaser:latest
+        securityContext:
+          privileged: true
+        script: |
+          #!/usr/bin/env bash
+          set -e
+    
+          echo "Fetching variables from SPS Environment Properties..."
+          export GITHUB_TOKEN=$(get_env GHP_PAT)
+          export GPG_FINGERPRINT=$(get_env GPG_FINGERPRINT)
+          export GPG_PRIVATE_KEY=$(get_env GPG_PRIVATE_KEY)
+          export GPG_PASSPHRASE=$(get_env GPG_PASSPHRASE)
+          export GIT_USER_EMAIL=$(get_env GIT_USER_EMAIL)
+          export GIT_USER_NAME=$(get_env GIT_USER_NAME)
+          export TAG=$(get_env TAG)
+    
+          echo "Git setup..."
+          git config --global user.email "$GIT_USER_EMAIL"
+          git config --global user.name "$GIT_USER_NAME"
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/instana/terraform-provider-instana.git
+    
+          echo "GPG setup..."
+          if command -v apk &> /dev/null; then
+            apk add --no-cache gnupg gpg-agent
+          fi
+    
+          export GPG_TTY=$(tty || echo "/dev/tty")
+          mkdir -p ~/.gnupg
+          chmod 700 ~/.gnupg
+          echo "pinentry-mode loopback" > ~/.gnupg/gpg.conf
+          echo "allow-loopback-pinentry" > ~/.gnupg/gpg-agent.conf
+          echo "disable-scdaemon" >> ~/.gnupg/gpg-agent.conf
+          gpgconf --kill gpg-agent || true
+          gpg-agent --daemon --allow-loopback-pinentry || true
+          
+          echo "Importing GPG Private Key..."
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+    
+          KEY_ID=$(gpg --list-secret-keys --with-colons | grep '^sec' | cut -d: -f5 | head -n 1)
+          /usr/libexec/gpg-preset-passphrase --preset --passphrase "$GPG_PASSPHRASE" "$KEY_ID" || \
+          echo "$GPG_PASSPHRASE" | gpg --batch --pinentry-mode loopback --passphrase-fd 0 --sign --dry-run > /dev/null 2>&1
+
+          echo "Checking for documentation required by the Terraform Registry..."
+          if [ ! -d "docs" ]; then
+            echo "Warning: 'docs/' directory not found. The Registry will show an empty documentation page."
+          fi
+          
+          echo "Validating tag $TAG for symantic versioning..."
+          if echo "$TAG" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+'; then
+            echo "Tag is valid. Continuing..."
+          else
+            echo "Error: TAG '$TAG' is not valid SemVer (X.Y.Z)"
+            exit 1
+          fi
+          
+          echo "Checking if tag v$TAG exists..."
+          if ! git rev-parse "v$TAG" >/dev/null 2>&1; then
+            echo "Tag v$TAG not found. Creating local tag for GoReleaser..."
+            git tag -a "v$TAG" -m "Release v$TAG"
+            git push origin "v$TAG"
+          else
+            echo "Error: Tag v$TAG already exists"
+            exit 1
+          fi
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Warning: dirty git state detected"
+            git status --porcelain
+            echo "Goreleaser may require the --skip=validate flag. Aborting..."
+            exit 1
+          fi
+
+          echo "Executing GoReleaser publish step..."
+          goreleaser release --clean
+
+      - name: unit-test
+        when: false
+      - name: sign-artifact
+        when: false
+      - name: scan-artifact
+        when: false
+      - name: collect-evidence
+        when: false
+      - name: setup
+        when: false
