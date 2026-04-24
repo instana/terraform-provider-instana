@@ -22,9 +22,9 @@ Full documentation is available on the Terraform Registry page:
 
 ## Examples
 
-### Reference Architecture
+### Reference Setup
 
-A comprehensive reference architecture example is available to help you get started with the Instana Terraform provider. This example demonstrates best practices for organizing and managing Instana monitoring resources using Terraform with a modular, multi-environment setup.
+A comprehensive reference setup example is available to help you get started with the Instana Terraform provider. This example demonstrates best practices for organizing and managing Instana monitoring resources using Terraform with a modular, multi-environment setup.
 
 📁 **Location:** [`examples/reference-setup/`](./examples/reference-setup/)
 
