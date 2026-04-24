@@ -1,4 +1,4 @@
-# Basic Instana Terraform Provider Example
+# Instana Terraform Provider Example
 
 This is a modular example of using the Instana Terraform provider (version >= 7.0.0) with S3 backend/local for state storage. Resources are organized into reusable modules for better maintainability and scalability.
 
@@ -19,7 +19,7 @@ This example creates:
 ## Architecture
 
 ```
-examples/reference-architecture/
+examples/reference-setup/
 ├── environments/              # Environment-specific configurations
 │   ├── dev/                  # Development environment
 │   │   ├── main.tf
@@ -334,7 +334,7 @@ terraform destroy -target=module.rbac
 7. **Incremental Changes**: Enable features gradually
 8. **Documentation**: Document custom configurations
 
-## Multi-Environment Architecture
+## Multi-Environment Setup
 
 This example uses a **directory-based approach** for complete environment isolation. Each environment (dev, staging, production) has its own:
 

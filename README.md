@@ -26,7 +26,7 @@ Full documentation is available on the Terraform Registry page:
 
 A comprehensive reference architecture example is available to help you get started with the Instana Terraform provider. This example demonstrates best practices for organizing and managing Instana monitoring resources using Terraform with a modular, multi-environment setup.
 
-📁 **Location:** [`examples/reference-architecture/`](./examples/reference-architecture/)
+📁 **Location:** [`examples/reference-setup/`](./examples/reference-setup/)
 
 **Features:**
 - Multi-environment setup (dev, staging, production)
@@ -34,7 +34,7 @@ A comprehensive reference architecture example is available to help you get star
 - S3 backend configuration for state management
 - Comprehensive documentation and usage examples
 
-For detailed setup instructions and usage, see the [Reference Architecture README](./examples/reference-architecture/README.md).
+For detailed setup instructions and usage, see the [Reference Setup README](./examples/reference-setup/README.md).
 
 ---
 
