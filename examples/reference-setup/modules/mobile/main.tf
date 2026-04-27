@@ -1,6 +1,4 @@
-# Alerting Module
-# Creates alerting channels and various types of alert configurations
-
+# Mobile Module
 terraform {
   required_providers {
     instana = {

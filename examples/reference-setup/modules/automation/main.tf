@@ -1,5 +1,4 @@
-# Alerting Module
-# Creates alerting channels and various types of alert configurations
+# Automation Module
 
 terraform {
   required_providers {
