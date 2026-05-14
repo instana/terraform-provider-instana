@@ -206,10 +206,12 @@ func (p *InstanaProvider) Configure(ctx context.Context, req provider.ConfigureR
 
 	// Make the Instana client available during DataSource and Resource Configure methods
 	resp.DataSourceData = &shared.ProviderMeta{
-		InstanaAPI: instanaAPI,
+		InstanaAPI:   instanaAPI,
+		ClientConfig: clientConfig,
 	}
 	resp.ResourceData = &shared.ProviderMeta{
-		InstanaAPI: instanaAPI,
+		InstanaAPI:   instanaAPI,
+		ClientConfig: clientConfig,
 	}
 }
 
