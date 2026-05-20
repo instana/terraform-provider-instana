@@ -82,12 +82,8 @@ func (r *terraformResourceImpl[T]) Create(ctx context.Context, req resource.Crea
 	// Add correlation ID to client config headers
 	r.addCorrelationIDToClient(correlationID)
 	
-	// Extract resource name from plan
-	resourceName := r.getResourceName(ctx, &req.Plan)
-	
 	tflog.Debug(ctx, "Starting resource creation", map[string]interface{}{
 		"correlation_id": correlationID,
-		"resource_name":  resourceName,
 	})
 
 	if r.providerMeta == nil || r.providerMeta.InstanaAPI == nil {
@@ -106,7 +102,6 @@ func (r *terraformResourceImpl[T]) Create(ctx context.Context, req resource.Crea
 		tflog.Debug(ctx, "Generated resource ID", map[string]interface{}{
 			"resource_id":    id,
 			"correlation_id": correlationID,
-			"resource_name":  resourceName,
 		})
 		resp.Diagnostics.Append(req.Plan.SetAttribute(ctx, path.Root("id"), types.StringValue(id))...)
 		if resp.Diagnostics.HasError() {
@@ -134,14 +129,12 @@ func (r *terraformResourceImpl[T]) Create(ctx context.Context, req resource.Crea
 	tflog.Debug(ctx, "Calling Instana API to create resource", map[string]interface{}{
 		"resource_id":    createRequest.GetIDForResourcePath(),
 		"correlation_id": correlationID,
-		"resource_name":  resourceName,
 	})
 	createdObject, err := r.resourceHandle.GetRestResource(r.providerMeta.InstanaAPI).Create(createRequest)
 	if err != nil {
 		tflog.Error(ctx, "Failed to create resource via API", map[string]interface{}{
 			"resource_id":    createRequest.GetIDForResourcePath(),
 			"correlation_id": correlationID,
-			"resource_name":  resourceName,
 			"error":          err.Error(),
 		})
 		resp.Diagnostics.AddError(
@@ -158,7 +151,6 @@ func (r *terraformResourceImpl[T]) Create(ctx context.Context, req resource.Crea
 		tflog.Error(ctx, "Failed to update state after creation", map[string]interface{}{
 			"resource_id":    createdObject.GetIDForResourcePath(),
 			"correlation_id": correlationID,
-			"resource_name":  resourceName,
 		})
 		return
 	}
@@ -166,7 +158,6 @@ func (r *terraformResourceImpl[T]) Create(ctx context.Context, req resource.Crea
 	tflog.Debug(ctx, "Successfully created resource", map[string]interface{}{
 		"resource_id":    createdObject.GetIDForResourcePath(),
 		"correlation_id": correlationID,
-		"resource_name":  resourceName,
 	})
 }
 
@@ -177,9 +168,6 @@ func (r *terraformResourceImpl[T]) Read(ctx context.Context, req resource.ReadRe
 	
 	// Add correlation ID to client config headers
 	r.addCorrelationIDToClient(correlationID)
-	
-	// Extract resource name from state
-	resourceName := r.getResourceName(ctx, &req.State)
 	
 	if r.providerMeta == nil || r.providerMeta.InstanaAPI == nil {
 		tflog.Error(ctx, "Provider not configured for resource read")
@@ -220,7 +208,6 @@ func (r *terraformResourceImpl[T]) Read(ctx context.Context, req resource.ReadRe
 	tflog.Debug(ctx, "Reading resource from API", map[string]interface{}{
 		"resource_id":    resourceID,
 		"correlation_id": correlationID,
-		"resource_name":  resourceName,
 	})
 
 	// Get the resource from the API
@@ -230,7 +217,6 @@ func (r *terraformResourceImpl[T]) Read(ctx context.Context, req resource.ReadRe
 			tflog.Warn(ctx, "Resource not found, removing from state", map[string]interface{}{
 				"resource_id":    resourceID,
 				"correlation_id": correlationID,
-				"resource_name":  resourceName,
 			})
 			// Resource no longer exists
 			resp.State.RemoveResource(ctx)
@@ -239,7 +225,6 @@ func (r *terraformResourceImpl[T]) Read(ctx context.Context, req resource.ReadRe
 		tflog.Error(ctx, "Failed to read resource from API", map[string]interface{}{
 			"resource_id":    resourceID,
 			"correlation_id": correlationID,
-			"resource_name":  resourceName,
 			"error":          err.Error(),
 		})
 		resp.Diagnostics.AddError(
@@ -252,7 +237,6 @@ func (r *terraformResourceImpl[T]) Read(ctx context.Context, req resource.ReadRe
 	tflog.Debug(ctx, "Successfully read resource from API", map[string]interface{}{
 		"resource_id":    resourceID,
 		"correlation_id": correlationID,
-		"resource_name":  resourceName,
 	})
 
 	// Update state with the current object
@@ -262,7 +246,6 @@ func (r *terraformResourceImpl[T]) Read(ctx context.Context, req resource.ReadRe
 		tflog.Error(ctx, "Failed to update state after read", map[string]interface{}{
 			"resource_id":    resourceID,
 			"correlation_id": correlationID,
-			"resource_name":  resourceName,
 		})
 	}
 }
@@ -274,9 +257,6 @@ func (r *terraformResourceImpl[T]) Update(ctx context.Context, req resource.Upda
 	
 	// Add correlation ID to client config headers
 	r.addCorrelationIDToClient(correlationID)
-	
-	// Extract resource name from plan
-	resourceName := r.getResourceName(ctx, &req.Plan)
 	
 	if r.providerMeta == nil || r.providerMeta.InstanaAPI == nil {
 		tflog.Error(ctx, "Provider not configured for resource update")
@@ -298,21 +278,18 @@ func (r *terraformResourceImpl[T]) Update(ctx context.Context, req resource.Upda
 	tflog.Debug(ctx, "Starting resource update", map[string]interface{}{
 		"resource_id":    obj.GetIDForResourcePath(),
 		"correlation_id": correlationID,
-		"resource_name":  resourceName,
 	})
 
 	// Update the resource
 	tflog.Debug(ctx, "Calling Instana API to update resource", map[string]interface{}{
 		"resource_id":    obj.GetIDForResourcePath(),
 		"correlation_id": correlationID,
-		"resource_name":  resourceName,
 	})
 	updatedObject, err := r.resourceHandle.GetRestResource(r.providerMeta.InstanaAPI).Update(obj)
 	if err != nil {
 		tflog.Error(ctx, "Failed to update resource via API", map[string]interface{}{
 			"resource_id":    obj.GetIDForResourcePath(),
 			"correlation_id": correlationID,
-			"resource_name":  resourceName,
 			"error":          err.Error(),
 		})
 		resp.Diagnostics.AddError(
@@ -329,7 +306,6 @@ func (r *terraformResourceImpl[T]) Update(ctx context.Context, req resource.Upda
 		tflog.Error(ctx, "Failed to update state after update", map[string]interface{}{
 			"resource_id":    updatedObject.GetIDForResourcePath(),
 			"correlation_id": correlationID,
-			"resource_name":  resourceName,
 		})
 		return
 	}
@@ -337,7 +313,6 @@ func (r *terraformResourceImpl[T]) Update(ctx context.Context, req resource.Upda
 	tflog.Debug(ctx, "Successfully updated resource", map[string]interface{}{
 		"resource_id":    updatedObject.GetIDForResourcePath(),
 		"correlation_id": correlationID,
-		"resource_name":  resourceName,
 	})
 }
 
@@ -348,9 +323,6 @@ func (r *terraformResourceImpl[T]) Delete(ctx context.Context, req resource.Dele
 	
 	// Add correlation ID to client config headers
 	r.addCorrelationIDToClient(correlationID)
-	
-	// Extract resource name from state
-	resourceName := r.getResourceName(ctx, &req.State)
 	
 	if r.providerMeta == nil || r.providerMeta.InstanaAPI == nil {
 		tflog.Error(ctx, "Provider not configured for resource deletion")
@@ -373,21 +345,18 @@ func (r *terraformResourceImpl[T]) Delete(ctx context.Context, req resource.Dele
 	tflog.Debug(ctx, "Starting resource deletion", map[string]interface{}{
 		"resource_id":    resourceID,
 		"correlation_id": correlationID,
-		"resource_name":  resourceName,
 	})
 
 	// Delete the resource
 	tflog.Debug(ctx, "Calling Instana API to delete resource", map[string]interface{}{
 		"resource_id":    resourceID,
 		"correlation_id": correlationID,
-		"resource_name":  resourceName,
 	})
 	err := r.resourceHandle.GetRestResource(r.providerMeta.InstanaAPI).DeleteByID(resourceID)
 	if err != nil {
 		tflog.Error(ctx, "Failed to delete resource via API", map[string]interface{}{
 			"resource_id":    resourceID,
 			"correlation_id": correlationID,
-			"resource_name":  resourceName,
 			"error":          err.Error(),
 		})
 		resp.Diagnostics.AddError(
@@ -400,7 +369,6 @@ func (r *terraformResourceImpl[T]) Delete(ctx context.Context, req resource.Dele
 	tflog.Debug(ctx, "Successfully deleted resource", map[string]interface{}{
 		"resource_id":    resourceID,
 		"correlation_id": correlationID,
-		"resource_name":  resourceName,
 	})
 
 	// Remove resource from state
@@ -409,10 +377,8 @@ func (r *terraformResourceImpl[T]) Delete(ctx context.Context, req resource.Dele
 
 // ImportState handles importing an existing resource into Terraform
 func (r *terraformResourceImpl[T]) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resourceName := r.resourceHandle.MetaData().ResourceName
 	tflog.Info(ctx, "Importing resource", map[string]interface{}{
-		"resource_type": resourceName,
-		"resource_id":   req.ID,
+		"resource_id": req.ID,
 	})
 
 	// Set ID
@@ -424,13 +390,11 @@ func (r *terraformResourceImpl[T]) ImportState(ctx context.Context, req resource
 
 	if resp.Diagnostics.HasError() {
 		tflog.Error(ctx, "Failed to import resource", map[string]interface{}{
-			"resource_type": resourceName,
-			"resource_id":   req.ID,
+			"resource_id": req.ID,
 		})
 	} else {
 		tflog.Info(ctx, "Successfully imported resource", map[string]interface{}{
-			"resource_type": resourceName,
-			"resource_id":   req.ID,
+			"resource_id": req.ID,
 		})
 	}
 }
@@ -450,17 +414,3 @@ func (r *terraformResourceImpl[T]) addCorrelationIDToClient(correlationID string
 	}
 }
 
-// getResourceName extracts the resource name from the plan or state
-func (r *terraformResourceImpl[T]) getResourceName(ctx context.Context, getter attributeGetter) string {
-	if getter == nil {
-		return ""
-	}
-	
-	var name types.String
-	diags := getter.GetAttribute(ctx, path.Root("name"), &name)
-	if diags.HasError() || name.IsNull() || name.IsUnknown() {
-		return ""
-	}
-	
-	return name.ValueString()
-}
