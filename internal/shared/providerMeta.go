@@ -1,8 +1,12 @@
 package shared
 
-import "github.com/instana/instana-go-client/client"
+import (
+	"github.com/instana/instana-go-client/client"
+	"github.com/instana/instana-go-client/config"
+)
 
 // ProviderMeta data structure for the metadata which is configured and provided to the resources by this provider
 type ProviderMeta struct {
-	InstanaAPI client.InstanaAPI
+	InstanaAPI   client.InstanaAPI
+	ClientConfig *config.ClientConfig
 }
