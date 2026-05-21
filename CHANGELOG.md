@@ -1,5 +1,17 @@
 # Changelog
 
+## [v7.0.1](https://github.com/instana/terraform-provider-instana/tree/v7.0.1) (2026-05-21)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.0.0...v7.0.1)
+
+**Implemented enhancements:**
+
+- Enhanced provider logging for better troubleshooting capabilities
+
+**Merged pull requests:**
+
+- Add debug logging for Terraform provider [\#82](https://github.com/instana/terraform-provider-instana/pull/82) ([BlessyElza](https://github.com/BlessyElza))
+
 ## [v7.0.0](https://github.com/instana/terraform-provider-instana/tree/v7.0.0) (2026-04-20)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v6.3.0...v7.0.0)
