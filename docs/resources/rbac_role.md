@@ -228,6 +228,7 @@ The following permissions can be assigned to roles:
 * `CAN_CONFIGURE_AGENTS` - Configure agents
 * `CAN_INSTALL_NEW_AGENTS` - Install new agents
 * `CAN_CONFIGURE_AGENT_RUN_MODE` - Configure agent run mode
+* `CAN_DOWNLOAD_AGENT_CONFIGURATION` - Download agent configuration
 * `ACCESS_INFRASTRUCTURE_ANALYZE` - Access infrastructure analyze
 
 ### Monitoring & Observability Permissions
@@ -280,6 +281,7 @@ The following permissions can be assigned to roles:
 * `CAN_CONFIGURE_API_TOKENS` - Configure API tokens
 * `CAN_CONFIGURE_PERSONAL_API_TOKENS` - Configure personal API tokens
 * `CAN_CONFIGURE_IP_FILTERING` - Configure IP filtering
+* `CAN_CONFIGURE_PERSONALLY_IDENTIFIABLE_INFORMATION_MASKING` - Configure personally identifiable information masking
 
 ### Integration & Configuration Permissions
 * `CAN_CONFIGURE_INTEGRATIONS` - Configure integrations
