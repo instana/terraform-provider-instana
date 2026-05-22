@@ -224,6 +224,11 @@ func buildSyntheticEntityAttribute() schema.SingleNestedAttribute {
 				Optional:    true,
 				Description: SloConfigDescSyntheticTestIDs,
 			},
+			SloConfigFieldIncludeUnscheduledTestResults: schema.BoolAttribute{
+				Optional:    true,
+				Computed:    true,
+				Description: SloConfigDescIncludeUnscheduledTestResults,
+			},
 			SloConfigFieldFilterExpression: schema.StringAttribute{
 				Optional:    true,
 				Description: SloConfigDescEntityFilter,
@@ -755,10 +760,18 @@ func (r *sloConfigResource) buildSyntheticEntity(model *SyntheticEntityModel) ap
 		}
 	}
 
-	return api.SloEntity{
+	entity := api.SloEntity{
 		Type:             SloConfigSyntheticEntity,
 		SyntheticTestIDs: testIDs,
 	}
+
+	// Set includeUnscheduledTestResults if provided
+	if !model.IncludeUnscheduledTestResults.IsNull() && !model.IncludeUnscheduledTestResults.IsUnknown() {
+		includeUnscheduled := model.IncludeUnscheduledTestResults.ValueBool()
+		entity.IncludeUnscheduledTestResults = &includeUnscheduled
+	}
+
+	return entity
 }
 
 // validateAndMapInfrastructureEntity validates and maps infrastructure entity from state
@@ -1312,6 +1325,13 @@ func (r *sloConfigResource) mapSyntheticEntityToState(entity api.SloEntity) (Syn
 
 	model := SyntheticEntityModel{
 		SyntheticTestIDs: testIDsSet,
+	}
+
+	// Set includeUnscheduledTestResults with default value of false if not present
+	if entity.IncludeUnscheduledTestResults != nil {
+		model.IncludeUnscheduledTestResults = types.BoolValue(*entity.IncludeUnscheduledTestResults)
+	} else {
+		model.IncludeUnscheduledTestResults = types.BoolValue(false)
 	}
 
 	filterExpr, filterDiags := r.mapFilterExpressionToState(entity.FilterExpression)

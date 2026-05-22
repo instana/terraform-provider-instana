@@ -52,6 +52,8 @@ const (
 	SloConfigDescSyntheticEntity = "Synthetic entity of SLO"
 	// SloConfigDescSyntheticTestIDs is the description for the synthetic_test_ids field
 	SloConfigDescSyntheticTestIDs = "A set of synthetic test IDs."
+	// SloConfigDescIncludeUnscheduledTestResults is the description for the include_unscheduled_test_results field
+	SloConfigDescIncludeUnscheduledTestResults = "Optional flag to indicate whether unscheduled test results are included"
 	// SloConfigDescInfrastructureEntity is the description for the infrastructure entity block
 	SloConfigDescInfrastructureEntity = "Infrastructure entity of SLO"
 	// SloConfigDescInfraType is the description for the infra_type field
@@ -192,10 +194,11 @@ const (
 	SloConfigFieldSloEntity                 = "entity"
 	SloConfigFieldSloIndicator              = "indicator"
 	SloConfigFieldSloTimeWindow             = "time_window"
-	SloConfigFieldApplicationID             = "application_id"
-	SloConfigFieldWebsiteID                 = "website_id"
-	SloConfigFieldSyntheticTestIDs          = "synthetic_test_ids"
-	SloConfigFieldInfraType                 = "infra_type"
+	SloConfigFieldApplicationID                  = "application_id"
+	SloConfigFieldWebsiteID                      = "website_id"
+	SloConfigFieldSyntheticTestIDs               = "synthetic_test_ids"
+	SloConfigFieldIncludeUnscheduledTestResults  = "include_unscheduled_test_results"
+	SloConfigFieldInfraType                      = "infra_type"
 	SloConfigFieldFilterExpression          = "filter_expression"
 	SloConfigFieldServiceID                 = "service_id"
 	SloConfigFieldEndpointID                = "endpoint_id"
