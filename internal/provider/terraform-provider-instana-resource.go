@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -18,11 +17,6 @@ import (
 
 // CorrelationIDHeader is the HTTP header name for correlation ID
 const CorrelationIDHeader = "X-Correlation-ID"
-
-// attributeGetter is an interface for types that can get attributes (Plan and State)
-type attributeGetter interface {
-	GetAttribute(ctx context.Context, path path.Path, target interface{}) diag.Diagnostics
-}
 
 // NewTerraformResource creates a new terraform resource for the given handle
 func NewTerraformResource[T client.InstanaDataObject](handle resourcehandle.ResourceHandle[T]) TerraformResource {
