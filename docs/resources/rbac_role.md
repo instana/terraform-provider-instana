@@ -115,8 +115,7 @@ resource "instana_rbac_role" "sre_role" {
     "CAN_CONFIGURE_MAINTENANCE_WINDOWS",
     "CAN_INVOKE_ALERT_CHANNEL",
     "CAN_MANUALLY_CLOSE_ISSUE",
-    "CAN_INSTALL_NEW_AGENTS",
-    "ACCESS_INFRASTRUCTURE_ANALYZE"
+    "CAN_INSTALL_NEW_AGENTS"
   ]
 
   member = [
@@ -222,14 +221,12 @@ The following permissions can be assigned to roles:
 * `CAN_CONFIGURE_SERVICE_MAPPING` - Configure service mapping
 * `CAN_CONFIGURE_APDEX` - Configure Apdex settings
 * `CAN_CONFIGURE_CUSTOM_ENTITIES` - Configure custom entities
-* `ACCESS_APPLICATIONS` - Access applications
 
 ### Agent & Infrastructure Permissions
 * `CAN_CONFIGURE_AGENTS` - Configure agents
 * `CAN_INSTALL_NEW_AGENTS` - Install new agents
 * `CAN_CONFIGURE_AGENT_RUN_MODE` - Configure agent run mode
 * `CAN_DOWNLOAD_AGENT_CONFIGURATION` - Download agent configuration
-* `ACCESS_INFRASTRUCTURE_ANALYZE` - Access infrastructure analyze
 
 ### Monitoring & Observability Permissions
 * `CAN_VIEW_TRACE_DETAILS` - View trace details
@@ -266,9 +263,6 @@ The following permissions can be assigned to roles:
 ### Mobile & Website Monitoring Permissions
 * `CAN_CONFIGURE_MOBILE_APP_MONITORING` - Configure mobile app monitoring
 * `CAN_CONFIGURE_WEBSITE_CONVERSIONS` - Configure website conversions
-* `ACCESS_MOBILE_APPS` - Access mobile apps
-* `ACCESS_WEBSITES` - Access websites
-* `ACCESS_SYNTHETICS` - Access synthetics
 
 ### Dashboard & Visualization Permissions
 * `CAN_EDIT_ALL_ACCESSIBLE_CUSTOM_DASHBOARDS` - Edit all accessible custom dashboards
@@ -290,12 +284,15 @@ The following permissions can be assigned to roles:
 * `CAN_CONFIGURE_DATABASE_MANAGEMENT` - Configure database management
 * `CAN_CONFIGURE_SUBTRACES` - Configure subtraces
 * `CAN_CONFIGURE_LLM` - Configure LLM
+* `CAN_CONFIGURE_LLM_MODEL_PRICE` - Configure LLM model price
+* `CAN_CONFIGURE_AI_AGENTS` - Configure AI agents
 
 ### Service Level & BizOps Permissions
-* `CAN_CONFIGURE_SERVICE_LEVEL_INDICATORS` - Configure service level indicators
 * `CAN_CONFIGURE_SERVICE_LEVELS` - Configure service levels
 * `CAN_CONFIGURE_SERVICE_LEVEL_CORRECTION_WINDOWS` - Configure service level correction windows
 * `CAN_VIEW_BUSINESS_PROCESS_DETAILS` - View business process details
+* `CAN_VIEW_BUSINESS_PROCESSES` - View business processes
+* `CAN_VIEW_BUSINESS_ACTIVITIES` - View business activities
 * `CAN_VIEW_BIZOPS_ALERTS` - View BizOps alerts
 * `CAN_CONFIGURE_BIZOPS` - Configure BizOps
 
@@ -330,6 +327,7 @@ The following permissions can be assigned to roles:
 * `LIMITED_BIZOPS_SCOPE` - Limited BizOps scope
 * `LIMITED_PHMC_SCOPE` - Limited PHMC scope
 * `LIMITED_GEN_AI_SCOPE` - Limited Gen AI scope
+* `LIMITED_GEN_AI_CAPABILITIES_SCOPE` - Limited Gen AI capabilities scope
 * `LIMITED_INFRASTRUCTURE_SCOPE` - Limited infrastructure scope
 * `LIMITED_NUTANIX_SCOPE` - Limited Nutanix scope
 * `LIMITED_WINDOWS_HYPERVISOR_SCOPE` - Limited Windows hypervisor scope
