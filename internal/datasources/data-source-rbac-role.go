@@ -15,8 +15,9 @@ const DataSourceInstanaRbacRole = "rbac_role"
 
 // RbacRoleDataSourceModel represents the data model for the rbac_role data source
 type RbacRoleDataSourceModel struct {
-	ID   types.String `tfsdk:"id"`
-	Name types.String `tfsdk:"name"`
+	ID          types.String   `tfsdk:"id"`
+	Name        types.String   `tfsdk:"name"`
+	Permissions []types.String `tfsdk:"permissions"`
 }
 
 // NewRbacRoleDataSource creates a new data source for rbac_role
@@ -33,19 +34,24 @@ func (d *RbacRoleDataSource) Metadata(_ context.Context, req datasource.Metadata
 }
 
 func (d *RbacRoleDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		Description: RbacRoleDescDataSource,
-		Attributes: map[string]schema.Attribute{
-			RbacRoleDataSourceFieldID: schema.StringAttribute{
-				Description: "ID of the RBAC Role.",
-				Required:    true,
-			},
-			"name": schema.StringAttribute{
-				Description: "Name of the RBAC Role.",
-				Computed:    true,
-			},
-		},
-	}
+       resp.Schema = schema.Schema{
+	       Description: RbacRoleDescDataSource,
+	       Attributes: map[string]schema.Attribute{
+		       RbacRoleDataSourceFieldID: schema.StringAttribute{
+			       Description: "ID of the RBAC Role.",
+			       Required:    true,
+		       },
+		       "name": schema.StringAttribute{
+			       Description: "Name of the RBAC Role.",
+			       Computed:    true,
+		       },
+		       "permissions": schema.SetAttribute{
+			       Description: "Permissions assigned to the RBAC Role.",
+			       Computed:    true,
+			       ElementType: types.StringType,
+		       },
+	       },
+       }
 }
 
 func (d *RbacRoleDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -90,6 +96,10 @@ func (d *RbacRoleDataSource) Read(ctx context.Context, req datasource.ReadReques
 
        data.ID = types.StringValue(role.ID)
        data.Name = types.StringValue(role.Name)
+       data.Permissions = make([]types.String, len(role.Permissions))
+       for i, p := range role.Permissions {
+	       data.Permissions[i] = types.StringValue(p)
+       }
 
        resp.Diagnostics.Append(resp.State.Set(ctx, &data)...) 
 }
