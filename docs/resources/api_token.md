@@ -239,7 +239,7 @@ All scope limitation attributes are optional and default to `false`:
 * `limited_xen_server_scope` - Limits the scope to Xen Server
 * `limited_windows_hypervisor_scope` - Limits the scope to Windows Hypervisor
 * `limited_alert_channels_scope` - Limits the scope to alert channels
-* `limited_linux_kvm_hypervisor_scope` - Limits the scope to Linux KVM Hypervisor
+* `limited_linux_kvm_hypervisor_scope` - Limits the scope to Linux KVM Hypervisor (**always normalized to false; setting to true will cause a plan-time error**)
 * `limited_service_level_scope` - Limits the scope to service levels
 * `limited_ai_gateway_scope` - Limits the scope to AI Gateway
 
@@ -256,7 +256,7 @@ All additional permission attributes are optional and default to `false`:
 * `can_configure_synthetic_tests` - Enables permission to configure synthetic tests
 * `can_configure_synthetic_locations` - Enables permission to configure synthetic locations
 * `can_configure_synthetic_credentials` - Enables permission to configure synthetic credentials
-* `can_view_synthetic_tests` - Enables permission to view synthetic tests
+* `can_view_synthetic_tests` - Enables permission to view synthetic tests (**must be true if `can_configure_synthetic_tests` is true; setting to false in this case will cause a plan-time error**)
 * `can_view_synthetic_locations` - Enables permission to view synthetic locations
 * `can_view_synthetic_test_results` - Enables permission to view synthetic test results
 * `can_use_synthetic_credentials` - Enables permission to use synthetic credentials
@@ -297,6 +297,16 @@ $ terraform import instana_api_token.my_token 60845e4e5e6b9cf8fc2868da
 ```
 
 ## Notes
+
+### ⚠️ Backend-Normalized and Derived Permissions
+
+Some permissions are always normalized or derived by the Instana backend. The provider enforces these rules at plan time:
+
+- `can_configure_personal_api_tokens`: Always false for API tokens. Setting to true will cause a plan-time error.
+- `limited_linux_kvm_hypervisor_scope`: Always false. Setting to true will cause a plan-time error.
+- `can_view_synthetic_tests`: Must be true if `can_configure_synthetic_tests` is true. Setting to false in this case will cause a plan-time error.
+
+If you see a plan-time error for these fields, update your Terraform configuration to match the backend-normalized value and re-run `terraform plan`.
 
 ### Token Security
 

@@ -105,12 +105,7 @@ func TestUpdateState(t *testing.T) {
 			AccessGrantingToken:         "test-access-token",
 			InternalID:                  "test-internal-id",
 			Name:                        "test-token",
-			CanConfigureServiceMapping:  true,
-			CanConfigureUsers:           true,
-			CanInstallNewAgents:         true,
-			CanConfigureIntegrations:    true,
 			CanConfigureEventsAndAlerts: true,
-			CanViewAuditLog:             true,
 		}
 
 		handle := NewAPITokenResourceHandle()
@@ -125,12 +120,7 @@ func TestUpdateState(t *testing.T) {
 		diags = state.Get(ctx, &model)
 		require.False(t, diags.HasError())
 
-		assert.True(t, model.CanConfigureServiceMapping.ValueBool())
-		assert.True(t, model.CanConfigureUsers.ValueBool())
-		assert.True(t, model.CanInstallNewAgents.ValueBool())
-		assert.True(t, model.CanConfigureIntegrations.ValueBool())
 		assert.True(t, model.CanConfigureEventsAndAlerts.ValueBool())
-		assert.True(t, model.CanViewAuditLog.ValueBool())
 	})
 
 	t.Run("API token with scope limitations", func(t *testing.T) {
@@ -179,17 +169,6 @@ func TestUpdateState(t *testing.T) {
 		require.False(t, diags.HasError())
 
 		// Verify all permissions are true
-		assert.True(t, model.CanConfigureServiceMapping.ValueBool())
-		assert.True(t, model.CanConfigureEumApplications.ValueBool())
-		assert.True(t, model.CanConfigureMobileAppMonitoring.ValueBool())
-		assert.True(t, model.CanConfigureUsers.ValueBool())
-		assert.True(t, model.CanInstallNewAgents.ValueBool())
-		assert.True(t, model.CanConfigureAPITokens.ValueBool())
-		assert.True(t, model.CanViewAuditLog.ValueBool())
-		assert.True(t, model.CanConfigureAgents.ValueBool())
-		assert.True(t, model.CanConfigureApplications.ValueBool())
-		assert.True(t, model.CanConfigureTeams.ValueBool())
-		assert.True(t, model.CanViewLogs.ValueBool())
 		assert.True(t, model.CanViewTraceDetails.ValueBool())
 	})
 }
@@ -242,12 +221,7 @@ func TestMapStateToDataObject(t *testing.T) {
 			AccessGrantingToken:         types.StringValue("test-access-token"),
 			InternalID:                  types.StringValue("test-internal-id"),
 			Name:                        types.StringValue("test-token"),
-			CanConfigureServiceMapping:  types.BoolValue(true),
-			CanConfigureUsers:           types.BoolValue(true),
-			CanInstallNewAgents:         types.BoolValue(true),
-			CanConfigureIntegrations:    types.BoolValue(true),
 			CanConfigureEventsAndAlerts: types.BoolValue(true),
-			CanViewAuditLog:             types.BoolValue(true),
 		}
 
 		state := createMockState(t, ctx, model)
@@ -255,12 +229,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		require.False(t, diags.HasError())
 		require.NotNil(t, apiToken)
 
-		assert.True(t, apiToken.CanConfigureServiceMapping)
-		assert.True(t, apiToken.CanConfigureUsers)
-		assert.True(t, apiToken.CanInstallNewAgents)
-		assert.True(t, apiToken.CanConfigureIntegrations)
 		assert.True(t, apiToken.CanConfigureEventsAndAlerts)
-		assert.True(t, apiToken.CanViewAuditLog)
 	})
 
 	t.Run("API token with scope limitations", func(t *testing.T) {
@@ -297,28 +266,11 @@ func TestMapStateToDataObject(t *testing.T) {
 		require.NotNil(t, apiToken)
 
 		// Verify all permissions
-		assert.True(t, apiToken.CanConfigureServiceMapping)
-		assert.True(t, apiToken.CanConfigureEumApplications)
-		assert.True(t, apiToken.CanConfigureMobileAppMonitoring)
-		assert.True(t, apiToken.CanConfigureUsers)
-		assert.True(t, apiToken.CanInstallNewAgents)
-		assert.True(t, apiToken.CanConfigureIntegrations)
 		assert.True(t, apiToken.CanConfigureEventsAndAlerts)
 		assert.True(t, apiToken.CanConfigureMaintenanceWindows)
 		assert.True(t, apiToken.CanConfigureApplicationSmartAlerts)
 		assert.True(t, apiToken.CanConfigureWebsiteSmartAlerts)
 		assert.True(t, apiToken.CanConfigureMobileAppSmartAlerts)
-		assert.True(t, apiToken.CanConfigureAPITokens)
-		assert.True(t, apiToken.CanConfigureAgentRunMode)
-		assert.True(t, apiToken.CanViewAuditLog)
-		assert.True(t, apiToken.CanConfigureAgents)
-		assert.True(t, apiToken.CanConfigureAuthenticationMethods)
-		assert.True(t, apiToken.CanConfigureApplications)
-		assert.True(t, apiToken.CanConfigureTeams)
-		assert.True(t, apiToken.CanConfigureReleases)
-		assert.True(t, apiToken.CanConfigureLogManagement)
-		assert.True(t, apiToken.CanCreatePublicCustomDashboards)
-		assert.True(t, apiToken.CanViewLogs)
 		assert.True(t, apiToken.CanViewTraceDetails)
 
 		// Verify scope limitations
@@ -401,8 +353,6 @@ func TestRoundTripConversion(t *testing.T) {
 		assert.Equal(t, originalAPIToken.Name, convertedAPIToken.Name)
 		assert.Equal(t, originalAPIToken.AccessGrantingToken, convertedAPIToken.AccessGrantingToken)
 		assert.Equal(t, originalAPIToken.InternalID, convertedAPIToken.InternalID)
-		assert.Equal(t, originalAPIToken.CanConfigureServiceMapping, convertedAPIToken.CanConfigureServiceMapping)
-		assert.Equal(t, originalAPIToken.CanConfigureUsers, convertedAPIToken.CanConfigureUsers)
 		assert.Equal(t, originalAPIToken.LimitedApplicationsScope, convertedAPIToken.LimitedApplicationsScope)
 		assert.Equal(t, originalAPIToken.CanConfigurePersonalAPITokens, convertedAPIToken.CanConfigurePersonalAPITokens)
 	})
@@ -449,9 +399,6 @@ func TestEdgeCases(t *testing.T) {
 		require.False(t, diags.HasError())
 
 		// Verify all permissions are false
-		assert.False(t, model.CanConfigureServiceMapping.ValueBool())
-		assert.False(t, model.CanConfigureUsers.ValueBool())
-		assert.False(t, model.CanInstallNewAgents.ValueBool())
 		assert.False(t, model.LimitedApplicationsScope.ValueBool())
 	})
 }
@@ -492,28 +439,11 @@ func createFullyPermissionedAPIToken() *api.APIToken {
 		AccessGrantingToken:                       "test-access-token",
 		InternalID:                                "test-internal-id",
 		Name:                                      "test-token",
-		CanConfigureServiceMapping:                true,
-		CanConfigureEumApplications:               true,
-		CanConfigureMobileAppMonitoring:           true,
-		CanConfigureUsers:                         true,
-		CanInstallNewAgents:                       true,
-		CanConfigureIntegrations:                  true,
 		CanConfigureEventsAndAlerts:               true,
 		CanConfigureMaintenanceWindows:            true,
 		CanConfigureApplicationSmartAlerts:        true,
 		CanConfigureWebsiteSmartAlerts:            true,
 		CanConfigureMobileAppSmartAlerts:          true,
-		CanConfigureAPITokens:                     true,
-		CanConfigureAgentRunMode:                  true,
-		CanViewAuditLog:                           true,
-		CanConfigureAgents:                        true,
-		CanConfigureAuthenticationMethods:         true,
-		CanConfigureApplications:                  true,
-		CanConfigureTeams:                         true,
-		CanConfigureReleases:                      true,
-		CanConfigureLogManagement:                 true,
-		CanCreatePublicCustomDashboards:           true,
-		CanViewLogs:                               true,
 		CanViewTraceDetails:                       true,
 		CanConfigureSessionSettings:               true,
 		CanConfigureGlobalAlertPayload:            true,
@@ -586,28 +516,11 @@ func createFullyPermissionedModel() APITokenModel {
 		AccessGrantingToken:                       types.StringValue("test-access-token"),
 		InternalID:                                types.StringValue("test-internal-id"),
 		Name:                                      types.StringValue("test-token"),
-		CanConfigureServiceMapping:                types.BoolValue(true),
-		CanConfigureEumApplications:               types.BoolValue(true),
-		CanConfigureMobileAppMonitoring:           types.BoolValue(true),
-		CanConfigureUsers:                         types.BoolValue(true),
-		CanInstallNewAgents:                       types.BoolValue(true),
-		CanConfigureIntegrations:                  types.BoolValue(true),
 		CanConfigureEventsAndAlerts:               types.BoolValue(true),
 		CanConfigureMaintenanceWindows:            types.BoolValue(true),
 		CanConfigureApplicationSmartAlerts:        types.BoolValue(true),
 		CanConfigureWebsiteSmartAlerts:            types.BoolValue(true),
 		CanConfigureMobileAppSmartAlerts:          types.BoolValue(true),
-		CanConfigureAPITokens:                     types.BoolValue(true),
-		CanConfigureAgentRunMode:                  types.BoolValue(true),
-		CanViewAuditLog:                           types.BoolValue(true),
-		CanConfigureAgents:                        types.BoolValue(true),
-		CanConfigureAuthenticationMethods:         types.BoolValue(true),
-		CanConfigureApplications:                  types.BoolValue(true),
-		CanConfigureTeams:                         types.BoolValue(true),
-		CanConfigureReleases:                      types.BoolValue(true),
-		CanConfigureLogManagement:                 types.BoolValue(true),
-		CanCreatePublicCustomDashboards:           types.BoolValue(true),
-		CanViewLogs:                               types.BoolValue(true),
 		CanViewTraceDetails:                       types.BoolValue(true),
 		CanConfigureSessionSettings:               types.BoolValue(true),
 		CanConfigureGlobalAlertPayload:            types.BoolValue(true),
