@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/instana/instana-go-client/api"
 	"github.com/instana/instana-go-client/client"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 )
@@ -34,24 +35,24 @@ func (d *RbacRoleDataSource) Metadata(_ context.Context, req datasource.Metadata
 }
 
 func (d *RbacRoleDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-       resp.Schema = schema.Schema{
-	       Description: RbacRoleDescDataSource,
-	       Attributes: map[string]schema.Attribute{
-		       RbacRoleDataSourceFieldID: schema.StringAttribute{
-			       Description: "ID of the RBAC Role.",
-			       Required:    true,
+	       resp.Schema = schema.Schema{
+		       Description: RbacRoleDescDataSource,
+		       Attributes: map[string]schema.Attribute{
+			       RbacRoleDataSourceFieldID: schema.StringAttribute{
+				       Description: "ID of the RBAC Role.",
+				       Optional:    true,
+			       },
+			       "name": schema.StringAttribute{
+				       Description: "Name of the RBAC Role.",
+				       Optional:    true,
+			       },
+			       "permissions": schema.SetAttribute{
+				       Description: "Permissions assigned to the RBAC Role.",
+				       Computed:    true,
+				       ElementType: types.StringType,
+			       },
 		       },
-		       "name": schema.StringAttribute{
-			       Description: "Name of the RBAC Role.",
-			       Computed:    true,
-		       },
-		       "permissions": schema.SetAttribute{
-			       Description: "Permissions assigned to the RBAC Role.",
-			       Computed:    true,
-			       ElementType: types.StringType,
-		       },
-	       },
-       }
+	       }
 }
 
 func (d *RbacRoleDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -72,34 +73,56 @@ func (d *RbacRoleDataSource) Configure(_ context.Context, req datasource.Configu
 }
 
 func (d *RbacRoleDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-       var data RbacRoleDataSourceModel
-       resp.Diagnostics.Append(req.Config.Get(ctx, &data)...) // Read config into data
-       if resp.Diagnostics.HasError() {
-	       return
-       }
+	       var data RbacRoleDataSourceModel
+	       resp.Diagnostics.Append(req.Config.Get(ctx, &data)...) // Read config into data
+	       if resp.Diagnostics.HasError() {
+		       return
+	       }
 
-       id := data.ID.ValueString()
-       if id == "" {
-	       resp.Diagnostics.AddError("Missing ID", "The 'id' attribute must be set.")
-	       return
-       }
+	       id := data.ID.ValueString()
+	       name := data.Name.ValueString()
+	       if id == "" && name == "" {
+		       resp.Diagnostics.AddError("Missing Attribute", "Either 'id' or 'name' must be set.")
+		       return
+	       }
 
-       role, err := d.instanaAPI.Roles().GetOne(id)
-       if err != nil {
-	       resp.Diagnostics.AddError("Error reading RBAC Role", fmt.Sprintf("Could not read RBAC Role with ID '%s': %s", id, err))
-	       return
-       }
-       if role == nil {
-	       resp.Diagnostics.AddError("Not found", fmt.Sprintf("No RBAC Role found with ID '%s'", id))
-	       return
-       }
+		var role *api.Role
+	       var err error
+	       if id != "" {
+		       role, err = d.instanaAPI.Roles().GetOne(id)
+		       if err != nil {
+			       resp.Diagnostics.AddError("Error reading RBAC Role", fmt.Sprintf("Could not read RBAC Role with ID '%s': %s", id, err))
+			       return
+		       }
+		       if role == nil {
+			       resp.Diagnostics.AddError("Not found", fmt.Sprintf("No RBAC Role found with ID '%s'", id))
+			       return
+		       }
+	       } else {
+		       // Fetch all roles and match by name
+		       roles, err := d.instanaAPI.Roles().GetAll()
+		       if err != nil {
+			       resp.Diagnostics.AddError("Error reading RBAC Roles", fmt.Sprintf("Could not read RBAC Roles: %s", err))
+			       return
+		       }
+		       for _, r := range *roles {
+			       if r.Name == name {
+				       role = r
+				       break
+			       }
+		       }
+		       if role == nil {
+			       resp.Diagnostics.AddError("Not found", fmt.Sprintf("No RBAC Role found with name '%s'", name))
+			       return
+		       }
+	       }
 
-       data.ID = types.StringValue(role.ID)
-       data.Name = types.StringValue(role.Name)
-       data.Permissions = make([]types.String, len(role.Permissions))
-       for i, p := range role.Permissions {
-	       data.Permissions[i] = types.StringValue(p)
-       }
+	       data.ID = types.StringValue(role.ID)
+	       data.Name = types.StringValue(role.Name)
+	       data.Permissions = make([]types.String, len(role.Permissions))
+	       for i, p := range role.Permissions {
+		       data.Permissions[i] = types.StringValue(p)
+	       }
 
-       resp.Diagnostics.Append(resp.State.Set(ctx, &data)...) 
+	       resp.Diagnostics.Append(resp.State.Set(ctx, &data)...) 
 }
