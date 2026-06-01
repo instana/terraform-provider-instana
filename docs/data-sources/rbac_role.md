@@ -21,10 +21,8 @@ data "instana_rbac_role" "by_name" {
 
 ## Argument Reference
 
-- `id` (Optional) - The ID of the RBAC Role. If both `id` and `name` are provided, `id` is used.
-- `name` (Optional) - The name of the RBAC Role. Used if `id` is not set.
-
-At least one of `id` or `name` must be specified.
+- `id` (Optional) - The ID of the RBAC Role. Exactly one of `id` or `name` must be specified.
+- `name` (Optional) - The name of the RBAC Role. Exactly one of `id` or `name` must be specified.
 
 ## Attribute Reference
 

@@ -30,12 +30,8 @@ func TestRbacRoleDataSourceSchema(t *testing.T) {
 	require.Equal(t, RbacRoleDescDataSource, resp.Schema.Description)
 	_, ok := resp.Schema.Attributes[RbacRoleDataSourceFieldID]
 	require.True(t, ok)
-	_, ok = resp.Schema.Attributes["name"]
+	_, ok = resp.Schema.Attributes[RbacRoleDataSourceFieldName]
+	require.True(t, ok)
+	_, ok = resp.Schema.Attributes[RbacRoleDataSourceFieldPermissions]
 	require.True(t, ok)
 }
-
-// Additional tests for Read logic would go here, using a mock InstanaAPI.
-// Example (pseudo):
-// func TestRbacRoleDataSourceRead_ByID(t *testing.T) { ... }
-// func TestRbacRoleDataSourceRead_ByName(t *testing.T) { ... }
-// func TestRbacRoleDataSourceRead_ErrorCases(t *testing.T) { ... }
