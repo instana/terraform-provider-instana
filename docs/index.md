@@ -56,6 +56,7 @@ resource.
   * Custom Event Specifications - `instana_custom_event_spec`
 * Host Agent - `instana_host_agents`
 * Settings
+  * RBAC Role - `instana_rbac_role`
   * User - `instana_user`
 * Synthetic Settings
   * Synthetic Location - `instana_synthetic_location`
