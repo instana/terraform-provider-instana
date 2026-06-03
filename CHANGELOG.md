@@ -1,4 +1,16 @@
 # Changelog
+## [v7.1.0](https://github.com/instana/terraform-provider-instana/tree/v7.1.0) (2026-06-03)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.0.1...v7.1.0)
+
+**Implemented enhancements:**
+
+- Added new data source for retrieving Instana RBAC roles
+
+**Merged pull requests:**
+
+- Add RBAC roles data source [\#85](https://github.com/instana/terraform-provider-instana/pull/85) ([nicoleyson](https://github.com/nicoleyson))
+
 
 ## [v7.0.1](https://github.com/instana/terraform-provider-instana/tree/v7.0.1) (2026-05-21)
 
