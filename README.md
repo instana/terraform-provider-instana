@@ -36,6 +36,17 @@ A comprehensive reference setup example is available to help you get started wit
 
 For detailed setup instructions and usage, see the [Reference Setup README](./examples/reference-setup/README.md).
 
+## Instana Modules
+
+The following Terraform modules are available to simplify the deployment and management of Instana agents on AWS infrastructure:
+
+| Module Name | Description | Terraform Registry | GitHub Repository |
+|-------------|-------------|-------------------|-------------------|
+| **instana-ec2-agent** | Terraform module for deploying Instana agents on AWS EC2 instances | [View on Registry](https://registry.terraform.io/modules/instana/instana-ec2-agent/aws/latest) | [View on GitHub](https://github.com/instana/terraform-aws-instana-ec2-agent) |
+| **instana-ecs-agent** | Terraform module for deploying Instana agents on AWS ECS clusters | [View on Registry](https://registry.terraform.io/modules/instana/instana-ecs-agent/aws/latest) | [View on GitHub](https://github.com/instana/terraform-aws-instana-ecs-agent) |
+
+---
+
 ---
 
 ## Migration Guide
