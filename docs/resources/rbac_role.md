@@ -285,14 +285,11 @@ The following permissions can be assigned to roles:
 * `CAN_CONFIGURE_SUBTRACES` - Configure subtraces
 * `CAN_CONFIGURE_LLM` - Configure LLM
 * `CAN_CONFIGURE_LLM_MODEL_PRICE` - Configure LLM model price
-* `CAN_CONFIGURE_AI_AGENTS` - Configure AI agents
 
 ### Service Level & BizOps Permissions
 * `CAN_CONFIGURE_SERVICE_LEVELS` - Configure service levels
 * `CAN_CONFIGURE_SERVICE_LEVEL_CORRECTION_WINDOWS` - Configure service level correction windows
 * `CAN_VIEW_BUSINESS_PROCESS_DETAILS` - View business process details
-* `CAN_VIEW_BUSINESS_PROCESSES` - View business processes
-* `CAN_VIEW_BUSINESS_ACTIVITIES` - View business activities
 * `CAN_VIEW_BIZOPS_ALERTS` - View BizOps alerts
 * `CAN_CONFIGURE_BIZOPS` - Configure BizOps
 
@@ -327,7 +324,6 @@ The following permissions can be assigned to roles:
 * `LIMITED_BIZOPS_SCOPE` - Limited BizOps scope
 * `LIMITED_PHMC_SCOPE` - Limited PHMC scope
 * `LIMITED_GEN_AI_SCOPE` - Limited Gen AI scope
-* `LIMITED_GEN_AI_CAPABILITIES_SCOPE` - Limited Gen AI capabilities scope
 * `LIMITED_INFRASTRUCTURE_SCOPE` - Limited infrastructure scope
 * `LIMITED_NUTANIX_SCOPE` - Limited Nutanix scope
 * `LIMITED_WINDOWS_HYPERVISOR_SCOPE` - Limited Windows hypervisor scope

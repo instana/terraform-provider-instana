@@ -213,9 +213,6 @@ terraform apply
   * `CAN_CONFIGURE_WEBSITE_CONVERSIONS` - Configure website conversions
   * `CAN_CONFIGURE_PERSONALLY_IDENTIFIABLE_INFORMATION_MASKING` - Configure personally identifiable information masking
   * `CAN_DOWNLOAD_AGENT_CONFIGURATION` - Download agent configuration
-  * `CAN_CONFIGURE_AI_AGENTS` - Configure AI agents
-  * `CAN_VIEW_BUSINESS_ACTIVITIES` - View business activities
-  * `CAN_VIEW_BUSINESS_PROCESSES` - View business processes
   * `CAN_CONFIGURE_APDEX` - Configure Apdex settings
   * `CAN_CONFIGURE_CUSTOM_ENTITIES` - Configure custom entities
   * `CAN_CONFIGURE_SERVICE_LEVELS` - Configure service levels
