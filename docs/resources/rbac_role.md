@@ -115,8 +115,7 @@ resource "instana_rbac_role" "sre_role" {
     "CAN_CONFIGURE_MAINTENANCE_WINDOWS",
     "CAN_INVOKE_ALERT_CHANNEL",
     "CAN_MANUALLY_CLOSE_ISSUE",
-    "CAN_INSTALL_NEW_AGENTS",
-    "ACCESS_INFRASTRUCTURE_ANALYZE"
+    "CAN_INSTALL_NEW_AGENTS"
   ]
 
   member = [
@@ -222,13 +221,12 @@ The following permissions can be assigned to roles:
 * `CAN_CONFIGURE_SERVICE_MAPPING` - Configure service mapping
 * `CAN_CONFIGURE_APDEX` - Configure Apdex settings
 * `CAN_CONFIGURE_CUSTOM_ENTITIES` - Configure custom entities
-* `ACCESS_APPLICATIONS` - Access applications
 
 ### Agent & Infrastructure Permissions
 * `CAN_CONFIGURE_AGENTS` - Configure agents
 * `CAN_INSTALL_NEW_AGENTS` - Install new agents
 * `CAN_CONFIGURE_AGENT_RUN_MODE` - Configure agent run mode
-* `ACCESS_INFRASTRUCTURE_ANALYZE` - Access infrastructure analyze
+* `CAN_DOWNLOAD_AGENT_CONFIGURATION` - Download agent configuration
 
 ### Monitoring & Observability Permissions
 * `CAN_VIEW_TRACE_DETAILS` - View trace details
@@ -265,9 +263,6 @@ The following permissions can be assigned to roles:
 ### Mobile & Website Monitoring Permissions
 * `CAN_CONFIGURE_MOBILE_APP_MONITORING` - Configure mobile app monitoring
 * `CAN_CONFIGURE_WEBSITE_CONVERSIONS` - Configure website conversions
-* `ACCESS_MOBILE_APPS` - Access mobile apps
-* `ACCESS_WEBSITES` - Access websites
-* `ACCESS_SYNTHETICS` - Access synthetics
 
 ### Dashboard & Visualization Permissions
 * `CAN_EDIT_ALL_ACCESSIBLE_CUSTOM_DASHBOARDS` - Edit all accessible custom dashboards
@@ -280,6 +275,7 @@ The following permissions can be assigned to roles:
 * `CAN_CONFIGURE_API_TOKENS` - Configure API tokens
 * `CAN_CONFIGURE_PERSONAL_API_TOKENS` - Configure personal API tokens
 * `CAN_CONFIGURE_IP_FILTERING` - Configure IP filtering
+* `CAN_CONFIGURE_PERSONALLY_IDENTIFIABLE_INFORMATION_MASKING` - Configure personally identifiable information masking
 
 ### Integration & Configuration Permissions
 * `CAN_CONFIGURE_INTEGRATIONS` - Configure integrations
@@ -288,9 +284,9 @@ The following permissions can be assigned to roles:
 * `CAN_CONFIGURE_DATABASE_MANAGEMENT` - Configure database management
 * `CAN_CONFIGURE_SUBTRACES` - Configure subtraces
 * `CAN_CONFIGURE_LLM` - Configure LLM
+* `CAN_CONFIGURE_LLM_MODEL_PRICE` - Configure LLM model price
 
 ### Service Level & BizOps Permissions
-* `CAN_CONFIGURE_SERVICE_LEVEL_INDICATORS` - Configure service level indicators
 * `CAN_CONFIGURE_SERVICE_LEVELS` - Configure service levels
 * `CAN_CONFIGURE_SERVICE_LEVEL_CORRECTION_WINDOWS` - Configure service level correction windows
 * `CAN_VIEW_BUSINESS_PROCESS_DETAILS` - View business process details

@@ -166,7 +166,6 @@ terraform apply
   * `CAN_CONFIGURE_GLOBAL_ALERT_PAYLOAD` - Configure global alert payload
   * `CAN_CONFIGURE_MOBILE_APP_MONITORING` - Configure mobile app monitoring
   * `CAN_CONFIGURE_API_TOKENS` - Configure API tokens
-  * `CAN_CONFIGURE_SERVICE_LEVEL_INDICATORS` - Configure service level indicators
   * `CAN_CONFIGURE_AUTHENTICATION_METHODS` - Configure authentication methods
   * `CAN_CONFIGURE_RELEASES` - Configure releases
   * `CAN_VIEW_AUDIT_LOG` - View audit log
@@ -191,7 +190,6 @@ terraform apply
   * `CAN_CONFIGURE_DATABASE_MANAGEMENT` - Configure database management
   * `CAN_CONFIGURE_LOG_RETENTION_PERIOD` - Configure log retention period
   * `CAN_CONFIGURE_PERSONAL_API_TOKENS` - Configure personal API tokens
-  * `ACCESS_INFRASTRUCTURE_ANALYZE` - Access infrastructure analyze
   * `CAN_VIEW_LOG_VOLUME` - View log volume
   * `CAN_RUN_AUTOMATION_ACTIONS` - Run automation actions
   * `CAN_VIEW_SYNTHETIC_TEST_RESULTS` - View synthetic test results
@@ -207,9 +205,19 @@ terraform apply
   * `CAN_CONFIGURE_SYNTHETIC_CREDENTIALS` - Configure synthetic credentials
   * `CAN_CONFIGURE_SUBTRACES` - Configure subtraces
   * `CAN_CONFIGURE_LLM` - Configure LLM
+  * `CAN_CONFIGURE_LLM_MODEL_PRICE` - Configure LLM model price
   * `CAN_CONFIGURE_BIZOPS` - Configure BizOps
   * `CAN_CONFIGURE_AUTOMATION_POLICIES` - Configure automation policies
   * `CAN_CONFIGURE_AUTOMATION_ACTIONS` - Configure automation actions
+  * `CAN_CONFIGURE_IP_FILTERING` - Configure IP filtering
+  * `CAN_CONFIGURE_WEBSITE_CONVERSIONS` - Configure website conversions
+  * `CAN_CONFIGURE_PERSONALLY_IDENTIFIABLE_INFORMATION_MASKING` - Configure personally identifiable information masking
+  * `CAN_DOWNLOAD_AGENT_CONFIGURATION` - Download agent configuration
+  * `CAN_CONFIGURE_APDEX` - Configure Apdex settings
+  * `CAN_CONFIGURE_CUSTOM_ENTITIES` - Configure custom entities
+  * `CAN_CONFIGURE_SERVICE_LEVELS` - Configure service levels
+  * `CAN_CONFIGURE_SERVICE_LEVEL_CORRECTION_WINDOWS` - Configure service level correction windows
+  * `CAN_CONFIGURE_SERVICE_LEVEL_SMART_ALERTS` - Configure service level smart alerts
 
 ### Member Reference
 
