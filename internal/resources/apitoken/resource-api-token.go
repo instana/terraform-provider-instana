@@ -18,22 +18,66 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/util"
 )
 
-// NewAPITokenResourceHandle creates the resource handle for API Tokens
+// RequireTrueIfOtherTruePlanModifier enforces that a bool attribute must be true if another field is true
+type RequireTrueIfOtherTruePlanModifier struct {
+	Field      string
+	OtherField string
+}
+
+func (m RequireTrueIfOtherTruePlanModifier) Description(_ context.Context) string {
+       return m.Field + " must be true if " + m.OtherField + " is true."
+}
+
+func (m RequireTrueIfOtherTruePlanModifier) MarkdownDescription(_ context.Context) string {
+       return m.Description(context.Background())
+}
+
+func (m RequireTrueIfOtherTruePlanModifier) PlanModifyBool(ctx context.Context, req planmodifier.BoolRequest, resp *planmodifier.BoolResponse) {
+       // If the plan is unknown, skip
+       if req.PlanValue.IsUnknown() {
+	       return
+       }
+       // Find the value of the other field in the config
+       if req.ConfigValue.IsUnknown() {
+	       return
+       }
+       // The config is the parent object, so we need to get the other field from the config object
+       // If not available, skip
+       var otherVal types.Bool
+       diags := req.Config.GetAttribute(ctx, path.Root(m.OtherField), &otherVal)
+       if diags.HasError() {
+	       return
+       }
+       // If the other field is true, this field must be true
+       if !otherVal.IsNull() && otherVal.ValueBool() {
+	       if !req.PlanValue.ValueBool() {
+		       resp.Diagnostics.AddError(
+			       m.Field+" must be true if "+m.OtherField+" is true",
+			       "The Instana backend will always set '"+m.Field+"' to true if '"+m.OtherField+"' is true. Setting this to false is not allowed and will cause the plan to fail.",
+		       )
+	       }
+       }
+}
+
+// apiTokenResource implements ResourceHandle for API tokens
+// This struct is required for method receivers below.
+type apiTokenResource struct {
+	metaData resourcehandle.ResourceMetaData
+}
+
 func NewAPITokenResourceHandle() resourcehandle.ResourceHandle[*restapi.APIToken] {
-	internalIDFieldName := APITokenFieldInternalID
-	return &apiTokenResource{
-		metaData: resourcehandle.ResourceMetaData{
-			ResourceName: ResourceInstanaAPIToken,
-			Schema: schema.Schema{
-				Description: APITokenDescResource,
-				Attributes: map[string]schema.Attribute{
-					APITokenFieldID: schema.StringAttribute{
-						Computed:    true,
-						Description: APITokenDescID,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
-					},
+	       return &apiTokenResource{
+		       metaData: resourcehandle.ResourceMetaData{
+			       ResourceName: ResourceInstanaAPIToken,
+			       SchemaVersion: 3,
+			       Schema: schema.Schema{
+				       Description: APITokenDescResource,
+				       Attributes: map[string]schema.Attribute{
+					       APITokenFieldID: schema.StringAttribute{
+						       Computed:    true,
+						       Description: APITokenDescID,
+						       PlanModifiers: []planmodifier.String{},
+					       },
 					APITokenFieldAccessGrantingToken: schema.StringAttribute{
 						Computed:    true,
 						Description: APITokenDescAccessGrantingToken,
@@ -51,36 +95,6 @@ func NewAPITokenResourceHandle() resourcehandle.ResourceHandle[*restapi.APIToken
 					APITokenFieldName: schema.StringAttribute{
 						Required:    true,
 						Description: APITokenDescName,
-					},
-					APITokenFieldCanConfigureServiceMapping: schema.BoolAttribute{
-						Optional:    true,
-						Computed:    true,
-						Description: APITokenDescCanConfigureServiceMapping,
-					},
-					APITokenFieldCanConfigureEumApplications: schema.BoolAttribute{
-						Optional:    true,
-						Computed:    true,
-						Description: APITokenDescCanConfigureEumApplications,
-					},
-					APITokenFieldCanConfigureMobileAppMonitoring: schema.BoolAttribute{
-						Optional:    true,
-						Computed:    true,
-						Description: APITokenDescCanConfigureMobileAppMonitoring,
-					},
-					APITokenFieldCanConfigureUsers: schema.BoolAttribute{
-						Optional:    true,
-						Computed:    true,
-						Description: APITokenDescCanConfigureUsers,
-					},
-					APITokenFieldCanInstallNewAgents: schema.BoolAttribute{
-						Optional:    true,
-						Computed:    true,
-						Description: APITokenDescCanInstallNewAgents,
-					},
-					APITokenFieldCanConfigureIntegrations: schema.BoolAttribute{
-						Optional:    true,
-						Computed:    true,
-						Description: APITokenDescCanConfigureIntegrations,
 					},
 					APITokenFieldCanConfigureEventsAndAlerts: schema.BoolAttribute{
 						Optional:    true,
@@ -107,60 +121,20 @@ func NewAPITokenResourceHandle() resourcehandle.ResourceHandle[*restapi.APIToken
 						Computed:    true,
 						Description: APITokenDescCanConfigureMobileAppSmartAlerts,
 					},
-					APITokenFieldCanConfigureAPITokens: schema.BoolAttribute{
+					APITokenFieldCanConfigureServiceLevelCorrectionWindows: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Description: APITokenDescCanConfigureAPITokens,
+						Description: APITokenDescCanConfigureServiceLevelCorrectionWindows,
 					},
-					APITokenFieldCanConfigureAgentRunMode: schema.BoolAttribute{
+					APITokenFieldCanConfigureServiceLevelSmartAlerts: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Description: APITokenDescCanConfigureAgentRunMode,
+						Description: APITokenDescCanConfigureServiceLevelSmartAlerts,
 					},
-					APITokenFieldCanViewAuditLog: schema.BoolAttribute{
+					APITokenFieldCanConfigureServiceLevels: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
-						Description: APITokenDescCanViewAuditLog,
-					},
-					APITokenFieldCanConfigureAgents: schema.BoolAttribute{
-						Optional:    true,
-						Computed:    true,
-						Description: APITokenDescCanConfigureAgents,
-					},
-					APITokenFieldCanConfigureAuthenticationMethods: schema.BoolAttribute{
-						Optional:    true,
-						Computed:    true,
-						Description: APITokenDescCanConfigureAuthenticationMethods,
-					},
-					APITokenFieldCanConfigureApplications: schema.BoolAttribute{
-						Optional:    true,
-						Computed:    true,
-						Description: APITokenDescCanConfigureApplications,
-					},
-					APITokenFieldCanConfigureTeams: schema.BoolAttribute{
-						Optional:    true,
-						Computed:    true,
-						Description: APITokenDescCanConfigureTeams,
-					},
-					APITokenFieldCanConfigureReleases: schema.BoolAttribute{
-						Optional:    true,
-						Computed:    true,
-						Description: APITokenDescCanConfigureReleases,
-					},
-					APITokenFieldCanConfigureLogManagement: schema.BoolAttribute{
-						Optional:    true,
-						Computed:    true,
-						Description: APITokenDescCanConfigureLogManagement,
-					},
-					APITokenFieldCanCreatePublicCustomDashboards: schema.BoolAttribute{
-						Optional:    true,
-						Computed:    true,
-						Description: APITokenDescCanCreatePublicCustomDashboards,
-					},
-					APITokenFieldCanViewLogs: schema.BoolAttribute{
-						Optional:    true,
-						Computed:    true,
-						Description: APITokenDescCanViewLogs,
+						Description: APITokenDescCanConfigureServiceLevels,
 					},
 					APITokenFieldCanViewTraceDetails: schema.BoolAttribute{
 						Optional:    true,
@@ -304,11 +278,14 @@ func NewAPITokenResourceHandle() resourcehandle.ResourceHandle[*restapi.APIToken
 						Computed:    true,
 						Description: APITokenDescLimitedAlertChannelsScope,
 					},
-					APITokenFieldLimitedLinuxKvmHypervisorScope: schema.BoolAttribute{
-						Optional:    true,
-						Computed:    true,
-						Description: APITokenDescLimitedLinuxKvmHypervisorScope,
-					},
+					   APITokenFieldLimitedLinuxKvmHypervisorScope: schema.BoolAttribute{
+						   Optional:    true,
+						   Computed:    true,
+						   Description: APITokenDescLimitedLinuxKvmHypervisorScope,
+						   PlanModifiers: []planmodifier.Bool{
+							   AlwaysFalseAPITokenPlanModifier{Field: APITokenFieldLimitedLinuxKvmHypervisorScope},
+						   },
+					   },
 					APITokenFieldLimitedServiceLevelScope: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
@@ -325,6 +302,9 @@ func NewAPITokenResourceHandle() resourcehandle.ResourceHandle[*restapi.APIToken
 						Optional:    true,
 						Computed:    true,
 						Description: APITokenDescCanConfigurePersonalAPITokens,
+						PlanModifiers: []planmodifier.Bool{
+							AlwaysFalseAPITokenPlanModifier{Field: APITokenFieldCanConfigurePersonalAPITokens},
+						},
 					},
 					APITokenFieldCanConfigureDatabaseManagement: schema.BoolAttribute{
 						Optional:    true,
@@ -370,7 +350,14 @@ func NewAPITokenResourceHandle() resourcehandle.ResourceHandle[*restapi.APIToken
 						Optional:    true,
 						Computed:    true,
 						Description: APITokenDescCanViewSyntheticTests,
+						PlanModifiers: []planmodifier.Bool{
+							RequireTrueIfOtherTruePlanModifier{
+								Field: APITokenFieldCanViewSyntheticTests,
+								OtherField: APITokenFieldCanConfigureSyntheticTests,
+							},
+						},
 					},
+				// ...existing code...
 					APITokenFieldCanViewSyntheticLocations: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
@@ -461,41 +448,15 @@ func NewAPITokenResourceHandle() resourcehandle.ResourceHandle[*restapi.APIToken
 						Computed:    true,
 						Description: APITokenDescCanConfigureAiAgents,
 					},
-					APITokenFieldCanConfigureApdex: schema.BoolAttribute{
-						Optional:    true,
-						Computed:    true,
-						Description: APITokenDescCanConfigureApdex,
-					},
-					APITokenFieldCanConfigureServiceLevelCorrectionWindows: schema.BoolAttribute{
-						Optional:    true,
-						Computed:    true,
-						Description: APITokenDescCanConfigureServiceLevelCorrectionWindows,
-					},
-					APITokenFieldCanConfigureServiceLevelSmartAlerts: schema.BoolAttribute{
-						Optional:    true,
-						Computed:    true,
-						Description: APITokenDescCanConfigureServiceLevelSmartAlerts,
-					},
-					APITokenFieldCanConfigureServiceLevels: schema.BoolAttribute{
-						Optional:    true,
-						Computed:    true,
-						Description: APITokenDescCanConfigureServiceLevels,
-					},
-				},
-			},
-			SkipIDGeneration: true,
-			SchemaVersion:    3,
-			ResourceIDField:  &internalIDFieldName,
-		},
-	}
-}
-
-// ============================================================================
-// Resource Implementation
-// ============================================================================
-
-type apiTokenResource struct {
-	metaData resourcehandle.ResourceMetaData
+					  APITokenFieldCanConfigureApdex: schema.BoolAttribute{
+						  Optional:    true,
+						  Computed:    true,
+						  Description: APITokenDescCanConfigureApdex,
+					  },
+				  },
+			  },
+		  },
+	  }
 }
 
 // MetaData returns the resource metadata
@@ -545,28 +506,11 @@ func (r *apiTokenResource) UpdateState(ctx context.Context, state *tfsdk.State, 
 
 // mapPermissionsToModel maps basic permissions from API to model
 func (r *apiTokenResource) mapPermissionsToModel(apiToken *restapi.APIToken, model *APITokenModel) {
-	model.CanConfigureServiceMapping = types.BoolValue(apiToken.CanConfigureServiceMapping)
-	model.CanConfigureEumApplications = types.BoolValue(apiToken.CanConfigureEumApplications)
-	model.CanConfigureMobileAppMonitoring = types.BoolValue(apiToken.CanConfigureMobileAppMonitoring)
-	model.CanConfigureUsers = types.BoolValue(apiToken.CanConfigureUsers)
-	model.CanInstallNewAgents = types.BoolValue(apiToken.CanInstallNewAgents)
-	model.CanConfigureIntegrations = types.BoolValue(apiToken.CanConfigureIntegrations)
 	model.CanConfigureEventsAndAlerts = types.BoolValue(apiToken.CanConfigureEventsAndAlerts)
 	model.CanConfigureMaintenanceWindows = types.BoolValue(apiToken.CanConfigureMaintenanceWindows)
 	model.CanConfigureApplicationSmartAlerts = types.BoolValue(apiToken.CanConfigureApplicationSmartAlerts)
 	model.CanConfigureWebsiteSmartAlerts = types.BoolValue(apiToken.CanConfigureWebsiteSmartAlerts)
 	model.CanConfigureMobileAppSmartAlerts = types.BoolValue(apiToken.CanConfigureMobileAppSmartAlerts)
-	model.CanConfigureAPITokens = types.BoolValue(apiToken.CanConfigureAPITokens)
-	model.CanConfigureAgentRunMode = types.BoolValue(apiToken.CanConfigureAgentRunMode)
-	model.CanViewAuditLog = types.BoolValue(apiToken.CanViewAuditLog)
-	model.CanConfigureAgents = types.BoolValue(apiToken.CanConfigureAgents)
-	model.CanConfigureAuthenticationMethods = types.BoolValue(apiToken.CanConfigureAuthenticationMethods)
-	model.CanConfigureApplications = types.BoolValue(apiToken.CanConfigureApplications)
-	model.CanConfigureTeams = types.BoolValue(apiToken.CanConfigureTeams)
-	model.CanConfigureReleases = types.BoolValue(apiToken.CanConfigureReleases)
-	model.CanConfigureLogManagement = types.BoolValue(apiToken.CanConfigureLogManagement)
-	model.CanCreatePublicCustomDashboards = types.BoolValue(apiToken.CanCreatePublicCustomDashboards)
-	model.CanViewLogs = types.BoolValue(apiToken.CanViewLogs)
 	model.CanViewTraceDetails = types.BoolValue(apiToken.CanViewTraceDetails)
 	model.CanConfigureSessionSettings = types.BoolValue(apiToken.CanConfigureSessionSettings)
 	model.CanConfigureGlobalAlertPayload = types.BoolValue(apiToken.CanConfigureGlobalAlertPayload)
@@ -688,28 +632,11 @@ func (r *apiTokenResource) getAPITokenModelFromPlanOrState(ctx context.Context, 
 
 // mapPermissionsFromModel maps basic permissions from model to API object
 func (r *apiTokenResource) mapPermissionsFromModel(model APITokenModel, apiToken *restapi.APIToken) {
-	apiToken.CanConfigureServiceMapping = model.CanConfigureServiceMapping.ValueBool()
-	apiToken.CanConfigureEumApplications = model.CanConfigureEumApplications.ValueBool()
-	apiToken.CanConfigureMobileAppMonitoring = model.CanConfigureMobileAppMonitoring.ValueBool()
-	apiToken.CanConfigureUsers = model.CanConfigureUsers.ValueBool()
-	apiToken.CanInstallNewAgents = model.CanInstallNewAgents.ValueBool()
-	apiToken.CanConfigureIntegrations = model.CanConfigureIntegrations.ValueBool()
 	apiToken.CanConfigureEventsAndAlerts = model.CanConfigureEventsAndAlerts.ValueBool()
 	apiToken.CanConfigureMaintenanceWindows = model.CanConfigureMaintenanceWindows.ValueBool()
 	apiToken.CanConfigureApplicationSmartAlerts = model.CanConfigureApplicationSmartAlerts.ValueBool()
 	apiToken.CanConfigureWebsiteSmartAlerts = model.CanConfigureWebsiteSmartAlerts.ValueBool()
 	apiToken.CanConfigureMobileAppSmartAlerts = model.CanConfigureMobileAppSmartAlerts.ValueBool()
-	apiToken.CanConfigureAPITokens = model.CanConfigureAPITokens.ValueBool()
-	apiToken.CanConfigureAgentRunMode = model.CanConfigureAgentRunMode.ValueBool()
-	apiToken.CanViewAuditLog = model.CanViewAuditLog.ValueBool()
-	apiToken.CanConfigureAgents = model.CanConfigureAgents.ValueBool()
-	apiToken.CanConfigureAuthenticationMethods = model.CanConfigureAuthenticationMethods.ValueBool()
-	apiToken.CanConfigureApplications = model.CanConfigureApplications.ValueBool()
-	apiToken.CanConfigureTeams = model.CanConfigureTeams.ValueBool()
-	apiToken.CanConfigureReleases = model.CanConfigureReleases.ValueBool()
-	apiToken.CanConfigureLogManagement = model.CanConfigureLogManagement.ValueBool()
-	apiToken.CanCreatePublicCustomDashboards = model.CanCreatePublicCustomDashboards.ValueBool()
-	apiToken.CanViewLogs = model.CanViewLogs.ValueBool()
 	apiToken.CanViewTraceDetails = model.CanViewTraceDetails.ValueBool()
 	apiToken.CanConfigureSessionSettings = model.CanConfigureSessionSettings.ValueBool()
 	apiToken.CanConfigureGlobalAlertPayload = model.CanConfigureGlobalAlertPayload.ValueBool()
@@ -789,3 +716,28 @@ func (r *apiTokenResource) GetStateUpgraders(ctx context.Context) map[int64]reso
 		2: resourcehandle.CreateStateUpgraderForVersion(2),
 	}
 }
+
+// --- Plan Modifiers for backend-normalized permissions ---
+
+// AlwaysFalseAPITokenPlanModifier normalizes a bool attribute to false and emits a warning if user tries to set true
+type AlwaysFalseAPITokenPlanModifier struct {
+       Field string
+}
+
+func (m AlwaysFalseAPITokenPlanModifier) Description(_ context.Context) string {
+       return m.Field + " is always false for API tokens. The value will be normalized to false."
+}
+
+func (m AlwaysFalseAPITokenPlanModifier) MarkdownDescription(_ context.Context) string {
+       return m.Description(context.Background())
+}
+
+func (m AlwaysFalseAPITokenPlanModifier) PlanModifyBool(ctx context.Context, req planmodifier.BoolRequest, resp *planmodifier.BoolResponse) {
+       if req.PlanValue.ValueBool() {
+	       resp.Diagnostics.AddError(
+		       m.Field+" cannot be set to true for API tokens",
+		       "The Instana backend will always set '"+m.Field+"' to false for API tokens. Setting this to true is not allowed and will cause the plan to fail.",
+	       )
+       }
+}
+
