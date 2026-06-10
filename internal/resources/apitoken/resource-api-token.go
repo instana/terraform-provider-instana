@@ -2,6 +2,7 @@ package apitoken
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -9,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	restapi "github.com/instana/instana-go-client/api"
@@ -308,6 +310,9 @@ func NewAPITokenResourceHandle() resourcehandle.ResourceHandle[*restapi.APIToken
 						Optional:    true,
 						Computed:    true,
 						Description: APITokenDescLimitedLinuxKvmHypervisorScope,
+						Validators: []validator.Bool{
+							FalseOnlyValidator{},
+						},
 					},
 					APITokenFieldLimitedServiceLevelScope: schema.BoolAttribute{
 						Optional:    true,
@@ -325,6 +330,9 @@ func NewAPITokenResourceHandle() resourcehandle.ResourceHandle[*restapi.APIToken
 						Optional:    true,
 						Computed:    true,
 						Description: APITokenDescCanConfigurePersonalAPITokens,
+						Validators: []validator.Bool{
+							FalseOnlyValidator{},
+						},
 					},
 					APITokenFieldCanConfigureDatabaseManagement: schema.BoolAttribute{
 						Optional:    true,
@@ -370,21 +378,50 @@ func NewAPITokenResourceHandle() resourcehandle.ResourceHandle[*restapi.APIToken
 						Optional:    true,
 						Computed:    true,
 						Description: APITokenDescCanViewSyntheticTests,
+						Validators: []validator.Bool{
+							ViewPermissionValidator{
+								RequiredBy: []string{
+									APITokenFieldCanConfigureSyntheticTests,
+								},
+							},
+						},
 					},
 					APITokenFieldCanViewSyntheticLocations: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
 						Description: APITokenDescCanViewSyntheticLocations,
+						Validators: []validator.Bool{
+							ViewPermissionValidator{
+								RequiredBy: []string{
+									APITokenFieldCanConfigureSyntheticLocations,
+									APITokenFieldCanConfigureSyntheticTests,
+								},
+							},
+						},
 					},
 					APITokenFieldCanViewSyntheticTestResults: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
 						Description: APITokenDescCanViewSyntheticTestResults,
+						Validators: []validator.Bool{
+							ViewPermissionValidator{
+								RequiredBy: []string{
+									APITokenFieldCanConfigureSyntheticTests,
+								},
+							},
+						},
 					},
 					APITokenFieldCanUseSyntheticCredentials: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
 						Description: APITokenDescCanUseSyntheticCredentials,
+						Validators: []validator.Bool{
+							ViewPermissionValidator{
+								RequiredBy: []string{
+									APITokenFieldCanConfigureSyntheticCredentials,
+								},
+							},
+						},
 					},
 					APITokenFieldCanConfigureBizops: schema.BoolAttribute{
 						Optional:    true,
@@ -787,5 +824,93 @@ func (r *apiTokenResource) mapAdditionalPermissionsFromModel(model APITokenModel
 func (r *apiTokenResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
 	return map[int64]resource.StateUpgrader{
 		2: resourcehandle.CreateStateUpgraderForVersion(2),
+	}
+}
+
+type ViewPermissionValidator struct {
+	RequiredBy []string
+}
+
+func (v ViewPermissionValidator) Description(ctx context.Context) string {
+	return "validates that view permission cannot be false when dependent permissions are enabled"
+}
+
+func (v ViewPermissionValidator) MarkdownDescription(ctx context.Context) string {
+	return v.Description(ctx)
+}
+
+func (v ViewPermissionValidator) ValidateBool(
+	ctx context.Context,
+	req validator.BoolRequest,
+	resp *validator.BoolResponse,
+) {
+	if req.ConfigValue.IsUnknown() || req.ConfigValue.IsNull() {
+		return
+	}
+
+	viewValue := req.ConfigValue.ValueBool()
+
+	// Only validate when view=false
+	if viewValue {
+		return
+	}
+
+	for _, attr := range v.RequiredBy {
+		var value types.Bool
+
+		diags := req.Config.GetAttribute(
+			ctx,
+			path.Root(attr),
+			&value,
+		)
+		resp.Diagnostics.Append(diags...)
+
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		if !value.IsNull() &&
+			!value.IsUnknown() &&
+			value.ValueBool() {
+
+			resp.Diagnostics.AddAttributeError(
+				req.Path,
+				"Invalid Permission Configuration",
+				fmt.Sprintf(
+					"%s cannot be false because %s is true.",
+					req.Path.String(),
+					attr,
+				),
+			)
+			return
+		}
+	}
+}
+
+type FalseOnlyValidator struct{}
+
+func (v FalseOnlyValidator) Description(ctx context.Context) string {
+	return "value must be false"
+}
+
+func (v FalseOnlyValidator) MarkdownDescription(ctx context.Context) string {
+	return v.Description(ctx)
+}
+
+func (v FalseOnlyValidator) ValidateBool(
+	ctx context.Context,
+	req validator.BoolRequest,
+	resp *validator.BoolResponse,
+) {
+	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {
+		return
+	}
+
+	if req.ConfigValue.ValueBool() {
+		resp.Diagnostics.AddAttributeError(
+			req.Path,
+			"Invalid Value",
+			"This attribute can only be set to false.",
+		)
 	}
 }
