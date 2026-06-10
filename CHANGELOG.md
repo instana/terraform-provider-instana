@@ -1,3 +1,22 @@
+## [v7.1.1](https://github.com/instana/terraform-provider-instana/tree/v7.1.1) (2026-06-10)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.1.0...v7.1.1)
+
+**Implemented enhancements:**
+
+- Updated RBAC permissions to align with the latest Instana API and added new roles
+- Added support for `IncludeUnscheduledTestResults` field in SLO synthetic entity configurations
+
+**Fixed bugs:**
+
+- Added provider validation for API token permissions that are normalized by the backend to prevent inconsistent-result-after-apply errors
+- Improved validation to reject invalid synthetic permission combinations during planning phase
+
+**Merged pull requests:**
+
+- RBAC permissions update and SLO configuration update [\#83](https://github.com/instana/terraform-provider-instana/pull/83) ([georgekutty-1](https://github.com/georgekutty-1))
+- Validate backend-normalized API token permissions in provider [\#88](https://github.com/instana/terraform-provider-instana/pull/88) ([georgekutty-1](https://github.com/georgekutty-1))
+
 # Changelog
 ## [v7.1.0](https://github.com/instana/terraform-provider-instana/tree/v7.1.0) (2026-06-03)
 
