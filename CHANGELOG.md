@@ -1,3 +1,22 @@
+## [v7.1.2](https://github.com/instana/terraform-provider-instana/tree/v7.1.2) (2026-06-12)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.1.1...v7.1.2)
+
+**Implemented enhancements:**
+
+- Added 7 API token permission fields to achieve complete API parity
+  - `can_collect_net_trace_logs` - Permission to collect network trace logs
+  - `can_configure_custom_entities` - Permission to configure custom entities
+  - `can_configure_website_conversions` - Permission to configure website conversions
+  - `can_configure_ip_filtering` - Permission to configure IP filtering
+  - `can_configure_llm_model_price` - Permission to configure LLM model pricing
+  - `can_configure_personally_identifiable_information_masking` - Permission to configure PII masking
+  - `can_download_agent_configuration` - Permission to download agent configuration
+
+**Merged pull requests:**
+
+- API token resource enhancement [\#89](https://github.com/instana/terraform-provider-instana/pull/89) ([georgekutty-1](https://github.com/georgekutty-1))
+
 ## [v7.1.1](https://github.com/instana/terraform-provider-instana/tree/v7.1.1) (2026-06-10)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.1.0...v7.1.1)

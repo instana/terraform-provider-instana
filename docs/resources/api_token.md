@@ -266,6 +266,7 @@ All additional permission attributes are optional and default to `false`:
 * `can_delete_logs` - Enables permission to delete logs
 * `can_create_heap_dump` - Enables permission to create heap dumps
 * `can_create_thread_dump` - Enables permission to create thread dumps
+* `can_collect_net_trace_logs` - Enables permission to collect network trace logs
 * `can_manually_close_issue` - Enables permission to manually close issues
 * `can_view_log_volume` - Enables permission to view log volume
 * `can_configure_log_retention_period` - Enables permission to configure log retention period
@@ -274,6 +275,12 @@ All additional permission attributes are optional and default to `false`:
 * `can_configure_llm` - Enables permission to configure Large Language Models (LLM)
 * `can_configure_ai_agents` - Enables permission to configure AI agents
 * `can_configure_apdex` - Enables permission to configure Apdex thresholds
+* `can_configure_custom_entities` - Enables permission to configure custom entities
+* `can_configure_website_conversions` - Enables permission to configure website conversions
+* `can_configure_ip_filtering` - Enables permission to configure IP filtering
+* `can_configure_llm_model_price` - Enables permission to configure LLM model pricing
+* `can_configure_personally_identifiable_information_masking` - Enables permission to configure personally identifiable information (PII) masking
+* `can_download_agent_configuration` - Enables permission to download agent configuration
 * `can_configure_service_level_correction_windows` - Enables permission to configure service level correction windows
 * `can_configure_service_level_smart_alerts` - Enables permission to configure service level smart alerts
 * `can_configure_service_levels` - Enables permission to configure service levels (SLOs/SLIs)

@@ -463,6 +463,11 @@ func NewAPITokenResourceHandle() resourcehandle.ResourceHandle[*restapi.APIToken
 						Computed:    true,
 						Description: APITokenDescCanCreateThreadDump,
 					},
+					APITokenFieldCanCollectNetTraceLogs: schema.BoolAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: APITokenDescCanCollectNetTraceLogs,
+					},
 					APITokenFieldCanManuallyCloseIssue: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
@@ -502,6 +507,36 @@ func NewAPITokenResourceHandle() resourcehandle.ResourceHandle[*restapi.APIToken
 						Optional:    true,
 						Computed:    true,
 						Description: APITokenDescCanConfigureApdex,
+					},
+					APITokenFieldCanConfigureCustomEntities: schema.BoolAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: APITokenDescCanConfigureCustomEntities,
+					},
+					APITokenFieldCanConfigureWebsiteConversions: schema.BoolAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: APITokenDescCanConfigureWebsiteConversions,
+					},
+					APITokenFieldCanConfigureIPFiltering: schema.BoolAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: APITokenDescCanConfigureIPFiltering,
+					},
+					APITokenFieldCanConfigureLlmModelPrice: schema.BoolAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: APITokenDescCanConfigureLlmModelPrice,
+					},
+					APITokenFieldCanConfigurePersonallyIdentifiableInformationMasking: schema.BoolAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: APITokenDescCanConfigurePersonallyIdentifiableInformationMasking,
+					},
+					APITokenFieldCanDownloadAgentConfiguration: schema.BoolAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: APITokenDescCanDownloadAgentConfiguration,
 					},
 					APITokenFieldCanConfigureServiceLevelCorrectionWindows: schema.BoolAttribute{
 						Optional:    true,
@@ -664,6 +699,7 @@ func (r *apiTokenResource) mapAdditionalPermissionsToModel(apiToken *restapi.API
 	model.CanDeleteLogs = types.BoolValue(apiToken.CanDeleteLogs)
 	model.CanCreateHeapDump = types.BoolValue(apiToken.CanCreateHeapDump)
 	model.CanCreateThreadDump = types.BoolValue(apiToken.CanCreateThreadDump)
+	model.CanCollectNetTraceLogs = types.BoolValue(apiToken.CanCollectNetTraceLogs)
 	model.CanManuallyCloseIssue = types.BoolValue(apiToken.CanManuallyCloseIssue)
 	model.CanViewLogVolume = types.BoolValue(apiToken.CanViewLogVolume)
 	model.CanConfigureLogRetentionPeriod = types.BoolValue(apiToken.CanConfigureLogRetentionPeriod)
@@ -672,6 +708,12 @@ func (r *apiTokenResource) mapAdditionalPermissionsToModel(apiToken *restapi.API
 	model.CanConfigureLlm = types.BoolValue(apiToken.CanConfigureLlm)
 	model.CanConfigureAiAgents = types.BoolValue(apiToken.CanConfigureAiAgents)
 	model.CanConfigureApdex = types.BoolValue(apiToken.CanConfigureApdex)
+	model.CanConfigureCustomEntities = types.BoolValue(apiToken.CanConfigureCustomEntities)
+	model.CanConfigureWebsiteConversions = types.BoolValue(apiToken.CanConfigureWebsiteConversions)
+	model.CanConfigureIPFiltering = types.BoolValue(apiToken.CanConfigureIPFiltering)
+	model.CanConfigureLlmModelPrice = types.BoolValue(apiToken.CanConfigureLlmModelPrice)
+	model.CanConfigurePersonallyIdentifiableInformationMasking = types.BoolValue(apiToken.CanConfigurePersonallyIdentifiableInformationMasking)
+	model.CanDownloadAgentConfiguration = types.BoolValue(apiToken.CanDownloadAgentConfiguration)
 	model.CanConfigureServiceLevelCorrectionWindows = types.BoolValue(apiToken.CanConfigureServiceLevelCorrectionWindows)
 	model.CanConfigureServiceLevelSmartAlerts = types.BoolValue(apiToken.CanConfigureServiceLevelSmartAlerts)
 	model.CanConfigureServiceLevels = types.BoolValue(apiToken.CanConfigureServiceLevels)
@@ -807,6 +849,7 @@ func (r *apiTokenResource) mapAdditionalPermissionsFromModel(model APITokenModel
 	apiToken.CanDeleteLogs = model.CanDeleteLogs.ValueBool()
 	apiToken.CanCreateHeapDump = model.CanCreateHeapDump.ValueBool()
 	apiToken.CanCreateThreadDump = model.CanCreateThreadDump.ValueBool()
+	apiToken.CanCollectNetTraceLogs = model.CanCollectNetTraceLogs.ValueBool()
 	apiToken.CanManuallyCloseIssue = model.CanManuallyCloseIssue.ValueBool()
 	apiToken.CanViewLogVolume = model.CanViewLogVolume.ValueBool()
 	apiToken.CanConfigureLogRetentionPeriod = model.CanConfigureLogRetentionPeriod.ValueBool()
@@ -815,6 +858,12 @@ func (r *apiTokenResource) mapAdditionalPermissionsFromModel(model APITokenModel
 	apiToken.CanConfigureLlm = model.CanConfigureLlm.ValueBool()
 	apiToken.CanConfigureAiAgents = model.CanConfigureAiAgents.ValueBool()
 	apiToken.CanConfigureApdex = model.CanConfigureApdex.ValueBool()
+	apiToken.CanConfigureCustomEntities = model.CanConfigureCustomEntities.ValueBool()
+	apiToken.CanConfigureWebsiteConversions = model.CanConfigureWebsiteConversions.ValueBool()
+	apiToken.CanConfigureIPFiltering = model.CanConfigureIPFiltering.ValueBool()
+	apiToken.CanConfigureLlmModelPrice = model.CanConfigureLlmModelPrice.ValueBool()
+	apiToken.CanConfigurePersonallyIdentifiableInformationMasking = model.CanConfigurePersonallyIdentifiableInformationMasking.ValueBool()
+	apiToken.CanDownloadAgentConfiguration = model.CanDownloadAgentConfiguration.ValueBool()
 	apiToken.CanConfigureServiceLevelCorrectionWindows = model.CanConfigureServiceLevelCorrectionWindows.ValueBool()
 	apiToken.CanConfigureServiceLevelSmartAlerts = model.CanConfigureServiceLevelSmartAlerts.ValueBool()
 	apiToken.CanConfigureServiceLevels = model.CanConfigureServiceLevels.ValueBool()
