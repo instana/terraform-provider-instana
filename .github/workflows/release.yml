@@ -1,11 +1,15 @@
-name: Release
+name: Release (Disabled - Using CI/CD Pipeline)
 
+# This workflow is disabled because releases are handled by the CI/CD pipeline
+# defined in .pipeline-config.yaml. To prevent conflicts, this workflow will
+# not trigger automatically on tag pushes.
 on:
-  push:
-    branches:
-      - "!*"
-    tags:
-      - "v*"
+  workflow_dispatch:  # Only allow manual triggering for testing
+  # push:
+  #   branches:
+  #     - "!*"
+  #   tags:
+  #     - "v*"
 
 jobs:
   release:
