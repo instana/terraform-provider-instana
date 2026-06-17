@@ -336,6 +336,7 @@ func (p *InstanaProvider) DataSources(_ context.Context) []func() datasource.Dat
 		datasources.NewSyntheticLocationDataSource,
 		datasources.NewUserDataSource,
 		datasources.NewRbacRoleDataSource,
+		datasources.NewRbacTeamDataSource,
 	}
 }
 

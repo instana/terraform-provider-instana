@@ -467,6 +467,9 @@ func NewAPITokenResourceHandle() resourcehandle.ResourceHandle[*restapi.APIToken
 						Optional:    true,
 						Computed:    true,
 						Description: APITokenDescCanCollectNetTraceLogs,
+						Validators: []validator.Bool{
+							FalseOnlyValidator{},
+						},
 					},
 					APITokenFieldCanManuallyCloseIssue: schema.BoolAttribute{
 						Optional:    true,
