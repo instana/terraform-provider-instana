@@ -1,3 +1,15 @@
+## [v7.2.0](https://github.com/instana/terraform-provider-instana/tree/v7.2.0) (2026-06-17)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.1.2...v7.2.0)
+
+**Implemented enhancements:**
+
+- Added new data source for retrieving Instana RBAC teams
+
+**Merged pull requests:**
+
+- Add RBAC team data source and disabled legacy GitHub release workflow [\#90](https://github.com/instana/terraform-provider-instana/pull/90) ([georgekutty-1](https://github.com/georgekutty-1))
+
 ## [v7.1.2](https://github.com/instana/terraform-provider-instana/tree/v7.1.2) (2026-06-12)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.1.1...v7.1.2)
