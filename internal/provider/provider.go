@@ -23,6 +23,7 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/resources/alertingchannel"
 	"github.com/instana/terraform-provider-instana/internal/resources/alertingconfig"
+	"github.com/instana/terraform-provider-instana/internal/resources/apdexconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/apitoken"
 	"github.com/instana/terraform-provider-instana/internal/resources/applicationalertconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/applicationconfig"
@@ -345,6 +346,7 @@ func (p *InstanaProvider) Resources(_ context.Context) []func() resource.Resourc
 		addResouceHandle(alertingconfig.NewAlertingConfigResourceHandle),
 		addResouceHandle(logalertconfig.NewLogAlertConfigResourceHandle),
 		addResouceHandle(alertingchannel.NewAlertingChannelResourceHandle),
+		addResouceHandle(apdexconfig.NewApdexConfigResourceHandle),
 		addResouceHandle(apitoken.NewAPITokenResourceHandle),
 		addResouceHandle(applicationalertconfig.NewApplicationAlertConfigResourceHandle),
 		addResouceHandle(applicationalertconfig.NewGlobalApplicationAlertConfigResourceHandle),
