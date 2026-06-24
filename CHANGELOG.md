@@ -1,4 +1,66 @@
+## [v7.2.0](https://github.com/instana/terraform-provider-instana/tree/v7.2.0) (2026-06-17)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.1.2...v7.2.0)
+
+**Implemented enhancements:**
+
+- Added new data source for retrieving Instana RBAC teams
+
+**Merged pull requests:**
+
+- Add RBAC team data source and disabled legacy GitHub release workflow [\#90](https://github.com/instana/terraform-provider-instana/pull/90) ([georgekutty-1](https://github.com/georgekutty-1))
+
+## [v7.1.2](https://github.com/instana/terraform-provider-instana/tree/v7.1.2) (2026-06-12)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.1.1...v7.1.2)
+
+**Implemented enhancements:**
+
+- Added 7 API token permission fields to achieve complete API parity
+  - `can_collect_net_trace_logs` - Permission to collect network trace logs
+  - `can_configure_custom_entities` - Permission to configure custom entities
+  - `can_configure_website_conversions` - Permission to configure website conversions
+  - `can_configure_ip_filtering` - Permission to configure IP filtering
+  - `can_configure_llm_model_price` - Permission to configure LLM model pricing
+  - `can_configure_personally_identifiable_information_masking` - Permission to configure PII masking
+  - `can_download_agent_configuration` - Permission to download agent configuration
+
+**Merged pull requests:**
+
+- API token resource enhancement [\#89](https://github.com/instana/terraform-provider-instana/pull/89) ([georgekutty-1](https://github.com/georgekutty-1))
+
+## [v7.1.1](https://github.com/instana/terraform-provider-instana/tree/v7.1.1) (2026-06-10)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.1.0...v7.1.1)
+
+**Implemented enhancements:**
+
+- Updated RBAC permissions to align with the latest Instana API and added new roles
+- Added support for `IncludeUnscheduledTestResults` field in SLO synthetic entity configurations
+
+**Fixed bugs:**
+
+- Added provider validation for API token permissions that are normalized by the backend to prevent inconsistent-result-after-apply errors
+- Improved validation to reject invalid synthetic permission combinations during planning phase
+
+**Merged pull requests:**
+
+- RBAC permissions update and SLO configuration update [\#83](https://github.com/instana/terraform-provider-instana/pull/83) ([georgekutty-1](https://github.com/georgekutty-1))
+- Validate backend-normalized API token permissions in provider [\#88](https://github.com/instana/terraform-provider-instana/pull/88) ([georgekutty-1](https://github.com/georgekutty-1))
+
 # Changelog
+## [v7.1.0](https://github.com/instana/terraform-provider-instana/tree/v7.1.0) (2026-06-03)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.0.1...v7.1.0)
+
+**Implemented enhancements:**
+
+- Added new data source for retrieving Instana RBAC roles
+
+**Merged pull requests:**
+
+- Add RBAC roles data source [\#85](https://github.com/instana/terraform-provider-instana/pull/85) ([nicoleyson](https://github.com/nicoleyson))
+
 
 ## [v7.0.1](https://github.com/instana/terraform-provider-instana/tree/v7.0.1) (2026-05-21)
 

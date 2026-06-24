@@ -4,6 +4,9 @@ import (
 	"context"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/instana-go-client/api"
@@ -454,6 +457,227 @@ func TestEdgeCases(t *testing.T) {
 		assert.False(t, model.CanInstallNewAgents.ValueBool())
 		assert.False(t, model.LimitedApplicationsScope.ValueBool())
 	})
+}
+
+func TestFalseOnlyValidator(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("allows false", func(t *testing.T) {
+		resp := runFalseOnlyValidator(
+			t,
+			ctx,
+			types.BoolValue(false),
+		)
+
+		assert.False(t, resp.Diagnostics.HasError())
+	})
+
+	t.Run("rejects true", func(t *testing.T) {
+		resp := runFalseOnlyValidator(
+			t,
+			ctx,
+			types.BoolValue(true),
+		)
+
+		require.True(t, resp.Diagnostics.HasError())
+		assert.Contains(t, diagnosticsToString(resp.Diagnostics), "Invalid Value")
+		assert.Contains(t, diagnosticsToString(resp.Diagnostics), "This attribute can only be set to false.")
+	})
+
+	t.Run("ignores null", func(t *testing.T) {
+		resp := runFalseOnlyValidator(
+			t,
+			ctx,
+			types.BoolNull(),
+		)
+
+		assert.False(t, resp.Diagnostics.HasError())
+	})
+
+	t.Run("ignores unknown", func(t *testing.T) {
+		resp := runFalseOnlyValidator(
+			t,
+			ctx,
+			types.BoolUnknown(),
+		)
+
+		assert.False(t, resp.Diagnostics.HasError())
+	})
+}
+
+func TestViewPermissionValidator(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("allows true even when dependency is true", func(t *testing.T) {
+		resp := runViewPermissionValidator(
+			t,
+			ctx,
+			APITokenModel{
+				CanConfigureSyntheticTests: types.BoolValue(true),
+				CanViewSyntheticTests:      types.BoolValue(true),
+			},
+			APITokenFieldCanViewSyntheticTests,
+			types.BoolValue(true),
+			[]string{APITokenFieldCanConfigureSyntheticTests},
+		)
+
+		assert.False(t, resp.Diagnostics.HasError())
+	})
+
+	t.Run("allows false when dependency is false", func(t *testing.T) {
+		resp := runViewPermissionValidator(
+			t,
+			ctx,
+			APITokenModel{
+				CanConfigureSyntheticTests: types.BoolValue(false),
+				CanViewSyntheticTests:      types.BoolValue(false),
+			},
+			APITokenFieldCanViewSyntheticTests,
+			types.BoolValue(false),
+			[]string{APITokenFieldCanConfigureSyntheticTests},
+		)
+
+		assert.False(t, resp.Diagnostics.HasError())
+	})
+
+	t.Run("rejects false when dependency is true", func(t *testing.T) {
+		resp := runViewPermissionValidator(
+			t,
+			ctx,
+			APITokenModel{
+				CanConfigureSyntheticTests: types.BoolValue(true),
+				CanViewSyntheticTests:      types.BoolValue(false),
+			},
+			APITokenFieldCanViewSyntheticTests,
+			types.BoolValue(false),
+			[]string{APITokenFieldCanConfigureSyntheticTests},
+		)
+
+		require.True(t, resp.Diagnostics.HasError())
+		assert.Contains(t, diagnosticsToString(resp.Diagnostics), "Invalid Permission Configuration")
+		assert.Contains(t, diagnosticsToString(resp.Diagnostics), APITokenFieldCanViewSyntheticTests+" cannot be false because "+APITokenFieldCanConfigureSyntheticTests+" is true.")
+	})
+
+	t.Run("rejects false when any dependency is true", func(t *testing.T) {
+		resp := runViewPermissionValidator(
+			t,
+			ctx,
+			APITokenModel{
+				CanConfigureSyntheticLocations: types.BoolValue(false),
+				CanConfigureSyntheticTests:     types.BoolValue(true),
+				CanViewSyntheticLocations:      types.BoolValue(false),
+			},
+			APITokenFieldCanViewSyntheticLocations,
+			types.BoolValue(false),
+			[]string{
+				APITokenFieldCanConfigureSyntheticLocations,
+				APITokenFieldCanConfigureSyntheticTests,
+			},
+		)
+
+		require.True(t, resp.Diagnostics.HasError())
+		assert.Contains(t, diagnosticsToString(resp.Diagnostics), "Invalid Permission Configuration")
+		assert.Contains(t, diagnosticsToString(resp.Diagnostics), APITokenFieldCanViewSyntheticLocations+" cannot be false because "+APITokenFieldCanConfigureSyntheticTests+" is true.")
+	})
+
+	t.Run("ignores null", func(t *testing.T) {
+		resp := runViewPermissionValidator(
+			t,
+			ctx,
+			APITokenModel{
+				CanConfigureSyntheticTests: types.BoolValue(true),
+				CanViewSyntheticTests:      types.BoolNull(),
+			},
+			APITokenFieldCanViewSyntheticTests,
+			types.BoolNull(),
+			[]string{APITokenFieldCanConfigureSyntheticTests},
+		)
+
+		assert.False(t, resp.Diagnostics.HasError())
+	})
+
+	t.Run("ignores unknown", func(t *testing.T) {
+		resp := runViewPermissionValidator(
+			t,
+			ctx,
+			APITokenModel{
+				CanConfigureSyntheticTests: types.BoolValue(true),
+				CanViewSyntheticTests:      types.BoolUnknown(),
+			},
+			APITokenFieldCanViewSyntheticTests,
+			types.BoolUnknown(),
+			[]string{APITokenFieldCanConfigureSyntheticTests},
+		)
+
+		assert.False(t, resp.Diagnostics.HasError())
+	})
+}
+
+func runFalseOnlyValidator(
+	t *testing.T,
+	ctx context.Context,
+	configValue types.Bool,
+) validator.BoolResponse {
+	t.Helper()
+
+	resp := validator.BoolResponse{}
+	FalseOnlyValidator{}.ValidateBool(
+		ctx,
+		validator.BoolRequest{
+			ConfigValue: configValue,
+			Path:        path.Root(APITokenFieldCanConfigurePersonalAPITokens),
+		},
+		&resp,
+	)
+
+	return resp
+}
+
+func runViewPermissionValidator(
+	t *testing.T,
+	ctx context.Context,
+	model APITokenModel,
+	attributeName string,
+	configValue types.Bool,
+	requiredBy []string,
+) validator.BoolResponse {
+	t.Helper()
+
+	handle := NewAPITokenResourceHandle()
+	plan := &tfsdk.Plan{
+		Schema: handle.MetaData().Schema,
+	}
+
+	diags := plan.Set(ctx, model)
+	require.False(t, diags.HasError())
+
+	config := tfsdk.Config{
+		Raw:    plan.Raw,
+		Schema: plan.Schema,
+	}
+
+	resp := validator.BoolResponse{}
+	ViewPermissionValidator{RequiredBy: requiredBy}.ValidateBool(
+		ctx,
+		validator.BoolRequest{
+			Config:      config,
+			ConfigValue: configValue,
+			Path:        path.Root(attributeName),
+		},
+		&resp,
+	)
+
+	return resp
+}
+
+func diagnosticsToString(diags diag.Diagnostics) string {
+	result := ""
+
+	for _, diagnostic := range diags {
+		result += diagnostic.Summary() + " " + diagnostic.Detail() + "\n"
+	}
+
+	return result
 }
 
 // Helper functions

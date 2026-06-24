@@ -239,7 +239,6 @@ All scope limitation attributes are optional and default to `false`:
 * `limited_xen_server_scope` - Limits the scope to Xen Server
 * `limited_windows_hypervisor_scope` - Limits the scope to Windows Hypervisor
 * `limited_alert_channels_scope` - Limits the scope to alert channels
-* `limited_linux_kvm_hypervisor_scope` - Limits the scope to Linux KVM Hypervisor
 * `limited_service_level_scope` - Limits the scope to service levels
 * `limited_ai_gateway_scope` - Limits the scope to AI Gateway
 
@@ -247,7 +246,6 @@ All scope limitation attributes are optional and default to `false`:
 
 All additional permission attributes are optional and default to `false`:
 
-* `can_configure_personal_api_tokens` - Enables permission to configure personal API tokens
 * `can_configure_database_management` - Enables permission to configure database management
 * `can_configure_automation_actions` - Enables permission to configure automation actions
 * `can_configure_automation_policies` - Enables permission to configure automation policies
@@ -256,10 +254,10 @@ All additional permission attributes are optional and default to `false`:
 * `can_configure_synthetic_tests` - Enables permission to configure synthetic tests
 * `can_configure_synthetic_locations` - Enables permission to configure synthetic locations
 * `can_configure_synthetic_credentials` - Enables permission to configure synthetic credentials
-* `can_view_synthetic_tests` - Enables permission to view synthetic tests
-* `can_view_synthetic_locations` - Enables permission to view synthetic locations
-* `can_view_synthetic_test_results` - Enables permission to view synthetic test results
-* `can_use_synthetic_credentials` - Enables permission to use synthetic credentials
+* `can_view_synthetic_tests` - Enables permission to view synthetic tests (**must be true if `can_configure_synthetic_tests` is true**)
+* `can_view_synthetic_locations` - Enables permission to view synthetic locations (**must be true if `can_configure_synthetic_tests`    or     `can_configure_synthetic_locations` is true**)
+* `can_view_synthetic_test_results` - Enables permission to view synthetic test results (**must be true if `can_configure_synthetic_tests` is true**)
+* `can_use_synthetic_credentials` - Enables permission to use synthetic credentials (**must be true if `can_configure_synthetic_credentials` is true**)
 * `can_configure_bizops` - Enables permission to configure business operations
 * `can_view_business_processes` - Enables permission to view business processes
 * `can_view_business_process_details` - Enables permission to view business process details
@@ -268,6 +266,7 @@ All additional permission attributes are optional and default to `false`:
 * `can_delete_logs` - Enables permission to delete logs
 * `can_create_heap_dump` - Enables permission to create heap dumps
 * `can_create_thread_dump` - Enables permission to create thread dumps
+* `can_collect_net_trace_logs` - Enables permission to collect network trace logs
 * `can_manually_close_issue` - Enables permission to manually close issues
 * `can_view_log_volume` - Enables permission to view log volume
 * `can_configure_log_retention_period` - Enables permission to configure log retention period
@@ -276,6 +275,12 @@ All additional permission attributes are optional and default to `false`:
 * `can_configure_llm` - Enables permission to configure Large Language Models (LLM)
 * `can_configure_ai_agents` - Enables permission to configure AI agents
 * `can_configure_apdex` - Enables permission to configure Apdex thresholds
+* `can_configure_custom_entities` - Enables permission to configure custom entities
+* `can_configure_website_conversions` - Enables permission to configure website conversions
+* `can_configure_ip_filtering` - Enables permission to configure IP filtering
+* `can_configure_llm_model_price` - Enables permission to configure LLM model pricing
+* `can_configure_personally_identifiable_information_masking` - Enables permission to configure personally identifiable information (PII) masking
+* `can_download_agent_configuration` - Enables permission to download agent configuration
 * `can_configure_service_level_correction_windows` - Enables permission to configure service level correction windows
 * `can_configure_service_level_smart_alerts` - Enables permission to configure service level smart alerts
 * `can_configure_service_levels` - Enables permission to configure service levels (SLOs/SLIs)
@@ -297,6 +302,22 @@ $ terraform import instana_api_token.my_token 60845e4e5e6b9cf8fc2868da
 ```
 
 ## Notes
+
+### ⚠️ Backend-Normalized and Derived Permissions
+
+Some permissions are always normalized or derived by the Instana backend. The provider enforces these rules at plan time:
+
+- `can_configure_personal_api_tokens`: Always false for API tokens. Setting to true will cause a plan-time error.
+- `limited_linux_kvm_hypervisor_scope`: Always false. Setting to true will cause a plan-time error.
+- `can_view_synthetic_tests`: Must be true if `can_configure_synthetic_tests` is true. Setting to false in this case will cause a plan-time error.
+- `can_view_synthetic_locations`: Must be true if `can_configure_synthetic_locations` is true. Setting to false in this case will cause a plan-time error.
+- `can_view_synthetic_locations`: Must be true if `can_configure_synthetic_tests` is true. Setting to false in this case will cause a plan-time error.
+- `can_view_synthetic_test_results`: Must be true if `can_configure_synthetic_tests` is true. Setting to false in this case will cause a plan-time error.
+- `can_use_synthetic_credentials`: Must be true if `can_configure_synthetic_credentials` is true. Setting to false in this case will cause a plan-time error.
+
+
+
+If you see a plan-time error for these fields, update your Terraform configuration to match the backend-normalized value and re-run `terraform plan`.
 
 ### Token Security
 

@@ -2,6 +2,7 @@ package apitoken
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -9,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	restapi "github.com/instana/instana-go-client/api"
@@ -308,6 +310,9 @@ func NewAPITokenResourceHandle() resourcehandle.ResourceHandle[*restapi.APIToken
 						Optional:    true,
 						Computed:    true,
 						Description: APITokenDescLimitedLinuxKvmHypervisorScope,
+						Validators: []validator.Bool{
+							FalseOnlyValidator{},
+						},
 					},
 					APITokenFieldLimitedServiceLevelScope: schema.BoolAttribute{
 						Optional:    true,
@@ -325,6 +330,9 @@ func NewAPITokenResourceHandle() resourcehandle.ResourceHandle[*restapi.APIToken
 						Optional:    true,
 						Computed:    true,
 						Description: APITokenDescCanConfigurePersonalAPITokens,
+						Validators: []validator.Bool{
+							FalseOnlyValidator{},
+						},
 					},
 					APITokenFieldCanConfigureDatabaseManagement: schema.BoolAttribute{
 						Optional:    true,
@@ -370,21 +378,50 @@ func NewAPITokenResourceHandle() resourcehandle.ResourceHandle[*restapi.APIToken
 						Optional:    true,
 						Computed:    true,
 						Description: APITokenDescCanViewSyntheticTests,
+						Validators: []validator.Bool{
+							ViewPermissionValidator{
+								RequiredBy: []string{
+									APITokenFieldCanConfigureSyntheticTests,
+								},
+							},
+						},
 					},
 					APITokenFieldCanViewSyntheticLocations: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
 						Description: APITokenDescCanViewSyntheticLocations,
+						Validators: []validator.Bool{
+							ViewPermissionValidator{
+								RequiredBy: []string{
+									APITokenFieldCanConfigureSyntheticLocations,
+									APITokenFieldCanConfigureSyntheticTests,
+								},
+							},
+						},
 					},
 					APITokenFieldCanViewSyntheticTestResults: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
 						Description: APITokenDescCanViewSyntheticTestResults,
+						Validators: []validator.Bool{
+							ViewPermissionValidator{
+								RequiredBy: []string{
+									APITokenFieldCanConfigureSyntheticTests,
+								},
+							},
+						},
 					},
 					APITokenFieldCanUseSyntheticCredentials: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
 						Description: APITokenDescCanUseSyntheticCredentials,
+						Validators: []validator.Bool{
+							ViewPermissionValidator{
+								RequiredBy: []string{
+									APITokenFieldCanConfigureSyntheticCredentials,
+								},
+							},
+						},
 					},
 					APITokenFieldCanConfigureBizops: schema.BoolAttribute{
 						Optional:    true,
@@ -426,6 +463,14 @@ func NewAPITokenResourceHandle() resourcehandle.ResourceHandle[*restapi.APIToken
 						Computed:    true,
 						Description: APITokenDescCanCreateThreadDump,
 					},
+					APITokenFieldCanCollectNetTraceLogs: schema.BoolAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: APITokenDescCanCollectNetTraceLogs,
+						Validators: []validator.Bool{
+							FalseOnlyValidator{},
+						},
+					},
 					APITokenFieldCanManuallyCloseIssue: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
@@ -465,6 +510,36 @@ func NewAPITokenResourceHandle() resourcehandle.ResourceHandle[*restapi.APIToken
 						Optional:    true,
 						Computed:    true,
 						Description: APITokenDescCanConfigureApdex,
+					},
+					APITokenFieldCanConfigureCustomEntities: schema.BoolAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: APITokenDescCanConfigureCustomEntities,
+					},
+					APITokenFieldCanConfigureWebsiteConversions: schema.BoolAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: APITokenDescCanConfigureWebsiteConversions,
+					},
+					APITokenFieldCanConfigureIPFiltering: schema.BoolAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: APITokenDescCanConfigureIPFiltering,
+					},
+					APITokenFieldCanConfigureLlmModelPrice: schema.BoolAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: APITokenDescCanConfigureLlmModelPrice,
+					},
+					APITokenFieldCanConfigurePersonallyIdentifiableInformationMasking: schema.BoolAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: APITokenDescCanConfigurePersonallyIdentifiableInformationMasking,
+					},
+					APITokenFieldCanDownloadAgentConfiguration: schema.BoolAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: APITokenDescCanDownloadAgentConfiguration,
 					},
 					APITokenFieldCanConfigureServiceLevelCorrectionWindows: schema.BoolAttribute{
 						Optional:    true,
@@ -627,6 +702,7 @@ func (r *apiTokenResource) mapAdditionalPermissionsToModel(apiToken *restapi.API
 	model.CanDeleteLogs = types.BoolValue(apiToken.CanDeleteLogs)
 	model.CanCreateHeapDump = types.BoolValue(apiToken.CanCreateHeapDump)
 	model.CanCreateThreadDump = types.BoolValue(apiToken.CanCreateThreadDump)
+	model.CanCollectNetTraceLogs = types.BoolValue(apiToken.CanCollectNetTraceLogs)
 	model.CanManuallyCloseIssue = types.BoolValue(apiToken.CanManuallyCloseIssue)
 	model.CanViewLogVolume = types.BoolValue(apiToken.CanViewLogVolume)
 	model.CanConfigureLogRetentionPeriod = types.BoolValue(apiToken.CanConfigureLogRetentionPeriod)
@@ -635,6 +711,12 @@ func (r *apiTokenResource) mapAdditionalPermissionsToModel(apiToken *restapi.API
 	model.CanConfigureLlm = types.BoolValue(apiToken.CanConfigureLlm)
 	model.CanConfigureAiAgents = types.BoolValue(apiToken.CanConfigureAiAgents)
 	model.CanConfigureApdex = types.BoolValue(apiToken.CanConfigureApdex)
+	model.CanConfigureCustomEntities = types.BoolValue(apiToken.CanConfigureCustomEntities)
+	model.CanConfigureWebsiteConversions = types.BoolValue(apiToken.CanConfigureWebsiteConversions)
+	model.CanConfigureIPFiltering = types.BoolValue(apiToken.CanConfigureIPFiltering)
+	model.CanConfigureLlmModelPrice = types.BoolValue(apiToken.CanConfigureLlmModelPrice)
+	model.CanConfigurePersonallyIdentifiableInformationMasking = types.BoolValue(apiToken.CanConfigurePersonallyIdentifiableInformationMasking)
+	model.CanDownloadAgentConfiguration = types.BoolValue(apiToken.CanDownloadAgentConfiguration)
 	model.CanConfigureServiceLevelCorrectionWindows = types.BoolValue(apiToken.CanConfigureServiceLevelCorrectionWindows)
 	model.CanConfigureServiceLevelSmartAlerts = types.BoolValue(apiToken.CanConfigureServiceLevelSmartAlerts)
 	model.CanConfigureServiceLevels = types.BoolValue(apiToken.CanConfigureServiceLevels)
@@ -770,6 +852,7 @@ func (r *apiTokenResource) mapAdditionalPermissionsFromModel(model APITokenModel
 	apiToken.CanDeleteLogs = model.CanDeleteLogs.ValueBool()
 	apiToken.CanCreateHeapDump = model.CanCreateHeapDump.ValueBool()
 	apiToken.CanCreateThreadDump = model.CanCreateThreadDump.ValueBool()
+	apiToken.CanCollectNetTraceLogs = model.CanCollectNetTraceLogs.ValueBool()
 	apiToken.CanManuallyCloseIssue = model.CanManuallyCloseIssue.ValueBool()
 	apiToken.CanViewLogVolume = model.CanViewLogVolume.ValueBool()
 	apiToken.CanConfigureLogRetentionPeriod = model.CanConfigureLogRetentionPeriod.ValueBool()
@@ -778,6 +861,12 @@ func (r *apiTokenResource) mapAdditionalPermissionsFromModel(model APITokenModel
 	apiToken.CanConfigureLlm = model.CanConfigureLlm.ValueBool()
 	apiToken.CanConfigureAiAgents = model.CanConfigureAiAgents.ValueBool()
 	apiToken.CanConfigureApdex = model.CanConfigureApdex.ValueBool()
+	apiToken.CanConfigureCustomEntities = model.CanConfigureCustomEntities.ValueBool()
+	apiToken.CanConfigureWebsiteConversions = model.CanConfigureWebsiteConversions.ValueBool()
+	apiToken.CanConfigureIPFiltering = model.CanConfigureIPFiltering.ValueBool()
+	apiToken.CanConfigureLlmModelPrice = model.CanConfigureLlmModelPrice.ValueBool()
+	apiToken.CanConfigurePersonallyIdentifiableInformationMasking = model.CanConfigurePersonallyIdentifiableInformationMasking.ValueBool()
+	apiToken.CanDownloadAgentConfiguration = model.CanDownloadAgentConfiguration.ValueBool()
 	apiToken.CanConfigureServiceLevelCorrectionWindows = model.CanConfigureServiceLevelCorrectionWindows.ValueBool()
 	apiToken.CanConfigureServiceLevelSmartAlerts = model.CanConfigureServiceLevelSmartAlerts.ValueBool()
 	apiToken.CanConfigureServiceLevels = model.CanConfigureServiceLevels.ValueBool()
@@ -787,5 +876,93 @@ func (r *apiTokenResource) mapAdditionalPermissionsFromModel(model APITokenModel
 func (r *apiTokenResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
 	return map[int64]resource.StateUpgrader{
 		2: resourcehandle.CreateStateUpgraderForVersion(2),
+	}
+}
+
+type ViewPermissionValidator struct {
+	RequiredBy []string
+}
+
+func (v ViewPermissionValidator) Description(ctx context.Context) string {
+	return "validates that view permission cannot be false when dependent permissions are enabled"
+}
+
+func (v ViewPermissionValidator) MarkdownDescription(ctx context.Context) string {
+	return v.Description(ctx)
+}
+
+func (v ViewPermissionValidator) ValidateBool(
+	ctx context.Context,
+	req validator.BoolRequest,
+	resp *validator.BoolResponse,
+) {
+	if req.ConfigValue.IsUnknown() || req.ConfigValue.IsNull() {
+		return
+	}
+
+	viewValue := req.ConfigValue.ValueBool()
+
+	// Only validate when view=false
+	if viewValue {
+		return
+	}
+
+	for _, attr := range v.RequiredBy {
+		var value types.Bool
+
+		diags := req.Config.GetAttribute(
+			ctx,
+			path.Root(attr),
+			&value,
+		)
+		resp.Diagnostics.Append(diags...)
+
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		if !value.IsNull() &&
+			!value.IsUnknown() &&
+			value.ValueBool() {
+
+			resp.Diagnostics.AddAttributeError(
+				req.Path,
+				"Invalid Permission Configuration",
+				fmt.Sprintf(
+					"%s cannot be false because %s is true.",
+					req.Path.String(),
+					attr,
+				),
+			)
+			return
+		}
+	}
+}
+
+type FalseOnlyValidator struct{}
+
+func (v FalseOnlyValidator) Description(ctx context.Context) string {
+	return "value must be false"
+}
+
+func (v FalseOnlyValidator) MarkdownDescription(ctx context.Context) string {
+	return v.Description(ctx)
+}
+
+func (v FalseOnlyValidator) ValidateBool(
+	ctx context.Context,
+	req validator.BoolRequest,
+	resp *validator.BoolResponse,
+) {
+	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {
+		return
+	}
+
+	if req.ConfigValue.ValueBool() {
+		resp.Diagnostics.AddAttributeError(
+			req.Path,
+			"Invalid Value",
+			"This attribute can only be set to false.",
+		)
 	}
 }
