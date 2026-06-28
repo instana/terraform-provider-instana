@@ -11,6 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -70,6 +72,9 @@ func buildIDAttribute() schema.StringAttribute {
 	return schema.StringAttribute{
 		Description: ApdexConfigDescID,
 		Computed:    true,
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.UseStateForUnknown(),
+		},
 	}
 }
 
@@ -223,7 +228,7 @@ func (r *apdexConfigResource) MapStateToDataObject(ctx context.Context, plan *tf
 		RbacTags:    RbacTags,
 	}
 
-	if !model.ID.IsNull() && !model.ID.IsUnknown() {
+	if !model.ID.IsNull() {
 		apdexConfig.ID = model.ID.ValueString()
 	}
 
