@@ -4,61 +4,6 @@ Apdex (Application Performance Index) is an open standard for measuring applicat
 
 API Documentation: <https://instana.github.io/openapi/#tag/Apdex-Configuration>
 
-**⚠️ BREAKING CHANGES - Plugin Framework Migration**
-
-**This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**. While the basic structure remains similar, there are important syntax changes for nested configurations.
-
-## Migration Guide (v5 to v6)
-
-For detailed migration instructions and examples, see the [Plugin Framework Migration Guide](https://github.com/instana/terraform-provider-instana/blob/main/PLUGIN-FRAMEWORK-MIGRATION.md).
-
-### Syntax Changes Overview
-
-- The `apdex_entity` configuration is now a **single nested attribute** instead of a block
-- Use `attribute = { ... }` syntax instead of `attribute { ... }` block syntax
-- All nested attributes within entity follow the same pattern
-- The `id` attribute is computed and auto-generated
-- Tag filter expressions are validated and normalized
-- RBAC tags are now structured as list of objects with `display_name` and `id`
-
-#### OLD (v5.x) Syntax:
-
-```hcl
-resource "instana_apdex_config" "example" {
-  apdex_name = "my-apdex"
-  
-  apdex_entity {
-    application {
-      entity_id      = "app-123"
-      threshold      = 500
-      boundary_scope = "ALL"
-    }
-  }
-}
-```
-
-#### NEW (v6.x) Syntax:
-
-```hcl
-resource "instana_apdex_config" "example" {
-  apdex_name = "my-apdex"
-  
-  apdex_entity = {
-    application = {
-      entity_id         = "btg-B701Rx6o9QNXUS4TVw"
-      threshold         = 500
-      boundary_scope    = "ALL"
-      include_internal  = false
-      include_synthetic = false
-    }
-  }
-  
-  tags = ["production", "critical"]
-}
-```
-
-Please update your Terraform configurations to use the new attribute-based syntax with equals signs.
-
 ## Example Usage
 
 ### Application Entity Apdex
