@@ -118,9 +118,10 @@ func GetStaticOnlyCustomPayloadFieldsSchema() schema.ListNestedAttribute {
 func CustomPayloadFieldsToTerraform(ctx context.Context, fields []model.CustomPayloadField[any]) (types.List, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	// If no fields, return null list
+	// If no fields, return empty list (not null) to avoid "inconsistent result" errors
+	// when Terraform planned an empty list and the API returns no fields.
 	if len(fields) == 0 {
-		return types.ListNull(GetCustomPayloadFieldType()), diags
+		return types.ListValueMust(GetCustomPayloadFieldType(), []attr.Value{}), diags
 	}
 
 	// Convert API fields to a slice of maps that can be used with ObjectValueFrom

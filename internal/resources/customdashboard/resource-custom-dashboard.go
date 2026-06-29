@@ -81,6 +81,22 @@ func NewCustomDashboardResourceHandle() resourcehandle.ResourceHandle[*api.Custo
 							},
 						},
 					},
+					CustomDashboardFieldRbacTags: schema.ListNestedAttribute{
+						Description: CustomDashboardDescRbacTags,
+						Optional:    true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								CustomDashboardFieldRbacTagID: schema.StringAttribute{
+									Required:    true,
+									Description: CustomDashboardDescRbacTagID,
+								},
+								CustomDashboardFieldRbacTagDisplayName: schema.StringAttribute{
+									Required:    true,
+									Description: CustomDashboardDescRbacTagDisplayName,
+								},
+							},
+						},
+					},
 				},
 			},
 			SchemaVersion: 2,
@@ -154,6 +170,17 @@ func (r *customDashboardResource) UpdateState(ctx context.Context, state *tfsdk.
 	// Map access rules
 	model.AccessRules = r.mapAccessRulesToState(dashboard.AccessRules)
 
+	// Map RBAC tags (team assignments). The Instana create/update API does not
+	// echo rbacTags back in its response, so on Create/Update (plan != nil) we
+	// keep the configured value to avoid an "inconsistent result" error. On
+	// Read (plan == nil) we populate from the API. This mirrors the widgets
+	// handling above.
+	if plan != nil {
+		// keep model.RbacTags as provided by the plan
+	} else {
+		model.RbacTags = r.mapRbacTagsToState(dashboard.RbacTags)
+	}
+
 	// Set the entire model to state
 	diags.Append(state.Set(ctx, model)...)
 	return diags
@@ -177,9 +204,22 @@ func (r *customDashboardResource) mapAccessRulesToState(accessRules []model.Acce
 	return models
 }
 
-// ============================================================================
-// State to API Mapping
-// ============================================================================
+// mapRbacTagsToState converts RBAC tags from API format to state models
+func (r *customDashboardResource) mapRbacTagsToState(rbacTags []api.RbacTag) []RbacTagModel {
+	if len(rbacTags) == 0 {
+		return nil
+	}
+
+	models := make([]RbacTagModel, len(rbacTags))
+	for i, tag := range rbacTags {
+		models[i] = RbacTagModel{
+			DisplayName: types.StringValue(tag.DisplayName),
+			ID:          types.StringValue(tag.ID),
+		}
+	}
+
+	return models
+}
 
 // MapStateToDataObject converts Terraform state to API data object
 func (r *customDashboardResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Plan, state *tfsdk.State) (*api.CustomDashboard, diag.Diagnostics) {
@@ -217,6 +257,7 @@ func (r *customDashboardResource) MapStateToDataObject(ctx context.Context, plan
 		ID:          id,
 		Title:       model.Title.ValueString(),
 		AccessRules: accessRules,
+		RbacTags:    r.mapRbacTagsFromState(model.RbacTags),
 		Widgets:     widgets,
 	}, diags
 }
@@ -248,6 +289,23 @@ func (r *customDashboardResource) mapAccessRulesFromState(accessRuleModels []Acc
 	}
 
 	return accessRules
+}
+
+// mapRbacTagsFromState converts RBAC tag models from state to API format
+func (r *customDashboardResource) mapRbacTagsFromState(rbacTagModels []RbacTagModel) []api.RbacTag {
+	if len(rbacTagModels) == 0 {
+		return nil
+	}
+
+	rbacTags := make([]api.RbacTag, len(rbacTagModels))
+	for i, tagModel := range rbacTagModels {
+		rbacTags[i] = api.RbacTag{
+			DisplayName: tagModel.DisplayName.ValueString(),
+			ID:          tagModel.ID.ValueString(),
+		}
+	}
+
+	return rbacTags
 }
 
 // GetStateUpgraders returns the state upgraders for this resource

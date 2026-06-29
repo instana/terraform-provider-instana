@@ -18,6 +18,12 @@ const (
 	CustomDashboardFieldAccessRuleRelationType = "relation_type"
 	//CustomDashboardFieldWidgets constant value for the schema field widgets
 	CustomDashboardFieldWidgets = "widgets"
+	//CustomDashboardFieldRbacTags constant value for the schema field rbac_tags
+	CustomDashboardFieldRbacTags = "rbac_tags"
+	//CustomDashboardFieldRbacTagDisplayName constant value for the schema field rbac_tags.display_name
+	CustomDashboardFieldRbacTagDisplayName = "display_name"
+	//CustomDashboardFieldRbacTagID constant value for the schema field rbac_tags.id
+	CustomDashboardFieldRbacTagID = "id"
 )
 
 // Resource description
@@ -35,6 +41,11 @@ const CustomDashboardDescAccessRule = "The access rules applied to the custom da
 const CustomDashboardDescAccessRuleAccessType = "The access type of the given access rule."
 const CustomDashboardDescAccessRuleRelatedID = "The id of the related entity (user, api_token, etc.) of the given access rule."
 const CustomDashboardDescAccessRuleRelationType = "The relation type of the given access rule."
+
+// Field descriptions - RBAC Tags
+const CustomDashboardDescRbacTags = "RBAC tags (teams) the custom dashboard is assigned to."
+const CustomDashboardDescRbacTagDisplayName = "Display name of the RBAC tag (team)."
+const CustomDashboardDescRbacTagID = "ID of the RBAC tag (team)."
 
 // Error messages
 const CustomDashboardErrMarshalWidgets = "Error marshaling widgets"

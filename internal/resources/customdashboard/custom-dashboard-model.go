@@ -10,6 +10,7 @@ type CustomDashboardModel struct {
 	ID          types.String         `tfsdk:"id"`
 	Title       types.String         `tfsdk:"title"`
 	AccessRules []AccessRuleModel    `tfsdk:"access_rule"`
+	RbacTags    []RbacTagModel       `tfsdk:"rbac_tags"`
 	Widgets     jsontypes.Normalized `tfsdk:"widgets"`
 }
 
@@ -18,4 +19,10 @@ type AccessRuleModel struct {
 	AccessType   types.String `tfsdk:"access_type"`
 	RelatedID    types.String `tfsdk:"related_id"`
 	RelationType types.String `tfsdk:"relation_type"`
+}
+
+// RbacTagModel represents an RBAC tag of the custom dashboard
+type RbacTagModel struct {
+	DisplayName types.String `tfsdk:"display_name"`
+	ID          types.String `tfsdk:"id"`
 }
