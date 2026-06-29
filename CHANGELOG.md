@@ -1,3 +1,15 @@
+## [v7.3.0](https://github.com/instana/terraform-provider-instana/tree/v7.3.0) (2026-06-29)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.2.0...v7.3.0)
+
+**Implemented enhancements:**
+
+- Added support for Apdex Configuration resource to manage application and website Apdex thresholds
+
+**Merged pull requests:**
+
+- Add Terraform support for Apdex Configuration resource [\#92](https://github.com/instana/terraform-provider-instana/pull/92) ([dhinesh-sr](https://github.com/dhinesh-sr))
+
 ## [v7.2.0](https://github.com/instana/terraform-provider-instana/tree/v7.2.0) (2026-06-17)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.1.2...v7.2.0)
