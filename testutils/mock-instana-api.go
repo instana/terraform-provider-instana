@@ -50,6 +50,11 @@ func (m *MockInstanaAPI) AlertingConfigurations() rest.RestResource[*api.Alertin
 	return nil
 }
 
+// ApdexConfigs mock implementation
+func (m *MockInstanaAPI) ApdexConfigs() rest.RestResource[*api.ApdexConfig] {
+	return nil
+}
+
 // SliConfigs mock implementation
 func (m *MockInstanaAPI) SliConfigs() rest.RestResource[*api.SliConfig] {
 	return nil
