@@ -455,9 +455,9 @@ func (r *syntheticAlertConfigResource) mapTagFilterFromModel(model *SyntheticAle
 	return r.createDefaultTagFilter(), diags
 }
 
-// hasTagFilterValue checks if the model has a tag filter value
+// hasTagFilterValue checks if the model has a non-empty tag filter value
 func (r *syntheticAlertConfigResource) hasTagFilterValue(model *SyntheticAlertConfigModel) bool {
-	return !model.TagFilter.IsNull() && !model.TagFilter.IsUnknown()
+	return !model.TagFilter.IsNull() && !model.TagFilter.IsUnknown() && model.TagFilter.ValueString() != ""
 }
 
 // parseTagFilterExpression parses the tag filter expression string

@@ -41,6 +41,22 @@ func NewAlertingChannelResourceHandle() resourcehandle.ResourceHandle[*api.Alert
 						Required:    true,
 						Description: AlertingChannelDescName,
 					},
+					AlertingChannelFieldRbacTags: schema.ListNestedAttribute{
+						Description: AlertingChannelDescRbacTags,
+						Optional:    true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								AlertingChannelFieldRbacTagID: schema.StringAttribute{
+									Required:    true,
+									Description: AlertingChannelDescRbacTagID,
+								},
+								AlertingChannelFieldRbacTagDisplayName: schema.StringAttribute{
+									Required:    true,
+									Description: AlertingChannelDescRbacTagDisplayName,
+								},
+							},
+						},
+					},
 					AlertingChannelFieldChannelEmail: schema.SingleNestedAttribute{
 						Optional:    true,
 						Description: AlertingChannelDescEmail,
@@ -401,6 +417,19 @@ func (r *alertingChannelResource) UpdateState(ctx context.Context, state *tfsdk.
 	// Create base model with common fields
 	model := r.createBaseModel(alertingChannel)
 
+	// The Instana alerting channel API does not echo rbacTags back in its
+	// Create/Update response. On Create/Update (plan != nil) keep the value
+	// from the plan to avoid an "inconsistent result" error. On Read
+	// (plan == nil) populate from the API response.
+	if plan != nil {
+		var planModel AlertingChannelModel
+		diags.Append(plan.Get(ctx, &planModel)...)
+		if diags.HasError() {
+			return diags
+		}
+		model.RbacTags = planModel.RbacTags
+	}
+
 	// Map channel-specific data based on channel type
 	channelDiags := r.mapChannelTypeToModel(ctx, alertingChannel, &model)
 	if channelDiags.HasError() {
@@ -412,12 +441,43 @@ func (r *alertingChannelResource) UpdateState(ctx context.Context, state *tfsdk.
 	return diags
 }
 
-// createBaseModel creates the base model with common fields (ID and Name)
+// createBaseModel creates the base model with common fields (ID, Name and RbacTags)
 func (r *alertingChannelResource) createBaseModel(alertingChannel *api.AlertingChannel) AlertingChannelModel {
 	return AlertingChannelModel{
-		ID:   types.StringValue(alertingChannel.ID),
-		Name: types.StringValue(alertingChannel.Name),
+		ID:       types.StringValue(alertingChannel.ID),
+		Name:     types.StringValue(alertingChannel.Name),
+		RbacTags: r.mapRbacTagsToModel(alertingChannel.RbacTags),
 	}
+}
+
+// mapRbacTagsToModel converts RbacTags from the API to the model slice
+func (r *alertingChannelResource) mapRbacTagsToModel(rbacTags []api.RbacTag) []AlertingChannelRbacTagModel {
+	if len(rbacTags) == 0 {
+		return nil
+	}
+	models := make([]AlertingChannelRbacTagModel, len(rbacTags))
+	for i, tag := range rbacTags {
+		models[i] = AlertingChannelRbacTagModel{
+			ID:          types.StringValue(tag.ID),
+			DisplayName: types.StringValue(tag.DisplayName),
+		}
+	}
+	return models
+}
+
+// mapRbacTagsFromModel converts RbacTags from the model slice to the API format
+func (r *alertingChannelResource) mapRbacTagsFromModel(models []AlertingChannelRbacTagModel) []api.RbacTag {
+	if len(models) == 0 {
+		return nil
+	}
+	tags := make([]api.RbacTag, len(models))
+	for i, m := range models {
+		tags[i] = api.RbacTag{
+			ID:          m.ID.ValueString(),
+			DisplayName: m.DisplayName.ValueString(),
+		}
+	}
+	return tags
 }
 
 // mapChannelTypeToModel maps the API channel data to the appropriate model field based on channel type
@@ -996,7 +1056,13 @@ func (r *alertingChannelResource) MapStateToDataObject(ctx context.Context, plan
 	id, name := r.extractCommonFields(model)
 
 	// Map the configured channel type to API object
-	return r.mapConfiguredChannelType(ctx, model, id, name)
+	channel, diags := r.mapConfiguredChannelType(ctx, model, id, name)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	// Apply rbac_tags from the model
+	return r.applyRbacTags(channel, model), diags
 }
 
 // getModelFromPlanOrState retrieves the model from either plan or state
@@ -1023,7 +1089,8 @@ func (r *alertingChannelResource) extractCommonFields(model AlertingChannelModel
 	return id, name
 }
 
-// mapConfiguredChannelType determines which channel type is configured and maps it to API object
+// mapConfiguredChannelType determines which channel type is configured and maps it to API object.
+// It also sets RbacTags from the model on the returned object.
 func (r *alertingChannelResource) mapConfiguredChannelType(ctx context.Context, model AlertingChannelModel, id, name string) (*api.AlertingChannel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
@@ -1083,6 +1150,12 @@ func (r *alertingChannelResource) mapConfiguredChannelType(ctx context.Context, 
 		AlertingChannelErrInvalidConfigMsg,
 	)
 	return nil, diags
+}
+
+// applyRbacTags sets RbacTags on the channel object and returns it
+func (r *alertingChannelResource) applyRbacTags(channel *api.AlertingChannel, model AlertingChannelModel) *api.AlertingChannel {
+	channel.RbacTags = r.mapRbacTagsFromModel(model.RbacTags)
+	return channel
 }
 
 // GetStateUpgraders returns the state upgraders for this resource

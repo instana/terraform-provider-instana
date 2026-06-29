@@ -9,6 +9,7 @@ import (
 type AlertingChannelModel struct {
 	ID                    types.String                       `tfsdk:"id"`
 	Name                  types.String                       `tfsdk:"name"`
+	RbacTags              []AlertingChannelRbacTagModel      `tfsdk:"rbac_tags"`
 	Email                 *shared.EmailModel                 `tfsdk:"email"`
 	OpsGenie              *shared.OpsGenieModel              `tfsdk:"ops_genie"`
 	PagerDuty             *shared.PagerDutyModel             `tfsdk:"pager_duty"`
@@ -25,4 +26,10 @@ type AlertingChannelModel struct {
 	WatsonAIOpsWebhook    *shared.WatsonAIOpsWebhookModel    `tfsdk:"watson_aiops_webhook"`
 	SlackApp              *shared.SlackAppModel              `tfsdk:"slack_app"`
 	MsTeamsApp            *shared.MsTeamsAppModel            `tfsdk:"ms_teams_app"`
+}
+
+// AlertingChannelRbacTagModel represents an RBAC tag (team assignment) of an alerting channel
+type AlertingChannelRbacTagModel struct {
+	ID          types.String `tfsdk:"id"`
+	DisplayName types.String `tfsdk:"display_name"`
 }
