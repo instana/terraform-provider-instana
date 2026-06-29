@@ -112,6 +112,13 @@ const (
 	AlertingChannelFieldChannelSlackApp = "slack_app"
 	//AlertingChannelSlackAppFieldAppID const for the appId field of the Slack App alerting channel
 	AlertingChannelSlackAppFieldAppID = "app_id"
+	// AlertingChannelFieldRbacTags const for schema field rbac_tags
+	AlertingChannelFieldRbacTags = "rbac_tags"
+	// AlertingChannelFieldRbacTagID const for schema field rbac_tags.id
+	AlertingChannelFieldRbacTagID = "id"
+	// AlertingChannelFieldRbacTagDisplayName const for schema field rbac_tags.display_name
+	AlertingChannelFieldRbacTagDisplayName = "display_name"
+
 	//AlertingChannelSlackAppFieldTeamID const for the teamId field of the Slack App alerting channel
 	AlertingChannelSlackAppFieldTeamID = "team_id"
 	//AlertingChannelSlackAppFieldTeamName const for the teamName field of the Slack App alerting channel
@@ -224,6 +231,11 @@ const (
 	AlertingChannelDescMsTeamsAppServiceURL        = "The Service URL of the MS Teams App alerting channel"
 	AlertingChannelDescMsTeamsAppTenantID          = "The Tenant ID of the MS Teams App alerting channel"
 	AlertingChannelDescMsTeamsAppTenantName        = "The Tenant Name of the MS Teams App alerting channel"
+
+	// RBAC Tags descriptions
+	AlertingChannelDescRbacTags           = "RBAC tags (teams) the alerting channel is assigned to."
+	AlertingChannelDescRbacTagID          = "ID of the RBAC tag (team)."
+	AlertingChannelDescRbacTagDisplayName = "Display name of the RBAC tag (team)."
 
 	// Error messages
 	AlertingChannelErrUnsupportedType       = "Unsupported alerting channel type"

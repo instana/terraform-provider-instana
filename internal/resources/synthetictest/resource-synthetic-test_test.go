@@ -161,8 +161,8 @@ func TestMapStateToDataObject(t *testing.T) {
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
 			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
-				"name":  types.StringType,
-				"value": types.StringType,
+				"id":           types.StringType,
+				"display_name": types.StringType,
 			}}),
 			HttpAction: &HttpActionConfigModel{
 				MarkSyntheticCall: types.BoolValue(false),
@@ -224,8 +224,8 @@ func TestMapStateToDataObject(t *testing.T) {
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
 			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
-				"name":  types.StringType,
-				"value": types.StringType,
+				"id":           types.StringType,
+				"display_name": types.StringType,
 			}}),
 			HttpScript: &HttpScriptConfigModel{
 				MarkSyntheticCall: types.BoolValue(false),
@@ -270,8 +270,8 @@ func TestMapStateToDataObject(t *testing.T) {
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
 			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
-				"name":  types.StringType,
-				"value": types.StringType,
+				"id":           types.StringType,
+				"display_name": types.StringType,
 			}}),
 			BrowserScript: &BrowserScriptConfigModel{
 				MarkSyntheticCall: types.BoolValue(false),
@@ -318,8 +318,8 @@ func TestMapStateToDataObject(t *testing.T) {
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
 			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
-				"name":  types.StringType,
-				"value": types.StringType,
+				"id":           types.StringType,
+				"display_name": types.StringType,
 			}}),
 			DNS: &DNSConfigModel{
 				MarkSyntheticCall: types.BoolValue(false),
@@ -375,8 +375,8 @@ func TestMapStateToDataObject(t *testing.T) {
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
 			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
-				"name":  types.StringType,
-				"value": types.StringType,
+				"id":           types.StringType,
+				"display_name": types.StringType,
 			}}),
 			SSLCertificate: &SSLCertificateConfigModel{
 				MarkSyntheticCall:    types.BoolValue(false),
@@ -427,8 +427,8 @@ func TestMapStateToDataObject(t *testing.T) {
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
 			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
-				"name":  types.StringType,
-				"value": types.StringType,
+				"id":           types.StringType,
+				"display_name": types.StringType,
 			}}),
 			WebpageAction: &WebpageActionConfigModel{
 				MarkSyntheticCall: types.BoolValue(false),
@@ -473,8 +473,8 @@ func TestMapStateToDataObject(t *testing.T) {
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
 			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
-				"name":  types.StringType,
-				"value": types.StringType,
+				"id":           types.StringType,
+				"display_name": types.StringType,
 			}}),
 			WebpageScript: &WebpageScriptConfigModel{
 				MarkSyntheticCall: types.BoolValue(false),
@@ -520,8 +520,8 @@ func TestMapStateToDataObject(t *testing.T) {
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
 			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
-				"name":  types.StringType,
-				"value": types.StringType,
+				"id":           types.StringType,
+				"display_name": types.StringType,
 			}}),
 		}
 
@@ -556,8 +556,8 @@ func TestMapStateToDataObject(t *testing.T) {
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
 			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
-				"name":  types.StringType,
-				"value": types.StringType,
+				"id":           types.StringType,
+				"display_name": types.StringType,
 			}}),
 			HttpAction: &HttpActionConfigModel{
 				MarkSyntheticCall: types.BoolValue(false),
@@ -609,12 +609,12 @@ func TestMapStateToDataObject(t *testing.T) {
 		rbacTags := []attr.Value{
 			types.ObjectValueMust(
 				map[string]attr.Type{
-					"name":  types.StringType,
-					"value": types.StringType,
+					"id":           types.StringType,
+					"display_name": types.StringType,
 				},
 				map[string]attr.Value{
-					"name":  types.StringValue("dept"),
-					"value": types.StringValue("eng"),
+					"id":           types.StringValue("dept"),
+					"display_name": types.StringValue("eng"),
 				},
 			),
 		}
@@ -630,8 +630,8 @@ func TestMapStateToDataObject(t *testing.T) {
 			CustomProperties: types.MapNull(types.StringType),
 			RbacTags: types.SetValueMust(
 				types.ObjectType{AttrTypes: map[string]attr.Type{
-					"name":  types.StringType,
-					"value": types.StringType,
+					"id":           types.StringType,
+					"display_name": types.StringType,
 				}},
 				rbacTags,
 			),
@@ -708,8 +708,8 @@ func TestMapStateToDataObject(t *testing.T) {
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
 			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
-				"name":  types.StringType,
-				"value": types.StringType,
+				"id":           types.StringType,
+				"display_name": types.StringType,
 			}}),
 			HttpAction: &HttpActionConfigModel{
 				MarkSyntheticCall: types.BoolValue(false),
@@ -783,8 +783,8 @@ func TestMapStateToDataObject(t *testing.T) {
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
 			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
-				"name":  types.StringType,
-				"value": types.StringType,
+				"id":           types.StringType,
+				"display_name": types.StringType,
 			}}),
 			DNS: &DNSConfigModel{
 				MarkSyntheticCall: types.BoolValue(false),
@@ -850,8 +850,8 @@ func TestMapStateToDataObject(t *testing.T) {
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
 			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
-				"name":  types.StringType,
-				"value": types.StringType,
+				"id":           types.StringType,
+				"display_name": types.StringType,
 			}}),
 			HttpAction: &HttpActionConfigModel{
 				MarkSyntheticCall: types.BoolValue(false),
@@ -917,8 +917,8 @@ func TestMapStateToDataObject(t *testing.T) {
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
 			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
-				"name":  types.StringType,
-				"value": types.StringType,
+				"id":           types.StringType,
+				"display_name": types.StringType,
 			}}),
 			SSLCertificate: &SSLCertificateConfigModel{
 				MarkSyntheticCall:    types.BoolValue(false),
@@ -1559,7 +1559,7 @@ func TestUpdateState(t *testing.T) {
 			Applications: []string{},
 			MobileApps:   []string{},
 			Websites:     []string{},
-			RbacTags:     []api.ApiTag{},
+			RbacTags:     []api.RbacTag{},
 			Configuration: api.SyntheticTestConfig{
 				MarkSyntheticCall: false,
 				Retries:           0,
@@ -1654,7 +1654,8 @@ func TestUpdateState(t *testing.T) {
 		var model SyntheticTestModel
 		diags = state.Get(ctx, &model)
 		assert.False(t, diags.HasError())
-		assert.True(t, model.CustomProperties.IsNull())
+		assert.False(t, model.CustomProperties.IsNull())
+		assert.Equal(t, 0, len(model.CustomProperties.Elements()))
 	})
 
 	t.Run("should update state with HTTP Action empty Headers and ExpectJson", func(t *testing.T) {
@@ -1789,8 +1790,8 @@ func TestUpdateState(t *testing.T) {
 			CustomProperties: map[string]string{
 				"env": "prod",
 			},
-			RbacTags: []api.ApiTag{
-				{Name: "dept", Value: "eng"},
+			RbacTags: []api.RbacTag{
+				{ID: "dept", DisplayName: "eng"},
 			},
 			Configuration: api.SyntheticTestConfig{
 				MarkSyntheticCall: false,
@@ -1856,8 +1857,8 @@ func TestMapStateToDataObjectEdgeCases(t *testing.T) {
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
 			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
-				"name":  types.StringType,
-				"value": types.StringType,
+				"id":           types.StringType,
+				"display_name": types.StringType,
 			}}),
 			HttpAction: &HttpActionConfigModel{
 				MarkSyntheticCall: types.BoolValue(false),
@@ -2147,8 +2148,8 @@ func TestMapConfigurationOptionalFields(t *testing.T) {
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
 			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
-				"name":  types.StringType,
-				"value": types.StringType,
+				"id":           types.StringType,
+				"display_name": types.StringType,
 			}}),
 			HttpScript: &HttpScriptConfigModel{
 				MarkSyntheticCall: types.BoolValue(false),
@@ -2197,8 +2198,8 @@ func TestMapConfigurationOptionalFields(t *testing.T) {
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
 			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
-				"name":  types.StringType,
-				"value": types.StringType,
+				"id":           types.StringType,
+				"display_name": types.StringType,
 			}}),
 			BrowserScript: &BrowserScriptConfigModel{
 				MarkSyntheticCall: types.BoolValue(false),
@@ -2249,8 +2250,8 @@ func TestMapConfigurationOptionalFields(t *testing.T) {
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
 			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
-				"name":  types.StringType,
-				"value": types.StringType,
+				"id":           types.StringType,
+				"display_name": types.StringType,
 			}}),
 			DNS: &DNSConfigModel{
 				MarkSyntheticCall: types.BoolValue(false),
@@ -2308,8 +2309,8 @@ func TestMapConfigurationOptionalFields(t *testing.T) {
 			PlaybackMode:     types.StringValue("Simultaneous"),
 			TestFrequency:    types.Int64Null(),
 			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
-				"name":  types.StringType,
-				"value": types.StringType,
+				"id":           types.StringType,
+				"display_name": types.StringType,
 			}}),
 			SSLCertificate: &SSLCertificateConfigModel{
 				MarkSyntheticCall:    types.BoolValue(false),
@@ -2473,7 +2474,7 @@ func initializeEmptyState(t *testing.T, ctx context.Context, state *tfsdk.State)
 		Locations:        types.SetNull(types.StringType),
 		PlaybackMode:     types.StringNull(),
 		TestFrequency:    types.Int64Null(),
-		RbacTags:         types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{"name": types.StringType, "value": types.StringType}}),
+		RbacTags:         types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{"id": types.StringType, "display_name": types.StringType}}),
 		HttpAction:       nil,
 		HttpScript:       nil,
 		BrowserScript:    nil,

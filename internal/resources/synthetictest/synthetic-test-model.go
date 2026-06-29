@@ -30,8 +30,8 @@ type SyntheticTestModel struct {
 
 // RbacTagModel represents an RBAC tag
 type RbacTagModel struct {
-	Name  types.String `tfsdk:"name"`
-	Value types.String `tfsdk:"value"`
+	DisplayName types.String `tfsdk:"display_name"`
+	ID          types.String `tfsdk:"id"`
 }
 
 // MultipleScriptsModel represents multiple scripts configuration
