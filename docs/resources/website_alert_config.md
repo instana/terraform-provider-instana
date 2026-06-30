@@ -421,7 +421,7 @@ Exactly one of the following rule types must be configured:
 * `metric_name` - Required - Metric name (e.g., `jsErrors`)
 * `aggregation` - Optional - Aggregation function. Values: `sum`, `mean`, `max`, `min`, `p25`, `p50`, `p75`, `p90`, `p95`, `p98`, `p99`
 * `operator` - Required - Comparison operator. Values: `EQUALS`, `NOT_EQUAL`, `CONTAINS`, `NOT_CONTAIN`, `IS_EMPTY`, `NOT_EMPTY`, `IS_BLANK`, `NOT_BLANK`, `STARTS_WITH`, `ENDS_WITH`, `NOT_STARTS_WITH`, `NOT_ENDS_WITH`, `GREATER_OR_EQUAL_THAN`, `LESS_OR_EQUAL_THAN`, `GREATER_THAN`, `LESS_THAN`
-* `value` - Optional - Value to identify the specific JavaScript error
+* `value` - Optional - Value to identify the specific JavaScript error. Defaults to `Any` when `operator = "NOT_EMPTY"`
 
 #### Status Code Rule Reference
 

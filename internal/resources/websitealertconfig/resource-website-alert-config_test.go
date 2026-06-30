@@ -819,6 +819,61 @@ func TestMapStateToDataObject_AllRuleTypes(t *testing.T) {
 		assert.NotNil(t, result.TimeThreshold.UserPercentage)
 		assert.NotNil(t, result.TimeThreshold.Users)
 	})
+
+	t.Run("should default specific js error value to Any when operator is NOT_EMPTY", func(t *testing.T) {
+		model := WebsiteAlertConfigModel{
+			ID:          types.StringValue("test-id"),
+			Name:        types.StringValue("Test"),
+			Description: types.StringValue("Desc"),
+			Triggering:  types.BoolValue(true),
+			WebsiteID:   types.StringValue("website-1"),
+			TagFilter:   types.StringNull(),
+			Granularity: types.Int64Value(600000),
+			Rules: []RuleWithThresholdPluginModel{
+				{
+					Rule: &WebsiteAlertRuleModel{
+						SpecificJsError: &WebsiteAlertRuleConfigCompleteModel{
+							MetricName:  types.StringValue("jsErrors"),
+							Aggregation: types.StringValue("SUM"),
+							Operator:    types.StringValue("NOT_EMPTY"),
+							Value:       types.StringNull(),
+						},
+					},
+					ThresholdOperator: types.StringValue(">="),
+					Thresholds: &shared.ThresholdAllPluginModel{
+						Warning: &shared.ThresholdAllTypeModel{
+							Static: &shared.StaticTypeModel{
+								Value: types.Float64Value(1),
+							},
+						},
+					},
+				},
+			},
+			TimeThreshold: &WebsiteTimeThresholdModel{
+				ViolationsInSequence: &WebsiteViolationsInSequenceModel{
+					TimeWindow: types.Int64Value(300000),
+				},
+			},
+		}
+
+		alertChannelIds, _ := types.SetValueFrom(ctx, types.StringType, []string{"channel-1"})
+		model.AlertChannelIDs = alertChannelIds
+		model.CustomPayloadFields = types.ListNull(shared.GetCustomPayloadFieldType())
+
+		state := &tfsdk.State{
+			Schema: resource.metaData.Schema,
+		}
+		diags := state.Set(ctx, model)
+		require.False(t, diags.HasError())
+
+		result, resultDiags := resource.MapStateToDataObject(ctx, nil, state)
+
+		assert.False(t, resultDiags.HasError())
+		assert.NotNil(t, result)
+		assert.Len(t, result.Rules, 1)
+		require.NotNil(t, result.Rules[0].Rule.Value)
+		assert.Equal(t, WebsiteAlertConfigDefaultRuleValueAny, *result.Rules[0].Rule.Value)
+	})
 }
 
 func TestUpdateState_AllRuleTypes(t *testing.T) {
@@ -999,6 +1054,60 @@ func TestUpdateState_AllRuleTypes(t *testing.T) {
 		assert.Len(t, model.Rules, 1)
 		assert.NotNil(t, model.Rules[0].Rule.SpecificJsError)
 		assert.NotNil(t, model.TimeThreshold.UserImpactOfViolationsInSequence)
+	})
+
+	t.Run("should normalize specific js error value to Any when API omits value for NOT_EMPTY", func(t *testing.T) {
+		severity := 5
+		aggregation := common.Aggregation("SUM")
+		operator := common.NotEmptyOperator
+		apiObject := &api.WebsiteAlertConfig{
+			ID:          "api-id",
+			Name:        "JS Error Alert",
+			Description: "JS Error Description",
+			Severity:    &severity,
+			Triggering:  true,
+			WebsiteID:   "website-1",
+			Granularity: 600000,
+			TimeThreshold: api.WebsiteTimeThreshold{
+				Type:       "violationsInSequence",
+				TimeWindow: func() *int64 { v := int64(300000); return &v }(),
+			},
+			CustomerPayloadFields: []common.CustomPayloadField[any]{},
+			Rules: []api.WebsiteAlertRuleWithThresholds{
+				{
+					Rule: &api.WebsiteAlertRule{
+						AlertType:   "specificJsError",
+						MetricName:  "jsErrors",
+						Aggregation: &aggregation,
+						Operator:    &operator,
+						Value:       nil,
+					},
+					ThresholdOperator: ">=",
+					Thresholds: map[common.AlertSeverity]common.ThresholdRule{
+						common.WarningSeverity: {
+							Type:  "staticThreshold",
+							Value: func() *float64 { v := float64(1); return &v }(),
+						},
+					},
+				},
+			},
+		}
+
+		state := &tfsdk.State{
+			Schema: resource.metaData.Schema,
+		}
+
+		initializeEmptyState(t, ctx, state)
+
+		diags := resource.UpdateState(ctx, state, nil, apiObject)
+		assert.False(t, diags.HasError())
+
+		var model WebsiteAlertConfigModel
+		diags = state.Get(ctx, &model)
+		assert.False(t, diags.HasError())
+		assert.Len(t, model.Rules, 1)
+		require.NotNil(t, model.Rules[0].Rule.SpecificJsError)
+		assert.Equal(t, WebsiteAlertConfigDefaultRuleValueAny, model.Rules[0].Rule.SpecificJsError.Value.ValueString())
 	})
 }
 

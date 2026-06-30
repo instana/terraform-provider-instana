@@ -535,6 +535,10 @@ func (r *websiteAlertConfigResource) mapSpecificJsErrorRule(specificJsErrorModel
 	if !specificJsErrorModel.Value.IsNull() && !specificJsErrorModel.Value.IsUnknown() {
 		value := specificJsErrorModel.Value.ValueString()
 		valuePtr = &value
+	} else if operator == common.NotEmptyOperator {
+		// For NOT_EMPTY, Instana UI expects an explicit "Any" value.
+		defaultValue := WebsiteAlertConfigDefaultRuleValueAny
+		valuePtr = &defaultValue
 	}
 
 	return &api.WebsiteAlertRule{
@@ -834,11 +838,17 @@ func (r *websiteAlertConfigResource) mapRuleToState(ctx context.Context, rule *a
 		}
 		websiteAlertRuleModel.StatusCode = &websiteAlertRuleConfigModel
 	case WebsiteAlertConfigAlertTypeSpecificJsError:
+		value := rule.Value
+		if rule.Operator != nil && *rule.Operator == common.NotEmptyOperator && (value == nil || *value == "") {
+			defaultValue := WebsiteAlertConfigDefaultRuleValueAny
+			value = &defaultValue
+		}
+
 		websiteAlertRuleConfigModel := WebsiteAlertRuleConfigCompleteModel{
 			MetricName:  types.StringValue(rule.MetricName),
 			Aggregation: types.StringValue(string(*rule.Aggregation)),
 			Operator:    types.StringValue(string(*rule.Operator)),
-			Value:       util.SetStringPointerToState(rule.Value),
+			Value:       util.SetStringPointerToState(value),
 		}
 		websiteAlertRuleModel.SpecificJsError = &websiteAlertRuleConfigModel
 
