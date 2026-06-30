@@ -243,8 +243,8 @@ terraform apply
 * `description` - Required - The description of the SLO Alert configuration
 * `severity` - Required - The severity of the alert when triggered. Must be `5` for warning or `10` for critical
 * `alert_type` - Required - The type of Smart Alert. Allowed values: `status`, `error_budget`, `burn_rate_v2`, `apdex_score`
-* `slo_ids` - Optional - A set of SLO IDs to monitor. Mutually exclusive with `apdex_ids`. Required when using SLO alert types (`status`, `error_budget`, `burn_rate_v2`)
-* `apdex_ids` - Optional - A set of Apdex configuration IDs to monitor. Mutually exclusive with `slo_ids`. Required when `alert_type` is `apdex_score`
+* `slo_ids` - Optional - A set of SLO IDs to monitor. Mutually exclusive with `apdex_ids`. Optional when using SLO alert types (`status`, `error_budget`, `burn_rate_v2`)
+* `apdex_ids` - Optional - A set of Apdex configuration IDs to monitor. Mutually exclusive with `slo_ids`. Optional when `alert_type` is `apdex_score`
 * `alert_channel_ids` - Required - A set of alert channel IDs to send notifications to
 * `triggering` - Optional - Flag to indicate whether to trigger an incident. Default: `false`
 * `threshold` - Optional - Configuration block defining the threshold for the alert condition. Required for `status`, `error_budget`, and `apdex_score` alert types [Details](#threshold-reference)
