@@ -15,6 +15,7 @@ type SloAlertConfigModel struct {
 	AlertType       types.String                  `tfsdk:"alert_type"`
 	Threshold       *SloAlertThresholdModel       `tfsdk:"threshold"`
 	SloIds          types.Set                     `tfsdk:"slo_ids"`
+	ApdexIds        types.Set                     `tfsdk:"apdex_ids"`
 	AlertChannelIds types.Set                     `tfsdk:"alert_channel_ids"`
 	TimeThreshold   *SloAlertTimeThresholdModel   `tfsdk:"time_threshold"`
 	BurnRateConfig  []SloAlertBurnRateConfigModel `tfsdk:"burn_rate_config"`

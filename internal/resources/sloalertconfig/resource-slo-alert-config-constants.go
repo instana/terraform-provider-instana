@@ -15,6 +15,7 @@ const (
 	SloAlertConfigFieldThresholdOperator               = "operator"
 	SloAlertConfigFieldThresholdValue                  = "value"
 	SloAlertConfigFieldSloIds                          = "slo_ids"
+	SloAlertConfigFieldApdexIds                        = "apdex_ids"
 	SloAlertConfigFieldAlertChannelIds                 = "alert_channel_ids"
 	SloAlertConfigFieldTimeThreshold                   = "time_threshold"
 	SloAlertConfigFieldTimeThresholdWarmUp             = "warm_up"
@@ -30,6 +31,8 @@ const (
 	SloAlertConfigStatus      = "status"
 	SloAlertConfigErrorBudget = "error_budget"
 	SloAlertConfigBurnRateV2  = "burn_rate_v2"
+	// SloAlertConfigApdexScore is the Terraform alert_type value for Apdex smart alerts
+	SloAlertConfigApdexScore = "apdex_score"
 
 	// Resource description constants
 
@@ -46,9 +49,11 @@ const (
 	// SloAlertConfigDescTriggering is the description for the triggering field
 	SloAlertConfigDescTriggering = "Optional flag to indicate whether also an Incident is triggered or not. The default is false"
 	// SloAlertConfigDescAlertType is the description for the alert_type field
-	SloAlertConfigDescAlertType = "What do you want to be alerted on? (Type of Smart Alert: status, error_budget, burn_rate_v2)"
+	SloAlertConfigDescAlertType = "What do you want to be alerted on? (Type of Smart Alert: status, error_budget, burn_rate_v2, apdex_score)"
 	// SloAlertConfigDescSloIds is the description for the slo_ids field
-	SloAlertConfigDescSloIds = "The SLO IDs that are monitored"
+	SloAlertConfigDescSloIds = "The SLO IDs that are monitored. Mutually exclusive with apdex_ids."
+	// SloAlertConfigDescApdexIds is the description for the apdex_ids field
+	SloAlertConfigDescApdexIds = "The Apdex configuration IDs that are monitored. Mutually exclusive with slo_ids. Optional when alert_type is apdex_score."
 	// SloAlertConfigDescAlertChannelIds is the description for the alert_channel_ids field
 	SloAlertConfigDescAlertChannelIds = "The IDs of the Alert Channels"
 	// SloAlertConfigDescThreshold is the description for the threshold block
@@ -98,6 +103,8 @@ const (
 	APIAlertTypeServiceLevelsObjective = "SERVICE_LEVELS_OBJECTIVE"
 	// APIAlertTypeErrorBudget represents the ERROR_BUDGET API alert type
 	APIAlertTypeErrorBudget = "ERROR_BUDGET"
+	// APIAlertTypeApdex represents the APDEX API alert type
+	APIAlertTypeApdex = "APDEX"
 
 	// API Metric constants
 
@@ -109,6 +116,8 @@ const (
 	APIMetricBurnRate = "BURN_RATE"
 	// APIMetricBurnRateV2 represents the BURN_RATE_V2 API metric
 	APIMetricBurnRateV2 = "BURN_RATE_V2"
+	// APIMetricScore represents the SCORE API metric used for Apdex smart alerts
+	APIMetricScore = "SCORE"
 
 	// Threshold operator constants
 
@@ -146,6 +155,8 @@ const (
 	SchemaFieldAlertType = "alert_type"
 	// SchemaFieldSloIds represents the slo_ids field identifier
 	SchemaFieldSloIds = "slo_ids"
+	// SchemaFieldApdexIds represents the apdex_ids field identifier
+	SchemaFieldApdexIds = "apdex_ids"
 	// SchemaFieldAlertChannelIds represents the alert_channel_ids field identifier
 	SchemaFieldAlertChannelIds = "alert_channel_ids"
 	// SchemaFieldCustomPayloadFields represents the custom_payload_fields field identifier
@@ -200,4 +211,8 @@ const (
 	AlertTypeBurnRateV2Alt1 = "burnRateV2"
 	// AlertTypeBurnRateV2Alt2 represents alternative naming for burn_rate_v2
 	AlertTypeBurnRateV2Alt2 = "BurnRateV2"
+	// AlertTypeApdexScoreAlt1 represents alternative naming for apdex_score
+	AlertTypeApdexScoreAlt1 = "apdexScore"
+	// AlertTypeApdexScoreAlt2 represents alternative naming for apdex_score
+	AlertTypeApdexScoreAlt2 = "ApdexScore"
 )

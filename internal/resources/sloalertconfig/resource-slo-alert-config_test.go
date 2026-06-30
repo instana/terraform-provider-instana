@@ -421,6 +421,7 @@ func TestMapStateToDataObject_StatusAlertType(t *testing.T) {
 			types.StringValue("slo-1"),
 			types.StringValue("slo-2"),
 		}),
+		ApdexIds: types.SetNull(types.StringType),
 		AlertChannelIds: types.SetValueMust(types.StringType, []attr.Value{
 			types.StringValue("channel-1"),
 		}),
@@ -476,6 +477,7 @@ func TestMapStateToDataObject_ErrorBudgetAlertType(t *testing.T) {
 		SloIds: types.SetValueMust(types.StringType, []attr.Value{
 			types.StringValue("slo-3"),
 		}),
+		ApdexIds: types.SetNull(types.StringType),
 		AlertChannelIds: types.SetValueMust(types.StringType, []attr.Value{
 			types.StringValue("channel-2"),
 			types.StringValue("channel-3"),
@@ -522,6 +524,7 @@ func TestMapStateToDataObject_BurnRateV2AlertType(t *testing.T) {
 			types.StringValue("slo-4"),
 			types.StringValue("slo-5"),
 		}),
+		ApdexIds: types.SetNull(types.StringType),
 		AlertChannelIds: types.SetValueMust(types.StringType, []attr.Value{
 			types.StringValue("channel-4"),
 		}),
@@ -638,12 +641,13 @@ func TestMapStateToDataObject_WithNormalizedAlertTypes(t *testing.T) {
 				SloIds: types.SetValueMust(types.StringType, []attr.Value{
 					types.StringValue("slo-1"),
 				}),
+				ApdexIds: types.SetNull(types.StringType),
 				AlertChannelIds: types.SetValueMust(types.StringType, []attr.Value{
 					types.StringValue("channel-1"),
 				}),
 				CustomPayload: types.ListNull(shared.GetCustomPayloadFieldType()),
 			}
-
+	
 			if tc.inputAlertType != "burn_rate_v2" && tc.inputAlertType != "burnRateV2" && tc.inputAlertType != "BurnRateV2" {
 				model.Threshold = &SloAlertThresholdModel{
 					Type:     types.StringValue("staticThreshold"),
@@ -683,6 +687,7 @@ func TestMapStateToDataObject_InvalidAlertType(t *testing.T) {
 		SloIds: types.SetValueMust(types.StringType, []attr.Value{
 			types.StringValue("slo-1"),
 		}),
+		ApdexIds: types.SetNull(types.StringType),
 		AlertChannelIds: types.SetValueMust(types.StringType, []attr.Value{
 			types.StringValue("channel-1"),
 		}),
@@ -716,6 +721,7 @@ func TestMapStateToDataObject_InvalidDuration(t *testing.T) {
 		SloIds: types.SetValueMust(types.StringType, []attr.Value{
 			types.StringValue("slo-1"),
 		}),
+		ApdexIds: types.SetNull(types.StringType),
 		AlertChannelIds: types.SetValueMust(types.StringType, []attr.Value{
 			types.StringValue("channel-1"),
 		}),
@@ -758,6 +764,7 @@ func TestMapStateToDataObject_InvalidThresholdValue(t *testing.T) {
 		SloIds: types.SetValueMust(types.StringType, []attr.Value{
 			types.StringValue("slo-1"),
 		}),
+		ApdexIds: types.SetNull(types.StringType),
 		AlertChannelIds: types.SetValueMust(types.StringType, []attr.Value{
 			types.StringValue("channel-1"),
 		}),
@@ -805,6 +812,7 @@ func TestMapStateToDataObject_WithNullThresholdType(t *testing.T) {
 		SloIds: types.SetValueMust(types.StringType, []attr.Value{
 			types.StringValue("slo-1"),
 		}),
+		ApdexIds: types.SetNull(types.StringType),
 		AlertChannelIds: types.SetValueMust(types.StringType, []attr.Value{
 			types.StringValue("channel-1"),
 		}),
@@ -840,6 +848,7 @@ func TestMapStateToDataObject_BurnRateV2WithoutBurnRateConfig(t *testing.T) {
 		SloIds: types.SetValueMust(types.StringType, []attr.Value{
 			types.StringValue("slo-1"),
 		}),
+		ApdexIds: types.SetNull(types.StringType),
 		AlertChannelIds: types.SetValueMust(types.StringType, []attr.Value{
 			types.StringValue("channel-1"),
 		}),
@@ -883,6 +892,7 @@ func TestMapStateToDataObject_FromState(t *testing.T) {
 		SloIds: types.SetValueMust(types.StringType, []attr.Value{
 			types.StringValue("slo-1"),
 		}),
+		ApdexIds: types.SetNull(types.StringType),
 		AlertChannelIds: types.SetValueMust(types.StringType, []attr.Value{
 			types.StringValue("channel-1"),
 		}),
@@ -925,6 +935,7 @@ func TestMapStateToDataObject_WithEmptyID(t *testing.T) {
 		SloIds: types.SetValueMust(types.StringType, []attr.Value{
 			types.StringValue("slo-1"),
 		}),
+		ApdexIds: types.SetNull(types.StringType),
 		AlertChannelIds: types.SetValueMust(types.StringType, []attr.Value{
 			types.StringValue("channel-1"),
 		}),
@@ -968,18 +979,19 @@ func TestMapStateToDataObject_WithDifferentOperators(t *testing.T) {
 				SloIds: types.SetValueMust(types.StringType, []attr.Value{
 					types.StringValue("slo-1"),
 				}),
+				ApdexIds: types.SetNull(types.StringType),
 				AlertChannelIds: types.SetValueMust(types.StringType, []attr.Value{
 					types.StringValue("channel-1"),
 				}),
 				CustomPayload: types.ListNull(shared.GetCustomPayloadFieldType()),
 			}
-
+	
 			state := createMockState(t, model)
-
+	
 			apiConfig, diags := resource.MapStateToDataObject(ctx, nil, &state)
 			require.False(t, diags.HasError())
 			require.NotNil(t, apiConfig)
-
+	
 			assert.Equal(t, operator, apiConfig.Threshold.Operator)
 		})
 	}
@@ -1016,6 +1028,173 @@ func TestNewSloAlertConfigResourceHandle(t *testing.T) {
 	assert.Equal(t, ResourceInstanaSloAlertConfig, metaData.ResourceName)
 }
 
+// TestUpdateState_ApdexScoreAlertType verifies that an API config with APDEX rule
+// is correctly mapped to Terraform state with alert_type "apdex_score" and apdex_ids.
+func TestUpdateState_ApdexScoreAlertType(t *testing.T) {
+	ctx := context.Background()
+	resource := NewSloAlertConfigResourceHandle()
+
+	apiConfig := &api.SloAlertConfig{
+		ID:          "apdex-alert-id",
+		Name:        "Apdex Score Alert",
+		Description: "Apdex Score Description",
+		Severity:    5,
+		Triggering:  false,
+		Enabled:     true,
+		Rule: api.SloAlertRule{
+			AlertType: "APDEX",
+			Metric:    "SCORE",
+		},
+		Threshold: &api.SloAlertThreshold{
+			Type:     "static",
+			Operator: "<",
+			Value:    0.8,
+		},
+		TimeThreshold: api.SloAlertTimeThreshold{
+			TimeWindow: 300000,
+			Expiry:     600000,
+		},
+		SloIds:                []string{},
+		ApdexIds:              []string{"apdex-1", "apdex-2"},
+		AlertChannelIds:       []string{"channel-1"},
+		CustomerPayloadFields: []common.CustomPayloadField[any]{},
+		BurnRateConfigs:       &[]api.BurnRateConfig{},
+	}
+
+	state := tfsdk.State{
+		Schema: resource.MetaData().Schema,
+	}
+	initializeEmptyState(ctx, &state)
+
+	diags := resource.UpdateState(ctx, &state, nil, apiConfig)
+	require.False(t, diags.HasError())
+
+	var model SloAlertConfigModel
+	diags = state.Get(ctx, &model)
+	require.False(t, diags.HasError())
+
+	assert.Equal(t, "apdex-alert-id", model.ID.ValueString())
+	assert.Equal(t, "Apdex Score Alert", model.Name.ValueString())
+	assert.Equal(t, "apdex_score", model.AlertType.ValueString())
+	assert.Equal(t, int64(5), model.Severity.ValueInt64())
+	assert.False(t, model.Triggering.ValueBool())
+	assert.NotNil(t, model.Threshold)
+	assert.Equal(t, "staticThreshold", model.Threshold.Type.ValueString())
+	assert.Equal(t, "<", model.Threshold.Operator.ValueString())
+	assert.Equal(t, 0.80, model.Threshold.Value.ValueFloat64())
+	assert.Equal(t, int64(300000), model.TimeThreshold.WarmUp.ValueInt64())
+	assert.Equal(t, int64(600000), model.TimeThreshold.CoolDown.ValueInt64())
+	assert.Equal(t, 2, len(model.ApdexIds.Elements()))
+	assert.Equal(t, 0, len(model.SloIds.Elements()))
+}
+
+// TestMapStateToDataObject_ApdexScoreAlertType verifies that a Terraform model with
+// alert_type "apdex_score" and apdex_ids is correctly mapped to an API SloAlertConfig.
+func TestMapStateToDataObject_ApdexScoreAlertType(t *testing.T) {
+	ctx := context.Background()
+	resource := NewSloAlertConfigResourceHandle()
+
+	model := SloAlertConfigModel{
+		ID:          types.StringValue("apdex-alert-id"),
+		Name:        types.StringValue("Apdex Score Alert"),
+		Description: types.StringValue("Apdex Score Description"),
+		Severity:    types.Int64Value(5),
+		Triggering:  types.BoolValue(false),
+		AlertType:   types.StringValue("apdex_score"),
+		Threshold: &SloAlertThresholdModel{
+			Type:     types.StringValue("staticThreshold"),
+			Operator: types.StringValue("<"),
+			Value:    types.Float64Value(0.8),
+		},
+		TimeThreshold: &SloAlertTimeThresholdModel{
+			WarmUp:   types.Int64Value(300000),
+			CoolDown: types.Int64Value(600000),
+		},
+		SloIds: types.SetValueMust(types.StringType, []attr.Value{}),
+		ApdexIds: types.SetValueMust(types.StringType, []attr.Value{
+			types.StringValue("apdex-1"),
+			types.StringValue("apdex-2"),
+		}),
+		AlertChannelIds: types.SetValueMust(types.StringType, []attr.Value{
+			types.StringValue("channel-1"),
+		}),
+		BurnRateConfig: nil,
+		CustomPayload:  types.ListNull(shared.GetCustomPayloadFieldType()),
+	}
+
+	state := createMockState(t, model)
+
+	apiConfig, diags := resource.MapStateToDataObject(ctx, nil, &state)
+	require.False(t, diags.HasError())
+	require.NotNil(t, apiConfig)
+
+	assert.Equal(t, "apdex-alert-id", apiConfig.ID)
+	assert.Equal(t, "Apdex Score Alert", apiConfig.Name)
+	assert.Equal(t, "APDEX", apiConfig.Rule.AlertType)
+	assert.Equal(t, "SCORE", apiConfig.Rule.Metric)
+	assert.NotNil(t, apiConfig.Threshold)
+	assert.Equal(t, "<", apiConfig.Threshold.Operator)
+	assert.Equal(t, 0.8, apiConfig.Threshold.Value)
+	assert.Len(t, apiConfig.ApdexIds, 2)
+	assert.Len(t, apiConfig.SloIds, 0)
+	assert.Equal(t, 300000, apiConfig.TimeThreshold.TimeWindow)
+	assert.Equal(t, 600000, apiConfig.TimeThreshold.Expiry)
+}
+
+// TestMapStateToDataObject_ApdexScoreNormalizedAliases verifies that camelCase aliases
+// for apdex_score are correctly normalized.
+func TestMapStateToDataObject_ApdexScoreNormalizedAliases(t *testing.T) {
+	ctx := context.Background()
+	resource := NewSloAlertConfigResourceHandle()
+
+	testCases := []struct {
+		name           string
+		inputAlertType string
+	}{
+		{"apdexScore alias", "apdexScore"},
+		{"ApdexScore alias", "ApdexScore"},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			model := SloAlertConfigModel{
+				ID:          types.StringValue("test-id"),
+				Name:        types.StringValue("Test Alert"),
+				Description: types.StringValue("Test Description"),
+				Severity:    types.Int64Value(5),
+				Triggering:  types.BoolValue(false),
+				AlertType:   types.StringValue(tc.inputAlertType),
+				Threshold: &SloAlertThresholdModel{
+					Type:     types.StringValue("staticThreshold"),
+					Operator: types.StringValue("<"),
+					Value:    types.Float64Value(0.9),
+				},
+				TimeThreshold: &SloAlertTimeThresholdModel{
+					WarmUp:   types.Int64Value(300000),
+					CoolDown: types.Int64Value(600000),
+				},
+				SloIds: types.SetValueMust(types.StringType, []attr.Value{}),
+				ApdexIds: types.SetValueMust(types.StringType, []attr.Value{
+					types.StringValue("apdex-1"),
+				}),
+				AlertChannelIds: types.SetValueMust(types.StringType, []attr.Value{
+					types.StringValue("channel-1"),
+				}),
+				CustomPayload: types.ListNull(shared.GetCustomPayloadFieldType()),
+			}
+
+			state := createMockState(t, model)
+
+			apiConfig, diags := resource.MapStateToDataObject(ctx, nil, &state)
+			require.False(t, diags.HasError())
+			require.NotNil(t, apiConfig)
+
+			assert.Equal(t, "APDEX", apiConfig.Rule.AlertType)
+			assert.Equal(t, "SCORE", apiConfig.Rule.Metric)
+		})
+	}
+}
+
 // Helper functions
 
 func initializeEmptyState(ctx context.Context, state *tfsdk.State) {
@@ -1028,6 +1207,7 @@ func initializeEmptyState(ctx context.Context, state *tfsdk.State) {
 		AlertType:       types.StringNull(),
 		Threshold:       nil,
 		SloIds:          types.SetNull(types.StringType),
+		ApdexIds:        types.SetNull(types.StringType),
 		AlertChannelIds: types.SetNull(types.StringType),
 		TimeThreshold:   nil,
 		BurnRateConfig:  nil,
