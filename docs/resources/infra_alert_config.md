@@ -212,6 +212,7 @@ terraform apply
 * `name` - Required - The name for the infrastructure alert configuration
 * `description` - Required - The description text of the infrastructure alert config
 * `granularity` - Required - The evaluation granularity used for detection of violations of the defined threshold. In other words, it defines the size of the tumbling window used. Allowed values: `300000`, `600000`, `900000`, `1200000`, `1800000` (milliseconds)
+* `grace_period` - Optional - The duration in milliseconds for which an alert remains open after conditions are no longer violated. The alert automatically closes once the grace period expires.
 * `evaluation_type` - Required - The evaluation type of the infrastructure alert config. Allowed values:
   * `CUSTOM` - Combine all metrics in scope into a single metric per group (default)
   * `PER_ENTITY` - Monitor each metric individually and trigger alerts for each individual entity

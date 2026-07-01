@@ -12,6 +12,8 @@ const (
 	WebsiteAlertConfigFieldDescription = "description"
 	//WebsiteAlertConfigFieldGranularity constant value for field granularity of resource instana_website_alert_config
 	WebsiteAlertConfigFieldGranularity = "granularity"
+	//WebsiteAlertConfigFieldGracePeriod constant value for field grace_period of resource instana_website_alert_config
+	WebsiteAlertConfigFieldGracePeriod = "grace_period"
 	//WebsiteAlertConfigFieldName constant value for field name of resource instana_website_alert_config
 	WebsiteAlertConfigFieldName = "name"
 	//WebsiteAlertConfigFieldEnabled constant value for field enabled of resource instana_website_alert_config
@@ -73,6 +75,7 @@ const (
 	WebsiteAlertConfigDescTagFilter       = "The tag filter expression for the Website Alert Configuration."
 	WebsiteAlertConfigDescAlertChannelIDs = "List of IDs of alert channels defined in Instana."
 	WebsiteAlertConfigDescGranularity     = "The evaluation granularity used for detection of violations of the defined threshold."
+	WebsiteAlertConfigDescGracePeriod     = "The duration in milliseconds for which an alert remains open after conditions are no longer violated, with the alert auto-closing once the grace period expires."
 	WebsiteAlertConfigDescRules           = "A list of rules where each rule is associated with multiple thresholds and their corresponding severity levels."
 
 	// Rule descriptions

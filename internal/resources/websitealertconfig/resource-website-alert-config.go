@@ -91,6 +91,10 @@ func NewWebsiteAlertConfigResourceHandle() resourcehandle.ResourceHandle[*api.We
 						Description: WebsiteAlertConfigDescGranularity,
 						Default:     int64default.StaticInt64(WebsiteAlertConfigDefaultGranularity),
 					},
+					WebsiteAlertConfigFieldGracePeriod: schema.Int64Attribute{
+						Optional:    true,
+						Description: WebsiteAlertConfigDescGracePeriod,
+					},
 					WebsiteAlertConfigFieldRules: schema.ListNestedAttribute{
 						Description: WebsiteAlertConfigDescRules,
 						Optional:    true,
@@ -351,6 +355,13 @@ func (r *websiteAlertConfigResource) MapStateToDataObject(ctx context.Context, p
 	}
 
 	// Create API object
+	// Map grace period if set
+	var gracePeriod *int64
+	if !model.GracePeriod.IsNull() && !model.GracePeriod.IsUnknown() {
+		gracePeriodValue := model.GracePeriod.ValueInt64()
+		gracePeriod = &gracePeriodValue
+	}
+
 	return &api.WebsiteAlertConfig{
 		ID:                    model.ID.ValueString(),
 		Name:                  model.Name.ValueString(),
@@ -362,6 +373,7 @@ func (r *websiteAlertConfigResource) MapStateToDataObject(ctx context.Context, p
 		TagFilterExpression:   tagFilter,
 		AlertChannelIDs:       alertChannelIDs,
 		Granularity:           common.Granularity(model.Granularity.ValueInt64()),
+		GracePeriod:           gracePeriod,
 		CustomerPayloadFields: customPayloadFields,
 		TimeThreshold:         *timeThreshold,
 		Rules:                 rules,
@@ -678,6 +690,13 @@ func (r *websiteAlertConfigResource) UpdateState(ctx context.Context, state *tfs
 	model.Triggering = types.BoolValue(apiObject.Triggering)
 	model.WebsiteID = types.StringValue(apiObject.WebsiteID)
 	model.Granularity = types.Int64Value(int64(apiObject.Granularity))
+
+	// Map grace period field
+	if apiObject.GracePeriod != nil {
+		model.GracePeriod = types.Int64Value(*apiObject.GracePeriod)
+	} else {
+		model.GracePeriod = types.Int64Null()
+	}
 
 	// Map enabled field
 	if apiObject.Enabled != nil {

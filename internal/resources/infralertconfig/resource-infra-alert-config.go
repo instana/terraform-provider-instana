@@ -75,6 +75,10 @@ func buildInfraAlertConfigSchema() schema.Schema {
 				Description: InfraAlertConfigDescGranularity,
 				Required:    true,
 			},
+			InfraAlertConfigFieldGracePeriod: schema.Int64Attribute{
+				Description: InfraAlertConfigDescGracePeriod,
+				Optional:    true,
+			},
 			InfraAlertConfigFieldEvaluationType: schema.StringAttribute{
 				Description: InfraAlertConfigDescEvaluationType,
 				Required:    true,
@@ -229,6 +233,14 @@ func (r *infraAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk
 	model.Name = types.StringValue(resource.Name)
 	model.Description = types.StringValue(resource.Description)
 	model.Granularity = types.Int64Value(int64(resource.Granularity))
+
+	// Map grace period
+	if resource.GracePeriod != nil {
+		model.GracePeriod = types.Int64Value(*resource.GracePeriod)
+	} else {
+		model.GracePeriod = types.Int64Null()
+	}
+
 	model.EvaluationType = types.StringValue(string(resource.EvaluationType))
 	model.Triggering = types.BoolValue(resource.Triggering)
 
@@ -415,6 +427,12 @@ func (r *infraAlertConfigResource) MapStateToDataObject(ctx context.Context, pla
 		Granularity:    common.Granularity(model.Granularity.ValueInt64()),
 		EvaluationType: api.InfraAlertEvaluationType(model.EvaluationType.ValueString()),
 		Triggering:     model.Triggering.ValueBool(),
+	}
+
+	// Map grace period
+	if !model.GracePeriod.IsNull() && !model.GracePeriod.IsUnknown() {
+		gracePeriod := model.GracePeriod.ValueInt64()
+		infraAlertConfig.GracePeriod = &gracePeriod
 	}
 
 	tagFilter, tagFilterDiags := r.mapModelTagFilterToAPI(model.TagFilter)
