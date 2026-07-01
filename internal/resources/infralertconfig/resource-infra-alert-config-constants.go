@@ -17,6 +17,8 @@ const (
 	InfraAlertConfigFieldGroupBy = "group_by"
 	// InfraAlertConfigFieldGranularity constant value for the schema field granularity
 	InfraAlertConfigFieldGranularity = "granularity"
+	// InfraAlertConfigFieldGracePeriod constant value for the schema field grace_period
+	InfraAlertConfigFieldGracePeriod = "grace_period"
 	// InfraAlertConfigFieldEvaluationType constant value for the schema field evaluation_type
 	InfraAlertConfigFieldEvaluationType = "evaluation_type"
 	// InfraAlertConfigFieldTriggering constant value for the schema field triggering
@@ -77,6 +79,8 @@ const (
 	InfraAlertConfigDescGroupBy = "The list of tags to group by"
 	// InfraAlertConfigDescGranularity description for the granularity field
 	InfraAlertConfigDescGranularity = "The granularity of the infrastructure alert configuration"
+	// InfraAlertConfigDescGracePeriod description for the grace_period field
+	InfraAlertConfigDescGracePeriod = "The duration in milliseconds for which an alert remains open after conditions are no longer violated, with the alert auto-closing once the grace period expires"
 	// InfraAlertConfigDescEvaluationType description for the evaluation_type field
 	InfraAlertConfigDescEvaluationType = "The evaluation type of the infrastructure alert configuration"
 	// InfraAlertConfigDescTriggering description for the triggering field

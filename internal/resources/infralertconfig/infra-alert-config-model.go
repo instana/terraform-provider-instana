@@ -14,6 +14,7 @@ type InfraAlertConfigModel struct {
 	GroupBy            types.Set                `tfsdk:"group_by"`
 	AlertChannels      *InfraAlertChannelsModel `tfsdk:"alert_channels"`
 	Granularity        types.Int64              `tfsdk:"granularity"`
+	GracePeriod        types.Int64              `tfsdk:"grace_period"`
 	TimeThreshold      *InfraTimeThresholdModel `tfsdk:"time_threshold"`
 	CustomPayloadField types.List               `tfsdk:"custom_payload_field"`
 	Rules              *InfraRulesModel         `tfsdk:"rules"`

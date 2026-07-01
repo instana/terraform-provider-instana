@@ -393,6 +393,7 @@ terraform apply
 * `tag_filter` - Optional - Tag filter expression to limit monitoring scope [Details](#tag-filter-reference)
 * `alert_channel_ids` - Optional - Set of alert channel IDs to notify
 * `granularity` - Optional - Evaluation granularity in milliseconds. Values: `300000`, `600000`, `900000`, `1200000`, `800000`. Default: `600000`
+* `grace_period` - Optional - The duration in milliseconds for which an alert remains open after conditions are no longer violated. The alert automatically closes once the grace period expires.
 * `rule` - Optional - Single alert rule configuration [Details](#rule-reference)
 * `rules` - Optional - Multiple alert rules with individual thresholds [Details](#rules-reference)
 * `threshold` - Optional - Threshold configuration for single rule [Details](#threshold-reference)
