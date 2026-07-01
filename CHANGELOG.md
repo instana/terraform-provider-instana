@@ -1,3 +1,17 @@
+## [v7.3.1](https://github.com/instana/terraform-provider-instana/tree/v7.3.1) (2026-07-01)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.3.0...v7.3.1)
+
+**Implemented enhancements:**
+
+- Added `grace_period` field support to Infrastructure and Website Alert Configuration resources
+- Added Apdex smart alert support to SLO Alert Configuration resource
+
+**Merged pull requests:**
+
+- Add grace_period field support to InfraAlertConfig and WebsiteAlertConfig [\#98](https://github.com/instana/terraform-provider-instana/pull/98) ([georgekutty-1](https://github.com/georgekutty-1))
+- Add Apdex smart alert support to instana_slo_alert_config [\#97](https://github.com/instana/terraform-provider-instana/pull/97) ([dhinesh-sr](https://github.com/dhinesh-sr))
+
 ## [v7.3.0](https://github.com/instana/terraform-provider-instana/tree/v7.3.0) (2026-06-29)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.2.0...v7.3.0)
