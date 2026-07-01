@@ -329,8 +329,8 @@ func (r *sloAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.S
 
 	model.Threshold = r.mapThresholdToState(sloAlertConfig.Threshold)
 	model.TimeThreshold = r.mapTimeThresholdToState(sloAlertConfig.TimeThreshold)
-	model.SloIds = r.mapStringSliceToSet(sloAlertConfig.SloIds)
-	model.ApdexIds = r.mapStringSliceToSet(sloAlertConfig.ApdexIds)
+	model.SloIds = r.mapStringSliceToSetPreservingNull(model.SloIds, sloAlertConfig.SloIds)
+	model.ApdexIds = r.mapStringSliceToSetPreservingNull(model.ApdexIds, sloAlertConfig.ApdexIds)
 	model.AlertChannelIds = r.mapStringSliceToSet(sloAlertConfig.AlertChannelIds)
 
 	if len(model.BurnRateConfig) == 0 {
@@ -411,6 +411,22 @@ func (r *sloAlertConfigResource) mapTimeThresholdToState(timeThreshold api.SloAl
 
 // mapStringSliceToSet converts a string slice to a Terraform set
 func (r *sloAlertConfigResource) mapStringSliceToSet(values []string) types.Set {
+	attrValues := make([]attr.Value, 0, len(values))
+	for _, value := range values {
+		attrValues = append(attrValues, types.StringValue(value))
+	}
+	return types.SetValueMust(types.StringType, attrValues)
+}
+
+// mapStringSliceToSetPreservingNull converts a string slice to a Terraform set,
+// but preserves null if the original value was null and the API returns nil/empty
+func (r *sloAlertConfigResource) mapStringSliceToSetPreservingNull(originalSet types.Set, values []string) types.Set {
+	// If the original was null and API returns nil or empty, keep it null
+	if originalSet.IsNull() && (values == nil || len(values) == 0) {
+		return types.SetNull(types.StringType)
+	}
+
+	// Otherwise, convert to set (even if empty)
 	attrValues := make([]attr.Value, 0, len(values))
 	for _, value := range values {
 		attrValues = append(attrValues, types.StringValue(value))
