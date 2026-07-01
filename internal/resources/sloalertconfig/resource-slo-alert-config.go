@@ -49,6 +49,7 @@ func buildSloAlertConfigSchema() schema.Schema {
 			SchemaFieldTriggering:          buildTriggeringAttribute(),
 			SchemaFieldAlertType:           buildAlertTypeAttribute(),
 			SchemaFieldSloIds:              buildSloIdsAttribute(),
+			SchemaFieldApdexIds:            buildApdexIdsAttribute(),
 			SchemaFieldAlertChannelIds:     buildAlertChannelIdsAttribute(),
 			SchemaFieldCustomPayloadFields: shared.GetCustomPayloadFieldsSchema(),
 			SchemaFieldThreshold:           buildThresholdAttribute(),
@@ -111,7 +112,7 @@ func buildAlertTypeAttribute() schema.StringAttribute {
 		Required:    true,
 		Description: SloAlertConfigDescAlertType,
 		Validators: []validator.String{
-			stringvalidator.OneOf(SloAlertConfigStatus, SloAlertConfigErrorBudget, SloAlertConfigBurnRateV2),
+			stringvalidator.OneOf(SloAlertConfigStatus, SloAlertConfigErrorBudget, SloAlertConfigBurnRateV2, SloAlertConfigApdexScore),
 		},
 	}
 }
@@ -119,8 +120,17 @@ func buildAlertTypeAttribute() schema.StringAttribute {
 // buildSloIdsAttribute creates the slo_ids field schema attribute
 func buildSloIdsAttribute() schema.SetAttribute {
 	return schema.SetAttribute{
-		Required:    true,
+		Optional:    true,
 		Description: SloAlertConfigDescSloIds,
+		ElementType: types.StringType,
+	}
+}
+
+// buildApdexIdsAttribute creates the apdex_ids field schema attribute
+func buildApdexIdsAttribute() schema.SetAttribute {
+	return schema.SetAttribute{
+		Optional:    true,
+		Description: SloAlertConfigDescApdexIds,
 		ElementType: types.StringType,
 	}
 }
@@ -319,7 +329,8 @@ func (r *sloAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.S
 
 	model.Threshold = r.mapThresholdToState(sloAlertConfig.Threshold)
 	model.TimeThreshold = r.mapTimeThresholdToState(sloAlertConfig.TimeThreshold)
-	model.SloIds = r.mapStringSliceToSet(sloAlertConfig.SloIds)
+	model.SloIds = r.mapStringSliceToSetPreservingNull(model.SloIds, sloAlertConfig.SloIds)
+	model.ApdexIds = r.mapStringSliceToSetPreservingNull(model.ApdexIds, sloAlertConfig.ApdexIds)
 	model.AlertChannelIds = r.mapStringSliceToSet(sloAlertConfig.AlertChannelIds)
 
 	if len(model.BurnRateConfig) == 0 {
@@ -359,6 +370,10 @@ func (r *sloAlertConfigResource) mapAPIAlertTypeToTerraform(rule api.SloAlertRul
 		if rule.Metric == APIMetricBurnRate {
 			return SloAlertConfigErrorBudget
 		}
+	}
+
+	if rule.AlertType == APIAlertTypeApdex && rule.Metric == APIMetricScore {
+		return SloAlertConfigApdexScore
 	}
 
 	return ""
@@ -403,6 +418,22 @@ func (r *sloAlertConfigResource) mapStringSliceToSet(values []string) types.Set 
 	return types.SetValueMust(types.StringType, attrValues)
 }
 
+// mapStringSliceToSetPreservingNull converts a string slice to a Terraform set,
+// but preserves null if the original value was null and the API returns nil/empty
+func (r *sloAlertConfigResource) mapStringSliceToSetPreservingNull(originalSet types.Set, values []string) types.Set {
+	// If the original was null and API returns nil or empty, keep it null
+	if originalSet.IsNull() && (values == nil || len(values) == 0) {
+		return types.SetNull(types.StringType)
+	}
+
+	// Otherwise, convert to set (even if empty)
+	attrValues := make([]attr.Value, 0, len(values))
+	for _, value := range values {
+		attrValues = append(attrValues, types.StringValue(value))
+	}
+	return types.SetValueMust(types.StringType, attrValues)
+}
+
 // mapBurnRateConfigsToState converts API burn rate configs to state models
 func (r *sloAlertConfigResource) mapBurnRateConfigsToState(burnRateConfigs *[]api.BurnRateConfig) ([]SloAlertBurnRateConfigModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
@@ -440,6 +471,9 @@ func (r *sloAlertConfigResource) MapStateToDataObject(ctx context.Context, plan 
 	sloIds, sloIdsDiags := r.mapSetToStringSlice(ctx, model.SloIds)
 	diags.Append(sloIdsDiags...)
 
+	apdexIds, apdexIdsDiags := r.mapSetToStringSlice(ctx, model.ApdexIds)
+	diags.Append(apdexIdsDiags...)
+
 	alertChannelIds, channelIdsDiags := r.mapSetToStringSlice(ctx, model.AlertChannelIds)
 	diags.Append(channelIdsDiags...)
 
@@ -463,6 +497,7 @@ func (r *sloAlertConfigResource) MapStateToDataObject(ctx context.Context, plan 
 		Threshold:             threshold,
 		TimeThreshold:         timeThreshold,
 		SloIds:                sloIds,
+		ApdexIds:              apdexIds,
 		AlertChannelIds:       alertChannelIds,
 		CustomerPayloadFields: customPayloadFields,
 		BurnRateConfigs:       &burnRateConfigs,
@@ -510,6 +545,11 @@ func (r *sloAlertConfigResource) mapAlertTypeToAPIRule(terraformAlertType string
 			AlertType: APIAlertTypeErrorBudget,
 			Metric:    APIMetricBurnRateV2,
 		}, diags
+	case SloAlertConfigApdexScore:
+		return api.SloAlertRule{
+			AlertType: APIAlertTypeApdex,
+			Metric:    APIMetricScore,
+		}, diags
 	default:
 		diags.AddError(
 			SloAlertConfigErrMappingAlertType,
@@ -528,6 +568,8 @@ func (r *sloAlertConfigResource) normalizeAlertType(alertType string) string {
 		return SloAlertConfigStatus
 	case AlertTypeBurnRateV2Alt1, AlertTypeBurnRateV2Alt2:
 		return SloAlertConfigBurnRateV2
+	case AlertTypeApdexScoreAlt1, AlertTypeApdexScoreAlt2:
+		return SloAlertConfigApdexScore
 	default:
 		return alertType
 	}

@@ -1,6 +1,6 @@
-# SLO Smart Alert Configuration Resource
+# SLO & Apdex Smart Alert Configuration Resource
 
-Management of Smart Alerts for Service Level Objectives (SLOs) to trigger notifications when specific thresholds are surpassed, such as SLO status, the percentage of error budget consumed, or the error budget burn rate. Additionally, you can customize the alert by selecting one or more alert channels, adding custom payloads, or setting time-based thresholds.
+Management of Smart Alerts for Service Level Objectives (SLOs) and Apdex configurations to trigger notifications when specific thresholds are surpassed, such as SLO status, the percentage of error budget consumed, the error budget burn rate, or the Apdex score. Additionally, you can customize the alert by selecting one or more alert channels, adding custom payloads, or setting time-based thresholds.
 
 API Documentation: <https://instana.github.io/openapi/#tag/Service-Levels-Alert-Configuration>
 
@@ -165,6 +165,34 @@ resource "instana_slo_alert_config" "burn_rate_single" {
   }
 }
 ```
+
+### Apdex Score Alert
+
+Monitor Apdex score and alert when it falls below a threshold. Use `alert_type = "apdex_score"` with `apdex_ids` referencing one or more Apdex configuration IDs. `slo_ids` and `apdex_ids` are mutually exclusive — leave `slo_ids` empty (or omit it) for Apdex alerts:
+
+```hcl
+resource "instana_slo_alert_config" "apdex_score_alert" {
+  name = "Apdex Score Alert"
+  description = "Alert when Apdex score drops below 0.95"
+  severity = 5
+  triggering = false
+  alert_type = "apdex_score"
+  apdex_ids = ["APDKf9ClVQLTkKSVDUPaQLJhg"] # replace with valid apdex config ids
+  alert_channel_ids = [] # replace with valid channel ids
+
+  threshold = {
+    type = "staticThreshold"
+    operator = "<="
+    value = 0.95
+  }
+
+  time_threshold = {
+    warm_up = 60000
+    cool_down = 60000
+  }
+}
+```
+
 ## Generating Configuration from Existing Resources
 
 If you have already created a SLO alert configuration in Instana and want to generate the Terraform configuration for it, you can use Terraform's import block feature with the `-generate-config-out` flag.
@@ -214,13 +242,14 @@ terraform apply
 * `name` - Required - The name of the SLO Alert configuration (max 256 characters)
 * `description` - Required - The description of the SLO Alert configuration
 * `severity` - Required - The severity of the alert when triggered. Must be `5` for warning or `10` for critical
-* `alert_type` - Required - The type of Smart Alert. Allowed values: `status`, `error_budget`, `burn_rate_v2`
-* `slo_ids` - Required - A set of SLO IDs to monitor. Must contain at least one ID
+* `alert_type` - Required - The type of Smart Alert. Allowed values: `status`, `error_budget`, `burn_rate_v2`, `apdex_score`
+* `slo_ids` - Optional - A set of SLO IDs to monitor. Mutually exclusive with `apdex_ids`. Optional when using SLO alert types (`status`, `error_budget`, `burn_rate_v2`)
+* `apdex_ids` - Optional - A set of Apdex configuration IDs to monitor. Mutually exclusive with `slo_ids`. Optional when `alert_type` is `apdex_score`
 * `alert_channel_ids` - Required - A set of alert channel IDs to send notifications to
 * `triggering` - Optional - Flag to indicate whether to trigger an incident. Default: `false`
-* `threshold` - Optional - Configuration block defining the threshold for the alert condition. Required for `status` and `error_budget` alert types [Details](#threshold-reference)
+* `threshold` - Optional - Configuration block defining the threshold for the alert condition. Required for `status`, `error_budget`, and `apdex_score` alert types [Details](#threshold-reference)
 * `time_threshold` - Required - Configuration block defining the time threshold for triggering and suppressing alerts [Details](#time-threshold-reference)
-* `burn_rate_config` - Optional - List of burn rate configurations and alerting windows. Required for `alert_type` set to `burn_rate_v2` [Details](#burn-rate-config-reference)
+* `burn_rate_config` - Optional - List of burn rate configurations and alerting windows. Required for `alert_type` set to `burn_rate_v2`. Not applicable for `apdex_score` [Details](#burn-rate-config-reference)
 * `custom_payload_fields` - Optional - List of custom payload fields to include in the alert notification [Details](#custom-payload-fields-reference)
 
 ### Threshold Reference
@@ -229,7 +258,7 @@ The alert is triggered when the threshold is evaluated by the value and operator
 
 * `type` - Optional - The type of threshold. Default: `staticThreshold`. Allowed values: `staticThreshold`
 * `operator` - Required - The operator used to evaluate the threshold. Allowed values: `>`, `>=`, `=`, `<=`, `<`
-* `value` - Required - The threshold value for the alert condition (float)
+* `value` - Required - The threshold value for the alert condition (float). For `apdex_score` alerts this is a value between `0.0` and `1.0`
 
 ### Time Threshold Reference
 
@@ -240,7 +269,7 @@ If the alert is triggered, after the warm-up period, a notification will be gene
 
 ### Burn Rate Config Reference
 
-The `burn_rate_config` block is applicable only for burn rate alerts (i.e., when `alert_type` = `burn_rate_v2`). This setting is required in such cases.
+The `burn_rate_config` block is applicable only for burn rate alerts (i.e., when `alert_type` = `burn_rate_v2`). This setting is required in such cases. It is **not** applicable for `apdex_score` alerts.
 
 Currently, two types of burn rate alert configurations are supported:
 - **Single Window, Single Threshold**: Uses a single threshold and a single alerting window
@@ -270,11 +299,11 @@ Each burn rate configuration object contains:
 
 ## Attributes Reference
 
-* `id` - The ID of the SLO alert configuration
+* `id` - The ID of the alert configuration
 
 ## Import
 
-SLO alert configurations can be imported using the `id`, e.g.:
+SLO and Apdex alert configurations can be imported using the `id`, e.g.:
 
 ```bash
 $ terraform import instana_slo_alert_config.example 60845e4e5e6b9cf8fc2868da
@@ -283,13 +312,16 @@ $ terraform import instana_slo_alert_config.example 60845e4e5e6b9cf8fc2868da
 ## Notes
 
 * The ID is auto-generated by Instana
+* **`slo_ids` and `apdex_ids` are mutually exclusive** — only one may be non-empty at a time or both can be empty.
 * Use `status` alert type to monitor SLO compliance status
 * Use `error_budget` alert type to monitor error budget consumption percentage
 * Use `burn_rate_v2` alert type to monitor the rate at which error budget is being consumed
+* Use `apdex_score` alert type to monitor Apdex score for application or website entities, Apdex alerts use the `SCORE` metric
+* For `apdex_score` alerts, the `threshold.value` is a float between `0.0` (worst) and `1.0` (perfect). Typical production targets are `0.9` or higher
 * Burn rate alerts with multiple windows trigger only when ALL configured windows breach their thresholds (AND logic)
 * The `warm_up` period prevents alert flapping by requiring sustained violations
 * The `cool_down` period prevents premature alert closure
 * Custom payload fields can include both static values and dynamic tag values
 * Severity level 5 is for warnings, severity level 10 is for critical alerts
-* Multiple SLOs can be monitored with a single alert configuration
+* Multiple SLOs (or multiple Apdex configurations) can be monitored with a single alert configuration
 * The `triggering` flag controls whether the alert creates incidents in Instana
