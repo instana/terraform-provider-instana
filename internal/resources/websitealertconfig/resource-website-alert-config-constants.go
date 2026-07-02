@@ -199,6 +199,7 @@ const (
 	WebsiteAlertConfigDefaultTriggering  = false
 	WebsiteAlertConfigDefaultEnabled     = true
 	WebsiteAlertConfigDefaultGranularity = 600000
+	WebsiteAlertConfigDefaultRuleValueAny = "Any"
 )
 
 // Validation limit constants
