@@ -590,6 +590,7 @@ func buildBaseSchema() map[string]schema.Attribute {
 		},
 		SyntheticTestFieldCustomProperties: schema.MapAttribute{
 			Optional:    true,
+			Computed:    true,
 			Description: SyntheticTestDescCustomProperties,
 			ElementType: types.StringType,
 		},
@@ -777,9 +778,13 @@ func (r *syntheticTestResource) mapWebsitesFromModel(ctx context.Context, model 
 func (r *syntheticTestResource) mapCustomPropertiesFromModel(ctx context.Context, model SyntheticTestModel) (map[string]string, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	customProperties := make(map[string]string)
+
+	// Always initialize with empty map, even if null or unknown
+	// This ensures empty object {} is treated as empty map and sent to API
 	if !model.CustomProperties.IsNull() && !model.CustomProperties.IsUnknown() {
 		diags.Append(model.CustomProperties.ElementsAs(ctx, &customProperties, false)...)
 	}
+
 	return customProperties, diags
 }
 

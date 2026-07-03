@@ -63,6 +63,7 @@ func GetCustomPayloadFieldsSchema() schema.ListNestedAttribute {
 	return schema.ListNestedAttribute{
 		Description: "Custom payload fields for the configuration.",
 		Optional:    true,
+		Computed:    true,
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: map[string]schema.Attribute{
 				CustomPayloadFieldsFieldKey: schema.StringAttribute{
@@ -121,6 +122,7 @@ func CustomPayloadFieldsToTerraform(ctx context.Context, fields []model.CustomPa
 	// If no fields, return empty list (not null) to avoid "inconsistent result" errors
 	// when Terraform planned an empty list and the API returns no fields.
 	if len(fields) == 0 {
+		// return types.ListNull(GetCustomPayloadFieldType()), diags
 		return types.ListValueMust(GetCustomPayloadFieldType(), []attr.Value{}), diags
 	}
 
