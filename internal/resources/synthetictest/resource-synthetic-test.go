@@ -604,13 +604,13 @@ func buildBaseSchema() map[string]schema.Attribute {
 			Description: SyntheticTestDescRbacTags,
 			NestedObject: schema.NestedAttributeObject{
 				Attributes: map[string]schema.Attribute{
-					"id": schema.StringAttribute{
+					SyntheticTestFieldRbacTagID: schema.StringAttribute{
 						Required:    true,
-						Description: "ID of the RBAC tag",
+						Description: SyntheticTestDescRbacTagID,
 					},
-					"display_name": schema.StringAttribute{
+					SyntheticTestFieldRbacTagDisplayName: schema.StringAttribute{
 						Required:    true,
-						Description: "Display name of the RBAC tag",
+						Description: SyntheticTestDescRbacTagDisplayName,
 					},
 				},
 			},
@@ -1313,8 +1313,8 @@ func (r *syntheticTestResource) mapLocationsToModel(apiObject *api.SyntheticTest
 // mapRbacTagsToModel maps RBAC tags to model
 func (r *syntheticTestResource) mapRbacTagsToModel(apiObject *api.SyntheticTest) types.Set {
 	tagAttrTypes := map[string]attr.Type{
-		"display_name": types.StringType,
-		"id":           types.StringType,
+		SyntheticTestFieldRbacTagDisplayName: types.StringType,
+		SyntheticTestFieldRbacTagID:          types.StringType,
 	}
 	if len(apiObject.RbacTags) > 0 {
 		rbacTagValues := make([]attr.Value, len(apiObject.RbacTags))
@@ -1322,8 +1322,8 @@ func (r *syntheticTestResource) mapRbacTagsToModel(apiObject *api.SyntheticTest)
 			tagObj, _ := types.ObjectValue(
 				tagAttrTypes,
 				map[string]attr.Value{
-					"display_name": types.StringValue(tag.DisplayName),
-					"id":           types.StringValue(tag.ID),
+					SyntheticTestFieldRbacTagDisplayName: types.StringValue(tag.DisplayName),
+					SyntheticTestFieldRbacTagID:          types.StringValue(tag.ID),
 				},
 			)
 			rbacTagValues[i] = tagObj

@@ -122,7 +122,6 @@ func CustomPayloadFieldsToTerraform(ctx context.Context, fields []model.CustomPa
 	// If no fields, return empty list (not null) to avoid "inconsistent result" errors
 	// when Terraform planned an empty list and the API returns no fields.
 	if len(fields) == 0 {
-		// return types.ListNull(GetCustomPayloadFieldType()), diags
 		return types.ListValueMust(GetCustomPayloadFieldType(), []attr.Value{}), diags
 	}
 

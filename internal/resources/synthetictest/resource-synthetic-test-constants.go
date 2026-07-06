@@ -204,9 +204,15 @@ const (
 	SyntheticTestDescWebpageAction = "Webpage action test configuration"
 	SyntheticTestDescWebpageScript = "Webpage script test configuration"
 
+	// RBAC tag field names
+	SyntheticTestFieldRbacTagID          = "id"
+	SyntheticTestFieldRbacTagDisplayName = "display_name"
+
 	// RBAC tag descriptions
-	SyntheticTestDescTagName  = "Tag name"
-	SyntheticTestDescTagValue = "Tag value"
+	SyntheticTestDescRbacTagID          = "ID of the RBAC tag"
+	SyntheticTestDescRbacTagDisplayName = "Display name of the RBAC tag"
+	SyntheticTestDescTagName            = "Tag name"
+	SyntheticTestDescTagValue           = "Tag value"
 
 	// Error message constants
 	SyntheticTestErrConfigRequired       = "Configuration required"
