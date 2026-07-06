@@ -9,7 +9,7 @@ type ApdexConfigModel struct {
 	ID          types.String      `tfsdk:"id"`
 	ApdexName   types.String      `tfsdk:"apdex_name"`
 	Tags        types.Set         `tfsdk:"tags"`
-	RbacTags    []RbacTagModel    `tfsdk:"rbac_tags"`
+	RbacTags    types.List        `tfsdk:"rbac_tags"`
 	ApdexEntity *ApdexEntityModel `tfsdk:"apdex_entity"`
 }
 

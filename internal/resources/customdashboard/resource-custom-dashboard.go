@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -84,6 +85,7 @@ func NewCustomDashboardResourceHandle() resourcehandle.ResourceHandle[*api.Custo
 					CustomDashboardFieldRbacTags: schema.ListNestedAttribute{
 						Description: CustomDashboardDescRbacTags,
 						Optional:    true,
+						Computed:    true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								CustomDashboardFieldRbacTagID: schema.StringAttribute{
@@ -204,21 +206,36 @@ func (r *customDashboardResource) mapAccessRulesToState(accessRules []model.Acce
 	return models
 }
 
-// mapRbacTagsToState converts RBAC tags from API format to state models
-func (r *customDashboardResource) mapRbacTagsToState(rbacTags []api.RbacTag) []RbacTagModel {
+// mapRbacTagsToState converts RBAC tags from API format to state List
+func (r *customDashboardResource) mapRbacTagsToState(rbacTags []api.RbacTag) types.List {
+	tagAttrTypes := map[string]attr.Type{
+		CustomDashboardFieldRbacTagID:          types.StringType,
+		CustomDashboardFieldRbacTagDisplayName: types.StringType,
+	}
+
+	// Always initialize with empty list, even if data is null or empty
 	if len(rbacTags) == 0 {
-		return nil
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+		return emptyList
 	}
 
-	models := make([]RbacTagModel, len(rbacTags))
+	tagValues := make([]attr.Value, len(rbacTags))
 	for i, tag := range rbacTags {
-		models[i] = RbacTagModel{
-			DisplayName: types.StringValue(tag.DisplayName),
-			ID:          types.StringValue(tag.ID),
-		}
+		tagObj, _ := types.ObjectValue(
+			tagAttrTypes,
+			map[string]attr.Value{
+				CustomDashboardFieldRbacTagID:          types.StringValue(tag.ID),
+				CustomDashboardFieldRbacTagDisplayName: types.StringValue(tag.DisplayName),
+			},
+		)
+		tagValues[i] = tagObj
 	}
 
-	return models
+	list, _ := types.ListValue(types.ObjectType{AttrTypes: tagAttrTypes}, tagValues)
+	return list
 }
 
 // MapStateToDataObject converts Terraform state to API data object
@@ -291,14 +308,22 @@ func (r *customDashboardResource) mapAccessRulesFromState(accessRuleModels []Acc
 	return accessRules
 }
 
-// mapRbacTagsFromState converts RBAC tag models from state to API format
-func (r *customDashboardResource) mapRbacTagsFromState(rbacTagModels []RbacTagModel) []api.RbacTag {
-	if len(rbacTagModels) == 0 {
-		return nil
+// mapRbacTagsFromState converts RBAC tag models from state List to API format
+func (r *customDashboardResource) mapRbacTagsFromState(rbacTagsList types.List) []api.RbacTag {
+	// Always initialize with empty array, even if data is null or empty
+	if rbacTagsList.IsNull() || rbacTagsList.IsUnknown() {
+		return []api.RbacTag{}
 	}
 
-	rbacTags := make([]api.RbacTag, len(rbacTagModels))
-	for i, tagModel := range rbacTagModels {
+	var tagModels []RbacTagModel
+	rbacTagsList.ElementsAs(context.Background(), &tagModels, false)
+
+	if len(tagModels) == 0 {
+		return []api.RbacTag{}
+	}
+
+	rbacTags := make([]api.RbacTag, len(tagModels))
+	for i, tagModel := range tagModels {
 		rbacTags[i] = api.RbacTag{
 			DisplayName: tagModel.DisplayName.ValueString(),
 			ID:          tagModel.ID.ValueString(),

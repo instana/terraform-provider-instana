@@ -10,7 +10,7 @@ type SloConfigModel struct {
 	Name       types.String     `tfsdk:"name"`
 	Target     types.Float64    `tfsdk:"target"`
 	Tags       types.Set        `tfsdk:"tags"`
-	RbacTags   []RbacTagModel   `tfsdk:"rbac_tags"`
+	RbacTags   types.List       `tfsdk:"rbac_tags"`
 	Entity     *EntityModel     `tfsdk:"entity"`
 	Indicator  *IndicatorModel  `tfsdk:"indicator"`
 	TimeWindow *TimeWindowModel `tfsdk:"time_window"`
@@ -118,9 +118,9 @@ type TimeBasedSaturationIndicatorModel struct {
 
 // SaturationIndicatorModel represents a saturation indicator in the Terraform model
 type EventBasedSaturationIndicatorModel struct {
-	MetricName  types.String  `tfsdk:"metric_name"`
-	Threshold   types.Float64 `tfsdk:"threshold"`
-	Operator    types.String  `tfsdk:"operator"`
+	MetricName types.String  `tfsdk:"metric_name"`
+	Threshold  types.Float64 `tfsdk:"threshold"`
+	Operator   types.String  `tfsdk:"operator"`
 }
 
 // RollingTimeWindowModel represents a rolling time window in the Terraform model

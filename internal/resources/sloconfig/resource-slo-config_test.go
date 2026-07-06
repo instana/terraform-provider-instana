@@ -667,18 +667,31 @@ func TestMapRbacTags(t *testing.T) {
 	resource := &sloConfigResource{}
 
 	t.Run("should map RBAC tags successfully", func(t *testing.T) {
-		rbacTags := []RbacTagModel{
-			{
-				DisplayName: types.StringValue("Team A"),
-				ID:          types.StringValue("team-a-id"),
-			},
-			{
-				DisplayName: types.StringValue("Team B"),
-				ID:          types.StringValue("team-b-id"),
-			},
+		tagAttrTypes := map[string]attr.Type{
+			SchemaFieldID:          types.StringType,
+			SchemaFieldDisplayName: types.StringType,
 		}
 
-		result := resource.mapRbacTagsFromState(rbacTags)
+		tagValues := []attr.Value{
+			func() attr.Value {
+				obj, _ := types.ObjectValue(tagAttrTypes, map[string]attr.Value{
+					SchemaFieldID:          types.StringValue("team-a-id"),
+					SchemaFieldDisplayName: types.StringValue("Team A"),
+				})
+				return obj
+			}(),
+			func() attr.Value {
+				obj, _ := types.ObjectValue(tagAttrTypes, map[string]attr.Value{
+					SchemaFieldID:          types.StringValue("team-b-id"),
+					SchemaFieldDisplayName: types.StringValue("Team B"),
+				})
+				return obj
+			}(),
+		}
+
+		rbacTagsList, _ := types.ListValue(types.ObjectType{AttrTypes: tagAttrTypes}, tagValues)
+
+		result := resource.mapRbacTagsFromState(rbacTagsList)
 
 		assert.Len(t, result, 2)
 		assert.Equal(t, "Team A", result[0].DisplayName)
@@ -688,7 +701,13 @@ func TestMapRbacTags(t *testing.T) {
 	})
 
 	t.Run("should return empty slice for no RBAC tags", func(t *testing.T) {
-		result := resource.mapRbacTagsFromState([]RbacTagModel{})
+		tagAttrTypes := map[string]attr.Type{
+			SchemaFieldID:          types.StringType,
+			SchemaFieldDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(types.ObjectType{AttrTypes: tagAttrTypes}, []attr.Value{})
+
+		result := resource.mapRbacTagsFromState(emptyList)
 
 		assert.Empty(t, result)
 	})
@@ -1377,12 +1396,18 @@ func TestMapStateToDataObjectWithFullModel(t *testing.T) {
 				types.StringValue("tag1"),
 				types.StringValue("tag2"),
 			}),
-			RbacTags: []RbacTagModel{
-				{
-					DisplayName: types.StringValue("Team A"),
-					ID:          types.StringValue("team-a-id"),
-				},
-			},
+			RbacTags: func() types.List {
+				tagAttrTypes := map[string]attr.Type{
+					SchemaFieldID:          types.StringType,
+					SchemaFieldDisplayName: types.StringType,
+				}
+				tagObj, _ := types.ObjectValue(tagAttrTypes, map[string]attr.Value{
+					SchemaFieldID:          types.StringValue("team-a-id"),
+					SchemaFieldDisplayName: types.StringValue("Team A"),
+				})
+				list, _ := types.ListValue(types.ObjectType{AttrTypes: tagAttrTypes}, []attr.Value{tagObj})
+				return list
+			}(),
 			Entity: &EntityModel{
 				ApplicationEntityModel: &ApplicationEntityModel{
 					ApplicationID:    types.StringValue("app-123"),
@@ -1667,14 +1692,45 @@ func TestMapRbacTagsWithMultipleTags(t *testing.T) {
 	resource := &sloConfigResource{}
 
 	t.Run("should map multiple RBAC tags", func(t *testing.T) {
-		rbacTags := []RbacTagModel{
-			{DisplayName: types.StringValue("Team A"), ID: types.StringValue("team-a")},
-			{DisplayName: types.StringValue("Team B"), ID: types.StringValue("team-b")},
-			{DisplayName: types.StringValue("Team C"), ID: types.StringValue("team-c")},
-			{DisplayName: types.StringValue("Team D"), ID: types.StringValue("team-d")},
+		tagAttrTypes := map[string]attr.Type{
+			SchemaFieldID:          types.StringType,
+			SchemaFieldDisplayName: types.StringType,
 		}
 
-		result := resource.mapRbacTagsFromState(rbacTags)
+		tagValues := []attr.Value{
+			func() attr.Value {
+				obj, _ := types.ObjectValue(tagAttrTypes, map[string]attr.Value{
+					SchemaFieldID:          types.StringValue("team-a"),
+					SchemaFieldDisplayName: types.StringValue("Team A"),
+				})
+				return obj
+			}(),
+			func() attr.Value {
+				obj, _ := types.ObjectValue(tagAttrTypes, map[string]attr.Value{
+					SchemaFieldID:          types.StringValue("team-b"),
+					SchemaFieldDisplayName: types.StringValue("Team B"),
+				})
+				return obj
+			}(),
+			func() attr.Value {
+				obj, _ := types.ObjectValue(tagAttrTypes, map[string]attr.Value{
+					SchemaFieldID:          types.StringValue("team-c"),
+					SchemaFieldDisplayName: types.StringValue("Team C"),
+				})
+				return obj
+			}(),
+			func() attr.Value {
+				obj, _ := types.ObjectValue(tagAttrTypes, map[string]attr.Value{
+					SchemaFieldID:          types.StringValue("team-d"),
+					SchemaFieldDisplayName: types.StringValue("Team D"),
+				})
+				return obj
+			}(),
+		}
+
+		rbacTagsList, _ := types.ListValue(types.ObjectType{AttrTypes: tagAttrTypes}, tagValues)
+
+		result := resource.mapRbacTagsFromState(rbacTagsList)
 
 		assert.Len(t, result, 4)
 		assert.Equal(t, "Team A", result[0].DisplayName)

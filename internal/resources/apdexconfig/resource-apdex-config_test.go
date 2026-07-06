@@ -364,30 +364,42 @@ func TestMapRbacTagsToState(t *testing.T) {
 				ID:          "team-b-id",
 			},
 		}
-	
+
 		result := resource.mapRbacTagsToState(rbacTags)
-	
+
 		assert.NotNil(t, result)
-		assert.Equal(t, 2, len(result))
-		assert.Equal(t, "Team A", result[0].DisplayName.ValueString())
-		assert.Equal(t, "team-a-id", result[0].ID.ValueString())
-		assert.Equal(t, "Team B", result[1].DisplayName.ValueString())
-		assert.Equal(t, "team-b-id", result[1].ID.ValueString())
+		assert.False(t, result.IsNull())
+		assert.False(t, result.IsUnknown())
+
+		var tagModels []RbacTagModel
+		result.ElementsAs(context.Background(), &tagModels, false)
+		assert.Equal(t, 2, len(tagModels))
+		assert.Equal(t, "Team A", tagModels[0].DisplayName.ValueString())
+		assert.Equal(t, "team-a-id", tagModels[0].ID.ValueString())
+		assert.Equal(t, "Team B", tagModels[1].DisplayName.ValueString())
+		assert.Equal(t, "team-b-id", tagModels[1].ID.ValueString())
 	})
-	
-	t.Run("should return nil for empty RBAC tags", func(t *testing.T) {
+
+	t.Run("should return empty list for empty RBAC tags", func(t *testing.T) {
 		rbacTags := []api.RbacTag{}
-	
+
 		result := resource.mapRbacTagsToState(rbacTags)
-	
+
 		assert.NotNil(t, result)
-		assert.Equal(t, 0, len(result))
+		assert.False(t, result.IsNull())
+		var tagModels []RbacTagModel
+		result.ElementsAs(context.Background(), &tagModels, false)
+		assert.Equal(t, 0, len(tagModels))
 	})
-	
-	t.Run("should return nil for nil RBAC tags", func(t *testing.T) {
+
+	t.Run("should return empty list for nil RBAC tags", func(t *testing.T) {
 		result := resource.mapRbacTagsToState(nil)
-	
-		assert.Nil(t, result)
+
+		assert.NotNil(t, result)
+		assert.False(t, result.IsNull())
+		var tagModels []RbacTagModel
+		result.ElementsAs(context.Background(), &tagModels, false)
+		assert.Equal(t, 0, len(tagModels))
 	})
 }
 
@@ -437,7 +449,7 @@ func TestMapEntityToState(t *testing.T) {
 		boundaryScope := "ALL"
 		includeInternal := true
 		includeSynthetic := false
-		
+
 		entity := api.ApdexEntity{
 			Type:             "application",
 			EntityID:         "app-123",
@@ -461,7 +473,7 @@ func TestMapEntityToState(t *testing.T) {
 
 	t.Run("should map website entity to state", func(t *testing.T) {
 		beaconType := "pageLoad"
-		
+
 		entity := api.ApdexEntity{
 			Type:       "website",
 			EntityID:   "website-456",

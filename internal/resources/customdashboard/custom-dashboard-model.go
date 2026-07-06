@@ -10,7 +10,7 @@ type CustomDashboardModel struct {
 	ID          types.String         `tfsdk:"id"`
 	Title       types.String         `tfsdk:"title"`
 	AccessRules []AccessRuleModel    `tfsdk:"access_rule"`
-	RbacTags    []RbacTagModel       `tfsdk:"rbac_tags"`
+	RbacTags    types.List           `tfsdk:"rbac_tags"`
 	Widgets     jsontypes.Normalized `tfsdk:"widgets"`
 }
 

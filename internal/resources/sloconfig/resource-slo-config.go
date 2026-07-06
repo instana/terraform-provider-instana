@@ -118,6 +118,7 @@ func buildTagsAttribute() schema.SetAttribute {
 func buildRbacTagsAttribute() schema.ListNestedAttribute {
 	return schema.ListNestedAttribute{
 		Optional:    true,
+		Computed:    true,
 		Description: SloConfigDescRbacTags,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
@@ -590,16 +591,27 @@ func (r *sloConfigResource) mapTagsFromState(tags types.Set) []string {
 	return tagsList
 }
 
-// mapRbacTagsFromState converts RBAC tags from state to API model
-func (r *sloConfigResource) mapRbacTagsFromState(rbacTags []RbacTagModel) []api.RbacTag {
-	rbacTagsList := make([]api.RbacTag, 0, len(rbacTags))
-	for _, t := range rbacTags {
-		rbacTagsList = append(rbacTagsList, api.RbacTag{
+// mapRbacTagsFromState converts RBAC tags from state List to API model
+func (r *sloConfigResource) mapRbacTagsFromState(rbacTagsList types.List) []api.RbacTag {
+	if rbacTagsList.IsNull() || rbacTagsList.IsUnknown() {
+		return []api.RbacTag{}
+	}
+
+	var tagModels []RbacTagModel
+	rbacTagsList.ElementsAs(context.Background(), &tagModels, false)
+
+	if len(tagModels) == 0 {
+		return []api.RbacTag{}
+	}
+
+	rbacTags := make([]api.RbacTag, 0, len(tagModels))
+	for _, t := range tagModels {
+		rbacTags = append(rbacTags, api.RbacTag{
 			DisplayName: t.DisplayName.ValueString(),
 			ID:          t.ID.ValueString(),
 		})
 	}
-	return rbacTagsList
+	return rbacTags
 }
 
 func (r *sloConfigResource) mapEntityFromState(entityObj EntityModel) (api.SloEntity, diag.Diagnostics) {
@@ -1204,20 +1216,36 @@ func (r *sloConfigResource) mapTagsToState(tags []string) types.Set {
 	return types.SetValueMust(types.StringType, elements)
 }
 
-// mapRbacTagsToState converts RBAC tags from API to state
-func (r *sloConfigResource) mapRbacTagsToState(rbacTags []api.RbacTag) []RbacTagModel {
-	if rbacTags == nil {
-		return nil
+// mapRbacTagsToState converts RBAC tags from API to state List
+func (r *sloConfigResource) mapRbacTagsToState(rbacTags []api.RbacTag) types.List {
+	tagAttrTypes := map[string]attr.Type{
+		SchemaFieldID:          types.StringType,
+		SchemaFieldDisplayName: types.StringType,
 	}
 
-	stateRbacTags := make([]RbacTagModel, 0, len(rbacTags))
-	for _, tag := range rbacTags {
-		stateRbacTags = append(stateRbacTags, RbacTagModel{
-			DisplayName: types.StringValue(tag.DisplayName),
-			ID:          types.StringValue(tag.ID),
-		})
+	// Always initialize with empty list, even if data is null or empty
+	if rbacTags == nil || len(rbacTags) == 0 {
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+		return emptyList
 	}
-	return stateRbacTags
+
+	tagValues := make([]attr.Value, len(rbacTags))
+	for i, tag := range rbacTags {
+		tagObj, _ := types.ObjectValue(
+			tagAttrTypes,
+			map[string]attr.Value{
+				SchemaFieldID:          types.StringValue(tag.ID),
+				SchemaFieldDisplayName: types.StringValue(tag.DisplayName),
+			},
+		)
+		tagValues[i] = tagObj
+	}
+
+	list, _ := types.ListValue(types.ObjectType{AttrTypes: tagAttrTypes}, tagValues)
+	return list
 }
 
 func (r *sloConfigResource) mapEntityToState(apiObject *api.SloConfig, currentEntityModel *EntityModel) (EntityModel, diag.Diagnostics) {

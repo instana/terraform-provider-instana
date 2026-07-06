@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -44,6 +45,7 @@ func NewAlertingChannelResourceHandle() resourcehandle.ResourceHandle[*api.Alert
 					AlertingChannelFieldRbacTags: schema.ListNestedAttribute{
 						Description: AlertingChannelDescRbacTags,
 						Optional:    true,
+						Computed:    true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 								AlertingChannelFieldRbacTagID: schema.StringAttribute{
@@ -421,14 +423,14 @@ func (r *alertingChannelResource) UpdateState(ctx context.Context, state *tfsdk.
 	// Create/Update response. On Create/Update (plan != nil) keep the value
 	// from the plan to avoid an "inconsistent result" error. On Read
 	// (plan == nil) populate from the API response.
-	if plan != nil {
-		var planModel AlertingChannelModel
-		diags.Append(plan.Get(ctx, &planModel)...)
-		if diags.HasError() {
-			return diags
-		}
-		model.RbacTags = planModel.RbacTags
-	}
+	// if plan != nil {
+	// 	var planModel AlertingChannelModel
+	// 	diags.Append(plan.Get(ctx, &planModel)...)
+	// 	if diags.HasError() {
+	// 		return diags
+	// 	}
+	// 	model.RbacTags = planModel.RbacTags
+	// }
 
 	// Map channel-specific data based on channel type
 	channelDiags := r.mapChannelTypeToModel(ctx, alertingChannel, &model)
@@ -450,28 +452,54 @@ func (r *alertingChannelResource) createBaseModel(alertingChannel *api.AlertingC
 	}
 }
 
-// mapRbacTagsToModel converts RbacTags from the API to the model slice
-func (r *alertingChannelResource) mapRbacTagsToModel(rbacTags []api.RbacTag) []AlertingChannelRbacTagModel {
+// mapRbacTagsToModel converts RbacTags from the API to the model List
+func (r *alertingChannelResource) mapRbacTagsToModel(rbacTags []api.RbacTag) types.List {
+	tagAttrTypes := map[string]attr.Type{
+		AlertingChannelFieldRbacTagID:          types.StringType,
+		AlertingChannelFieldRbacTagDisplayName: types.StringType,
+	}
+
+	// Always initialize with empty list, even if data is null or empty
 	if len(rbacTags) == 0 {
-		return nil
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+		return emptyList
 	}
-	models := make([]AlertingChannelRbacTagModel, len(rbacTags))
+
+	tagValues := make([]attr.Value, len(rbacTags))
 	for i, tag := range rbacTags {
-		models[i] = AlertingChannelRbacTagModel{
-			ID:          types.StringValue(tag.ID),
-			DisplayName: types.StringValue(tag.DisplayName),
-		}
+		tagObj, _ := types.ObjectValue(
+			tagAttrTypes,
+			map[string]attr.Value{
+				AlertingChannelFieldRbacTagID:          types.StringValue(tag.ID),
+				AlertingChannelFieldRbacTagDisplayName: types.StringValue(tag.DisplayName),
+			},
+		)
+		tagValues[i] = tagObj
 	}
-	return models
+
+	list, _ := types.ListValue(types.ObjectType{AttrTypes: tagAttrTypes}, tagValues)
+	return list
 }
 
-// mapRbacTagsFromModel converts RbacTags from the model slice to the API format
-func (r *alertingChannelResource) mapRbacTagsFromModel(models []AlertingChannelRbacTagModel) []api.RbacTag {
-	if len(models) == 0 {
-		return nil
+// mapRbacTagsFromModel converts RbacTags from the model List to the API format
+func (r *alertingChannelResource) mapRbacTagsFromModel(rbacTagsList types.List) []api.RbacTag {
+	// Always initialize with empty array, even if data is null or empty
+	if rbacTagsList.IsNull() || rbacTagsList.IsUnknown() {
+		return []api.RbacTag{}
 	}
-	tags := make([]api.RbacTag, len(models))
-	for i, m := range models {
+
+	var tagModels []AlertingChannelRbacTagModel
+	rbacTagsList.ElementsAs(context.Background(), &tagModels, false)
+
+	if len(tagModels) == 0 {
+		return []api.RbacTag{}
+	}
+
+	tags := make([]api.RbacTag, len(tagModels))
+	for i, m := range tagModels {
 		tags[i] = api.RbacTag{
 			ID:          m.ID.ValueString(),
 			DisplayName: m.DisplayName.ValueString(),

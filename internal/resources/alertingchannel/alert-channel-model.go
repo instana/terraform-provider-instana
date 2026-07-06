@@ -9,7 +9,7 @@ import (
 type AlertingChannelModel struct {
 	ID                    types.String                       `tfsdk:"id"`
 	Name                  types.String                       `tfsdk:"name"`
-	RbacTags              []AlertingChannelRbacTagModel      `tfsdk:"rbac_tags"`
+	RbacTags              types.List                         `tfsdk:"rbac_tags"`
 	Email                 *shared.EmailModel                 `tfsdk:"email"`
 	OpsGenie              *shared.OpsGenieModel              `tfsdk:"ops_genie"`
 	PagerDuty             *shared.PagerDutyModel             `tfsdk:"pager_duty"`

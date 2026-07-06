@@ -601,6 +601,7 @@ func buildBaseSchema() map[string]schema.Attribute {
 		},
 		SyntheticTestFieldRbacTags: schema.SetNestedAttribute{
 			Optional:    true,
+			Computed:    true,
 			Description: SyntheticTestDescRbacTags,
 			NestedObject: schema.NestedAttributeObject{
 				Attributes: map[string]schema.Attribute{
@@ -801,7 +802,8 @@ func (r *syntheticTestResource) mapLocationsFromModel(ctx context.Context, model
 // mapRbacTagsFromModel maps RBAC tags from model
 func (r *syntheticTestResource) mapRbacTagsFromModel(ctx context.Context, model SyntheticTestModel) ([]api.RbacTag, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	var rbacTags []api.RbacTag
+	// Always initialize with empty array, even if data is null or empty
+	rbacTags := []api.RbacTag{}
 	if !model.RbacTags.IsNull() && !model.RbacTags.IsUnknown() {
 		var rbacTagModels []RbacTagModel
 		diags.Append(model.RbacTags.ElementsAs(ctx, &rbacTagModels, false)...)
@@ -1316,24 +1318,31 @@ func (r *syntheticTestResource) mapRbacTagsToModel(apiObject *api.SyntheticTest)
 		SyntheticTestFieldRbacTagDisplayName: types.StringType,
 		SyntheticTestFieldRbacTagID:          types.StringType,
 	}
-	if len(apiObject.RbacTags) > 0 {
-		rbacTagValues := make([]attr.Value, len(apiObject.RbacTags))
-		for i, tag := range apiObject.RbacTags {
-			tagObj, _ := types.ObjectValue(
-				tagAttrTypes,
-				map[string]attr.Value{
-					SyntheticTestFieldRbacTagDisplayName: types.StringValue(tag.DisplayName),
-					SyntheticTestFieldRbacTagID:          types.StringValue(tag.ID),
-				},
-			)
-			rbacTagValues[i] = tagObj
-		}
-		return types.SetValueMust(
+
+	// Always initialize with empty set, even if data is null or empty
+	if len(apiObject.RbacTags) == 0 {
+		emptySet, _ := types.SetValue(
 			types.ObjectType{AttrTypes: tagAttrTypes},
-			rbacTagValues,
+			[]attr.Value{},
 		)
+		return emptySet
 	}
-	return types.SetNull(types.ObjectType{AttrTypes: tagAttrTypes})
+
+	rbacTagValues := make([]attr.Value, len(apiObject.RbacTags))
+	for i, tag := range apiObject.RbacTags {
+		tagObj, _ := types.ObjectValue(
+			tagAttrTypes,
+			map[string]attr.Value{
+				SyntheticTestFieldRbacTagDisplayName: types.StringValue(tag.DisplayName),
+				SyntheticTestFieldRbacTagID:          types.StringValue(tag.ID),
+			},
+		)
+		rbacTagValues[i] = tagObj
+	}
+	return types.SetValueMust(
+		types.ObjectType{AttrTypes: tagAttrTypes},
+		rbacTagValues,
+	)
 }
 
 // mapHttpActionConfigToModel maps HTTP Action configuration to model
