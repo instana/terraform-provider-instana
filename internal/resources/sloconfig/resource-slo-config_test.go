@@ -1651,11 +1651,21 @@ func TestUpdateStateWithEmptyTags(t *testing.T) {
 		}
 
 		// Initialize state with existing tags so UpdateState will process them
+		rbacTagAttrTypes := map[string]attr.Type{
+			"id":           types.StringType,
+			"display_name": types.StringType,
+		}
+		emptyRbacTags, _ := types.ListValue(
+			types.ObjectType{AttrTypes: rbacTagAttrTypes},
+			[]attr.Value{},
+		)
+
 		initialModel := SloConfigModel{
-			ID:     types.StringValue("test-id"),
-			Name:   types.StringValue("Old Name"),
-			Target: types.Float64Value(95.0),
-			Tags:   types.SetValueMust(types.StringType, []attr.Value{types.StringValue("existing-tag")}),
+			ID:       types.StringValue("test-id"),
+			Name:     types.StringValue("Old Name"),
+			Target:   types.Float64Value(95.0),
+			Tags:     types.SetValueMust(types.StringType, []attr.Value{types.StringValue("existing-tag")}),
+			RbacTags: emptyRbacTags,
 			Entity: &EntityModel{
 				ApplicationEntityModel: &ApplicationEntityModel{
 					ApplicationID: types.StringValue(appID),

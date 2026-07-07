@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/instana-go-client/api"
@@ -165,10 +166,20 @@ func TestUpdateState(t *testing.T) {
 		}
 
 		// Create plan with model
+		tagAttrTypes := map[string]attr.Type{
+			CustomDashboardFieldRbacTagID:          types.StringType,
+			CustomDashboardFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
 		planModel := CustomDashboardModel{
-			ID:      types.StringValue("dashboard-123"),
-			Title:   types.StringValue("Test Dashboard"),
-			Widgets: jsontypes.NewNormalizedValue(`[{"type":"chart","data":"test"}]`),
+			ID:       types.StringValue("dashboard-123"),
+			Title:    types.StringValue("Test Dashboard"),
+			Widgets:  jsontypes.NewNormalizedValue(`[{"type":"chart","data":"test"}]`),
+			RbacTags: emptyList,
 			AccessRules: []AccessRuleModel{
 				{
 					AccessType:   types.StringValue("READ"),
@@ -315,10 +326,20 @@ func TestUpdateState(t *testing.T) {
 			},
 		}
 
+		tagAttrTypes := map[string]attr.Type{
+			CustomDashboardFieldRbacTagID:          types.StringType,
+			CustomDashboardFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
 		planModel := CustomDashboardModel{
-			ID:      types.StringValue("dashboard-multi"),
-			Title:   types.StringValue("Multi Access Dashboard"),
-			Widgets: jsontypes.NewNormalizedValue(`[]`),
+			ID:       types.StringValue("dashboard-multi"),
+			Title:    types.StringValue("Multi Access Dashboard"),
+			Widgets:  jsontypes.NewNormalizedValue(`[]`),
+			RbacTags: emptyList,
 			AccessRules: []AccessRuleModel{
 				{
 					AccessType:   types.StringValue("READ"),
@@ -360,10 +381,20 @@ func TestMapStateToDataObject(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("from plan - complete dashboard", func(t *testing.T) {
+		tagAttrTypes := map[string]attr.Type{
+			CustomDashboardFieldRbacTagID:          types.StringType,
+			CustomDashboardFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
 		model := CustomDashboardModel{
-			ID:      types.StringValue("dashboard-123"),
-			Title:   types.StringValue("Test Dashboard"),
-			Widgets: jsontypes.NewNormalizedValue(`[{"type":"chart","data":"test"}]`),
+			ID:       types.StringValue("dashboard-123"),
+			Title:    types.StringValue("Test Dashboard"),
+			Widgets:  jsontypes.NewNormalizedValue(`[{"type":"chart","data":"test"}]`),
+			RbacTags: emptyList,
 			AccessRules: []AccessRuleModel{
 				{
 					AccessType:   types.StringValue("READ"),
@@ -393,10 +424,20 @@ func TestMapStateToDataObject(t *testing.T) {
 	})
 
 	t.Run("from state - complete dashboard", func(t *testing.T) {
+		tagAttrTypes := map[string]attr.Type{
+			CustomDashboardFieldRbacTagID:          types.StringType,
+			CustomDashboardFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
 		model := CustomDashboardModel{
-			ID:      types.StringValue("dashboard-456"),
-			Title:   types.StringValue("State Dashboard"),
-			Widgets: jsontypes.NewNormalizedValue(`{"widgets":[{"id":"w1"}]}`),
+			ID:       types.StringValue("dashboard-456"),
+			Title:    types.StringValue("State Dashboard"),
+			Widgets:  jsontypes.NewNormalizedValue(`{"widgets":[{"id":"w1"}]}`),
+			RbacTags: emptyList,
 			AccessRules: []AccessRuleModel{
 				{
 					AccessType:   types.StringValue("READ_WRITE"),
@@ -420,10 +461,20 @@ func TestMapStateToDataObject(t *testing.T) {
 	})
 
 	t.Run("with null ID", func(t *testing.T) {
+		tagAttrTypes := map[string]attr.Type{
+			CustomDashboardFieldRbacTagID:          types.StringType,
+			CustomDashboardFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
 		model := CustomDashboardModel{
-			ID:      types.StringNull(),
-			Title:   types.StringValue("New Dashboard"),
-			Widgets: jsontypes.NewNormalizedValue(`[]`),
+			ID:       types.StringNull(),
+			Title:    types.StringValue("New Dashboard"),
+			Widgets:  jsontypes.NewNormalizedValue(`[]`),
+			RbacTags: emptyList,
 		}
 
 		plan := createMockPlan(t, ctx, model)
@@ -436,10 +487,20 @@ func TestMapStateToDataObject(t *testing.T) {
 	})
 
 	t.Run("with null widgets", func(t *testing.T) {
+		tagAttrTypes := map[string]attr.Type{
+			CustomDashboardFieldRbacTagID:          types.StringType,
+			CustomDashboardFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
 		model := CustomDashboardModel{
-			ID:      types.StringValue("dashboard-789"),
-			Title:   types.StringValue("No Widgets Dashboard"),
-			Widgets: jsontypes.NewNormalizedNull(),
+			ID:       types.StringValue("dashboard-789"),
+			Title:    types.StringValue("No Widgets Dashboard"),
+			Widgets:  jsontypes.NewNormalizedNull(),
+			RbacTags: emptyList,
 		}
 
 		plan := createMockPlan(t, ctx, model)
@@ -451,10 +512,20 @@ func TestMapStateToDataObject(t *testing.T) {
 	})
 
 	t.Run("with empty access rules", func(t *testing.T) {
+		tagAttrTypes := map[string]attr.Type{
+			CustomDashboardFieldRbacTagID:          types.StringType,
+			CustomDashboardFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
 		model := CustomDashboardModel{
 			ID:          types.StringValue("dashboard-empty"),
 			Title:       types.StringValue("Empty Rules Dashboard"),
 			Widgets:     jsontypes.NewNormalizedValue(`[]`),
+			RbacTags:    emptyList,
 			AccessRules: []AccessRuleModel{},
 		}
 
@@ -467,10 +538,20 @@ func TestMapStateToDataObject(t *testing.T) {
 	})
 
 	t.Run("with global access rule without related ID", func(t *testing.T) {
+		tagAttrTypes := map[string]attr.Type{
+			CustomDashboardFieldRbacTagID:          types.StringType,
+			CustomDashboardFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
 		model := CustomDashboardModel{
-			ID:      types.StringValue("dashboard-global"),
-			Title:   types.StringValue("Global Dashboard"),
-			Widgets: jsontypes.NewNormalizedValue(`[]`),
+			ID:       types.StringValue("dashboard-global"),
+			Title:    types.StringValue("Global Dashboard"),
+			Widgets:  jsontypes.NewNormalizedValue(`[]`),
+			RbacTags: emptyList,
 			AccessRules: []AccessRuleModel{
 				{
 					AccessType:   types.StringValue("READ"),
@@ -511,10 +592,20 @@ func TestMapStateToDataObject(t *testing.T) {
 			]
 		}`
 
+		tagAttrTypes := map[string]attr.Type{
+			CustomDashboardFieldRbacTagID:          types.StringType,
+			CustomDashboardFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
 		model := CustomDashboardModel{
-			ID:      types.StringValue("dashboard-complex"),
-			Title:   types.StringValue("Complex Dashboard"),
-			Widgets: jsontypes.NewNormalizedValue(complexWidgets),
+			ID:       types.StringValue("dashboard-complex"),
+			Title:    types.StringValue("Complex Dashboard"),
+			Widgets:  jsontypes.NewNormalizedValue(complexWidgets),
+			RbacTags: emptyList,
 		}
 
 		plan := createMockPlan(t, ctx, model)
@@ -530,10 +621,20 @@ func TestMapStateToDataObject(t *testing.T) {
 	})
 
 	t.Run("with all access types", func(t *testing.T) {
+		tagAttrTypes := map[string]attr.Type{
+			CustomDashboardFieldRbacTagID:          types.StringType,
+			CustomDashboardFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
 		model := CustomDashboardModel{
-			ID:      types.StringValue("dashboard-all-types"),
-			Title:   types.StringValue("All Types Dashboard"),
-			Widgets: jsontypes.NewNormalizedValue(`[]`),
+			ID:       types.StringValue("dashboard-all-types"),
+			Title:    types.StringValue("All Types Dashboard"),
+			Widgets:  jsontypes.NewNormalizedValue(`[]`),
+			RbacTags: emptyList,
 			AccessRules: []AccessRuleModel{
 				{
 					AccessType:   types.StringValue("READ"),
@@ -727,10 +828,20 @@ func stringPtr(s string) *string {
 
 // initializeEmptyState initializes the state with an empty CustomDashboardModel
 func initializeEmptyState(t *testing.T, ctx context.Context, state *tfsdk.State) {
+	tagAttrTypes := map[string]attr.Type{
+		CustomDashboardFieldRbacTagID:          types.StringType,
+		CustomDashboardFieldRbacTagDisplayName: types.StringType,
+	}
+	emptyList, _ := types.ListValue(
+		types.ObjectType{AttrTypes: tagAttrTypes},
+		[]attr.Value{},
+	)
+
 	emptyModel := CustomDashboardModel{
 		ID:          types.StringNull(),
 		Title:       types.StringNull(),
 		AccessRules: []AccessRuleModel{},
+		RbacTags:    emptyList,
 		Widgets:     jsontypes.NewNormalizedNull(),
 	}
 	diags := state.Set(ctx, emptyModel)

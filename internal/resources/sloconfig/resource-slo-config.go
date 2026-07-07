@@ -1174,9 +1174,7 @@ func (r *sloConfigResource) UpdateState(ctx context.Context, state *tfsdk.State,
 	if len(apiObject.Tags) > 0 {
 		model.Tags = r.mapTagsToState(apiObject.Tags)
 	}
-	if len(apiObject.RbacTags) > 0 {
-		model.RbacTags = r.mapRbacTagsToState(apiObject.RbacTags)
-	}
+	model.RbacTags = r.mapRbacTagsToState(apiObject.RbacTags)
 
 	entityData, entityDiags := r.mapEntityToState(apiObject, model.Entity)
 	diags.Append(entityDiags...)

@@ -1560,8 +1560,9 @@ func TestUpdateState_WithEmptyCustomPayloadFields(t *testing.T) {
 	diags = state.Get(ctx, &model)
 	require.False(t, diags.HasError())
 
-	// Empty custom payload fields should result in null list
-	assert.True(t, model.CustomPayloadField.IsNull())
+	// Empty custom payload fields should result in empty list (not null)
+	assert.False(t, model.CustomPayloadField.IsNull())
+	assert.True(t, len(model.CustomPayloadField.Elements()) == 0)
 }
 
 func TestMapStateToDataObject_WithEmptyAlertChannelLists(t *testing.T) {

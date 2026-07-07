@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/instana-go-client/api"
@@ -436,9 +437,19 @@ func TestMapStateToDataObject(t *testing.T) {
 		emails := []string{"test@example.com"}
 		emailsSet, _ := types.SetValueFrom(ctx, types.StringType, emails)
 
+		tagAttrTypes := map[string]attr.Type{
+			AlertingChannelFieldRbacTagID:          types.StringType,
+			AlertingChannelFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
 		model := AlertingChannelModel{
-			ID:   types.StringValue("test-id"),
-			Name: types.StringValue("test-name"),
+			ID:       types.StringValue("test-id"),
+			Name:     types.StringValue("test-name"),
+			RbacTags: emptyList,
 			Email: &shared.EmailModel{
 				Emails: emailsSet,
 			},
@@ -455,9 +466,19 @@ func TestMapStateToDataObject(t *testing.T) {
 		tags := []string{"tag1"}
 		tagsList, _ := types.SetValueFrom(ctx, types.StringType, tags)
 
+		tagAttrTypes := map[string]attr.Type{
+			AlertingChannelFieldRbacTagID:          types.StringType,
+			AlertingChannelFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
 		model := AlertingChannelModel{
-			ID:   types.StringValue("test-id"),
-			Name: types.StringValue("test-name"),
+			ID:       types.StringValue("test-id"),
+			Name:     types.StringValue("test-name"),
+			RbacTags: emptyList,
 			OpsGenie: &shared.OpsGenieModel{
 				APIKey: types.StringValue("api-key"),
 				Region: types.StringValue("EU"),
@@ -473,9 +494,19 @@ func TestMapStateToDataObject(t *testing.T) {
 	})
 
 	t.Run("PagerDuty channel", func(t *testing.T) {
+		tagAttrTypes := map[string]attr.Type{
+			AlertingChannelFieldRbacTagID:          types.StringType,
+			AlertingChannelFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
 		model := AlertingChannelModel{
-			ID:   types.StringValue("test-id"),
-			Name: types.StringValue("test-name"),
+			ID:       types.StringValue("test-id"),
+			Name:     types.StringValue("test-name"),
+			RbacTags: emptyList,
 			PagerDuty: &shared.PagerDutyModel{
 				ServiceIntegrationKey: types.StringValue("integration-key"),
 			},
@@ -489,9 +520,19 @@ func TestMapStateToDataObject(t *testing.T) {
 	})
 
 	t.Run("Slack channel", func(t *testing.T) {
+		tagAttrTypes := map[string]attr.Type{
+			AlertingChannelFieldRbacTagID:          types.StringType,
+			AlertingChannelFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
 		model := AlertingChannelModel{
-			ID:   types.StringValue("test-id"),
-			Name: types.StringValue("test-name"),
+			ID:       types.StringValue("test-id"),
+			Name:     types.StringValue("test-name"),
+			RbacTags: emptyList,
 			Slack: &shared.SlackModel{
 				WebhookURL: types.StringValue("https://slack.com/webhook"),
 			},
@@ -505,9 +546,19 @@ func TestMapStateToDataObject(t *testing.T) {
 	})
 
 	t.Run("Splunk channel", func(t *testing.T) {
+		tagAttrTypes := map[string]attr.Type{
+			AlertingChannelFieldRbacTagID:          types.StringType,
+			AlertingChannelFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
 		model := AlertingChannelModel{
-			ID:   types.StringValue("test-id"),
-			Name: types.StringValue("test-name"),
+			ID:       types.StringValue("test-id"),
+			Name:     types.StringValue("test-name"),
+			RbacTags: emptyList,
 			Splunk: &shared.SplunkModel{
 				URL:   types.StringValue("https://splunk.com"),
 				Token: types.StringValue("token"),
@@ -522,9 +573,19 @@ func TestMapStateToDataObject(t *testing.T) {
 	})
 
 	t.Run("VictorOps channel", func(t *testing.T) {
+		tagAttrTypes := map[string]attr.Type{
+			AlertingChannelFieldRbacTagID:          types.StringType,
+			AlertingChannelFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
 		model := AlertingChannelModel{
-			ID:   types.StringValue("test-id"),
-			Name: types.StringValue("test-name"),
+			ID:       types.StringValue("test-id"),
+			Name:     types.StringValue("test-name"),
+			RbacTags: emptyList,
 			VictorOps: &shared.VictorOpsModel{
 				APIKey:     types.StringValue("api-key"),
 				RoutingKey: types.StringValue("routing-key"),
@@ -542,9 +603,19 @@ func TestMapStateToDataObject(t *testing.T) {
 		urls := []string{"https://webhook.com"}
 		urlsSet, _ := types.SetValueFrom(ctx, types.StringType, urls)
 
+		tagAttrTypes := map[string]attr.Type{
+			AlertingChannelFieldRbacTagID:          types.StringType,
+			AlertingChannelFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
 		model := AlertingChannelModel{
-			ID:   types.StringValue("test-id"),
-			Name: types.StringValue("test-name"),
+			ID:       types.StringValue("test-id"),
+			Name:     types.StringValue("test-name"),
+			RbacTags: emptyList,
 			Webhook: &shared.WebhookModel{
 				WebhookURLs: urlsSet,
 				HTTPHeaders: types.MapNull(types.StringType),
@@ -559,9 +630,19 @@ func TestMapStateToDataObject(t *testing.T) {
 	})
 
 	t.Run("Office365 channel", func(t *testing.T) {
+		tagAttrTypes := map[string]attr.Type{
+			AlertingChannelFieldRbacTagID:          types.StringType,
+			AlertingChannelFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
 		model := AlertingChannelModel{
-			ID:   types.StringValue("test-id"),
-			Name: types.StringValue("test-name"),
+			ID:       types.StringValue("test-id"),
+			Name:     types.StringValue("test-name"),
+			RbacTags: emptyList,
 			Office365: &shared.WebhookBasedModel{
 				WebhookURL: types.StringValue("https://office365.com/webhook"),
 			},
@@ -575,9 +656,19 @@ func TestMapStateToDataObject(t *testing.T) {
 	})
 
 	t.Run("GoogleChat channel", func(t *testing.T) {
+		tagAttrTypes := map[string]attr.Type{
+			AlertingChannelFieldRbacTagID:          types.StringType,
+			AlertingChannelFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
 		model := AlertingChannelModel{
-			ID:   types.StringValue("test-id"),
-			Name: types.StringValue("test-name"),
+			ID:       types.StringValue("test-id"),
+			Name:     types.StringValue("test-name"),
+			RbacTags: emptyList,
 			GoogleChat: &shared.WebhookBasedModel{
 				WebhookURL: types.StringValue("https://chat.google.com/webhook"),
 			},
@@ -591,9 +682,19 @@ func TestMapStateToDataObject(t *testing.T) {
 	})
 
 	t.Run("ServiceNow channel", func(t *testing.T) {
+		tagAttrTypes := map[string]attr.Type{
+			AlertingChannelFieldRbacTagID:          types.StringType,
+			AlertingChannelFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
 		model := AlertingChannelModel{
-			ID:   types.StringValue("test-id"),
-			Name: types.StringValue("test-name"),
+			ID:       types.StringValue("test-id"),
+			Name:     types.StringValue("test-name"),
+			RbacTags: emptyList,
 			ServiceNow: &shared.ServiceNowModel{
 				ServiceNowURL: types.StringValue("https://servicenow.com"),
 				Username:      types.StringValue("user"),
@@ -609,9 +710,19 @@ func TestMapStateToDataObject(t *testing.T) {
 	})
 
 	t.Run("ServiceNowApplication channel", func(t *testing.T) {
+		tagAttrTypes := map[string]attr.Type{
+			AlertingChannelFieldRbacTagID:          types.StringType,
+			AlertingChannelFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
 		model := AlertingChannelModel{
-			ID:   types.StringValue("test-id"),
-			Name: types.StringValue("test-name"),
+			ID:       types.StringValue("test-id"),
+			Name:     types.StringValue("test-name"),
+			RbacTags: emptyList,
 			ServiceNowApplication: &shared.ServiceNowApplicationModel{
 				ServiceNowURL: types.StringValue("https://servicenow.com"),
 				Username:      types.StringValue("user"),
@@ -630,9 +741,19 @@ func TestMapStateToDataObject(t *testing.T) {
 	})
 
 	t.Run("PrometheusWebhook channel", func(t *testing.T) {
+		tagAttrTypes := map[string]attr.Type{
+			AlertingChannelFieldRbacTagID:          types.StringType,
+			AlertingChannelFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
 		model := AlertingChannelModel{
-			ID:   types.StringValue("test-id"),
-			Name: types.StringValue("test-name"),
+			ID:       types.StringValue("test-id"),
+			Name:     types.StringValue("test-name"),
+			RbacTags: emptyList,
 			PrometheusWebhook: &shared.PrometheusWebhookModel{
 				WebhookURL: types.StringValue("https://prometheus.com/webhook"),
 			},
@@ -646,9 +767,19 @@ func TestMapStateToDataObject(t *testing.T) {
 	})
 
 	t.Run("WebexTeamsWebhook channel", func(t *testing.T) {
+		tagAttrTypes := map[string]attr.Type{
+			AlertingChannelFieldRbacTagID:          types.StringType,
+			AlertingChannelFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
 		model := AlertingChannelModel{
-			ID:   types.StringValue("test-id"),
-			Name: types.StringValue("test-name"),
+			ID:       types.StringValue("test-id"),
+			Name:     types.StringValue("test-name"),
+			RbacTags: emptyList,
 			WebexTeamsWebhook: &shared.WebhookBasedModel{
 				WebhookURL: types.StringValue("https://webex.com/webhook"),
 			},
@@ -662,9 +793,19 @@ func TestMapStateToDataObject(t *testing.T) {
 	})
 
 	t.Run("WatsonAIOpsWebhook channel", func(t *testing.T) {
+		tagAttrTypes := map[string]attr.Type{
+			AlertingChannelFieldRbacTagID:          types.StringType,
+			AlertingChannelFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
 		model := AlertingChannelModel{
-			ID:   types.StringValue("test-id"),
-			Name: types.StringValue("test-name"),
+			ID:       types.StringValue("test-id"),
+			Name:     types.StringValue("test-name"),
+			RbacTags: emptyList,
 			WatsonAIOpsWebhook: &shared.WatsonAIOpsWebhookModel{
 				WebhookURL:  types.StringValue("https://watson.com/webhook"),
 				HTTPHeaders: types.SetNull(types.StringType),
@@ -679,9 +820,19 @@ func TestMapStateToDataObject(t *testing.T) {
 	})
 
 	t.Run("No channel configured", func(t *testing.T) {
+		tagAttrTypes := map[string]attr.Type{
+			AlertingChannelFieldRbacTagID:          types.StringType,
+			AlertingChannelFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
 		model := AlertingChannelModel{
-			ID:   types.StringValue("test-id"),
-			Name: types.StringValue("test-name"),
+			ID:       types.StringValue("test-id"),
+			Name:     types.StringValue("test-name"),
+			RbacTags: emptyList,
 		}
 
 		state := createMockState(t, ctx, model)
