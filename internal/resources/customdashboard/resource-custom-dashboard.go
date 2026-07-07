@@ -145,11 +145,7 @@ func (r *customDashboardResource) UpdateState(ctx context.Context, state *tfsdk.
 	} else {
 		model = CustomDashboardModel{}
 	}
-	// Create a model and populate it with values from the dashboard
-	// model = CustomDashboardModel{
-	// 	ID:    types.StringValue(dashboard.ID),
-	// 	Title: types.StringValue(dashboard.Title),
-	// }
+
 	model.ID = types.StringValue(dashboard.ID)
 	model.Title = types.StringValue(dashboard.Title)
 
@@ -172,16 +168,7 @@ func (r *customDashboardResource) UpdateState(ctx context.Context, state *tfsdk.
 	// Map access rules
 	model.AccessRules = r.mapAccessRulesToState(dashboard.AccessRules)
 
-	// Map RBAC tags (team assignments). The Instana create/update API does not
-	// echo rbacTags back in its response, so on Create/Update (plan != nil) we
-	// keep the configured value to avoid an "inconsistent result" error. On
-	// Read (plan == nil) we populate from the API. This mirrors the widgets
-	// handling above.
-	if plan != nil {
-		// keep model.RbacTags as provided by the plan
-	} else {
-		model.RbacTags = r.mapRbacTagsToState(dashboard.RbacTags)
-	}
+	model.RbacTags = r.mapRbacTagsToState(dashboard.RbacTags)
 
 	// Set the entire model to state
 	diags.Append(state.Set(ctx, model)...)
