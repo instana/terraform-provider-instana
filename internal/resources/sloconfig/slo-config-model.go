@@ -30,6 +30,7 @@ type EntityModel struct {
 	WebsiteEntityModel        *WebsiteEntityModel        `tfsdk:"website"`
 	SyntheticEntityModel      *SyntheticEntityModel      `tfsdk:"synthetic"`
 	InfrastructureEntityModel *InfrastructureEntityModel `tfsdk:"infrastructure"`
+	MobileEntityModel         *MobileEntityModel         `tfsdk:"mobile"`
 }
 type IndicatorModel struct {
 	TimeBasedLatencyIndicatorModel       *TimeBasedLatencyIndicatorModel       `tfsdk:"time_based_latency"`
@@ -40,6 +41,7 @@ type IndicatorModel struct {
 	CustomIndicatorModel                 *CustomIndicatorModel                 `tfsdk:"custom"`
 	TimeBasedSaturationIndicatorModel    *TimeBasedSaturationIndicatorModel    `tfsdk:"time_based_saturation"`
 	EventBasedSaturationIndicatorModel   *EventBasedSaturationIndicatorModel   `tfsdk:"event_based_saturation"`
+	AdvancedCustomIndicatorModel         *AdvancedCustomIndicatorModel         `tfsdk:"advanced_custom"`
 }
 
 // ApplicationEntityModel represents an application entity in the Terraform model
@@ -73,33 +75,72 @@ type InfrastructureEntityModel struct {
 	FilterExpression types.String `tfsdk:"filter_expression"`
 }
 
+// MobileEntityModel represents a mobile app entity in the Terraform model
+type MobileEntityModel struct {
+	MobileIDs        types.Set    `tfsdk:"mobile_ids"`
+	FilterExpression types.String `tfsdk:"filter_expression"`
+}
+
+// EntityMetricScopeModel represents the scope nested inside a metric block
+type EntityMetricScopeModel struct {
+	ScopeType        types.String `tfsdk:"scope_type"`
+	FilterExpression types.String `tfsdk:"filter_expression"`
+}
+
+// EntityMetricModel represents the metric nested block for threshold-based mobile indicators
+type EntityMetricModel struct {
+	MetricName types.String            `tfsdk:"metric_name"`
+	Scope      *EntityMetricScopeModel `tfsdk:"scope"`
+}
+
+// AdvancedFilterModel represents one side (good or bad) of an advanced-custom indicator
+type AdvancedFilterModel struct {
+	Aggregation types.String       `tfsdk:"aggregation"`
+	Threshold   types.Float64      `tfsdk:"threshold"`
+	Operator    types.String       `tfsdk:"operator"`
+	Metric      *EntityMetricModel `tfsdk:"metric"`
+}
+
+// AdvancedCustomIndicatorModel represents the advanced-custom blueprint indicator
+type AdvancedCustomIndicatorModel struct {
+	Type       types.String         `tfsdk:"type"`
+	GoodEvents *AdvancedFilterModel `tfsdk:"good_events"`
+	BadEvents  *AdvancedFilterModel `tfsdk:"bad_events"`
+}
+
 // TimeBasedLatencyIndicatorModel represents a time-based latency indicator in the Terraform model
 type TimeBasedLatencyIndicatorModel struct {
-	Threshold   types.Float64 `tfsdk:"threshold"`
-	Aggregation types.String  `tfsdk:"aggregation"`
+	Threshold   types.Float64      `tfsdk:"threshold"`
+	Aggregation types.String       `tfsdk:"aggregation"`
+	Metric      *EntityMetricModel `tfsdk:"metric"`
 }
 
 // EventBasedLatencyIndicatorModel represents an event-based latency indicator in the Terraform model
 type EventBasedLatencyIndicatorModel struct {
-	Threshold types.Float64 `tfsdk:"threshold"`
+	Threshold types.Float64      `tfsdk:"threshold"`
+	Metric    *EntityMetricModel `tfsdk:"metric"`
 }
 
 // TimeBasedAvailabilityIndicatorModel represents a time-based availability indicator in the Terraform model
 type TimeBasedAvailabilityIndicatorModel struct {
-	Threshold   types.Float64 `tfsdk:"threshold"`
-	Aggregation types.String  `tfsdk:"aggregation"`
+	Threshold   types.Float64      `tfsdk:"threshold"`
+	Aggregation types.String       `tfsdk:"aggregation"`
+	Metric      *EntityMetricModel `tfsdk:"metric"`
 }
 
 // EventBasedAvailabilityIndicatorModel represents an event-based availability indicator in the Terraform model
 type EventBasedAvailabilityIndicatorModel struct {
-	// No fields needed for this indicator type
+	Threshold   types.Float64      `tfsdk:"threshold"`
+	Aggregation types.String       `tfsdk:"aggregation"`
+	Metric      *EntityMetricModel `tfsdk:"metric"`
 }
 
 // TrafficIndicatorModel represents a traffic indicator in the Terraform model
 type TrafficIndicatorModel struct {
-	TrafficType types.String  `tfsdk:"traffic_type"`
-	Threshold   types.Float64 `tfsdk:"threshold"`
-	Operator    types.String  `tfsdk:"operator"`
+	TrafficType types.String       `tfsdk:"traffic_type"`
+	Threshold   types.Float64      `tfsdk:"threshold"`
+	Operator    types.String       `tfsdk:"operator"`
+	Metric      *EntityMetricModel `tfsdk:"metric"`
 }
 
 // CustomIndicatorModel represents a custom indicator in the Terraform model
@@ -108,19 +149,21 @@ type CustomIndicatorModel struct {
 	BadEventFilterExpression  types.String `tfsdk:"bad_event_filter_expression"`
 }
 
-// SaturationIndicatorModel represents a saturation indicator in the Terraform model
+// TimeBasedSaturationIndicatorModel represents a saturation indicator in the Terraform model
 type TimeBasedSaturationIndicatorModel struct {
-	MetricName  types.String  `tfsdk:"metric_name"`
-	Threshold   types.Float64 `tfsdk:"threshold"`
-	Aggregation types.String  `tfsdk:"aggregation"`
-	Operator    types.String  `tfsdk:"operator"`
+	MetricName  types.String       `tfsdk:"metric_name"`
+	Threshold   types.Float64      `tfsdk:"threshold"`
+	Aggregation types.String       `tfsdk:"aggregation"`
+	Operator    types.String       `tfsdk:"operator"`
+	Metric      *EntityMetricModel `tfsdk:"metric"`
 }
 
-// SaturationIndicatorModel represents a saturation indicator in the Terraform model
+// EventBasedSaturationIndicatorModel represents a saturation indicator in the Terraform model
 type EventBasedSaturationIndicatorModel struct {
-	MetricName types.String  `tfsdk:"metric_name"`
-	Threshold  types.Float64 `tfsdk:"threshold"`
-	Operator   types.String  `tfsdk:"operator"`
+	MetricName types.String       `tfsdk:"metric_name"`
+	Threshold  types.Float64      `tfsdk:"threshold"`
+	Operator   types.String       `tfsdk:"operator"`
+	Metric     *EntityMetricModel `tfsdk:"metric"`
 }
 
 // RollingTimeWindowModel represents a rolling time window in the Terraform model
