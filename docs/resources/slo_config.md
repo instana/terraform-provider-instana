@@ -486,6 +486,144 @@ resource "instana_slo_config" "custom_infrastructure_slo" {
   }
 }
 ```
+### Mobile App Entity SLOs
+
+#### Mobile APP SLO with Time-Based
+```hcl
+resource "instana_slo_config" "time_based_mobile_app_slo" {
+  name   = "timebased_mobile_app_slo"
+  target = 0.99
+  tags   = ["time-based", "mobile-app-slo"]
+
+  entity = {
+    mobile = {
+      mobile_ids = ["i1IsNS7FQAegEljBTkNBMQ"]
+    }
+  }
+
+  indicator = {
+    time_based_availability = {
+      threshold   = 15
+      aggregation = "SUM"
+      metric = {
+        metric_name = "crashAffectedSessionCount"
+        scope = {
+          scope_type = "crash"
+        }
+      }
+    }
+  }
+
+  time_window = {
+    fixed = {
+      duration        = 1
+      duration_unit   = "calendar_month"
+      start_timestamp = 1781564400000
+      timezone        = "Europe/Dublin"
+    }
+  }
+}
+```
+
+#### Mobile APP SLO with Event-Based
+```hcl
+resource "instana_slo_config" "event_based_mobile_app_slo" {
+  name   = "eventbased-mobile-app-slo"
+  target = 0.95
+  tags   = ["event-based", "mobile-app-slo"]
+
+  entity = {
+    mobile = {
+      mobile_ids        = []
+      filter_expression = "mobileBeacon.platform@na EQUALS 'Android'"
+    }
+  }
+
+  indicator = {
+    event_based_availability = {
+      threshold   = 0
+      aggregation = "MEAN"
+      metric = {
+        metric_name = "http5xx"
+        scope = {
+          scope_type = "httpRequest"
+        }
+      }
+    }
+  }
+
+  time_window = {
+    fixed = {
+      duration        = 1
+      duration_unit   = "week"
+      start_timestamp = 1781582400000
+      timezone        = "UTC"
+    }
+  }
+}
+```
+
+#### Custom Mobile APP SLO
+```hcl
+resource "instana_slo_config" "custom_mobile_app_slo" {
+  name   = "custom_based_mobile_app_slo"
+  target = 0.99
+  tags   = ["custom-based", "mobile-app-slo"]
+
+  entity = {
+    mobile = {
+      mobile_ids = [
+        "PwozCjutQEuJjQT01ktwOw",
+        "i1IsNS7FQAegEljBTkNBMQ"
+      ]
+    }
+  }
+
+  indicator = {
+    advanced_custom = {
+      type = "eventBased"
+
+      good_events = {
+        aggregation = "SUM"
+        threshold   = 500
+        operator    = "<"
+
+        metric = {
+          metric_name = "httpLatency"
+          scope = {
+            scope_type = "httpRequest"
+          }
+        }
+      }
+
+      bad_events = {
+        aggregation = "SUM"
+        threshold   = 300
+        operator    = ">"
+
+        metric = {
+          metric_name = "viewChangeDuration"
+          scope = {
+            scope_type = "viewChange"
+          }
+        }
+      }
+    }
+  }
+
+  time_window = {
+    fixed = {
+      duration        = 1
+      duration_unit   = "calendar_month"
+      start_timestamp = 1782082800000
+      timezone        = "UTC"
+    }
+  }
+}
+```
+
+
+
 ### SLOs with RBAC Tags
 
 #### SLO with RBAC Tags
@@ -596,6 +734,7 @@ The `entity` attribute must contain exactly one of the following:
 * `website` - Website-based SLO entity - [Details](#website-entity-attributes)
 * `synthetic` - Synthetic-based SLO entity - [Details](#synthetic-entity-attributes)
 * `infrastructure` - Infrastructure-based SLO entity - [Details](#infrastructure-entity-attributes)
+* `mobile` - Mobile-app-based SLO entity - [Details](#mobile-entity-attributes)
 
 #### Application Entity Attributes
 
@@ -615,13 +754,22 @@ The `entity` attribute must contain exactly one of the following:
 
 #### Synthetic Entity Attributes
 
-* `synthetic_test_ids` - (Required) A set of synthetic test IDs. Must contain at least one ID.
-* `filter_expression` - (Optional) Tag filter expression to match events/calls - [Details](#tag-filter-expression-syntax)
+Exactly one of `synthetic_test_ids` or `filter_expression` must be provided — they are mutually exclusive.
+
+* `synthetic_test_ids` - (Optional) A static set of synthetic test IDs used to explicitly select tests. Cannot be combined with `filter_expression`
+* `filter_expression` - (Optional) Tag filter expression to dynamically scope the entity — use this instead of `synthetic_test_ids` when you want dynamic selection - [Details](#tag-filter-expression-syntax)
 
 #### Infrastructure Entity Attributes
 
 * `infra_type` - (Required) Type of the infrastructure entity.
 * `filter_expression` - (Optional) Tag filter expression that allows additional scoping or matching of infrastructure entities - [Details](#tag-filter-expression-syntax)
+
+#### Mobile Entity Attributes
+
+Exactly one of `mobile_ids` or `filter_expression` must be provided — they are mutually exclusive.
+
+* `mobile_ids` - (Optional) A static set of mobile app IDs used to explicitly select apps. Cannot be combined with `filter_expression`
+* `filter_expression` - (Optional) Tag filter expression to dynamically scope the entity — use this instead of `mobile_ids` when you want dynamic selection - [Details](#tag-filter-expression-syntax)
 
 ### Indicator Attribute
 
@@ -635,30 +783,35 @@ The `indicator` attribute must contain exactly one of the following:
 * `custom` - Custom indicator - [Details](#custom-indicator-attributes)
 * `time_based_saturation` - Time-based saturation indicator - [Details](#time-based-saturation-indicator-attributes)
 * `event_based_saturation` - Event-based saturation indicator - [Details](#event-based-saturation-indicator-attributes)
+* `advanced_custom` - Advanced custom indicator for mobile/event-based scenarios - [Details](#advanced-custom-indicator-attributes)
 
 #### Time-Based Latency Indicator Attributes
 
 * `threshold` - (Required) The latency threshold in milliseconds. Must be greater than 0
 * `aggregation` - (Required) The aggregation type. Valid values: `MEAN`, `MAX`, `MIN`, `P25`, `P50`, `P75`, `P90`, `P95`, `P98`, `P99`
+* `metric` - (Optional) Entity metric configuration - [Details](#metric-attribute)
 
 #### Event-Based Latency Indicator Attributes
 
 * `threshold` - (Required) The latency threshold in milliseconds. Must be greater than 0
+* `metric` - (Optional) Entity metric configuration - [Details](#metric-attribute)
 
 #### Time-Based Availability Indicator Attributes
 
 * `threshold` - (Required) The error rate threshold. Typically `0.0` for availability
 * `aggregation` - (Required) The aggregation type. Valid value: `MEAN`
+* `metric` - (Optional) Entity metric configuration - [Details](#metric-attribute)
 
 #### Event-Based Availability Indicator Attributes
 
-No additional attributes required. This is an empty object: `event_based_availability = {}`
+* `metric` - (Optional) Entity metric configuration - [Details](#metric-attribute)
 
 #### Traffic Indicator Attributes
 
 * `traffic_type` - (Required) The type of traffic to measure. Valid values: `all`, `erroneous`
 * `threshold` - (Required) The traffic threshold. Must be greater than 0
 * `operator` - (Required) The comparison operator. Valid values: ``, `=`, `<`, `<=`
+* `metric` - (Optional) Entity metric configuration - [Details](#metric-attribute)
 
 #### Custom Indicator Attributes
 
@@ -671,12 +824,36 @@ No additional attributes required. This is an empty object: `event_based_availab
 * `threshold` - (Required) The saturation threshold. Must be greater than or equal to 0
 * `aggregation` - (Required) The aggregation type. Valid values: `MEAN`, `MAX`, `MIN`, `P25`, `P50`, `P75`, `P90`, `P95`, `P98`, `P99`
 * `operator` - (Optional) Comparison operator used to evaluate the metric. Valid values: `>`, `>=`, `<`, `<=`. Defaults to `>=` if not specified.
+* `metric` - (Optional) Entity metric configuration - [Details](#metric-attribute)
 
 #### Event-Based Saturation Indicator Attributes
 
 * `metric_name` - (Required) The name of the metric which needs to be measured.
 * `threshold` - (Required) The saturation threshold. Must be greater than or equal to 0
 * `operator` - (Optional) Comparison operator used to evaluate the metric. Valid values: `>`, `>=`, `<`, `<=`. Defaults to `>=` if not specified.
+* `metric` - (Optional) Entity metric configuration - [Details](#metric-attribute)
+
+#### Advanced Custom Indicator Attributes
+
+Used for mobile app SLOs and other event-based advanced scenarios.
+
+* `type` - (Optional) The indicator measurement type. Valid value: `eventBased`
+* `good_events` - (Optional) Advanced filter defining the good-event threshold condition
+  * `threshold` - (Optional) The threshold value to compare against
+  * `operator` - (Optional) The comparison operator. Valid values: `>`, `>=`, `<`, `<=`
+  * `metric` - (Optional) Entity metric configuration - [Details](#metric-attribute)
+* `bad_events` - (Optional) Advanced filter defining the bad-event threshold condition
+  * `threshold` - (Optional) The threshold value to compare against
+  * `operator` - (Optional) The comparison operator. Valid values: `>`, `>=`, `<`, `<=`
+  * `metric` - (Optional) Entity metric configuration - [Details](#metric-attribute)
+
+#### Metric Attribute
+
+The `metric` block is an optional sub-attribute available on several indicator types. It is primarily used for mobile app SLOs.
+
+* `metric_name` - (Optional) The name of the metric (e.g., `crashAffectedSessionCount`, `httpLatency`, `http5xx`)
+* `scope` - (Optional) Scope of the entity metric
+  * `scope_type` - (Optional) The beacon/signal type for the metric scope (e.g., `httpRequest`, `crash`, `viewChange`)
 
 ### Time Window Attribute
 
@@ -694,7 +871,7 @@ The `time_window` attribute must contain exactly one of the following:
 #### Fixed Time Window Attributes
 
 * `duration` - (Required) The duration of the time window. Must be an integer
-* `duration_unit` - (Required) The unit of the duration. Valid values: `day`, `week`
+* `duration_unit` - (Required) The unit of the duration. Valid values: `day`, `week`, `calendar_month`
 * `timezone` - (Optional) The timezone for the time window. Defaults to `UTC`
 * `start_timestamp` - (Required) The starting timestamp for the fixed time window (Unix timestamp as float)
 
