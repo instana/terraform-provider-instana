@@ -853,7 +853,8 @@ The `metric` block is an optional sub-attribute available on several indicator t
 
 * `metric_name` - (Optional) The name of the metric (e.g., `crashAffectedSessionCount`, `httpLatency`, `http5xx`)
 * `scope` - (Optional) Scope of the entity metric
-  * `scope_type` - (Optional) The beacon/signal type for the metric scope (e.g., `httpRequest`, `crash`, `viewChange`)
+  * `scope_type` - (Required) The beacon/signal type for the metric scope (e.g., `httpRequest`, `crash`, `viewChange`)
+  * `filter_expression` - (Optional) Tag filter expression to further narrow the metric scope - [Details](#tag-filter-expression-syntax)
 
 ### Time Window Attribute
 
