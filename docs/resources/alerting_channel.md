@@ -72,6 +72,13 @@ resource "instana_alerting_channel" "email_multiple" {
       "devops@example.com"
     ]
   }
+
+  rbac_tags = [
+    {
+      id           = "team-id-1234"  # replace with actual team id
+      display_name = "Platform Team" # replace with actual team display name
+    }
+  ]
 }
 ```
 
@@ -486,6 +493,7 @@ terraform apply
 
 * `id` - (Computed) The unique identifier of the alerting channel
 * `name` - (Required) The name of the alerting channel
+* `rbac_tags` - (Optional, Computed) List of RBAC tags (teams) this alerting channel is assigned to. [Details](#rbac-tags-attributes)
 
 **Exactly one of the following channel types must be configured:**
 
@@ -654,6 +662,11 @@ terraform apply
 * `tenant_name` - (Required) The Tenant Name for MS Teams.
 
 **Type:** `string` for all attributes
+
+### RBAC Tags Attributes
+
+* `id` - (Required) The ID of the RBAC tag (team).
+* `display_name` - (Required) The display name of the RBAC tag (team).
 
 ## Attribute Reference
 

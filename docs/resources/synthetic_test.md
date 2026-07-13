@@ -60,7 +60,7 @@ resource "instana_synthetic_test" "example" {
 
 1. **Test Configuration Blocks**: `http_action { }` → `http_action = { }`
 2. **Nested Objects**: `scripts { }` → `scripts = { }`
-3. **RBAC Tags**: `rbac_tags { }` (multiple) → `rbac_tags = [{ }]` (set)
+3. **RBAC Tags**: `rbac_tags { }` (multiple) → `rbac_tags = [{ }]` (set) with `id` and `display_name` fields
 4. **DNS Filters**: `target_values { }` (multiple) → `target_values = [{ }]` (set)
 5. **SSL Validation**: `validation_rules { }` (multiple) → `validation_rules = [{ }]` (set)
 
@@ -71,16 +71,15 @@ resource "instana_synthetic_test" "example" {
 Basic HTTP GET request test:
 
 ```hcl
-
 resource "instana_synthetic_test" "http_action_basic" {
   label          = "Basic HTTP Test"
   description    = "Monitor website availability"
   active         = true
-  applications = ["NQIAsj1tSJm2zxMQx78MSA"] # replace with actual application Ids
-  locations      = ["b8dsyQt4fDukWzR9RMXW"] # replace with actual location Ids
+  applications   = ["NQIAsj1tSJm2zxMQx78MSA"] # replace with actual application Ids
+  locations      = ["b8dsyQt4fDukWzR9RMXW"]    # replace with actual location Ids
   test_frequency = 15
   playback_mode  = "Simultaneous"
-  
+
   http_action = {
     mark_synthetic_call = true
     retries             = 2
@@ -92,7 +91,14 @@ resource "instana_synthetic_test" "http_action_basic" {
     allow_insecure      = false
     expect_status       = 200
   }
-  
+
+  rbac_tags = [
+    {
+      id           = "team-id-1234"  # replace with actual team id
+      display_name = "Platform Team" # replace with actual team display name
+    }
+  ]
+
   custom_properties = {
     "environment" = "production"
     "team"        = "platform"
@@ -274,8 +280,8 @@ terraform apply
 
 ### RBAC Tags Reference
 
-* `name` - Required - Tag name
-* `value` - Required - Tag value
+* `id` - Required - The ID of the RBAC tag (team).
+* `display_name` - Required - The display name of the RBAC tag (team).
 
 ### HTTP Action Reference
 

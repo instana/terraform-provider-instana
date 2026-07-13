@@ -138,19 +138,46 @@ func (r *terraformResourceImpl[T]) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
+	// If the resource handle requires a post-create update (e.g. custom dashboard
+	// RBAC tags are silently dropped by the Create endpoint), call Update with the
+	// original payload — patched with the server-assigned ID — so those fields are
+	// persisted before we write the final state.
+	finalObject := createdObject
+	if updater, ok := any(r.resourceHandle).(resourcehandle.PostCreateUpdater[T]); ok && updater.NeedsPostCreateUpdate(createRequest) {
+		updatePayload := updater.ApplyCreatedID(createRequest, createdObject)
+		tflog.Debug(ctx, "Calling Instana API to apply post-create update (e.g. RBAC tags)", map[string]interface{}{
+			"resource_id":    updatePayload.GetIDForResourcePath(),
+			"correlation_id": correlationID,
+		})
+		updatedObject, updateErr := r.resourceHandle.GetRestResource(r.providerMeta.InstanaAPI).Update(updatePayload)
+		if updateErr != nil {
+			tflog.Error(ctx, "Failed to apply post-create update via API", map[string]interface{}{
+				"resource_id":    updatePayload.GetIDForResourcePath(),
+				"correlation_id": correlationID,
+				"error":          updateErr.Error(),
+			})
+			resp.Diagnostics.AddError(
+				"Error applying post-create update",
+				fmt.Sprintf("Resource was created but the follow-up update (needed to persist all fields) failed: %s", updateErr),
+			)
+			return
+		}
+		finalObject = updatedObject
+	}
+
 	// Update state with created object
-	diags = r.resourceHandle.UpdateState(ctx, &resp.State, &req.Plan, createdObject)
+	diags = r.resourceHandle.UpdateState(ctx, &resp.State, &req.Plan, finalObject)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		tflog.Error(ctx, "Failed to update state after creation", map[string]interface{}{
-			"resource_id":    createdObject.GetIDForResourcePath(),
+			"resource_id":    finalObject.GetIDForResourcePath(),
 			"correlation_id": correlationID,
 		})
 		return
 	}
 
 	tflog.Debug(ctx, "Successfully created resource", map[string]interface{}{
-		"resource_id":    createdObject.GetIDForResourcePath(),
+		"resource_id":    finalObject.GetIDForResourcePath(),
 		"correlation_id": correlationID,
 	})
 }

@@ -326,3 +326,17 @@ func (r *customDashboardResource) GetStateUpgraders(ctx context.Context) map[int
 		1: resourcehandle.CreateStateUpgraderForVersion(1),
 	}
 }
+
+// NeedsPostCreateUpdate returns true when the original Create request contains
+// RBAC tags, because the Custom Dashboard Create endpoint silently drops them.
+// A follow-up Update call is needed to persist the tags.
+func (r *customDashboardResource) NeedsPostCreateUpdate(original *api.CustomDashboard) bool {
+	return len(original.RbacTags) > 0
+}
+
+// ApplyCreatedID copies the server-assigned ID from the created object into the
+// original request payload so the follow-up Update call targets the right resource.
+func (r *customDashboardResource) ApplyCreatedID(original *api.CustomDashboard, created *api.CustomDashboard) *api.CustomDashboard {
+	original.ID = created.ID
+	return original
+}

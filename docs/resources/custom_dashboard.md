@@ -82,6 +82,12 @@ resource "instana_custom_dashboard" "custom_dashboard" {
     },
   ]
   title = "custom_dashboard"
+  rbac_tags = [
+    {
+      id           = "team-id-1234"           # replace with actual team id
+      display_name = "Platform Team"          # replace with actual team display name
+    },
+  ]
   widgets = jsonencode([{
     config = {
       comparisonDecreaseColor = "greenish"
@@ -169,12 +175,18 @@ terraform apply
 * `title` - Required - The name/title of the custom dashboard
 * `access_rule` - Required - Configuration of access rules (sharing/permissions) of the custom dashboard (list). [Details](#access-rule-argument-reference)
 * `widgets` - Required - JSON array of widget configurations. It is recommended to get this configuration via the `Edit as Json` feature of custom dashboards in Instana UI and to adopt the configuration afterwards
+* `rbac_tags` - Optional, Computed - List of RBAC tags (teams) this custom dashboard is assigned to. [Details](#rbac-tags-argument-reference)
 
 ### Access Rule Argument Reference
 
 * `access_type` - Required - Type of granted access. Allowed values: `READ`, `READ_WRITE`
 * `relation_type` - Required - Type of the entity for which the access is granted. Allowed values: `USER`, `API_TOKEN`, `ROLE`, `TEAM`, `GLOBAL`
 * `related_id` - Optional - The ID of the related entity for which access is granted. Required for all `relation_type` except `GLOBAL`
+
+### RBAC Tags Argument Reference
+
+* `id` - Required - The ID of the RBAC tag (team).
+* `display_name` - Required - The display name of the RBAC tag (team).
 
 ## Attributes Reference
 

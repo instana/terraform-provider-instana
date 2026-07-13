@@ -44,3 +44,25 @@ type ResourceHandle[T client.InstanaDataObject] interface {
 	// Return nil or empty map if no state upgrades are needed
 	GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader
 }
+
+// PostCreateUpdater is an optional interface that a ResourceHandle can implement
+// to indicate that an additional Update API call should be made immediately after
+// the Create API call. This is required for resources (e.g. custom dashboards)
+// whose Create endpoint does not accept certain fields (e.g. RBAC tags) but whose
+// Update endpoint does.
+//
+// If the resource handle implements this interface and NeedsPostCreateUpdate
+// returns true for the just-created object, the generic Create operation will
+// call the Update API with the original request payload (with the ID from the
+// created object applied) and use the update response to set the final state.
+type PostCreateUpdater[T client.InstanaDataObject] interface {
+	// NeedsPostCreateUpdate returns true when the created object requires a
+	// follow-up Update call to persist fields that were silently dropped by the
+	// Create endpoint.
+	NeedsPostCreateUpdate(original T) bool
+
+	// ApplyCreatedID copies the server-assigned ID from the created object into
+	// the original request payload so the subsequent Update call targets the
+	// correct resource.
+	ApplyCreatedID(original T, created T) T
+}
