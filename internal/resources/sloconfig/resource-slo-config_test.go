@@ -379,7 +379,10 @@ func TestMapIndicatorFromState_EventBasedAvailability(t *testing.T) {
 
 	t.Run("should map event-based availability indicator successfully", func(t *testing.T) {
 		model := IndicatorModel{
-			EventBasedAvailabilityIndicatorModel: &EventBasedAvailabilityIndicatorModel{},
+			EventBasedAvailabilityIndicatorModel: &EventBasedAvailabilityIndicatorModel{
+				Threshold:   types.Float64Value(0),
+				Aggregation: types.StringValue("MEAN"),
+			},
 		}
 
 		result, diags := resource.mapIndicatorFromState(model)
@@ -387,6 +390,9 @@ func TestMapIndicatorFromState_EventBasedAvailability(t *testing.T) {
 		assert.False(t, diags.HasError())
 		assert.Equal(t, SloConfigAPIIndicatorBlueprintAvailability, result.Blueprint)
 		assert.Equal(t, SloConfigAPIIndicatorMeasurementTypeEventBased, result.Type)
+		assert.Equal(t, 0.0, result.Threshold)
+		assert.NotNil(t, result.Aggregation)
+		assert.Equal(t, "MEAN", *result.Aggregation)
 	})
 }
 
@@ -971,10 +977,13 @@ func TestMapIndicatorToState(t *testing.T) {
 	})
 
 	t.Run("should map event-based availability indicator to state", func(t *testing.T) {
+		aggregation := "MEAN"
 		apiObject := &api.SloConfig{
 			Indicator: api.SloIndicator{
-				Blueprint: SloConfigAPIIndicatorBlueprintAvailability,
-				Type:      SloConfigAPIIndicatorMeasurementTypeEventBased,
+				Blueprint:   SloConfigAPIIndicatorBlueprintAvailability,
+				Type:        SloConfigAPIIndicatorMeasurementTypeEventBased,
+				Threshold:   0.0,
+				Aggregation: &aggregation,
 			},
 		}
 
@@ -982,6 +991,8 @@ func TestMapIndicatorToState(t *testing.T) {
 
 		assert.False(t, diags.HasError())
 		assert.NotNil(t, result.EventBasedAvailabilityIndicatorModel)
+		assert.Equal(t, 0.0, result.EventBasedAvailabilityIndicatorModel.Threshold.ValueFloat64())
+		assert.Equal(t, "MEAN", result.EventBasedAvailabilityIndicatorModel.Aggregation.ValueString())
 	})
 
 	t.Run("should map traffic indicator to state", func(t *testing.T) {
@@ -1854,5 +1865,388 @@ func TestUpdateStateWithMappingErrors(t *testing.T) {
 		diags := resource.UpdateState(ctx, state, nil, apiObject)
 
 		assert.True(t, diags.HasError())
+	})
+}
+
+// ---- Mobile Entity tests ----
+
+func TestMapEntityFromState_MobileEntity(t *testing.T) {
+	resource := &sloConfigResource{}
+
+	t.Run("should map mobile entity successfully", func(t *testing.T) {
+		mobileIDs, _ := types.SetValueFrom(context.Background(), types.StringType, []string{"app-1", "app-2"})
+		entityModel := EntityModel{
+			MobileEntityModel: &MobileEntityModel{
+				MobileIDs:        mobileIDs,
+				FilterExpression: types.StringNull(),
+			},
+		}
+
+		result, diags := resource.mapEntityFromState(entityModel)
+
+		assert.False(t, diags.HasError())
+		assert.Equal(t, SloConfigMobileEntity, result.Type)
+		assert.ElementsMatch(t, []string{"app-1", "app-2"}, result.MobileIds)
+		assert.NotNil(t, result.FilterExpression)
+	})
+
+	t.Run("should succeed when mobile_ids is null (all mobile apps)", func(t *testing.T) {
+		entityModel := EntityModel{
+			MobileEntityModel: &MobileEntityModel{
+				MobileIDs:        types.SetNull(types.StringType),
+				FilterExpression: types.StringNull(),
+			},
+		}
+
+		result, diags := resource.mapEntityFromState(entityModel)
+
+		assert.False(t, diags.HasError())
+		assert.Equal(t, SloConfigMobileEntity, result.Type)
+		assert.Empty(t, result.MobileIds)
+	})
+
+	t.Run("should succeed when mobile_ids is empty (all mobile apps)", func(t *testing.T) {
+		emptySet, _ := types.SetValueFrom(context.Background(), types.StringType, []string{})
+		entityModel := EntityModel{
+			MobileEntityModel: &MobileEntityModel{
+				MobileIDs:        emptySet,
+				FilterExpression: types.StringNull(),
+			},
+		}
+
+		result, diags := resource.mapEntityFromState(entityModel)
+
+		assert.False(t, diags.HasError())
+		assert.Equal(t, SloConfigMobileEntity, result.Type)
+		assert.Empty(t, result.MobileIds)
+	})
+}
+
+func TestMapMobileEntityToState(t *testing.T) {
+	resource := &sloConfigResource{}
+
+	t.Run("should map mobile entity from API to Terraform state", func(t *testing.T) {
+		entity := api.SloEntity{
+			Type:      SloConfigMobileEntity,
+			MobileIds: []string{"app-1", "app-2"},
+		}
+
+		result, diags := resource.mapMobileEntityToState(entity)
+
+		assert.False(t, diags.HasError(), fmt.Sprintf("unexpected errors: %v", diags))
+		assert.Equal(t, 2, len(result.MobileIDs.Elements()))
+	})
+
+	t.Run("should map mobile entity type in full entity switch", func(t *testing.T) {
+		apiObject := &api.SloConfig{
+			Entity: api.SloEntity{
+				Type:      SloConfigMobileEntity,
+				MobileIds: []string{"app-1"},
+			},
+		}
+
+		result, diags := resource.mapEntityToState(apiObject, nil)
+
+		assert.False(t, diags.HasError())
+		require.NotNil(t, result.MobileEntityModel)
+		assert.Nil(t, result.ApplicationEntityModel)
+		assert.Equal(t, 1, len(result.MobileEntityModel.MobileIDs.Elements()))
+	})
+}
+
+// ---- EntityMetric (ThresholdIndicatorSupport metric field) tests ----
+
+func TestMapIndicatorFromState_WithEntityMetric(t *testing.T) {
+	resource := &sloConfigResource{}
+
+	t.Run("should map time-based latency indicator with metric field", func(t *testing.T) {
+		model := IndicatorModel{
+			TimeBasedLatencyIndicatorModel: &TimeBasedLatencyIndicatorModel{
+				Threshold:   types.Float64Value(500.0),
+				Aggregation: types.StringValue("MEAN"),
+				Metric: &EntityMetricModel{
+					MetricName: types.StringValue("duration"),
+					Scope: &EntityMetricScopeModel{
+						ScopeType: types.StringValue("httpRequests"),
+					},
+				},
+			},
+		}
+
+		result, diags := resource.mapIndicatorFromState(model)
+
+		assert.False(t, diags.HasError())
+		assert.Equal(t, SloConfigAPIIndicatorBlueprintLatency, result.Blueprint)
+		require.NotNil(t, result.Metric)
+		assert.Equal(t, "duration", result.Metric.Name)
+		require.NotNil(t, result.Metric.Scope)
+		assert.Equal(t, "httpRequests", result.Metric.Scope.Type)
+	})
+
+	t.Run("should map time-based availability indicator with metric field", func(t *testing.T) {
+		model := IndicatorModel{
+			TimeBasedAvailabilityIndicatorModel: &TimeBasedAvailabilityIndicatorModel{
+				Threshold:   types.Float64Value(0.99),
+				Aggregation: types.StringValue("MEAN"),
+				Metric: &EntityMetricModel{
+					MetricName: types.StringValue("crashRate"),
+					Scope: &EntityMetricScopeModel{
+						ScopeType: types.StringValue("crashes"),
+					},
+				},
+			},
+		}
+
+		result, diags := resource.mapIndicatorFromState(model)
+
+		assert.False(t, diags.HasError())
+		assert.Equal(t, SloConfigAPIIndicatorBlueprintAvailability, result.Blueprint)
+		require.NotNil(t, result.Metric)
+		assert.Equal(t, "crashRate", result.Metric.Name)
+	})
+
+	t.Run("should map traffic indicator with metric field", func(t *testing.T) {
+		model := IndicatorModel{
+			TrafficIndicatorModel: &TrafficIndicatorModel{
+				TrafficType: types.StringValue("CALLS_TOTAL"),
+				Threshold:   types.Float64Value(1000.0),
+				Operator:    types.StringValue(">="),
+				Metric: &EntityMetricModel{
+					MetricName: types.StringValue("requestCount"),
+					Scope: &EntityMetricScopeModel{
+						ScopeType: types.StringValue("httpRequests"),
+					},
+				},
+			},
+		}
+
+		result, diags := resource.mapIndicatorFromState(model)
+
+		assert.False(t, diags.HasError())
+		assert.Equal(t, SloConfigAPIIndicatorBlueprintTraffic, result.Blueprint)
+		require.NotNil(t, result.Metric)
+		assert.Equal(t, "requestCount", result.Metric.Name)
+	})
+}
+
+func TestMapIndicatorToState_WithEntityMetric(t *testing.T) {
+	resource := &sloConfigResource{}
+
+	t.Run("should map time-based latency indicator with metric to state", func(t *testing.T) {
+		aggregation := "MEAN"
+		apiObject := &api.SloConfig{
+			Indicator: api.SloIndicator{
+				Blueprint:   SloConfigAPIIndicatorBlueprintLatency,
+				Type:        SloConfigAPIIndicatorMeasurementTypeTimeBased,
+				Threshold:   500.0,
+				Aggregation: &aggregation,
+				Metric: &api.SloEntityMetric{
+					Name: "duration",
+					Scope: &api.SloEntityMetricScope{
+						Type: "httpRequests",
+					},
+				},
+			},
+		}
+
+		result, diags := resource.mapIndicatorToState(apiObject, &SloConfigModel{})
+
+		assert.False(t, diags.HasError())
+		require.NotNil(t, result.TimeBasedLatencyIndicatorModel)
+		require.NotNil(t, result.TimeBasedLatencyIndicatorModel.Metric)
+		assert.Equal(t, "duration", result.TimeBasedLatencyIndicatorModel.Metric.MetricName.ValueString())
+		require.NotNil(t, result.TimeBasedLatencyIndicatorModel.Metric.Scope)
+		assert.Equal(t, "httpRequests", result.TimeBasedLatencyIndicatorModel.Metric.Scope.ScopeType.ValueString())
+	})
+
+	t.Run("should map indicator with nil metric to state with nil Metric field", func(t *testing.T) {
+		aggregation := "MEAN"
+		apiObject := &api.SloConfig{
+			Indicator: api.SloIndicator{
+				Blueprint:   SloConfigAPIIndicatorBlueprintLatency,
+				Type:        SloConfigAPIIndicatorMeasurementTypeTimeBased,
+				Threshold:   500.0,
+				Aggregation: &aggregation,
+				Metric:      nil,
+			},
+		}
+
+		result, diags := resource.mapIndicatorToState(apiObject, &SloConfigModel{})
+
+		assert.False(t, diags.HasError())
+		require.NotNil(t, result.TimeBasedLatencyIndicatorModel)
+		assert.Nil(t, result.TimeBasedLatencyIndicatorModel.Metric)
+	})
+}
+
+// ---- AdvancedCustom indicator tests ----
+
+func TestMapIndicatorFromState_AdvancedCustom(t *testing.T) {
+	resource := &sloConfigResource{}
+
+	t.Run("should map advanced-custom indicator successfully", func(t *testing.T) {
+		model := IndicatorModel{
+			AdvancedCustomIndicatorModel: &AdvancedCustomIndicatorModel{
+				Type: types.StringValue("eventBased"),
+				GoodEvents: &AdvancedFilterModel{
+					Aggregation: types.StringValue("MEAN"),
+					Threshold:   types.Float64Value(500.0),
+					Operator:    types.StringValue("<"),
+					Metric: &EntityMetricModel{
+						MetricName: types.StringValue("duration"),
+						Scope: &EntityMetricScopeModel{
+							ScopeType: types.StringValue("httpRequests"),
+						},
+					},
+				},
+				BadEvents: &AdvancedFilterModel{
+					Aggregation: types.StringValue("MEAN"),
+					Threshold:   types.Float64Value(500.0),
+					Operator:    types.StringValue(">="),
+					Metric: &EntityMetricModel{
+						MetricName: types.StringValue("duration"),
+						Scope: &EntityMetricScopeModel{
+							ScopeType: types.StringValue("httpRequests"),
+						},
+					},
+				},
+			},
+		}
+
+		result, diags := resource.mapIndicatorFromState(model)
+
+		assert.False(t, diags.HasError())
+		assert.Equal(t, SloConfigAPIIndicatorBlueprintAdvancedCustom, result.Blueprint)
+		assert.Equal(t, "eventBased", result.Type)
+		require.NotNil(t, result.GoodEvents)
+		assert.Equal(t, "<", result.GoodEvents.Operator)
+		assert.Equal(t, "duration", result.GoodEvents.Metric.Name)
+		assert.Equal(t, "httpRequests", result.GoodEvents.Metric.Scope.Type)
+		require.NotNil(t, result.BadEvents)
+		assert.Equal(t, ">=", result.BadEvents.Operator)
+	})
+
+	t.Run("should default type to eventBased when not set", func(t *testing.T) {
+		model := IndicatorModel{
+			AdvancedCustomIndicatorModel: &AdvancedCustomIndicatorModel{
+				Type: types.StringNull(),
+				GoodEvents: &AdvancedFilterModel{
+					Aggregation: types.StringValue("MEAN"),
+					Threshold:   types.Float64Value(500.0),
+					Operator:    types.StringValue("<"),
+					Metric: &EntityMetricModel{
+						MetricName: types.StringValue("duration"),
+					},
+				},
+			},
+		}
+
+		result, diags := resource.mapIndicatorFromState(model)
+
+		assert.False(t, diags.HasError())
+		assert.Equal(t, SloConfigAPIIndicatorMeasurementTypeEventBased, result.Type)
+	})
+
+	t.Run("should return error when good_events metric is missing", func(t *testing.T) {
+		model := IndicatorModel{
+			AdvancedCustomIndicatorModel: &AdvancedCustomIndicatorModel{
+				Type: types.StringValue("eventBased"),
+				GoodEvents: &AdvancedFilterModel{
+					Aggregation: types.StringValue("MEAN"),
+					Threshold:   types.Float64Value(500.0),
+					Operator:    types.StringValue("<"),
+					Metric:      nil, // missing
+				},
+			},
+		}
+
+		_, diags := resource.mapIndicatorFromState(model)
+
+		assert.True(t, diags.HasError())
+		assert.Contains(t, diags[0].Summary(), SloConfigErrAdvancedCustomRequired)
+	})
+
+	t.Run("should return error when good_events is nil", func(t *testing.T) {
+		model := IndicatorModel{
+			AdvancedCustomIndicatorModel: &AdvancedCustomIndicatorModel{
+				Type:       types.StringValue("eventBased"),
+				GoodEvents: nil,
+			},
+		}
+
+		_, diags := resource.mapIndicatorFromState(model)
+
+		assert.True(t, diags.HasError())
+		assert.Contains(t, diags[0].Summary(), SloConfigErrAdvancedCustomRequired)
+	})
+}
+
+func TestMapIndicatorToState_AdvancedCustom(t *testing.T) {
+	resource := &sloConfigResource{}
+
+	t.Run("should map advanced-custom indicator from API to state", func(t *testing.T) {
+		apiObject := &api.SloConfig{
+			Indicator: api.SloIndicator{
+				Blueprint: SloConfigAPIIndicatorBlueprintAdvancedCustom,
+				Type:      "eventBased",
+				GoodEvents: &api.SloAdvancedFilter{
+					Aggregation: "MEAN",
+					Threshold:   500.0,
+					Operator:    "<",
+					Metric: &api.SloEntityMetric{
+						Name: "duration",
+						Scope: &api.SloEntityMetricScope{
+							Type: "httpRequests",
+						},
+					},
+				},
+				BadEvents: &api.SloAdvancedFilter{
+					Aggregation: "MEAN",
+					Threshold:   500.0,
+					Operator:    ">=",
+					Metric: &api.SloEntityMetric{
+						Name: "duration",
+						Scope: &api.SloEntityMetricScope{
+							Type: "httpRequests",
+						},
+					},
+				},
+			},
+		}
+
+		result, diags := resource.mapIndicatorToState(apiObject, &SloConfigModel{})
+
+		assert.False(t, diags.HasError())
+		require.NotNil(t, result.AdvancedCustomIndicatorModel)
+		assert.Equal(t, "eventBased", result.AdvancedCustomIndicatorModel.Type.ValueString())
+		require.NotNil(t, result.AdvancedCustomIndicatorModel.GoodEvents)
+		assert.Equal(t, "<", result.AdvancedCustomIndicatorModel.GoodEvents.Operator.ValueString())
+		assert.Equal(t, "duration", result.AdvancedCustomIndicatorModel.GoodEvents.Metric.MetricName.ValueString())
+		assert.Equal(t, "httpRequests", result.AdvancedCustomIndicatorModel.GoodEvents.Metric.Scope.ScopeType.ValueString())
+		require.NotNil(t, result.AdvancedCustomIndicatorModel.BadEvents)
+		assert.Equal(t, ">=", result.AdvancedCustomIndicatorModel.BadEvents.Operator.ValueString())
+		assert.Nil(t, result.TimeBasedLatencyIndicatorModel)
+	})
+
+	t.Run("should map advanced-custom with nil bad_events from API", func(t *testing.T) {
+		apiObject := &api.SloConfig{
+			Indicator: api.SloIndicator{
+				Blueprint: SloConfigAPIIndicatorBlueprintAdvancedCustom,
+				Type:      "eventBased",
+				GoodEvents: &api.SloAdvancedFilter{
+					Aggregation: "MEAN",
+					Threshold:   500.0,
+					Operator:    "<",
+					Metric:      &api.SloEntityMetric{Name: "duration"},
+				},
+				BadEvents: nil,
+			},
+		}
+
+		result, diags := resource.mapIndicatorToState(apiObject, &SloConfigModel{})
+
+		assert.False(t, diags.HasError())
+		require.NotNil(t, result.AdvancedCustomIndicatorModel)
+		assert.Nil(t, result.AdvancedCustomIndicatorModel.BadEvents)
 	})
 }

@@ -46,6 +46,10 @@ const (
 	SloConfigDescWebsiteEntity = "Website entity of SLO"
 	// SloConfigDescWebsiteID is the description for the website_id field
 	SloConfigDescWebsiteID = "The website ID of the entity"
+	// SloConfigDescMobileEntity is the description for the mobile entity block
+	SloConfigDescMobileEntity = "Mobile App entity of SLO"
+	// SloConfigDescMobileIDs is the description for the mobile_ids field
+	SloConfigDescMobileIDs = "The ID(s) of the Mobile Apps"
 	// SloConfigDescBeaconType is the description for the beacon_type field
 	SloConfigDescBeaconType = "The beacon type for the entity configuration (pageLoad, resourceLoad, httpRequest, error, custom, pageChange)"
 	// SloConfigDescSyntheticEntity is the description for the synthetic entity block
@@ -78,6 +82,18 @@ const (
 	SloConfigDescEventBasedSaturation = "Event-based Saturation indicator"
 	// SloConfigDescMetricName is the description for the metric_name field
 	SloConfigDescMetricName = "The metric name for saturation indicator"
+	// SloConfigDescAdvancedCustomEntity is the description for the advanced_custom indicator block
+	SloConfigDescAdvancedCustom = "Advanced custom indicator (event-based, mobile)"
+	// SloConfigDescMetric is the description for the metric block
+	SloConfigDescMetric = "Entity metric configuration for mobile/advanced indicators"
+	// SloConfigDescMetricMetricName is the description for metric name inside the metric block
+	SloConfigDescMetricMetricName = "Name of the metric (e.g. duration, crashRate)"
+	// SloConfigDescMetricScope is the description for the scope block inside metric
+	SloConfigDescMetricScope = "Scope of the entity metric"
+	// SloConfigDescMetricScopeType is the description for the type field inside metric scope
+	SloConfigDescMetricScopeType = "Beacon/signal type for the metric scope (e.g. httpRequests, crashes)"
+	// SloConfigDescAdvancedFilter is the description for goodEvents/badEvents block
+	SloConfigDescAdvancedFilter = "Advanced filter defining a threshold condition on a metric"
 	// SloConfigDescThreshold is the description for the threshold field
 	SloConfigDescThreshold = "The threshold for the metric configuration"
 	// SloConfigDescAggregation is the description for the aggregation field
@@ -117,6 +133,8 @@ const (
 	SloConfigErrWebsiteIDRequired = "website_id and beacon_type are required for website entity"
 	// SloConfigErrSyntheticTestIDsRequired is the error message for missing synthetic_test_ids
 	SloConfigErrSyntheticTestIDsRequired = "synthetic_test_ids is required for synthetic entity"
+	// SloConfigErrMobileIDsRequired is the error message for missing mobile_ids
+	SloConfigErrMobileIDsRequired = "mobile_ids is required for mobile entity"
 	// SloConfigErrMissingEntity is the error title for missing entity configuration
 	SloConfigErrMissingEntity = "Missing entity configuration"
 	// SloConfigErrExactlyOneEntity is the error message for missing entity configuration
@@ -175,6 +193,10 @@ const (
 	SloConfigErrInfraTypeRequired = "Infrastructure type required"
 	// SloConfigErrInfraTypeRequiredMsg is the error message for missing infrastructure type
 	SloConfigErrInfraTypeRequiredMsg = "infra_type is required for infrastructure entity"
+	// SloConfigErrAdvancedCustomRequired is the error title for missing advanced_custom indicator fields
+	SloConfigErrAdvancedCustomRequired = "Advanced custom indicator fields required"
+	// SloConfigErrAdvancedCustomRequiredMsg is the error message for missing advanced_custom fields
+	SloConfigErrAdvancedCustomRequiredMsg = "good_events with metric, aggregation, threshold and operator are required for advanced_custom indicator"
 	// SloConfigErrSaturationRequired is the error title for missing saturation indicator fields
 	SloConfigErrTimeBasedSaturationRequired = "Time-based Saturation indicator fields required"
 	// SloConfigErrSaturationRequired is the error title for missing saturation indicator fields
@@ -199,6 +221,7 @@ const (
 	SloConfigFieldSyntheticTestIDs               = "synthetic_test_ids"
 	SloConfigFieldIncludeUnscheduledTestResults  = "include_unscheduled_test_results"
 	SloConfigFieldInfraType                      = "infra_type"
+	SloConfigFieldMobileIDs                      = "mobile_ids"
 	SloConfigFieldFilterExpression          = "filter_expression"
 	SloConfigFieldServiceID                 = "service_id"
 	SloConfigFieldEndpointID                = "endpoint_id"
@@ -222,6 +245,7 @@ const (
 	SloConfigWebsiteEntity        = "website"
 	SloConfigSyntheticEntity      = "synthetic"
 	SloConfigInfrastructureEntity = "infrastructure"
+	SloConfigMobileEntity         = "mobile"
 
 	// Slo time windows types
 	SloConfigRollingTimeWindow = "rolling"
@@ -248,11 +272,12 @@ const (
 
 	SloConfigAPIFieldFilter = "tagFilterExpression"
 
-	SloConfigAPIIndicatorBlueprintLatency      = "latency"
-	SloConfigAPIIndicatorBlueprintAvailability = "availability"
-	SloConfigAPIIndicatorBlueprintTraffic      = "traffic"
-	SloConfigAPIIndicatorBlueprintCustom       = "custom"
-	SloConfigAPIIndicatorBlueprintSaturation   = "saturation"
+	SloConfigAPIIndicatorBlueprintLatency       = "latency"
+	SloConfigAPIIndicatorBlueprintAvailability  = "availability"
+	SloConfigAPIIndicatorBlueprintTraffic       = "traffic"
+	SloConfigAPIIndicatorBlueprintCustom        = "custom"
+	SloConfigAPIIndicatorBlueprintSaturation    = "saturation"
+	SloConfigAPIIndicatorBlueprintAdvancedCustom = "advanced-custom"
 
 	SloConfigAPIFieldBlueprint = "blueprint"
 	SloConfigAPIFieldType      = "type"
@@ -287,8 +312,20 @@ const (
 	SchemaFieldTimeBasedSaturation = "time_based_saturation"
 	// SchemaFieldEventBasedSaturation represents the event-based saturation field identifier
 	SchemaFieldEventBasedSaturation = "event_based_saturation"
+	// SchemaFieldAdvancedCustom represents the advanced_custom field identifier
+	SchemaFieldAdvancedCustom = "advanced_custom"
 	// SchemaFieldOperator represents the operator field identifier
 	SchemaFieldOperator = "operator"
+	// SchemaFieldMetric represents the metric field identifier
+	SchemaFieldMetric = "metric"
+	// SchemaFieldMetricScope represents the scope field identifier inside metric
+	SchemaFieldMetricScope = "scope"
+	// SchemaFieldMetricScopeType represents the type field inside metric scope
+	SchemaFieldMetricScopeType = "scope_type"
+	// SchemaFieldGoodEvents represents the good_events field identifier
+	SchemaFieldGoodEvents = "good_events"
+	// SchemaFieldBadEvents represents the bad_events field identifier
+	SchemaFieldBadEvents = "bad_events"
 
 	// Operator constants
 

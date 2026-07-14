@@ -68,11 +68,7 @@ func NewApplicationConfigResourceHandle() resourcehandle.ResourceHandle[*api.App
 						},
 					},
 					ApplicationConfigFieldTagFilter: schema.StringAttribute{
-						Optional: true,
-						Computed: true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
+						Required:    true,
 						Description: ApplicationConfigDescTagFilter,
 					},
 					ApplicationConfigFieldAccessRules: schema.ListNestedAttribute{
