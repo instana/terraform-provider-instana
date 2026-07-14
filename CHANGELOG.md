@@ -1,3 +1,23 @@
+## [v7.3.3](https://github.com/instana/terraform-provider-instana/tree/v7.3.3) (2026-07-14)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.3.2...v7.3.3)
+
+**Implemented enhancements:**
+
+- Added Mobile App SLO support to `instana_slo_config` resource with `mobile` entity block, supporting `mobile_ids` and `filter_expression`
+- Bumped `instana-go-client` dependency from `v1.1.2` to `v1.1.3` to include new `MobileIds`, `SloAdvancedFilter`, and `SloEntityMetric` API model fields
+- Added application config mandatory validation for tag filter
+- Updated resource documentation for `instana_alerting_channel`, `instana_custom_dashboard`, and `instana_synthetic_test` to correctly describe RBAC tag usage
+
+**Fixed bugs:**
+
+- Fixed custom dashboard creation with `rbac_tags` by adding a generic post-create update hook that issues a follow-up Update after Create to preserve the rbac fields
+
+**Merged pull requests:**
+
+- Mobile slo suport [\#102](https://github.com/instana/terraform-provider-instana/pull/102) ([georgekutty-1](https://github.com/georgekutty-1))
+- Rbac tags documentation and custom dashboard fix [\#101](https://github.com/instana/terraform-provider-instana/pull/101) ([georgekutty-1](https://github.com/georgekutty-1))
+
 ## [v7.3.2](https://github.com/instana/terraform-provider-instana/tree/v7.3.2) (2026-07-09)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.3.1...v7.3.2)
