@@ -1,3 +1,16 @@
+## [v7.3.4](https://github.com/instana/terraform-provider-instana/tree/v7.3.4) (2026-07-14)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.3.3...v7.3.4)
+
+**Implemented enhancements:**
+
+- Added `slack_app` and `ms_teams_app` channel types to the `instana_alerting_channel` data source, bringing it to full parity with the resource
+- Updated `instana_alerting_channel` data source documentation to include `slack_app` and `ms_teams_app` attribute reference and field descriptions
+
+**Merged pull requests:**
+
+- Alert channel datasource - slack and teams app [\#103](https://github.com/instana/terraform-provider-instana/pull/103) ([georgekutty-1](https://github.com/georgekutty-1))
+
 ## [v7.3.3](https://github.com/instana/terraform-provider-instana/tree/v7.3.3) (2026-07-14)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.3.2...v7.3.3)
