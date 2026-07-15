@@ -33,6 +33,8 @@ type AlertingChannelDataSourceModel struct {
 	PrometheusWebhook     *shared.PrometheusWebhookModel     `tfsdk:"prometheus_webhook"`
 	WebexTeamsWebhook     *shared.WebhookBasedModel          `tfsdk:"webex_teams_webhook"`
 	WatsonAIOpsWebhook    *shared.WatsonAIOpsWebhookModel    `tfsdk:"watson_aiops_webhook"`
+	SlackApp              *shared.SlackAppModel              `tfsdk:"slack_app"`
+	MsTeamsApp            *shared.MsTeamsAppModel            `tfsdk:"ms_teams_app"`
 }
 
 // NewAlertingChannelDataSource creates a new data source for alerting channel
@@ -309,6 +311,78 @@ func (d *AlertingChannelDataSource) Schema(_ context.Context, _ datasource.Schem
 					},
 				},
 			},
+			AlertingChannelFieldChannelSlackApp: schema.SingleNestedAttribute{
+				Computed:    true,
+				Description: AlertingChannelDescSlackApp,
+				Attributes: map[string]schema.Attribute{
+					AlertingChannelSlackAppFieldAppID: schema.StringAttribute{
+						Description: AlertingChannelDescSlackAppAppID,
+						Computed:    true,
+					},
+					AlertingChannelSlackAppFieldTeamID: schema.StringAttribute{
+						Description: AlertingChannelDescSlackAppTeamID,
+						Computed:    true,
+					},
+					AlertingChannelSlackAppFieldTeamName: schema.StringAttribute{
+						Description: AlertingChannelDescSlackAppTeamName,
+						Computed:    true,
+					},
+					AlertingChannelSlackAppFieldChannelID: schema.StringAttribute{
+						Description: AlertingChannelDescSlackAppChannelID,
+						Computed:    true,
+					},
+					AlertingChannelSlackAppFieldChannelName: schema.StringAttribute{
+						Description: AlertingChannelDescSlackAppChannelName,
+						Computed:    true,
+					},
+					AlertingChannelSlackAppFieldEmojiRendering: schema.BoolAttribute{
+						Description: AlertingChannelDescSlackAppEmojiRendering,
+						Computed:    true,
+					},
+				},
+			},
+			AlertingChannelFieldChannelMsTeamsApp: schema.SingleNestedAttribute{
+				Computed:    true,
+				Description: AlertingChannelDescMsTeamsApp,
+				Attributes: map[string]schema.Attribute{
+					AlertingChannelMsTeamsAppFieldAPITokenID: schema.StringAttribute{
+						Description: AlertingChannelDescMsTeamsAppAPITokenID,
+						Computed:    true,
+					},
+					AlertingChannelMsTeamsAppFieldTeamID: schema.StringAttribute{
+						Description: AlertingChannelDescMsTeamsAppTeamID,
+						Computed:    true,
+					},
+					AlertingChannelMsTeamsAppFieldTeamName: schema.StringAttribute{
+						Description: AlertingChannelDescMsTeamsAppTeamName,
+						Computed:    true,
+					},
+					AlertingChannelMsTeamsAppFieldChannelID: schema.StringAttribute{
+						Description: AlertingChannelDescMsTeamsAppChannelID,
+						Computed:    true,
+					},
+					AlertingChannelMsTeamsAppFieldChannelName: schema.StringAttribute{
+						Description: AlertingChannelDescMsTeamsAppChannelName,
+						Computed:    true,
+					},
+					AlertingChannelMsTeamsAppFieldInstanaURL: schema.StringAttribute{
+						Description: AlertingChannelDescMsTeamsAppInstanaURL,
+						Computed:    true,
+					},
+					AlertingChannelMsTeamsAppFieldServiceURL: schema.StringAttribute{
+						Description: AlertingChannelDescMsTeamsAppServiceURL,
+						Computed:    true,
+					},
+					AlertingChannelMsTeamsAppFieldTenantID: schema.StringAttribute{
+						Description: AlertingChannelDescMsTeamsAppTenantID,
+						Computed:    true,
+					},
+					AlertingChannelMsTeamsAppFieldTenantName: schema.StringAttribute{
+						Description: AlertingChannelDescMsTeamsAppTenantName,
+						Computed:    true,
+					},
+				},
+			},
 		},
 	}
 }
@@ -476,6 +550,20 @@ func (d *AlertingChannelDataSource) Read(ctx context.Context, req datasource.Rea
 			return
 		}
 		data.WatsonAIOpsWebhook = watsonAIOpsWebhookChannel
+	case api.SlackAppChannelType:
+		slackAppChannel, slackAppDiags := shared.MapSlackAppChannelToState(ctx, matchingChannel)
+		if slackAppDiags.HasError() {
+			resp.Diagnostics.Append(slackAppDiags...)
+			return
+		}
+		data.SlackApp = slackAppChannel
+	case api.MsTeamsAppChannelType:
+		msTeamsAppChannel, msTeamsAppDiags := shared.MapMsTeamsAppChannelToState(ctx, matchingChannel)
+		if msTeamsAppDiags.HasError() {
+			resp.Diagnostics.Append(msTeamsAppDiags...)
+			return
+		}
+		data.MsTeamsApp = msTeamsAppChannel
 	default:
 		resp.Diagnostics.AddError(
 			AlertingChannelErrUnsupportedChannelType,

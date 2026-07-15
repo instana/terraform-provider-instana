@@ -22,6 +22,7 @@ Exactly one of the following items is provided depending on the type of the aler
 
 * `email` - configuration of a email alerting channel - [Details](#email)
 * `google_chat` - configuration of a Google Chat alerting channel - [Details](#google-chat)
+* `ms_teams_app` - configuration of a MS Teams App (bidirectional) alerting channel - [Details](#ms-teams-app)
 * `office_365` - configuration of a Office 365 alerting channel - [Details](#office-365)
 * `ops_genie` - configuration of a OpsGenie alerting channel - [Details](#opsgenie)
 * `pager_duty` - configuration of a PagerDuty alerting channel - [Details](#pagerduty)
@@ -29,6 +30,7 @@ Exactly one of the following items is provided depending on the type of the aler
 * `service_now` - configuration of a ServiceNow alerting channel - [Details](#servicenow)
 * `service_now_application` - configuration of a ServiceNow Application alerting channel - [Details](#servicenow-application)
 * `slack` - configuration of a Slack alerting channel - [Details](#slack)
+* `slack_app` - configuration of a Slack App (bidirectional) alerting channel - [Details](#slack-app)
 * `splunk` - configuration of a Splunk alerting channel - [Details](#splunk)
 * `victor_ops` - configuration of a VictorOps alerting channel - [Details](#victorops)
 * `watson_aiops_webhook` - configuration of a Watson AIOps Webhook alerting channel - [Details](#watson-aiops-webhook)
@@ -118,3 +120,24 @@ Exactly one of the following items is provided depending on the type of the aler
 
 * `webhook_urls` - the list of webhook URLs where the alert will be sent to
 * `http_headers` - key/value map of additional http headers which will be sent to the webhook
+
+### Slack App
+
+* `app_id` - the App ID of the Slack App
+* `team_id` - the Team ID where the Slack App is installed
+* `team_name` - the Team Name where the Slack App is installed
+* `channel_id` - the Channel ID where alerts will be sent
+* `channel_name` - the Channel Name where alerts will be sent
+* `emoji_rendering` - whether emoji rendering is enabled in alert messages
+
+### MS Teams App
+
+* `api_token_id` - the API Token ID for MS Teams App authentication
+* `team_id` - the Team ID where the MS Teams App is installed
+* `team_name` - the Team Name where the MS Teams App is installed
+* `channel_id` - the Channel ID where alerts will be sent
+* `channel_name` - the Channel Name where alerts will be sent
+* `instana_url` - the Instana URL for linking back from MS Teams
+* `service_url` - the MS Teams service URL
+* `tenant_id` - the Tenant ID for MS Teams
+* `tenant_name` - the Tenant Name for MS Teams
