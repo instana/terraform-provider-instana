@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -17,6 +18,14 @@ import (
 
 // CorrelationIDHeader is the HTTP header name for correlation ID
 const CorrelationIDHeader = "X-Correlation-ID"
+
+// correlationIDMu guards writes to providerMeta.ClientConfig.Headers.Custom in
+// addCorrelationIDToClient. ClientConfig is shared across every resource
+// instance/goroutine (Create/Read/Update/Delete run concurrently under
+// Terraform's default parallelism), and Headers.Custom is a plain map with no
+// synchronization of its own, so unguarded concurrent writes here panic with
+// "fatal error: concurrent map writes" (see #91).
+var correlationIDMu sync.Mutex
 
 // NewTerraformResource creates a new terraform resource for the given handle
 func NewTerraformResource[T client.InstanaDataObject](handle resourcehandle.ResourceHandle[T]) TerraformResource {
@@ -427,6 +436,9 @@ func (r *terraformResourceImpl[T]) UpgradeState(ctx context.Context) map[int64]r
 
 // addCorrelationIDToClient adds the correlation ID header to the client configuration
 func (r *terraformResourceImpl[T]) addCorrelationIDToClient(correlationID string) {
+	correlationIDMu.Lock()
+	defer correlationIDMu.Unlock()
+
 	if r.providerMeta != nil && r.providerMeta.ClientConfig != nil {
 		if r.providerMeta.ClientConfig.Headers.Custom == nil {
 			r.providerMeta.ClientConfig.Headers.Custom = make(map[string]string)
