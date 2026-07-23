@@ -32,6 +32,7 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/resources/customdashboard"
 	"github.com/instana/terraform-provider-instana/internal/resources/customeventspec"
 	"github.com/instana/terraform-provider-instana/internal/resources/group"
+	"github.com/instana/terraform-provider-instana/internal/resources/groupmapping"
 	"github.com/instana/terraform-provider-instana/internal/resources/infralertconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/logalertconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/maintenancewindowconfig"
@@ -362,6 +363,7 @@ func (p *InstanaProvider) Resources(_ context.Context) []func() resource.Resourc
 		addResouceHandle(mobilealertconfig.NewMobileAlertConfigResourceHandle),
 		addResouceHandle(maintenancewindowconfig.NewMaintenanceWindowConfigResourceHandle),
 		addResouceHandle(group.NewGroupResourceHandle),
+		addResouceHandle(groupmapping.NewGroupMappingResourceHandle),
 		addResouceHandle(team.NewTeamResourceHandle),
 		addResouceHandle(roles.NewRoleResourceHandle),
 		addResouceHandle(sliconfig.NewSliConfigResourceHandle),
