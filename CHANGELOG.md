@@ -1,3 +1,18 @@
+## [v7.4.0](https://github.com/instana/terraform-provider-instana/tree/v7.4.0) (2026-07-28)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.3.4...v7.4.0)
+
+**Implemented enhancements:**
+
+- Added new `instana_rbac_group_mapping` resource to manage RBAC group mappings in Instana, mapping IdP (LDAP, OIDC, SAML) attribute key/value pairs to Instana roles for automatic user role assignment on login
+- New resource supports `key`, `value`, `group_id` (required) and optional `team_id` fields
+- Bumped `instana-go-client` dependency from `v1.1.3` to `v1.1.4` to include the new `GroupMapping` API struct and `GroupMappings()` endpoint
+- Added resource documentation for `instana_rbac_group_mapping` with usage examples and Terraform import instructions
+
+**Merged pull requests:**
+
+- RBAC group mapping resource [\#106](https://github.com/instana/terraform-provider-instana/pull/106) ([blessyelzabyju](https://github.com/BlessyElza))
+
 ## [v7.3.4](https://github.com/instana/terraform-provider-instana/tree/v7.3.4) (2026-07-14)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.3.3...v7.3.4)
