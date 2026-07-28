@@ -164,3 +164,8 @@ func (m *MockInstanaAPI) MobileAlertConfigs() rest.RestResource[*api.MobileAlert
 func (m *MockInstanaAPI) MaintenanceWindowConfigs() rest.RestResource[*api.MaintenanceWindow] {
 	return nil
 }
+
+// GroupMappings mock implementation
+func (m *MockInstanaAPI) GroupMappings() rest.RestResource[*api.GroupMapping] {
+	return nil
+}
