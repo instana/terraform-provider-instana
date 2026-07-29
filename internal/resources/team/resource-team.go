@@ -258,7 +258,7 @@ func (r *teamResource) buildTeamModelFromAPIResponse(team *api.Team, planModel T
 	}
 
 	if team.Scope != nil {
-		scopeModel, scopeDiags := r.mapScopeToModel(team.Scope)
+		scopeModel, scopeDiags := r.mapScopeToModel(team.Scope, planModel.Scope)
 		diags.Append(scopeDiags...)
 		if !diags.HasError() {
 			model.Scope = scopeModel
@@ -302,25 +302,31 @@ func (r *teamResource) mapRolesToModel(apiRoles []api.TeamRole) []TeamMemberRole
 	return roles
 }
 
-// mapScopeToModel converts API scope to model scope
-func (r *teamResource) mapScopeToModel(apiScope *api.TeamScope) (*TeamScopeModel, diag.Diagnostics) {
+// mapScopeToModel converts API scope to model scope.
+// planScope is the scope from the prior plan/state and is used as the
+// fallback for each slice field when the API omits it (omitempty nil).
+// This preserves the null-vs-empty-set distinction the user expressed:
+//   - field not configured in HCL  → plan nil  → API nil  → state nil  (null)
+//   - field configured as empty set → plan []   → API nil  → state []   (empty set)
+//   - field configured with values  → plan [x]  → API [x]  → state [x]
+func (r *teamResource) mapScopeToModel(apiScope *api.TeamScope, planScope *TeamScopeModel) (*TeamScopeModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	scopeModel := &TeamScopeModel{
-		AccessPermissions:    apiScope.AccessPermissions,
-		Applications:         apiScope.Applications,
-		KubernetesClusters:   apiScope.KubernetesClusters,
-		KubernetesNamespaces: apiScope.KubernetesNamespaces,
-		MobileApps:           apiScope.MobileApps,
-		Websites:             apiScope.Websites,
+		AccessPermissions:    coalesceStringSlice(apiScope.AccessPermissions, planScopeField(planScope, func(s *TeamScopeModel) []string { return s.AccessPermissions })),
+		Applications:         coalesceStringSlice(apiScope.Applications, planScopeField(planScope, func(s *TeamScopeModel) []string { return s.Applications })),
+		KubernetesClusters:   coalesceStringSlice(apiScope.KubernetesClusters, planScopeField(planScope, func(s *TeamScopeModel) []string { return s.KubernetesClusters })),
+		KubernetesNamespaces: coalesceStringSlice(apiScope.KubernetesNamespaces, planScopeField(planScope, func(s *TeamScopeModel) []string { return s.KubernetesNamespaces })),
+		MobileApps:           coalesceStringSlice(apiScope.MobileApps, planScopeField(planScope, func(s *TeamScopeModel) []string { return s.MobileApps })),
+		Websites:             coalesceStringSlice(apiScope.Websites, planScopeField(planScope, func(s *TeamScopeModel) []string { return s.Websites })),
 		InfraDFQFilter:       util.SetStringPointerToState(apiScope.InfraDFQFilter),
 		ActionFilter:         util.SetStringPointerToState(apiScope.ActionFilter),
 		LogFilter:            util.SetStringPointerToState(apiScope.LogFilter),
-		BusinessPerspectives: apiScope.BusinessPerspectives,
-		SloIDs:               apiScope.SloIDs,
-		SyntheticTests:       apiScope.SyntheticTests,
-		SyntheticCredentials: apiScope.SyntheticCredentials,
-		TagIDs:               apiScope.TagIDs,
+		BusinessPerspectives: coalesceStringSlice(apiScope.BusinessPerspectives, planScopeField(planScope, func(s *TeamScopeModel) []string { return s.BusinessPerspectives })),
+		SloIDs:               coalesceStringSlice(apiScope.SloIDs, planScopeField(planScope, func(s *TeamScopeModel) []string { return s.SloIDs })),
+		SyntheticTests:       coalesceStringSlice(apiScope.SyntheticTests, planScopeField(planScope, func(s *TeamScopeModel) []string { return s.SyntheticTests })),
+		SyntheticCredentials: coalesceStringSlice(apiScope.SyntheticCredentials, planScopeField(planScope, func(s *TeamScopeModel) []string { return s.SyntheticCredentials })),
+		TagIDs:               coalesceStringSlice(apiScope.TagIDs, planScopeField(planScope, func(s *TeamScopeModel) []string { return s.TagIDs })),
 	}
 
 	if apiScope.RestrictedApplicationFilter != nil {
@@ -550,4 +556,21 @@ func (r *teamResource) GetStateUpgraders(ctx context.Context) map[int64]resource
 	return map[int64]resource.StateUpgrader{
 		0: resourcehandle.CreateStateUpgraderForVersion(0),
 	}
+}
+
+// planScopeField safely extracts a []string field from a *TeamScopeModel that may be nil 
+func planScopeField(plan *TeamScopeModel, field func(*TeamScopeModel) []string) []string {
+	if plan == nil {
+		return nil
+	}
+	return field(plan)
+}
+
+// coalesceStringSlice returns apiVal when it is non-nil (the API returned data for this field), 
+// otherwise falls back to planVal.
+func coalesceStringSlice(apiVal []string, planVal []string) []string {
+	if apiVal != nil {
+		return apiVal
+	}
+	return planVal
 }

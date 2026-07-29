@@ -125,10 +125,14 @@ func (r *roleResource) buildRoleModelFromAPIResponse(role *api.Role, existingMem
 	return model
 }
 
-// mapMembersToModel converts API members to model members
+// mapMembersToModel converts API members to model members.
+// When the API returns no members, the return value mirrors the plan:
+//   - nil  → member was not configured at all (keep null in state)
+//   - non-nil empty slice → member = [] was configured (keep empty set in state)
+
 func (r *roleResource) mapMembersToModel(apiMembers []api.APIMember, existingMembers []RoleMemberModel) []RoleMemberModel {
 	if len(apiMembers) == 0 {
-		return make([]RoleMemberModel, 0)
+		return existingMembers
 	}
 
 	members := make([]RoleMemberModel, len(apiMembers))

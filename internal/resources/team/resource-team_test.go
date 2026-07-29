@@ -1567,6 +1567,129 @@ func TestHelperFunctions(t *testing.T) {
 	})
 }
 
+func TestCoalesceStringSlice(t *testing.T) {
+	t.Run("returns api value when non-nil", func(t *testing.T) {
+		result := coalesceStringSlice([]string{"a"}, []string{"b"})
+		assert.Equal(t, []string{"a"}, result)
+	})
+
+	t.Run("returns api empty slice over plan nil", func(t *testing.T) {
+		result := coalesceStringSlice([]string{}, nil)
+		assert.NotNil(t, result)
+		assert.Empty(t, result)
+	})
+
+	t.Run("returns plan value when api is nil", func(t *testing.T) {
+		result := coalesceStringSlice(nil, []string{"b"})
+		assert.Equal(t, []string{"b"}, result)
+	})
+
+	t.Run("returns nil when both are nil", func(t *testing.T) {
+		result := coalesceStringSlice(nil, nil)
+		assert.Nil(t, result)
+	})
+}
+
+func TestPlanScopeField(t *testing.T) {
+	t.Run("returns nil when plan scope is nil", func(t *testing.T) {
+		result := planScopeField(nil, func(s *TeamScopeModel) []string { return s.Applications })
+		assert.Nil(t, result)
+	})
+
+	t.Run("returns field value from plan scope", func(t *testing.T) {
+		scope := &TeamScopeModel{Applications: []string{"app-1"}}
+		result := planScopeField(scope, func(s *TeamScopeModel) []string { return s.Applications })
+		assert.Equal(t, []string{"app-1"}, result)
+	})
+
+	t.Run("returns nil field from plan scope", func(t *testing.T) {
+		scope := &TeamScopeModel{Applications: nil}
+		result := planScopeField(scope, func(s *TeamScopeModel) []string { return s.Applications })
+		assert.Nil(t, result)
+	})
+
+	t.Run("returns empty slice field from plan scope", func(t *testing.T) {
+		scope := &TeamScopeModel{Applications: []string{}}
+		result := planScopeField(scope, func(s *TeamScopeModel) []string { return s.Applications })
+		assert.NotNil(t, result)
+		assert.Empty(t, result)
+	})
+}
+
+// Regression tests for GitHub issue #105.
+// The error direction depends on which fields the user configured vs omitted:
+//
+//   Bug A: field configured (plan = [])  → API omits it → was SetValEmpty, but now null
+//   Bug B: field not configured (plan = null) → normalisation → was null, but now SetValEmpty
+//
+// coalesceStringSlice fixes both by using the plan value as the fallback
+// when the API returns nil, exactly preserving what Terraform planned.
+func TestUpdateState_Issue105_ScopeCoalescing(t *testing.T) {
+	resource := &teamResource{}
+	ctx := context.Background()
+
+	// API returns scope with only some fields populated; all others are nil.
+	apiTeam := &api.Team{
+		ID:  "team-id",
+		Tag: "issue-105",
+		Scope: &api.TeamScope{
+			Applications: []string{"app-1"},
+			MobileApps:   []string{"mob-1"},
+			// all other slice fields nil (omitempty)
+		},
+	}
+
+	handle := NewTeamResourceHandle()
+	state := &tfsdk.State{Schema: handle.MetaData().Schema}
+
+	// Plan reflects exactly what the user wrote in HCL:
+	//   - applications / mobile_apps  → configured with values
+	//   - access_permissions / websites → configured as empty sets
+	//   - slo_ids / tag_ids / etc.    → not configured at all (nil)
+	planModel := TeamModel{
+		ID:  types.StringValue("team-id"),
+		Tag: types.StringValue("issue-105"),
+		Scope: &TeamScopeModel{
+			Applications:      []string{"app-1"},
+			MobileApps:        []string{"mob-1"},
+			AccessPermissions: []string{},
+			Websites:          []string{},
+			// SloIDs, TagIDs, KubernetesClusters, etc. left nil (not configured)
+		},
+	}
+	plan := createMockTeamPlan(t, ctx, planModel)
+
+	diags := resource.UpdateState(ctx, state, plan, apiTeam)
+	require.False(t, diags.HasError())
+
+	var model TeamModel
+	diags = state.Get(ctx, &model)
+	require.False(t, diags.HasError())
+
+	require.NotNil(t, model.Scope)
+
+	// Fields the API returned: must use API value.
+	assert.Equal(t, []string{"app-1"}, model.Scope.Applications)
+	assert.Equal(t, []string{"mob-1"}, model.Scope.MobileApps)
+
+	// Fields configured as empty set in plan: must stay non-nil empty slice
+	// (empty set in state), not flip to null.
+	assert.NotNil(t, model.Scope.AccessPermissions)
+	assert.Empty(t, model.Scope.AccessPermissions)
+	assert.NotNil(t, model.Scope.Websites)
+	assert.Empty(t, model.Scope.Websites)
+
+	// Fields not configured in plan (nil): must remain nil (null in state),
+	// not flip to empty set.
+	assert.Nil(t, model.Scope.SloIDs)
+	assert.Nil(t, model.Scope.TagIDs)
+	assert.Nil(t, model.Scope.KubernetesClusters)
+	assert.Nil(t, model.Scope.KubernetesNamespaces)
+	assert.Nil(t, model.Scope.BusinessPerspectives)
+	assert.Nil(t, model.Scope.SyntheticTests)
+	assert.Nil(t, model.Scope.SyntheticCredentials)
+}
+
 // Helper functions
 
 func createMockTeamState(t *testing.T, ctx context.Context, model TeamModel) *tfsdk.State {

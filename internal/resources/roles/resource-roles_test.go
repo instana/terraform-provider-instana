@@ -762,6 +762,22 @@ func TestMapMembersToModel(t *testing.T) {
 		assert.Equal(t, "user-1", result[0].UserID.ValueString())
 		assert.Equal(t, "user-2", result[1].UserID.ValueString())
 	})
+
+	// Regression test for GitHub issue #105:
+	// When member is not configured (existingMembers = nil) and the API
+	// returns no members, the result must be nil — not an empty slice.
+	// Returning []RoleMemberModel{} causes the framework to serialise
+	// the field as an empty set, which mismatches the plan's null value.
+	t.Run("should return nil when member not configured and API has no members", func(t *testing.T) {
+		result := resource.mapMembersToModel([]api.APIMember{}, nil)
+		assert.Nil(t, result)
+	})
+
+	t.Run("should return empty slice when member configured as empty and API has no members", func(t *testing.T) {
+		result := resource.mapMembersToModel([]api.APIMember{}, []RoleMemberModel{})
+		assert.NotNil(t, result)
+		assert.Empty(t, result)
+	})
 }
 
 func TestMapModelMembersToAPI(t *testing.T) {
