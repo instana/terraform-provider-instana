@@ -1616,14 +1616,6 @@ func TestPlanScopeField(t *testing.T) {
 	})
 }
 
-// Regression tests for GitHub issue #105.
-// The error direction depends on which fields the user configured vs omitted:
-//
-//   Bug A: field configured (plan = [])  → API omits it → was SetValEmpty, but now null
-//   Bug B: field not configured (plan = null) → normalisation → was null, but now SetValEmpty
-//
-// coalesceStringSlice fixes both by using the plan value as the fallback
-// when the API returns nil, exactly preserving what Terraform planned.
 func TestUpdateState_Issue105_ScopeCoalescing(t *testing.T) {
 	resource := &teamResource{}
 	ctx := context.Background()
@@ -1642,10 +1634,6 @@ func TestUpdateState_Issue105_ScopeCoalescing(t *testing.T) {
 	handle := NewTeamResourceHandle()
 	state := &tfsdk.State{Schema: handle.MetaData().Schema}
 
-	// Plan reflects exactly what the user wrote in HCL:
-	//   - applications / mobile_apps  → configured with values
-	//   - access_permissions / websites → configured as empty sets
-	//   - slo_ids / tag_ids / etc.    → not configured at all (nil)
 	planModel := TeamModel{
 		ID:  types.StringValue("team-id"),
 		Tag: types.StringValue("issue-105"),
@@ -1668,19 +1656,14 @@ func TestUpdateState_Issue105_ScopeCoalescing(t *testing.T) {
 
 	require.NotNil(t, model.Scope)
 
-	// Fields the API returned: must use API value.
 	assert.Equal(t, []string{"app-1"}, model.Scope.Applications)
 	assert.Equal(t, []string{"mob-1"}, model.Scope.MobileApps)
 
-	// Fields configured as empty set in plan: must stay non-nil empty slice
-	// (empty set in state), not flip to null.
 	assert.NotNil(t, model.Scope.AccessPermissions)
 	assert.Empty(t, model.Scope.AccessPermissions)
 	assert.NotNil(t, model.Scope.Websites)
 	assert.Empty(t, model.Scope.Websites)
 
-	// Fields not configured in plan (nil): must remain nil (null in state),
-	// not flip to empty set.
 	assert.Nil(t, model.Scope.SloIDs)
 	assert.Nil(t, model.Scope.TagIDs)
 	assert.Nil(t, model.Scope.KubernetesClusters)

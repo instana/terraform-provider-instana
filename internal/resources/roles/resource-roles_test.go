@@ -763,7 +763,6 @@ func TestMapMembersToModel(t *testing.T) {
 		assert.Equal(t, "user-2", result[1].UserID.ValueString())
 	})
 
-	// Regression test for GitHub issue #105:
 	// When member is not configured (existingMembers = nil) and the API
 	// returns no members, the result must be nil — not an empty slice.
 	// Returning []RoleMemberModel{} causes the framework to serialise
