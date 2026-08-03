@@ -4,10 +4,12 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
@@ -19,6 +21,28 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/shared/tagfilter"
 	"github.com/instana/terraform-provider-instana/internal/util"
 )
+
+// stringsToSet converts a []string to a types.Set of strings.
+// Both nil (JSON null) and [] (JSON []) are stored as an empty set — the Teams API
+// uses null and [] interchangeably to mean "not configured", and the schema fields are
+// Optional+Computed with UseStateForUnknown. Storing an empty set for both cases keeps
+// the plan value ([] from TF filling an unset nested attr) consistent with state after
+// apply, regardless of whether the API echoes back null or [].
+func stringsToSet(ctx context.Context, ss []string) (types.Set, diag.Diagnostics) {
+	if len(ss) == 0 {
+		return types.SetValueMust(types.StringType, []attr.Value{}), nil
+	}
+	return types.SetValueFrom(ctx, types.StringType, ss)
+}
+
+// setToStrings extracts a []string from a types.Set. Returns nil for null/unknown/empty.
+func setToStrings(ctx context.Context, s types.Set) ([]string, diag.Diagnostics) {
+	if s.IsNull() || s.IsUnknown() || len(s.Elements()) == 0 {
+		return nil, nil
+	}
+	var result []string
+	return result, s.ElementsAs(ctx, &result, false)
+}
 
 // NewTeamResourceHandle creates the resource handle for RBAC Teams
 func NewTeamResourceHandle() resourcehandle.ResourceHandle[*api.Team] {
@@ -110,33 +134,45 @@ func buildScopeAttributes() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		TeamFieldScopeAccessPermissions: schema.SetAttribute{
 			Optional:    true,
+			Computed:    true,
 			Description: TeamDescScopeAccessPermissions,
 			ElementType: types.StringType,
+			PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
 		},
 		TeamFieldScopeApplications: schema.SetAttribute{
 			Optional:    true,
+			Computed:    true,
 			Description: TeamDescScopeApplications,
 			ElementType: types.StringType,
+			PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
 		},
 		TeamFieldScopeKubernetesClusters: schema.SetAttribute{
 			Optional:    true,
+			Computed:    true,
 			Description: TeamDescScopeKubernetesClusters,
 			ElementType: types.StringType,
+			PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
 		},
 		TeamFieldScopeKubernetesNamespaces: schema.SetAttribute{
 			Optional:    true,
+			Computed:    true,
 			Description: TeamDescScopeKubernetesNamespaces,
 			ElementType: types.StringType,
+			PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
 		},
 		TeamFieldScopeMobileApps: schema.SetAttribute{
 			Optional:    true,
+			Computed:    true,
 			Description: TeamDescScopeMobileApps,
 			ElementType: types.StringType,
+			PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
 		},
 		TeamFieldScopeWebsites: schema.SetAttribute{
 			Optional:    true,
+			Computed:    true,
 			Description: TeamDescScopeWebsites,
 			ElementType: types.StringType,
+			PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
 		},
 		TeamFieldScopeInfraDFQFilter: schema.StringAttribute{
 			Optional:    true,
@@ -152,28 +188,38 @@ func buildScopeAttributes() map[string]schema.Attribute {
 		},
 		TeamFieldScopeBusinessPerspectives: schema.SetAttribute{
 			Optional:    true,
+			Computed:    true,
 			Description: TeamDescScopeBusinessPerspectives,
 			ElementType: types.StringType,
+			PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
 		},
 		TeamFieldScopeSloIDs: schema.SetAttribute{
 			Optional:    true,
+			Computed:    true,
 			Description: TeamDescScopeSloIDs,
 			ElementType: types.StringType,
+			PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
 		},
 		TeamFieldScopeSyntheticTests: schema.SetAttribute{
 			Optional:    true,
+			Computed:    true,
 			Description: TeamDescScopeSyntheticTests,
 			ElementType: types.StringType,
+			PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
 		},
 		TeamFieldScopeSyntheticCredentials: schema.SetAttribute{
 			Optional:    true,
+			Computed:    true,
 			Description: TeamDescScopeSyntheticCredentials,
 			ElementType: types.StringType,
+			PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
 		},
 		TeamFieldScopeTagIDs: schema.SetAttribute{
 			Optional:    true,
+			Computed:    true,
 			Description: TeamDescScopeTagIDs,
 			ElementType: types.StringType,
+			PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
 		},
 		TeamFieldScopeRestrictedApplicationFilter: schema.SingleNestedAttribute{
 			Description: TeamDescScopeRestrictedApplicationFilter,
@@ -233,7 +279,7 @@ func (r *teamResource) UpdateState(ctx context.Context, state *tfsdk.State, plan
 	} else if state != nil {
 		diags.Append(state.Get(ctx, &model)...)
 	}
-	m, diags := r.buildTeamModelFromAPIResponse(team, model)
+	m, diags := r.buildTeamModelFromAPIResponse(ctx, team, model)
 	if diags.HasError() {
 		return diags
 	}
@@ -241,7 +287,7 @@ func (r *teamResource) UpdateState(ctx context.Context, state *tfsdk.State, plan
 }
 
 // buildTeamModelFromAPIResponse constructs a TeamModel from the API Team response
-func (r *teamResource) buildTeamModelFromAPIResponse(team *api.Team, planModel TeamModel) (TeamModel, diag.Diagnostics) {
+func (r *teamResource) buildTeamModelFromAPIResponse(ctx context.Context, team *api.Team, planModel TeamModel) (TeamModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	model := TeamModel{
@@ -258,7 +304,7 @@ func (r *teamResource) buildTeamModelFromAPIResponse(team *api.Team, planModel T
 	}
 
 	if team.Scope != nil {
-		scopeModel, scopeDiags := r.mapScopeToModel(team.Scope)
+		scopeModel, scopeDiags := r.mapScopeToModel(ctx, team.Scope)
 		diags.Append(scopeDiags...)
 		if !diags.HasError() {
 			model.Scope = scopeModel
@@ -302,25 +348,42 @@ func (r *teamResource) mapRolesToModel(apiRoles []api.TeamRole) []TeamMemberRole
 	return roles
 }
 
-// mapScopeToModel converts API scope to model scope
-func (r *teamResource) mapScopeToModel(apiScope *api.TeamScope) (*TeamScopeModel, diag.Diagnostics) {
+// mapScopeToModel converts API scope to model scope.
+// Each []string scope field from the API (null or a list) is stored as types.Set so that
+// the Optional+Computed schema attribute can correctly distinguish unknown/null/empty during plan.
+func (r *teamResource) mapScopeToModel(ctx context.Context, apiScope *api.TeamScope) (*TeamScopeModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	scopeModel := &TeamScopeModel{
-		AccessPermissions:    apiScope.AccessPermissions,
-		Applications:         apiScope.Applications,
-		KubernetesClusters:   apiScope.KubernetesClusters,
-		KubernetesNamespaces: apiScope.KubernetesNamespaces,
-		MobileApps:           apiScope.MobileApps,
-		Websites:             apiScope.Websites,
-		InfraDFQFilter:       util.SetStringPointerToState(apiScope.InfraDFQFilter),
-		ActionFilter:         util.SetStringPointerToState(apiScope.ActionFilter),
-		LogFilter:            util.SetStringPointerToState(apiScope.LogFilter),
-		BusinessPerspectives: apiScope.BusinessPerspectives,
-		SloIDs:               apiScope.SloIDs,
-		SyntheticTests:       apiScope.SyntheticTests,
-		SyntheticCredentials: apiScope.SyntheticCredentials,
-		TagIDs:               apiScope.TagIDs,
+		InfraDFQFilter: util.SetStringPointerToState(apiScope.InfraDFQFilter),
+		ActionFilter:   util.SetStringPointerToState(apiScope.ActionFilter),
+		LogFilter:      util.SetStringPointerToState(apiScope.LogFilter),
+	}
+
+	setFields := []struct {
+		apiVal []string
+		target *types.Set
+	}{
+		{apiScope.AccessPermissions, &scopeModel.AccessPermissions},
+		{apiScope.Applications, &scopeModel.Applications},
+		{apiScope.KubernetesClusters, &scopeModel.KubernetesClusters},
+		{apiScope.KubernetesNamespaces, &scopeModel.KubernetesNamespaces},
+		{apiScope.MobileApps, &scopeModel.MobileApps},
+		{apiScope.Websites, &scopeModel.Websites},
+		{apiScope.BusinessPerspectives, &scopeModel.BusinessPerspectives},
+		{apiScope.SloIDs, &scopeModel.SloIDs},
+		{apiScope.SyntheticTests, &scopeModel.SyntheticTests},
+		{apiScope.SyntheticCredentials, &scopeModel.SyntheticCredentials},
+		{apiScope.TagIDs, &scopeModel.TagIDs},
+	}
+
+	for _, f := range setFields {
+		s, d := stringsToSet(ctx, f.apiVal)
+		diags.Append(d...)
+		if diags.HasError() {
+			return nil, diags
+		}
+		*f.target = s
 	}
 
 	if apiScope.RestrictedApplicationFilter != nil {
@@ -386,7 +449,7 @@ func (r *teamResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Pla
 	}
 
 	if model.Scope != nil {
-		scopeAPI, scopeDiags := r.mapModelScopeToAPI(model.Scope)
+		scopeAPI, scopeDiags := r.mapModelScopeToAPI(ctx, model.Scope)
 		diags.Append(scopeDiags...)
 		if !diags.HasError() {
 			team.Scope = scopeAPI
@@ -469,21 +532,36 @@ func (r *teamResource) mapModelRolesToAPI(modelRoles []TeamMemberRole) []api.Tea
 }
 
 // mapModelScopeToAPI converts model scope to API scope
-func (r *teamResource) mapModelScopeToAPI(modelScope *TeamScopeModel) (*api.TeamScope, diag.Diagnostics) {
+func (r *teamResource) mapModelScopeToAPI(ctx context.Context, modelScope *TeamScopeModel) (*api.TeamScope, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	apiScope := &api.TeamScope{
-		AccessPermissions:    modelScope.AccessPermissions,
-		Applications:         modelScope.Applications,
-		KubernetesClusters:   modelScope.KubernetesClusters,
-		KubernetesNamespaces: modelScope.KubernetesNamespaces,
-		MobileApps:           modelScope.MobileApps,
-		Websites:             modelScope.Websites,
-		BusinessPerspectives: modelScope.BusinessPerspectives,
-		SloIDs:               modelScope.SloIDs,
-		SyntheticTests:       modelScope.SyntheticTests,
-		SyntheticCredentials: modelScope.SyntheticCredentials,
-		TagIDs:               modelScope.TagIDs,
+	apiScope := &api.TeamScope{}
+
+	// Extract each types.Set field back to []string for the API call.
+	setFields := []struct {
+		src    types.Set
+		target *[]string
+	}{
+		{modelScope.AccessPermissions, &apiScope.AccessPermissions},
+		{modelScope.Applications, &apiScope.Applications},
+		{modelScope.KubernetesClusters, &apiScope.KubernetesClusters},
+		{modelScope.KubernetesNamespaces, &apiScope.KubernetesNamespaces},
+		{modelScope.MobileApps, &apiScope.MobileApps},
+		{modelScope.Websites, &apiScope.Websites},
+		{modelScope.BusinessPerspectives, &apiScope.BusinessPerspectives},
+		{modelScope.SloIDs, &apiScope.SloIDs},
+		{modelScope.SyntheticTests, &apiScope.SyntheticTests},
+		{modelScope.SyntheticCredentials, &apiScope.SyntheticCredentials},
+		{modelScope.TagIDs, &apiScope.TagIDs},
+	}
+
+	for _, f := range setFields {
+		ss, d := setToStrings(ctx, f.src)
+		diags.Append(d...)
+		if diags.HasError() {
+			return nil, diags
+		}
+		*f.target = ss
 	}
 
 	if !modelScope.InfraDFQFilter.IsNull() && !modelScope.InfraDFQFilter.IsUnknown() {

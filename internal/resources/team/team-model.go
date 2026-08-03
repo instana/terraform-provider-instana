@@ -27,22 +27,25 @@ type TeamMemberRole struct {
 	RoleID types.String `tfsdk:"role_id"`
 }
 
-// TeamScopeModel represents the scope configuration for the team
+// TeamScopeModel represents the scope configuration for the team.
+// All set-typed scope fields use types.Set (not []string) because the schema marks them
+// Optional+Computed — the Terraform Framework requires types.Set to correctly carry the
+// unknown value during plan when a Computed field has not yet been resolved.
 type TeamScopeModel struct {
-	AccessPermissions           []string                              `tfsdk:"access_permissions"`
-	Applications                []string                              `tfsdk:"applications"`
-	KubernetesClusters          []string                              `tfsdk:"kubernetes_clusters"`
-	KubernetesNamespaces        []string                              `tfsdk:"kubernetes_namespaces"`
-	MobileApps                  []string                              `tfsdk:"mobile_apps"`
-	Websites                    []string                              `tfsdk:"websites"`
+	AccessPermissions           types.Set                             `tfsdk:"access_permissions"`
+	Applications                types.Set                             `tfsdk:"applications"`
+	KubernetesClusters          types.Set                             `tfsdk:"kubernetes_clusters"`
+	KubernetesNamespaces        types.Set                             `tfsdk:"kubernetes_namespaces"`
+	MobileApps                  types.Set                             `tfsdk:"mobile_apps"`
+	Websites                    types.Set                             `tfsdk:"websites"`
 	InfraDFQFilter              types.String                          `tfsdk:"infra_dfq_filter"`
 	ActionFilter                types.String                          `tfsdk:"action_filter"`
 	LogFilter                   types.String                          `tfsdk:"log_filter"`
-	BusinessPerspectives        []string                              `tfsdk:"business_perspectives"`
-	SloIDs                      []string                              `tfsdk:"slo_ids"`
-	SyntheticTests              []string                              `tfsdk:"synthetic_tests"`
-	SyntheticCredentials        []string                              `tfsdk:"synthetic_credentials"`
-	TagIDs                      []string                              `tfsdk:"tag_ids"`
+	BusinessPerspectives        types.Set                             `tfsdk:"business_perspectives"`
+	SloIDs                      types.Set                             `tfsdk:"slo_ids"`
+	SyntheticTests              types.Set                             `tfsdk:"synthetic_tests"`
+	SyntheticCredentials        types.Set                             `tfsdk:"synthetic_credentials"`
+	TagIDs                      types.Set                             `tfsdk:"tag_ids"`
 	RestrictedApplicationFilter *TeamRestrictedApplicationFilterModel `tfsdk:"restricted_application_filter"`
 }
 
