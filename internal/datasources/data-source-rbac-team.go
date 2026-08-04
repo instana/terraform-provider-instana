@@ -281,35 +281,51 @@ func (d *RbacTeamDataSource) Read(ctx context.Context, req datasource.ReadReques
 
 	// Map scope
 	if teamData.Scope != nil {
-		data.Scope = &team.TeamScopeModel{
-			AccessPermissions:    teamData.Scope.AccessPermissions,
-			Applications:         teamData.Scope.Applications,
-			KubernetesClusters:   teamData.Scope.KubernetesClusters,
-			KubernetesNamespaces: teamData.Scope.KubernetesNamespaces,
-			MobileApps:           teamData.Scope.MobileApps,
-			Websites:             teamData.Scope.Websites,
-			InfraDFQFilter:       types.StringPointerValue(teamData.Scope.InfraDFQFilter),
-			ActionFilter:         types.StringPointerValue(teamData.Scope.ActionFilter),
-			LogFilter:            types.StringPointerValue(teamData.Scope.LogFilter),
-			BusinessPerspectives: teamData.Scope.BusinessPerspectives,
-			SloIDs:               teamData.Scope.SloIDs,
-			SyntheticTests:       teamData.Scope.SyntheticTests,
-			SyntheticCredentials: teamData.Scope.SyntheticCredentials,
-			TagIDs:               teamData.Scope.TagIDs,
+		scopeModel := &team.TeamScopeModel{
+			InfraDFQFilter: types.StringPointerValue(teamData.Scope.InfraDFQFilter),
+			ActionFilter:   types.StringPointerValue(teamData.Scope.ActionFilter),
+			LogFilter:      types.StringPointerValue(teamData.Scope.LogFilter),
+		}
+
+		// Convert each []string scope field to types.Set
+		type setField struct {
+			src    []string
+			target *types.Set
+		}
+		fields := []setField{
+			{teamData.Scope.AccessPermissions, &scopeModel.AccessPermissions},
+			{teamData.Scope.Applications, &scopeModel.Applications},
+			{teamData.Scope.KubernetesClusters, &scopeModel.KubernetesClusters},
+			{teamData.Scope.KubernetesNamespaces, &scopeModel.KubernetesNamespaces},
+			{teamData.Scope.MobileApps, &scopeModel.MobileApps},
+			{teamData.Scope.Websites, &scopeModel.Websites},
+			{teamData.Scope.BusinessPerspectives, &scopeModel.BusinessPerspectives},
+			{teamData.Scope.SloIDs, &scopeModel.SloIDs},
+			{teamData.Scope.SyntheticTests, &scopeModel.SyntheticTests},
+			{teamData.Scope.SyntheticCredentials, &scopeModel.SyntheticCredentials},
+			{teamData.Scope.TagIDs, &scopeModel.TagIDs},
+		}
+		for _, f := range fields {
+			s, d := types.SetValueFrom(ctx, types.StringType, f.src)
+			resp.Diagnostics.Append(d...)
+			if resp.Diagnostics.HasError() {
+				return
+			}
+			*f.target = s
 		}
 
 		// Map restricted application filter if present
 		if teamData.Scope.RestrictedApplicationFilter != nil {
-			data.Scope.RestrictedApplicationFilter = &team.TeamRestrictedApplicationFilterModel{
+			scopeModel.RestrictedApplicationFilter = &team.TeamRestrictedApplicationFilterModel{
 				Label: types.StringPointerValue(teamData.Scope.RestrictedApplicationFilter.Label),
 			}
 			if teamData.Scope.RestrictedApplicationFilter.Scope != nil {
-				data.Scope.RestrictedApplicationFilter.Scope = types.StringValue(string(*teamData.Scope.RestrictedApplicationFilter.Scope))
+				scopeModel.RestrictedApplicationFilter.Scope = types.StringValue(string(*teamData.Scope.RestrictedApplicationFilter.Scope))
 			}
-			// Note: TagFilterExpression mapping would require the tagfilter package
-			// For now, we'll leave it as null if not needed
-			data.Scope.RestrictedApplicationFilter.TagFilterExpression = types.StringNull()
+			scopeModel.RestrictedApplicationFilter.TagFilterExpression = types.StringNull()
 		}
+
+		data.Scope = scopeModel
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

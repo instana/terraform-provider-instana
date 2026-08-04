@@ -5,10 +5,12 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
@@ -47,8 +49,15 @@ func buildRoleSchema() schema.Schema {
 				Description: RoleDescName,
 			},
 			RoleFieldMembers: schema.SetNestedAttribute{
-				Description:  RoleDescMembers,
-				Optional:     true,
+				Description: RoleDescMembers,
+				Optional:    true,
+				Computed:    true,
+				// UseStateForUnknown: when the user omits the member block, the plan would
+				// normally be "unknown". This modifier fills it with the current state value
+				// instead, so Terraform can detect drift on subsequent plans.
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
 				NestedObject: buildMemberNestedObject(),
 			},
 			RoleFieldPermissions: schema.SetAttribute{
@@ -95,49 +104,46 @@ func (r *roleResource) SetComputedFields(_ context.Context, _ *tfsdk.Plan) diag.
 
 // UpdateState updates the Terraform state with data from the API response
 func (r *roleResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, role *api.Role) diag.Diagnostics {
-	// Get existing state/plan to preserve optional fields
-	var existingModel RoleModel
 	var diags diag.Diagnostics
 
-	if plan != nil {
-		diags.Append(plan.Get(ctx, &existingModel)...)
-	} else if state != nil {
-		diags.Append(state.Get(ctx, &existingModel)...)
-	}
-
+	membersSet, membersDiags := r.mapMembersToSet(ctx, role.Members)
+	diags.Append(membersDiags...)
 	if diags.HasError() {
 		return diags
 	}
 
-	model := r.buildRoleModelFromAPIResponse(role, existingModel.Members)
-	return state.Set(ctx, model)
-}
-
-// buildRoleModelFromAPIResponse constructs a RoleModel from the API Role response
-func (r *roleResource) buildRoleModelFromAPIResponse(role *api.Role, existingMembers []RoleMemberModel) RoleModel {
 	model := RoleModel{
 		ID:          types.StringValue(role.ID),
 		Name:        types.StringValue(role.Name),
-		Members:     r.mapMembersToModel(role.Members, existingMembers),
+		Members:     membersSet,
 		Permissions: role.Permissions,
 	}
-
-	return model
+	return state.Set(ctx, model)
 }
 
-// mapMembersToModel converts API members to model members
-func (r *roleResource) mapMembersToModel(apiMembers []api.APIMember, existingMembers []RoleMemberModel) []RoleMemberModel {
+// mapMembersToSet converts API members to a types.Set.
+// The Roles API always returns "members": [] — using types.Set (instead of []RoleMemberModel)
+// lets Terraform hold the unknown/null/empty distinction correctly when the field is Optional+Computed.
+func (r *roleResource) mapMembersToSet(ctx context.Context, apiMembers []api.APIMember) (types.Set, diag.Diagnostics) {
+	memberType := buildMemberNestedObject().Type()
+
 	if len(apiMembers) == 0 {
-		return make([]RoleMemberModel, 0)
+		return types.SetValueMust(memberType, []attr.Value{}), nil
 	}
 
-	members := make([]RoleMemberModel, len(apiMembers))
+	elems := make([]attr.Value, len(apiMembers))
 	for i, apiMember := range apiMembers {
-		members[i] = RoleMemberModel{
-			UserID: types.StringValue(apiMember.UserID),
+		obj, diags := types.ObjectValue(
+			map[string]attr.Type{RoleFieldMemberUserID: types.StringType},
+			map[string]attr.Value{RoleFieldMemberUserID: types.StringValue(apiMember.UserID)},
+		)
+		if diags.HasError() {
+			return types.SetNull(memberType), diags
 		}
+		elems[i] = obj
 	}
-	return members
+
+	return types.SetValue(memberType, elems)
 }
 
 // MapStateToDataObject maps Terraform state/plan to API Role object
@@ -150,10 +156,16 @@ func (r *roleResource) MapStateToDataObject(ctx context.Context, plan *tfsdk.Pla
 		return nil, diags
 	}
 
+	apiMembers, membersDiags := r.mapSetMembersToAPI(ctx, model.Members)
+	diags.Append(membersDiags...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
 	role := &api.Role{
 		ID:          r.extractRoleID(model),
 		Name:        model.Name.ValueString(),
-		Members:     r.mapModelMembersToAPI(model.Members),
+		Members:     apiMembers,
 		Permissions: model.Permissions,
 	}
 
@@ -182,20 +194,23 @@ func (r *roleResource) extractRoleID(model RoleModel) string {
 	return model.ID.ValueString()
 }
 
-// mapModelMembersToAPI converts model members to API members
-func (r *roleResource) mapModelMembersToAPI(modelMembers []RoleMemberModel) []api.APIMember {
-	if len(modelMembers) == 0 {
-		return make([]api.APIMember, 0)
+// mapSetMembersToAPI converts a types.Set of members to API members
+func (r *roleResource) mapSetMembersToAPI(ctx context.Context, membersSet types.Set) ([]api.APIMember, diag.Diagnostics) {
+	if membersSet.IsNull() || membersSet.IsUnknown() || len(membersSet.Elements()) == 0 {
+		return []api.APIMember{}, nil
 	}
 
-	apiMembers := make([]api.APIMember, 0, len(modelMembers))
-	for _, memberModel := range modelMembers {
-		apiMembers = append(apiMembers, api.APIMember{
-			UserID: memberModel.UserID.ValueString(),
-		})
+	var modelMembers []RoleMemberModel
+	diags := membersSet.ElementsAs(ctx, &modelMembers, false)
+	if diags.HasError() {
+		return nil, diags
 	}
 
-	return apiMembers
+	apiMembers := make([]api.APIMember, len(modelMembers))
+	for i, m := range modelMembers {
+		apiMembers[i] = api.APIMember{UserID: m.UserID.ValueString()}
+	}
+	return apiMembers, nil
 }
 
 // GetStateUpgraders returns the state upgraders for this resource

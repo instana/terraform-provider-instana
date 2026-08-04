@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/instana-go-client/api"
@@ -14,6 +15,56 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+// stringsToTypesSet converts a []string to a types.Set for use in test struct literals.
+func stringsToTypesSet(t *testing.T, ss ...string) types.Set {
+	t.Helper()
+	if len(ss) == 0 {
+		return types.SetValueMust(types.StringType, []attr.Value{})
+	}
+	elems := make([]attr.Value, len(ss))
+	for i, s := range ss {
+		elems[i] = types.StringValue(s)
+	}
+	result, diags := types.SetValue(types.StringType, elems)
+	require.False(t, diags.HasError())
+	return result
+}
+
+// extractStringsFromSet extracts a []string from a types.Set for assertions.
+func extractStringsFromSet(t *testing.T, ctx context.Context, s types.Set) []string {
+	t.Helper()
+	if s.IsNull() || s.IsUnknown() {
+		return nil
+	}
+	var result []string
+	diags := s.ElementsAs(ctx, &result, false)
+	require.False(t, diags.HasError())
+	return result
+}
+
+// emptyTeamScopeModel returns a TeamScopeModel with all types.Set fields initialised to
+// empty, properly-typed sets. Tests that only need to set a subset of scope fields should
+// start from this base to avoid the "MISSING TYPE" framework panic.
+func emptyTeamScopeModel(t *testing.T) TeamScopeModel {
+	t.Helper()
+	return TeamScopeModel{
+		AccessPermissions:    stringsToTypesSet(t),
+		Applications:         stringsToTypesSet(t),
+		KubernetesClusters:   stringsToTypesSet(t),
+		KubernetesNamespaces: stringsToTypesSet(t),
+		MobileApps:           stringsToTypesSet(t),
+		Websites:             stringsToTypesSet(t),
+		InfraDFQFilter:       types.StringNull(),
+		ActionFilter:         types.StringNull(),
+		LogFilter:            types.StringNull(),
+		BusinessPerspectives: stringsToTypesSet(t),
+		SloIDs:               stringsToTypesSet(t),
+		SyntheticTests:       stringsToTypesSet(t),
+		SyntheticCredentials: stringsToTypesSet(t),
+		TagIDs:               stringsToTypesSet(t),
+	}
+}
 
 func TestNewTeamResourceHandle(t *testing.T) {
 	handle := NewTeamResourceHandle()
@@ -270,9 +321,10 @@ func TestUpdateState(t *testing.T) {
 		require.False(t, diags.HasError())
 
 		require.NotNil(t, model.Scope)
-		assert.Len(t, model.Scope.AccessPermissions, 2)
-		assert.Equal(t, "perm-1", model.Scope.AccessPermissions[0])
-		assert.Equal(t, "perm-2", model.Scope.AccessPermissions[1])
+		perms := extractStringsFromSet(t, ctx, model.Scope.AccessPermissions)
+		assert.Len(t, perms, 2)
+		assert.Contains(t, perms, "perm-1")
+		assert.Contains(t, perms, "perm-2")
 	})
 
 	t.Run("team with scope - applications", func(t *testing.T) {
@@ -297,8 +349,9 @@ func TestUpdateState(t *testing.T) {
 		require.False(t, diags.HasError())
 
 		require.NotNil(t, model.Scope)
-		assert.Len(t, model.Scope.Applications, 2)
-		assert.Equal(t, "app-1", model.Scope.Applications[0])
+		apps := extractStringsFromSet(t, ctx, model.Scope.Applications)
+		assert.Len(t, apps, 2)
+		assert.Contains(t, apps, "app-1")
 	})
 
 	t.Run("team with scope - kubernetes clusters", func(t *testing.T) {
@@ -323,8 +376,9 @@ func TestUpdateState(t *testing.T) {
 		require.False(t, diags.HasError())
 
 		require.NotNil(t, model.Scope)
-		assert.Len(t, model.Scope.KubernetesClusters, 2)
-		assert.Equal(t, "k8s-1", model.Scope.KubernetesClusters[0])
+		clusters := extractStringsFromSet(t, ctx, model.Scope.KubernetesClusters)
+		assert.Len(t, clusters, 2)
+		assert.Contains(t, clusters, "k8s-1")
 	})
 
 	t.Run("team with scope - kubernetes namespaces", func(t *testing.T) {
@@ -349,8 +403,9 @@ func TestUpdateState(t *testing.T) {
 		require.False(t, diags.HasError())
 
 		require.NotNil(t, model.Scope)
-		assert.Len(t, model.Scope.KubernetesNamespaces, 2)
-		assert.Equal(t, "ns-1", model.Scope.KubernetesNamespaces[0])
+		namespaces := extractStringsFromSet(t, ctx, model.Scope.KubernetesNamespaces)
+		assert.Len(t, namespaces, 2)
+		assert.Contains(t, namespaces, "ns-1")
 	})
 
 	t.Run("team with scope - mobile apps", func(t *testing.T) {
@@ -375,8 +430,9 @@ func TestUpdateState(t *testing.T) {
 		require.False(t, diags.HasError())
 
 		require.NotNil(t, model.Scope)
-		assert.Len(t, model.Scope.MobileApps, 2)
-		assert.Equal(t, "mobile-1", model.Scope.MobileApps[0])
+		mobileApps := extractStringsFromSet(t, ctx, model.Scope.MobileApps)
+		assert.Len(t, mobileApps, 2)
+		assert.Contains(t, mobileApps, "mobile-1")
 	})
 
 	t.Run("team with scope - websites", func(t *testing.T) {
@@ -401,8 +457,9 @@ func TestUpdateState(t *testing.T) {
 		require.False(t, diags.HasError())
 
 		require.NotNil(t, model.Scope)
-		assert.Len(t, model.Scope.Websites, 2)
-		assert.Equal(t, "website-1", model.Scope.Websites[0])
+		websites := extractStringsFromSet(t, ctx, model.Scope.Websites)
+		assert.Len(t, websites, 2)
+		assert.Contains(t, websites, "website-1")
 	})
 
 	t.Run("team with scope - infra DFQ filter", func(t *testing.T) {
@@ -505,8 +562,9 @@ func TestUpdateState(t *testing.T) {
 		require.False(t, diags.HasError())
 
 		require.NotNil(t, model.Scope)
-		assert.Len(t, model.Scope.BusinessPerspectives, 2)
-		assert.Equal(t, "bp-1", model.Scope.BusinessPerspectives[0])
+		bp := extractStringsFromSet(t, ctx, model.Scope.BusinessPerspectives)
+		assert.Len(t, bp, 2)
+		assert.Contains(t, bp, "bp-1")
 	})
 
 	t.Run("team with scope - SLO IDs", func(t *testing.T) {
@@ -531,8 +589,9 @@ func TestUpdateState(t *testing.T) {
 		require.False(t, diags.HasError())
 
 		require.NotNil(t, model.Scope)
-		assert.Len(t, model.Scope.SloIDs, 2)
-		assert.Equal(t, "slo-1", model.Scope.SloIDs[0])
+		sloIDs := extractStringsFromSet(t, ctx, model.Scope.SloIDs)
+		assert.Len(t, sloIDs, 2)
+		assert.Contains(t, sloIDs, "slo-1")
 	})
 
 	t.Run("team with scope - synthetic tests", func(t *testing.T) {
@@ -557,8 +616,9 @@ func TestUpdateState(t *testing.T) {
 		require.False(t, diags.HasError())
 
 		require.NotNil(t, model.Scope)
-		assert.Len(t, model.Scope.SyntheticTests, 2)
-		assert.Equal(t, "test-1", model.Scope.SyntheticTests[0])
+		tests := extractStringsFromSet(t, ctx, model.Scope.SyntheticTests)
+		assert.Len(t, tests, 2)
+		assert.Contains(t, tests, "test-1")
 	})
 
 	t.Run("team with scope - synthetic credentials", func(t *testing.T) {
@@ -583,8 +643,9 @@ func TestUpdateState(t *testing.T) {
 		require.False(t, diags.HasError())
 
 		require.NotNil(t, model.Scope)
-		assert.Len(t, model.Scope.SyntheticCredentials, 2)
-		assert.Equal(t, "cred-1", model.Scope.SyntheticCredentials[0])
+		creds := extractStringsFromSet(t, ctx, model.Scope.SyntheticCredentials)
+		assert.Len(t, creds, 2)
+		assert.Contains(t, creds, "cred-1")
 	})
 
 	t.Run("team with scope - tag IDs", func(t *testing.T) {
@@ -609,8 +670,9 @@ func TestUpdateState(t *testing.T) {
 		require.False(t, diags.HasError())
 
 		require.NotNil(t, model.Scope)
-		assert.Len(t, model.Scope.TagIDs, 2)
-		assert.Equal(t, "tag-1", model.Scope.TagIDs[0])
+		tagIDs := extractStringsFromSet(t, ctx, model.Scope.TagIDs)
+		assert.Len(t, tagIDs, 2)
+		assert.Contains(t, tagIDs, "tag-1")
 	})
 
 	t.Run("team with scope - restricted application filter with label", func(t *testing.T) {
@@ -765,18 +827,18 @@ func TestUpdateState(t *testing.T) {
 				},
 			},
 			Scope: &TeamScopeModel{
-				AccessPermissions:    []string{"perm-1"},
-				Applications:         []string{"app-1"},
-				KubernetesClusters:   []string{"k8s-1"},
-				KubernetesNamespaces: []string{"ns-1"},
-				MobileApps:           []string{"mobile-1"},
-				Websites:             []string{"website-1"},
+				AccessPermissions:    stringsToTypesSet(t, "perm-1"),
+				Applications:         stringsToTypesSet(t, "app-1"),
+				KubernetesClusters:   stringsToTypesSet(t, "k8s-1"),
+				KubernetesNamespaces: stringsToTypesSet(t, "ns-1"),
+				MobileApps:           stringsToTypesSet(t, "mobile-1"),
+				Websites:             stringsToTypesSet(t, "website-1"),
 				InfraDFQFilter:       types.StringValue("entity.type:host"),
-				BusinessPerspectives: []string{"bp-1"},
-				SloIDs:               []string{"slo-1"},
-				SyntheticTests:       []string{"test-1"},
-				SyntheticCredentials: []string{"cred-1"},
-				TagIDs:               []string{"tag-1"},
+				BusinessPerspectives: stringsToTypesSet(t, "bp-1"),
+				SloIDs:               stringsToTypesSet(t, "slo-1"),
+				SyntheticTests:       stringsToTypesSet(t, "test-1"),
+				SyntheticCredentials: stringsToTypesSet(t, "cred-1"),
+				TagIDs:               stringsToTypesSet(t, "tag-1"),
 				RestrictedApplicationFilter: &TeamRestrictedApplicationFilterModel{
 					Label: types.StringValue("test-label"),
 					Scope: types.StringValue(string(api.RestrictedApplicationFilterScopeIncludeAllDownstream)),
@@ -798,8 +860,8 @@ func TestUpdateState(t *testing.T) {
 		assert.Equal(t, "Full team", model.Info.Description.ValueString())
 		assert.Len(t, model.Members, 1)
 		require.NotNil(t, model.Scope)
-		assert.Len(t, model.Scope.AccessPermissions, 1)
-		assert.Len(t, model.Scope.Applications, 1)
+		assert.Len(t, model.Scope.AccessPermissions.Elements(), 1)
+		assert.Len(t, model.Scope.Applications.Elements(), 1)
 		require.NotNil(t, model.Scope.RestrictedApplicationFilter)
 	})
 }
@@ -978,9 +1040,11 @@ func TestMapStateToDataObject(t *testing.T) {
 		model := TeamModel{
 			ID:  types.StringValue("test-id"),
 			Tag: types.StringValue("test-team"),
-			Scope: &TeamScopeModel{
-				AccessPermissions: []string{"perm-1", "perm-2"},
-			},
+			Scope: func() *TeamScopeModel {
+					s := emptyTeamScopeModel(t)
+					s.AccessPermissions = stringsToTypesSet(t, "perm-1", "perm-2")
+					return &s
+				}(),
 		}
 
 		state := createMockTeamState(t, ctx, model)
@@ -990,16 +1054,18 @@ func TestMapStateToDataObject(t *testing.T) {
 
 		require.NotNil(t, team.Scope)
 		assert.Len(t, team.Scope.AccessPermissions, 2)
-		assert.Equal(t, "perm-1", team.Scope.AccessPermissions[0])
+		assert.Contains(t, team.Scope.AccessPermissions, "perm-1")
 	})
 
 	t.Run("team with scope - applications", func(t *testing.T) {
 		model := TeamModel{
 			ID:  types.StringValue("test-id"),
 			Tag: types.StringValue("test-team"),
-			Scope: &TeamScopeModel{
-				Applications: []string{"app-1", "app-2"},
-			},
+			Scope: func() *TeamScopeModel {
+					s := emptyTeamScopeModel(t)
+					s.Applications = stringsToTypesSet(t, "app-1", "app-2")
+					return &s
+				}(),
 		}
 
 		state := createMockTeamState(t, ctx, model)
@@ -1009,16 +1075,18 @@ func TestMapStateToDataObject(t *testing.T) {
 
 		require.NotNil(t, team.Scope)
 		assert.Len(t, team.Scope.Applications, 2)
-		assert.Equal(t, "app-1", team.Scope.Applications[0])
+		assert.Contains(t, team.Scope.Applications, "app-1")
 	})
 
 	t.Run("team with scope - infra DFQ filter", func(t *testing.T) {
 		model := TeamModel{
 			ID:  types.StringValue("test-id"),
 			Tag: types.StringValue("test-team"),
-			Scope: &TeamScopeModel{
-				InfraDFQFilter: types.StringValue("entity.type:host"),
-			},
+			Scope: func() *TeamScopeModel {
+					s := emptyTeamScopeModel(t)
+					s.InfraDFQFilter = types.StringValue("entity.type:host")
+					return &s
+				}(),
 		}
 
 		state := createMockTeamState(t, ctx, model)
@@ -1035,9 +1103,11 @@ func TestMapStateToDataObject(t *testing.T) {
 		model := TeamModel{
 			ID:  types.StringValue("test-id"),
 			Tag: types.StringValue("test-team"),
-			Scope: &TeamScopeModel{
-				InfraDFQFilter: types.StringNull(),
-			},
+			Scope: func() *TeamScopeModel {
+					s := emptyTeamScopeModel(t)
+					s.InfraDFQFilter = types.StringNull()
+					return &s
+				}(),
 		}
 
 		state := createMockTeamState(t, ctx, model)
@@ -1053,9 +1123,11 @@ func TestMapStateToDataObject(t *testing.T) {
 		model := TeamModel{
 			ID:  types.StringValue("test-id"),
 			Tag: types.StringValue("test-team"),
-			Scope: &TeamScopeModel{
-				ActionFilter: types.StringValue("action.type:custom"),
-			},
+			Scope: func() *TeamScopeModel {
+					s := emptyTeamScopeModel(t)
+					s.ActionFilter = types.StringValue("action.type:custom")
+					return &s
+				}(),
 		}
 
 		state := createMockTeamState(t, ctx, model)
@@ -1072,9 +1144,11 @@ func TestMapStateToDataObject(t *testing.T) {
 		model := TeamModel{
 			ID:  types.StringValue("test-id"),
 			Tag: types.StringValue("test-team"),
-			Scope: &TeamScopeModel{
-				LogFilter: types.StringValue("log.level:error"),
-			},
+			Scope: func() *TeamScopeModel {
+					s := emptyTeamScopeModel(t)
+					s.LogFilter = types.StringValue("log.level:error")
+					return &s
+				}(),
 		}
 
 		state := createMockTeamState(t, ctx, model)
@@ -1088,20 +1162,20 @@ func TestMapStateToDataObject(t *testing.T) {
 	})
 
 	t.Run("team with scope - all array fields", func(t *testing.T) {
+		scope := emptyTeamScopeModel(t)
+		scope.KubernetesClusters = stringsToTypesSet(t, "k8s-1")
+		scope.KubernetesNamespaces = stringsToTypesSet(t, "ns-1")
+		scope.MobileApps = stringsToTypesSet(t, "mobile-1")
+		scope.Websites = stringsToTypesSet(t, "website-1")
+		scope.BusinessPerspectives = stringsToTypesSet(t, "bp-1")
+		scope.SloIDs = stringsToTypesSet(t, "slo-1")
+		scope.SyntheticTests = stringsToTypesSet(t, "test-1")
+		scope.SyntheticCredentials = stringsToTypesSet(t, "cred-1")
+		scope.TagIDs = stringsToTypesSet(t, "tag-1")
 		model := TeamModel{
-			ID:  types.StringValue("test-id"),
-			Tag: types.StringValue("test-team"),
-			Scope: &TeamScopeModel{
-				KubernetesClusters:   []string{"k8s-1"},
-				KubernetesNamespaces: []string{"ns-1"},
-				MobileApps:           []string{"mobile-1"},
-				Websites:             []string{"website-1"},
-				BusinessPerspectives: []string{"bp-1"},
-				SloIDs:               []string{"slo-1"},
-				SyntheticTests:       []string{"test-1"},
-				SyntheticCredentials: []string{"cred-1"},
-				TagIDs:               []string{"tag-1"},
-			},
+			ID:    types.StringValue("test-id"),
+			Tag:   types.StringValue("test-team"),
+			Scope: &scope,
 		}
 
 		state := createMockTeamState(t, ctx, model)
@@ -1125,11 +1199,13 @@ func TestMapStateToDataObject(t *testing.T) {
 		model := TeamModel{
 			ID:  types.StringValue("test-id"),
 			Tag: types.StringValue("test-team"),
-			Scope: &TeamScopeModel{
-				RestrictedApplicationFilter: &TeamRestrictedApplicationFilterModel{
+			Scope: func() *TeamScopeModel {
+				s := emptyTeamScopeModel(t)
+				s.RestrictedApplicationFilter = &TeamRestrictedApplicationFilterModel{
 					Label: types.StringValue("test-label"),
-				},
-			},
+				}
+				return &s
+			}(),
 		}
 
 		state := createMockTeamState(t, ctx, model)
@@ -1147,11 +1223,13 @@ func TestMapStateToDataObject(t *testing.T) {
 		model := TeamModel{
 			ID:  types.StringValue("test-id"),
 			Tag: types.StringValue("test-team"),
-			Scope: &TeamScopeModel{
-				RestrictedApplicationFilter: &TeamRestrictedApplicationFilterModel{
+			Scope: func() *TeamScopeModel {
+				s := emptyTeamScopeModel(t)
+				s.RestrictedApplicationFilter = &TeamRestrictedApplicationFilterModel{
 					Scope: types.StringValue(string(api.RestrictedApplicationFilterScopeIncludeNoDownstream)),
-				},
-			},
+				}
+				return &s
+			}(),
 		}
 
 		state := createMockTeamState(t, ctx, model)
@@ -1169,11 +1247,13 @@ func TestMapStateToDataObject(t *testing.T) {
 		model := TeamModel{
 			ID:  types.StringValue("test-id"),
 			Tag: types.StringValue("test-team"),
-			Scope: &TeamScopeModel{
-				RestrictedApplicationFilter: &TeamRestrictedApplicationFilterModel{
+			Scope: func() *TeamScopeModel {
+				s := emptyTeamScopeModel(t)
+				s.RestrictedApplicationFilter = &TeamRestrictedApplicationFilterModel{
 					TagFilterExpression: types.StringValue("entity.type EQUALS 'service'"),
-				},
-			},
+				}
+				return &s
+			}(),
 		}
 
 		state := createMockTeamState(t, ctx, model)
@@ -1190,13 +1270,15 @@ func TestMapStateToDataObject(t *testing.T) {
 		model := TeamModel{
 			ID:  types.StringValue("test-id"),
 			Tag: types.StringValue("test-team"),
-			Scope: &TeamScopeModel{
-				RestrictedApplicationFilter: &TeamRestrictedApplicationFilterModel{
+			Scope: func() *TeamScopeModel {
+				s := emptyTeamScopeModel(t)
+				s.RestrictedApplicationFilter = &TeamRestrictedApplicationFilterModel{
 					Label:               types.StringNull(),
 					Scope:               types.StringNull(),
 					TagFilterExpression: types.StringNull(),
-				},
-			},
+				}
+				return &s
+			}(),
 		}
 
 		state := createMockTeamState(t, ctx, model)
@@ -1227,20 +1309,20 @@ func TestMapStateToDataObject(t *testing.T) {
 				},
 			},
 			Scope: &TeamScopeModel{
-				AccessPermissions:    []string{"perm-1"},
-				Applications:         []string{"app-1"},
-				KubernetesClusters:   []string{"k8s-1"},
-				KubernetesNamespaces: []string{"ns-1"},
-				MobileApps:           []string{"mobile-1"},
-				Websites:             []string{"website-1"},
+				AccessPermissions:    stringsToTypesSet(t, "perm-1"),
+				Applications:         stringsToTypesSet(t, "app-1"),
+				KubernetesClusters:   stringsToTypesSet(t, "k8s-1"),
+				KubernetesNamespaces: stringsToTypesSet(t, "ns-1"),
+				MobileApps:           stringsToTypesSet(t, "mobile-1"),
+				Websites:             stringsToTypesSet(t, "website-1"),
 				InfraDFQFilter:       types.StringValue("entity.type:host"),
 				ActionFilter:         types.StringValue("action.type:custom"),
 				LogFilter:            types.StringValue("log.level:error"),
-				BusinessPerspectives: []string{"bp-1"},
-				SloIDs:               []string{"slo-1"},
-				SyntheticTests:       []string{"test-1"},
-				SyntheticCredentials: []string{"cred-1"},
-				TagIDs:               []string{"tag-1"},
+				BusinessPerspectives: stringsToTypesSet(t, "bp-1"),
+				SloIDs:               stringsToTypesSet(t, "slo-1"),
+				SyntheticTests:       stringsToTypesSet(t, "test-1"),
+				SyntheticCredentials: stringsToTypesSet(t, "cred-1"),
+				TagIDs:               stringsToTypesSet(t, "tag-1"),
 				RestrictedApplicationFilter: &TeamRestrictedApplicationFilterModel{
 					Label:               types.StringValue("test-label"),
 					Scope:               types.StringValue(string(api.RestrictedApplicationFilterScopeIncludeAllDownstream)),
@@ -1325,18 +1407,18 @@ func TestRoundTripConversion(t *testing.T) {
 				},
 			},
 			Scope: &TeamScopeModel{
-				AccessPermissions:    []string{"perm-1"},
-				Applications:         []string{"app-1"},
-				KubernetesClusters:   []string{"k8s-1"},
-				KubernetesNamespaces: []string{"ns-1"},
-				MobileApps:           []string{"mobile-1"},
-				Websites:             []string{"website-1"},
+				AccessPermissions:    stringsToTypesSet(t, "perm-1"),
+				Applications:         stringsToTypesSet(t, "app-1"),
+				KubernetesClusters:   stringsToTypesSet(t, "k8s-1"),
+				KubernetesNamespaces: stringsToTypesSet(t, "ns-1"),
+				MobileApps:           stringsToTypesSet(t, "mobile-1"),
+				Websites:             stringsToTypesSet(t, "website-1"),
 				InfraDFQFilter:       types.StringValue("entity.type:host"),
-				BusinessPerspectives: []string{"bp-1"},
-				SloIDs:               []string{"slo-1"},
-				SyntheticTests:       []string{"test-1"},
-				SyntheticCredentials: []string{"cred-1"},
-				TagIDs:               []string{"tag-1"},
+				BusinessPerspectives: stringsToTypesSet(t, "bp-1"),
+				SloIDs:               stringsToTypesSet(t, "slo-1"),
+				SyntheticTests:       stringsToTypesSet(t, "test-1"),
+				SyntheticCredentials: stringsToTypesSet(t, "cred-1"),
+				TagIDs:               stringsToTypesSet(t, "tag-1"),
 				RestrictedApplicationFilter: &TeamRestrictedApplicationFilterModel{
 					Label: types.StringValue("test-label"),
 					Scope: types.StringValue(string(api.RestrictedApplicationFilterScopeIncludeAllDownstream)),
@@ -1408,17 +1490,17 @@ func TestEdgeCases(t *testing.T) {
 			ID:  types.StringValue("test-id"),
 			Tag: types.StringValue("test-team"),
 			Scope: &TeamScopeModel{
-				AccessPermissions:    []string{},
-				Applications:         []string{},
-				KubernetesClusters:   []string{},
-				KubernetesNamespaces: []string{},
-				MobileApps:           []string{},
-				Websites:             []string{},
-				BusinessPerspectives: []string{},
-				SloIDs:               []string{},
-				SyntheticTests:       []string{},
-				SyntheticCredentials: []string{},
-				TagIDs:               []string{},
+				AccessPermissions:    stringsToTypesSet(t),
+				Applications:         stringsToTypesSet(t),
+				KubernetesClusters:   stringsToTypesSet(t),
+				KubernetesNamespaces: stringsToTypesSet(t),
+				MobileApps:           stringsToTypesSet(t),
+				Websites:             stringsToTypesSet(t),
+				BusinessPerspectives: stringsToTypesSet(t),
+				SloIDs:               stringsToTypesSet(t),
+				SyntheticTests:       stringsToTypesSet(t),
+				SyntheticCredentials: stringsToTypesSet(t),
+				TagIDs:               stringsToTypesSet(t),
 			},
 		}
 
@@ -1457,11 +1539,13 @@ func TestEdgeCases(t *testing.T) {
 		model := TeamModel{
 			ID:  types.StringValue("test-id"),
 			Tag: types.StringValue("test-team"),
-			Scope: &TeamScopeModel{
-				RestrictedApplicationFilter: &TeamRestrictedApplicationFilterModel{
+			Scope: func() *TeamScopeModel {
+				s := emptyTeamScopeModel(t)
+				s.RestrictedApplicationFilter = &TeamRestrictedApplicationFilterModel{
 					TagFilterExpression: types.StringValue("invalid expression"),
-				},
-			},
+				}
+				return &s
+			}(),
 		}
 
 		state := createMockTeamState(t, ctx, model)
