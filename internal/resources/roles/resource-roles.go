@@ -123,8 +123,7 @@ func (r *roleResource) UpdateState(ctx context.Context, state *tfsdk.State, plan
 
 // mapMembersToSet converts API members to a types.Set.
 // The Roles API always returns "members": [] — using types.Set (instead of []RoleMemberModel)
-// lets Terraform hold the unknown/null/empty distinction correctly when the field is
-// Optional+Computed.
+// lets Terraform hold the unknown/null/empty distinction correctly when the field is Optional+Computed.
 func (r *roleResource) mapMembersToSet(ctx context.Context, apiMembers []api.APIMember) (types.Set, diag.Diagnostics) {
 	memberType := buildMemberNestedObject().Type()
 

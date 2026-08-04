@@ -28,9 +28,6 @@ type TeamMemberRole struct {
 }
 
 // TeamScopeModel represents the scope configuration for the team.
-// All set-typed scope fields use types.Set (not []string) because the schema marks them
-// Optional+Computed — the Terraform Framework requires types.Set to correctly carry the
-// unknown value during plan when a Computed field has not yet been resolved.
 type TeamScopeModel struct {
 	AccessPermissions           types.Set                             `tfsdk:"access_permissions"`
 	Applications                types.Set                             `tfsdk:"applications"`

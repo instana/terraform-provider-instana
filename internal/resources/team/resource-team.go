@@ -23,22 +23,18 @@ import (
 )
 
 // stringsToSet converts a []string to a types.Set of strings.
-// Both nil (JSON null) and [] (JSON []) are stored as an empty set — the Teams API
-// uses null and [] interchangeably to mean "not configured", and the schema fields are
-// Optional+Computed with UseStateForUnknown. Storing an empty set for both cases keeps
-// the plan value ([] from TF filling an unset nested attr) consistent with state after
-// apply, regardless of whether the API echoes back null or [].
+// A nil or empty slice is mapped to an empty set; a non-empty slice is converted element-by-element.
 func stringsToSet(ctx context.Context, ss []string) (types.Set, diag.Diagnostics) {
-	if len(ss) == 0 {
+	if (ss == nil || len(ss) == 0) {
 		return types.SetValueMust(types.StringType, []attr.Value{}), nil
 	}
 	return types.SetValueFrom(ctx, types.StringType, ss)
 }
 
-// setToStrings extracts a []string from a types.Set. Returns nil for null/unknown/empty.
+// setToStrings extracts a []string from a types.Set. Returns [] for null/unknown/empty.
 func setToStrings(ctx context.Context, s types.Set) ([]string, diag.Diagnostics) {
 	if s.IsNull() || s.IsUnknown() || len(s.Elements()) == 0 {
-		return nil, nil
+		return []string{}, nil
 	}
 	var result []string
 	return result, s.ElementsAs(ctx, &result, false)
