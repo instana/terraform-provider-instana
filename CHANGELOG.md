@@ -1,3 +1,16 @@
+## [v7.4.1](https://github.com/instana/terraform-provider-instana/tree/v7.4.1) (2026-08-04)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.4.0...v7.4.1)
+
+**Fixed bugs:**
+
+- Fixed perpetual diff after `terraform apply` in `instana_rbac_role` by changing the `member` field from `[]RoleMemberModel` to `types.Set` and adding a `UseStateForUnknown` plan modifier
+- Fixed perpetual diff after `terraform apply` in `instana_rbac_team` by changing all set-typed scope fields from `[]string` to `types.Set` and adding `UseStateForUnknown` plan modifiers
+
+**Merged pull requests:**
+
+- fix(rbac): resolve apply consistency errors for instana_rbac_team scope and instana_rbac_role member [\#108](https://github.com/instana/terraform-provider-instana/pull/108) ([BlessyElza](https://github.com/BlessyElza))
+
 ## [v7.4.0](https://github.com/instana/terraform-provider-instana/tree/v7.4.0) (2026-07-28)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.3.4...v7.4.0)
