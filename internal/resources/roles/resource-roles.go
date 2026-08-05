@@ -49,6 +49,7 @@ func buildRoleSchema() schema.Schema {
 			RoleFieldMembers: schema.SetNestedAttribute{
 				Description:  RoleDescMembers,
 				Optional:     true,
+				Computed:     true,
 				NestedObject: buildMemberNestedObject(),
 			},
 			RoleFieldPermissions: schema.SetAttribute{

@@ -44,6 +44,7 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/resources/sloconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/slocorrectionconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/syntheticalertconfig"
+	"github.com/instana/terraform-provider-instana/internal/resources/syntheticcredential"
 	"github.com/instana/terraform-provider-instana/internal/resources/synthetictest"
 	"github.com/instana/terraform-provider-instana/internal/resources/team"
 	"github.com/instana/terraform-provider-instana/internal/resources/websitealertconfig"
@@ -370,6 +371,7 @@ func (p *InstanaProvider) Resources(_ context.Context) []func() resource.Resourc
 		addResouceHandle(sloalertconfig.NewSloAlertConfigResourceHandle),
 		addResouceHandle(slocorrectionconfig.NewSloCorrectionConfigResourceHandle),
 		addResouceHandle(syntheticalertconfig.NewSyntheticAlertConfigResourceHandle),
+		addResouceHandle(syntheticcredential.NewSyntheticCredentialResourceHandle),
 		addResouceHandle(synthetictest.NewSyntheticTestResourceHandle),
 		addResouceHandle(websitealertconfig.NewWebsiteAlertConfigResourceHandle),
 		addResouceHandle(websitemonitoringconfig.NewWebsiteMonitoringConfigResourceHandle),
