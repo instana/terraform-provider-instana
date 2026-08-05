@@ -15,9 +15,6 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/util"
 )
 
-// CorrelationIDHeader is the HTTP header name for correlation ID
-const CorrelationIDHeader = "X-Correlation-ID"
-
 // NewTerraformResource creates a new terraform resource for the given handle
 func NewTerraformResource[T client.InstanaDataObject](handle resourcehandle.ResourceHandle[T]) TerraformResource {
 	return &terraformResourceImpl[T]{
@@ -72,10 +69,7 @@ func (r *terraformResourceImpl[T]) Configure(_ context.Context, req resource.Con
 func (r *terraformResourceImpl[T]) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Generate correlation ID for this operation
 	correlationID := util.GenerateCorrelationID()
-	
-	// Add correlation ID to client config headers
-	r.addCorrelationIDToClient(correlationID)
-	
+
 	tflog.Debug(ctx, "Starting resource creation", map[string]interface{}{
 		"correlation_id": correlationID,
 	})
@@ -186,10 +180,7 @@ func (r *terraformResourceImpl[T]) Create(ctx context.Context, req resource.Crea
 func (r *terraformResourceImpl[T]) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// Generate correlation ID for this operation
 	correlationID := util.GenerateCorrelationID()
-	
-	// Add correlation ID to client config headers
-	r.addCorrelationIDToClient(correlationID)
-	
+
 	if r.providerMeta == nil || r.providerMeta.InstanaAPI == nil {
 		tflog.Error(ctx, "Provider not configured for resource read")
 		resp.Diagnostics.AddError(
@@ -275,10 +266,7 @@ func (r *terraformResourceImpl[T]) Read(ctx context.Context, req resource.ReadRe
 func (r *terraformResourceImpl[T]) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	// Generate correlation ID for this operation
 	correlationID := util.GenerateCorrelationID()
-	
-	// Add correlation ID to client config headers
-	r.addCorrelationIDToClient(correlationID)
-	
+
 	if r.providerMeta == nil || r.providerMeta.InstanaAPI == nil {
 		tflog.Error(ctx, "Provider not configured for resource update")
 		resp.Diagnostics.AddError(
@@ -341,10 +329,7 @@ func (r *terraformResourceImpl[T]) Update(ctx context.Context, req resource.Upda
 func (r *terraformResourceImpl[T]) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	// Generate correlation ID for this operation
 	correlationID := util.GenerateCorrelationID()
-	
-	// Add correlation ID to client config headers
-	r.addCorrelationIDToClient(correlationID)
-	
+
 	if r.providerMeta == nil || r.providerMeta.InstanaAPI == nil {
 		tflog.Error(ctx, "Provider not configured for resource deletion")
 		resp.Diagnostics.AddError(
@@ -423,15 +408,5 @@ func (r *terraformResourceImpl[T]) ImportState(ctx context.Context, req resource
 // UpgradeState handles state upgrades for resources that need schema migration
 func (r *terraformResourceImpl[T]) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
 	return r.resourceHandle.GetStateUpgraders(ctx)
-}
-
-// addCorrelationIDToClient adds the correlation ID header to the client configuration
-func (r *terraformResourceImpl[T]) addCorrelationIDToClient(correlationID string) {
-	if r.providerMeta != nil && r.providerMeta.ClientConfig != nil {
-		if r.providerMeta.ClientConfig.Headers.Custom == nil {
-			r.providerMeta.ClientConfig.Headers.Custom = make(map[string]string)
-		}
-		r.providerMeta.ClientConfig.Headers.Custom[CorrelationIDHeader] = correlationID
-	}
 }
 
