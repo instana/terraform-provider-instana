@@ -982,7 +982,7 @@ func TestMapIndicatorToState(t *testing.T) {
 			Indicator: api.SloIndicator{
 				Blueprint:   SloConfigAPIIndicatorBlueprintAvailability,
 				Type:        SloConfigAPIIndicatorMeasurementTypeEventBased,
-				Threshold:   0.0,
+				Threshold:   0.9995,
 				Aggregation: &aggregation,
 			},
 		}
@@ -991,7 +991,7 @@ func TestMapIndicatorToState(t *testing.T) {
 
 		assert.False(t, diags.HasError())
 		assert.NotNil(t, result.EventBasedAvailabilityIndicatorModel)
-		assert.Equal(t, 0.0, result.EventBasedAvailabilityIndicatorModel.Threshold.ValueFloat64())
+		assert.Equal(t, 0.9995, result.EventBasedAvailabilityIndicatorModel.Threshold.ValueFloat64(), "threshold must not be rounded to 2 decimal places")
 		assert.Equal(t, "MEAN", result.EventBasedAvailabilityIndicatorModel.Aggregation.ValueString())
 	})
 

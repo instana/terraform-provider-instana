@@ -71,6 +71,57 @@ func TestUpdateState_StatusAlertType(t *testing.T) {
 	assert.Equal(t, int64(600000), model.TimeThreshold.CoolDown.ValueInt64())
 }
 
+// TestUpdateState_ThresholdHighPrecisionDecimal verifies that floating-point values with more
+// than 2 decimal places (e.g. 0.9995) are preserved exactly in state and are not rounded,
+// which would produce an inconsistent-result error from Terraform.
+func TestUpdateState_ThresholdHighPrecisionDecimal(t *testing.T) {
+	ctx := context.Background()
+	resource := NewSloAlertConfigResourceHandle()
+
+	apiConfig := &api.SloAlertConfig{
+		ID:          "test-id-precision",
+		Name:        "Precision Test Alert",
+		Description: "Precision Test Description",
+		Severity:    5,
+		Triggering:  false,
+		Enabled:     true,
+		Rule: api.SloAlertRule{
+			AlertType: "SERVICE_LEVELS_OBJECTIVE",
+			Metric:    "STATUS",
+		},
+		Threshold: &api.SloAlertThreshold{
+			Type:     "staticThreshold",
+			Operator: ">=",
+			Value:    0.9995,
+		},
+		TimeThreshold: api.SloAlertTimeThreshold{
+			TimeWindow: 300000,
+			Expiry:     0,
+		},
+		SloIds:                []string{"slo-1"},
+		AlertChannelIds:       []string{"channel-1"},
+		CustomerPayloadFields: []common.CustomPayloadField[any]{},
+		BurnRateConfigs:       &[]api.BurnRateConfig{},
+	}
+
+	state := tfsdk.State{
+		Schema: resource.MetaData().Schema,
+	}
+	initializeEmptyState(ctx, &state)
+
+	diags := resource.UpdateState(ctx, &state, nil, apiConfig)
+	require.False(t, diags.HasError())
+
+	var model SloAlertConfigModel
+	diags = state.Get(ctx, &model)
+	require.False(t, diags.HasError())
+
+	require.NotNil(t, model.Threshold)
+	assert.Equal(t, 0.9995, model.Threshold.Value.ValueFloat64(), "threshold value must not be rounded")
+}
+
+
+
 func TestUpdateState_ErrorBudgetAlertType(t *testing.T) {
 	ctx := context.Background()
 	resource := NewSloAlertConfigResourceHandle()
@@ -194,7 +245,7 @@ func TestUpdateState_BurnRateV2AlertType(t *testing.T) {
 	assert.Equal(t, "60", model.BurnRateConfig[0].Duration.ValueString())
 	assert.Equal(t, "MINUTES", model.BurnRateConfig[0].DurationUnitType.ValueString())
 	assert.Equal(t, ">", model.BurnRateConfig[0].ThresholdOperator.ValueString())
-	assert.Equal(t, "2.50", model.BurnRateConfig[0].ThresholdValue.ValueString())
+	assert.Equal(t, "2.5", model.BurnRateConfig[0].ThresholdValue.ValueString())
 
 	// Check second burn rate config
 	assert.Equal(t, "LONG", model.BurnRateConfig[1].AlertWindowType.ValueString())

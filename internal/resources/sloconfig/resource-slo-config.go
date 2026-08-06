@@ -3,7 +3,6 @@ package sloconfig
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
@@ -1745,12 +1744,8 @@ func (r *sloConfigResource) mapIndicatorToState(apiObject *api.SloConfig, sloCon
 
 // createTimeBasedLatencyModel creates time-based latency indicator model
 func (r *sloConfigResource) createTimeBasedLatencyModel(indicator api.SloIndicator) *TimeBasedLatencyIndicatorModel {
-	// Round to 2 decimal places to avoid floating-point precision issues
-	formatted := strconv.FormatFloat(indicator.Threshold, 'f', 2, 64)
-	parsed, _ := strconv.ParseFloat(formatted, 64)
-
 	return &TimeBasedLatencyIndicatorModel{
-		Threshold:   types.Float64Value(parsed),
+		Threshold:   types.Float64Value(indicator.Threshold),
 		Aggregation: util.SetStringPointerToState(indicator.Aggregation),
 		Metric:      r.mapEntityMetricToModel(indicator.Metric),
 	}
@@ -1758,24 +1753,16 @@ func (r *sloConfigResource) createTimeBasedLatencyModel(indicator api.SloIndicat
 
 // createEventBasedLatencyModel creates event-based latency indicator model
 func (r *sloConfigResource) createEventBasedLatencyModel(indicator api.SloIndicator) *EventBasedLatencyIndicatorModel {
-	// Round to 2 decimal places to avoid floating-point precision issues
-	formatted := strconv.FormatFloat(indicator.Threshold, 'f', 2, 64)
-	parsed, _ := strconv.ParseFloat(formatted, 64)
-
 	return &EventBasedLatencyIndicatorModel{
-		Threshold: types.Float64Value(parsed),
+		Threshold: types.Float64Value(indicator.Threshold),
 		Metric:    r.mapEntityMetricToModel(indicator.Metric),
 	}
 }
 
 // createTimeBasedAvailabilityModel creates time-based availability indicator model
 func (r *sloConfigResource) createTimeBasedAvailabilityModel(indicator api.SloIndicator) *TimeBasedAvailabilityIndicatorModel {
-	// Round to 2 decimal places to avoid floating-point precision issues
-	formatted := strconv.FormatFloat(indicator.Threshold, 'f', 2, 64)
-	parsed, _ := strconv.ParseFloat(formatted, 64)
-
 	return &TimeBasedAvailabilityIndicatorModel{
-		Threshold:   types.Float64Value(parsed),
+		Threshold:   types.Float64Value(indicator.Threshold),
 		Aggregation: util.SetStringPointerToState(indicator.Aggregation),
 		Metric:      r.mapEntityMetricToModel(indicator.Metric),
 	}
@@ -1783,10 +1770,8 @@ func (r *sloConfigResource) createTimeBasedAvailabilityModel(indicator api.SloIn
 
 // createEventBasedAvailabilityModel creates event-based availability indicator model
 func (r *sloConfigResource) createEventBasedAvailabilityModel(indicator api.SloIndicator) *EventBasedAvailabilityIndicatorModel {
-	formatted := strconv.FormatFloat(indicator.Threshold, 'f', 2, 64)
-	parsed, _ := strconv.ParseFloat(formatted, 64)
 	return &EventBasedAvailabilityIndicatorModel{
-		Threshold:   types.Float64Value(parsed),
+		Threshold:   types.Float64Value(indicator.Threshold),
 		Aggregation: util.SetStringPointerToState(indicator.Aggregation),
 		Metric:      r.mapEntityMetricToModel(indicator.Metric),
 	}
@@ -1794,13 +1779,9 @@ func (r *sloConfigResource) createEventBasedAvailabilityModel(indicator api.SloI
 
 // createTrafficModel creates traffic indicator model
 func (r *sloConfigResource) createTrafficModel(indicator api.SloIndicator, existingVal *IndicatorModel) *TrafficIndicatorModel {
-	// Round to 2 decimal places to avoid floating-point precision issues
-	formatted := strconv.FormatFloat(indicator.Threshold, 'f', 2, 64)
-	parsed, _ := strconv.ParseFloat(formatted, 64)
-
 	trafficIndicatorModel := &TrafficIndicatorModel{
 		TrafficType: util.SetStringPointerToState(indicator.TrafficType),
-		Threshold:   types.Float64Value(parsed),
+		Threshold:   types.Float64Value(indicator.Threshold),
 		Metric:      r.mapEntityMetricToModel(indicator.Metric),
 	}
 	// Always prefer the API-returned operator; fall back to existing state value
@@ -1834,13 +1815,9 @@ func (r *sloConfigResource) createCustomModel(indicator api.SloIndicator) (*Cust
 
 // createTimeBasedSaturationModel creates saturation indicator model
 func (r *sloConfigResource) createTimeBasedSaturationModel(indicator api.SloIndicator) *TimeBasedSaturationIndicatorModel {
-	// Round to 2 decimal places to avoid floating-point precision issues
-	formatted := strconv.FormatFloat(indicator.Threshold, 'f', 2, 64)
-	parsed, _ := strconv.ParseFloat(formatted, 64)
-
 	return &TimeBasedSaturationIndicatorModel{
 		MetricName:  util.SetStringPointerToState(indicator.MetricName),
-		Threshold:   types.Float64Value(parsed),
+		Threshold:   types.Float64Value(indicator.Threshold),
 		Aggregation: util.SetStringPointerToState(indicator.Aggregation),
 		Operator:    util.SetStringPointerToState(indicator.Operator),
 		Metric:      r.mapEntityMetricToModel(indicator.Metric),
@@ -1849,13 +1826,9 @@ func (r *sloConfigResource) createTimeBasedSaturationModel(indicator api.SloIndi
 
 // createEventBasedSaturationModel creates saturation indicator model
 func (r *sloConfigResource) createEventBasedSaturationModel(indicator api.SloIndicator) *EventBasedSaturationIndicatorModel {
-	// Round to 2 decimal places to avoid floating-point precision issues
-	formatted := strconv.FormatFloat(indicator.Threshold, 'f', 2, 64)
-	parsed, _ := strconv.ParseFloat(formatted, 64)
-
 	return &EventBasedSaturationIndicatorModel{
 		MetricName: util.SetStringPointerToState(indicator.MetricName),
-		Threshold:  types.Float64Value(parsed),
+		Threshold:  types.Float64Value(indicator.Threshold),
 		Operator:   util.SetStringPointerToState(indicator.Operator),
 		Metric:     r.mapEntityMetricToModel(indicator.Metric),
 	}
