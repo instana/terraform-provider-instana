@@ -1,3 +1,15 @@
+## [v7.4.2](https://github.com/instana/terraform-provider-instana/tree/v7.4.2) (2026-08-06)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.4.1...v7.4.2)
+
+**Fixed bugs:**
+
+- Fixed decimal precision loss in `instana_slo_config` and `instana_slo_alert_config` threshold state mapping by removing `FormatFloat`/`ParseFloat` round-trips that truncated values like `0.9995` to `1.0`, resolving Terraform's "inconsistent result after apply" error
+
+**Merged pull requests:**
+
+- fix(slo): fix decimal precision loss in threshold state mapping [\#110](https://github.com/instana/terraform-provider-instana/pull/110) ([BlessyElza](https://github.com/BlessyElza))
+
 ## [v7.4.1](https://github.com/instana/terraform-provider-instana/tree/v7.4.1) (2026-08-04)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.4.0...v7.4.1)
