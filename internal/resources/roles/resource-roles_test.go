@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/instana-go-client/api"
@@ -13,6 +14,39 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+// buildMembersSet builds a types.Set of RoleMemberModel from a list of user IDs.
+func buildMembersSet(t *testing.T, userIDs ...string) types.Set {
+	t.Helper()
+	memberType := buildMemberNestedObject().Type()
+	if len(userIDs) == 0 {
+		return types.SetValueMust(memberType, []attr.Value{})
+	}
+	elems := make([]attr.Value, len(userIDs))
+	for i, uid := range userIDs {
+		obj, diags := types.ObjectValue(
+			map[string]attr.Type{RoleFieldMemberUserID: types.StringType},
+			map[string]attr.Value{RoleFieldMemberUserID: types.StringValue(uid)},
+		)
+		require.False(t, diags.HasError())
+		elems[i] = obj
+	}
+	s, diags := types.SetValue(memberType, elems)
+	require.False(t, diags.HasError())
+	return s
+}
+
+// extractMembersFromSet extracts []RoleMemberModel from a types.Set for assertions.
+func extractMembersFromSet(t *testing.T, ctx context.Context, membersSet types.Set) []RoleMemberModel {
+	t.Helper()
+	if membersSet.IsNull() || membersSet.IsUnknown() {
+		return nil
+	}
+	var members []RoleMemberModel
+	diags := membersSet.ElementsAs(ctx, &members, false)
+	require.False(t, diags.HasError())
+	return members
+}
 
 func TestNewRoleResourceHandle(t *testing.T) {
 	t.Run("should create resource handle with correct metadata", func(t *testing.T) {
@@ -163,16 +197,9 @@ func TestMapStateToDataObject(t *testing.T) {
 
 	t.Run("should map complete model from state successfully", func(t *testing.T) {
 		model := RoleModel{
-			ID:   types.StringValue("role-id-123"),
-			Name: types.StringValue("Test Role"),
-			Members: []RoleMemberModel{
-				{
-					UserID: types.StringValue("user-1"),
-				},
-				{
-					UserID: types.StringValue("user-2"),
-				},
-			},
+			ID:      types.StringValue("role-id-123"),
+			Name:    types.StringValue("Test Role"),
+			Members: buildMembersSet(t, "user-1", "user-2"),
 			Permissions: []string{
 				string(api.PermissionCanConfigureApplications),
 				string(api.PermissionCanViewLogs),
@@ -192,24 +219,16 @@ func TestMapStateToDataObject(t *testing.T) {
 		assert.Equal(t, "role-id-123", result.ID)
 		assert.Equal(t, "Test Role", result.Name)
 		assert.Len(t, result.Members, 2)
-		assert.Equal(t, "user-1", result.Members[0].UserID)
-		assert.Equal(t, "user-2", result.Members[1].UserID)
 		assert.Len(t, result.Permissions, 2)
 		assert.Contains(t, result.Permissions, string(api.PermissionCanConfigureApplications))
 	})
 
 	t.Run("should map model from plan successfully", func(t *testing.T) {
 		model := RoleModel{
-			ID:   types.StringValue("plan-role-id"),
-			Name: types.StringValue("Plan Role"),
-			Members: []RoleMemberModel{
-				{
-					UserID: types.StringValue("user-3"),
-				},
-			},
-			Permissions: []string{
-				string(api.PermissionCanConfigureUsers),
-			},
+			ID:          types.StringValue("plan-role-id"),
+			Name:        types.StringValue("Plan Role"),
+			Members:     buildMembersSet(t, "user-3"),
+			Permissions: []string{string(api.PermissionCanConfigureUsers)},
 		}
 
 		plan := &tfsdk.Plan{
@@ -239,19 +258,10 @@ func TestMapStateToDataObject(t *testing.T) {
 
 	t.Run("should map members with optional fields", func(t *testing.T) {
 		model := RoleModel{
-			ID:   types.StringValue("role-id"),
-			Name: types.StringValue("Test Role"),
-			Members: []RoleMemberModel{
-				{
-					UserID: types.StringValue("user-1"),
-				},
-				{
-					UserID: types.StringValue("user-2"),
-				},
-			},
-			Permissions: []string{
-				string(api.PermissionCanConfigureApplications),
-			},
+			ID:          types.StringValue("role-id"),
+			Name:        types.StringValue("Test Role"),
+			Members:     buildMembersSet(t, "user-1", "user-2"),
+			Permissions: []string{string(api.PermissionCanConfigureApplications)},
 		}
 
 		state := &tfsdk.State{
@@ -265,15 +275,13 @@ func TestMapStateToDataObject(t *testing.T) {
 		assert.False(t, resultDiags.HasError())
 		assert.NotNil(t, result)
 		assert.Len(t, result.Members, 2)
-		assert.Equal(t, "user-1", result.Members[0].UserID)
-		assert.Equal(t, "user-2", result.Members[1].UserID)
 	})
 
 	t.Run("should handle empty members list", func(t *testing.T) {
 		model := RoleModel{
 			ID:          types.StringValue("role-id"),
 			Name:        types.StringValue("Test Role"),
-			Members:     []RoleMemberModel{},
+			Members:     buildMembersSet(t),
 			Permissions: []string{string(api.PermissionCanConfigureApplications)},
 		}
 
@@ -292,13 +300,9 @@ func TestMapStateToDataObject(t *testing.T) {
 
 	t.Run("should handle empty permissions list", func(t *testing.T) {
 		model := RoleModel{
-			ID:   types.StringValue("role-id"),
-			Name: types.StringValue("Test Role"),
-			Members: []RoleMemberModel{
-				{
-					UserID: types.StringValue("user-1"),
-				},
-			},
+			ID:          types.StringValue("role-id"),
+			Name:        types.StringValue("Test Role"),
+			Members:     buildMembersSet(t, "user-1"),
 			Permissions: []string{},
 		}
 
@@ -317,13 +321,9 @@ func TestMapStateToDataObject(t *testing.T) {
 
 	t.Run("should handle null ID for new resource", func(t *testing.T) {
 		model := RoleModel{
-			ID:   types.StringNull(),
-			Name: types.StringValue("New Role"),
-			Members: []RoleMemberModel{
-				{
-					UserID: types.StringValue("user-1"),
-				},
-			},
+			ID:          types.StringNull(),
+			Name:        types.StringValue("New Role"),
+			Members:     buildMembersSet(t, "user-1"),
 			Permissions: []string{string(api.PermissionCanConfigureApplications)},
 		}
 
@@ -342,13 +342,9 @@ func TestMapStateToDataObject(t *testing.T) {
 
 	t.Run("should handle multiple permissions", func(t *testing.T) {
 		model := RoleModel{
-			ID:   types.StringValue("role-id"),
-			Name: types.StringValue("Test Role"),
-			Members: []RoleMemberModel{
-				{
-					UserID: types.StringValue("user-1"),
-				},
-			},
+			ID:      types.StringValue("role-id"),
+			Name:    types.StringValue("Test Role"),
+			Members: buildMembersSet(t, "user-1"),
 			Permissions: []string{
 				string(api.PermissionCanConfigureApplications),
 				string(api.PermissionCanViewLogs),
@@ -418,8 +414,8 @@ func TestUpdateState(t *testing.T) {
 		assert.False(t, diags.HasError())
 
 		assert.Equal(t, "api-role-id-123", model.ID.ValueString())
-		assert.Len(t, model.Members, 2)
-		assert.Equal(t, "user-1", model.Members[0].UserID.ValueString())
+		members := extractMembersFromSet(t, ctx, model.Members)
+		assert.Len(t, members, 2)
 		assert.Len(t, model.Permissions, 2)
 	})
 
@@ -454,8 +450,9 @@ func TestUpdateState(t *testing.T) {
 		assert.False(t, diags.HasError())
 
 		assert.Equal(t, "api-role-id-456", model.ID.ValueString())
-		assert.Len(t, model.Members, 1)
-		assert.Equal(t, "user-3", model.Members[0].UserID.ValueString())
+		members := extractMembersFromSet(t, ctx, model.Members)
+		assert.Len(t, members, 1)
+		assert.Equal(t, "user-3", members[0].UserID.ValueString())
 	})
 
 	t.Run("should update state with empty members list", func(t *testing.T) {
@@ -481,19 +478,16 @@ func TestUpdateState(t *testing.T) {
 		diags = state.Get(ctx, &model)
 		assert.False(t, diags.HasError())
 
-		assert.Empty(t, model.Members)
+		members := extractMembersFromSet(t, ctx, model.Members)
+		assert.Empty(t, members)
 	})
 
 	t.Run("should preserve existing member data from plan", func(t *testing.T) {
 		// Set up existing plan with member data
 		existingModel := RoleModel{
-			ID:   types.StringValue("role-id"),
-			Name: types.StringValue("Test Role"),
-			Members: []RoleMemberModel{
-				{
-					UserID: types.StringValue("user-1"),
-				},
-			},
+			ID:          types.StringValue("role-id"),
+			Name:        types.StringValue("Test Role"),
+			Members:     buildMembersSet(t, "user-1"),
 			Permissions: []string{string(api.PermissionCanConfigureApplications)},
 		}
 
@@ -559,20 +553,17 @@ func TestUpdateState(t *testing.T) {
 		diags = state.Get(ctx, &model)
 		assert.False(t, diags.HasError())
 
-		assert.Len(t, model.Members, 1)
+		members := extractMembersFromSet(t, ctx, model.Members)
+		assert.Len(t, members, 1)
 	})
 
 	t.Run("should update state with API values when present", func(t *testing.T) {
 
 		// Set up existing plan with different data
 		existingModel := RoleModel{
-			ID:   types.StringValue("role-id"),
-			Name: types.StringValue("Test Role"),
-			Members: []RoleMemberModel{
-				{
-					UserID: types.StringValue("user-1"),
-				},
-			},
+			ID:          types.StringValue("role-id"),
+			Name:        types.StringValue("Test Role"),
+			Members:     buildMembersSet(t, "user-1"),
 			Permissions: []string{string(api.PermissionCanConfigureApplications)},
 		}
 
@@ -610,20 +601,17 @@ func TestUpdateState(t *testing.T) {
 		assert.False(t, diags.HasError())
 
 		// Should use API values when present
-		assert.Len(t, model.Members, 1)
+		members := extractMembersFromSet(t, ctx, model.Members)
+		assert.Len(t, members, 1)
 	})
 
 	t.Run("should handle new members not in existing state", func(t *testing.T) {
 
 		// Set up existing plan with one member
 		existingModel := RoleModel{
-			ID:   types.StringValue("role-id"),
-			Name: types.StringValue("Test Role"),
-			Members: []RoleMemberModel{
-				{
-					UserID: types.StringValue("user-1"),
-				},
-			},
+			ID:          types.StringValue("role-id"),
+			Name:        types.StringValue("Test Role"),
+			Members:     buildMembersSet(t, "user-1"),
 			Permissions: []string{string(api.PermissionCanConfigureApplications)},
 		}
 
@@ -660,203 +648,91 @@ func TestUpdateState(t *testing.T) {
 		diags = state.Get(ctx, &model)
 		assert.False(t, diags.HasError())
 
-		assert.Len(t, model.Members, 1)
-		assert.Equal(t, "user-2", model.Members[0].UserID.ValueString())
+		members := extractMembersFromSet(t, ctx, model.Members)
+		assert.Len(t, members, 1)
+		assert.Equal(t, "user-2", members[0].UserID.ValueString())
 	})
 }
 
-func TestMapMembersToModel(t *testing.T) {
+func TestMapMembersToSet(t *testing.T) {
 	resource := &roleResource{}
+	ctx := context.Background()
 
 	t.Run("should map empty members list", func(t *testing.T) {
-		result := resource.mapMembersToModel([]api.APIMember{}, []RoleMemberModel{})
+		result, diags := resource.mapMembersToSet(ctx, []api.APIMember{})
+		assert.False(t, diags.HasError())
+		assert.Empty(t, result.Elements())
+	})
+
+	t.Run("should map members with all fields", func(t *testing.T) {
+		apiMembers := []api.APIMember{
+			{
+				UserID: "user-1",
+			},
+		}
+
+		result, diags := resource.mapMembersToSet(ctx, apiMembers)
+		assert.False(t, diags.HasError())
+		assert.Len(t, result.Elements(), 1)
+
+		members := extractMembersFromSet(t, ctx, result)
+		assert.Equal(t, "user-1", members[0].UserID.ValueString())
+	})
+
+	t.Run("should map multiple members", func(t *testing.T) {
+		apiMembers := []api.APIMember{
+			{UserID: "user-1"},
+			{UserID: "user-2"},
+		}
+
+		result, diags := resource.mapMembersToSet(ctx, apiMembers)
+		assert.False(t, diags.HasError())
+		assert.Len(t, result.Elements(), 2)
+	})
+}
+
+func TestMapSetMembersToAPI(t *testing.T) {
+	resource := &roleResource{}
+	ctx := context.Background()
+
+	t.Run("should map empty members set", func(t *testing.T) {
+		result, diags := resource.mapSetMembersToAPI(ctx, buildMembersSet(t))
+		assert.False(t, diags.HasError())
 		assert.Empty(t, result)
 	})
 
 	t.Run("should map members with all fields", func(t *testing.T) {
+		membersSet := buildMembersSet(t, "user-1")
 
-		apiMembers := []api.APIMember{
-			{
-				UserID: "user-1",
-			},
-		}
-
-		result := resource.mapMembersToModel(apiMembers, []RoleMemberModel{})
-
+		result, diags := resource.mapSetMembersToAPI(ctx, membersSet)
+		assert.False(t, diags.HasError())
 		assert.Len(t, result, 1)
-		assert.Equal(t, "user-1", result[0].UserID.ValueString())
+		assert.Equal(t, "user-1", result[0].UserID)
+		assert.Nil(t, result[0].Email)
+		assert.Nil(t, result[0].Name)
 	})
 
-	t.Run("should preserve existing member data when API returns nil", func(t *testing.T) {
-		existingMembers := []RoleMemberModel{
-			{
-				UserID: types.StringValue("user-1"),
-			},
-		}
-
-		apiMembers := []api.APIMember{
-			{
-				UserID: "user-1",
-				Email:  nil,
-			},
-		}
-
-		result := resource.mapMembersToModel(apiMembers, existingMembers)
-
-		assert.Len(t, result, 1)
-	})
-
-	t.Run("should handle empty strings from API", func(t *testing.T) {
-
-		existingMembers := []RoleMemberModel{
-			{
-				UserID: types.StringValue("user-1"),
-			},
-		}
-
-		apiMembers := []api.APIMember{
-			{
-				UserID: "user-1",
-			},
-		}
-
-		result := resource.mapMembersToModel(apiMembers, existingMembers)
-
-		assert.Len(t, result, 1)
-		// Should preserve existing values when API returns empty strings
-	})
-
-	t.Run("should use API values when present and non-empty", func(t *testing.T) {
-
-		existingMembers := []RoleMemberModel{
-			{
-				UserID: types.StringValue("user-1"),
-			},
-		}
-
-		apiMembers := []api.APIMember{
-			{
-				UserID: "user-1",
-			},
-		}
-
-		result := resource.mapMembersToModel(apiMembers, existingMembers)
-
-		assert.Len(t, result, 1)
-	})
-
-	t.Run("should handle multiple members", func(t *testing.T) {
-
-		apiMembers := []api.APIMember{
-			{
-				UserID: "user-1",
-			},
-			{
-				UserID: "user-2",
-			},
-		}
-
-		result := resource.mapMembersToModel(apiMembers, []RoleMemberModel{})
-
-		assert.Len(t, result, 2)
-		assert.Equal(t, "user-1", result[0].UserID.ValueString())
-		assert.Equal(t, "user-2", result[1].UserID.ValueString())
-	})
-}
-
-func TestMapModelMembersToAPI(t *testing.T) {
-	resource := &roleResource{}
-
-	t.Run("should map empty members list", func(t *testing.T) {
-		result := resource.mapModelMembersToAPI([]RoleMemberModel{})
+	t.Run("should handle null members set", func(t *testing.T) {
+		memberType := buildMemberNestedObject().Type()
+		result, diags := resource.mapSetMembersToAPI(ctx, types.SetNull(memberType))
+		assert.False(t, diags.HasError())
 		assert.Empty(t, result)
 	})
 
-	t.Run("should map members with all fields", func(t *testing.T) {
-		modelMembers := []RoleMemberModel{
-			{
-				UserID: types.StringValue("user-1"),
-			},
-		}
+	t.Run("should map multiple members", func(t *testing.T) {
+		membersSet := buildMembersSet(t, "user-1", "user-2", "user-3")
 
-		result := resource.mapModelMembersToAPI(modelMembers)
-
-		assert.Len(t, result, 1)
-		assert.Equal(t, "user-1", result[0].UserID)
-		assert.Nil(t, result[0].Email)
-		assert.Nil(t, result[0].Name)
-	})
-
-	t.Run("should handle null email and name", func(t *testing.T) {
-		modelMembers := []RoleMemberModel{
-			{
-				UserID: types.StringValue("user-1"),
-			},
-		}
-
-		result := resource.mapModelMembersToAPI(modelMembers)
-
-		assert.Len(t, result, 1)
-		assert.Equal(t, "user-1", result[0].UserID)
-		assert.Nil(t, result[0].Email)
-		assert.Nil(t, result[0].Name)
-	})
-
-	t.Run("should handle unknown email and name", func(t *testing.T) {
-		modelMembers := []RoleMemberModel{
-			{
-				UserID: types.StringValue("user-1"),
-			},
-		}
-
-		result := resource.mapModelMembersToAPI(modelMembers)
-
-		assert.Len(t, result, 1)
-		assert.Equal(t, "user-1", result[0].UserID)
-		assert.Nil(t, result[0].Email)
-		assert.Nil(t, result[0].Name)
-	})
-
-	t.Run("should handle mixed null and non-null fields", func(t *testing.T) {
-		modelMembers := []RoleMemberModel{
-			{
-				UserID: types.StringValue("user-1"),
-			},
-			{
-				UserID: types.StringValue("user-2"),
-			},
-		}
-
-		result := resource.mapModelMembersToAPI(modelMembers)
-
-		assert.Len(t, result, 2)
-		assert.Equal(t, "user-1", result[0].UserID)
-		assert.Equal(t, "user-2", result[1].UserID)
-		assert.Nil(t, result[0].Email)
-		assert.Nil(t, result[0].Name)
-		assert.Nil(t, result[1].Email)
-		assert.Nil(t, result[1].Name)
-	})
-
-	t.Run("should handle multiple members", func(t *testing.T) {
-		modelMembers := []RoleMemberModel{
-			{
-				UserID: types.StringValue("user-1"),
-			},
-			{
-				UserID: types.StringValue("user-2"),
-			},
-			{
-				UserID: types.StringValue("user-3"),
-			},
-		}
-
-		result := resource.mapModelMembersToAPI(modelMembers)
-
+		result, diags := resource.mapSetMembersToAPI(ctx, membersSet)
+		assert.False(t, diags.HasError())
 		assert.Len(t, result, 3)
-		assert.Equal(t, "user-1", result[0].UserID)
-		assert.Equal(t, "user-2", result[1].UserID)
-		assert.Equal(t, "user-3", result[2].UserID)
+		// Collect user IDs for assertion (set order is not guaranteed)
+		userIDs := make([]string, len(result))
+		for i, m := range result {
+			userIDs[i] = m.UserID
+		}
+		assert.Contains(t, userIDs, "user-1")
+		assert.Contains(t, userIDs, "user-2")
+		assert.Contains(t, userIDs, "user-3")
 	})
 }
 
@@ -882,59 +758,6 @@ func TestExtractRoleID(t *testing.T) {
 	})
 }
 
-func TestBuildRoleModelFromAPIResponse(t *testing.T) {
-	resource := &roleResource{}
-
-	t.Run("should build model with all fields", func(t *testing.T) {
-
-		apiRole := &api.Role{
-			ID:   "role-123",
-			Name: "Test Role",
-			Members: []api.APIMember{
-				{
-					UserID: "user-1",
-				},
-			},
-			Permissions: []string{
-				string(api.PermissionCanConfigureApplications),
-			},
-		}
-
-		result := resource.buildRoleModelFromAPIResponse(apiRole, []RoleMemberModel{})
-
-		assert.Equal(t, "role-123", result.ID.ValueString())
-		assert.Len(t, result.Members, 1)
-		assert.Len(t, result.Permissions, 1)
-	})
-
-	t.Run("should preserve existing member data", func(t *testing.T) {
-		existingMembers := []RoleMemberModel{
-			{
-				UserID: types.StringValue("user-1"),
-			},
-		}
-
-		apiRole := &api.Role{
-			ID:   "role-123",
-			Name: "Test Role",
-			Members: []api.APIMember{
-				{
-					UserID: "user-1",
-					Email:  nil,
-				},
-			},
-			Permissions: []string{
-				string(api.PermissionCanConfigureApplications),
-			},
-		}
-
-		result := resource.buildRoleModelFromAPIResponse(apiRole, existingMembers)
-
-		assert.NotNil(t, result)
-		assert.Equal(t, "role-123", result.ID.ValueString())
-	})
-}
-
 func TestExtractModelFromPlanOrState(t *testing.T) {
 	resource := &roleResource{
 		metaData: resourcehandle.ResourceMetaData{
@@ -947,13 +770,9 @@ func TestExtractModelFromPlanOrState(t *testing.T) {
 
 	t.Run("should extract from plan when provided", func(t *testing.T) {
 		model := RoleModel{
-			ID:   types.StringValue("role-id"),
-			Name: types.StringValue("Test Role"),
-			Members: []RoleMemberModel{
-				{
-					UserID: types.StringValue("user-1"),
-				},
-			},
+			ID:          types.StringValue("role-id"),
+			Name:        types.StringValue("Test Role"),
+			Members:     buildMembersSet(t, "user-1"),
 			Permissions: []string{string(api.PermissionCanConfigureApplications)},
 		}
 
@@ -971,13 +790,9 @@ func TestExtractModelFromPlanOrState(t *testing.T) {
 
 	t.Run("should extract from state when plan is nil", func(t *testing.T) {
 		model := RoleModel{
-			ID:   types.StringValue("state-role-id"),
-			Name: types.StringValue("State Role"),
-			Members: []RoleMemberModel{
-				{
-					UserID: types.StringValue("user-2"),
-				},
-			},
+			ID:          types.StringValue("state-role-id"),
+			Name:        types.StringValue("State Role"),
+			Members:     buildMembersSet(t, "user-2"),
 			Permissions: []string{string(api.PermissionCanConfigureUsers)},
 		}
 
@@ -1003,10 +818,11 @@ func TestExtractModelFromPlanOrState(t *testing.T) {
 
 // initializeEmptyRoleState initializes the state with an empty model to ensure proper state initialization
 func initializeEmptyRoleState(t *testing.T, ctx context.Context, state *tfsdk.State) {
+	memberType := buildMemberNestedObject().Type()
 	emptyModel := RoleModel{
 		ID:          types.StringNull(),
 		Name:        types.StringNull(),
-		Members:     []RoleMemberModel{},
+		Members:     types.SetValueMust(memberType, []attr.Value{}),
 		Permissions: []string{},
 	}
 	diags := state.Set(ctx, emptyModel)

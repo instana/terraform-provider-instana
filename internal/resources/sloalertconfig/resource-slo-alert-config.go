@@ -390,14 +390,10 @@ func (r *sloAlertConfigResource) mapThresholdToState(threshold *api.SloAlertThre
 		thresholdType = ThresholdTypeStaticThreshold
 	}
 
-	// Round to 2 decimal places to avoid floating-point precision issues
-	formatted := strconv.FormatFloat(threshold.Value, 'f', 2, 64)
-	parsed, _ := strconv.ParseFloat(formatted, 64)
-
 	return &SloAlertThresholdModel{
 		Type:     types.StringValue(thresholdType),
 		Operator: types.StringValue(threshold.Operator),
-		Value:    types.Float64Value(parsed),
+		Value:    types.Float64Value(threshold.Value),
 	}
 }
 
@@ -449,7 +445,7 @@ func (r *sloAlertConfigResource) mapBurnRateConfigsToState(burnRateConfigs *[]ap
 			Duration:          types.StringValue(fmt.Sprintf("%d", cfg.Duration)),
 			DurationUnitType:  types.StringValue(cfg.DurationUnitType),
 			ThresholdOperator: types.StringValue(cfg.Threshold.Operator),
-			ThresholdValue:    types.StringValue(fmt.Sprintf("%.2f", cfg.Threshold.Value)),
+			ThresholdValue:    types.StringValue(strconv.FormatFloat(cfg.Threshold.Value, 'f', -1, 64)),
 		})
 	}
 

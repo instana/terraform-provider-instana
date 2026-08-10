@@ -20,6 +20,7 @@ import (
 
 	"github.com/instana/instana-go-client/config"
 	"github.com/instana/terraform-provider-instana/internal/datasources"
+	"github.com/instana/terraform-provider-instana/internal/util"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/resources/alertingchannel"
 	"github.com/instana/terraform-provider-instana/internal/resources/alertingconfig"
@@ -74,6 +75,9 @@ const SchemaFieldEndpoint = "endpoint"
 
 // SchemaFieldTlsSkipVerify flag to deactivate skip tls verification
 const SchemaFieldTlsSkipVerify = "tls_skip_verify"
+
+// CorrelationIDHeader is the HTTP header name for correlation ID
+const CorrelationIDHeader = "X-Correlation-ID"
 
 // InstanaProviderModel describes the provider data model
 type InstanaProviderModel struct {
@@ -180,6 +184,10 @@ func (p *InstanaProvider) Configure(ctx context.Context, req provider.ConfigureR
 	clientConfig.BaseURL = "https://" + endpoint
 	clientConfig.UserAgent = userAgent
 	clientConfig.Logger = newTerraformLogger(ctx)
+	if clientConfig.Headers.Custom == nil {
+		clientConfig.Headers.Custom = make(map[string]string)
+	}
+	clientConfig.Headers.Custom[CorrelationIDHeader] = util.GenerateCorrelationID()
 
 	// Handle TLS skip verify by creating a custom HTTP client with appropriate transport
 	if !providerConfig.TLSSkipVerify.IsNull() && providerConfig.TLSSkipVerify.ValueBool() {
