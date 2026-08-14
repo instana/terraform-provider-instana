@@ -41,12 +41,3 @@ const (
 	SessionSettingsDefaultIdleTimeInMillis = 28800000
 )
 
-// Error message constants
-const (
-	// SessionSettingsErrRetrievingPlan error message for plan retrieval failures
-	SessionSettingsErrRetrievingPlan = "Error retrieving plan data"
-	// SessionSettingsErrRetrievingState error message for state retrieval failures
-	SessionSettingsErrRetrievingState = "Error retrieving state data"
-	// SessionSettingsErrUpdatingState error message for state update failures
-	SessionSettingsErrUpdatingState = "Error updating state"
-)

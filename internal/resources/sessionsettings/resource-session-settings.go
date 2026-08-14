@@ -89,6 +89,15 @@ func (h *sessionSettingsResourceHandle) MapStateToDataObject(ctx context.Context
 		return nil, diags
 	}
 
+	if model.IdleTimeInMillis.ValueInt64() > model.TokenLifeTimeInMillis.ValueInt64() {
+		diags.AddError(
+			"Invalid session settings",
+			"idle_time_in_millis must not be greater than token_life_time_in_millis: "+
+				"the user session timeout cannot be smaller than the idle timeout.",
+		)
+		return nil, diags
+	}
+
 	return &restapi.SessionSettings{
 		TokenLifeTimeInMillis: model.TokenLifeTimeInMillis.ValueInt64(),
 		IdleTimeInMillis:      model.IdleTimeInMillis.ValueInt64(),
@@ -103,7 +112,7 @@ func (h *sessionSettingsResourceHandle) UpdateState(ctx context.Context, state *
 	})
 }
 
-// GetStateUpgraders returns state upgraders — none needed for this resource.
+// GetStateUpgraders returns nil — no state schema migrations are needed for this resource.
 func (h *sessionSettingsResourceHandle) GetStateUpgraders(_ context.Context) map[int64]resource.StateUpgrader {
-	return map[int64]resource.StateUpgrader{}
+	return nil
 }

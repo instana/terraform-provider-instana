@@ -114,6 +114,45 @@ func TestSessionSettingsMapStateToDataObject_FromState(t *testing.T) {
 	assert.Equal(t, int64(28800000), settings.IdleTimeInMillis)
 }
 
+func TestSessionSettingsMapStateToDataObject_IdleGreaterThanToken_ReturnsError(t *testing.T) {
+	ctx := context.Background()
+	sch := handleSchema()
+
+	plan := &tfsdk.Plan{Schema: sch}
+	require.False(t, plan.Set(ctx, &SessionSettingsModel{
+		TokenLifeTimeInMillis: types.Int64Value(3600000),  // 1 hour
+		IdleTimeInMillis:      types.Int64Value(28800000), // 8 hours — larger than token lifetime
+	}).HasError())
+
+	handle := &sessionSettingsResourceHandle{}
+	settings, diags := handle.MapStateToDataObject(ctx, plan, nil)
+
+	assert.True(t, diags.HasError())
+	assert.Nil(t, settings)
+	assert.Contains(t, diags[0].Detail(), "idle_time_in_millis must not be greater than token_life_time_in_millis")
+}
+
+func TestSessionSettingsMapStateToDataObject_IdleEqualToToken_IsValid(t *testing.T) {
+	ctx := context.Background()
+	sch := handleSchema()
+
+	plan := &tfsdk.Plan{Schema: sch}
+	require.False(t, plan.Set(ctx, &SessionSettingsModel{
+		TokenLifeTimeInMillis: types.Int64Value(3600000),
+		IdleTimeInMillis:      types.Int64Value(3600000), // equal — must be allowed
+	}).HasError())
+
+	handle := &sessionSettingsResourceHandle{}
+	settings, diags := handle.MapStateToDataObject(ctx, plan, nil)
+
+	assert.False(t, diags.HasError())
+	require.NotNil(t, settings)
+	assert.Equal(t, int64(3600000), settings.TokenLifeTimeInMillis)
+	assert.Equal(t, int64(3600000), settings.IdleTimeInMillis)
+}
+
+
+
 // ---- UpdateState ----
 
 func TestSessionSettingsUpdateState(t *testing.T) {
@@ -141,9 +180,9 @@ func TestSessionSettingsUpdateState(t *testing.T) {
 
 func TestSessionSettingsGetStateUpgraders(t *testing.T) {
 	handle := &sessionSettingsResourceHandle{}
+	// Returns nil — no state schema migrations are needed for this resource.
 	upgraders := handle.GetStateUpgraders(context.Background())
-	assert.NotNil(t, upgraders)
-	assert.Empty(t, upgraders)
+	assert.Nil(t, upgraders)
 }
 
 // ---- GetSingletonRestResource (via mock) ----
