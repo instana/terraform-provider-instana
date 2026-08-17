@@ -11,7 +11,7 @@ require (
 	github.com/hashicorp/terraform-plugin-framework-validators v0.18.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.36.1
-	github.com/instana/instana-go-client v1.1.4
+	github.com/instana/instana-go-client v1.2.0
 	github.com/rs/xid v1.5.0
 	github.com/stretchr/testify v1.11.1
 )
@@ -61,5 +61,3 @@ require (
 	gopkg.in/resty.v1 v1.12.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/instana/instana-go-client => /Users/georgekuttyjoseph/Documents/Instana/Projects/sourceCode/instana-go-client
