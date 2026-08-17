@@ -1,3 +1,15 @@
+## [v7.5.0](https://github.com/instana/terraform-provider-instana/tree/v7.5.0) (2026-08-17)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.4.2...v7.5.0)
+
+**Implemented enhancements:**
+
+- Added new `instana_session_settings` resource to manage session settings in Instana, supporting configuration of session timeout and inactivity timeout durations
+
+**Merged pull requests:**
+
+- add instana_session_settings resource [\#112](https://github.com/instana/terraform-provider-instana/pull/112) ([georgekutty-1](https://github.com/georgekutty-1))
+
 ## [v7.4.2](https://github.com/instana/terraform-provider-instana/tree/v7.4.2) (2026-08-06)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.4.1...v7.4.2)

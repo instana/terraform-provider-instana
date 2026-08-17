@@ -410,3 +410,190 @@ func (r *terraformResourceImpl[T]) UpgradeState(ctx context.Context) map[int64]r
 	return r.resourceHandle.GetStateUpgraders(ctx)
 }
 
+// ---------------------------------------------------------------------------
+// Singleton resource — no ID, no list; uses Get / Upsert / Delete
+// ---------------------------------------------------------------------------
+
+// NewTerraformSingletonResource creates a Terraform resource backed by a SingletonResourceHandle.
+// Singletons have no ID field and map Create/Update both to Upsert; Read calls Get; Delete
+// calls Delete on the singleton endpoint.
+func NewTerraformSingletonResource[T any](handle resourcehandle.SingletonResourceHandle[T]) TerraformResource {
+	return &terraformSingletonResourceImpl[T]{
+		resourceHandle: handle,
+	}
+}
+
+type terraformSingletonResourceImpl[T any] struct {
+	resourceHandle resourcehandle.SingletonResourceHandle[T]
+	providerMeta   *shared.ProviderMeta
+}
+
+// Metadata returns the resource type name.
+func (r *terraformSingletonResourceImpl[T]) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_" + r.resourceHandle.MetaData().ResourceName
+}
+
+// Schema defines the schema for the resource.
+func (r *terraformSingletonResourceImpl[T]) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = r.resourceHandle.MetaData().Schema
+	resp.Schema.Version = r.resourceHandle.MetaData().SchemaVersion
+	resp.Schema.DeprecationMessage = r.resourceHandle.MetaData().DeprecationMessage
+}
+
+// Configure stores the provider meta.
+func (r *terraformSingletonResourceImpl[T]) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	if req.ProviderData == nil {
+		return
+	}
+	providerMeta, ok := req.ProviderData.(*shared.ProviderMeta)
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Resource Configure Type",
+			fmt.Sprintf("Expected *shared.ProviderMeta, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+		return
+	}
+	r.providerMeta = providerMeta
+}
+
+// Create upserts the singleton resource.
+func (r *terraformSingletonResourceImpl[T]) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	correlationID := util.GenerateCorrelationID()
+	tflog.Debug(ctx, "Creating singleton resource", map[string]interface{}{"correlation_id": correlationID})
+
+	if r.providerMeta == nil || r.providerMeta.InstanaAPI == nil {
+		resp.Diagnostics.AddError("Provider not configured", providerNotConfiguredDetail)
+		return
+	}
+
+	diags := r.resourceHandle.SetComputedFields(ctx, &req.Plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	obj, diags := r.resourceHandle.MapStateToDataObject(ctx, &req.Plan, nil)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	upserted, err := r.resourceHandle.GetSingletonRestResource(r.providerMeta.InstanaAPI).Upsert(obj)
+	if err != nil {
+		resp.Diagnostics.AddError("Error creating singleton resource", fmt.Sprintf("Could not create resource: %s", err))
+		return
+	}
+
+	resp.Diagnostics.Append(r.resourceHandle.UpdateState(ctx, &resp.State, &req.Plan, upserted)...)
+	tflog.Debug(ctx, "Successfully created singleton resource", map[string]interface{}{"correlation_id": correlationID})
+}
+
+// Read reads the singleton resource.
+func (r *terraformSingletonResourceImpl[T]) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	correlationID := util.GenerateCorrelationID()
+	tflog.Debug(ctx, "Reading singleton resource", map[string]interface{}{"correlation_id": correlationID})
+
+	if r.providerMeta == nil || r.providerMeta.InstanaAPI == nil {
+		resp.Diagnostics.AddError("Provider not configured", providerNotConfiguredDetail)
+		return
+	}
+
+	obj, err := r.resourceHandle.GetSingletonRestResource(r.providerMeta.InstanaAPI).Get()
+	if err != nil {
+		if errors.Is(err, client.ErrEntityNotFound) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+		resp.Diagnostics.AddError("Error reading singleton resource", fmt.Sprintf("Could not read resource: %s", err))
+		return
+	}
+
+	resp.Diagnostics.Append(r.resourceHandle.UpdateState(ctx, &resp.State, nil, obj)...)
+	tflog.Debug(ctx, "Successfully read singleton resource", map[string]interface{}{"correlation_id": correlationID})
+}
+
+// Update upserts the singleton resource with the new plan values.
+func (r *terraformSingletonResourceImpl[T]) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	correlationID := util.GenerateCorrelationID()
+	tflog.Debug(ctx, "Updating singleton resource", map[string]interface{}{"correlation_id": correlationID})
+
+	if r.providerMeta == nil || r.providerMeta.InstanaAPI == nil {
+		resp.Diagnostics.AddError("Provider not configured", providerNotConfiguredDetail)
+		return
+	}
+
+	obj, diags := r.resourceHandle.MapStateToDataObject(ctx, &req.Plan, &req.State)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	upserted, err := r.resourceHandle.GetSingletonRestResource(r.providerMeta.InstanaAPI).Upsert(obj)
+	if err != nil {
+		resp.Diagnostics.AddError("Error updating singleton resource", fmt.Sprintf("Could not update resource: %s", err))
+		return
+	}
+
+	resp.Diagnostics.Append(r.resourceHandle.UpdateState(ctx, &resp.State, &req.Plan, upserted)...)
+	tflog.Debug(ctx, "Successfully updated singleton resource", map[string]interface{}{"correlation_id": correlationID})
+}
+
+// Delete deletes the singleton resource (reverts to defaults).
+func (r *terraformSingletonResourceImpl[T]) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	correlationID := util.GenerateCorrelationID()
+	tflog.Debug(ctx, "Deleting singleton resource", map[string]interface{}{"correlation_id": correlationID})
+
+	if r.providerMeta == nil || r.providerMeta.InstanaAPI == nil {
+		resp.Diagnostics.AddError("Provider not configured", providerNotConfiguredDetail)
+		return
+	}
+
+	if err := r.resourceHandle.GetSingletonRestResource(r.providerMeta.InstanaAPI).Delete(); err != nil {
+		resp.Diagnostics.AddError("Error deleting singleton resource", fmt.Sprintf("Could not delete resource: %s", err))
+		return
+	}
+
+	tflog.Debug(ctx, "Successfully deleted singleton resource", map[string]interface{}{"correlation_id": correlationID})
+}
+
+// ImportState imports the singleton resource by reading its current value from the API.
+// Because singletons have no real ID, pass any non-empty placeholder string as the
+// import ID (e.g. "session_settings"). The value is ignored — the current settings are
+// fetched directly from the API and written into state.
+//
+// Import block example:
+//
+//	import {
+//	  to = instana_session_settings.main
+//	  id = "session_settings"
+//	}
+func (r *terraformSingletonResourceImpl[T]) ImportState(ctx context.Context, _ resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	correlationID := util.GenerateCorrelationID()
+	tflog.Info(ctx, "Importing singleton resource", map[string]interface{}{"correlation_id": correlationID})
+
+	if r.providerMeta == nil || r.providerMeta.InstanaAPI == nil {
+		resp.Diagnostics.AddError("Provider not configured", providerNotConfiguredDetail)
+		return
+	}
+
+	obj, err := r.resourceHandle.GetSingletonRestResource(r.providerMeta.InstanaAPI).Get()
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error importing singleton resource",
+			fmt.Sprintf("Could not read resource from API during import: %s", err),
+		)
+		return
+	}
+
+	resp.Diagnostics.Append(r.resourceHandle.UpdateState(ctx, &resp.State, nil, obj)...)
+	tflog.Info(ctx, "Successfully imported singleton resource", map[string]interface{}{"correlation_id": correlationID})
+}
+
+// UpgradeState handles state upgrades for singleton resources.
+func (r *terraformSingletonResourceImpl[T]) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return r.resourceHandle.GetStateUpgraders(ctx)
+}
+
+const providerNotConfiguredDetail = "The provider hasn't been configured before apply, " +
+	"likely because it depends on an unknown value from another resource."
+
