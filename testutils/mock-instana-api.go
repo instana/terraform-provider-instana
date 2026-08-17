@@ -169,3 +169,8 @@ func (m *MockInstanaAPI) MaintenanceWindowConfigs() rest.RestResource[*api.Maint
 func (m *MockInstanaAPI) GroupMappings() rest.RestResource[*api.GroupMapping] {
 	return nil
 }
+
+// SessionSettings mock implementation
+func (m *MockInstanaAPI) SessionSettings() rest.SingletonRestResource[*api.SessionSettings] {
+	return nil
+}

@@ -45,6 +45,7 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/resources/sloconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/slocorrectionconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/syntheticalertconfig"
+	"github.com/instana/terraform-provider-instana/internal/resources/sessionsettings"
 	"github.com/instana/terraform-provider-instana/internal/resources/synthetictest"
 	"github.com/instana/terraform-provider-instana/internal/resources/team"
 	"github.com/instana/terraform-provider-instana/internal/resources/websitealertconfig"
@@ -382,12 +383,20 @@ func (p *InstanaProvider) Resources(_ context.Context) []func() resource.Resourc
 		addResouceHandle(websitealertconfig.NewWebsiteAlertConfigResourceHandle),
 		addResouceHandle(websitemonitoringconfig.NewWebsiteMonitoringConfigResourceHandle),
 		addResouceHandle(sloconfig.NewSloConfigResourceHandle),
+		addSingletonResourceHandle(sessionsettings.NewSessionSettingsResourceHandle),
 	}
 }
 
-// Helper function to wrap resource handles
+// addResouceHandle wraps a ResourceHandle constructor for use in the Resources list.
 func addResouceHandle[T client.InstanaDataObject](handleFunc func() resourcehandle.ResourceHandle[T]) func() resource.Resource {
 	return func() resource.Resource {
 		return NewTerraformResource(handleFunc())
+	}
+}
+
+// addSingletonResourceHandle wraps a SingletonResourceHandle constructor for use in the Resources list.
+func addSingletonResourceHandle[T any](handleFunc func() resourcehandle.SingletonResourceHandle[T]) func() resource.Resource {
+	return func() resource.Resource {
+		return NewTerraformSingletonResource(handleFunc())
 	}
 }
