@@ -120,6 +120,11 @@ func (m *MockInstanaAPI) SyntheticLocations() rest.ReadOnlyRestResource[*api.Syn
 	return nil
 }
 
+// SyntheticCredentials mock implementation
+func (m *MockInstanaAPI) SyntheticCredentials() rest.RestResource[*api.SyntheticCredential] {
+	return nil
+}
+
 // SyntheticAlertConfigs mock implementation
 func (m *MockInstanaAPI) SyntheticAlertConfigs() rest.RestResource[*api.SyntheticAlertConfig] {
 	return nil
