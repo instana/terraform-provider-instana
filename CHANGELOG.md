@@ -1,3 +1,18 @@
+## [v7.6.0](https://github.com/instana/terraform-provider-instana/tree/v7.6.0) (2026-08-18)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.5.0...v7.6.0)
+
+**Implemented enhancements:**
+
+- Added new `instana_synthetic_credential` resource to manage synthetic credentials in Instana, including `credential_name`, write-only sensitive `credential_value`, optional application/mobile/website scoping, and RBAC tag associations
+- Added resource support for write-only synthetic credential secrets by preserving `credential_value` in state and allowing import by `credential_name`
+- Bumped `instana-go-client` dependency from `v1.2.0` to `v1.3.0` to support synthetic credential APIs
+- Added resource documentation for `instana_synthetic_credential` with usage examples and Terraform import instructions
+
+**Merged pull requests:**
+
+- added new resource : synthetic credentials [\#113](https://github.com/instana/terraform-provider-instana/pull/113) ([BlessyElza](https://github.com/BlessyElza))
+
 ## [v7.5.0](https://github.com/instana/terraform-provider-instana/tree/v7.5.0) (2026-08-17)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.4.2...v7.5.0)
