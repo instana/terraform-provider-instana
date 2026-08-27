@@ -43,6 +43,7 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/resources/sliconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/sloalertconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/sloconfig"
+	"github.com/instana/terraform-provider-instana/internal/resources/release"
 	"github.com/instana/terraform-provider-instana/internal/resources/slocorrectionconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/syntheticalertconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/syntheticcredential"
@@ -385,6 +386,7 @@ func (p *InstanaProvider) Resources(_ context.Context) []func() resource.Resourc
 		addResouceHandle(websitealertconfig.NewWebsiteAlertConfigResourceHandle),
 		addResouceHandle(websitemonitoringconfig.NewWebsiteMonitoringConfigResourceHandle),
 		addResouceHandle(sloconfig.NewSloConfigResourceHandle),
+		addResouceHandle(release.NewReleaseResourceHandle),
 		addSingletonResourceHandle(sessionsettings.NewSessionSettingsResourceHandle),
 	}
 }
