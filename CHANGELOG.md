@@ -1,3 +1,17 @@
+## [v7.7.0](https://github.com/instana/terraform-provider-instana/tree/v7.7.0) (2026-09-01)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.6.0...v7.7.0)
+
+**Implemented enhancements:**
+
+- Introduces a new `instana_release` resource for managing Instana Release Markers. Release Markers allow you to annotate your Instana monitoring timeline with deployment or release events, making it easier to correlate application behaviour changes with specific releases
+- Bumped `instana-go-client` dependency from `v1.3.0` to `v1.4.0` to support Release Marker APIs
+- Added resource documentation for `instana_release` with usage examples and Terraform import instructions
+
+**Merged pull requests:**
+
+- Add `instana_release` Terraform resource for managing Release Markers [\#115](https://github.com/instana/terraform-provider-instana/pull/115) ([georgekutty-1](https://github.com/georgekutty-1))
+
 ## [v7.6.0](https://github.com/instana/terraform-provider-instana/tree/v7.6.0) (2026-08-18)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.5.0...v7.6.0)
