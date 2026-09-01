@@ -13,15 +13,92 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// emptyApplicationsList returns an empty types.List with the correct element type.
-func emptyApplicationsList() types.List {
-	return types.ListValueMust(types.ObjectType{AttrTypes: applicationAttrTypes}, []attr.Value{})
+// ─── helpers ─────────────────────────────────────────────────────────────────
+
+func emptyReleaseModel() ReleaseModel {
+	appElemType := types.ObjectType{AttrTypes: applicationAttrTypes}
+	svcElemType := types.ObjectType{AttrTypes: serviceAttrTypes}
+	return ReleaseModel{
+		ID:           types.StringValue(""),
+		Name:         types.StringValue(""),
+		Start:        types.Int64Value(0),
+		LastUpdated:  types.Int64Value(0),
+		Applications: types.ListValueMust(appElemType, []attr.Value{}),
+		Services:     types.ListValueMust(svcElemType, []attr.Value{}),
+	}
 }
 
-// emptyServicesList returns an empty types.List with the correct element type.
-func emptyServicesList() types.List {
-	return types.ListValueMust(types.ObjectType{AttrTypes: serviceAttrTypes}, []attr.Value{})
+func setState(t *testing.T, state *tfsdk.State, model ReleaseModel) {
+	t.Helper()
+	require.False(t, state.Set(context.Background(), model).HasError())
 }
+
+func setPlan(t *testing.T, plan *tfsdk.Plan, model ReleaseModel) {
+	t.Helper()
+	require.False(t, plan.Set(context.Background(), model).HasError())
+}
+
+func getModel(t *testing.T, state *tfsdk.State) ReleaseModel {
+	t.Helper()
+	var m ReleaseModel
+	require.False(t, state.Get(context.Background(), &m).HasError())
+	return m
+}
+
+// buildScopedToValue creates a types.Object for scoped_to from a list of app names.
+func buildScopedToValue(t *testing.T, appNames []string) attr.Value {
+	t.Helper()
+	appElemType := types.ObjectType{AttrTypes: applicationAttrTypes}
+	appElems := make([]attr.Value, len(appNames))
+	for i, n := range appNames {
+		obj, diags := types.ObjectValue(applicationAttrTypes, map[string]attr.Value{
+			ReleaseFieldName: types.StringValue(n),
+		})
+		require.False(t, diags.HasError())
+		appElems[i] = obj
+	}
+	appsList, diags := types.ListValue(appElemType, appElems)
+	require.False(t, diags.HasError())
+	scopedTo, diags := types.ObjectValue(scopedToAttrTypes, map[string]attr.Value{
+		ReleaseFieldApplications: appsList,
+	})
+	require.False(t, diags.HasError())
+	return scopedTo
+}
+
+// buildServiceModel creates a ReleaseModel with one service (optionally scoped).
+func buildServiceModel(t *testing.T, svcName string, scopedToAppNames []string) ReleaseModel {
+	t.Helper()
+	appElemType := types.ObjectType{AttrTypes: applicationAttrTypes}
+	svcElemType := types.ObjectType{AttrTypes: serviceAttrTypes}
+
+	var scopedToVal attr.Value
+	if len(scopedToAppNames) > 0 {
+		scopedToVal = buildScopedToValue(t, scopedToAppNames)
+	} else {
+		scopedToVal = types.ObjectNull(scopedToAttrTypes)
+	}
+
+	svcObj, diags := types.ObjectValue(serviceAttrTypes, map[string]attr.Value{
+		ReleaseFieldName:     types.StringValue(svcName),
+		ReleaseFieldScopedTo: scopedToVal,
+	})
+	require.False(t, diags.HasError())
+
+	svcList, diags := types.ListValue(svcElemType, []attr.Value{svcObj})
+	require.False(t, diags.HasError())
+
+	return ReleaseModel{
+		ID:           types.StringValue("id-1"),
+		Name:         types.StringValue("release"),
+		Start:        types.Int64Value(1742349976000),
+		LastUpdated:  types.Int64Value(0),
+		Applications: types.ListValueMust(appElemType, []attr.Value{}),
+		Services:     svcList,
+	}
+}
+
+// ─── NewReleaseResourceHandle ─────────────────────────────────────────────────
 
 func TestNewReleaseResourceHandle(t *testing.T) {
 	handle := NewReleaseResourceHandle()
@@ -36,137 +113,137 @@ func TestNewReleaseResourceHandle(t *testing.T) {
 
 func TestReleaseMetaData(t *testing.T) {
 	r := &releaseResource{
-		metaData: resourcehandle.ResourceMetaData{
-			ResourceName:  "test_release",
-			SchemaVersion: 0,
-		},
+		metaData: resourcehandle.ResourceMetaData{ResourceName: "test_release"},
 	}
-	meta := r.MetaData()
-	assert.Equal(t, "test_release", meta.ResourceName)
+	assert.Equal(t, "test_release", r.MetaData().ResourceName)
 }
 
 func TestReleaseSetComputedFields(t *testing.T) {
 	r := NewReleaseResourceHandle()
-	ctx := context.Background()
 	plan := &tfsdk.Plan{Schema: r.MetaData().Schema}
-	diags := r.SetComputedFields(ctx, plan)
+	diags := r.SetComputedFields(context.Background(), plan)
 	assert.False(t, diags.HasError())
 }
 
 func TestReleaseGetStateUpgraders(t *testing.T) {
-	r := NewReleaseResourceHandle()
-	upgraders := r.GetStateUpgraders(context.Background())
-	assert.Nil(t, upgraders)
+	assert.Nil(t, NewReleaseResourceHandle().GetStateUpgraders(context.Background()))
 }
 
-func TestReleaseUpdateState_BasicRelease(t *testing.T) {
+// ─── UpdateState ─────────────────────────────────────────────────────────────
+
+func TestUpdateState_BasicRelease(t *testing.T) {
 	ctx := context.Background()
 	r := NewReleaseResourceHandle()
 
 	release := &api.ReleaseWithMetadata{
-		ID:          "Tiu16hLCTniHDtHb_uDV1w",
-		Name:        "demo-app/main-**",
-		Start:       1709091782000,
-		LastUpdated: 1709091782533,
+		ID: "Tiu16hLCTniHDtHb_uDV1w", Name: "demo-app/main-**",
+		Start: 1709091782000, LastUpdated: 1709091782533,
 	}
 
 	state := &tfsdk.State{Schema: r.MetaData().Schema}
-	initialModel := ReleaseModel{
-		ID:           types.StringValue(""),
-		Name:         types.StringValue(""),
-		Start:        types.Int64Value(0),
-		LastUpdated:  types.Int64Value(0),
-		Applications: emptyApplicationsList(),
-		Services:     emptyServicesList(),
-	}
-	require.False(t, state.Set(ctx, initialModel).HasError())
+	setState(t, state, emptyReleaseModel())
 
-	diags := r.UpdateState(ctx, state, nil, release)
-	require.False(t, diags.HasError())
+	require.False(t, r.UpdateState(ctx, state, nil, release).HasError())
 
-	var model ReleaseModel
-	require.False(t, state.Get(ctx, &model).HasError())
-
-	assert.Equal(t, "Tiu16hLCTniHDtHb_uDV1w", model.ID.ValueString())
-	assert.Equal(t, "demo-app/main-**", model.Name.ValueString())
-	assert.Equal(t, int64(1709091782000), model.Start.ValueInt64())
-	assert.Equal(t, int64(1709091782533), model.LastUpdated.ValueInt64())
-	assert.Empty(t, model.Applications.Elements())
-	assert.Empty(t, model.Services.Elements())
+	m := getModel(t, state)
+	assert.Equal(t, "Tiu16hLCTniHDtHb_uDV1w", m.ID.ValueString())
+	assert.Equal(t, "demo-app/main-**", m.Name.ValueString())
+	assert.Equal(t, int64(1709091782000), m.Start.ValueInt64())
+	assert.Equal(t, int64(1709091782533), m.LastUpdated.ValueInt64())
+	assert.Equal(t, 0, len(m.Applications.Elements()))
+	assert.Equal(t, 0, len(m.Services.Elements()))
 }
 
-func TestReleaseUpdateState_WithApplicationsAndServices(t *testing.T) {
+func TestUpdateState_WithApplications(t *testing.T) {
 	ctx := context.Background()
 	r := NewReleaseResourceHandle()
 
 	release := &api.ReleaseWithMetadata{
-		ID:          "XK1e1TF3T9SHKugndn_soQ",
-		Name:        "frontend/release-2000",
-		Start:       1706674621000,
-		LastUpdated: 1706674621604,
-		Applications: []*api.ReleaseApplicationScope{
-			{Name: "app1"},
-		},
+		ID: "id-1", Name: "backend/v1", Start: 1709091782000, LastUpdated: 1709091782533,
+		Applications: []*api.ReleaseApplicationScope{{Name: "app1"}, {Name: "app2"}},
+	}
+
+	state := &tfsdk.State{Schema: r.MetaData().Schema}
+	setState(t, state, emptyReleaseModel())
+
+	require.False(t, r.UpdateState(ctx, state, nil, release).HasError())
+
+	m := getModel(t, state)
+	assert.Equal(t, 2, len(m.Applications.Elements()))
+}
+
+func TestUpdateState_WithServiceNoScopedTo(t *testing.T) {
+	ctx := context.Background()
+	r := NewReleaseResourceHandle()
+
+	release := &api.ReleaseWithMetadata{
+		ID: "id-1", Name: "svc/v1", Start: 1709091782000, LastUpdated: 1709091782533,
+		Services: []*api.ReleaseServiceScope{{Name: "payment"}},
+	}
+
+	state := &tfsdk.State{Schema: r.MetaData().Schema}
+	setState(t, state, emptyReleaseModel())
+
+	require.False(t, r.UpdateState(ctx, state, nil, release).HasError())
+
+	m := getModel(t, state)
+	assert.Equal(t, 1, len(m.Services.Elements()))
+}
+
+func TestUpdateState_WithServiceAndScopedTo(t *testing.T) {
+	ctx := context.Background()
+	r := NewReleaseResourceHandle()
+
+	release := &api.ReleaseWithMetadata{
+		ID: "id-2", Name: "svc/v2", Start: 1709091782000, LastUpdated: 1709091782533,
 		Services: []*api.ReleaseServiceScope{
 			{
 				Name: "payment",
 				ScopedTo: &api.ReleaseServiceScopedTo{
-					ApplicationName: "checkout-app",
+					Applications: []*api.ReleaseApplicationScope{{Name: "checkout-app"}},
 				},
 			},
 		},
 	}
 
 	state := &tfsdk.State{Schema: r.MetaData().Schema}
-	initialModel := ReleaseModel{
-		ID:           types.StringValue(""),
-		Name:         types.StringValue(""),
-		Start:        types.Int64Value(0),
-		LastUpdated:  types.Int64Value(0),
-		Applications: emptyApplicationsList(),
-		Services:     emptyServicesList(),
-	}
-	require.False(t, state.Set(ctx, initialModel).HasError())
+	setState(t, state, emptyReleaseModel())
 
-	diags := r.UpdateState(ctx, state, nil, release)
-	require.False(t, diags.HasError())
+	require.False(t, r.UpdateState(ctx, state, nil, release).HasError())
 
-	var model ReleaseModel
-	require.False(t, state.Get(ctx, &model).HasError())
+	m := getModel(t, state)
+	assert.Equal(t, 1, len(m.Services.Elements()))
 
-	var apps []ApplicationModel
-	require.False(t, model.Applications.ElementsAs(ctx, &apps, false).HasError())
-	require.Len(t, apps, 1)
-	assert.Equal(t, "app1", apps[0].Name.ValueString())
-
+	// Inspect the service object directly
 	var svcs []ServiceModel
-	require.False(t, model.Services.ElementsAs(ctx, &svcs, false).HasError())
+	require.False(t, m.Services.ElementsAs(ctx, &svcs, false).HasError())
 	require.Len(t, svcs, 1)
 	assert.Equal(t, "payment", svcs[0].Name.ValueString())
 	require.NotNil(t, svcs[0].ScopedTo)
-	assert.Equal(t, "checkout-app", svcs[0].ScopedTo.ApplicationName.ValueString())
+
+	var scopedApps []ApplicationModel
+	require.False(t, svcs[0].ScopedTo.Applications.ElementsAs(ctx, &scopedApps, false).HasError())
+	require.Len(t, scopedApps, 1)
+	assert.Equal(t, "checkout-app", scopedApps[0].Name.ValueString())
 }
 
-func TestReleaseMapStateToDataObject_BasicRelease(t *testing.T) {
+// ─── MapStateToDataObject ─────────────────────────────────────────────────────
+
+func TestMapStateToDataObject_BasicFromPlan(t *testing.T) {
 	ctx := context.Background()
 	r := NewReleaseResourceHandle()
 
-	model := ReleaseModel{
-		ID:           types.StringValue("release-id-1"),
-		Name:         types.StringValue("frontend/release-1000"),
-		Start:        types.Int64Value(1742349976000),
-		LastUpdated:  types.Int64Value(0),
-		Applications: emptyApplicationsList(),
-		Services:     emptyServicesList(),
-	}
+	model := emptyReleaseModel()
+	model.ID = types.StringValue("release-id-1")
+	model.Name = types.StringValue("frontend/release-1000")
+	model.Start = types.Int64Value(1742349976000)
 
 	plan := &tfsdk.Plan{Schema: r.MetaData().Schema}
-	require.False(t, plan.Set(ctx, model).HasError())
+	setPlan(t, plan, model)
 
 	release, diags := r.MapStateToDataObject(ctx, plan, nil)
 	require.False(t, diags.HasError())
 	require.NotNil(t, release)
-
 	assert.Equal(t, "release-id-1", release.ID)
 	assert.Equal(t, "frontend/release-1000", release.Name)
 	assert.Equal(t, int64(1742349976000), release.Start)
@@ -174,123 +251,123 @@ func TestReleaseMapStateToDataObject_BasicRelease(t *testing.T) {
 	assert.Nil(t, release.Services)
 }
 
-func TestReleaseMapStateToDataObject_WithApplicationsAndServices(t *testing.T) {
+func TestMapStateToDataObject_BasicFromState(t *testing.T) {
 	ctx := context.Background()
 	r := NewReleaseResourceHandle()
 
-	appObj, d := types.ObjectValue(applicationAttrTypes, map[string]attr.Value{
-		ReleaseFieldName: types.StringValue("my-app"),
-	})
-	require.False(t, d.HasError())
-
-	scopedToObj, d := types.ObjectValue(scopedToAttrTypes, map[string]attr.Value{
-		ReleaseFieldApplicationName: types.StringValue("my-app"),
-		ReleaseFieldEnvironmentName: types.StringValue("production"),
-	})
-	require.False(t, d.HasError())
-
-	svcObj, d := types.ObjectValue(serviceAttrTypes, map[string]attr.Value{
-		ReleaseFieldName:     types.StringValue("my-service"),
-		ReleaseFieldScopedTo: scopedToObj,
-	})
-	require.False(t, d.HasError())
-
-	appsList, d := types.ListValue(types.ObjectType{AttrTypes: applicationAttrTypes}, []attr.Value{appObj})
-	require.False(t, d.HasError())
-
-	svcsList, d := types.ListValue(types.ObjectType{AttrTypes: serviceAttrTypes}, []attr.Value{svcObj})
-	require.False(t, d.HasError())
-
-	model := ReleaseModel{
-		ID:           types.StringValue("release-id-2"),
-		Name:         types.StringValue("backend/release-5"),
-		Start:        types.Int64Value(1742349976000),
-		LastUpdated:  types.Int64Value(0),
-		Applications: appsList,
-		Services:     svcsList,
-	}
-
-	plan := &tfsdk.Plan{Schema: r.MetaData().Schema}
-	require.False(t, plan.Set(ctx, model).HasError())
-
-	release, diags := r.MapStateToDataObject(ctx, plan, nil)
-	require.False(t, diags.HasError())
-	require.NotNil(t, release)
-
-	require.Len(t, release.Applications, 1)
-	assert.Equal(t, "my-app", release.Applications[0].Name)
-
-	require.Len(t, release.Services, 1)
-	assert.Equal(t, "my-service", release.Services[0].Name)
-	require.NotNil(t, release.Services[0].ScopedTo)
-	assert.Equal(t, "my-app", release.Services[0].ScopedTo.ApplicationName)
-	assert.Equal(t, "production", release.Services[0].ScopedTo.EnvironmentName)
-}
-
-func TestReleaseMapStateToDataObject_WithStateWhenNoPlan(t *testing.T) {
-	ctx := context.Background()
-	r := NewReleaseResourceHandle()
-
-	model := ReleaseModel{
-		ID:           types.StringValue("release-id-3"),
-		Name:         types.StringValue("state-read-release"),
-		Start:        types.Int64Value(1742349976000),
-		LastUpdated:  types.Int64Value(0),
-		Applications: emptyApplicationsList(),
-		Services:     emptyServicesList(),
-	}
+	model := emptyReleaseModel()
+	model.Name = types.StringValue("state-read-release")
+	model.Start = types.Int64Value(1742349976000)
 
 	state := &tfsdk.State{Schema: r.MetaData().Schema}
-	require.False(t, state.Set(ctx, model).HasError())
+	setState(t, state, model)
 
 	release, diags := r.MapStateToDataObject(ctx, nil, state)
 	require.False(t, diags.HasError())
-	require.NotNil(t, release)
-
 	assert.Equal(t, "state-read-release", release.Name)
 }
 
-func TestMapApplicationsToState_Empty(t *testing.T) {
+func TestMapStateToDataObject_WithApplications(t *testing.T) {
 	ctx := context.Background()
-	result, diags := mapApplicationsToState(ctx, nil)
+	r := NewReleaseResourceHandle()
+
+	appElemType := types.ObjectType{AttrTypes: applicationAttrTypes}
+	appObj, _ := types.ObjectValue(applicationAttrTypes, map[string]attr.Value{
+		ReleaseFieldName: types.StringValue("my-app"),
+	})
+	appList, _ := types.ListValue(appElemType, []attr.Value{appObj})
+
+	model := emptyReleaseModel()
+	model.Name = types.StringValue("app-release")
+	model.Start = types.Int64Value(1742349976000)
+	model.Applications = appList
+
+	plan := &tfsdk.Plan{Schema: r.MetaData().Schema}
+	setPlan(t, plan, model)
+
+	release, diags := r.MapStateToDataObject(ctx, plan, nil)
 	require.False(t, diags.HasError())
-	assert.False(t, result.IsNull())
-	assert.Empty(t, result.Elements())
+	require.Len(t, release.Applications, 1)
+	assert.Equal(t, "my-app", release.Applications[0].Name)
 }
 
-func TestMapServicesToState_Empty(t *testing.T) {
+func TestMapStateToDataObject_WithServiceNoScopedTo(t *testing.T) {
 	ctx := context.Background()
-	result, diags := mapServicesToState(ctx, nil)
+	r := NewReleaseResourceHandle()
+
+	model := buildServiceModel(t, "my-service", nil)
+	plan := &tfsdk.Plan{Schema: r.MetaData().Schema}
+	setPlan(t, plan, model)
+
+	release, diags := r.MapStateToDataObject(ctx, plan, nil)
 	require.False(t, diags.HasError())
-	assert.False(t, result.IsNull())
-	assert.Empty(t, result.Elements())
+	require.Len(t, release.Services, 1)
+	assert.Equal(t, "my-service", release.Services[0].Name)
+	assert.Nil(t, release.Services[0].ScopedTo)
 }
 
-func TestMapApplicationsFromState_Empty(t *testing.T) {
+func TestMapStateToDataObject_WithServiceAndScopedTo(t *testing.T) {
 	ctx := context.Background()
-	result, diags := mapApplicationsFromState(ctx, emptyApplicationsList())
+	r := NewReleaseResourceHandle()
+
+	model := buildServiceModel(t, "payment", []string{"checkout-app"})
+	plan := &tfsdk.Plan{Schema: r.MetaData().Schema}
+	setPlan(t, plan, model)
+
+	release, diags := r.MapStateToDataObject(ctx, plan, nil)
 	require.False(t, diags.HasError())
-	assert.Nil(t, result)
+	require.Len(t, release.Services, 1)
+	assert.Equal(t, "payment", release.Services[0].Name)
+	require.NotNil(t, release.Services[0].ScopedTo)
+	require.Len(t, release.Services[0].ScopedTo.Applications, 1)
+	assert.Equal(t, "checkout-app", release.Services[0].ScopedTo.Applications[0].Name)
 }
 
-func TestMapServicesFromState_Empty(t *testing.T) {
+func TestMapStateToDataObject_WithServiceAndMultipleScopedToApps(t *testing.T) {
 	ctx := context.Background()
-	result, diags := mapServicesFromState(ctx, emptyServicesList())
+	r := NewReleaseResourceHandle()
+
+	model := buildServiceModel(t, "payment", []string{"app-a", "app-b"})
+	plan := &tfsdk.Plan{Schema: r.MetaData().Schema}
+	setPlan(t, plan, model)
+
+	release, diags := r.MapStateToDataObject(ctx, plan, nil)
 	require.False(t, diags.HasError())
-	assert.Nil(t, result)
+	require.NotNil(t, release.Services[0].ScopedTo)
+	require.Len(t, release.Services[0].ScopedTo.Applications, 2)
+	assert.Equal(t, "app-a", release.Services[0].ScopedTo.Applications[0].Name)
+	assert.Equal(t, "app-b", release.Services[0].ScopedTo.Applications[1].Name)
 }
 
-func TestMapServicesToState_NoScopedTo(t *testing.T) {
-	ctx := context.Background()
-	services := []*api.ReleaseServiceScope{
-		{Name: "plain-service"},
+// ─── helper functions ─────────────────────────────────────────────────────────
+
+func TestBuildApplicationList_Empty(t *testing.T) {
+	list, diags := buildApplicationList(nil)
+	require.False(t, diags.HasError())
+	assert.Equal(t, 0, len(list.Elements()))
+}
+
+func TestBuildApplicationList_OneEntry(t *testing.T) {
+	list, diags := buildApplicationList([]*api.ReleaseApplicationScope{{Name: "app1"}})
+	require.False(t, diags.HasError())
+	assert.Equal(t, 1, len(list.Elements()))
+}
+
+func TestBuildScopedToObject_Nil(t *testing.T) {
+	val, diags := buildScopedToObject(nil)
+	require.False(t, diags.HasError())
+	obj, ok := val.(types.Object)
+	require.True(t, ok)
+	assert.True(t, obj.IsNull())
+}
+
+func TestBuildScopedToObject_WithApplications(t *testing.T) {
+	scopedTo := &api.ReleaseServiceScopedTo{
+		Applications: []*api.ReleaseApplicationScope{{Name: "app1"}},
 	}
-	result, diags := mapServicesToState(ctx, services)
+	val, diags := buildScopedToObject(scopedTo)
 	require.False(t, diags.HasError())
-	require.Len(t, result.Elements(), 1)
-
-	var svcs []ServiceModel
-	require.False(t, result.ElementsAs(ctx, &svcs, false).HasError())
-	assert.Equal(t, "plain-service", svcs[0].Name.ValueString())
-	assert.Nil(t, svcs[0].ScopedTo)
+	obj, ok := val.(types.Object)
+	require.True(t, ok)
+	assert.False(t, obj.IsNull())
 }

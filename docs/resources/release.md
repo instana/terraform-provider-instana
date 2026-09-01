@@ -35,7 +35,7 @@ resource "instana_release" "backend_deployment" {
 
 ### Release Scoped to Services
 
-Associate a release with specific services:
+Associate a release with specific services (no scope restriction):
 
 ```hcl
 resource "instana_release" "service_release" {
@@ -49,9 +49,10 @@ resource "instana_release" "service_release" {
 }
 ```
 
-### Release Scoped to a Service in a Specific Application
+### Release Scoped to a Service in Specific Applications
 
-Restrict a service scope to a particular application perspective using `scoped_to`:
+Restrict a service scope to particular application perspectives using `scoped_to`.
+The `scoped_to.applications` list is required when `scoped_to` is set (minimum 1 entry):
 
 ```hcl
 resource "instana_release" "scoped_service_release" {
@@ -62,19 +63,19 @@ resource "instana_release" "scoped_service_release" {
     {
       name = "auth-service"
       scoped_to = {
-        application_name = "checkout-app"
+        applications = [
+          { name = "checkout-app" },
+        ]
       }
     },
   ]
 }
 ```
 
-### Release Scoped to a Service in a Specific Environment
-
-Restrict a service scope to a particular environment:
+### Service Scoped to Multiple Application Perspectives
 
 ```hcl
-resource "instana_release" "production_release" {
+resource "instana_release" "multi_scoped_release" {
   name  = "inventory/v4.0.0"
   start = 1742349976000
 
@@ -82,7 +83,10 @@ resource "instana_release" "production_release" {
     {
       name = "inventory-service"
       scoped_to = {
-        environment_name = "production"
+        applications = [
+          { name = "storefront-app" },
+          { name = "warehouse-app" },
+        ]
       }
     },
   ]
@@ -91,7 +95,7 @@ resource "instana_release" "production_release" {
 
 ### Full Release with Applications and Services
 
-Combine application perspectives, services, and full service scoping in a single release marker:
+Combine top-level application perspectives and scoped services in a single release marker:
 
 ```hcl
 resource "instana_release" "full_release" {
@@ -106,30 +110,13 @@ resource "instana_release" "full_release" {
     {
       name = "api-gateway"
       scoped_to = {
-        application_name = "platform-app"
-        environment_name = "production"
+        applications = [
+          { name = "platform-app" },
+        ]
       }
     },
     { name = "cache-service" },
   ]
-}
-```
-
-### Dynamic Release Timestamp
-
-Use Terraform's `timestamp()` function to mark a release at the time of the Terraform apply:
-
-> **Note:** Using `timestamp()` causes the resource to be recreated on every apply since the value changes each run. Use a fixed epoch millisecond value for stable releases.
-
-```hcl
-locals {
-  # Convert RFC3339 timestamp to milliseconds since epoch
-  release_time_ms = parseint(formatdate("YYYYMMDDhhmmss", timestamp()), 10)
-}
-
-resource "instana_release" "ci_deployment" {
-  name  = "ci/build-${var.build_number}"
-  start = 1742349976000  # Use a fixed value in practice
 }
 ```
 
@@ -174,22 +161,23 @@ terraform apply
 
 * `name` - Required - The name of the release. For example: `frontend/release-2000`. Maximum 256 characters.
 * `start` - Required - The timestamp (in milliseconds since epoch) for when the release occurs. Must be at least `1`. For example: `1742349976000` is Wednesday, 19 March 2025 02:06:16 UTC.
-* `applications` - Optional - A list of application perspectives where this release marker will be visible. Maximum 10 entries. Each entry contains: [Details](#application-scope-reference)
-* `services` - Optional - A list of services where this release marker will be visible. Maximum 10 entries. Each entry contains: [Details](#service-scope-reference)
+* `applications` - Optional - A list of application perspectives where this release marker will be visible (0–10 entries). Each entry: [Details](#application-scope-reference)
+* `services` - Optional - A list of services where this release marker will be visible (0–10 entries). Each entry: [Details](#service-scope-reference)
 
 ### Application Scope Reference
 
-* `name` - Required - The name of the Application Perspective. For example: `app1`. Maximum 256 characters.
+Used both in the top-level `applications` list and inside `scoped_to.applications`.
+
+* `name` - Required - The name of the Application Perspective. For example: `checkout-app`. Maximum 256 characters.
 
 ### Service Scope Reference
 
 * `name` - Required - The name of the Service. For example: `payment`. Maximum 256 characters.
-* `scoped_to` - Optional - An optional scope restriction to limit the service to a specific application or environment. [Details](#scoped-to-reference)
+* `scoped_to` - Optional - Restricts this service entry to specific application perspectives. When provided, `scoped_to.applications` is required. [Details](#scoped-to-reference)
 
 ### Scoped To Reference
 
-* `application_name` - Optional - The name of the Application Perspective to scope the service to.
-* `environment_name` - Optional - The name of the environment to scope the service to.
+* `applications` - Required (when `scoped_to` is set) - The list of application perspectives that scope this service (1–10 entries). Each entry follows the [Application Scope Reference](#application-scope-reference).
 
 ## Attributes Reference
 
@@ -209,6 +197,7 @@ $ terraform import instana_release.example Tiu16hLCTniHDtHb_uDV1w
 * The `id` and `last_updated` fields are computed by Instana and cannot be set in configuration.
 * The `start` timestamp is in **milliseconds** since the Unix epoch, not seconds.
 * `applications` and `services` each support a maximum of **10** entries per the Instana API.
+* When `scoped_to` is used, `scoped_to.applications` **must** contain at least 1 entry — the API rejects requests where `scopedTo.applications` is null or empty.
 * Release markers are visible in Instana's Application and Service dashboards when `applications` or `services` scopes are configured.
 * Deleting this resource will remove the release marker from Instana.
 * Required API token permission: `CanConfigureReleases`.

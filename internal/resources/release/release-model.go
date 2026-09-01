@@ -15,7 +15,7 @@ type ReleaseModel struct {
 	Services     types.List   `tfsdk:"services"`
 }
 
-// ApplicationModel represents a single application scope in the release
+// ApplicationModel represents a single application scope in a release or in scoped_to
 type ApplicationModel struct {
 	Name types.String `tfsdk:"name"`
 }
@@ -26,10 +26,10 @@ type ServiceModel struct {
 	ScopedTo *ScopedToModel `tfsdk:"scoped_to"`
 }
 
-// ScopedToModel represents the optional scope restriction for a service
+// ScopedToModel restricts a service to specific application perspectives.
+// The API requires at least one application when scoped_to is present.
 type ScopedToModel struct {
-	ApplicationName types.String `tfsdk:"application_name"`
-	EnvironmentName types.String `tfsdk:"environment_name"`
+	Applications types.List `tfsdk:"applications"`
 }
 
 type releaseResource struct {
