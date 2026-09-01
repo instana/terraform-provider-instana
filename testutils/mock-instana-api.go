@@ -179,3 +179,8 @@ func (m *MockInstanaAPI) GroupMappings() rest.RestResource[*api.GroupMapping] {
 func (m *MockInstanaAPI) SessionSettings() rest.SingletonRestResource[*api.SessionSettings] {
 	return nil
 }
+
+// Releases mock implementation
+func (m *MockInstanaAPI) Releases() rest.RestResource[*api.ReleaseWithMetadata] {
+	return nil
+}
