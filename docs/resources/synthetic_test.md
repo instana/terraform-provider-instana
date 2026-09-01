@@ -63,6 +63,7 @@ resource "instana_synthetic_test" "example" {
 3. **RBAC Tags**: `rbac_tags { }` (multiple) → `rbac_tags = [{ }]` (set) with `id` and `display_name` fields
 4. **DNS Filters**: `target_values { }` (multiple) → `target_values = [{ }]` (set)
 5. **SSL Validation**: `validation_rules { }` (multiple) → `validation_rules = [{ }]` (set)
+6. **ICMP Validation**: `icmp_validation_rules { }` (multiple) → `icmp_validation_rules = [{ }]` (set)
 
 ## Example Usage
 
@@ -210,6 +211,64 @@ resource "instana_synthetic_test" "ssl_cert_test" {
   }
 }
 ```
+
+### ICMP Ping Test
+
+Basic ICMP ping test monitoring host availability:
+
+```hcl
+resource "instana_synthetic_test" "icmp_basic" {
+  label          = "Ping Test"
+  description    = "Monitor host availability via ICMP"
+  active         = true
+  locations      = ["b8dsyQt4fDukWzR9RMXW"] # replace with actual location ids
+  test_frequency = 5
+  playback_mode  = "Simultaneous"
+
+  icmp = {
+    mark_synthetic_call = true
+    target_host         = "prod.example.com" # replace with actual hostname or IP
+    packet_count        = 5
+    packet_size         = 64
+    packet_interval     = "1s"
+    packet_timeout      = "2s"
+    use_dns             = true
+    use_ipv6            = false
+  }
+}
+```
+
+### ICMP Ping Test with Validation Rules
+
+ICMP ping test with packet loss and round-trip time thresholds:
+
+```hcl
+resource "instana_synthetic_test" "icmp_with_validation" {
+  label          = "Ping Test with Validation"
+  active         = true
+  locations      = ["b8dsyQt4fDukWzR9RMXW"] # replace with actual location ids
+  test_frequency = 5
+
+  icmp = {
+    target_host  = "192.0.2.1" # replace with actual IP
+    packet_count = 10
+
+    icmp_validation_rules = [
+      {
+        key      = "packetLoss"
+        operator = "LESS_THAN"
+        value    = 5
+      },
+      {
+        key      = "rtt"
+        operator = "LESS_THAN_OR_EQUALS"
+        value    = 100
+      }
+    ]
+  }
+}
+```
+
 ## Generating Configuration from Existing Resources
 
 If you have already created a synthetic test in Instana and want to generate the Terraform configuration for it, you can use Terraform's import block feature with the `-generate-config-out` flag.
@@ -277,6 +336,7 @@ terraform apply
 * `ssl_certificate` - Optional - SSL certificate test configuration [Details](#ssl-certificate-reference)
 * `webpage_action` - Optional - Webpage action test configuration [Details](#webpage-action-reference)
 * `webpage_script` - Optional - Webpage script test configuration [Details](#webpage-script-reference)
+* `icmp` - Optional - ICMP ping test configuration [Details](#icmp-reference)
 
 ### RBAC Tags Reference
 
@@ -379,6 +439,27 @@ terraform apply
 * `operator` - Required - Validation operator. Values: `CONTAINS`, `EQUALS`, `GREATER_THAN`, `IS`, `LESS_THAN`, `MATCHES`, `NOT_MATCHES`
 * `value` - Required - Validation value (string)
 
+### ICMP Reference
+
+* `mark_synthetic_call` - Optional - Mark calls as synthetic. Default: `false`
+* `retries` - Optional - Number of retry attempts (0-2). Default: `0`
+* `retry_interval` - Optional - Time between retries in seconds (1-10). Default: `1`
+* `timeout` - Optional - Timeout duration (e.g., `"30s"`, `"1m"`)
+* `target_host` - **Required** - Hostname or IP address to ping
+* `packet_count` - Optional - Number of ICMP packets to send
+* `packet_interval` - Optional - Time interval between packets (e.g., `"1s"`)
+* `packet_size` - Optional - Size of each ICMP packet in bytes
+* `packet_timeout` - Optional - Per-packet timeout (e.g., `"2s"`)
+* `use_dns` - Optional - Resolve target host via DNS before pinging
+* `use_ipv6` - Optional - Use IPv6 for the ping
+* `icmp_validation_rules` - Optional - Set of validation rules evaluated against ping results [Details](#icmp-validation-rules-reference)
+
+#### ICMP Validation Rules Reference
+
+* `key` - Required - Metric key to validate. Common values: `packetLoss`, `rtt`, `minRtt`, `maxRtt`
+* `operator` - Required - Comparison operator. Values: `CONTAINS`, `EQUALS`, `GREATER_THAN`, `GREATER_THAN_OR_EQUALS`, `IS`, `LESS_THAN`, `LESS_THAN_OR_EQUALS`, `MATCHES`, `NOT_MATCHES`
+* `value` - Required - Threshold integer value (e.g., `5` for 5% packet loss)
+
 ### Webpage Action Reference
 
 * `mark_synthetic_call` - Optional - Mark calls as synthetic. Default: `false`
@@ -422,3 +503,4 @@ $ terraform import instana_synthetic_test.example cl1g4qrmo26x930s17i2
 * SSL certificate tests alert before certificates expire
 * DNS tests validate DNS resolution and records
 * HTTP scripts support both Basic and Jest frameworks
+* ICMP tests send ping packets and can validate packet loss and round-trip time

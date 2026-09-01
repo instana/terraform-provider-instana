@@ -511,6 +511,79 @@ func buildWebpageActionSchema() schema.SingleNestedAttribute {
 	}
 }
 
+// buildICMPSchema builds ICMP ping test configuration schema
+func buildICMPSchema() schema.SingleNestedAttribute {
+	attrs := buildCommonConfigAttributes()
+
+	attrs[SyntheticTestFieldTargetHost] = schema.StringAttribute{
+		Required:    true,
+		Description: SyntheticTestDescTargetHost,
+	}
+	attrs[SyntheticTestFieldPacketCount] = schema.Int64Attribute{
+		Optional:    true,
+		Description: SyntheticTestDescPacketCount,
+	}
+	attrs[SyntheticTestFieldPacketInterval] = schema.StringAttribute{
+		Optional:    true,
+		Description: SyntheticTestDescPacketInterval,
+	}
+	attrs[SyntheticTestFieldPacketSize] = schema.Int64Attribute{
+		Optional:    true,
+		Description: SyntheticTestDescPacketSize,
+	}
+	attrs[SyntheticTestFieldPacketTimeout] = schema.StringAttribute{
+		Optional:    true,
+		Description: SyntheticTestDescPacketTimeout,
+	}
+	attrs[SyntheticTestFieldUseDNS] = schema.BoolAttribute{
+		Optional:    true,
+		Description: SyntheticTestDescUseDNS,
+	}
+	attrs[SyntheticTestFieldUseIPv6] = schema.BoolAttribute{
+		Optional:    true,
+		Description: SyntheticTestDescUseIPv6,
+	}
+	attrs[SyntheticTestFieldICMPValidationRules] = schema.SetNestedAttribute{
+		Optional:    true,
+		Description: SyntheticTestDescICMPValidationRules,
+		NestedObject: schema.NestedAttributeObject{
+			Attributes: map[string]schema.Attribute{
+				SyntheticTestFieldKey: schema.StringAttribute{
+					Required:    true,
+					Description: SyntheticTestDescICMPValidationKey,
+				},
+				SyntheticTestFieldOperator: schema.StringAttribute{
+					Required:    true,
+					Description: SyntheticTestDescValidationOperator,
+					Validators: []validator.String{
+						stringvalidator.OneOf(
+							SyntheticTestOperatorCONTAINS,
+							SyntheticTestOperatorEQUALS,
+							SyntheticTestOperatorGREATER_THAN,
+							SyntheticTestOperatorGREATER_THAN_OR_EQUAL,
+							SyntheticTestOperatorIS,
+							SyntheticTestOperatorLESS_THAN,
+							SyntheticTestOperatorLESS_THAN_OR_EQUAL,
+							SyntheticTestOperatorMATCHES,
+							SyntheticTestOperatorNOT_MATCHES,
+						),
+					},
+				},
+				SyntheticTestFieldValue: schema.Int64Attribute{
+					Required:    true,
+					Description: SyntheticTestDescICMPValidationValue,
+				},
+			},
+		},
+	}
+
+	return schema.SingleNestedAttribute{
+		Optional:    true,
+		Description: SyntheticTestDescICMP,
+		Attributes:  attrs,
+	}
+}
+
 // buildWebpageScriptSchema builds Webpage Script configuration schema
 func buildWebpageScriptSchema() schema.SingleNestedAttribute {
 	attrs := buildCommonConfigAttributes()
@@ -856,6 +929,9 @@ func (r *syntheticTestResource) validateSingleConfigType(model SyntheticTestMode
 	if model.WebpageScript != nil {
 		configCount++
 	}
+	if model.ICMP != nil {
+		configCount++
+	}
 
 	if configCount == 0 {
 		diags.AddError(SyntheticTestErrConfigRequired, "Exactly one synthetic test configuration type must be specified")
@@ -1117,6 +1193,49 @@ func (r *syntheticTestResource) mapWebpageScriptFromModel(webpageScriptModel *We
 	}, diags
 }
 
+// mapICMPFromModel maps ICMP model to API configuration
+func (r *syntheticTestResource) mapICMPFromModel(ctx context.Context, icmpModel *ICMPConfigModel) (api.SyntheticTestConfig, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	config := api.SyntheticTestConfig{
+		MarkSyntheticCall: icmpModel.MarkSyntheticCall.ValueBool(),
+		Retries:           int32(icmpModel.Retries.ValueInt64()),
+		RetryInterval:     int32(icmpModel.RetryInterval.ValueInt64()),
+		SyntheticType:     SyntheticTestTypeICMP,
+		Timeout:           getStringPointerFromType(icmpModel.Timeout),
+		TargetHost:        getStringPointerFromType(icmpModel.TargetHost),
+		PacketInterval:    getStringPointerFromType(icmpModel.PacketInterval),
+		PacketTimeout:     getStringPointerFromType(icmpModel.PacketTimeout),
+		UseDNS:            getBoolPointerFromType(icmpModel.UseDNS),
+		UseIPv6:           getBoolPointerFromType(icmpModel.UseIPv6),
+	}
+
+	if !icmpModel.PacketCount.IsNull() && !icmpModel.PacketCount.IsUnknown() {
+		v := int32(icmpModel.PacketCount.ValueInt64())
+		config.PacketCount = &v
+	}
+	if !icmpModel.PacketSize.IsNull() && !icmpModel.PacketSize.IsUnknown() {
+		v := int32(icmpModel.PacketSize.ValueInt64())
+		config.PacketSize = &v
+	}
+
+	if !icmpModel.ICMPValidationRules.IsNull() && !icmpModel.ICMPValidationRules.IsUnknown() {
+		var ruleModels []ICMPValidationModel
+		diags.Append(icmpModel.ICMPValidationRules.ElementsAs(ctx, &ruleModels, false)...)
+		if !diags.HasError() {
+			for _, rm := range ruleModels {
+				config.ICMPValidationRules = append(config.ICMPValidationRules, api.ICMPValidation{
+					Key:      rm.Key.ValueString(),
+					Operator: rm.Operator.ValueString(),
+					Value:    rm.Value.ValueInt64(),
+				})
+			}
+		}
+	}
+
+	return config, diags
+}
+
 func (r *syntheticTestResource) mapConfigurationFromModel(ctx context.Context, model SyntheticTestModel) (api.SyntheticTestConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
@@ -1147,6 +1266,9 @@ func (r *syntheticTestResource) mapConfigurationFromModel(ctx context.Context, m
 	}
 	if model.WebpageScript != nil {
 		return r.mapWebpageScriptFromModel(model.WebpageScript)
+	}
+	if model.ICMP != nil {
+		return r.mapICMPFromModel(ctx, model.ICMP)
 	}
 
 	// This should never happen due to validation above
@@ -1205,6 +1327,9 @@ func (r *syntheticTestResource) UpdateState(ctx context.Context, state *tfsdk.St
 	case SyntheticTestTypeWebpageScript:
 		model.WebpageScript = r.mapWebpageScriptConfigToModel(apiObject.Configuration)
 		r.clearOtherConfigTypes(&model, SyntheticTestTypeWebpageScript)
+	case SyntheticTestTypeICMP:
+		model.ICMP = r.mapICMPConfigToModel(apiObject.Configuration)
+		r.clearOtherConfigTypes(&model, SyntheticTestTypeICMP)
 	}
 
 	// Set state
@@ -1394,6 +1519,7 @@ func buildSchema() schema.Schema {
 	attrs[SyntheticTestFieldSSLCertificate] = buildSSLCertificateSchema()
 	attrs[SyntheticTestFieldWebpageAction] = buildWebpageActionSchema()
 	attrs[SyntheticTestFieldWebpageScript] = buildWebpageScriptSchema()
+	attrs[SyntheticTestFieldICMP] = buildICMPSchema()
 
 	return schema.Schema{
 		Description: SyntheticTestDescResource,
@@ -1647,6 +1773,67 @@ func (r *syntheticTestResource) mapSSLValidationRulesToModel(validationRules []a
 	}})
 }
 
+// mapICMPConfigToModel maps ICMP API configuration to Terraform model
+func (r *syntheticTestResource) mapICMPConfigToModel(config api.SyntheticTestConfig) *ICMPConfigModel {
+	icmpModel := &ICMPConfigModel{
+		MarkSyntheticCall: types.BoolValue(config.MarkSyntheticCall),
+		Retries:           types.Int64Value(int64(config.Retries)),
+		RetryInterval:     types.Int64Value(int64(config.RetryInterval)),
+		Timeout:           util.SetStringPointerToState(config.Timeout),
+		TargetHost:        util.SetStringPointerToState(config.TargetHost),
+		PacketInterval:    util.SetStringPointerToState(config.PacketInterval),
+		PacketTimeout:     util.SetStringPointerToState(config.PacketTimeout),
+	}
+
+	if config.PacketCount != nil {
+		icmpModel.PacketCount = types.Int64Value(int64(*config.PacketCount))
+	} else {
+		icmpModel.PacketCount = types.Int64Null()
+	}
+	if config.PacketSize != nil {
+		icmpModel.PacketSize = types.Int64Value(int64(*config.PacketSize))
+	} else {
+		icmpModel.PacketSize = types.Int64Null()
+	}
+	if config.UseDNS != nil {
+		icmpModel.UseDNS = types.BoolValue(*config.UseDNS)
+	}
+	if config.UseIPv6 != nil {
+		icmpModel.UseIPv6 = types.BoolValue(*config.UseIPv6)
+	}
+
+	icmpModel.ICMPValidationRules = r.mapICMPValidationRulesToModel(config.ICMPValidationRules)
+
+	return icmpModel
+}
+
+// mapICMPValidationRulesToModel maps ICMP validation rules slice to a Terraform types.Set
+func (r *syntheticTestResource) mapICMPValidationRulesToModel(rules []api.ICMPValidation) types.Set {
+	ruleAttrTypes := map[string]attr.Type{
+		SyntheticTestFieldKey:      types.StringType,
+		SyntheticTestFieldOperator: types.StringType,
+		SyntheticTestFieldValue:    types.Int64Type,
+	}
+
+	if len(rules) == 0 {
+		return types.SetNull(types.ObjectType{AttrTypes: ruleAttrTypes})
+	}
+
+	ruleObjs := make([]attr.Value, len(rules))
+	for i, rule := range rules {
+		obj, _ := types.ObjectValue(
+			ruleAttrTypes,
+			map[string]attr.Value{
+				SyntheticTestFieldKey:      types.StringValue(rule.Key),
+				SyntheticTestFieldOperator: types.StringValue(rule.Operator),
+				SyntheticTestFieldValue:    types.Int64Value(rule.Value),
+			},
+		)
+		ruleObjs[i] = obj
+	}
+	return types.SetValueMust(types.ObjectType{AttrTypes: ruleAttrTypes}, ruleObjs)
+}
+
 // mapWebpageActionConfigToModel maps Webpage Action configuration to model
 func (r *syntheticTestResource) mapWebpageActionConfigToModel(config api.SyntheticTestConfig) *WebpageActionConfigModel {
 	webpageActionModel := &WebpageActionConfigModel{
@@ -1718,6 +1905,9 @@ func (r *syntheticTestResource) clearOtherConfigTypes(model *SyntheticTestModel,
 	}
 	if keepType != SyntheticTestTypeWebpageScript {
 		model.WebpageScript = nil
+	}
+	if keepType != SyntheticTestTypeICMP {
+		model.ICMP = nil
 	}
 }
 

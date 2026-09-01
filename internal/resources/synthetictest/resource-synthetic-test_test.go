@@ -2482,7 +2482,328 @@ func initializeEmptyState(t *testing.T, ctx context.Context, state *tfsdk.State)
 		SSLCertificate:   nil,
 		WebpageAction:    nil,
 		WebpageScript:    nil,
+		ICMP:             nil,
 	}
 	diags := state.Set(ctx, emptyModel)
 	require.False(t, diags.HasError(), "Failed to initialize empty state")
+}
+
+// ---------------------------------------------------------------------------
+// ICMP tests
+// ---------------------------------------------------------------------------
+
+func icmpValidationRulesAttrType() map[string]attr.Type {
+	return map[string]attr.Type{
+		"key":      types.StringType,
+		"operator": types.StringType,
+		"value":    types.Int64Type,
+	}
+}
+
+func TestMapStateToDataObjectICMP(t *testing.T) {
+	resource := &syntheticTestResource{
+		metaData: resourcehandle.ResourceMetaData{
+			ResourceName:  ResourceInstanaSyntheticTest,
+			Schema:        NewSyntheticTestResourceHandle().MetaData().Schema,
+			SchemaVersion: 0,
+		},
+	}
+	ctx := context.Background()
+
+	t.Run("should map ICMP from state with all fields", func(t *testing.T) {
+		ruleObj, _ := types.ObjectValue(
+			icmpValidationRulesAttrType(),
+			map[string]attr.Value{
+				"key":      types.StringValue("packetLoss"),
+				"operator": types.StringValue("LESS_THAN"),
+				"value":    types.Int64Value(5),
+			},
+		)
+		rules, _ := types.SetValue(
+			types.ObjectType{AttrTypes: icmpValidationRulesAttrType()},
+			[]attr.Value{ruleObj},
+		)
+
+		model := SyntheticTestModel{
+			ID:               types.StringValue("icmp-id"),
+			Label:            types.StringValue("ICMP Test"),
+			Description:      types.StringNull(),
+			Active:           types.BoolValue(true),
+			ApplicationID:    types.StringNull(),
+			Applications:     types.SetNull(types.StringType),
+			MobileApps:       types.SetNull(types.StringType),
+			Websites:         types.SetNull(types.StringType),
+			CustomProperties: types.MapNull(types.StringType),
+			PlaybackMode:     types.StringValue("Simultaneous"),
+			TestFrequency:    types.Int64Null(),
+			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
+				"id":           types.StringType,
+				"display_name": types.StringType,
+			}}),
+			ICMP: &ICMPConfigModel{
+				MarkSyntheticCall:   types.BoolValue(true),
+				Retries:             types.Int64Value(1),
+				RetryInterval:       types.Int64Value(2),
+				Timeout:             types.StringValue("30s"),
+				TargetHost:          types.StringValue("192.0.2.1"),
+				PacketCount:         types.Int64Value(5),
+				PacketInterval:      types.StringValue("1s"),
+				PacketSize:          types.Int64Value(64),
+				PacketTimeout:       types.StringValue("2s"),
+				UseDNS:              types.BoolValue(true),
+				UseIPv6:             types.BoolValue(false),
+				ICMPValidationRules: rules,
+			},
+		}
+
+		locations, _ := types.SetValueFrom(ctx, types.StringType, []string{"loc-1"})
+		model.Locations = locations
+
+		state := &tfsdk.State{Schema: resource.metaData.Schema}
+		require.False(t, state.Set(ctx, model).HasError())
+
+		result, diags := resource.MapStateToDataObject(ctx, nil, state)
+		require.False(t, diags.HasError())
+		require.NotNil(t, result)
+
+		cfg := result.Configuration
+		assert.Equal(t, SyntheticTestTypeICMP, cfg.SyntheticType)
+		assert.True(t, cfg.MarkSyntheticCall)
+		assert.Equal(t, int32(1), cfg.Retries)
+		assert.Equal(t, int32(2), cfg.RetryInterval)
+		require.NotNil(t, cfg.TargetHost)
+		assert.Equal(t, "192.0.2.1", *cfg.TargetHost)
+		require.NotNil(t, cfg.PacketCount)
+		assert.Equal(t, int32(5), *cfg.PacketCount)
+		require.NotNil(t, cfg.PacketSize)
+		assert.Equal(t, int32(64), *cfg.PacketSize)
+		require.NotNil(t, cfg.PacketInterval)
+		assert.Equal(t, "1s", *cfg.PacketInterval)
+		require.NotNil(t, cfg.PacketTimeout)
+		assert.Equal(t, "2s", *cfg.PacketTimeout)
+		require.NotNil(t, cfg.UseDNS)
+		assert.True(t, *cfg.UseDNS)
+		require.NotNil(t, cfg.UseIPv6)
+		assert.False(t, *cfg.UseIPv6)
+		require.Len(t, cfg.ICMPValidationRules, 1)
+		assert.Equal(t, "packetLoss", cfg.ICMPValidationRules[0].Key)
+		assert.Equal(t, "LESS_THAN", cfg.ICMPValidationRules[0].Operator)
+		assert.Equal(t, int64(5), cfg.ICMPValidationRules[0].Value)
+	})
+
+	t.Run("should map ICMP from state with only required fields", func(t *testing.T) {
+		model := SyntheticTestModel{
+			ID:               types.StringValue("icmp-id"),
+			Label:            types.StringValue("ICMP Test"),
+			Description:      types.StringNull(),
+			Active:           types.BoolValue(true),
+			ApplicationID:    types.StringNull(),
+			Applications:     types.SetNull(types.StringType),
+			MobileApps:       types.SetNull(types.StringType),
+			Websites:         types.SetNull(types.StringType),
+			CustomProperties: types.MapNull(types.StringType),
+			PlaybackMode:     types.StringValue("Simultaneous"),
+			TestFrequency:    types.Int64Null(),
+			RbacTags: types.SetNull(types.ObjectType{AttrTypes: map[string]attr.Type{
+				"id":           types.StringType,
+				"display_name": types.StringType,
+			}}),
+			ICMP: &ICMPConfigModel{
+				MarkSyntheticCall: types.BoolValue(false),
+				Retries:           types.Int64Value(0),
+				RetryInterval:     types.Int64Value(1),
+				Timeout:           types.StringNull(),
+				TargetHost:        types.StringValue("ping.example.com"),
+				PacketCount:       types.Int64Null(),
+				PacketInterval:    types.StringNull(),
+				PacketSize:        types.Int64Null(),
+				PacketTimeout:     types.StringNull(),
+				UseDNS:            types.BoolNull(),
+				UseIPv6:           types.BoolNull(),
+				ICMPValidationRules: types.SetNull(types.ObjectType{
+					AttrTypes: icmpValidationRulesAttrType(),
+				}),
+			},
+		}
+
+		locations, _ := types.SetValueFrom(ctx, types.StringType, []string{"loc-1"})
+		model.Locations = locations
+
+		state := &tfsdk.State{Schema: resource.metaData.Schema}
+		require.False(t, state.Set(ctx, model).HasError())
+
+		result, diags := resource.MapStateToDataObject(ctx, nil, state)
+		require.False(t, diags.HasError())
+		require.NotNil(t, result)
+
+		cfg := result.Configuration
+		assert.Equal(t, SyntheticTestTypeICMP, cfg.SyntheticType)
+		require.NotNil(t, cfg.TargetHost)
+		assert.Equal(t, "ping.example.com", *cfg.TargetHost)
+		assert.Nil(t, cfg.PacketCount)
+		assert.Nil(t, cfg.PacketSize)
+		assert.Empty(t, cfg.ICMPValidationRules)
+	})
+}
+
+func TestUpdateStateICMP(t *testing.T) {
+	r := &syntheticTestResource{
+		metaData: resourcehandle.ResourceMetaData{
+			ResourceName:  ResourceInstanaSyntheticTest,
+			Schema:        NewSyntheticTestResourceHandle().MetaData().Schema,
+			SchemaVersion: 0,
+		},
+	}
+	ctx := context.Background()
+
+	t.Run("should update state from ICMP API object", func(t *testing.T) {
+		targetHost := "192.0.2.1"
+		packetCount := int32(3)
+		packetSize := int32(32)
+		packetInterval := "500ms"
+		packetTimeout := "1s"
+		useDNS := false
+		useIPv6 := true
+
+		apiObj := &api.SyntheticTest{
+			ID:           "icmp-api-id",
+			Label:        "ICMP from API",
+			Active:       true,
+			PlaybackMode: "Simultaneous",
+			Locations:    []string{"loc-a"},
+			Configuration: api.SyntheticTestConfig{
+				MarkSyntheticCall: true,
+				SyntheticType:     SyntheticTestTypeICMP,
+				TargetHost:        &targetHost,
+				PacketCount:       &packetCount,
+				PacketSize:        &packetSize,
+				PacketInterval:    &packetInterval,
+				PacketTimeout:     &packetTimeout,
+				UseDNS:            &useDNS,
+				UseIPv6:           &useIPv6,
+				ICMPValidationRules: []api.ICMPValidation{
+					{Key: "rtt", Operator: "LESS_THAN_OR_EQUALS", Value: 100},
+				},
+			},
+		}
+
+		state := &tfsdk.State{Schema: r.metaData.Schema}
+		initializeEmptyState(t, ctx, state)
+
+		diags := r.UpdateState(ctx, state, nil, apiObj)
+		require.False(t, diags.HasError())
+
+		var model SyntheticTestModel
+		require.False(t, state.Get(ctx, &model).HasError())
+
+		assert.Equal(t, "icmp-api-id", model.ID.ValueString())
+		require.NotNil(t, model.ICMP)
+
+		icmp := model.ICMP
+		assert.Equal(t, "192.0.2.1", icmp.TargetHost.ValueString())
+		assert.Equal(t, int64(3), icmp.PacketCount.ValueInt64())
+		assert.Equal(t, int64(32), icmp.PacketSize.ValueInt64())
+		assert.Equal(t, "500ms", icmp.PacketInterval.ValueString())
+		assert.Equal(t, "1s", icmp.PacketTimeout.ValueString())
+		assert.False(t, icmp.UseDNS.ValueBool())
+		assert.True(t, icmp.UseIPv6.ValueBool())
+
+		var ruleModels []ICMPValidationModel
+		require.False(t, icmp.ICMPValidationRules.ElementsAs(ctx, &ruleModels, false).HasError())
+		require.Len(t, ruleModels, 1)
+		assert.Equal(t, "rtt", ruleModels[0].Key.ValueString())
+		assert.Equal(t, "LESS_THAN_OR_EQUALS", ruleModels[0].Operator.ValueString())
+		assert.Equal(t, int64(100), ruleModels[0].Value.ValueInt64())
+
+		// All other config types must be nil
+		assert.Nil(t, model.HttpAction)
+		assert.Nil(t, model.HttpScript)
+		assert.Nil(t, model.BrowserScript)
+		assert.Nil(t, model.DNS)
+		assert.Nil(t, model.SSLCertificate)
+		assert.Nil(t, model.WebpageAction)
+		assert.Nil(t, model.WebpageScript)
+	})
+
+	t.Run("should update state from ICMP API object without validation rules", func(t *testing.T) {
+		targetHost := "ping.example.com"
+
+		apiObj := &api.SyntheticTest{
+			ID:           "icmp-no-rules",
+			Label:        "ICMP no rules",
+			Active:       true,
+			PlaybackMode: "Simultaneous",
+			Locations:    []string{"loc-a"},
+			Configuration: api.SyntheticTestConfig{
+				MarkSyntheticCall: false,
+				SyntheticType:     SyntheticTestTypeICMP,
+				TargetHost:        &targetHost,
+			},
+		}
+
+		state := &tfsdk.State{Schema: r.metaData.Schema}
+		initializeEmptyState(t, ctx, state)
+
+		diags := r.UpdateState(ctx, state, nil, apiObj)
+		require.False(t, diags.HasError())
+
+		var model SyntheticTestModel
+		require.False(t, state.Get(ctx, &model).HasError())
+
+		require.NotNil(t, model.ICMP)
+		assert.Equal(t, "ping.example.com", model.ICMP.TargetHost.ValueString())
+		assert.True(t, model.ICMP.ICMPValidationRules.IsNull())
+	})
+}
+
+func TestValidateSingleConfigTypeICMP(t *testing.T) {
+	r := &syntheticTestResource{}
+
+	t.Run("ICMP alone is valid", func(t *testing.T) {
+		model := SyntheticTestModel{
+			ICMP: &ICMPConfigModel{TargetHost: types.StringValue("host")},
+		}
+		count, diags := r.validateSingleConfigType(model)
+		assert.Equal(t, 1, count)
+		assert.False(t, diags.HasError())
+	})
+
+	t.Run("ICMP with another type is invalid", func(t *testing.T) {
+		model := SyntheticTestModel{
+			ICMP: &ICMPConfigModel{TargetHost: types.StringValue("host")},
+			HttpAction: &HttpActionConfigModel{
+				URL: types.StringValue("https://example.com"),
+			},
+		}
+		count, diags := r.validateSingleConfigType(model)
+		assert.Equal(t, 2, count)
+		assert.True(t, diags.HasError())
+	})
+}
+
+func TestBuildICMPSchema(t *testing.T) {
+	t.Run("should include icmp in schema", func(t *testing.T) {
+		handle := NewSyntheticTestResourceHandle()
+		schema := handle.MetaData().Schema
+		assert.NotNil(t, schema.Attributes[SyntheticTestFieldICMP])
+	})
+}
+
+func TestMapICMPValidationRulesToModel(t *testing.T) {
+	r := &syntheticTestResource{}
+
+	t.Run("returns null set when rules are empty", func(t *testing.T) {
+		result := r.mapICMPValidationRulesToModel(nil)
+		assert.True(t, result.IsNull())
+	})
+
+	t.Run("maps rules correctly", func(t *testing.T) {
+		rules := []api.ICMPValidation{
+			{Key: "packetLoss", Operator: "EQUALS", Value: 0},
+			{Key: "rtt", Operator: "LESS_THAN", Value: 50},
+		}
+		result := r.mapICMPValidationRulesToModel(rules)
+		assert.False(t, result.IsNull())
+		assert.Equal(t, 2, len(result.Elements()))
+	})
 }
