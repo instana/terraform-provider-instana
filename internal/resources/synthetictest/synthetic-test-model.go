@@ -26,6 +26,7 @@ type SyntheticTestModel struct {
 	SSLCertificate   *SSLCertificateConfigModel `tfsdk:"ssl_certificate"`
 	WebpageAction    *WebpageActionConfigModel  `tfsdk:"webpage_action"`
 	WebpageScript    *WebpageScriptConfigModel  `tfsdk:"webpage_script"`
+	ICMP             *ICMPConfigModel           `tfsdk:"icmp"`
 }
 
 // RbacTagModel represents an RBAC tag
@@ -148,6 +149,29 @@ type WebpageActionConfigModel struct {
 	URL               types.String `tfsdk:"url"`
 	Browser           types.String `tfsdk:"browser"`
 	RecordVideo       types.Bool   `tfsdk:"record_video"`
+}
+
+// ICMPValidationModel represents a single ICMP validation rule in Terraform state
+type ICMPValidationModel struct {
+	Key      types.String `tfsdk:"key"`
+	Operator types.String `tfsdk:"operator"`
+	Value    types.Int64  `tfsdk:"value"`
+}
+
+// ICMPConfigModel represents the Terraform model for ICMP ping test configuration
+type ICMPConfigModel struct {
+	MarkSyntheticCall   types.Bool   `tfsdk:"mark_synthetic_call"`
+	Retries             types.Int64  `tfsdk:"retries"`
+	RetryInterval       types.Int64  `tfsdk:"retry_interval"`
+	Timeout             types.String `tfsdk:"timeout"`
+	TargetHost          types.String `tfsdk:"target_host"`
+	PacketCount         types.Int64  `tfsdk:"packet_count"`
+	PacketInterval      types.String `tfsdk:"packet_interval"`
+	PacketSize          types.Int64  `tfsdk:"packet_size"`
+	PacketTimeout       types.String `tfsdk:"packet_timeout"`
+	UseDNS              types.Bool   `tfsdk:"use_dns"`
+	UseIPv6             types.Bool   `tfsdk:"use_ipv6"`
+	ICMPValidationRules types.Set    `tfsdk:"icmp_validation_rules"`
 }
 
 // WebpageScriptConfigModel represents the Terraform model for Webpage Script configuration

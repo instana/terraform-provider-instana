@@ -25,6 +25,7 @@ const (
 	SyntheticTestFieldSSLCertificate   = "ssl_certificate"
 	SyntheticTestFieldWebpageAction    = "webpage_action"
 	SyntheticTestFieldWebpageScript    = "webpage_script"
+	SyntheticTestFieldICMP             = "icmp"
 
 	// Common configuration field names
 	SyntheticTestFieldMarkSyntheticCall           = "mark_synthetic_call"
@@ -71,6 +72,16 @@ const (
 	SyntheticTestFieldValidationRules             = "validation_rules"
 	SyntheticTestFieldName                        = "name"
 
+	// ICMP field names
+	SyntheticTestFieldTargetHost            = "target_host"
+	SyntheticTestFieldPacketCount           = "packet_count"
+	SyntheticTestFieldPacketInterval        = "packet_interval"
+	SyntheticTestFieldPacketSize            = "packet_size"
+	SyntheticTestFieldPacketTimeout         = "packet_timeout"
+	SyntheticTestFieldUseDNS                = "use_dns"
+	SyntheticTestFieldUseIPv6               = "use_ipv6"
+	SyntheticTestFieldICMPValidationRules   = "icmp_validation_rules"
+
 	// Playback mode constants
 	SyntheticTestPlaybackModeSimultaneous = "Simultaneous"
 	SyntheticTestPlaybackModeStaggered    = "Staggered"
@@ -106,13 +117,15 @@ const (
 	SyntheticTestTransportUDP = "UDP"
 
 	// Operator constants
-	SyntheticTestOperatorCONTAINS     = "CONTAINS"
-	SyntheticTestOperatorEQUALS       = "EQUALS"
-	SyntheticTestOperatorGREATER_THAN = "GREATER_THAN"
-	SyntheticTestOperatorIS           = "IS"
-	SyntheticTestOperatorLESS_THAN    = "LESS_THAN"
-	SyntheticTestOperatorMATCHES      = "MATCHES"
-	SyntheticTestOperatorNOT_MATCHES  = "NOT_MATCHES"
+	SyntheticTestOperatorCONTAINS              = "CONTAINS"
+	SyntheticTestOperatorEQUALS                = "EQUALS"
+	SyntheticTestOperatorGREATER_THAN          = "GREATER_THAN"
+	SyntheticTestOperatorGREATER_THAN_OR_EQUAL = "GREATER_THAN_OR_EQUALS"
+	SyntheticTestOperatorIS                    = "IS"
+	SyntheticTestOperatorLESS_THAN             = "LESS_THAN"
+	SyntheticTestOperatorLESS_THAN_OR_EQUAL    = "LESS_THAN_OR_EQUALS"
+	SyntheticTestOperatorMATCHES               = "MATCHES"
+	SyntheticTestOperatorNOT_MATCHES           = "NOT_MATCHES"
 
 	// Synthetic type constants
 	SyntheticTestTypeHTTPAction     = "HTTPAction"
@@ -122,6 +135,7 @@ const (
 	SyntheticTestTypeSSLCertificate = "SSLCertificate"
 	SyntheticTestTypeWebpageAction  = "WebpageAction"
 	SyntheticTestTypeWebpageScript  = "WebpageScript"
+	SyntheticTestTypeICMP           = "ICMP"
 
 	// Resource description constants
 	SyntheticTestDescResource         = "This resource manages Synthetic Tests in Instana."
@@ -199,6 +213,19 @@ const (
 	SyntheticTestDescValidationKey        = "Validation key"
 	SyntheticTestDescValidationOperator   = "Validation operator"
 	SyntheticTestDescValidationValue      = "Validation value"
+
+	// ICMP configuration descriptions
+	SyntheticTestDescICMP                = "ICMP ping test configuration"
+	SyntheticTestDescTargetHost          = "The hostname or IP address to ping. Required."
+	SyntheticTestDescPacketCount         = "Number of ICMP packets to send."
+	SyntheticTestDescPacketInterval      = "Time interval between packets (e.g. '1s')."
+	SyntheticTestDescPacketSize          = "Size of each ICMP packet in bytes."
+	SyntheticTestDescPacketTimeout       = "Per-packet timeout (e.g. '2s')."
+	SyntheticTestDescUseDNS              = "Resolve the target host via DNS before pinging."
+	SyntheticTestDescUseIPv6             = "Use IPv6 for the ping."
+	SyntheticTestDescICMPValidationRules = "Validation rules evaluated against ICMP ping results."
+	SyntheticTestDescICMPValidationKey   = "Metric key to validate (e.g. packetLoss, rtt)."
+	SyntheticTestDescICMPValidationValue = "Threshold integer value for the validation rule."
 
 	// Webpage configuration descriptions
 	SyntheticTestDescWebpageAction = "Webpage action test configuration"
