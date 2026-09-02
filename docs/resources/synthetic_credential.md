@@ -51,6 +51,107 @@ resource "instana_synthetic_credential" "service_key" {
 }
 ```
 
+## Using Credentials in Synthetic Tests
+
+Synthetic credentials can be referenced inside **script-based** synthetic tests — specifically `http_script` (API script) and `browser_script` tests. 
+
+Inside a script, reference a credential by name using the `$secure.<credential_name>` syntax. The credential value is resolved by the Instana runtime before script execution. Do not build the reference dynamically using variables, string concatenation, or `eval()` — only the literal `$secure.credentialName` format is supported.
+
+> **Note:** Only the `$secure.credentialName` format is supported. The `$secure[credentialName]` bracket notation is not supported.
+
+### HTTP Script (API Script) with Credentials
+
+The following example creates a credential and then references it in an API script test that authenticates against a protected endpoint:
+
+```hcl
+resource "instana_synthetic_credential" "api_key" {
+  credential_name  = "api_key"
+  credential_value = var.api_key
+}
+
+resource "instana_synthetic_test" "api_script_with_credentials" {
+  label          = "Authenticated API Script Test"
+  description    = "Test a protected API endpoint using a stored credential"
+  active         = true
+  locations      = ["b8dsyQt4fDukWzR9RMXW"] # replace with actual location IDs
+  test_frequency = 15
+  playback_mode  = "Simultaneous"
+
+  http_script = {
+    mark_synthetic_call = true
+    retries             = 1
+    retry_interval      = 1
+    timeout             = "30s"
+    script              = <<-EOT
+      const assert = require('assert');
+
+      // Reference the stored credential using $secure.<credential_name>
+      const response = await $http.get({
+        url: 'https://api.example.com/v1/protected-resource',
+        headers: {
+          'Authorization': 'Bearer ' + $secure.api_key,
+          'Content-Type':  'application/json'
+        }
+      });
+
+      assert.equal(response.statusCode, 200, 'Expected HTTP 200 OK');
+    EOT
+  }
+
+  depends_on = [instana_synthetic_credential.api_key]
+}
+```
+
+### Browser Script with Credentials
+
+The following example creates username and password credentials and then references them in a browser script that logs into a web application:
+
+```hcl
+resource "instana_synthetic_credential" "login_username" {
+  credential_name  = "login_username"
+  credential_value = var.login_username
+}
+
+resource "instana_synthetic_credential" "login_password" {
+  credential_name  = "login_password"
+  credential_value = var.login_password
+}
+
+resource "instana_synthetic_test" "browser_script_with_credentials" {
+  label          = "Login Flow Browser Script Test"
+  description    = "Test the login flow using stored credentials"
+  active         = true
+  locations      = ["b8dsyQt4fDukWzR9RMXW"] # replace with actual location IDs
+  test_frequency = 30
+  playback_mode  = "Simultaneous"
+
+  browser_script = {
+    mark_synthetic_call = true
+    retries             = 1
+    retry_interval      = 1
+    timeout             = "60s"
+    browser             = "chrome"
+    record_video        = false
+    script              = <<-EOT
+      // Fill in the login form using stored credentials
+      await page.fill('#username', $secure.login_username);
+      await page.fill('#password', $secure.login_password);
+      await page.click('#submit-btn');
+
+      // Verify successful login
+      await page.waitForSelector('h1');
+    EOT
+  }
+
+  depends_on = [
+    instana_synthetic_credential.login_username,
+    instana_synthetic_credential.login_password,
+  ]
+}
+```
+
+> **Tip:** The `depends_on` argument is recommended when the credential and the test are defined in the same Terraform configuration. This ensures the credential is created before the synthetic test.
+
 ## Generating Configuration from Existing Resources
 
 If you have already created a synthetic credential in Instana and want to generate the Terraform configuration for it, you can use Terraform's import block feature with the `-generate-config-out` flag.
