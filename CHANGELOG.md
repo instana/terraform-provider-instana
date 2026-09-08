@@ -1,3 +1,19 @@
+## [v7.7.1](https://github.com/instana/terraform-provider-instana/tree/v7.7.1) (2026-09-08)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.7.0...v7.7.1)
+
+**Implemented enhancements:**
+
+- Added support for ICMP synthetic test type in `instana_synthetic_test`, allowing you to monitor host/IP reachability using ping-based checks with configurable packet count, retry count, and timeout
+- Added credential usage examples to the `instana_synthetic_credential` documentation for script-based synthetic tests, making it easier to reference credentials in your synthetic test scripts
+- Log alert configurations (`instana_log_alert_config`) now default the `alert_type` field to `log.count` when not specified, reducing required configuration for common log alerting scenarios
+
+**Merged pull requests:**
+
+- Add ICMP synthetic test support [\#118](https://github.com/instana/terraform-provider-instana/pull/118) ([georgekutty-1](https://github.com/georgekutty-1))
+- Add credential usage examples for script-based synthetic tests [\#117](https://github.com/instana/terraform-provider-instana/pull/117) ([BlessyElza](https://github.com/BlessyElza))
+- Default alert\_type to "log.count" when omitted [\#116](https://github.com/instana/terraform-provider-instana/pull/116) ([BlessyElza](https://github.com/BlessyElza))
+
 ## [v7.7.0](https://github.com/instana/terraform-provider-instana/tree/v7.7.0) (2026-09-01)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.6.0...v7.7.0)
