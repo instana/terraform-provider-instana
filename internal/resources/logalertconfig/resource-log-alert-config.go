@@ -74,7 +74,7 @@ func buildLogAlertConfigSchema() schema.Schema {
 			LogAlertConfigFieldGranularity: schema.Int64Attribute{
 				Optional:    true,
 				Computed:    true,
-				Default:     int64default.StaticInt64(int64(common.Granularity60000)),
+				Default:     int64default.StaticInt64(int64(common.Granularity600000)),
 				Description: LogAlertConfigDescGranularity,
 				Validators: []validator.Int64{
 					int64validator.OneOf(
@@ -160,14 +160,14 @@ func buildRulesSchema() schema.SingleNestedAttribute {
 				Description: LogAlertConfigDescMetricName,
 			},
 			LogAlertConfigFieldAlertType: schema.StringAttribute{
-					Optional:    true,
-					Computed:    true,
-					Default:     stringdefault.StaticString(LogAlertTypeLogCount),
-					Description: LogAlertConfigDescAlertType,
-					Validators: []validator.String{
-						stringvalidator.OneOf(LogAlertTypeLogCount),
-					},
+				Optional:    true,
+				Computed:    true,
+				Default:     stringdefault.StaticString(LogAlertTypeLogCount),
+				Description: LogAlertConfigDescAlertType,
+				Validators: []validator.String{
+					stringvalidator.OneOf(LogAlertTypeLogCount),
 				},
+			},
 			LogAlertConfigFieldAggregation: schema.StringAttribute{
 				Optional:    true,
 				Computed:    true,
@@ -506,6 +506,19 @@ func (r *logAlertConfigResource) MapStateToDataObject(ctx context.Context, plan 
 	alertChannels, alertChannelsDiags := r.mapModelAlertChannelsToAPI(ctx, model.AlertChannels)
 	diags.Append(alertChannelsDiags...)
 	config.AlertChannels = alertChannels
+
+	if model.TimeThreshold != nil && model.TimeThreshold.ViolationsInSequence != nil {
+		violations := model.TimeThreshold.ViolationsInSequence
+		if !violations.TimeWindow.IsNull() && !violations.TimeWindow.IsUnknown() && config.Granularity > 0 {
+			if violations.TimeWindow.ValueInt64()/int64(config.Granularity) > 12 {
+				diags.AddError(
+					LogAlertConfigErrInvalidTimeWindow,
+					LogAlertConfigErrInvalidTimeWindowMsg,
+				)
+				return nil, diags
+			}
+		}
+	}
 
 	config.TimeThreshold = r.mapModelTimeThresholdToAPI(model.TimeThreshold)
 

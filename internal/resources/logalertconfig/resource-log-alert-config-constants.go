@@ -129,4 +129,8 @@ const (
 	LogAlertConfigErrParsingTagFilter = "Error parsing tag filter"
 	// LogAlertConfigErrParsingTagFilterMsg error message template for tag filter parsing failures
 	LogAlertConfigErrParsingTagFilterMsg = "Could not parse tag filter: "
+	// LogAlertConfigErrInvalidTimeWindow error title for invalid time window validation failures
+	LogAlertConfigErrInvalidTimeWindow = "Invalid time window"
+	// LogAlertConfigErrInvalidTimeWindowMsg error message for time_window / granularity ratio exceeding 12
+	LogAlertConfigErrInvalidTimeWindowMsg = "time_window / granularity must not be greater than 12"
 )

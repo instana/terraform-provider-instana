@@ -932,6 +932,58 @@ func TestMapStateToDataObject_WithNullTimeWindowInTimeThreshold(t *testing.T) {
 	assert.Nil(t, result.TimeThreshold)
 }
 
+func TestMapStateToDataObject_TimeWindowGranularityRatioGreaterThan12_ReturnsError(t *testing.T) {
+	ctx := context.Background()
+	resource := NewLogAlertConfigResourceHandle()
+
+	// granularity = 60000 (1 min), time_window = 780000 (13 min) -> ratio = 13 > 12
+	state := createMockState(t, LogAlertConfigModel{
+		ID:          types.StringValue("test-id"),
+		Name:        types.StringValue("Test Log Alert"),
+		Description: types.StringValue("Test Description"),
+		Granularity: types.Int64Value(60000),
+		TagFilter:   types.StringValue("entity.type EQUALS 'log'"),
+		TimeThreshold: &TimeThresholdModel{
+			ViolationsInSequence: &ViolationsInSequenceModel{
+				TimeWindow: types.Int64Value(780000),
+			},
+		},
+		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
+	})
+
+	result, diags := resource.MapStateToDataObject(ctx, nil, &state)
+	require.True(t, diags.HasError())
+	assert.Nil(t, result)
+	assert.Equal(t, LogAlertConfigErrInvalidTimeWindow, diags[0].Summary())
+	assert.Equal(t, LogAlertConfigErrInvalidTimeWindowMsg, diags[0].Detail())
+}
+
+func TestMapStateToDataObject_TimeWindowGranularityRatioEqualTo12_IsValid(t *testing.T) {
+	ctx := context.Background()
+	resource := NewLogAlertConfigResourceHandle()
+
+	// granularity = 60000 (1 min), time_window = 720000 (12 min) -> ratio = 12 <= 12
+	state := createMockState(t, LogAlertConfigModel{
+		ID:          types.StringValue("test-id"),
+		Name:        types.StringValue("Test Log Alert"),
+		Description: types.StringValue("Test Description"),
+		Granularity: types.Int64Value(60000),
+		TagFilter:   types.StringValue("entity.type EQUALS 'log'"),
+		TimeThreshold: &TimeThresholdModel{
+			ViolationsInSequence: &ViolationsInSequenceModel{
+				TimeWindow: types.Int64Value(720000),
+			},
+		},
+		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
+	})
+
+	result, diags := resource.MapStateToDataObject(ctx, nil, &state)
+	require.False(t, diags.HasError())
+	require.NotNil(t, result)
+	require.NotNil(t, result.TimeThreshold)
+	assert.Equal(t, int64(720000), result.TimeThreshold.TimeWindow)
+}
+
 func TestUpdateState_WithEmptyRules(t *testing.T) {
 	ctx := context.Background()
 	resource := NewLogAlertConfigResourceHandle()
