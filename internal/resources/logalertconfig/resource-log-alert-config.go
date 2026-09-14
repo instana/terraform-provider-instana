@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
@@ -211,10 +212,56 @@ func buildTimeThresholdSchema() schema.SingleNestedAttribute {
 						Optional:    true,
 						Computed:    true,
 						Default:     int64default.StaticInt64(600000),
+						Validators: []validator.Int64{
+							timeWindowGranularityValidator{},
+						},
 					},
 				},
 			},
 		},
+	}
+}
+
+type timeWindowGranularityValidator struct{}
+
+func (v timeWindowGranularityValidator) Description(ctx context.Context) string {
+	return "validates that time_window / granularity is not greater than 12"
+}
+
+func (v timeWindowGranularityValidator) MarkdownDescription(ctx context.Context) string {
+	return v.Description(ctx)
+}
+
+func (v timeWindowGranularityValidator) ValidateInt64(
+	ctx context.Context,
+	req validator.Int64Request,
+	resp *validator.Int64Response,
+) {
+	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {
+		return
+	}
+
+	timeWindow := req.ConfigValue.ValueInt64()
+
+	var granularity types.Int64
+	resp.Diagnostics.Append(
+		req.Config.GetAttribute(ctx, path.Root(LogAlertConfigFieldGranularity), &granularity)...,
+	)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var granularityValue int64 = DefaultGranularity
+	if !granularity.IsNull() && !granularity.IsUnknown() {
+		granularityValue = granularity.ValueInt64()
+	}
+
+	if granularityValue > 0 && (timeWindow/granularityValue) > 12 {
+		resp.Diagnostics.AddAttributeError(
+			req.Path,
+			LogAlertConfigErrInvalidTimeWindow,
+			LogAlertConfigErrInvalidTimeWindowMsg,
+		)
 	}
 }
 
@@ -506,19 +553,6 @@ func (r *logAlertConfigResource) MapStateToDataObject(ctx context.Context, plan 
 	alertChannels, alertChannelsDiags := r.mapModelAlertChannelsToAPI(ctx, model.AlertChannels)
 	diags.Append(alertChannelsDiags...)
 	config.AlertChannels = alertChannels
-
-	if model.TimeThreshold != nil && model.TimeThreshold.ViolationsInSequence != nil {
-		violations := model.TimeThreshold.ViolationsInSequence
-		if !violations.TimeWindow.IsNull() && !violations.TimeWindow.IsUnknown() && config.Granularity > 0 {
-			if violations.TimeWindow.ValueInt64()/int64(config.Granularity) > 12 {
-				diags.AddError(
-					LogAlertConfigErrInvalidTimeWindow,
-					LogAlertConfigErrInvalidTimeWindowMsg,
-				)
-				return nil, diags
-			}
-		}
-	}
 
 	config.TimeThreshold = r.mapModelTimeThresholdToAPI(model.TimeThreshold)
 
