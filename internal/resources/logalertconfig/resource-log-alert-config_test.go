@@ -5,7 +5,9 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/instana-go-client/api"
@@ -930,6 +932,150 @@ func TestMapStateToDataObject_WithNullTimeWindowInTimeThreshold(t *testing.T) {
 	require.False(t, diags.HasError())
 	require.NotNil(t, result)
 	assert.Nil(t, result.TimeThreshold)
+}
+
+func TestTimeWindowGranularityValidator(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("valid when time_window / granularity <= 12", func(t *testing.T) {
+		resp := runTimeWindowGranularityValidator(
+			t,
+			ctx,
+			LogAlertConfigModel{
+				Name:        types.StringValue("Test"),
+				Description: types.StringValue("Test"),
+				Granularity: types.Int64Value(60000),
+				TimeThreshold: &TimeThresholdModel{
+					ViolationsInSequence: &ViolationsInSequenceModel{
+						TimeWindow: types.Int64Value(720000), // 12x
+					},
+				},
+			},
+			types.Int64Value(720000),
+		)
+		assert.False(t, resp.Diagnostics.HasError())
+	})
+
+	t.Run("invalid when time_window / granularity > 12", func(t *testing.T) {
+		resp := runTimeWindowGranularityValidator(
+			t,
+			ctx,
+			LogAlertConfigModel{
+				Name:        types.StringValue("Test"),
+				Description: types.StringValue("Test"),
+				Granularity: types.Int64Value(60000),
+				TimeThreshold: &TimeThresholdModel{
+					ViolationsInSequence: &ViolationsInSequenceModel{
+						TimeWindow: types.Int64Value(780000), // 13x > 12
+					},
+				},
+			},
+			types.Int64Value(780000),
+		)
+		assert.True(t, resp.Diagnostics.HasError())
+		assert.Equal(t, LogAlertConfigErrInvalidTimeWindow, resp.Diagnostics[0].Summary())
+		assert.Equal(t, LogAlertConfigErrInvalidTimeWindowMsg, resp.Diagnostics[0].Detail())
+	})
+
+	t.Run("uses DefaultGranularity when granularity is null", func(t *testing.T) {
+		// DefaultGranularity = 600000 (10 min). 7200000 / 600000 = 12 (valid)
+		respValid := runTimeWindowGranularityValidator(
+			t,
+			ctx,
+			LogAlertConfigModel{
+				Name:        types.StringValue("Test"),
+				Description: types.StringValue("Test"),
+				Granularity: types.Int64Null(),
+				TimeThreshold: &TimeThresholdModel{
+					ViolationsInSequence: &ViolationsInSequenceModel{
+						TimeWindow: types.Int64Value(7200000),
+					},
+				},
+			},
+			types.Int64Value(7200000),
+		)
+		assert.False(t, respValid.Diagnostics.HasError())
+
+		// 7800000 / 600000 = 13 > 12 (invalid)
+		respInvalid := runTimeWindowGranularityValidator(
+			t,
+			ctx,
+			LogAlertConfigModel{
+				Name:        types.StringValue("Test"),
+				Description: types.StringValue("Test"),
+				Granularity: types.Int64Null(),
+				TimeThreshold: &TimeThresholdModel{
+					ViolationsInSequence: &ViolationsInSequenceModel{
+						TimeWindow: types.Int64Value(7800000),
+					},
+				},
+			},
+			types.Int64Value(7800000),
+		)
+		assert.True(t, respInvalid.Diagnostics.HasError())
+	})
+
+	t.Run("ignores null or unknown config value", func(t *testing.T) {
+		resp := validator.Int64Response{}
+		timeWindowGranularityValidator{}.ValidateInt64(
+			ctx,
+			validator.Int64Request{
+				ConfigValue: types.Int64Null(),
+				Path:        path.Root(LogAlertConfigFieldTimeThreshold).AtName(LogAlertConfigFieldTimeThresholdViolationsInSequence).AtName(LogAlertConfigFieldTimeThresholdTimeWindow),
+			},
+			&resp,
+		)
+		assert.False(t, resp.Diagnostics.HasError())
+	})
+
+	t.Run("descriptions", func(t *testing.T) {
+		v := timeWindowGranularityValidator{}
+		assert.NotEmpty(t, v.Description(ctx))
+		assert.NotEmpty(t, v.MarkdownDescription(ctx))
+	})
+}
+
+func runTimeWindowGranularityValidator(
+	t *testing.T,
+	ctx context.Context,
+	model LogAlertConfigModel,
+	configValue types.Int64,
+) validator.Int64Response {
+	t.Helper()
+
+	// Populate required fields if not provided to allow plan.Set to succeed
+	if model.CustomPayloadFields.IsNull() {
+		model.CustomPayloadFields = types.ListNull(shared.GetCustomPayloadFieldType())
+	}
+	if model.ID.IsNull() {
+		model.ID = types.StringValue("test-id")
+	}
+
+	handle := NewLogAlertConfigResourceHandle()
+	plan := &tfsdk.Plan{
+		Schema: handle.MetaData().Schema,
+	}
+
+	diags := plan.Set(ctx, &model)
+	require.False(t, diags.HasError(), "plan.Set failed: %v", diags)
+
+	config := tfsdk.Config{
+		Raw:    plan.Raw,
+		Schema: plan.Schema,
+	}
+
+	resp := validator.Int64Response{}
+	timeWindowGranularityValidator{}.ValidateInt64(
+		ctx,
+		validator.Int64Request{
+			Config:      config,
+			ConfigValue: configValue,
+			Path:        path.Root(LogAlertConfigFieldTimeThreshold).AtName(LogAlertConfigFieldTimeThresholdViolationsInSequence).AtName(LogAlertConfigFieldTimeThresholdTimeWindow),
+		},
+		&resp,
+	)
+
+	return resp
 }
 
 func TestUpdateState_WithEmptyRules(t *testing.T) {
