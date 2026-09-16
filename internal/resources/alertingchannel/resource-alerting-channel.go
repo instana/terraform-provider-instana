@@ -342,6 +342,71 @@ func NewAlertingChannelResourceHandle() resourcehandle.ResourceHandle[*api.Alert
 							},
 						},
 					},
+					AlertingChannelFieldChannelZChatOps: schema.SingleNestedAttribute{
+						Optional:    true,
+						Description: AlertingChannelDescZChatOps,
+						Attributes: map[string]schema.Attribute{
+							AlertingChannelZChatOpsFieldIncidentsURL: schema.StringAttribute{
+								Required:    true,
+								Description: AlertingChannelDescZChatOpsIncidentsURL,
+							},
+							AlertingChannelZChatOpsFieldBearerAuthToken: schema.StringAttribute{
+								Required:    true,
+								Sensitive:   true,
+								Description: AlertingChannelDescZChatOpsBearerAuthToken,
+								PlanModifiers: []planmodifier.String{
+									stringplanmodifier.UseStateForUnknown(),
+								},
+							},
+							AlertingChannelZChatOpsFieldChannels: schema.SetAttribute{
+								Required:    true,
+								Description: AlertingChannelDescZChatOpsChannels,
+								ElementType: types.StringType,
+							},
+						},
+					},
+					AlertingChannelFieldChannelSalesforce: schema.SingleNestedAttribute{
+						Optional:    true,
+						Description: AlertingChannelDescSalesforce,
+						Attributes: map[string]schema.Attribute{
+							AlertingChannelSalesforceFieldURL: schema.StringAttribute{
+								Required:    true,
+								Description: AlertingChannelDescSalesforceURL,
+							},
+							AlertingChannelSalesforceFieldClientID: schema.StringAttribute{
+								Required:    true,
+								Description: AlertingChannelDescSalesforceClientID,
+							},
+							AlertingChannelSalesforceFieldClientSecret: schema.StringAttribute{
+								Required:    true,
+								Sensitive:   true,
+								Description: AlertingChannelDescSalesforceClientSecret,
+								PlanModifiers: []planmodifier.String{
+									stringplanmodifier.UseStateForUnknown(),
+								},
+							},
+						},
+					},
+					AlertingChannelFieldChannelNS1: schema.SingleNestedAttribute{
+						Optional:    true,
+						Description: AlertingChannelDescNS1,
+						Attributes: map[string]schema.Attribute{
+							AlertingChannelWebhookFieldWebhookURLs: schema.SetAttribute{
+								Required:    true,
+								Description: AlertingChannelDescNS1WebhookURLs,
+								ElementType: types.StringType,
+							},
+							AlertingChannelNS1FieldFeedLabel: schema.StringAttribute{
+								Required:    true,
+								Description: AlertingChannelDescNS1FeedLabel,
+							},
+							AlertingChannelWebhookFieldHTTPHeaders: schema.SetAttribute{
+								Optional:    true,
+								Description: AlertingChannelDescNS1Headers,
+								ElementType: types.StringType,
+							},
+						},
+					},
 					AlertingChannelFieldChannelMsTeamsApp: schema.SingleNestedAttribute{
 						Optional:    true,
 						Description: AlertingChannelDescMsTeamsApp,
@@ -545,6 +610,12 @@ func (r *alertingChannelResource) mapChannelTypeToModel(ctx context.Context, ale
 		return r.mapSlackAppToModel(ctx, alertingChannel, model)
 	case api.MsTeamsAppChannelType:
 		return r.mapMsTeamsAppToModel(ctx, alertingChannel, model)
+	case api.ZChatOpsChannelType:
+		return r.mapZChatOpsToModel(ctx, alertingChannel, model)
+	case api.SalesforceChannelType:
+		return r.mapSalesforceToModel(ctx, alertingChannel, model)
+	case api.NS1ChannelType:
+		return r.mapNS1ToModel(ctx, alertingChannel, model)
 	default:
 		diags.AddError(
 			AlertingChannelErrUnsupportedType,
@@ -679,6 +750,30 @@ func (r *alertingChannelResource) mapMsTeamsAppToModel(ctx context.Context, chan
 	msTeamsAppChannel, diags := shared.MapMsTeamsAppChannelToState(ctx, channel)
 	if !diags.HasError() {
 		model.MsTeamsApp = msTeamsAppChannel
+	}
+	return diags
+}
+
+func (r *alertingChannelResource) mapZChatOpsToModel(ctx context.Context, channel *api.AlertingChannel, model *AlertingChannelModel) diag.Diagnostics {
+	zChatOpsChannel, diags := shared.MapZChatOpsChannelToState(ctx, channel)
+	if !diags.HasError() {
+		model.ZChatOps = zChatOpsChannel
+	}
+	return diags
+}
+
+func (r *alertingChannelResource) mapSalesforceToModel(ctx context.Context, channel *api.AlertingChannel, model *AlertingChannelModel) diag.Diagnostics {
+	salesforceChannel, diags := shared.MapSalesforceChannelToState(ctx, channel)
+	if !diags.HasError() {
+		model.Salesforce = salesforceChannel
+	}
+	return diags
+}
+
+func (r *alertingChannelResource) mapNS1ToModel(ctx context.Context, channel *api.AlertingChannel, model *AlertingChannelModel) diag.Diagnostics {
+	ns1Channel, diags := shared.MapNS1ChannelToState(ctx, channel)
+	if !diags.HasError() {
+		model.NS1 = ns1Channel
 	}
 	return diags
 }
@@ -1067,6 +1162,75 @@ func (r *alertingChannelResource) mapMsTeamsAppChannelFromState(ctx context.Cont
 	return result, nil
 }
 
+// mapZChatOpsChannelFromState converts IBM Z ChatOps channel state to API object
+func (r *alertingChannelResource) mapZChatOpsChannelFromState(ctx context.Context, id string, name string, zChatOps *shared.ZChatOpsModel) (*api.AlertingChannel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	var channels []string
+	diags.Append(zChatOps.Channels.ElementsAs(ctx, &channels, false)...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	incidentsURL := zChatOps.ZChatOpsIncidentsURL.ValueString()
+	bearerAuthToken := zChatOps.BearerAuthToken.ValueString()
+
+	return &api.AlertingChannel{
+		ID:                   id,
+		Name:                 name,
+		Kind:                 api.ZChatOpsChannelType,
+		ZChatOpsIncidentsURL: &incidentsURL,
+		BearerAuthToken:      &bearerAuthToken,
+		Channels:             channels,
+	}, diags
+}
+
+// mapSalesforceChannelFromState converts Salesforce channel state to API object
+func (r *alertingChannelResource) mapSalesforceChannelFromState(ctx context.Context, id string, name string, salesforce *shared.SalesforceModel) (*api.AlertingChannel, diag.Diagnostics) {
+	salesforceURL := salesforce.SalesforceURL.ValueString()
+	clientID := salesforce.ClientID.ValueString()
+	clientSecret := salesforce.ClientSecret.ValueString()
+
+	return &api.AlertingChannel{
+		ID:            id,
+		Name:          name,
+		Kind:          api.SalesforceChannelType,
+		SalesforceURL: &salesforceURL,
+		ClientID:      &clientID,
+		ClientSecret:  &clientSecret,
+	}, nil
+}
+
+// mapNS1ChannelFromState converts IBM NS1 Connect channel state to API object
+func (r *alertingChannelResource) mapNS1ChannelFromState(ctx context.Context, id string, name string, ns1 *shared.NS1Model) (*api.AlertingChannel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	var webhookURLs []string
+	diags.Append(ns1.WebhookURLs.ElementsAs(ctx, &webhookURLs, false)...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	var headers []string
+	if !ns1.Headers.IsNull() && !ns1.Headers.IsUnknown() {
+		diags.Append(ns1.Headers.ElementsAs(ctx, &headers, false)...)
+		if diags.HasError() {
+			return nil, diags
+		}
+	}
+
+	feedLabel := ns1.FeedLabel.ValueString()
+
+	return &api.AlertingChannel{
+		ID:          id,
+		Name:        name,
+		Kind:        api.NS1ChannelType,
+		WebhookURLs: webhookURLs,
+		FeedLabel:   &feedLabel,
+		Headers:     headers,
+	}, diags
+}
+
 // ============================================================================
 // Main Mapping Method
 // ============================================================================
@@ -1170,6 +1334,15 @@ func (r *alertingChannelResource) mapConfiguredChannelType(ctx context.Context, 
 	}
 	if model.MsTeamsApp != nil {
 		return r.mapMsTeamsAppChannelFromState(ctx, id, name, model.MsTeamsApp)
+	}
+	if model.ZChatOps != nil {
+		return r.mapZChatOpsChannelFromState(ctx, id, name, model.ZChatOps)
+	}
+	if model.Salesforce != nil {
+		return r.mapSalesforceChannelFromState(ctx, id, name, model.Salesforce)
+	}
+	if model.NS1 != nil {
+		return r.mapNS1ChannelFromState(ctx, id, name, model.NS1)
 	}
 
 	// No valid channel type configured

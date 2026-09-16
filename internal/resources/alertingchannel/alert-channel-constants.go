@@ -132,6 +132,29 @@ const (
 
 	//AlertingChannelFieldChannelMsTeamsApp const for schema field of the MS Teams App channel
 	AlertingChannelFieldChannelMsTeamsApp = "ms_teams_app"
+
+	//AlertingChannelFieldChannelZChatOps const for schema field of the IBM Z ChatOps channel
+	AlertingChannelFieldChannelZChatOps = "z_chatops"
+	//AlertingChannelZChatOpsFieldIncidentsURL const for the zchatOpsIncidentsUrl field of the Z ChatOps alerting channel
+	AlertingChannelZChatOpsFieldIncidentsURL = "zchatops_incidents_url"
+	//AlertingChannelZChatOpsFieldBearerAuthToken const for the bearerAuthToken field of the Z ChatOps alerting channel
+	AlertingChannelZChatOpsFieldBearerAuthToken = "bearer_auth_token"
+	//AlertingChannelZChatOpsFieldChannels const for the channels field of the Z ChatOps alerting channel
+	AlertingChannelZChatOpsFieldChannels = "channels"
+
+	//AlertingChannelFieldChannelSalesforce const for schema field of the Salesforce channel
+	AlertingChannelFieldChannelSalesforce = "salesforce"
+	//AlertingChannelSalesforceFieldURL const for the salesforceUrl field of the Salesforce alerting channel
+	AlertingChannelSalesforceFieldURL = "salesforce_url"
+	//AlertingChannelSalesforceFieldClientID const for the clientId field of the Salesforce alerting channel
+	AlertingChannelSalesforceFieldClientID = "client_id"
+	//AlertingChannelSalesforceFieldClientSecret const for the clientSecret field of the Salesforce alerting channel
+	AlertingChannelSalesforceFieldClientSecret = "client_secret"
+
+	//AlertingChannelFieldChannelNS1 const for schema field of the IBM NS1 Connect channel
+	AlertingChannelFieldChannelNS1 = "ns1"
+	//AlertingChannelNS1FieldFeedLabel const for the feedLabel field of the NS1 alerting channel
+	AlertingChannelNS1FieldFeedLabel = "feed_label"
 	//AlertingChannelMsTeamsAppFieldAPITokenID const for the apiTokenId field of the MS Teams App alerting channel
 	AlertingChannelMsTeamsAppFieldAPITokenID = "api_token_id"
 	//AlertingChannelMsTeamsAppFieldTeamID const for the teamId field of the MS Teams App alerting channel
@@ -221,6 +244,18 @@ const (
 	AlertingChannelDescSlackAppChannelID           = "The Channel ID of the Slack App alerting channel"
 	AlertingChannelDescSlackAppChannelName         = "The Channel Name of the Slack App alerting channel"
 	AlertingChannelDescSlackAppEmojiRendering      = "Whether to enable emoji rendering in the Slack App alerting channel"
+	AlertingChannelDescZChatOps                    = "The configuration of the IBM Z ChatOps channel"
+	AlertingChannelDescZChatOpsIncidentsURL        = "The Z ChatOps incidents URL"
+	AlertingChannelDescZChatOpsBearerAuthToken     = "The bearer auth token for the IBM Z ChatOps alerting channel"
+	AlertingChannelDescZChatOpsChannels            = "The list of Z ChatOps channels"
+	AlertingChannelDescSalesforce                  = "The configuration of the Salesforce channel"
+	AlertingChannelDescSalesforceURL               = "The Salesforce instance URL"
+	AlertingChannelDescSalesforceClientID          = "The Salesforce OAuth client ID"
+	AlertingChannelDescSalesforceClientSecret      = "The Salesforce OAuth client secret"
+	AlertingChannelDescNS1                         = "The configuration of the IBM NS1 Connect channel"
+	AlertingChannelDescNS1WebhookURLs              = "The list of webhook URLs for the NS1 Connect alerting channel"
+	AlertingChannelDescNS1FeedLabel                = "The NS1 Connect feed label"
+	AlertingChannelDescNS1Headers                  = "The list of HTTP headers for the NS1 Connect alerting channel (format: 'key: value')"
 	AlertingChannelDescMsTeamsApp                  = "The configuration of the MS Teams App (bidirectional) channel"
 	AlertingChannelDescMsTeamsAppAPITokenID        = "The API Token ID of the MS Teams App alerting channel"
 	AlertingChannelDescMsTeamsAppTeamID            = "The Team ID of the MS Teams App alerting channel"

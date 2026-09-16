@@ -109,6 +109,27 @@ type MsTeamsAppModel struct {
 	TenantName  types.String `tfsdk:"tenant_name"`
 }
 
+// ZChatOpsModel represents the IBM Z ChatOps alerting channel configuration
+type ZChatOpsModel struct {
+	ZChatOpsIncidentsURL types.String `tfsdk:"zchatops_incidents_url"`
+	BearerAuthToken      types.String `tfsdk:"bearer_auth_token"`
+	Channels             types.Set    `tfsdk:"channels"`
+}
+
+// SalesforceModel represents the Salesforce alerting channel configuration
+type SalesforceModel struct {
+	SalesforceURL types.String `tfsdk:"salesforce_url"`
+	ClientID      types.String `tfsdk:"client_id"`
+	ClientSecret  types.String `tfsdk:"client_secret"`
+}
+
+// NS1Model represents the IBM NS1 Connect alerting channel configuration
+type NS1Model struct {
+	WebhookURLs types.Set    `tfsdk:"webhook_urls"`
+	FeedLabel   types.String `tfsdk:"feed_label"`
+	Headers     types.Set    `tfsdk:"http_headers"`
+}
+
 func MapAlertChannelsToState(ctx context.Context, alertChannels map[common.AlertSeverity][]string) (types.Object, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
@@ -518,6 +539,63 @@ func MapMsTeamsAppChannelToState(ctx context.Context, channel *api.AlertingChann
 		ServiceURL:  util.SetStringPointerToState(channel.ServiceURL),
 		TenantID:    util.SetStringPointerToState(channel.TenantID),
 		TenantName:  util.SetStringPointerToState(channel.TenantName),
+	}
+
+	return model, diags
+}
+
+// MapZChatOpsChannelToState maps an IBM Z ChatOps AlertingChannel API object to its Terraform state model.
+func MapZChatOpsChannelToState(ctx context.Context, channel *api.AlertingChannel) (*ZChatOpsModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	channelsSet, setDiags := types.SetValueFrom(ctx, types.StringType, channel.Channels)
+	diags.Append(setDiags...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	model := &ZChatOpsModel{
+		ZChatOpsIncidentsURL: util.SetStringPointerToState(channel.ZChatOpsIncidentsURL),
+		BearerAuthToken:      util.SetStringPointerToState(channel.BearerAuthToken),
+		Channels:             channelsSet,
+	}
+
+	return model, diags
+}
+
+// MapSalesforceChannelToState maps a Salesforce AlertingChannel API object to its Terraform state model.
+func MapSalesforceChannelToState(ctx context.Context, channel *api.AlertingChannel) (*SalesforceModel, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	model := &SalesforceModel{
+		SalesforceURL: util.SetStringPointerToState(channel.SalesforceURL),
+		ClientID:      util.SetStringPointerToState(channel.ClientID),
+		ClientSecret:  util.SetStringPointerToState(channel.ClientSecret),
+	}
+
+	return model, diags
+}
+
+// MapNS1ChannelToState maps an IBM NS1 Connect AlertingChannel API object to its Terraform state model.
+func MapNS1ChannelToState(ctx context.Context, channel *api.AlertingChannel) (*NS1Model, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	webhookURLsSet, setDiags := types.SetValueFrom(ctx, types.StringType, channel.WebhookURLs)
+	diags.Append(setDiags...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	headersSet, setDiags := types.SetValueFrom(ctx, types.StringType, channel.Headers)
+	diags.Append(setDiags...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	model := &NS1Model{
+		WebhookURLs: webhookURLsSet,
+		FeedLabel:   util.SetStringPointerToState(channel.FeedLabel),
+		Headers:     headersSet,
 	}
 
 	return model, diags

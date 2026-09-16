@@ -429,6 +429,96 @@ func TestMapWatsonAIOpsWebhookChannelFromState(t *testing.T) {
 	})
 }
 
+func TestMapZChatOpsChannelFromState(t *testing.T) {
+	resource := &alertingChannelResource{}
+	ctx := context.Background()
+
+	channels := []string{"test", "test2"}
+	channelsSet, _ := types.SetValueFrom(ctx, types.StringType, channels)
+
+	model := &shared.ZChatOpsModel{
+		ZChatOpsIncidentsURL: types.StringValue("https://z-chatops.example.com/incidents"),
+		BearerAuthToken:      types.StringValue("token123"),
+		Channels:             channelsSet,
+	}
+
+	channel, diags := resource.mapZChatOpsChannelFromState(ctx, "test-id", "test-name", model)
+	require.False(t, diags.HasError())
+	require.NotNil(t, channel)
+	assert.Equal(t, "test-id", channel.ID)
+	assert.Equal(t, "test-name", channel.Name)
+	assert.Equal(t, api.ZChatOpsChannelType, channel.Kind)
+	assert.Equal(t, "https://z-chatops.example.com/incidents", *channel.ZChatOpsIncidentsURL)
+	assert.Equal(t, "token123", *channel.BearerAuthToken)
+	assert.Equal(t, channels, channel.Channels)
+}
+
+func TestMapSalesforceChannelFromState(t *testing.T) {
+	resource := &alertingChannelResource{}
+	ctx := context.Background()
+
+	model := &shared.SalesforceModel{
+		SalesforceURL: types.StringValue("https://example.my.salesforce.com"),
+		ClientID:      types.StringValue("key"),
+		ClientSecret:  types.StringValue("secret"),
+	}
+
+	channel, diags := resource.mapSalesforceChannelFromState(ctx, "test-id", "test-name", model)
+	require.False(t, diags.HasError())
+	require.NotNil(t, channel)
+	assert.Equal(t, "test-id", channel.ID)
+	assert.Equal(t, "test-name", channel.Name)
+	assert.Equal(t, api.SalesforceChannelType, channel.Kind)
+	assert.Equal(t, "https://example.my.salesforce.com", *channel.SalesforceURL)
+	assert.Equal(t, "key", *channel.ClientID)
+	assert.Equal(t, "secret", *channel.ClientSecret)
+}
+
+func TestMapNS1ChannelFromState(t *testing.T) {
+	resource := &alertingChannelResource{}
+	ctx := context.Background()
+
+	t.Run("with headers", func(t *testing.T) {
+		webhookURLs := []string{"https://example.com/webhook"}
+		webhookURLsSet, _ := types.SetValueFrom(ctx, types.StringType, webhookURLs)
+		headers := []string{"headerkey: headervalue"}
+		headersSet, _ := types.SetValueFrom(ctx, types.StringType, headers)
+
+		model := &shared.NS1Model{
+			WebhookURLs: webhookURLsSet,
+			FeedLabel:   types.StringValue("Feedlabel"),
+			Headers:     headersSet,
+		}
+
+		channel, diags := resource.mapNS1ChannelFromState(ctx, "test-id", "test-name", model)
+		require.False(t, diags.HasError())
+		require.NotNil(t, channel)
+		assert.Equal(t, "test-id", channel.ID)
+		assert.Equal(t, "test-name", channel.Name)
+		assert.Equal(t, api.NS1ChannelType, channel.Kind)
+		assert.Equal(t, webhookURLs, channel.WebhookURLs)
+		assert.Equal(t, "Feedlabel", *channel.FeedLabel)
+		assert.Equal(t, headers, channel.Headers)
+	})
+
+	t.Run("without headers", func(t *testing.T) {
+		webhookURLs := []string{"https://example.com/webhook"}
+		webhookURLsSet, _ := types.SetValueFrom(ctx, types.StringType, webhookURLs)
+
+		model := &shared.NS1Model{
+			WebhookURLs: webhookURLsSet,
+			FeedLabel:   types.StringValue("Feedlabel"),
+			Headers:     types.SetNull(types.StringType),
+		}
+
+		channel, diags := resource.mapNS1ChannelFromState(ctx, "test-id", "test-name", model)
+		require.False(t, diags.HasError())
+		require.NotNil(t, channel)
+		assert.Equal(t, api.NS1ChannelType, channel.Kind)
+		assert.Nil(t, channel.Headers)
+	})
+}
+
 func TestMapStateToDataObject(t *testing.T) {
 	resource := &alertingChannelResource{}
 	ctx := context.Background()
@@ -819,6 +909,97 @@ func TestMapStateToDataObject(t *testing.T) {
 		assert.Equal(t, api.WatsonAIOpsWebhookChannelType, channel.Kind)
 	})
 
+	t.Run("ZChatOps channel", func(t *testing.T) {
+		tagAttrTypes := map[string]attr.Type{
+			AlertingChannelFieldRbacTagID:          types.StringType,
+			AlertingChannelFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
+		channelsSet, _ := types.SetValueFrom(ctx, types.StringType, []string{"test"})
+		model := AlertingChannelModel{
+			ID:       types.StringValue("test-id"),
+			Name:     types.StringValue("test-name"),
+			RbacTags: emptyList,
+			ZChatOps: &shared.ZChatOpsModel{
+				ZChatOpsIncidentsURL: types.StringValue("https://z-chatops.example.com/incidents"),
+				BearerAuthToken:      types.StringValue("token123"),
+				Channels:             channelsSet,
+			},
+		}
+
+		state := createMockState(t, ctx, model)
+		channel, diags := resource.MapStateToDataObject(ctx, nil, state)
+		require.False(t, diags.HasError())
+		require.NotNil(t, channel)
+		assert.Equal(t, api.ZChatOpsChannelType, channel.Kind)
+		assert.Equal(t, "https://z-chatops.example.com/incidents", *channel.ZChatOpsIncidentsURL)
+		assert.Equal(t, "token123", *channel.BearerAuthToken)
+	})
+
+	t.Run("Salesforce channel", func(t *testing.T) {
+		tagAttrTypes := map[string]attr.Type{
+			AlertingChannelFieldRbacTagID:          types.StringType,
+			AlertingChannelFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
+		model := AlertingChannelModel{
+			ID:       types.StringValue("test-id"),
+			Name:     types.StringValue("test-name"),
+			RbacTags: emptyList,
+			Salesforce: &shared.SalesforceModel{
+				SalesforceURL: types.StringValue("https://example.my.salesforce.com"),
+				ClientID:      types.StringValue("key"),
+				ClientSecret:  types.StringValue("secret"),
+			},
+		}
+
+		state := createMockState(t, ctx, model)
+		channel, diags := resource.MapStateToDataObject(ctx, nil, state)
+		require.False(t, diags.HasError())
+		require.NotNil(t, channel)
+		assert.Equal(t, api.SalesforceChannelType, channel.Kind)
+		assert.Equal(t, "https://example.my.salesforce.com", *channel.SalesforceURL)
+	})
+
+	t.Run("NS1 channel", func(t *testing.T) {
+		tagAttrTypes := map[string]attr.Type{
+			AlertingChannelFieldRbacTagID:          types.StringType,
+			AlertingChannelFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
+		webhookURLsSet, _ := types.SetValueFrom(ctx, types.StringType, []string{"https://example.com/webhook"})
+		headersSet, _ := types.SetValueFrom(ctx, types.StringType, []string{"headerkey: headervalue"})
+		model := AlertingChannelModel{
+			ID:       types.StringValue("test-id"),
+			Name:     types.StringValue("test-name"),
+			RbacTags: emptyList,
+			NS1: &shared.NS1Model{
+				WebhookURLs: webhookURLsSet,
+				FeedLabel:   types.StringValue("Feedlabel"),
+				Headers:     headersSet,
+			},
+		}
+
+		state := createMockState(t, ctx, model)
+		channel, diags := resource.MapStateToDataObject(ctx, nil, state)
+		require.False(t, diags.HasError())
+		require.NotNil(t, channel)
+		assert.Equal(t, api.NS1ChannelType, channel.Kind)
+		assert.Equal(t, "Feedlabel", *channel.FeedLabel)
+	})
+
 	t.Run("No channel configured", func(t *testing.T) {
 		tagAttrTypes := map[string]attr.Type{
 			AlertingChannelFieldRbacTagID:          types.StringType,
@@ -1200,6 +1381,93 @@ func TestUpdateState(t *testing.T) {
 		diags = state.Get(ctx, &model)
 		require.False(t, diags.HasError())
 		assert.NotNil(t, model.WatsonAIOpsWebhook)
+	})
+
+	t.Run("ZChatOps channel", func(t *testing.T) {
+		resource := &alertingChannelResource{}
+		incidentsURL := "https://z-chatops.example.com/incidents"
+		bearerToken := "token123"
+		apiChannel := &api.AlertingChannel{
+			ID:                   "test-id",
+			Name:                 "test-name",
+			Kind:                 api.ZChatOpsChannelType,
+			ZChatOpsIncidentsURL: &incidentsURL,
+			BearerAuthToken:      &bearerToken,
+			Channels:             []string{"test"},
+		}
+
+		handle := NewAlertingChannelResourceHandle()
+		state := &tfsdk.State{
+			Schema: handle.MetaData().Schema,
+		}
+
+		diags := resource.UpdateState(ctx, state, nil, apiChannel)
+		require.False(t, diags.HasError())
+
+		var model AlertingChannelModel
+		diags = state.Get(ctx, &model)
+		require.False(t, diags.HasError())
+		assert.NotNil(t, model.ZChatOps)
+		assert.Equal(t, incidentsURL, model.ZChatOps.ZChatOpsIncidentsURL.ValueString())
+		assert.Equal(t, bearerToken, model.ZChatOps.BearerAuthToken.ValueString())
+	})
+
+	t.Run("Salesforce channel", func(t *testing.T) {
+		resource := &alertingChannelResource{}
+		sfURL := "https://example.my.salesforce.com"
+		clientID := "key"
+		clientSecret := "secret"
+		apiChannel := &api.AlertingChannel{
+			ID:            "test-id",
+			Name:          "test-name",
+			Kind:          api.SalesforceChannelType,
+			SalesforceURL: &sfURL,
+			ClientID:      &clientID,
+			ClientSecret:  &clientSecret,
+		}
+
+		handle := NewAlertingChannelResourceHandle()
+		state := &tfsdk.State{
+			Schema: handle.MetaData().Schema,
+		}
+
+		diags := resource.UpdateState(ctx, state, nil, apiChannel)
+		require.False(t, diags.HasError())
+
+		var model AlertingChannelModel
+		diags = state.Get(ctx, &model)
+		require.False(t, diags.HasError())
+		assert.NotNil(t, model.Salesforce)
+		assert.Equal(t, sfURL, model.Salesforce.SalesforceURL.ValueString())
+		assert.Equal(t, clientID, model.Salesforce.ClientID.ValueString())
+		assert.Equal(t, clientSecret, model.Salesforce.ClientSecret.ValueString())
+	})
+
+	t.Run("NS1 channel", func(t *testing.T) {
+		resource := &alertingChannelResource{}
+		feedLabel := "Feedlabel"
+		apiChannel := &api.AlertingChannel{
+			ID:          "test-id",
+			Name:        "test-name",
+			Kind:        api.NS1ChannelType,
+			WebhookURLs: []string{"https://example.com/webhook"},
+			FeedLabel:   &feedLabel,
+			Headers:     []string{"headerkey: headervalue"},
+		}
+
+		handle := NewAlertingChannelResourceHandle()
+		state := &tfsdk.State{
+			Schema: handle.MetaData().Schema,
+		}
+
+		diags := resource.UpdateState(ctx, state, nil, apiChannel)
+		require.False(t, diags.HasError())
+
+		var model AlertingChannelModel
+		diags = state.Get(ctx, &model)
+		require.False(t, diags.HasError())
+		assert.NotNil(t, model.NS1)
+		assert.Equal(t, feedLabel, model.NS1.FeedLabel.ValueString())
 	})
 
 	t.Run("Unsupported channel type", func(t *testing.T) {
