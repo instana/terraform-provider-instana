@@ -320,12 +320,32 @@ func NewAPITokenResourceHandle() resourcehandle.ResourceHandle[*restapi.APIToken
 						Description: APITokenDescLimitedServiceLevelScope,
 					},
 					APITokenFieldLimitedAiGatewayScope: schema.BoolAttribute{
-						Optional:    true,
-						Computed:    true,
-						Description: APITokenDescLimitedAiGatewayScope,
-					},
-
-					// Additional permissions
+							Optional:    true,
+							Computed:    true,
+							Description: APITokenDescLimitedAiGatewayScope,
+						},
+						APITokenFieldLimitedGenAIScope: schema.BoolAttribute{
+							Optional:    true,
+							Computed:    true,
+							Description: APITokenDescLimitedGenAIScope,
+						},
+						APITokenFieldLimitedSAPScope: schema.BoolAttribute{
+							Optional:    true,
+							Computed:    true,
+							Description: APITokenDescLimitedSAPScope,
+						},
+						APITokenFieldLimitedGenAICapabilitiesScope: schema.BoolAttribute{
+							Optional:    true,
+							Computed:    true,
+							Description: APITokenDescLimitedGenAICapabilitiesScope,
+						},
+						APITokenFieldLimitedLoggingPerspectivesScope: schema.BoolAttribute{
+							Optional:    true,
+							Computed:    true,
+							Description: APITokenDescLimitedLoggingPerspectivesScope,
+						},
+	
+						// Additional permissions
 					APITokenFieldCanConfigurePersonalAPITokens: schema.BoolAttribute{
 						Optional:    true,
 						Computed:    true,
@@ -552,12 +572,57 @@ func NewAPITokenResourceHandle() resourcehandle.ResourceHandle[*restapi.APIToken
 						Description: APITokenDescCanConfigureServiceLevelSmartAlerts,
 					},
 					APITokenFieldCanConfigureServiceLevels: schema.BoolAttribute{
-						Optional:    true,
-						Computed:    true,
-						Description: APITokenDescCanConfigureServiceLevels,
+							Optional:    true,
+							Computed:    true,
+							Description: APITokenDescCanConfigureServiceLevels,
+						},
+						APITokenFieldCanConfigureNetworkIntegrations: schema.BoolAttribute{
+							Optional:    true,
+							Computed:    true,
+							Description: APITokenDescCanConfigureNetworkIntegrations,
+						},
+						APITokenFieldCanConfigureLoggingPerspectives: schema.BoolAttribute{
+							Optional:    true,
+							Computed:    true,
+							Description: APITokenDescCanConfigureLoggingPerspectives,
+						},
+						APITokenFieldCanConfigureEntityPayloadTransformationRules: schema.BoolAttribute{
+							Optional:    true,
+							Computed:    true,
+							Description: APITokenDescCanConfigureEntityPayloadTransformationRules,
+						},
+						APITokenFieldCanConfigureGenAIEvaluations: schema.BoolAttribute{
+							Optional:    true,
+							Computed:    true,
+							Description: APITokenDescCanConfigureGenAIEvaluations,
+						},
+						APITokenFieldCanConfigureGenAISmartAlerts: schema.BoolAttribute{
+							Optional:    true,
+							Computed:    true,
+							Description: APITokenDescCanConfigureGenAISmartAlerts,
+						},
+						APITokenFieldCanConfigureApplicationBusinessCriticality: schema.BoolAttribute{
+							Optional:    true,
+							Computed:    true,
+							Description: APITokenDescCanConfigureApplicationBusinessCriticality,
+						},
+						APITokenFieldCanConfigureWebsiteBusinessCriticality: schema.BoolAttribute{
+							Optional:    true,
+							Computed:    true,
+							Description: APITokenDescCanConfigureWebsiteBusinessCriticality,
+						},
+						APITokenFieldCanConfigureMobileAppBusinessCriticality: schema.BoolAttribute{
+							Optional:    true,
+							Computed:    true,
+							Description: APITokenDescCanConfigureMobileAppBusinessCriticality,
+						},
+						APITokenFieldCanPlaybackSessionReplay: schema.BoolAttribute{
+							Optional:    true,
+							Computed:    true,
+							Description: APITokenDescCanPlaybackSessionReplay,
+						},
 					},
 				},
-			},
 			SkipIDGeneration: true,
 			SchemaVersion:    3,
 			ResourceIDField:  &internalIDFieldName,
@@ -677,6 +742,10 @@ func (r *apiTokenResource) mapScopeLimitationsToModel(apiToken *restapi.APIToken
 	model.LimitedLinuxKvmHypervisorScope = types.BoolValue(apiToken.LimitedLinuxKvmHypervisorScope)
 	model.LimitedServiceLevelScope = types.BoolValue(apiToken.LimitedServiceLevelScope)
 	model.LimitedAiGatewayScope = types.BoolValue(apiToken.LimitedAiGatewayScope)
+	model.LimitedGenAIScope = types.BoolValue(apiToken.LimitedGenAIScope)
+	model.LimitedSAPScope = types.BoolValue(apiToken.LimitedSAPScope)
+	model.LimitedGenAICapabilitiesScope = types.BoolValue(apiToken.LimitedGenAICapabilitiesScope)
+	model.LimitedLoggingPerspectivesScope = types.BoolValue(apiToken.LimitedLoggingPerspectivesScope)
 }
 
 // mapAdditionalPermissionsToModel maps additional permissions from API to model
@@ -720,6 +789,15 @@ func (r *apiTokenResource) mapAdditionalPermissionsToModel(apiToken *restapi.API
 	model.CanConfigureServiceLevelCorrectionWindows = types.BoolValue(apiToken.CanConfigureServiceLevelCorrectionWindows)
 	model.CanConfigureServiceLevelSmartAlerts = types.BoolValue(apiToken.CanConfigureServiceLevelSmartAlerts)
 	model.CanConfigureServiceLevels = types.BoolValue(apiToken.CanConfigureServiceLevels)
+	model.CanConfigureNetworkIntegrations = types.BoolValue(apiToken.CanConfigureNetworkIntegrations)
+	model.CanConfigureLoggingPerspectives = types.BoolValue(apiToken.CanConfigureLoggingPerspectives)
+	model.CanConfigureEntityPayloadTransformationRules = types.BoolValue(apiToken.CanConfigureEntityPayloadTransformationRules)
+	model.CanConfigureGenAIEvaluations = types.BoolValue(apiToken.CanConfigureGenAIEvaluations)
+	model.CanConfigureGenAISmartAlerts = types.BoolValue(apiToken.CanConfigureGenAISmartAlerts)
+	model.CanConfigureApplicationBusinessCriticality = types.BoolValue(apiToken.CanConfigureApplicationBusinessCriticality)
+	model.CanConfigureWebsiteBusinessCriticality = types.BoolValue(apiToken.CanConfigureWebsiteBusinessCriticality)
+	model.CanConfigureMobileAppBusinessCriticality = types.BoolValue(apiToken.CanConfigureMobileAppBusinessCriticality)
+	model.CanPlaybackSessionReplay = types.BoolValue(apiToken.CanPlaybackSessionReplay)
 }
 
 // ============================================================================
@@ -827,6 +905,10 @@ func (r *apiTokenResource) mapScopeLimitationsFromModel(model APITokenModel, api
 	apiToken.LimitedLinuxKvmHypervisorScope = model.LimitedLinuxKvmHypervisorScope.ValueBool()
 	apiToken.LimitedServiceLevelScope = model.LimitedServiceLevelScope.ValueBool()
 	apiToken.LimitedAiGatewayScope = model.LimitedAiGatewayScope.ValueBool()
+	apiToken.LimitedGenAIScope = model.LimitedGenAIScope.ValueBool()
+	apiToken.LimitedSAPScope = model.LimitedSAPScope.ValueBool()
+	apiToken.LimitedGenAICapabilitiesScope = model.LimitedGenAICapabilitiesScope.ValueBool()
+	apiToken.LimitedLoggingPerspectivesScope = model.LimitedLoggingPerspectivesScope.ValueBool()
 }
 
 // mapAdditionalPermissionsFromModel maps additional permissions from model to API object
@@ -870,6 +952,15 @@ func (r *apiTokenResource) mapAdditionalPermissionsFromModel(model APITokenModel
 	apiToken.CanConfigureServiceLevelCorrectionWindows = model.CanConfigureServiceLevelCorrectionWindows.ValueBool()
 	apiToken.CanConfigureServiceLevelSmartAlerts = model.CanConfigureServiceLevelSmartAlerts.ValueBool()
 	apiToken.CanConfigureServiceLevels = model.CanConfigureServiceLevels.ValueBool()
+	apiToken.CanConfigureNetworkIntegrations = model.CanConfigureNetworkIntegrations.ValueBool()
+	apiToken.CanConfigureLoggingPerspectives = model.CanConfigureLoggingPerspectives.ValueBool()
+	apiToken.CanConfigureEntityPayloadTransformationRules = model.CanConfigureEntityPayloadTransformationRules.ValueBool()
+	apiToken.CanConfigureGenAIEvaluations = model.CanConfigureGenAIEvaluations.ValueBool()
+	apiToken.CanConfigureGenAISmartAlerts = model.CanConfigureGenAISmartAlerts.ValueBool()
+	apiToken.CanConfigureApplicationBusinessCriticality = model.CanConfigureApplicationBusinessCriticality.ValueBool()
+	apiToken.CanConfigureWebsiteBusinessCriticality = model.CanConfigureWebsiteBusinessCriticality.ValueBool()
+	apiToken.CanConfigureMobileAppBusinessCriticality = model.CanConfigureMobileAppBusinessCriticality.ValueBool()
+	apiToken.CanPlaybackSessionReplay = model.CanPlaybackSessionReplay.ValueBool()
 }
 
 // GetStateUpgraders returns the state upgraders for this resource
