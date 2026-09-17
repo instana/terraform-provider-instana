@@ -199,8 +199,10 @@ func TestMapWebhookChannelFromState(t *testing.T) {
 		headersMap, _ := types.MapValueFrom(ctx, types.StringType, headers)
 
 		webhookModel := &shared.WebhookModel{
-			WebhookURLs: webhookURLsSet,
-			HTTPHeaders: headersMap,
+			WebhookURLs:  webhookURLsSet,
+			HTTPHeaders:  headersMap,
+			OAuthEnabled: types.BoolNull(),
+			OAuth:        nil,
 		}
 
 		channel, diags := resource.mapWebhookChannelFromState(ctx, "test-id", "test-name", webhookModel)
@@ -211,6 +213,8 @@ func TestMapWebhookChannelFromState(t *testing.T) {
 		assert.Equal(t, api.WebhookChannelType, channel.Kind)
 		assert.Equal(t, webhookURLs, channel.WebhookURLs)
 		assert.Len(t, channel.Headers, 2)
+		assert.Nil(t, channel.OAuthEnabled)
+		assert.Nil(t, channel.OAuth)
 	})
 
 	t.Run("without headers", func(t *testing.T) {
@@ -218,8 +222,10 @@ func TestMapWebhookChannelFromState(t *testing.T) {
 		webhookURLsSet, _ := types.SetValueFrom(ctx, types.StringType, webhookURLs)
 
 		webhookModel := &shared.WebhookModel{
-			WebhookURLs: webhookURLsSet,
-			HTTPHeaders: types.MapNull(types.StringType),
+			WebhookURLs:  webhookURLsSet,
+			HTTPHeaders:  types.MapNull(types.StringType),
+			OAuthEnabled: types.BoolNull(),
+			OAuth:        nil,
 		}
 
 		channel, diags := resource.mapWebhookChannelFromState(ctx, "test-id", "test-name", webhookModel)
@@ -227,6 +233,74 @@ func TestMapWebhookChannelFromState(t *testing.T) {
 		require.NotNil(t, channel)
 		assert.Equal(t, api.WebhookChannelType, channel.Kind)
 		assert.Nil(t, channel.Headers)
+		assert.Nil(t, channel.OAuthEnabled)
+		assert.Nil(t, channel.OAuth)
+	})
+
+	t.Run("with oauth enabled and full config", func(t *testing.T) {
+		webhookURLs := []string{"https://webhook.example.com"}
+		webhookURLsSet, _ := types.SetValueFrom(ctx, types.StringType, webhookURLs)
+
+		additionalParams := map[string]string{
+			"audience": "https://audience.example.com",
+			"scope":    "read write",
+		}
+		additionalParamsMap, _ := types.MapValueFrom(ctx, types.StringType, additionalParams)
+
+		webhookModel := &shared.WebhookModel{
+			WebhookURLs:  webhookURLsSet,
+			HTTPHeaders:  types.MapNull(types.StringType),
+			OAuthEnabled: types.BoolValue(true),
+			OAuth: &shared.WebhookOAuthModel{
+				Config: &shared.WebhookOAuthConfigModel{
+					ClientID:             types.StringValue("client-id"),
+					ClientSecret:         types.StringValue("secret"),
+					TokenURL:             types.StringValue("https://token.example.com"),
+					AdditionalParameters: additionalParamsMap,
+				},
+			},
+		}
+
+		channel, diags := resource.mapWebhookChannelFromState(ctx, "test-id", "test-name", webhookModel)
+		require.False(t, diags.HasError())
+		require.NotNil(t, channel)
+		assert.Equal(t, api.WebhookChannelType, channel.Kind)
+		require.NotNil(t, channel.OAuthEnabled)
+		assert.True(t, *channel.OAuthEnabled)
+		require.NotNil(t, channel.OAuth)
+		assert.Equal(t, "client-id", channel.OAuth.Config.ClientID)
+		assert.Equal(t, "secret", channel.OAuth.Config.ClientSecret)
+		assert.Equal(t, "https://token.example.com", channel.OAuth.Config.TokenURL)
+		assert.Equal(t, "https://audience.example.com", channel.OAuth.Config.AdditionalParameters["audience"])
+		assert.Equal(t, "read write", channel.OAuth.Config.AdditionalParameters["scope"])
+	})
+
+	t.Run("with oauth enabled and no additional parameters", func(t *testing.T) {
+		webhookURLs := []string{"https://webhook.example.com"}
+		webhookURLsSet, _ := types.SetValueFrom(ctx, types.StringType, webhookURLs)
+
+		webhookModel := &shared.WebhookModel{
+			WebhookURLs:  webhookURLsSet,
+			HTTPHeaders:  types.MapNull(types.StringType),
+			OAuthEnabled: types.BoolValue(true),
+			OAuth: &shared.WebhookOAuthModel{
+				Config: &shared.WebhookOAuthConfigModel{
+					ClientID:             types.StringValue("client-id"),
+					ClientSecret:         types.StringValue("secret"),
+					TokenURL:             types.StringValue("https://token.example.com"),
+					AdditionalParameters: types.MapNull(types.StringType),
+				},
+			},
+		}
+
+		channel, diags := resource.mapWebhookChannelFromState(ctx, "test-id", "test-name", webhookModel)
+		require.False(t, diags.HasError())
+		require.NotNil(t, channel)
+		require.NotNil(t, channel.OAuthEnabled)
+		assert.True(t, *channel.OAuthEnabled)
+		require.NotNil(t, channel.OAuth)
+		assert.Equal(t, "client-id", channel.OAuth.Config.ClientID)
+		assert.Nil(t, channel.OAuth.Config.AdditionalParameters)
 	})
 }
 
@@ -1201,6 +1275,52 @@ func TestUpdateState(t *testing.T) {
 		diags = state.Get(ctx, &model)
 		require.False(t, diags.HasError())
 		assert.NotNil(t, model.Webhook)
+	})
+
+	t.Run("Webhook channel with OAuth", func(t *testing.T) {
+		resource := &alertingChannelResource{}
+		oauthEnabled := true
+		apiChannel := &api.AlertingChannel{
+			ID:           "test-id",
+			Name:         "test-name",
+			Kind:         api.WebhookChannelType,
+			WebhookURLs:  []string{"https://webhook.com"},
+			OAuthEnabled: &oauthEnabled,
+			OAuth: &api.WebhookOAuth{
+				Config: api.WebhookOAuthConfig{
+					ClientID:     "client-id",
+					ClientSecret: "secret",
+					TokenURL:     "https://token.example.com",
+					AdditionalParameters: map[string]string{
+						"audience": "https://audience.example.com",
+						"scope":    "read write",
+					},
+				},
+			},
+		}
+
+		handle := NewAlertingChannelResourceHandle()
+		state := &tfsdk.State{
+			Schema: handle.MetaData().Schema,
+		}
+
+		diags := resource.UpdateState(ctx, state, nil, apiChannel)
+		require.False(t, diags.HasError())
+
+		var model AlertingChannelModel
+		diags = state.Get(ctx, &model)
+		require.False(t, diags.HasError())
+		require.NotNil(t, model.Webhook)
+		assert.True(t, model.Webhook.OAuthEnabled.ValueBool())
+		require.NotNil(t, model.Webhook.OAuth)
+		require.NotNil(t, model.Webhook.OAuth.Config)
+		assert.Equal(t, "client-id", model.Webhook.OAuth.Config.ClientID.ValueString())
+		assert.Equal(t, "secret", model.Webhook.OAuth.Config.ClientSecret.ValueString())
+		assert.Equal(t, "https://token.example.com", model.Webhook.OAuth.Config.TokenURL.ValueString())
+		additionalParams := map[string]string{}
+		model.Webhook.OAuth.Config.AdditionalParameters.ElementsAs(ctx, &additionalParams, false)
+		assert.Equal(t, "https://audience.example.com", additionalParams["audience"])
+		assert.Equal(t, "read write", additionalParams["scope"])
 	})
 
 	t.Run("Office365 channel", func(t *testing.T) {
