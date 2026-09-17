@@ -286,6 +286,29 @@ resource "instana_alerting_channel" "webhook_with_headers" {
 }
 ```
 
+#### Webhook with OAuth 2.0
+```hcl
+resource "instana_alerting_channel" "webhook_oauth" {
+  name = "webhook-oauth"
+
+  webhook = {
+    webhook_urls  = ["https://api.example.com/instana/alerts"] # Replace with your own value
+    oauth_enabled = true
+    oauth = {
+      config = {
+        client_id     = "my-client-id"       # Replace with your own value
+        client_secret = "my-client-secret"   # Replace with your own value
+        token_url     = "https://auth.example.com/oauth2/token" # Replace with your own value
+        additional_parameters = {
+          audience = "https://api.example.com"
+          scope    = "read write"
+        }
+      }
+    }
+  }
+}
+```
+
 ### ServiceNow Alerting Channel
 
 #### Basic ServiceNow Configuration
@@ -698,10 +721,22 @@ terraform apply
 
 * `webhook_urls` - (Required) Set of webhook URLs where alerts will be sent. Must contain at least one URL.
 * `http_headers` - (Optional) Map of additional HTTP headers to send with webhook requests. Keys are header names, values are header values.
+* `oauth_enabled` - (Optional, Computed) Whether OAuth 2.0 is enabled for this webhook channel.
+* `oauth` - (Optional) OAuth 2.0 configuration block. Required when `oauth_enabled` is `true`.
+  * `config` - (Required) OAuth 2.0 client credentials configuration block.
+    * `client_id` - (Required) The OAuth 2.0 client ID.
+    * `client_secret` - (Required, Sensitive) The OAuth 2.0 client secret.
+    * `token_url` - (Required) The OAuth 2.0 token endpoint URL.
+    * `additional_parameters` - (Optional) Map of additional parameters to include in the OAuth 2.0 token request (e.g. `audience`, `scope`).
 
 **Types:**
 - `webhook_urls`: `set(string)`
 - `http_headers`: `map(string)`
+- `oauth_enabled`: `bool`
+- `oauth.config.client_id`: `string`
+- `oauth.config.client_secret`: `string` (sensitive)
+- `oauth.config.token_url`: `string`
+- `oauth.config.additional_parameters`: `map(string)`
 
 ### ServiceNow Channel Attributes
 

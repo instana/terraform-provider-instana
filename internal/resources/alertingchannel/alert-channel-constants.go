@@ -57,6 +57,20 @@ const (
 	AlertingChannelWebhookFieldWebhookURLs = "webhook_urls"
 	//AlertingChannelWebhookFieldHTTPHeaders const for the http headers field of the Webhook alerting channel
 	AlertingChannelWebhookFieldHTTPHeaders = "http_headers"
+	//AlertingChannelWebhookFieldOAuthEnabled const for the oauthEnabled field of the Webhook alerting channel
+	AlertingChannelWebhookFieldOAuthEnabled = "oauth_enabled"
+	//AlertingChannelWebhookFieldOAuth const for the oauth block of the Webhook alerting channel
+	AlertingChannelWebhookFieldOAuth = "oauth"
+	//AlertingChannelWebhookOAuthFieldConfig const for the config block inside the oauth block
+	AlertingChannelWebhookOAuthFieldConfig = "config"
+	//AlertingChannelWebhookOAuthConfigFieldClientID const for the clientId field inside oauth.config
+	AlertingChannelWebhookOAuthConfigFieldClientID = "client_id"
+	//AlertingChannelWebhookOAuthConfigFieldClientSecret const for the clientSecret field inside oauth.config
+	AlertingChannelWebhookOAuthConfigFieldClientSecret = "client_secret"
+	//AlertingChannelWebhookOAuthConfigFieldTokenURL const for the tokenUrl field inside oauth.config
+	AlertingChannelWebhookOAuthConfigFieldTokenURL = "token_url"
+	//AlertingChannelWebhookOAuthConfigFieldAdditionalParameters const for the additionalParameters field inside oauth.config
+	AlertingChannelWebhookOAuthConfigFieldAdditionalParameters = "additional_parameters"
 
 	//AlertingChannelFieldChannelOffice365 const for schema field of the Office 365 channel
 	AlertingChannelFieldChannelOffice365 = "office_365"
@@ -204,9 +218,16 @@ const (
 	AlertingChannelDescVictorOps                   = "The configuration of the VictorOps channel"
 	AlertingChannelDescVictorOpsAPIKey             = "The API Key of the VictorOps alerting channel"
 	AlertingChannelDescVictorOpsRoutingKey         = "The Routing Key of the VictorOps alerting channel"
-	AlertingChannelDescWebhook                     = "The configuration of the Webhook channel"
-	AlertingChannelDescWebhookWebhookURLs          = "The list of webhook urls of the Webhook alerting channel"
-	AlertingChannelDescWebhookHTTPHeaders          = "The optional map of HTTP headers of the Webhook alerting channel"
+	AlertingChannelDescWebhook                                  = "The configuration of the Webhook channel"
+	AlertingChannelDescWebhookWebhookURLs                       = "The list of webhook urls of the Webhook alerting channel"
+	AlertingChannelDescWebhookHTTPHeaders                       = "The optional map of HTTP headers of the Webhook alerting channel"
+	AlertingChannelDescWebhookOAuthEnabled                      = "Whether OAuth 2.0 is enabled for the Webhook alerting channel"
+	AlertingChannelDescWebhookOAuth                             = "The OAuth 2.0 configuration for the Webhook alerting channel"
+	AlertingChannelDescWebhookOAuthConfig                       = "The OAuth 2.0 client credentials configuration"
+	AlertingChannelDescWebhookOAuthConfigClientID               = "The OAuth 2.0 client ID"
+	AlertingChannelDescWebhookOAuthConfigClientSecret           = "The OAuth 2.0 client secret"
+	AlertingChannelDescWebhookOAuthConfigTokenURL               = "The OAuth 2.0 token endpoint URL"
+	AlertingChannelDescWebhookOAuthConfigAdditionalParameters   = "Additional parameters to include in the OAuth 2.0 token request (e.g. audience, scope)"
 	AlertingChannelDescOffice365                   = "The configuration of the Office 365 channel"
 	AlertingChannelDescOffice365WebhookURL         = "The webhook URL of the Office 365 alerting channel"
 	AlertingChannelDescGoogleChat                  = "The configuration of the Google Chat channel"

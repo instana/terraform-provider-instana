@@ -162,6 +162,41 @@ func NewAlertingChannelResourceHandle() resourcehandle.ResourceHandle[*api.Alert
 								Description: AlertingChannelDescWebhookHTTPHeaders,
 								ElementType: types.StringType,
 							},
+							AlertingChannelWebhookFieldOAuthEnabled: schema.BoolAttribute{
+								Optional:    true,
+								Computed:    true,
+								Description: AlertingChannelDescWebhookOAuthEnabled,
+							},
+							AlertingChannelWebhookFieldOAuth: schema.SingleNestedAttribute{
+								Optional:    true,
+								Description: AlertingChannelDescWebhookOAuth,
+								Attributes: map[string]schema.Attribute{
+									AlertingChannelWebhookOAuthFieldConfig: schema.SingleNestedAttribute{
+										Required:    true,
+										Description: AlertingChannelDescWebhookOAuthConfig,
+										Attributes: map[string]schema.Attribute{
+											AlertingChannelWebhookOAuthConfigFieldClientID: schema.StringAttribute{
+												Required:    true,
+												Description: AlertingChannelDescWebhookOAuthConfigClientID,
+											},
+											AlertingChannelWebhookOAuthConfigFieldClientSecret: schema.StringAttribute{
+												Required:    true,
+												Sensitive:   true,
+												Description: AlertingChannelDescWebhookOAuthConfigClientSecret,
+											},
+											AlertingChannelWebhookOAuthConfigFieldTokenURL: schema.StringAttribute{
+												Required:    true,
+												Description: AlertingChannelDescWebhookOAuthConfigTokenURL,
+											},
+											AlertingChannelWebhookOAuthConfigFieldAdditionalParameters: schema.MapAttribute{
+												Optional:    true,
+												Description: AlertingChannelDescWebhookOAuthConfigAdditionalParameters,
+												ElementType: types.StringType,
+											},
+										},
+									},
+								},
+							},
 						},
 					},
 					AlertingChannelFieldChannelOffice365: schema.SingleNestedAttribute{
@@ -934,6 +969,32 @@ func (r *alertingChannelResource) mapWebhookChannelFromState(ctx context.Context
 		}
 
 		result.Headers = headers
+	}
+
+	// Add OAuth if present
+	if !webhook.OAuthEnabled.IsNull() && !webhook.OAuthEnabled.IsUnknown() {
+		oauthEnabled := webhook.OAuthEnabled.ValueBool()
+		result.OAuthEnabled = &oauthEnabled
+	}
+
+	if webhook.OAuth != nil && webhook.OAuth.Config != nil {
+		cfg := webhook.OAuth.Config
+		oauthConfig := api.WebhookOAuthConfig{
+			ClientID:     cfg.ClientID.ValueString(),
+			ClientSecret: cfg.ClientSecret.ValueString(),
+			TokenURL:     cfg.TokenURL.ValueString(),
+		}
+
+		if !cfg.AdditionalParameters.IsNull() && !cfg.AdditionalParameters.IsUnknown() {
+			var additionalParams map[string]string
+			diags.Append(cfg.AdditionalParameters.ElementsAs(ctx, &additionalParams, false)...)
+			if diags.HasError() {
+				return nil, diags
+			}
+			oauthConfig.AdditionalParameters = additionalParams
+		}
+
+		result.OAuth = &api.WebhookOAuth{Config: oauthConfig}
 	}
 
 	return result, nil

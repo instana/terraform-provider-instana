@@ -34,9 +34,24 @@ type VictorOpsModel struct {
 	RoutingKey types.String `tfsdk:"routing_key"`
 }
 
+// WebhookOAuthConfigModel represents the OAuth 2.0 config block in Terraform state
+type WebhookOAuthConfigModel struct {
+	ClientID             types.String `tfsdk:"client_id"`
+	ClientSecret         types.String `tfsdk:"client_secret"`
+	TokenURL             types.String `tfsdk:"token_url"`
+	AdditionalParameters types.Map    `tfsdk:"additional_parameters"`
+}
+
+// WebhookOAuthModel represents the OAuth 2.0 wrapper block in Terraform state
+type WebhookOAuthModel struct {
+	Config *WebhookOAuthConfigModel `tfsdk:"config"`
+}
+
 type WebhookModel struct {
-	WebhookURLs types.Set `tfsdk:"webhook_urls"`
-	HTTPHeaders types.Map `tfsdk:"http_headers"`
+	WebhookURLs  types.Set          `tfsdk:"webhook_urls"`
+	HTTPHeaders  types.Map          `tfsdk:"http_headers"`
+	OAuthEnabled types.Bool         `tfsdk:"oauth_enabled"`
+	OAuth        *WebhookOAuthModel `tfsdk:"oauth"`
 }
 
 type EmailModel struct {
@@ -474,10 +489,36 @@ func MapWebhookChannelToState(ctx context.Context, channel *api.AlertingChannel)
 		return nil, diags
 	}
 
+	// Map OAuth enabled flag
+	oauthEnabled := types.BoolValue(false)
+	if channel.OAuthEnabled != nil {
+		oauthEnabled = types.BoolValue(*channel.OAuthEnabled)
+	}
+
+	// Map OAuth config block
+	var oauthModel *WebhookOAuthModel
+	if channel.OAuth != nil {
+		additionalParams, additionalParamsDiags := types.MapValueFrom(ctx, types.StringType, channel.OAuth.Config.AdditionalParameters)
+		if additionalParamsDiags.HasError() {
+			diags.Append(additionalParamsDiags...)
+			return nil, diags
+		}
+		oauthModel = &WebhookOAuthModel{
+			Config: &WebhookOAuthConfigModel{
+				ClientID:             types.StringValue(channel.OAuth.Config.ClientID),
+				ClientSecret:         types.StringValue(channel.OAuth.Config.ClientSecret),
+				TokenURL:             types.StringValue(channel.OAuth.Config.TokenURL),
+				AdditionalParameters: additionalParams,
+			},
+		}
+	}
+
 	// Create and return Webhook model
 	return &WebhookModel{
-		WebhookURLs: webhookURLsSet,
-		HTTPHeaders: headersMap,
+		WebhookURLs:  webhookURLsSet,
+		HTTPHeaders:  headersMap,
+		OAuthEnabled: oauthEnabled,
+		OAuth:        oauthModel,
 	}, diags
 }
 
