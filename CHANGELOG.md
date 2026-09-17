@@ -1,3 +1,17 @@
+## [v7.7.2](https://github.com/instana/terraform-provider-instana/tree/v7.7.2) (2026-09-15)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.7.1...v7.7.2)
+
+**Implemented enhancements:**
+
+- Added a new `### Understanding the name, key, origin Structure` subsection to the tag filter documentation in the resource docs. This explains how a tag filter string is parsed into Instana API fields.
+- Added granularity and time window ratio validation for `instana_log_alert_config` to prevent misconfigured alert rules
+
+**Merged pull requests:**
+
+- docs: Add tag filter name/key/origin mapping guide to all resource documentation [\#121](https://github.com/instana/terraform-provider-instana/pull/121) ([georgekutty-1](https://github.com/georgekutty-1))
+- Add validation for time window and granularity ratio in log alert configuration [\#120](https://github.com/instana/terraform-provider-instana/pull/120) ([georgekutty-1](https://github.com/georgekutty-1))
+
 ## [v7.7.1](https://github.com/instana/terraform-provider-instana/tree/v7.7.1) (2026-09-08)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.7.0...v7.7.1)
