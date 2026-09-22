@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -45,6 +46,12 @@ func NewAlertingConfigResourceHandle() resourcehandle.ResourceHandle[*api.Alerti
 						Validators: []validator.String{
 							stringvalidator.LengthBetween(1, 256),
 						},
+					},
+					AlertingConfigFieldMute: schema.BoolAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: AlertingConfigDescMute,
+						Default:     booldefault.StaticBool(false),
 					},
 					AlertingConfigFieldIntegrationIds: schema.SetAttribute{
 						Required:    true,
@@ -137,6 +144,7 @@ func (r *alertingConfigResource) UpdateState(ctx context.Context, state *tfsdk.S
 	model := AlertingConfigModel{
 		ID:        types.StringValue(config.ID),
 		AlertName: types.StringValue(config.AlertName),
+		Mute:      types.BoolValue(config.MuteUntil != 0),
 	}
 
 	// Map integration IDs
@@ -257,9 +265,16 @@ func (r *alertingConfigResource) MapStateToDataObject(ctx context.Context, plan 
 		return nil, payloadDiags
 	}
 
+	// Map mute flag to muteUntil sentinel value
+	var muteUntil int64
+	if model.Mute.ValueBool() {
+		muteUntil = 9007199254740991
+	}
+
 	return &api.AlertingConfiguration{
 		ID:                          id,
 		AlertName:                   alertName,
+		MuteUntil:                   muteUntil,
 		IntegrationIDs:              integrationIDs,
 		EventFilteringConfiguration: eventFilterConfig,
 		CustomerPayloadFields:       customerPayloadFields,

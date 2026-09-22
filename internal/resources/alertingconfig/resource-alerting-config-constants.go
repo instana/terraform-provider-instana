@@ -21,6 +21,8 @@ const (
 	AlertingConfigFieldEventFilterApplicationAlertIDs = "event_filter_application_alert_ids"
 	// AlertingConfigFieldID constant value for the schema field id
 	AlertingConfigFieldID = "id"
+	// AlertingConfigFieldMute constant value for the schema field mute
+	AlertingConfigFieldMute = "mute"
 
 	// Description constants
 
@@ -40,4 +42,6 @@ const (
 	AlertingConfigDescEventFilterRuleIDs = "Configures the list of Rule IDs which should trigger an alert."
 	// AlertingConfigDescEventFilterApplicationAlertIDs description for the event_filter_application_alert_ids field
 	AlertingConfigDescEventFilterApplicationAlertIDs = "Configures the list of Application Alert Config IDs which should trigger an alert."
+	// AlertingConfigDescMute description for the mute field
+	AlertingConfigDescMute = "When set to true, mutes the alert indefinitely. When false (default), the alert is active."
 )
