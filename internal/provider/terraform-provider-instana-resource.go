@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -484,7 +485,12 @@ func (r *terraformSingletonResourceImpl[T]) Create(ctx context.Context, req reso
 		return
 	}
 
-	resp.Diagnostics.Append(r.resourceHandle.UpdateState(ctx, &resp.State, &req.Plan, upserted)...)
+ 	finalObj, ok := r.applyPostUpsertVerification(&resp.Diagnostics, upserted)
+	if !ok {
+		return
+	}
+
+	resp.Diagnostics.Append(r.resourceHandle.UpdateState(ctx, &resp.State, &req.Plan, finalObj)...)
 	tflog.Debug(ctx, "Successfully created singleton resource", map[string]interface{}{"correlation_id": correlationID})
 }
 
@@ -534,8 +540,30 @@ func (r *terraformSingletonResourceImpl[T]) Update(ctx context.Context, req reso
 		return
 	}
 
-	resp.Diagnostics.Append(r.resourceHandle.UpdateState(ctx, &resp.State, &req.Plan, upserted)...)
+	finalObj, ok := r.applyPostUpsertVerification(&resp.Diagnostics, upserted)
+	if !ok {
+		return
+	}
+
+	resp.Diagnostics.Append(r.resourceHandle.UpdateState(ctx, &resp.State, &req.Plan, finalObj)...)
 	tflog.Debug(ctx, "Successfully updated singleton resource", map[string]interface{}{"correlation_id": correlationID})
+}
+
+// applyPostUpsertVerification checks whether the resource handle implements PostUpsertVerifier
+// and, if so, calls Verify when the upserted object requires it.
+// Returns the object to use for state (the verified object on success, or the original upserted
+// object when no verification is needed) and a boolean indicating whether the caller should
+// continue (false means an error was added to diags and the caller should return early).
+func (r *terraformSingletonResourceImpl[T]) applyPostUpsertVerification(diags *diag.Diagnostics, upserted T) (T, bool) {
+	if verifier, ok := r.resourceHandle.(resourcehandle.PostUpsertVerifier[T]); ok && verifier.NeedsPostUpsertVerification(upserted) {
+		verified, err := verifier.Verify(r.providerMeta.InstanaAPI)
+		if err != nil {
+			diags.AddError("Error verifying singleton resource", fmt.Sprintf("Could not verify resource: %s", err))
+			return upserted, false
+		}
+		return verified, true
+	}
+	return upserted, true
 }
 
 // Delete deletes the singleton resource (reverts to defaults).

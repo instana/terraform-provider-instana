@@ -180,6 +180,44 @@ func (m *MockInstanaAPI) SessionSettings() rest.SingletonRestResource[*api.Sessi
 	return nil
 }
 
+// MockIPFilteringRestResource is a mock implementation for testing IP filtering
+type MockIPFilteringRestResource struct {
+	GetResult    *api.IPFiltering
+	GetErr       error
+	UpsertResult *api.IPFiltering
+	UpsertErr    error
+	DeleteErr    error
+	VerifyResult *api.IPFiltering
+	VerifyErr    error
+}
+
+func (m *MockIPFilteringRestResource) Get() (*api.IPFiltering, error) {
+	return m.GetResult, m.GetErr
+}
+
+func (m *MockIPFilteringRestResource) Upsert(data *api.IPFiltering) (*api.IPFiltering, error) {
+	if m.UpsertResult != nil {
+		return m.UpsertResult, m.UpsertErr
+	}
+	return data, m.UpsertErr
+}
+
+func (m *MockIPFilteringRestResource) Delete() error {
+	return m.DeleteErr
+}
+
+func (m *MockIPFilteringRestResource) Verify() (*api.IPFiltering, error) {
+	if m.VerifyResult != nil {
+		return m.VerifyResult, m.VerifyErr
+	}
+	return m.UpsertResult, m.VerifyErr
+}
+
+// IPFiltering mock implementation
+func (m *MockInstanaAPI) IPFiltering() api.IPFilteringRestResource {
+	return &MockIPFilteringRestResource{}
+}
+
 // Releases mock implementation
 func (m *MockInstanaAPI) Releases() rest.RestResource[*api.ReleaseWithMetadata] {
 	return nil
