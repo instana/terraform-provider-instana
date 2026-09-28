@@ -199,8 +199,10 @@ func TestMapWebhookChannelFromState(t *testing.T) {
 		headersMap, _ := types.MapValueFrom(ctx, types.StringType, headers)
 
 		webhookModel := &shared.WebhookModel{
-			WebhookURLs: webhookURLsSet,
-			HTTPHeaders: headersMap,
+			WebhookURLs:  webhookURLsSet,
+			HTTPHeaders:  headersMap,
+			OAuthEnabled: types.BoolNull(),
+			OAuth:        nil,
 		}
 
 		channel, diags := resource.mapWebhookChannelFromState(ctx, "test-id", "test-name", webhookModel)
@@ -211,6 +213,8 @@ func TestMapWebhookChannelFromState(t *testing.T) {
 		assert.Equal(t, api.WebhookChannelType, channel.Kind)
 		assert.Equal(t, webhookURLs, channel.WebhookURLs)
 		assert.Len(t, channel.Headers, 2)
+		assert.Nil(t, channel.OAuthEnabled)
+		assert.Nil(t, channel.OAuth)
 	})
 
 	t.Run("without headers", func(t *testing.T) {
@@ -218,8 +222,10 @@ func TestMapWebhookChannelFromState(t *testing.T) {
 		webhookURLsSet, _ := types.SetValueFrom(ctx, types.StringType, webhookURLs)
 
 		webhookModel := &shared.WebhookModel{
-			WebhookURLs: webhookURLsSet,
-			HTTPHeaders: types.MapNull(types.StringType),
+			WebhookURLs:  webhookURLsSet,
+			HTTPHeaders:  types.MapNull(types.StringType),
+			OAuthEnabled: types.BoolNull(),
+			OAuth:        nil,
 		}
 
 		channel, diags := resource.mapWebhookChannelFromState(ctx, "test-id", "test-name", webhookModel)
@@ -227,6 +233,74 @@ func TestMapWebhookChannelFromState(t *testing.T) {
 		require.NotNil(t, channel)
 		assert.Equal(t, api.WebhookChannelType, channel.Kind)
 		assert.Nil(t, channel.Headers)
+		assert.Nil(t, channel.OAuthEnabled)
+		assert.Nil(t, channel.OAuth)
+	})
+
+	t.Run("with oauth enabled and full config", func(t *testing.T) {
+		webhookURLs := []string{"https://webhook.example.com"}
+		webhookURLsSet, _ := types.SetValueFrom(ctx, types.StringType, webhookURLs)
+
+		additionalParams := map[string]string{
+			"audience": "https://audience.example.com",
+			"scope":    "read write",
+		}
+		additionalParamsMap, _ := types.MapValueFrom(ctx, types.StringType, additionalParams)
+
+		webhookModel := &shared.WebhookModel{
+			WebhookURLs:  webhookURLsSet,
+			HTTPHeaders:  types.MapNull(types.StringType),
+			OAuthEnabled: types.BoolValue(true),
+			OAuth: &shared.WebhookOAuthModel{
+				Config: &shared.WebhookOAuthConfigModel{
+					ClientID:             types.StringValue("client-id"),
+					ClientSecret:         types.StringValue("secret"),
+					TokenURL:             types.StringValue("https://token.example.com"),
+					AdditionalParameters: additionalParamsMap,
+				},
+			},
+		}
+
+		channel, diags := resource.mapWebhookChannelFromState(ctx, "test-id", "test-name", webhookModel)
+		require.False(t, diags.HasError())
+		require.NotNil(t, channel)
+		assert.Equal(t, api.WebhookChannelType, channel.Kind)
+		require.NotNil(t, channel.OAuthEnabled)
+		assert.True(t, *channel.OAuthEnabled)
+		require.NotNil(t, channel.OAuth)
+		assert.Equal(t, "client-id", channel.OAuth.Config.ClientID)
+		assert.Equal(t, "secret", channel.OAuth.Config.ClientSecret)
+		assert.Equal(t, "https://token.example.com", channel.OAuth.Config.TokenURL)
+		assert.Equal(t, "https://audience.example.com", channel.OAuth.Config.AdditionalParameters["audience"])
+		assert.Equal(t, "read write", channel.OAuth.Config.AdditionalParameters["scope"])
+	})
+
+	t.Run("with oauth enabled and no additional parameters", func(t *testing.T) {
+		webhookURLs := []string{"https://webhook.example.com"}
+		webhookURLsSet, _ := types.SetValueFrom(ctx, types.StringType, webhookURLs)
+
+		webhookModel := &shared.WebhookModel{
+			WebhookURLs:  webhookURLsSet,
+			HTTPHeaders:  types.MapNull(types.StringType),
+			OAuthEnabled: types.BoolValue(true),
+			OAuth: &shared.WebhookOAuthModel{
+				Config: &shared.WebhookOAuthConfigModel{
+					ClientID:             types.StringValue("client-id"),
+					ClientSecret:         types.StringValue("secret"),
+					TokenURL:             types.StringValue("https://token.example.com"),
+					AdditionalParameters: types.MapNull(types.StringType),
+				},
+			},
+		}
+
+		channel, diags := resource.mapWebhookChannelFromState(ctx, "test-id", "test-name", webhookModel)
+		require.False(t, diags.HasError())
+		require.NotNil(t, channel)
+		require.NotNil(t, channel.OAuthEnabled)
+		assert.True(t, *channel.OAuthEnabled)
+		require.NotNil(t, channel.OAuth)
+		assert.Equal(t, "client-id", channel.OAuth.Config.ClientID)
+		assert.Nil(t, channel.OAuth.Config.AdditionalParameters)
 	})
 }
 
@@ -425,6 +499,96 @@ func TestMapWatsonAIOpsWebhookChannelFromState(t *testing.T) {
 		channel, diags := resource.mapWatsonAIOpsWebhookChannelFromState(ctx, "test-id", "test-name", watsonModel)
 		require.False(t, diags.HasError())
 		require.NotNil(t, channel)
+		assert.Nil(t, channel.Headers)
+	})
+}
+
+func TestMapZChatOpsChannelFromState(t *testing.T) {
+	resource := &alertingChannelResource{}
+	ctx := context.Background()
+
+	channels := []string{"test", "test2"}
+	channelsSet, _ := types.SetValueFrom(ctx, types.StringType, channels)
+
+	model := &shared.ZChatOpsModel{
+		ZChatOpsIncidentsURL: types.StringValue("https://z-chatops.example.com/incidents"),
+		BearerAuthToken:      types.StringValue("token123"),
+		Channels:             channelsSet,
+	}
+
+	channel, diags := resource.mapZChatOpsChannelFromState(ctx, "test-id", "test-name", model)
+	require.False(t, diags.HasError())
+	require.NotNil(t, channel)
+	assert.Equal(t, "test-id", channel.ID)
+	assert.Equal(t, "test-name", channel.Name)
+	assert.Equal(t, api.ZChatOpsChannelType, channel.Kind)
+	assert.Equal(t, "https://z-chatops.example.com/incidents", *channel.ZChatOpsIncidentsURL)
+	assert.Equal(t, "token123", *channel.BearerAuthToken)
+	assert.Equal(t, channels, channel.Channels)
+}
+
+func TestMapSalesforceChannelFromState(t *testing.T) {
+	resource := &alertingChannelResource{}
+	ctx := context.Background()
+
+	model := &shared.SalesforceModel{
+		SalesforceURL: types.StringValue("https://example.my.salesforce.com"),
+		ClientID:      types.StringValue("key"),
+		ClientSecret:  types.StringValue("secret"),
+	}
+
+	channel, diags := resource.mapSalesforceChannelFromState(ctx, "test-id", "test-name", model)
+	require.False(t, diags.HasError())
+	require.NotNil(t, channel)
+	assert.Equal(t, "test-id", channel.ID)
+	assert.Equal(t, "test-name", channel.Name)
+	assert.Equal(t, api.SalesforceChannelType, channel.Kind)
+	assert.Equal(t, "https://example.my.salesforce.com", *channel.SalesforceURL)
+	assert.Equal(t, "key", *channel.ClientID)
+	assert.Equal(t, "secret", *channel.ClientSecret)
+}
+
+func TestMapNS1ChannelFromState(t *testing.T) {
+	resource := &alertingChannelResource{}
+	ctx := context.Background()
+
+	t.Run("with headers", func(t *testing.T) {
+		webhookURLs := []string{"https://example.com/webhook"}
+		webhookURLsSet, _ := types.SetValueFrom(ctx, types.StringType, webhookURLs)
+		headers := []string{"headerkey: headervalue"}
+		headersSet, _ := types.SetValueFrom(ctx, types.StringType, headers)
+
+		model := &shared.NS1Model{
+			WebhookURLs: webhookURLsSet,
+			FeedLabel:   types.StringValue("Feedlabel"),
+			Headers:     headersSet,
+		}
+
+		channel, diags := resource.mapNS1ChannelFromState(ctx, "test-id", "test-name", model)
+		require.False(t, diags.HasError())
+		require.NotNil(t, channel)
+		assert.Equal(t, "test-id", channel.ID)
+		assert.Equal(t, "test-name", channel.Name)
+		assert.Equal(t, api.NS1ChannelType, channel.Kind)
+		assert.Equal(t, webhookURLs, channel.WebhookURLs)
+		assert.Equal(t, "Feedlabel", *channel.FeedLabel)
+		assert.Equal(t, headers, channel.Headers)
+	})
+
+	t.Run("without headers", func(t *testing.T) {
+		webhookURLs := []string{"https://example.com/webhook"}
+		webhookURLsSet, _ := types.SetValueFrom(ctx, types.StringType, webhookURLs)
+
+		model := &shared.NS1Model{
+			WebhookURLs: webhookURLsSet,
+			FeedLabel:   types.StringValue("Feedlabel"),
+			Headers:     types.SetNull(types.StringType),
+		}
+
+		channel, diags := resource.mapNS1ChannelFromState(ctx, "test-id", "test-name", model)
+		require.False(t, diags.HasError())
+		require.NotNil(t, channel)
+		assert.Equal(t, api.NS1ChannelType, channel.Kind)
 		assert.Nil(t, channel.Headers)
 	})
 }
@@ -819,6 +983,97 @@ func TestMapStateToDataObject(t *testing.T) {
 		assert.Equal(t, api.WatsonAIOpsWebhookChannelType, channel.Kind)
 	})
 
+	t.Run("ZChatOps channel", func(t *testing.T) {
+		tagAttrTypes := map[string]attr.Type{
+			AlertingChannelFieldRbacTagID:          types.StringType,
+			AlertingChannelFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
+		channelsSet, _ := types.SetValueFrom(ctx, types.StringType, []string{"test"})
+		model := AlertingChannelModel{
+			ID:       types.StringValue("test-id"),
+			Name:     types.StringValue("test-name"),
+			RbacTags: emptyList,
+			ZChatOps: &shared.ZChatOpsModel{
+				ZChatOpsIncidentsURL: types.StringValue("https://z-chatops.example.com/incidents"),
+				BearerAuthToken:      types.StringValue("token123"),
+				Channels:             channelsSet,
+			},
+		}
+
+		state := createMockState(t, ctx, model)
+		channel, diags := resource.MapStateToDataObject(ctx, nil, state)
+		require.False(t, diags.HasError())
+		require.NotNil(t, channel)
+		assert.Equal(t, api.ZChatOpsChannelType, channel.Kind)
+		assert.Equal(t, "https://z-chatops.example.com/incidents", *channel.ZChatOpsIncidentsURL)
+		assert.Equal(t, "token123", *channel.BearerAuthToken)
+	})
+
+	t.Run("Salesforce channel", func(t *testing.T) {
+		tagAttrTypes := map[string]attr.Type{
+			AlertingChannelFieldRbacTagID:          types.StringType,
+			AlertingChannelFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
+		model := AlertingChannelModel{
+			ID:       types.StringValue("test-id"),
+			Name:     types.StringValue("test-name"),
+			RbacTags: emptyList,
+			Salesforce: &shared.SalesforceModel{
+				SalesforceURL: types.StringValue("https://example.my.salesforce.com"),
+				ClientID:      types.StringValue("key"),
+				ClientSecret:  types.StringValue("secret"),
+			},
+		}
+
+		state := createMockState(t, ctx, model)
+		channel, diags := resource.MapStateToDataObject(ctx, nil, state)
+		require.False(t, diags.HasError())
+		require.NotNil(t, channel)
+		assert.Equal(t, api.SalesforceChannelType, channel.Kind)
+		assert.Equal(t, "https://example.my.salesforce.com", *channel.SalesforceURL)
+	})
+
+	t.Run("NS1 channel", func(t *testing.T) {
+		tagAttrTypes := map[string]attr.Type{
+			AlertingChannelFieldRbacTagID:          types.StringType,
+			AlertingChannelFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
+		webhookURLsSet, _ := types.SetValueFrom(ctx, types.StringType, []string{"https://example.com/webhook"})
+		headersSet, _ := types.SetValueFrom(ctx, types.StringType, []string{"headerkey: headervalue"})
+		model := AlertingChannelModel{
+			ID:       types.StringValue("test-id"),
+			Name:     types.StringValue("test-name"),
+			RbacTags: emptyList,
+			NS1: &shared.NS1Model{
+				WebhookURLs: webhookURLsSet,
+				FeedLabel:   types.StringValue("Feedlabel"),
+				Headers:     headersSet,
+			},
+		}
+
+		state := createMockState(t, ctx, model)
+		channel, diags := resource.MapStateToDataObject(ctx, nil, state)
+		require.False(t, diags.HasError())
+		require.NotNil(t, channel)
+		assert.Equal(t, api.NS1ChannelType, channel.Kind)
+		assert.Equal(t, "Feedlabel", *channel.FeedLabel)
+	})
+
 	t.Run("No channel configured", func(t *testing.T) {
 		tagAttrTypes := map[string]attr.Type{
 			AlertingChannelFieldRbacTagID:          types.StringType,
@@ -1022,6 +1277,52 @@ func TestUpdateState(t *testing.T) {
 		assert.NotNil(t, model.Webhook)
 	})
 
+	t.Run("Webhook channel with OAuth", func(t *testing.T) {
+		resource := &alertingChannelResource{}
+		oauthEnabled := true
+		apiChannel := &api.AlertingChannel{
+			ID:           "test-id",
+			Name:         "test-name",
+			Kind:         api.WebhookChannelType,
+			WebhookURLs:  []string{"https://webhook.com"},
+			OAuthEnabled: &oauthEnabled,
+			OAuth: &api.WebhookOAuth{
+				Config: api.WebhookOAuthConfig{
+					ClientID:     "client-id",
+					ClientSecret: "secret",
+					TokenURL:     "https://token.example.com",
+					AdditionalParameters: map[string]string{
+						"audience": "https://audience.example.com",
+						"scope":    "read write",
+					},
+				},
+			},
+		}
+
+		handle := NewAlertingChannelResourceHandle()
+		state := &tfsdk.State{
+			Schema: handle.MetaData().Schema,
+		}
+
+		diags := resource.UpdateState(ctx, state, nil, apiChannel)
+		require.False(t, diags.HasError())
+
+		var model AlertingChannelModel
+		diags = state.Get(ctx, &model)
+		require.False(t, diags.HasError())
+		require.NotNil(t, model.Webhook)
+		assert.True(t, model.Webhook.OAuthEnabled.ValueBool())
+		require.NotNil(t, model.Webhook.OAuth)
+		require.NotNil(t, model.Webhook.OAuth.Config)
+		assert.Equal(t, "client-id", model.Webhook.OAuth.Config.ClientID.ValueString())
+		assert.Equal(t, "secret", model.Webhook.OAuth.Config.ClientSecret.ValueString())
+		assert.Equal(t, "https://token.example.com", model.Webhook.OAuth.Config.TokenURL.ValueString())
+		additionalParams := map[string]string{}
+		model.Webhook.OAuth.Config.AdditionalParameters.ElementsAs(ctx, &additionalParams, false)
+		assert.Equal(t, "https://audience.example.com", additionalParams["audience"])
+		assert.Equal(t, "read write", additionalParams["scope"])
+	})
+
 	t.Run("Office365 channel", func(t *testing.T) {
 		resource := &alertingChannelResource{}
 		webhookURL := "https://office365.com/webhook"
@@ -1200,6 +1501,93 @@ func TestUpdateState(t *testing.T) {
 		diags = state.Get(ctx, &model)
 		require.False(t, diags.HasError())
 		assert.NotNil(t, model.WatsonAIOpsWebhook)
+	})
+
+	t.Run("ZChatOps channel", func(t *testing.T) {
+		resource := &alertingChannelResource{}
+		incidentsURL := "https://z-chatops.example.com/incidents"
+		bearerToken := "token123"
+		apiChannel := &api.AlertingChannel{
+			ID:                   "test-id",
+			Name:                 "test-name",
+			Kind:                 api.ZChatOpsChannelType,
+			ZChatOpsIncidentsURL: &incidentsURL,
+			BearerAuthToken:      &bearerToken,
+			Channels:             []string{"test"},
+		}
+
+		handle := NewAlertingChannelResourceHandle()
+		state := &tfsdk.State{
+			Schema: handle.MetaData().Schema,
+		}
+
+		diags := resource.UpdateState(ctx, state, nil, apiChannel)
+		require.False(t, diags.HasError())
+
+		var model AlertingChannelModel
+		diags = state.Get(ctx, &model)
+		require.False(t, diags.HasError())
+		assert.NotNil(t, model.ZChatOps)
+		assert.Equal(t, incidentsURL, model.ZChatOps.ZChatOpsIncidentsURL.ValueString())
+		assert.Equal(t, bearerToken, model.ZChatOps.BearerAuthToken.ValueString())
+	})
+
+	t.Run("Salesforce channel", func(t *testing.T) {
+		resource := &alertingChannelResource{}
+		sfURL := "https://example.my.salesforce.com"
+		clientID := "key"
+		clientSecret := "secret"
+		apiChannel := &api.AlertingChannel{
+			ID:            "test-id",
+			Name:          "test-name",
+			Kind:          api.SalesforceChannelType,
+			SalesforceURL: &sfURL,
+			ClientID:      &clientID,
+			ClientSecret:  &clientSecret,
+		}
+
+		handle := NewAlertingChannelResourceHandle()
+		state := &tfsdk.State{
+			Schema: handle.MetaData().Schema,
+		}
+
+		diags := resource.UpdateState(ctx, state, nil, apiChannel)
+		require.False(t, diags.HasError())
+
+		var model AlertingChannelModel
+		diags = state.Get(ctx, &model)
+		require.False(t, diags.HasError())
+		assert.NotNil(t, model.Salesforce)
+		assert.Equal(t, sfURL, model.Salesforce.SalesforceURL.ValueString())
+		assert.Equal(t, clientID, model.Salesforce.ClientID.ValueString())
+		assert.Equal(t, clientSecret, model.Salesforce.ClientSecret.ValueString())
+	})
+
+	t.Run("NS1 channel", func(t *testing.T) {
+		resource := &alertingChannelResource{}
+		feedLabel := "Feedlabel"
+		apiChannel := &api.AlertingChannel{
+			ID:          "test-id",
+			Name:        "test-name",
+			Kind:        api.NS1ChannelType,
+			WebhookURLs: []string{"https://example.com/webhook"},
+			FeedLabel:   &feedLabel,
+			Headers:     []string{"headerkey: headervalue"},
+		}
+
+		handle := NewAlertingChannelResourceHandle()
+		state := &tfsdk.State{
+			Schema: handle.MetaData().Schema,
+		}
+
+		diags := resource.UpdateState(ctx, state, nil, apiChannel)
+		require.False(t, diags.HasError())
+
+		var model AlertingChannelModel
+		diags = state.Get(ctx, &model)
+		require.False(t, diags.HasError())
+		assert.NotNil(t, model.NS1)
+		assert.Equal(t, feedLabel, model.NS1.FeedLabel.ValueString())
 	})
 
 	t.Run("Unsupported channel type", func(t *testing.T) {

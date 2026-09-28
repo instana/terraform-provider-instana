@@ -26,6 +26,9 @@ type AlertingChannelModel struct {
 	WatsonAIOpsWebhook    *shared.WatsonAIOpsWebhookModel    `tfsdk:"watson_aiops_webhook"`
 	SlackApp              *shared.SlackAppModel              `tfsdk:"slack_app"`
 	MsTeamsApp            *shared.MsTeamsAppModel            `tfsdk:"ms_teams_app"`
+	ZChatOps              *shared.ZChatOpsModel              `tfsdk:"z_chatops"`
+	Salesforce            *shared.SalesforceModel            `tfsdk:"salesforce"`
+	NS1                   *shared.NS1Model                   `tfsdk:"ns1"`
 }
 
 // AlertingChannelRbacTagModel represents an RBAC tag (team assignment) of an alerting channel

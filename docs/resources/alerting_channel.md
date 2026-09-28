@@ -286,6 +286,29 @@ resource "instana_alerting_channel" "webhook_with_headers" {
 }
 ```
 
+#### Webhook with OAuth 2.0
+```hcl
+resource "instana_alerting_channel" "webhook_oauth" {
+  name = "webhook-oauth"
+
+  webhook = {
+    webhook_urls  = ["https://api.example.com/instana/alerts"] # Replace with your own value
+    oauth_enabled = true
+    oauth = {
+      config = {
+        client_id     = "my-client-id"       # Replace with your own value
+        client_secret = "my-client-secret"   # Replace with your own value
+        token_url     = "https://auth.example.com/oauth2/token" # Replace with your own value
+        additional_parameters = {
+          audience = "https://api.example.com"
+          scope    = "read write"
+        }
+      }
+    }
+  }
+}
+```
+
 ### ServiceNow Alerting Channel
 
 #### Basic ServiceNow Configuration
@@ -445,6 +468,126 @@ resource "instana_alerting_channel" "ms_teams_bidirect" {
 }
 ```
 
+### IBM Z ChatOps Alerting Channel
+
+#### Basic IBM Z ChatOps Configuration
+```hcl
+resource "instana_alerting_channel" "z_chatops_basic" {
+  name = "ibm-z-chatops-alerts"
+
+  z_chatops = {
+    zchatops_incidents_url = "https://z-chatops.example.com/incidents" # Replace with your own value
+    bearer_auth_token      = "your-bearer-auth-token"                  # Replace with your own value
+    channels               = ["mychannel"]                             # Replace with your own value
+  }
+}
+```
+
+#### IBM Z ChatOps with RBAC Tags
+```hcl
+resource "instana_alerting_channel" "z_chatops_with_rbac" {
+  name = "ibm-z-chatops-alerts"
+
+  z_chatops = {
+    zchatops_incidents_url = "https://z-chatops.example.com/incidents" # Replace with your own value
+    bearer_auth_token      = "your-bearer-auth-token"                  # Replace with your own value
+    channels               = ["mychannel"]                             # Replace with your own value
+  }
+
+  rbac_tags = [
+    {
+      id           = "rbac-team-id-placeholder" # Replace with actual team ID
+      display_name = "your-team-display-name"  # Replace with actual team display name
+    }
+  ]
+}
+```
+
+### Salesforce Alerting Channel
+
+#### Basic Salesforce Configuration
+```hcl
+resource "instana_alerting_channel" "salesforce_basic" {
+  name = "salesforce-alerts"
+
+  salesforce = {
+    salesforce_url = "https://example.my.salesforce.com" # Replace with your own value
+    client_id      = "my-salesforce-client-id"           # Replace with your own value
+    client_secret  = "my-salesforce-client-secret"       # Replace with your own value
+  }
+}
+```
+
+#### Salesforce with RBAC Tags
+```hcl
+resource "instana_alerting_channel" "salesforce_with_rbac" {
+  name = "salesforce-alerts"
+
+  salesforce = {
+    salesforce_url = "https://example.my.salesforce.com" # Replace with your own value
+    client_id      = "my-salesforce-client-id"           # Replace with your own value
+    client_secret  = "my-salesforce-client-secret"       # Replace with your own value
+  }
+
+  rbac_tags = [
+    {
+      id           = "rbac-team-id-placeholder" # Replace with actual team ID
+      display_name = "your-team-display-name"  # Replace with actual team display name
+    }
+  ]
+}
+```
+
+### IBM NS1 Connect Alerting Channel
+
+#### Basic IBM NS1 Connect Configuration
+```hcl
+resource "instana_alerting_channel" "ns1_basic" {
+  name = "ibm-ns1-connect-alerts"
+
+  ns1 = {
+    webhook_urls = ["https://example.com/webhook"] # Replace with your own value
+    feed_label   = "Feedlabel"                     # Replace with your own value
+  }
+}
+```
+
+#### IBM NS1 Connect with HTTP Headers
+```hcl
+resource "instana_alerting_channel" "ns1_with_headers" {
+  name = "ibm-ns1-connect-authenticated"
+
+  ns1 = {
+    webhook_urls = ["https://example.com/webhook"] # Replace with your own value
+    feed_label   = "Feedlabel"                     # Replace with your own value
+    http_headers = [
+      "Authorization: Bearer token", # Replace with your own value
+      "X-Custom-Header: value"            # Replace with your own value
+    ]
+  }
+}
+```
+
+#### IBM NS1 Connect with RBAC Tags
+```hcl
+resource "instana_alerting_channel" "ns1_with_rbac" {
+  name = "ibm-ns1-connect-alerts"
+
+  ns1 = {
+    webhook_urls = ["https://example.com/webhook"] # Replace with your own value
+    feed_label   = "Feedlabel"                     # Replace with your own value
+    http_headers = ["headerkey: headervalue"]       # Replace with your own value
+  }
+
+  rbac_tags = [
+    {
+      id           = "rbac-team-id-placeholder" # Replace with actual team ID
+      display_name = "your-team-display-name"  # Replace with actual team display name
+    }
+  ]
+}
+```
+
 ## Generating Configuration from Existing Resources
 
 If you have already created an alerting channel in Instana and want to generate the Terraform configuration for it, you can use Terraform's import block feature with the `-generate-config-out` flag.
@@ -513,6 +656,9 @@ terraform apply
 * `watson_aiops_webhook` - (Optional) Configuration of a Watson AIOps webhook alerting channel - [Details](#watson-aiops-webhook-channel-attributes)
 * `slack_app` - (Optional) Configuration of a Slack App (bidirectional) alerting channel - [Details](#slack-app-channel-attributes)
 * `ms_teams_app` - (Optional) Configuration of a MS Teams App (bidirectional) alerting channel - [Details](#ms-teams-app-channel-attributes)
+* `z_chatops` - (Optional) Configuration of an IBM Z ChatOps alerting channel - [Details](#ibm-z-chatops-channel-attributes)
+* `salesforce` - (Optional) Configuration of a Salesforce alerting channel - [Details](#salesforce-channel-attributes)
+* `ns1` - (Optional) Configuration of an IBM NS1 Connect alerting channel - [Details](#ibm-ns1-connect-channel-attributes)
 
 ### Email Channel Attributes
 
@@ -575,10 +721,22 @@ terraform apply
 
 * `webhook_urls` - (Required) Set of webhook URLs where alerts will be sent. Must contain at least one URL.
 * `http_headers` - (Optional) Map of additional HTTP headers to send with webhook requests. Keys are header names, values are header values.
+* `oauth_enabled` - (Optional, Computed) Whether OAuth 2.0 is enabled for this webhook channel.
+* `oauth` - (Optional) OAuth 2.0 configuration block. Required when `oauth_enabled` is `true`.
+  * `config` - (Required) OAuth 2.0 client credentials configuration block.
+    * `client_id` - (Required) The OAuth 2.0 client ID.
+    * `client_secret` - (Required, Sensitive) The OAuth 2.0 client secret.
+    * `token_url` - (Required) The OAuth 2.0 token endpoint URL.
+    * `additional_parameters` - (Optional) Map of additional parameters to include in the OAuth 2.0 token request (e.g. `audience`, `scope`).
 
 **Types:**
 - `webhook_urls`: `set(string)`
 - `http_headers`: `map(string)`
+- `oauth_enabled`: `bool`
+- `oauth.config.client_id`: `string`
+- `oauth.config.client_secret`: `string` (sensitive)
+- `oauth.config.token_url`: `string`
+- `oauth.config.additional_parameters`: `map(string)`
 
 ### ServiceNow Channel Attributes
 
@@ -662,6 +820,36 @@ terraform apply
 * `tenant_name` - (Required) The Tenant Name for MS Teams.
 
 **Type:** `string` for all attributes
+
+### IBM Z ChatOps Channel Attributes
+
+* `zchatops_incidents_url` - (Required) The IBM Z ChatOps incidents URL where alerts will be sent.
+* `bearer_auth_token` - (Required, Sensitive) The bearer authentication token for the IBM Z ChatOps alerting channel. Uses state preservation on updates.
+* `channels` - (Required) Set of Z ChatOps channel names to send alerts to.
+
+**Types:**
+- `zchatops_incidents_url`: `string`
+- `bearer_auth_token`: `string`
+- `channels`: `set(string)`
+
+### Salesforce Channel Attributes
+
+* `salesforce_url` - (Required) The Salesforce instance URL (e.g. `https://example.my.salesforce.com`).
+* `client_id` - (Required) The Salesforce OAuth client ID.
+* `client_secret` - (Required, Sensitive) The Salesforce OAuth client secret. Uses state preservation on updates.
+
+**Type:** `string` for all attributes
+
+### IBM NS1 Connect Channel Attributes
+
+* `webhook_urls` - (Required) Set of webhook URLs where alerts will be sent. Must contain at least one URL.
+* `feed_label` - (Required) The NS1 Connect feed label used to identify the alert feed.
+* `http_headers` - (Optional) List of HTTP headers to send with webhook requests. Each header must be in the format `"Header-Name: value"`.
+
+**Types:**
+- `webhook_urls`: `set(string)`
+- `feed_label`: `string`
+- `http_headers`: `set(string)`
 
 ### RBAC Tags Attributes
 

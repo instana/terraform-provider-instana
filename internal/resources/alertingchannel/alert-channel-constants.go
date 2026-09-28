@@ -57,6 +57,20 @@ const (
 	AlertingChannelWebhookFieldWebhookURLs = "webhook_urls"
 	//AlertingChannelWebhookFieldHTTPHeaders const for the http headers field of the Webhook alerting channel
 	AlertingChannelWebhookFieldHTTPHeaders = "http_headers"
+	//AlertingChannelWebhookFieldOAuthEnabled const for the oauthEnabled field of the Webhook alerting channel
+	AlertingChannelWebhookFieldOAuthEnabled = "oauth_enabled"
+	//AlertingChannelWebhookFieldOAuth const for the oauth block of the Webhook alerting channel
+	AlertingChannelWebhookFieldOAuth = "oauth"
+	//AlertingChannelWebhookOAuthFieldConfig const for the config block inside the oauth block
+	AlertingChannelWebhookOAuthFieldConfig = "config"
+	//AlertingChannelWebhookOAuthConfigFieldClientID const for the clientId field inside oauth.config
+	AlertingChannelWebhookOAuthConfigFieldClientID = "client_id"
+	//AlertingChannelWebhookOAuthConfigFieldClientSecret const for the clientSecret field inside oauth.config
+	AlertingChannelWebhookOAuthConfigFieldClientSecret = "client_secret"
+	//AlertingChannelWebhookOAuthConfigFieldTokenURL const for the tokenUrl field inside oauth.config
+	AlertingChannelWebhookOAuthConfigFieldTokenURL = "token_url"
+	//AlertingChannelWebhookOAuthConfigFieldAdditionalParameters const for the additionalParameters field inside oauth.config
+	AlertingChannelWebhookOAuthConfigFieldAdditionalParameters = "additional_parameters"
 
 	//AlertingChannelFieldChannelOffice365 const for schema field of the Office 365 channel
 	AlertingChannelFieldChannelOffice365 = "office_365"
@@ -132,6 +146,29 @@ const (
 
 	//AlertingChannelFieldChannelMsTeamsApp const for schema field of the MS Teams App channel
 	AlertingChannelFieldChannelMsTeamsApp = "ms_teams_app"
+
+	//AlertingChannelFieldChannelZChatOps const for schema field of the IBM Z ChatOps channel
+	AlertingChannelFieldChannelZChatOps = "z_chatops"
+	//AlertingChannelZChatOpsFieldIncidentsURL const for the zchatOpsIncidentsUrl field of the Z ChatOps alerting channel
+	AlertingChannelZChatOpsFieldIncidentsURL = "zchatops_incidents_url"
+	//AlertingChannelZChatOpsFieldBearerAuthToken const for the bearerAuthToken field of the Z ChatOps alerting channel
+	AlertingChannelZChatOpsFieldBearerAuthToken = "bearer_auth_token"
+	//AlertingChannelZChatOpsFieldChannels const for the channels field of the Z ChatOps alerting channel
+	AlertingChannelZChatOpsFieldChannels = "channels"
+
+	//AlertingChannelFieldChannelSalesforce const for schema field of the Salesforce channel
+	AlertingChannelFieldChannelSalesforce = "salesforce"
+	//AlertingChannelSalesforceFieldURL const for the salesforceUrl field of the Salesforce alerting channel
+	AlertingChannelSalesforceFieldURL = "salesforce_url"
+	//AlertingChannelSalesforceFieldClientID const for the clientId field of the Salesforce alerting channel
+	AlertingChannelSalesforceFieldClientID = "client_id"
+	//AlertingChannelSalesforceFieldClientSecret const for the clientSecret field of the Salesforce alerting channel
+	AlertingChannelSalesforceFieldClientSecret = "client_secret"
+
+	//AlertingChannelFieldChannelNS1 const for schema field of the IBM NS1 Connect channel
+	AlertingChannelFieldChannelNS1 = "ns1"
+	//AlertingChannelNS1FieldFeedLabel const for the feedLabel field of the NS1 alerting channel
+	AlertingChannelNS1FieldFeedLabel = "feed_label"
 	//AlertingChannelMsTeamsAppFieldAPITokenID const for the apiTokenId field of the MS Teams App alerting channel
 	AlertingChannelMsTeamsAppFieldAPITokenID = "api_token_id"
 	//AlertingChannelMsTeamsAppFieldTeamID const for the teamId field of the MS Teams App alerting channel
@@ -181,9 +218,16 @@ const (
 	AlertingChannelDescVictorOps                   = "The configuration of the VictorOps channel"
 	AlertingChannelDescVictorOpsAPIKey             = "The API Key of the VictorOps alerting channel"
 	AlertingChannelDescVictorOpsRoutingKey         = "The Routing Key of the VictorOps alerting channel"
-	AlertingChannelDescWebhook                     = "The configuration of the Webhook channel"
-	AlertingChannelDescWebhookWebhookURLs          = "The list of webhook urls of the Webhook alerting channel"
-	AlertingChannelDescWebhookHTTPHeaders          = "The optional map of HTTP headers of the Webhook alerting channel"
+	AlertingChannelDescWebhook                                  = "The configuration of the Webhook channel"
+	AlertingChannelDescWebhookWebhookURLs                       = "The list of webhook urls of the Webhook alerting channel"
+	AlertingChannelDescWebhookHTTPHeaders                       = "The optional map of HTTP headers of the Webhook alerting channel"
+	AlertingChannelDescWebhookOAuthEnabled                      = "Whether OAuth 2.0 is enabled for the Webhook alerting channel"
+	AlertingChannelDescWebhookOAuth                             = "The OAuth 2.0 configuration for the Webhook alerting channel"
+	AlertingChannelDescWebhookOAuthConfig                       = "The OAuth 2.0 client credentials configuration"
+	AlertingChannelDescWebhookOAuthConfigClientID               = "The OAuth 2.0 client ID"
+	AlertingChannelDescWebhookOAuthConfigClientSecret           = "The OAuth 2.0 client secret"
+	AlertingChannelDescWebhookOAuthConfigTokenURL               = "The OAuth 2.0 token endpoint URL"
+	AlertingChannelDescWebhookOAuthConfigAdditionalParameters   = "Additional parameters to include in the OAuth 2.0 token request (e.g. audience, scope)"
 	AlertingChannelDescOffice365                   = "The configuration of the Office 365 channel"
 	AlertingChannelDescOffice365WebhookURL         = "The webhook URL of the Office 365 alerting channel"
 	AlertingChannelDescGoogleChat                  = "The configuration of the Google Chat channel"
@@ -221,6 +265,18 @@ const (
 	AlertingChannelDescSlackAppChannelID           = "The Channel ID of the Slack App alerting channel"
 	AlertingChannelDescSlackAppChannelName         = "The Channel Name of the Slack App alerting channel"
 	AlertingChannelDescSlackAppEmojiRendering      = "Whether to enable emoji rendering in the Slack App alerting channel"
+	AlertingChannelDescZChatOps                    = "The configuration of the IBM Z ChatOps channel"
+	AlertingChannelDescZChatOpsIncidentsURL        = "The Z ChatOps incidents URL"
+	AlertingChannelDescZChatOpsBearerAuthToken     = "The bearer auth token for the IBM Z ChatOps alerting channel"
+	AlertingChannelDescZChatOpsChannels            = "The list of Z ChatOps channels"
+	AlertingChannelDescSalesforce                  = "The configuration of the Salesforce channel"
+	AlertingChannelDescSalesforceURL               = "The Salesforce instance URL"
+	AlertingChannelDescSalesforceClientID          = "The Salesforce OAuth client ID"
+	AlertingChannelDescSalesforceClientSecret      = "The Salesforce OAuth client secret"
+	AlertingChannelDescNS1                         = "The configuration of the IBM NS1 Connect channel"
+	AlertingChannelDescNS1WebhookURLs              = "The list of webhook URLs for the NS1 Connect alerting channel"
+	AlertingChannelDescNS1FeedLabel                = "The NS1 Connect feed label"
+	AlertingChannelDescNS1Headers                  = "The list of HTTP headers for the NS1 Connect alerting channel (format: 'key: value')"
 	AlertingChannelDescMsTeamsApp                  = "The configuration of the MS Teams App (bidirectional) channel"
 	AlertingChannelDescMsTeamsAppAPITokenID        = "The API Token ID of the MS Teams App alerting channel"
 	AlertingChannelDescMsTeamsAppTeamID            = "The Team ID of the MS Teams App alerting channel"
