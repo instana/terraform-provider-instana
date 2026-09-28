@@ -1,3 +1,17 @@
+## [v7.8.0](https://github.com/instana/terraform-provider-instana/tree/v7.8.0) (2026-09-28)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.7.2...v7.8.0)
+
+**Implemented enhancements:**
+
+- Added a new `instana_ip_filtering` resource for managing IP filtering rules in Instana, with automatic verification support
+- Bumped `instana-go-client` dependency from `v1.4.1` to `v1.5.0` to support IP filtering APIs
+- Added resource documentation for `instana_ip_filtering` with usage examples and Terraform import instructions
+
+**Merged pull requests:**
+
+- Add support for IP Filtering resource with automatic verification [\#123](https://github.com/instana/terraform-provider-instana/pull/123) ([georgekutty-1](https://github.com/georgekutty-1))
+
 ## [v7.7.2](https://github.com/instana/terraform-provider-instana/tree/v7.7.2) (2026-09-15)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.7.1...v7.7.2)
