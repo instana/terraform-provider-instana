@@ -35,6 +35,7 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/resources/group"
 	"github.com/instana/terraform-provider-instana/internal/resources/groupmapping"
 	"github.com/instana/terraform-provider-instana/internal/resources/infralertconfig"
+	"github.com/instana/terraform-provider-instana/internal/resources/ipfiltering"
 	"github.com/instana/terraform-provider-instana/internal/resources/logalertconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/maintenancewindowconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/mobilealertconfig"
@@ -388,6 +389,7 @@ func (p *InstanaProvider) Resources(_ context.Context) []func() resource.Resourc
 		addResouceHandle(sloconfig.NewSloConfigResourceHandle),
 		addResouceHandle(release.NewReleaseResourceHandle),
 		addSingletonResourceHandle(sessionsettings.NewSessionSettingsResourceHandle),
+		addSingletonResourceHandle(ipfiltering.NewIPFilteringResourceHandle),
 	}
 }
 

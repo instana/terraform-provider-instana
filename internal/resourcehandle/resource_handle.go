@@ -41,6 +41,19 @@ type SingletonResourceHandle[T any] interface {
 	GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader
 }
 
+// PostUpsertVerifier is an optional interface that a SingletonResourceHandle can implement
+// to indicate that an additional Verify API call should be made immediately after
+// Upsert when the configuration is enabled. This is required for resources (e.g. IP filtering)
+// whose backend employs an anti-lockout safety mechanism where newly enabled configurations
+// are only temporarily active (~5 minutes) until explicitly verified.
+type PostUpsertVerifier[T any] interface {
+	// NeedsPostUpsertVerification returns true when the upserted object requires verification.
+	NeedsPostUpsertVerification(obj T) bool
+
+	// Verify executes the verification call against the Instana API.
+	Verify(api client.InstanaAPI) (T, error)
+}
+
 // ResourceMetaData the metadata of a terraform ResourceHandle
 type ResourceMetaData struct {
 	ResourceName       string
