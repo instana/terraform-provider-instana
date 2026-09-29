@@ -1,6 +1,6 @@
 module github.com/instana/terraform-provider-instana
 
-go 1.24
+go 1.25.0
 
 require (
 	github.com/alecthomas/participle v0.7.1
@@ -9,7 +9,7 @@ require (
 	github.com/hashicorp/terraform-plugin-framework v1.15.0
 	github.com/hashicorp/terraform-plugin-framework-jsontypes v0.2.0
 	github.com/hashicorp/terraform-plugin-framework-validators v0.18.0
-	github.com/hashicorp/terraform-plugin-log v0.9.0
+	github.com/hashicorp/terraform-plugin-log v0.11.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.36.1
 	github.com/instana/instana-go-client v1.6.0
 	github.com/rs/xid v1.5.0
