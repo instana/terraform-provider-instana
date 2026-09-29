@@ -208,6 +208,62 @@ func TestUpdateState(t *testing.T) {
 		require.False(t, diags.HasError())
 		assert.False(t, model.CustomPayloadFields.IsNull())
 	})
+
+	t.Run("muteUntil sentinel maps to mute true", func(t *testing.T) {
+		apiConfig := &api.AlertingConfiguration{
+			ID:             "test-id",
+			AlertName:      "test-alert",
+			MuteUntil:      9007199254740991,
+			IntegrationIDs: []string{},
+			EventFilteringConfiguration: api.EventFilteringConfiguration{
+				Query:      nil,
+				RuleIDs:    []string{},
+				EventTypes: []api.AlertEventType{},
+			},
+			CustomerPayloadFields: []common.CustomPayloadField[any]{},
+		}
+
+		handle := NewAlertingConfigResourceHandle()
+		state := &tfsdk.State{
+			Schema: handle.MetaData().Schema,
+		}
+
+		diags := resource.UpdateState(ctx, state, nil, apiConfig)
+		require.False(t, diags.HasError())
+
+		var model AlertingConfigModel
+		diags = state.Get(ctx, &model)
+		require.False(t, diags.HasError())
+		assert.True(t, model.Mute.ValueBool())
+	})
+
+	t.Run("muteUntil zero maps to mute false", func(t *testing.T) {
+		apiConfig := &api.AlertingConfiguration{
+			ID:             "test-id",
+			AlertName:      "test-alert",
+			MuteUntil:      0,
+			IntegrationIDs: []string{},
+			EventFilteringConfiguration: api.EventFilteringConfiguration{
+				Query:      nil,
+				RuleIDs:    []string{},
+				EventTypes: []api.AlertEventType{},
+			},
+			CustomerPayloadFields: []common.CustomPayloadField[any]{},
+		}
+
+		handle := NewAlertingConfigResourceHandle()
+		state := &tfsdk.State{
+			Schema: handle.MetaData().Schema,
+		}
+
+		diags := resource.UpdateState(ctx, state, nil, apiConfig)
+		require.False(t, diags.HasError())
+
+		var model AlertingConfigModel
+		diags = state.Get(ctx, &model)
+		require.False(t, diags.HasError())
+		assert.False(t, model.Mute.ValueBool())
+	})
 }
 
 func TestMapStateToDataObject(t *testing.T) {
@@ -221,6 +277,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		model := AlertingConfigModel{
 			ID:                             types.StringValue("test-id"),
 			AlertName:                      types.StringValue("test-alert"),
+			Mute:                           types.BoolValue(false),
 			IntegrationIDs:                 integrationIDsSet,
 			EventFilterQuery:               types.StringNull(),
 			EventFilterEventTypes:          types.SetNull(types.StringType),
@@ -239,6 +296,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		assert.Nil(t, config.EventFilteringConfiguration.Query)
 		assert.Empty(t, config.EventFilteringConfiguration.RuleIDs)
 		assert.Empty(t, config.EventFilteringConfiguration.EventTypes)
+		assert.Equal(t, int64(0), config.MuteUntil)
 	})
 
 	t.Run("configuration from plan", func(t *testing.T) {
@@ -248,6 +306,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		model := AlertingConfigModel{
 			ID:                             types.StringValue(""),
 			AlertName:                      types.StringValue("test-alert"),
+			Mute:                           types.BoolValue(false),
 			IntegrationIDs:                 integrationIDsSet,
 			EventFilterQuery:               types.StringNull(),
 			EventFilterEventTypes:          types.SetNull(types.StringType),
@@ -264,6 +323,52 @@ func TestMapStateToDataObject(t *testing.T) {
 		assert.Equal(t, "test-alert", config.AlertName)
 	})
 
+	t.Run("mute true sets muteUntil to sentinel value", func(t *testing.T) {
+		integrationIDs := []string{"integration-1"}
+		integrationIDsSet, _ := types.SetValueFrom(ctx, types.StringType, integrationIDs)
+
+		model := AlertingConfigModel{
+			ID:                             types.StringValue("test-id"),
+			AlertName:                      types.StringValue("test-alert"),
+			Mute:                           types.BoolValue(true),
+			IntegrationIDs:                 integrationIDsSet,
+			EventFilterQuery:               types.StringNull(),
+			EventFilterEventTypes:          types.SetNull(types.StringType),
+			EventFilterRuleIDs:             types.SetNull(types.StringType),
+			EventFilterApplicationAlertIDs: types.SetNull(types.StringType),
+			CustomPayloadFields:            types.ListNull(shared.GetCustomPayloadFieldType()),
+		}
+
+		state := createMockState(t, ctx, model)
+		config, diags := resource.MapStateToDataObject(ctx, nil, state)
+		require.False(t, diags.HasError())
+		require.NotNil(t, config)
+		assert.Equal(t, int64(9007199254740991), config.MuteUntil)
+	})
+
+	t.Run("mute false sets muteUntil to zero", func(t *testing.T) {
+		integrationIDs := []string{"integration-1"}
+		integrationIDsSet, _ := types.SetValueFrom(ctx, types.StringType, integrationIDs)
+
+		model := AlertingConfigModel{
+			ID:                             types.StringValue("test-id"),
+			AlertName:                      types.StringValue("test-alert"),
+			Mute:                           types.BoolValue(false),
+			IntegrationIDs:                 integrationIDsSet,
+			EventFilterQuery:               types.StringNull(),
+			EventFilterEventTypes:          types.SetNull(types.StringType),
+			EventFilterRuleIDs:             types.SetNull(types.StringType),
+			EventFilterApplicationAlertIDs: types.SetNull(types.StringType),
+			CustomPayloadFields:            types.ListNull(shared.GetCustomPayloadFieldType()),
+		}
+
+		state := createMockState(t, ctx, model)
+		config, diags := resource.MapStateToDataObject(ctx, nil, state)
+		require.False(t, diags.HasError())
+		require.NotNil(t, config)
+		assert.Equal(t, int64(0), config.MuteUntil)
+	})
+
 	t.Run("with event filter query", func(t *testing.T) {
 		integrationIDs := []string{"integration-1"}
 		integrationIDsSet, _ := types.SetValueFrom(ctx, types.StringType, integrationIDs)
@@ -271,6 +376,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		model := AlertingConfigModel{
 			ID:                             types.StringValue("test-id"),
 			AlertName:                      types.StringValue("test-alert"),
+			Mute:                           types.BoolValue(false),
 			IntegrationIDs:                 integrationIDsSet,
 			EventFilterQuery:               types.StringValue("entity.type:host"),
 			EventFilterEventTypes:          types.SetNull(types.StringType),
@@ -296,6 +402,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		model := AlertingConfigModel{
 			ID:                             types.StringValue("test-id"),
 			AlertName:                      types.StringValue("test-alert"),
+			Mute:                           types.BoolValue(false),
 			IntegrationIDs:                 integrationIDsSet,
 			EventFilterQuery:               types.StringNull(),
 			EventFilterEventTypes:          eventTypesSet,
@@ -323,6 +430,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		model := AlertingConfigModel{
 			ID:                             types.StringValue("test-id"),
 			AlertName:                      types.StringValue("test-alert"),
+			Mute:                           types.BoolValue(false),
 			IntegrationIDs:                 integrationIDsSet,
 			EventFilterQuery:               types.StringNull(),
 			EventFilterEventTypes:          types.SetNull(types.StringType),
@@ -351,6 +459,7 @@ func TestMapStateToDataObject(t *testing.T) {
 		model := AlertingConfigModel{
 			ID:                             types.StringValue("test-id"),
 			AlertName:                      types.StringValue("test-alert"),
+			Mute:                           types.BoolValue(false),
 			IntegrationIDs:                 integrationIDsSet,
 			EventFilterQuery:               types.StringNull(),
 			EventFilterEventTypes:          types.SetNull(types.StringType),
@@ -586,6 +695,7 @@ func TestMapStateToDataObjectWithDynamicCustomPayloadFields(t *testing.T) {
 		model := AlertingConfigModel{
 			ID:                             types.StringValue("test-id"),
 			AlertName:                      types.StringValue("test-alert"),
+			Mute:                           types.BoolValue(false),
 			IntegrationIDs:                 integrationIDsSet,
 			EventFilterQuery:               types.StringNull(),
 			EventFilterEventTypes:          types.SetNull(types.StringType),
@@ -673,6 +783,7 @@ func TestMapStateToDataObjectEdgeCases(t *testing.T) {
 		model := AlertingConfigModel{
 			ID:                             types.StringValue("test-id-complex"),
 			AlertName:                      types.StringValue("comprehensive-alert-config"),
+			Mute:                           types.BoolValue(false),
 			IntegrationIDs:                 integrationIDsSet,
 			EventFilterQuery:               types.StringValue("entity.type:host AND entity.label:production AND entity.zone:us-east-1"),
 			EventFilterEventTypes:          eventTypesSet,
@@ -703,6 +814,7 @@ func TestMapStateToDataObjectEdgeCases(t *testing.T) {
 		model := AlertingConfigModel{
 			ID:                             types.StringValue(""),
 			AlertName:                      types.StringValue("test-alert"),
+			Mute:                           types.BoolValue(false),
 			IntegrationIDs:                 integrationIDsSet,
 			EventFilterQuery:               types.StringValue(""),
 			EventFilterEventTypes:          types.SetNull(types.StringType),

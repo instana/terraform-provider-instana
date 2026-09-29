@@ -6,6 +6,7 @@ import "github.com/hashicorp/terraform-plugin-framework/types"
 type AlertingConfigModel struct {
 	ID                             types.String `tfsdk:"id"`
 	AlertName                      types.String `tfsdk:"alert_name"`
+	Mute                           types.Bool   `tfsdk:"mute"`
 	IntegrationIDs                 types.Set    `tfsdk:"integration_ids"`
 	EventFilterQuery               types.String `tfsdk:"event_filter_query"`
 	EventFilterEventTypes          types.Set    `tfsdk:"event_filter_event_types"`
