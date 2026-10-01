@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -13,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
@@ -89,6 +91,15 @@ func buildInfraAlertConfigSchema() schema.Schema {
 				Computed:    true,
 				Default:     booldefault.StaticBool(false),
 			},
+			InfraAlertConfigFieldRuleLogicalOperator: schema.StringAttribute{
+				Description: InfraAlertConfigDescRuleLogicalOperator,
+				Optional:    true,
+				Computed:    true,
+				Default:     stringdefault.StaticString(RuleLogicalOperatorAND),
+				Validators: []validator.String{
+					stringvalidator.OneOf(RuleLogicalOperatorAND, RuleLogicalOperatorOR),
+				},
+			},
 			InfraAlertConfigFieldCustomPayloadField: shared.GetCustomPayloadFieldsSchema(),
 			InfraAlertConfigFieldRules:              buildRulesSchema(),
 			InfraAlertConfigFieldAlertChannels:      buildAlertChannelsSchema(),
@@ -97,13 +108,18 @@ func buildInfraAlertConfigSchema() schema.Schema {
 	}
 }
 
-// buildRulesSchema constructs the schema for rules configuration
-func buildRulesSchema() schema.SingleNestedAttribute {
-	return schema.SingleNestedAttribute{
+// buildRulesSchema constructs the schema for rules configuration as a list (max 5 items)
+func buildRulesSchema() schema.ListNestedAttribute {
+	return schema.ListNestedAttribute{
 		Description: InfraAlertConfigDescRules,
 		Optional:    true,
-		Attributes: map[string]schema.Attribute{
-			InfraAlertConfigFieldGenericRule: buildGenericRuleSchema(),
+		Validators: []validator.List{
+			listvalidator.SizeBetween(1, MaxRulesCount),
+		},
+		NestedObject: schema.NestedAttributeObject{
+			Attributes: map[string]schema.Attribute{
+				InfraAlertConfigFieldGenericRule: buildGenericRuleSchema(),
+			},
 		},
 	}
 }
@@ -138,9 +154,9 @@ func buildGenericRuleSchema() schema.SingleNestedAttribute {
 			InfraAlertConfigFieldThresholdOperator: schema.StringAttribute{
 				Optional:    true,
 				Computed:    true,
-				Description: "The operator to apply for threshold comparison",
+				Description: InfraAlertConfigDescThresholdOperator,
 				Validators: []validator.String{
-					stringvalidator.OneOf(">", ">=", "<", "<="),
+					stringvalidator.OneOf(">", ">=", "<", "<=", "OUTSIDE", "BETWEEN"),
 				},
 			},
 			InfraAlertConfigFieldThreshold: schema.SingleNestedAttribute{
@@ -149,6 +165,27 @@ func buildGenericRuleSchema() schema.SingleNestedAttribute {
 				Attributes: map[string]schema.Attribute{
 					ResourceFieldThresholdRuleWarningSeverity:  shared.StaticAndAdaptiveThresholdAttributeSchema(),
 					ResourceFieldThresholdRuleCriticalSeverity: shared.StaticAndAdaptiveThresholdAttributeSchema(),
+				},
+			},
+			InfraAlertConfigFieldMetricGroupBy: schema.SetAttribute{
+				Description: InfraAlertConfigDescMetricGroupBy,
+				Optional:    true,
+				ElementType: types.StringType,
+			},
+			InfraAlertConfigFieldMetricTagFilter: schema.SingleNestedAttribute{
+				Description: InfraAlertConfigDescMetricTagFilter,
+				Optional:    true,
+				Computed:    true,
+				Attributes: map[string]schema.Attribute{
+					InfraAlertConfigFieldMetricTagFilterLogicalOperator: schema.StringAttribute{
+						Description: InfraAlertConfigDescMetricTagFilterLogicalOperator,
+						Optional:    true,
+						Computed:    true,
+						Default:     stringdefault.StaticString(RuleLogicalOperatorAND),
+						Validators: []validator.String{
+							stringvalidator.OneOf(RuleLogicalOperatorAND, RuleLogicalOperatorOR),
+						},
+					},
 				},
 			},
 		},
@@ -243,6 +280,13 @@ func (r *infraAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk
 
 	model.EvaluationType = types.StringValue(string(resource.EvaluationType))
 	model.Triggering = types.BoolValue(resource.Triggering)
+
+	// Map rule_logical_operator
+	if resource.RuleLogicalOperator != EmptyString {
+		model.RuleLogicalOperator = types.StringValue(resource.RuleLogicalOperator)
+	} else {
+		model.RuleLogicalOperator = types.StringValue(RuleLogicalOperatorAND)
+	}
 
 	// to preserve the existing value in plan/state to handle the value drift
 	if model.TagFilter.IsNull() || model.TagFilter.IsUnknown() {
@@ -369,30 +413,68 @@ func (r *infraAlertConfigResource) mapTimeThresholdToModel(apiTimeThreshold *api
 	}
 }
 
-// mapRulesToModel converts API rules to model representation
-func (r *infraAlertConfigResource) mapRulesToModel(ctx context.Context, rules []common.RuleWithThreshold[api.InfraAlertRule]) (*InfraRulesModel, diag.Diagnostics) {
+// mapRulesToModel converts API rules to model representation (list)
+func (r *infraAlertConfigResource) mapRulesToModel(ctx context.Context, rules []common.RuleWithThreshold[api.InfraAlertRule]) ([]InfraRulesModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if len(rules) == 0 {
 		return nil, diags
 	}
 
-	firstRule := rules[0]
-	thresholdRuleModel := r.mapThresholdsToModel(ctx, firstRule.Thresholds)
+	result := make([]InfraRulesModel, 0, len(rules))
+	for _, apiRule := range rules {
+		thresholdRuleModel := r.mapThresholdsToModel(ctx, apiRule.Thresholds)
 
-	genericRuleModel := &InfraGenericRuleModel{
-		MetricName:             types.StringValue(firstRule.Rule.MetricName),
-		EntityType:             types.StringValue(firstRule.Rule.EntityType),
-		Aggregation:            types.StringValue(string(firstRule.Rule.Aggregation)),
-		CrossSeriesAggregation: types.StringValue(string(firstRule.Rule.CrossSeriesAggregation)),
-		Regex:                  types.BoolValue(firstRule.Rule.Regex),
-		ThresholdOperator:      types.StringValue(string(firstRule.ThresholdOperator)),
-		ThresholdRule:          thresholdRuleModel,
+		metricGroupBy := r.mapMetricGroupByToModel(apiRule.Rule.MetricGroupBy)
+		metricTagFilterExpr := r.mapMetricTagFilterExprToModel(apiRule.Rule.MetricTagFilterExpression)
+
+		genericRuleModel := &InfraGenericRuleModel{
+			MetricName:                types.StringValue(apiRule.Rule.MetricName),
+			EntityType:                types.StringValue(apiRule.Rule.EntityType),
+			Aggregation:               types.StringValue(string(apiRule.Rule.Aggregation)),
+			CrossSeriesAggregation:    types.StringValue(string(apiRule.Rule.CrossSeriesAggregation)),
+			Regex:                     types.BoolValue(apiRule.Rule.Regex),
+			ThresholdOperator:         types.StringValue(string(apiRule.ThresholdOperator)),
+			ThresholdRule:             thresholdRuleModel,
+			MetricGroupBy:             metricGroupBy,
+			MetricTagFilterExpression: metricTagFilterExpr,
+		}
+
+		result = append(result, InfraRulesModel{
+			GenericRule: genericRuleModel,
+		})
 	}
 
-	return &InfraRulesModel{
-		GenericRule: genericRuleModel,
-	}, diags
+	return result, diags
+}
+
+// mapMetricGroupByToModel converts a []string metric group-by to a types.Set
+func (r *infraAlertConfigResource) mapMetricGroupByToModel(metricGroupBy []string) types.Set {
+	if metricGroupBy == nil {
+		return types.SetNull(types.StringType)
+	}
+	elements := make([]attr.Value, len(metricGroupBy))
+	for i, v := range metricGroupBy {
+		elements[i] = types.StringValue(v)
+	}
+	return types.SetValueMust(types.StringType, elements)
+}
+
+// mapMetricTagFilterExprToModel converts the API metricTagFilterExpression to the model.
+// An empty or nil expression maps to the default {logical_operator: "AND"} block.
+func (r *infraAlertConfigResource) mapMetricTagFilterExprToModel(expr *tag.TagFilter) *InfraMetricTagFilterExpressionModel {
+	if expr == nil {
+		return &InfraMetricTagFilterExpressionModel{
+			LogicalOperator: types.StringValue(RuleLogicalOperatorAND),
+		}
+	}
+	logicalOp := RuleLogicalOperatorAND
+	if expr.LogicalOperator != nil {
+		logicalOp = string(*expr.LogicalOperator)
+	}
+	return &InfraMetricTagFilterExpressionModel{
+		LogicalOperator: types.StringValue(logicalOp),
+	}
 }
 
 // mapThresholdsToModel converts API thresholds to model representation
@@ -427,6 +509,13 @@ func (r *infraAlertConfigResource) MapStateToDataObject(ctx context.Context, pla
 		Granularity:    common.Granularity(model.Granularity.ValueInt64()),
 		EvaluationType: api.InfraAlertEvaluationType(model.EvaluationType.ValueString()),
 		Triggering:     model.Triggering.ValueBool(),
+	}
+
+	// Map rule_logical_operator
+	if !model.RuleLogicalOperator.IsNull() && !model.RuleLogicalOperator.IsUnknown() {
+		infraAlertConfig.RuleLogicalOperator = model.RuleLogicalOperator.ValueString()
+	} else {
+		infraAlertConfig.RuleLogicalOperator = RuleLogicalOperatorAND
 	}
 
 	// Map grace period
@@ -581,34 +670,73 @@ func (r *infraAlertConfigResource) mapModelCustomPayloadFieldsToAPI(ctx context.
 	return shared.MapCustomPayloadFieldsToAPIObject(ctx, customPayloadField)
 }
 
-// mapModelRulesToAPI converts model rules to API representation
-func (r *infraAlertConfigResource) mapModelRulesToAPI(ctx context.Context, rulesModel *InfraRulesModel) ([]common.RuleWithThreshold[api.InfraAlertRule], diag.Diagnostics) {
+// mapModelRulesToAPI converts model rules list to API representation
+func (r *infraAlertConfigResource) mapModelRulesToAPI(ctx context.Context, rulesModel []InfraRulesModel) ([]common.RuleWithThreshold[api.InfraAlertRule], diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	if rulesModel == nil || rulesModel.GenericRule == nil {
+	if len(rulesModel) == 0 {
 		return nil, diags
 	}
 
-	genericRuleModel := rulesModel.GenericRule
+	result := make([]common.RuleWithThreshold[api.InfraAlertRule], 0, len(rulesModel))
+	for _, ruleEntry := range rulesModel {
+		if ruleEntry.GenericRule == nil {
+			continue
+		}
+		genericRuleModel := ruleEntry.GenericRule
 
-	ruleWithThreshold := common.RuleWithThreshold[api.InfraAlertRule]{
-		ThresholdOperator: common.ThresholdOperator(genericRuleModel.ThresholdOperator.ValueString()),
-		Rule: api.InfraAlertRule{
-			AlertType:              GenericRuleAlertType,
-			MetricName:             genericRuleModel.MetricName.ValueString(),
-			EntityType:             genericRuleModel.EntityType.ValueString(),
-			Aggregation:            common.Aggregation(genericRuleModel.Aggregation.ValueString()),
-			CrossSeriesAggregation: common.Aggregation(genericRuleModel.CrossSeriesAggregation.ValueString()),
-			Regex:                  genericRuleModel.Regex.ValueBool(),
-		},
-		Thresholds: make(map[common.AlertSeverity]common.ThresholdRule),
+		metricGroupBy, metricGroupByDiags := r.mapModelMetricGroupByToAPI(ctx, genericRuleModel.MetricGroupBy)
+		diags.Append(metricGroupByDiags...)
+
+		metricTagFilterExpr := r.mapModelMetricTagFilterExprToAPI(genericRuleModel.MetricTagFilterExpression)
+
+		ruleWithThreshold := common.RuleWithThreshold[api.InfraAlertRule]{
+			ThresholdOperator: common.ThresholdOperator(genericRuleModel.ThresholdOperator.ValueString()),
+			Rule: api.InfraAlertRule{
+				AlertType:                 GenericRuleAlertType,
+				MetricName:                genericRuleModel.MetricName.ValueString(),
+				EntityType:                genericRuleModel.EntityType.ValueString(),
+				Aggregation:               common.Aggregation(genericRuleModel.Aggregation.ValueString()),
+				CrossSeriesAggregation:    common.Aggregation(genericRuleModel.CrossSeriesAggregation.ValueString()),
+				Regex:                     genericRuleModel.Regex.ValueBool(),
+				MetricGroupBy:             metricGroupBy,
+				MetricTagFilterExpression: metricTagFilterExpr,
+			},
+			Thresholds: make(map[common.AlertSeverity]common.ThresholdRule),
+		}
+
+		thresholds, thresholdDiags := r.mapModelThresholdsToAPI(ctx, genericRuleModel.ThresholdRule)
+		diags.Append(thresholdDiags...)
+		ruleWithThreshold.Thresholds = thresholds
+
+		result = append(result, ruleWithThreshold)
 	}
 
-	thresholds, thresholdDiags := r.mapModelThresholdsToAPI(ctx, genericRuleModel.ThresholdRule)
-	diags.Append(thresholdDiags...)
-	ruleWithThreshold.Thresholds = thresholds
+	return result, diags
+}
 
-	return []common.RuleWithThreshold[api.InfraAlertRule]{ruleWithThreshold}, diags
+// mapModelMetricGroupByToAPI converts the metric_group_by set to a []string
+func (r *infraAlertConfigResource) mapModelMetricGroupByToAPI(ctx context.Context, metricGroupBy types.Set) ([]string, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	if metricGroupBy.IsNull() || metricGroupBy.IsUnknown() {
+		return []string{}, diags
+	}
+	var result []string
+	diags.Append(metricGroupBy.ElementsAs(ctx, &result, false)...)
+	return result, diags
+}
+
+// mapModelMetricTagFilterExprToAPI converts the metric_tag_filter_expression model to an API TagFilter.
+// Always sends the empty EXPRESSION the API expects.
+func (r *infraAlertConfigResource) mapModelMetricTagFilterExprToAPI(model *InfraMetricTagFilterExpressionModel) *tag.TagFilter {
+	if model == nil || model.LogicalOperator.IsNull() || model.LogicalOperator.IsUnknown() {
+		return tag.NewLogicalAndTagFilter([]*tag.TagFilter{})
+	}
+	logicalOp := model.LogicalOperator.ValueString()
+	if logicalOp == RuleLogicalOperatorOR {
+		return tag.NewLogicalOrTagFilter([]*tag.TagFilter{})
+	}
+	return tag.NewLogicalAndTagFilter([]*tag.TagFilter{})
 }
 
 // mapModelThresholdsToAPI converts model thresholds to API representation

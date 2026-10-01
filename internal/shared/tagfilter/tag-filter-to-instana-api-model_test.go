@@ -44,7 +44,9 @@ func createTestShouldMapStringComparisonToRepresentationOfInstanaAPI(operator co
 			},
 		}
 
-		expectedResult := tag.NewStringTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, operator, "value")
+		expectedResult := tag.NewLogicalAndTagFilter([]*tag.TagFilter{
+			tag.NewStringTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, operator, "value"),
+		})
 		runTestCaseForMappingToAPI(expr, expectedResult, t)
 	}
 }
@@ -68,7 +70,9 @@ func createTestShouldMapNumberComparisonToRepresentationOfInstanaAPI(operator co
 			},
 		}
 
-		expectedResult := tag.NewNumberTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, operator, numberValue)
+		expectedResult := tag.NewLogicalAndTagFilter([]*tag.TagFilter{
+			tag.NewNumberTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, operator, numberValue),
+		})
 		runTestCaseForMappingToAPI(expr, expectedResult, t)
 	}
 }
@@ -92,7 +96,9 @@ func createTestShouldMapBooleanComparisonToRepresentationOfInstanaAPI(operator c
 			},
 		}
 
-		expectedResult := tag.NewBooleanTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, operator, boolValue)
+		expectedResult := tag.NewLogicalAndTagFilter([]*tag.TagFilter{
+			tag.NewBooleanTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, operator, boolValue),
+		})
 		runTestCaseForMappingToAPI(expr, expectedResult, t)
 	}
 }
@@ -117,7 +123,9 @@ func createTestShouldMapTagComparisonToRepresentationOfInstanaAPI(operator commo
 			},
 		}
 
-		expectedResult := tag.NewTagTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, operator, key, value)
+		expectedResult := tag.NewLogicalAndTagFilter([]*tag.TagFilter{
+			tag.NewTagTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, operator, key, value),
+		})
 		runTestCaseForMappingToAPI(expr, expectedResult, t)
 	}
 }
@@ -141,7 +149,9 @@ func TestShouldMapTagComparisonToRepresentationOfInstanaAPIUsingAStringValue(t *
 		},
 	}
 
-	expectedResult := tag.NewTagTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, common.EqualsOperator, key, value)
+	expectedResult := tag.NewLogicalAndTagFilter([]*tag.TagFilter{
+		tag.NewTagTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, common.EqualsOperator, key, value),
+	})
 	runTestCaseForMappingToAPI(expr, expectedResult, t)
 }
 
@@ -164,7 +174,9 @@ func TestShouldMapTagComparisonToRepresentationOfInstanaAPIUsingANumberValue(t *
 		},
 	}
 
-	expectedResult := tag.NewTagTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, common.EqualsOperator, key, "1234")
+	expectedResult := tag.NewLogicalAndTagFilter([]*tag.TagFilter{
+		tag.NewTagTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, common.EqualsOperator, key, "1234"),
+	})
 	runTestCaseForMappingToAPI(expr, expectedResult, t)
 }
 
@@ -187,7 +199,9 @@ func TestShouldMapTagComparisonToRepresentationOfInstanaAPIUsingABooleanValue(t 
 		},
 	}
 
-	expectedResult := tag.NewTagTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, common.EqualsOperator, key, "true")
+	expectedResult := tag.NewLogicalAndTagFilter([]*tag.TagFilter{
+		tag.NewTagTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, common.EqualsOperator, key, "true"),
+	})
 	runTestCaseForMappingToAPI(expr, expectedResult, t)
 }
 
@@ -214,7 +228,9 @@ func createTestShouldMapUnaryOperatorToRepresentationOfInstanaAPI(operatorName c
 			},
 		}
 
-		expectedResult := tag.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, operatorName)
+		expectedResult := tag.NewLogicalAndTagFilter([]*tag.TagFilter{
+			tag.NewUnaryTagFilter(tagfilter.TagFilterEntityDestination, entitySpecKey, operatorName),
+		})
 		runTestCaseForMappingToAPI(expr, expectedResult, t)
 	}
 }

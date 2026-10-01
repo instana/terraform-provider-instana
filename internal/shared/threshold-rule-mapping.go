@@ -70,8 +70,10 @@ type HistoricBaselineModel struct {
 }
 
 type StaticTypeModel struct {
-	//Operator types.String  `tfsdk:"operator"`
-	Value types.Float64 `tfsdk:"value"`
+	//Operator   types.String  `tfsdk:"operator"`
+	Value      types.Float64 `tfsdk:"value"`
+	UpperBound types.Float64 `tfsdk:"upper_bound"`
+	LowerBound types.Float64 `tfsdk:"lower_bound"`
 }
 type ThresholdPluginModel struct {
 	Warning  *ThresholdTypeModel `tfsdk:"warning"`
@@ -110,16 +112,16 @@ func StaticAttributeSchema() schema.SingleNestedAttribute {
 		Attributes: map[string]schema.Attribute{
 			LogAlertConfigFieldValue: schema.Float64Attribute{
 				Optional:    true,
-				Description: "The value of the threshold",
+				Description: "The threshold value. Required for point-value operators (>, >=, <, <=). Must be null for BETWEEN/OUTSIDE operators.",
 			},
-			// ResourceFieldThresholdOperator: schema.StringAttribute{
-			// 	Optional:    true,
-			// 	Computed:    true,
-			// 	Description: "The operator for the adaptive baseline threshold",
-			// 	Validators: []validator.String{
-			// 		stringvalidator.OneOf(">", ">=", "<", "<="),
-			// 	},
-			// },
+			"upper_bound": schema.Float64Attribute{
+				Optional:    true,
+				Description: "The upper bound of the threshold range. Required for BETWEEN and OUTSIDE operators. Must be null for point-value operators.",
+			},
+			"lower_bound": schema.Float64Attribute{
+				Optional:    true,
+				Description: "The lower bound of the threshold range. Required for BETWEEN and OUTSIDE operators. Must be null for point-value operators.",
+			},
 		},
 	}
 }
@@ -266,12 +268,25 @@ func MapThresholdRulePluginFromState(ctx context.Context, thresholdObj *Threshol
 	// Check for static threshold
 	if thresholdObj.Static != nil {
 		staticVal := thresholdObj.Static
+
+		// Range operators (BETWEEN / OUTSIDE) use upper_bound + lower_bound; value must be nil.
+		if !staticVal.UpperBound.IsNull() && !staticVal.UpperBound.IsUnknown() {
+			upperBound := math.Round(staticVal.UpperBound.ValueFloat64()*100) / 100
+			lowerBound := math.Round(staticVal.LowerBound.ValueFloat64()*100) / 100
+			return &model.ThresholdRule{
+				Type:       "staticThreshold",
+				Value:      nil,
+				UpperBound: &upperBound,
+				LowerBound: &lowerBound,
+			}, diags
+		}
+
+		// Point-value operators use a single value.
 		valueFloat := staticVal.Value.ValueFloat64()
 		rounded := math.Round(valueFloat*100) / 100
 		return &model.ThresholdRule{
 			Type:  "staticThreshold",
 			Value: &rounded,
-			//Operator: staticVal.Operator.ValueStringPointer(),
 		}, diags
 	}
 
@@ -281,14 +296,11 @@ func MapThresholdRulePluginFromState(ctx context.Context, thresholdObj *Threshol
 		seasonality := model.ThresholdSeasonality(adaptiveVal.Seasonality.ValueString())
 		deviationFactor := float32(util.RoundFloat64To2Decimals(adaptiveVal.DeviationFactor.ValueFloat64()))
 		adaptability := float32(util.RoundFloat64To2Decimals(adaptiveVal.Adaptability.ValueFloat64()))
-		// Note: Operator field is currently not used by the API but kept for future compatibility
-		//operator := util.SetStringPointerFromState(adaptiveVal.Operator)
 		return &model.ThresholdRule{
 			Type:            "adaptiveBaseline",
 			Seasonality:     &seasonality,
 			DeviationFactor: &deviationFactor,
 			Adaptability:    &adaptability,
-			//Operator:        operator,
 		}, diags
 	}
 	return nil, diags
@@ -481,20 +493,12 @@ func MapThresholdPluginToState(ctx context.Context, threshold *model.ThresholdRu
 		}
 		thresholdTypeModel.AdaptiveBaseline = &adaptiveBaselineModel
 	default:
-		// Default to static threshold for all other types
-		// Round to 2 decimal places to avoid floating-point precision issues
-		var roundedValue types.Float64
-		if threshold.Value != nil {
-			// Format to 2 decimal places and parse back to ensure exact precision
-			formatted := strconv.FormatFloat(*threshold.Value, 'f', 2, 64)
-			parsed, _ := strconv.ParseFloat(formatted, 64)
-			roundedValue = types.Float64Value(parsed)
-		} else {
-			roundedValue = types.Float64Null()
-		}
+		// Default to static threshold for all other types.
+		// Range thresholds (BETWEEN / OUTSIDE) carry upper_bound + lower_bound; value is nil.
 		static := StaticTypeModel{
-			//Operator: util.SetStringPointerToState(threshold.Operator),
-			Value: roundedValue,
+			Value:      roundFloat64PtrToState(threshold.Value),
+			UpperBound: roundFloat64PtrToState(threshold.UpperBound),
+			LowerBound: roundFloat64PtrToState(threshold.LowerBound),
 		}
 		thresholdTypeModel.Static = &static
 	}
@@ -549,23 +553,26 @@ func MapAllThresholdPluginToState(ctx context.Context, threshold *model.Threshol
 		}
 		thresholdTypeModel.HistoricBaseline = &historicBaselineModel
 	default:
-		// Default to static threshold for all other types
-		// Round to 2 decimal places to avoid floating-point precision issues
-		var roundedValue types.Float64
-		if threshold.Value != nil {
-			// Format to 2 decimal places and parse back to ensure exact precision
-			formatted := strconv.FormatFloat(*threshold.Value, 'f', 2, 64)
-			parsed, _ := strconv.ParseFloat(formatted, 64)
-			roundedValue = types.Float64Value(parsed)
-		} else {
-			roundedValue = types.Float64Null()
-		}
+		// Default to static threshold for all other types.
+		// Range thresholds (BETWEEN / OUTSIDE) carry upper_bound + lower_bound; value is nil.
 		static := StaticTypeModel{
-			//Operator: util.SetStringPointerToState(threshold.Operator),
-			Value: roundedValue,
+			Value:      roundFloat64PtrToState(threshold.Value),
+			UpperBound: roundFloat64PtrToState(threshold.UpperBound),
+			LowerBound: roundFloat64PtrToState(threshold.LowerBound),
 		}
 		thresholdTypeModel.Static = &static
 	}
 
 	return &thresholdTypeModel
+}
+
+// roundFloat64PtrToState converts a *float64 to a types.Float64, rounding to 2 decimal places.
+// Returns types.Float64Null() when the pointer is nil.
+func roundFloat64PtrToState(v *float64) types.Float64 {
+	if v == nil {
+		return types.Float64Null()
+	}
+	formatted := strconv.FormatFloat(*v, 'f', 2, 64)
+	parsed, _ := strconv.ParseFloat(formatted, 64)
+	return types.Float64Value(parsed)
 }

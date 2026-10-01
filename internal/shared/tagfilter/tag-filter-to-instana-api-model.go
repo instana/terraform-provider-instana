@@ -7,9 +7,17 @@ import (
 	"github.com/instana/instana-go-client/shared/types"
 )
 
-// ToAPIModel Implementation of the mapping form filter expression model to the Instana API model
+// ToAPIModel Implementation of the mapping form filter expression model to the Instana API model.
+// The Instana API always expects the top-level tagFilterExpression to be an EXPRESSION node
+// (type=EXPRESSION, logicalOperator, elements=[...]). A single leaf TAG_FILTER is therefore
+// always wrapped in a logical-AND envelope so the API receives the correct structure.
 func (m *tagFilterMapper) ToAPIModel(input *FilterExpression) *tag.TagFilter {
-	return m.mapLogicalOrToAPIModel(input.Expression)
+	result := m.mapLogicalOrToAPIModel(input.Expression)
+	// Wrap bare leaf nodes in an EXPRESSION/AND envelope
+	if result.GetType() == tag.TagFilterType {
+		return tag.NewLogicalAndTagFilter([]*tag.TagFilter{result})
+	}
+	return result
 }
 
 func (m *tagFilterMapper) mapLogicalOrToAPIModel(input *LogicalOrExpression) *tag.TagFilter {

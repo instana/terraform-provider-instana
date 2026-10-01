@@ -1131,10 +1131,15 @@ func TestShouldHandleRoundTripConversionWithSingleQuotesInValue(t *testing.T) {
 	convertedAPIModel := mapper.ToAPIModel(parsedExpr)
 	require.NotNil(t, convertedAPIModel)
 
-	// Step 5: Verify the round-trip conversion preserved the original value
-	require.Equal(t, tag.TagFilterType, convertedAPIModel.GetType())
-	require.Equal(t, "log.exception.type", *convertedAPIModel.Name)
-	require.Equal(t, common.EqualsOperator, *convertedAPIModel.Operator)
-	require.Equal(t, "<class 'ConnectionResetError'>", *convertedAPIModel.StringValue)
-	require.Equal(t, tagfilter.TagFilterEntityNotApplicable, *convertedAPIModel.Entity)
+	// Step 5: Verify the round-trip conversion preserved the original value.
+	// ToAPIModel always wraps a single leaf in an EXPRESSION/AND envelope so that
+	// the Instana API receives the correct top-level structure.
+	require.Equal(t, tag.TagFilterExpressionType, convertedAPIModel.GetType())
+	require.Len(t, convertedAPIModel.Elements, 1)
+	leaf := convertedAPIModel.Elements[0]
+	require.Equal(t, tag.TagFilterType, leaf.GetType())
+	require.Equal(t, "log.exception.type", *leaf.Name)
+	require.Equal(t, common.EqualsOperator, *leaf.Operator)
+	require.Equal(t, "<class 'ConnectionResetError'>", *leaf.StringValue)
+	require.Equal(t, tagfilter.TagFilterEntityNotApplicable, *leaf.Entity)
 }
