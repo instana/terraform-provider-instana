@@ -180,9 +180,9 @@ func buildRulesSchema() schema.SingleNestedAttribute {
 			LogAlertConfigFieldThresholdOperator: schema.StringAttribute{
 				Optional:    true,
 				Computed:    true,
-				Description: "The operator to apply for threshold comparison",
+				Description: "The operator to apply for threshold comparison. Supported values: >, >=, <, <=, OUTSIDE (static+adaptive), BETWEEN (static only).",
 				Validators: []validator.String{
-					stringvalidator.OneOf(">", ">=", "<", "<="),
+					stringvalidator.OneOf(">", ">=", "<", "<=", "OUTSIDE", "BETWEEN"),
 				},
 			},
 			LogAlertConfigFieldThreshold: schema.SingleNestedAttribute{
