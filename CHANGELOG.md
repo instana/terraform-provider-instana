@@ -1,3 +1,21 @@
+## [v7.8.1](https://github.com/instana/terraform-provider-instana/tree/v7.8.1) (2026-10-01)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.8.0...v7.8.1)
+
+**Implemented enhancements:**
+
+- Added support for three new alert channel types in `instana_alerting_channel`: IBM Z ChatOps, Salesforce, and IBM NS1 Connect
+- Added OAuth 2.0 authentication support for the Webhook alert channel type in `instana_alerting_channel`
+- Added `mute_until` field to `instana_alerting_config` resource, allowing alert configurations to be muted until a specified time
+- Bumped `instana-go-client` dependency from `v1.5.0` to `v1.6.0` to support alerting config mute APIs
+- Added and updated resource documentation for `instana_alerting_channel` (new channel types) and `instana_alerting_config` (`mute` field with usage example and notes)
+
+**Merged pull requests:**
+
+- feat: add IBM Z ChatOps, Salesforce, NS1 Connect alert channels and OAuth 2.0 webhook support [\#124](https://github.com/instana/terraform-provider-instana/pull/124) ([BlessyElza](https://github.com/BlessyElza))
+- feat(alerting-config): add mute field to alerting configuration resource [\#135](https://github.com/instana/terraform-provider-instana/pull/135) ([BlessyElza](https://github.com/BlessyElza))
+- docs: add mute field to alerting config documentation [\#136](https://github.com/instana/terraform-provider-instana/pull/136) ([BlessyElza](https://github.com/BlessyElza))
+
 ## [v7.8.0](https://github.com/instana/terraform-provider-instana/tree/v7.8.0) (2026-09-28)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.7.2...v7.8.0)
