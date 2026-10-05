@@ -241,6 +241,10 @@ All scope limitation attributes are optional and default to `false`:
 * `limited_alert_channels_scope` - Limits the scope to alert channels
 * `limited_service_level_scope` - Limits the scope to service levels
 * `limited_ai_gateway_scope` - Limits the scope to AI Gateway
+* `limited_gen_ai_scope` - Limits the scope to GenAI
+* `limited_sap_scope` - Limits the scope to SAP
+* `limited_gen_ai_capabilities_scope` - Limits the scope to GenAI capabilities
+* `limited_logging_perspectives_scope` - Limits the scope to logging perspectives
 
 ### Additional Permissions
 
@@ -284,6 +288,15 @@ All additional permission attributes are optional and default to `false`:
 * `can_configure_service_level_correction_windows` - Enables permission to configure service level correction windows
 * `can_configure_service_level_smart_alerts` - Enables permission to configure service level smart alerts
 * `can_configure_service_levels` - Enables permission to configure service levels (SLOs/SLIs)
+* `can_configure_network_integrations` - Enables permission to configure network integrations
+* `can_configure_logging_perspectives` - Enables permission to configure logging perspectives
+* `can_configure_entity_payload_transformation_rules` - Enables permission to configure entity payload transformation rules
+* `can_configure_gen_ai_evaluations` - Enables permission to configure GenAI evaluations
+* `can_configure_gen_ai_smart_alerts` - Enables permission to configure GenAI smart alerts
+* `can_configure_application_business_criticality` - Enables permission to configure application business criticality
+* `can_configure_website_business_criticality` - Enables permission to configure website business criticality
+* `can_configure_mobile_app_business_criticality` - Enables permission to configure mobile app business criticality
+* `can_playback_session_replay` - Enables permission to playback session replay
 
 ## Attribute Reference
 

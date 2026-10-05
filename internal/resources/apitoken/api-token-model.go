@@ -63,8 +63,12 @@ type APITokenModel struct {
 	LimitedWindowsHypervisorScope  types.Bool `tfsdk:"limited_windows_hypervisor_scope"`
 	LimitedAlertChannelsScope      types.Bool `tfsdk:"limited_alert_channels_scope"`
 	LimitedLinuxKvmHypervisorScope types.Bool `tfsdk:"limited_linux_kvm_hypervisor_scope"`
-	LimitedServiceLevelScope       types.Bool `tfsdk:"limited_service_level_scope"`
-	LimitedAiGatewayScope          types.Bool `tfsdk:"limited_ai_gateway_scope"`
+	LimitedServiceLevelScope            types.Bool `tfsdk:"limited_service_level_scope"`
+	LimitedAiGatewayScope               types.Bool `tfsdk:"limited_ai_gateway_scope"`
+	LimitedGenAIScope                   types.Bool `tfsdk:"limited_gen_ai_scope"`
+	LimitedSAPScope                     types.Bool `tfsdk:"limited_sap_scope"`
+	LimitedGenAICapabilitiesScope       types.Bool `tfsdk:"limited_gen_ai_capabilities_scope"`
+	LimitedLoggingPerspectivesScope     types.Bool `tfsdk:"limited_logging_perspectives_scope"`
 
 	// Additional permissions
 	CanConfigurePersonalAPITokens                        types.Bool `tfsdk:"can_configure_personal_api_tokens"`
@@ -106,4 +110,13 @@ type APITokenModel struct {
 	CanConfigureServiceLevelCorrectionWindows            types.Bool `tfsdk:"can_configure_service_level_correction_windows"`
 	CanConfigureServiceLevelSmartAlerts                  types.Bool `tfsdk:"can_configure_service_level_smart_alerts"`
 	CanConfigureServiceLevels                            types.Bool `tfsdk:"can_configure_service_levels"`
+	CanConfigureNetworkIntegrations                      types.Bool `tfsdk:"can_configure_network_integrations"`
+	CanConfigureLoggingPerspectives                      types.Bool `tfsdk:"can_configure_logging_perspectives"`
+	CanConfigureEntityPayloadTransformationRules         types.Bool `tfsdk:"can_configure_entity_payload_transformation_rules"`
+	CanConfigureGenAIEvaluations                         types.Bool `tfsdk:"can_configure_gen_ai_evaluations"`
+	CanConfigureGenAISmartAlerts                         types.Bool `tfsdk:"can_configure_gen_ai_smart_alerts"`
+	CanConfigureApplicationBusinessCriticality           types.Bool `tfsdk:"can_configure_application_business_criticality"`
+	CanConfigureWebsiteBusinessCriticality               types.Bool `tfsdk:"can_configure_website_business_criticality"`
+	CanConfigureMobileAppBusinessCriticality             types.Bool `tfsdk:"can_configure_mobile_app_business_criticality"`
+	CanPlaybackSessionReplay                             types.Bool `tfsdk:"can_playback_session_replay"`
 }
