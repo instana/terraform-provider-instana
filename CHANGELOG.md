@@ -1,3 +1,17 @@
+## [v7.8.2](https://github.com/instana/terraform-provider-instana/tree/v7.8.2) (2026-10-06)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.8.1...v7.8.2)
+
+**Implemented enhancements:**
+
+- Added new permission and scope limitation fields to the `instana_api_token` resource to support the latest API token capabilities introduced in Instana
+- Bumped `instana-go-client` dependency from `v1.6.0` to `v1.6.1`
+
+**Merged pull requests:**
+
+- feat(api-token): add new permission and scope limitation fields [\#138](https://github.com/instana/terraform-provider-instana/pull/138) ([BlessyElza](https://github.com/BlessyElza))
+- update go client version [\#139](https://github.com/instana/terraform-provider-instana/pull/139) ([BlessyElza](https://github.com/BlessyElza))
+
 ## [v7.8.1](https://github.com/instana/terraform-provider-instana/tree/v7.8.1) (2026-10-01)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.8.0...v7.8.1)
