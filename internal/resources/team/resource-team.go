@@ -291,7 +291,7 @@ func (r *teamResource) buildTeamModelFromAPIResponse(ctx context.Context, team *
 		Tag: types.StringValue(team.Tag),
 	}
 
-	if planModel.Info != nil {
+	if team.Info != nil {
 		model.Info = r.mapTeamInfoToModel(team.Info)
 	}
 
