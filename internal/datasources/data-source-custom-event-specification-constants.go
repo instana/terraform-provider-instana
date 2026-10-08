@@ -32,6 +32,12 @@ const (
 	CustomEventSpecificationDescQuery = "Dynamic focus query for the custom event specification."
 	// CustomEventSpecificationDescExpirationTime description for the expiration_time field
 	CustomEventSpecificationDescExpirationTime = "The expiration time (grace period) to wait before the issue is closed."
+	// CustomEventSpecificationDescTransientEventEnabled description for the transient_event_enabled field
+	CustomEventSpecificationDescTransientEventEnabled = "Indicates if transient event handling is enabled."
+	// CustomEventSpecificationDescTransientEventThreshold description for the transient_event_threshold field
+	CustomEventSpecificationDescTransientEventThreshold = "The duration in milliseconds that an event must persist before it is considered non-transient."
+	// CustomEventSpecificationDescTransientEventAlertMuted description for the transient_event_alert_muted field
+	CustomEventSpecificationDescTransientEventAlertMuted = "Indicates if alerts for transient events are muted."
 )
 
 // Error message constants
@@ -51,13 +57,16 @@ const (
 )
 
 const (
-	CustomEventSpecificationFieldName           = "name"
-	CustomEventSpecificationFieldEntityType     = "entity_type"
-	CustomEventSpecificationFieldQuery          = "query"
-	CustomEventSpecificationFieldTriggering     = "triggering"
-	CustomEventSpecificationFieldDescription    = "description"
-	CustomEventSpecificationFieldExpirationTime = "expiration_time"
-	CustomEventSpecificationFieldEnabled        = "enabled"
+	CustomEventSpecificationFieldName                  = "name"
+	CustomEventSpecificationFieldEntityType            = "entity_type"
+	CustomEventSpecificationFieldQuery                 = "query"
+	CustomEventSpecificationFieldTriggering            = "triggering"
+	CustomEventSpecificationFieldDescription           = "description"
+	CustomEventSpecificationFieldExpirationTime        = "expiration_time"
+	CustomEventSpecificationFieldEnabled               = "enabled"
+	CustomEventSpecificationFieldTransientEventEnabled    = "transient_event_enabled"
+	CustomEventSpecificationFieldTransientEventThreshold  = "transient_event_threshold"
+	CustomEventSpecificationFieldTransientEventAlertMuted = "transient_event_alert_muted"
 
 	CustomEventSpecificationFieldRuleLogicalOperator         = "rule_logical_operator"
 	CustomEventSpecificationFieldRules                       = "rules"

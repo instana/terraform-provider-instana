@@ -4,16 +4,19 @@ import "github.com/hashicorp/terraform-plugin-framework/types"
 
 // CustomEventSpecificationModel represents the data model for the custom event specification resource
 type CustomEventSpecificationModel struct {
-	ID                  types.String `tfsdk:"id"`
-	Name                types.String `tfsdk:"name"`
-	EntityType          types.String `tfsdk:"entity_type"`
-	Query               types.String `tfsdk:"query"`
-	Triggering          types.Bool   `tfsdk:"triggering"`
-	Description         types.String `tfsdk:"description"`
-	ExpirationTime      types.Int64  `tfsdk:"expiration_time"`
-	Enabled             types.Bool   `tfsdk:"enabled"`
-	RuleLogicalOperator types.String `tfsdk:"rule_logical_operator"`
-	Rules               *RulesModel  `tfsdk:"rules"`
+	ID                       types.String `tfsdk:"id"`
+	Name                     types.String `tfsdk:"name"`
+	EntityType               types.String `tfsdk:"entity_type"`
+	Query                    types.String `tfsdk:"query"`
+	Triggering               types.Bool   `tfsdk:"triggering"`
+	Description              types.String `tfsdk:"description"`
+	ExpirationTime           types.Int64  `tfsdk:"expiration_time"`
+	Enabled                  types.Bool   `tfsdk:"enabled"`
+	RuleLogicalOperator      types.String `tfsdk:"rule_logical_operator"`
+	Rules                    *RulesModel  `tfsdk:"rules"`
+	TransientEventEnabled    types.Bool   `tfsdk:"transient_event_enabled"`
+	TransientEventThreshold  types.Int64  `tfsdk:"transient_event_threshold"`
+	TransientEventAlertMuted types.Bool   `tfsdk:"transient_event_alert_muted"`
 }
 
 // RulesModel represents the rules container in the custom event specification
