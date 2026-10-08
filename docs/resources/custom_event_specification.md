@@ -323,5 +323,4 @@ $ terraform import instana_custom_event_specification.example 60845e4e5e6b9cf8fc
 * Entity types and available metrics can be discovered using the Instana REST API
 * When `triggering` is set to `false`, the event will be created but won't trigger incidents
 * The `expiration_time` defines how long an issue remains open after conditions are no longer met
-* **Transient event fields** (`transient_event_enabled`, `transient_event_threshold`, `transient_event_alert_muted`) are new backend features introduced in 2025. They are all optional with safe defaults (`true`, `300000`, `false`) so existing configurations remain unaffected
 * When `transient_event_enabled` is `true`, events that resolve within the `transient_event_threshold` window are treated as transient. Setting `transient_event_alert_muted` to `true` will additionally suppress alert notifications for those short-lived events
