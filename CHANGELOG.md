@@ -1,3 +1,15 @@
+## [v7.9.0](https://github.com/instana/terraform-provider-instana/tree/v7.9.0) (2026-10-08)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.8.2...v7.9.0)
+
+**Implemented enhancements:**
+
+- Added `instana_application_config` data source to retrieve details about existing application configurations (application perspectives) by `id` or `name`
+
+**Merged pull requests:**
+
+- Add instana_application_config data source [\#140](https://github.com/instana/terraform-provider-instana/pull/140) ([georgekutty-1](https://github.com/georgekutty-1))
+
 ## [v7.8.2](https://github.com/instana/terraform-provider-instana/tree/v7.8.2) (2026-10-06)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.8.1...v7.8.2)
