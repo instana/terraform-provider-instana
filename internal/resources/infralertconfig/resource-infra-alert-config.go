@@ -36,7 +36,7 @@ func NewInfraAlertConfigResourceHandle() resourcehandle.ResourceHandle[*api.Infr
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:  ResourceInstanaInfraAlertConfig,
 			Schema:        buildInfraAlertConfigSchema(),
-			SchemaVersion: 2,
+			SchemaVersion: 3,
 		},
 	}
 }
@@ -771,5 +771,6 @@ func (r *infraAlertConfigResource) mapModelThresholdsToAPI(ctx context.Context, 
 func (r *infraAlertConfigResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
 	return map[int64]resource.StateUpgrader{
 		1: resourcehandle.CreateStateUpgraderForVersion(1),
+		2: resourcehandle.CreateStateUpgraderForVersion(2),
 	}
 }
