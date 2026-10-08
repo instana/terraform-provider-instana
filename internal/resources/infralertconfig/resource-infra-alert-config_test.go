@@ -26,7 +26,7 @@ func TestNewInfraAlertConfigResourceHandle(t *testing.T) {
 	metaData := resource.MetaData()
 	assert.Equal(t, ResourceInstanaInfraAlertConfig, metaData.ResourceName)
 	assert.NotNil(t, metaData.Schema)
-	assert.Equal(t, int64(2), metaData.SchemaVersion)
+	assert.Equal(t, int64(3), metaData.SchemaVersion)
 }
 
 func TestMetaData(t *testing.T) {
@@ -710,7 +710,7 @@ func TestMapStateToDataObject_WithRulesAndStaticThreshold(t *testing.T) {
 					Regex:                     types.BoolValue(false),
 					ThresholdOperator:         types.StringValue(string(common.ThresholdOperatorGreaterThan)),
 					MetricGroupBy:             types.SetNull(types.StringType),
-					MetricTagFilterExpression: nil,
+					MetricTagFilterExpression: types.ObjectNull(metricTagFilterExprAttrTypes),
 					ThresholdRule: &shared.ThresholdPluginModel{
 						Warning: &shared.ThresholdTypeModel{
 							Static: &shared.StaticTypeModel{
@@ -767,7 +767,7 @@ func TestMapStateToDataObject_WithRulesAndAdaptiveBaselineThreshold(t *testing.T
 					Regex:                     types.BoolValue(true),
 					ThresholdOperator:         types.StringValue(string(common.ThresholdOperatorGreaterThan)),
 					MetricGroupBy:             types.SetNull(types.StringType),
-					MetricTagFilterExpression: nil,
+					MetricTagFilterExpression: types.ObjectNull(metricTagFilterExprAttrTypes),
 					ThresholdRule: &shared.ThresholdPluginModel{
 						Critical: &shared.ThresholdTypeModel{
 							AdaptiveBaseline: &shared.AdaptiveBaselineModel{
@@ -822,7 +822,7 @@ func TestMapStateToDataObject_WithBothThresholds(t *testing.T) {
 					Regex:                     types.BoolValue(false),
 					ThresholdOperator:         types.StringValue(string(common.ThresholdOperatorGreaterThan)),
 					MetricGroupBy:             types.SetNull(types.StringType),
-					MetricTagFilterExpression: nil,
+					MetricTagFilterExpression: types.ObjectNull(metricTagFilterExprAttrTypes),
 					ThresholdRule: &shared.ThresholdPluginModel{
 						Warning: &shared.ThresholdTypeModel{
 							Static: &shared.StaticTypeModel{
@@ -1725,7 +1725,7 @@ func TestMapStateToDataObject_WithRulesButNoThresholds(t *testing.T) {
 					Regex:                     types.BoolValue(false),
 					ThresholdOperator:         types.StringValue(string(common.ThresholdOperatorGreaterThan)),
 					MetricGroupBy:             types.SetNull(types.StringType),
-					MetricTagFilterExpression: nil,
+					MetricTagFilterExpression: types.ObjectNull(metricTagFilterExprAttrTypes),
 					ThresholdRule:             nil,
 				},
 			},
