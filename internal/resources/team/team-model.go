@@ -39,10 +39,12 @@ type TeamScopeModel struct {
 	ActionFilter                types.String                          `tfsdk:"action_filter"`
 	LogFilter                   types.String                          `tfsdk:"log_filter"`
 	BusinessPerspectives        types.Set                             `tfsdk:"business_perspectives"`
+	LoggingPerspectives         types.Set                             `tfsdk:"logging_perspectives"`
+	TagIDs                      types.Set                             `tfsdk:"tag_ids"`
 	SloIDs                      types.Set                             `tfsdk:"slo_ids"`
+	ApdexIDs                    types.Set                             `tfsdk:"apdex_ids"`
 	SyntheticTests              types.Set                             `tfsdk:"synthetic_tests"`
 	SyntheticCredentials        types.Set                             `tfsdk:"synthetic_credentials"`
-	TagIDs                      types.Set                             `tfsdk:"tag_ids"`
 	RestrictedApplicationFilter *TeamRestrictedApplicationFilterModel `tfsdk:"restricted_application_filter"`
 }
 

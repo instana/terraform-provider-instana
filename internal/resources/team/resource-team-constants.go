@@ -53,8 +53,12 @@ const (
 	TeamFieldScopeLogFilter = "log_filter"
 	// TeamFieldScopeBusinessPerspectives constant value for the schema field business_perspectives
 	TeamFieldScopeBusinessPerspectives = "business_perspectives"
+	// TeamFieldScopeLoggingPerspectives constant value for the schema field logging_perspectives
+	TeamFieldScopeLoggingPerspectives = "logging_perspectives"
 	// TeamFieldScopeSloIDs constant value for the schema field slo_ids
 	TeamFieldScopeSloIDs = "slo_ids"
+	// TeamFieldScopeApdexIDs constant value for the schema field apdex_ids
+	TeamFieldScopeApdexIDs = "apdex_ids"
 	// TeamFieldScopeSyntheticTests constant value for the schema field synthetic_tests
 	TeamFieldScopeSyntheticTests = "synthetic_tests"
 	// TeamFieldScopeSyntheticCredentials constant value for the schema field synthetic_credentials
@@ -122,8 +126,12 @@ const (
 	TeamDescScopeLogFilter = "The log filter for the team"
 	// TeamDescScopeBusinessPerspectives description for the business_perspectives field
 	TeamDescScopeBusinessPerspectives = "The business perspective IDs accessible to the team"
+	// TeamDescScopeLoggingPerspectives description for the logging_perspectives field
+	TeamDescScopeLoggingPerspectives = "The logging perspective IDs accessible to the team"
 	// TeamDescScopeSloIDs description for the slo_ids field
 	TeamDescScopeSloIDs = "The SLO IDs accessible to the team"
+	// TeamDescScopeApdexIDs description for the apdex_ids field
+	TeamDescScopeApdexIDs = "The Apdex configuration IDs accessible to the team"
 	// TeamDescScopeSyntheticTests description for the synthetic_tests field
 	TeamDescScopeSyntheticTests = "The synthetic test IDs accessible to the team"
 	// TeamDescScopeSyntheticCredentials description for the synthetic_credentials field

@@ -345,10 +345,12 @@ terraform apply
 * `action_filter` - Optional - Action filter for automation
 * `log_filter` - Optional - Log filter query
 * `business_perspectives` - Optional - List of business perspective IDs accessible to the team
+* `logging_perspectives` - Optional - List of logging perspective IDs accessible to the team
+* `tag_ids` - Optional - List of tag IDs accessible to the team
 * `slo_ids` - Optional - List of SLO IDs accessible to the team
+* `apdex_ids` - Optional - List of Apdex configuration IDs accessible to the team
 * `synthetic_tests` - Optional - List of synthetic test IDs accessible to the team
 * `synthetic_credentials` - Optional - List of synthetic credential IDs accessible to the team
-* `tag_ids` - Optional - List of tag IDs accessible to the team
 * `restricted_application_filter` - Optional - Restricted application filter configuration [Details](#restricted-application-filter-reference)
 
 ### Restricted Application Filter Reference

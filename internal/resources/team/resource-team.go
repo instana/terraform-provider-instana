@@ -189,10 +189,31 @@ func buildScopeAttributes() map[string]schema.Attribute {
 			ElementType: types.StringType,
 			PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
 		},
+		TeamFieldScopeLoggingPerspectives: schema.SetAttribute{
+			Optional:    true,
+			Computed:    true,
+			Description: TeamDescScopeLoggingPerspectives,
+			ElementType: types.StringType,
+			PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
+		},
+		TeamFieldScopeTagIDs: schema.SetAttribute{
+			Optional:    true,
+			Computed:    true,
+			Description: TeamDescScopeTagIDs,
+			ElementType: types.StringType,
+			PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
+		},
 		TeamFieldScopeSloIDs: schema.SetAttribute{
 			Optional:    true,
 			Computed:    true,
 			Description: TeamDescScopeSloIDs,
+			ElementType: types.StringType,
+			PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
+		},
+		TeamFieldScopeApdexIDs: schema.SetAttribute{
+			Optional:    true,
+			Computed:    true,
+			Description: TeamDescScopeApdexIDs,
 			ElementType: types.StringType,
 			PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
 		},
@@ -207,13 +228,6 @@ func buildScopeAttributes() map[string]schema.Attribute {
 			Optional:    true,
 			Computed:    true,
 			Description: TeamDescScopeSyntheticCredentials,
-			ElementType: types.StringType,
-			PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
-		},
-		TeamFieldScopeTagIDs: schema.SetAttribute{
-			Optional:    true,
-			Computed:    true,
-			Description: TeamDescScopeTagIDs,
 			ElementType: types.StringType,
 			PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
 		},
@@ -367,10 +381,12 @@ func (r *teamResource) mapScopeToModel(ctx context.Context, apiScope *api.TeamSc
 		{apiScope.MobileApps, &scopeModel.MobileApps},
 		{apiScope.Websites, &scopeModel.Websites},
 		{apiScope.BusinessPerspectives, &scopeModel.BusinessPerspectives},
+		{apiScope.LoggingPerspectives, &scopeModel.LoggingPerspectives},
+		{apiScope.TagIDs, &scopeModel.TagIDs},
 		{apiScope.SloIDs, &scopeModel.SloIDs},
+		{apiScope.ApdexIDs, &scopeModel.ApdexIDs},
 		{apiScope.SyntheticTests, &scopeModel.SyntheticTests},
 		{apiScope.SyntheticCredentials, &scopeModel.SyntheticCredentials},
-		{apiScope.TagIDs, &scopeModel.TagIDs},
 	}
 
 	for _, f := range setFields {
@@ -545,10 +561,12 @@ func (r *teamResource) mapModelScopeToAPI(ctx context.Context, modelScope *TeamS
 		{modelScope.MobileApps, &apiScope.MobileApps},
 		{modelScope.Websites, &apiScope.Websites},
 		{modelScope.BusinessPerspectives, &apiScope.BusinessPerspectives},
+		{modelScope.LoggingPerspectives, &apiScope.LoggingPerspectives},
+		{modelScope.TagIDs, &apiScope.TagIDs},
 		{modelScope.SloIDs, &apiScope.SloIDs},
+		{modelScope.ApdexIDs, &apiScope.ApdexIDs},
 		{modelScope.SyntheticTests, &apiScope.SyntheticTests},
 		{modelScope.SyntheticCredentials, &apiScope.SyntheticCredentials},
-		{modelScope.TagIDs, &apiScope.TagIDs},
 	}
 
 	for _, f := range setFields {

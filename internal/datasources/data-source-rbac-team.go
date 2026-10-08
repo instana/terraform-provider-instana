@@ -145,8 +145,23 @@ func (d *RbacTeamDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 						Computed:    true,
 						ElementType: types.StringType,
 					},
+					team.TeamFieldScopeLoggingPerspectives: schema.SetAttribute{
+						Description: team.TeamDescScopeLoggingPerspectives,
+						Computed:    true,
+						ElementType: types.StringType,
+					},
+					team.TeamFieldScopeTagIDs: schema.SetAttribute{
+						Description: team.TeamDescScopeTagIDs,
+						Computed:    true,
+						ElementType: types.StringType,
+					},
 					team.TeamFieldScopeSloIDs: schema.SetAttribute{
 						Description: team.TeamDescScopeSloIDs,
+						Computed:    true,
+						ElementType: types.StringType,
+					},
+					team.TeamFieldScopeApdexIDs: schema.SetAttribute{
+						Description: team.TeamDescScopeApdexIDs,
 						Computed:    true,
 						ElementType: types.StringType,
 					},
@@ -157,11 +172,6 @@ func (d *RbacTeamDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 					},
 					team.TeamFieldScopeSyntheticCredentials: schema.SetAttribute{
 						Description: team.TeamDescScopeSyntheticCredentials,
-						Computed:    true,
-						ElementType: types.StringType,
-					},
-					team.TeamFieldScopeTagIDs: schema.SetAttribute{
-						Description: team.TeamDescScopeTagIDs,
 						Computed:    true,
 						ElementType: types.StringType,
 					},
@@ -300,10 +310,12 @@ func (d *RbacTeamDataSource) Read(ctx context.Context, req datasource.ReadReques
 			{teamData.Scope.MobileApps, &scopeModel.MobileApps},
 			{teamData.Scope.Websites, &scopeModel.Websites},
 			{teamData.Scope.BusinessPerspectives, &scopeModel.BusinessPerspectives},
+			{teamData.Scope.LoggingPerspectives, &scopeModel.LoggingPerspectives},
+			{teamData.Scope.TagIDs, &scopeModel.TagIDs},
 			{teamData.Scope.SloIDs, &scopeModel.SloIDs},
+			{teamData.Scope.ApdexIDs, &scopeModel.ApdexIDs},
 			{teamData.Scope.SyntheticTests, &scopeModel.SyntheticTests},
 			{teamData.Scope.SyntheticCredentials, &scopeModel.SyntheticCredentials},
-			{teamData.Scope.TagIDs, &scopeModel.TagIDs},
 		}
 		for _, f := range fields {
 			s, d := types.SetValueFrom(ctx, types.StringType, f.src)

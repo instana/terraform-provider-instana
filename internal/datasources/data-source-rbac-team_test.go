@@ -46,6 +46,12 @@ func TestRbacTeamDataSourceSchema(t *testing.T) {
 	require.Contains(t, resp.Schema.Attributes, team.TeamFieldMembers)
 	require.Contains(t, resp.Schema.Attributes, team.TeamFieldScope)
 
+	// Verify scope nested attributes exist
+	scopeAttr, ok := resp.Schema.Attributes[team.TeamFieldScope].(schema.SingleNestedAttribute)
+	require.True(t, ok)
+	require.Contains(t, scopeAttr.Attributes, team.TeamFieldScopeLoggingPerspectives)
+	require.Contains(t, scopeAttr.Attributes, team.TeamFieldScopeApdexIDs)
+
 	// Verify ID field is optional and computed
 	idAttr := resp.Schema.Attributes[RbacTeamDataSourceFieldID]
 	require.True(t, idAttr.(schema.StringAttribute).Optional)

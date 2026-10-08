@@ -59,10 +59,12 @@ func emptyTeamScopeModel(t *testing.T) TeamScopeModel {
 		ActionFilter:         types.StringNull(),
 		LogFilter:            types.StringNull(),
 		BusinessPerspectives: stringsToTypesSet(t),
+		LoggingPerspectives:  stringsToTypesSet(t),
+		TagIDs:               stringsToTypesSet(t),
 		SloIDs:               stringsToTypesSet(t),
+		ApdexIDs:             stringsToTypesSet(t),
 		SyntheticTests:       stringsToTypesSet(t),
 		SyntheticCredentials: stringsToTypesSet(t),
-		TagIDs:               stringsToTypesSet(t),
 	}
 }
 
@@ -567,6 +569,33 @@ func TestUpdateState(t *testing.T) {
 		assert.Contains(t, bp, "bp-1")
 	})
 
+	t.Run("team with scope - logging perspectives", func(t *testing.T) {
+		team := &api.Team{
+			ID:  "test-id",
+			Tag: "test-team",
+			Scope: &api.TeamScope{
+				LoggingPerspectives: []string{"lp-1", "lp-2"},
+			},
+		}
+
+		handle := NewTeamResourceHandle()
+		state := &tfsdk.State{
+			Schema: handle.MetaData().Schema,
+		}
+
+		diags := resource.UpdateState(ctx, state, nil, team)
+		require.False(t, diags.HasError())
+
+		var model TeamModel
+		diags = state.Get(ctx, &model)
+		require.False(t, diags.HasError())
+
+		require.NotNil(t, model.Scope)
+		lp := extractStringsFromSet(t, ctx, model.Scope.LoggingPerspectives)
+		assert.Len(t, lp, 2)
+		assert.Contains(t, lp, "lp-1")
+	})
+
 	t.Run("team with scope - SLO IDs", func(t *testing.T) {
 		team := &api.Team{
 			ID:  "test-id",
@@ -592,6 +621,33 @@ func TestUpdateState(t *testing.T) {
 		sloIDs := extractStringsFromSet(t, ctx, model.Scope.SloIDs)
 		assert.Len(t, sloIDs, 2)
 		assert.Contains(t, sloIDs, "slo-1")
+	})
+
+	t.Run("team with scope - apdex IDs", func(t *testing.T) {
+		team := &api.Team{
+			ID:  "test-id",
+			Tag: "test-team",
+			Scope: &api.TeamScope{
+				ApdexIDs: []string{"apdex-1", "apdex-2"},
+			},
+		}
+
+		handle := NewTeamResourceHandle()
+		state := &tfsdk.State{
+			Schema: handle.MetaData().Schema,
+		}
+
+		diags := resource.UpdateState(ctx, state, nil, team)
+		require.False(t, diags.HasError())
+
+		var model TeamModel
+		diags = state.Get(ctx, &model)
+		require.False(t, diags.HasError())
+
+		require.NotNil(t, model.Scope)
+		apdexIDs := extractStringsFromSet(t, ctx, model.Scope.ApdexIDs)
+		assert.Len(t, apdexIDs, 2)
+		assert.Contains(t, apdexIDs, "apdex-1")
 	})
 
 	t.Run("team with scope - synthetic tests", func(t *testing.T) {
@@ -795,10 +851,12 @@ func TestUpdateState(t *testing.T) {
 				Websites:             []string{"website-1"},
 				InfraDFQFilter:       &filter,
 				BusinessPerspectives: []string{"bp-1"},
+				LoggingPerspectives:  []string{"lp-1"},
+				TagIDs:               []string{"tag-1"},
 				SloIDs:               []string{"slo-1"},
+				ApdexIDs:             []string{"apdex-1"},
 				SyntheticTests:       []string{"test-1"},
 				SyntheticCredentials: []string{"cred-1"},
-				TagIDs:               []string{"tag-1"},
 				RestrictedApplicationFilter: &api.RestrictedApplicationFilter{
 					Label: &label,
 					Scope: &scope,
@@ -835,10 +893,12 @@ func TestUpdateState(t *testing.T) {
 				Websites:             stringsToTypesSet(t, "website-1"),
 				InfraDFQFilter:       types.StringValue("entity.type:host"),
 				BusinessPerspectives: stringsToTypesSet(t, "bp-1"),
+				LoggingPerspectives:  stringsToTypesSet(t, "lp-1"),
+				TagIDs:               stringsToTypesSet(t, "tag-1"),
 				SloIDs:               stringsToTypesSet(t, "slo-1"),
+				ApdexIDs:             stringsToTypesSet(t, "apdex-1"),
 				SyntheticTests:       stringsToTypesSet(t, "test-1"),
 				SyntheticCredentials: stringsToTypesSet(t, "cred-1"),
-				TagIDs:               stringsToTypesSet(t, "tag-1"),
 				RestrictedApplicationFilter: &TeamRestrictedApplicationFilterModel{
 					Label: types.StringValue("test-label"),
 					Scope: types.StringValue(string(api.RestrictedApplicationFilterScopeIncludeAllDownstream)),
@@ -1168,10 +1228,12 @@ func TestMapStateToDataObject(t *testing.T) {
 		scope.MobileApps = stringsToTypesSet(t, "mobile-1")
 		scope.Websites = stringsToTypesSet(t, "website-1")
 		scope.BusinessPerspectives = stringsToTypesSet(t, "bp-1")
+		scope.LoggingPerspectives = stringsToTypesSet(t, "lp-1")
+		scope.TagIDs = stringsToTypesSet(t, "tag-1")
 		scope.SloIDs = stringsToTypesSet(t, "slo-1")
+		scope.ApdexIDs = stringsToTypesSet(t, "apdex-1")
 		scope.SyntheticTests = stringsToTypesSet(t, "test-1")
 		scope.SyntheticCredentials = stringsToTypesSet(t, "cred-1")
-		scope.TagIDs = stringsToTypesSet(t, "tag-1")
 		model := TeamModel{
 			ID:    types.StringValue("test-id"),
 			Tag:   types.StringValue("test-team"),
@@ -1189,10 +1251,12 @@ func TestMapStateToDataObject(t *testing.T) {
 		assert.Len(t, team.Scope.MobileApps, 1)
 		assert.Len(t, team.Scope.Websites, 1)
 		assert.Len(t, team.Scope.BusinessPerspectives, 1)
+		assert.Len(t, team.Scope.LoggingPerspectives, 1)
+		assert.Len(t, team.Scope.TagIDs, 1)
 		assert.Len(t, team.Scope.SloIDs, 1)
+		assert.Len(t, team.Scope.ApdexIDs, 1)
 		assert.Len(t, team.Scope.SyntheticTests, 1)
 		assert.Len(t, team.Scope.SyntheticCredentials, 1)
-		assert.Len(t, team.Scope.TagIDs, 1)
 	})
 
 	t.Run("team with scope - restricted application filter with label", func(t *testing.T) {
@@ -1319,10 +1383,12 @@ func TestMapStateToDataObject(t *testing.T) {
 				ActionFilter:         types.StringValue("action.type:custom"),
 				LogFilter:            types.StringValue("log.level:error"),
 				BusinessPerspectives: stringsToTypesSet(t, "bp-1"),
+				LoggingPerspectives:  stringsToTypesSet(t, "lp-1"),
+				TagIDs:               stringsToTypesSet(t, "tag-1"),
 				SloIDs:               stringsToTypesSet(t, "slo-1"),
+				ApdexIDs:             stringsToTypesSet(t, "apdex-1"),
 				SyntheticTests:       stringsToTypesSet(t, "test-1"),
 				SyntheticCredentials: stringsToTypesSet(t, "cred-1"),
-				TagIDs:               stringsToTypesSet(t, "tag-1"),
 				RestrictedApplicationFilter: &TeamRestrictedApplicationFilterModel{
 					Label:               types.StringValue("test-label"),
 					Scope:               types.StringValue(string(api.RestrictedApplicationFilterScopeIncludeAllDownstream)),
@@ -1380,10 +1446,12 @@ func TestRoundTripConversion(t *testing.T) {
 				Websites:             []string{"website-1"},
 				InfraDFQFilter:       &filter,
 				BusinessPerspectives: []string{"bp-1"},
+				LoggingPerspectives:  []string{"lp-1"},
+				TagIDs:               []string{"tag-1"},
 				SloIDs:               []string{"slo-1"},
+				ApdexIDs:             []string{"apdex-1"},
 				SyntheticTests:       []string{"test-1"},
 				SyntheticCredentials: []string{"cred-1"},
-				TagIDs:               []string{"tag-1"},
 				RestrictedApplicationFilter: &api.RestrictedApplicationFilter{
 					Label: &label,
 					Scope: &scope,
@@ -1415,10 +1483,12 @@ func TestRoundTripConversion(t *testing.T) {
 				Websites:             stringsToTypesSet(t, "website-1"),
 				InfraDFQFilter:       types.StringValue("entity.type:host"),
 				BusinessPerspectives: stringsToTypesSet(t, "bp-1"),
+				LoggingPerspectives:  stringsToTypesSet(t, "lp-1"),
+				TagIDs:               stringsToTypesSet(t, "tag-1"),
 				SloIDs:               stringsToTypesSet(t, "slo-1"),
+				ApdexIDs:             stringsToTypesSet(t, "apdex-1"),
 				SyntheticTests:       stringsToTypesSet(t, "test-1"),
 				SyntheticCredentials: stringsToTypesSet(t, "cred-1"),
-				TagIDs:               stringsToTypesSet(t, "tag-1"),
 				RestrictedApplicationFilter: &TeamRestrictedApplicationFilterModel{
 					Label: types.StringValue("test-label"),
 					Scope: types.StringValue(string(api.RestrictedApplicationFilterScopeIncludeAllDownstream)),
@@ -1497,10 +1567,12 @@ func TestEdgeCases(t *testing.T) {
 				MobileApps:           stringsToTypesSet(t),
 				Websites:             stringsToTypesSet(t),
 				BusinessPerspectives: stringsToTypesSet(t),
+				LoggingPerspectives:  stringsToTypesSet(t),
+				TagIDs:               stringsToTypesSet(t),
 				SloIDs:               stringsToTypesSet(t),
+				ApdexIDs:             stringsToTypesSet(t),
 				SyntheticTests:       stringsToTypesSet(t),
 				SyntheticCredentials: stringsToTypesSet(t),
-				TagIDs:               stringsToTypesSet(t),
 			},
 		}
 
