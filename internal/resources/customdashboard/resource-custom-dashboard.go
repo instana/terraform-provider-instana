@@ -137,6 +137,14 @@ func (r *customDashboardResource) SetComputedFields(_ context.Context, _ *tfsdk.
 func (r *customDashboardResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, dashboard *api.CustomDashboard) diag.Diagnostics {
 	var diags diag.Diagnostics
 
+	if dashboard == nil || utils.IsBlank(dashboard.ID) {
+		diags.AddError(
+			CustomDashboardErrInvalidAPIResponse,
+			CustomDashboardErrEmptyID,
+		)
+		return diags
+	}
+
 	var model CustomDashboardModel
 	if plan != nil {
 		diags.Append(plan.Get(ctx, &model)...)
@@ -146,23 +154,27 @@ func (r *customDashboardResource) UpdateState(ctx context.Context, state *tfsdk.
 		model = CustomDashboardModel{}
 	}
 
+	if diags.HasError() {
+		return diags
+	}
+
 	model.ID = types.StringValue(dashboard.ID)
 	model.Title = types.StringValue(dashboard.Title)
 
 	// Handle widgets
-	if model.Widgets.IsNull() || model.Widgets.IsUnknown() {
+	// if model.Widgets.IsNull() || model.Widgets.IsUnknown() {
 
-		widgetsBytes, err := dashboard.Widgets.MarshalJSON()
-		if err != nil {
-			diags.AddError(
-				CustomDashboardErrMarshalWidgets,
-				fmt.Sprintf(CustomDashboardErrMarshalWidgetsFailed, err),
-			)
-			return diags
-		}
-		json, _ := util.CanonicalizeJSON(string(widgetsBytes))
-		model.Widgets = jsontypes.NewNormalizedValue(json)
+	widgetsBytes, err := dashboard.Widgets.MarshalJSON()
+	if err != nil {
+		diags.AddError(
+			CustomDashboardErrMarshalWidgets,
+			fmt.Sprintf(CustomDashboardErrMarshalWidgetsFailed, err),
+		)
+		return diags
 	}
+	json, _ := util.CanonicalizeJSON(string(widgetsBytes))
+	model.Widgets = jsontypes.NewNormalizedValue(json)
+	// }
 	// else we keep the existing values
 
 	// Map access rules
