@@ -25,7 +25,10 @@ This data source exports the following attributes in addition to the arguments a
 
 * `id` - The custom event specification identifier.
 * `description` - The description text of the custom event specification.
-* `query` - The dynamic filter query for which the rule should be applied to
-* `enabled` - Boolean flag if the rule should be enabled. Default is true.
-* `triggering` - Boolean flag if the rule should trigger an incident. Default is false.
+* `query` - The dynamic filter query for which the rule should be applied to.
+* `enabled` - Boolean flag if the rule should be enabled. Default is `true`.
+* `triggering` - Boolean flag if the rule should trigger an incident. Default is `false`.
 * `expiration_time` - The grace period in milliseconds until the issue is closed.
+* `transient_event_enabled` - Indicates if transient event handling is enabled. Default is `true`.
+* `transient_event_threshold` - The duration in milliseconds that an event must persist before it is considered non-transient. Default is `300000`.
+* `transient_event_alert_muted` - Indicates if alerts for transient events are muted. Default is `false`.

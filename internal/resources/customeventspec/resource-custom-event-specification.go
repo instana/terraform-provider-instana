@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -104,6 +105,24 @@ func createCustomEventSpecificationSchema() schema.Schema {
 				Optional:    true,
 				Computed:    true,
 				Default:     booldefault.StaticBool(true),
+			},
+			CustomEventSpecificationFieldTransientEventEnabled: schema.BoolAttribute{
+				Description: CustomEventSpecificationResourceDescTransientEventEnabled,
+				Optional:    true,
+				Computed:    true,
+				Default:     booldefault.StaticBool(CustomEventSpecificationDefaultTransientEventEnabled),
+			},
+			CustomEventSpecificationFieldTransientEventThreshold: schema.Int64Attribute{
+				Description: CustomEventSpecificationResourceDescTransientEventThreshold,
+				Optional:    true,
+				Computed:    true,
+				Default:     int64default.StaticInt64(CustomEventSpecificationDefaultTransientEventThreshold),
+			},
+			CustomEventSpecificationFieldTransientEventAlertMuted: schema.BoolAttribute{
+				Description: CustomEventSpecificationResourceDescTransientEventAlertMuted,
+				Optional:    true,
+				Computed:    true,
+				Default:     booldefault.StaticBool(CustomEventSpecificationDefaultTransientEventAlertMuted),
 			},
 			CustomEventSpecificationFieldRuleLogicalOperator: schema.StringAttribute{
 				Description: CustomEventSpecificationResourceDescRuleLogicalOperator,
@@ -358,6 +377,9 @@ func (r *customEventSpecificationResource) UpdateState(ctx context.Context, stat
 	model.Query = util.SetStringPointerToState(spec.Query)
 	model.Description = util.SetStringPointerToState(spec.Description)
 	model.ExpirationTime = util.SetInt64PointerToState(spec.ExpirationTime)
+	model.TransientEventEnabled = types.BoolValue(spec.TransientEventEnabled)
+	model.TransientEventThreshold = types.Int64Value(spec.TransientEventThreshold)
+	model.TransientEventAlertMuted = types.BoolValue(spec.TransientEventAlertMuted)
 
 	// Process rules if present (preserve the value from plan/model to handle the value drift)
 	if model.Rules == nil {
@@ -605,16 +627,19 @@ func (r *customEventSpecificationResource) extractModel(ctx context.Context, pla
 // buildAPISpecification constructs the API specification from the model
 func (r *customEventSpecificationResource) buildAPISpecification(model *CustomEventSpecificationModel, diags *diag.Diagnostics) *api.CustomEventSpecification {
 	return &api.CustomEventSpecification{
-		ID:                  r.extractID(model),
-		Name:                model.Name.ValueString(),
-		EntityType:          model.EntityType.ValueString(),
-		Query:               r.extractOptionalString(model.Query),
-		Triggering:          model.Triggering.ValueBool(),
-		Description:         r.extractOptionalString(model.Description),
-		ExpirationTime:      r.extractOptionalInt(model.ExpirationTime),
-		Enabled:             model.Enabled.ValueBool(),
-		RuleLogicalOperator: model.RuleLogicalOperator.ValueString(),
-		Rules:               r.buildRulesFromModel(model.Rules, diags),
+		ID:                       r.extractID(model),
+		Name:                     model.Name.ValueString(),
+		EntityType:               model.EntityType.ValueString(),
+		Query:                    r.extractOptionalString(model.Query),
+		Triggering:               model.Triggering.ValueBool(),
+		Description:              r.extractOptionalString(model.Description),
+		ExpirationTime:           r.extractOptionalInt(model.ExpirationTime),
+		Enabled:                  model.Enabled.ValueBool(),
+		RuleLogicalOperator:      model.RuleLogicalOperator.ValueString(),
+		Rules:                    r.buildRulesFromModel(model.Rules, diags),
+		TransientEventEnabled:    model.TransientEventEnabled.ValueBool(),
+		TransientEventThreshold:  model.TransientEventThreshold.ValueInt64(),
+		TransientEventAlertMuted: model.TransientEventAlertMuted.ValueBool(),
 	}
 }
 

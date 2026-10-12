@@ -77,6 +77,37 @@ resource "instana_custom_event_specification" "entity_count" {
 }
 ```
 
+### Threshold Rule with Transient Event Settings
+
+Use transient event controls to suppress short-lived spikes:
+
+```hcl
+resource "instana_custom_event_specification" "threshold_with_transient" {
+  name                       = "CPU Spike Alert"
+  description                = "Alert on sustained CPU spikes, ignore transient ones"
+  enabled                    = true
+  triggering                 = true
+  expiration_time            = 600000
+  entity_type                = "netCoreRuntimePlatform"
+  query                      = "entity.application.id:\"<your-app-id>\""
+  transient_event_enabled    = true
+  transient_event_threshold  = 300000
+  transient_event_alert_muted = false
+
+  rules = {
+    threshold = {
+      severity           = "warning"
+      metric_name        = "metrics.contentionCount"
+      rollup             = 0
+      window             = 60000
+      aggregation        = "avg"
+      condition_operator = "<"
+      condition_value    = 100
+    }
+  }
+}
+```
+
 ### Entity Count Verification Rule
 
 Verify entity counts with matching criteria:
@@ -185,10 +216,13 @@ terraform apply
   * For threshold rules, supported entity types (plugins) can be retrieved from the Instana REST API using `/api/infrastructure-monitoring/catalog/plugins`
 * `description` - Optional - The description text of the custom event specification (default: empty string)
 * `query` - Optional - The dynamic filter query for which the rule should be applied to (default: empty string)
-* `enabled` - Optional - Boolean flag if the rule should be enabled (default: true)
-* `triggering` - Optional - Boolean flag if the rule should trigger an incident (default: false)
+* `enabled` - Optional - Boolean flag if the rule should be enabled (default: `true`)
+* `triggering` - Optional - Boolean flag if the rule should trigger an incident (default: `false`)
 * `expiration_time` - Optional - The grace period in milliseconds until the issue is closed
 * `rule_logical_operator` - Optional - The logical operator which will be applied to combine multiple rules (threshold rules only). Default: `AND`. Allowed values: `AND`, `OR`
+* `transient_event_enabled` - Optional - Indicates if transient event handling is enabled. When enabled, brief spikes that resolve quickly are handled differently to reduce alert noise (default: `true`)
+* `transient_event_threshold` - Optional - The duration in milliseconds that an event must persist before it is considered non-transient and an alert is raised (default: `300000`)
+* `transient_event_alert_muted` - Optional - Indicates if alerts for transient events are muted. When `true`, alerts are suppressed for events that resolve within the `transient_event_threshold` window (default: `false`)
 * `rules` - Required - The configuration of the specific rule of the custom event [Details](#rules)
 
 ### Rules
@@ -289,3 +323,4 @@ $ terraform import instana_custom_event_specification.example 60845e4e5e6b9cf8fc
 * Entity types and available metrics can be discovered using the Instana REST API
 * When `triggering` is set to `false`, the event will be created but won't trigger incidents
 * The `expiration_time` defines how long an issue remains open after conditions are no longer met
+* When `transient_event_enabled` is `true`, events that resolve within the `transient_event_threshold` window are treated as transient. Setting `transient_event_alert_muted` to `true` will additionally suppress alert notifications for those short-lived events

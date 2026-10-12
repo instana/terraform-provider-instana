@@ -17,14 +17,17 @@ import (
 
 // CustomEventSpecificationDataSourceModel represents the data model for the custom event specification data source
 type CustomEventSpecificationDataSourceModel struct {
-	ID             types.String `tfsdk:"id"`
-	Name           types.String `tfsdk:"name"`
-	Description    types.String `tfsdk:"description"`
-	EntityType     types.String `tfsdk:"entity_type"`
-	Triggering     types.Bool   `tfsdk:"triggering"`
-	Enabled        types.Bool   `tfsdk:"enabled"`
-	Query          types.String `tfsdk:"query"`
-	ExpirationTime types.Int64  `tfsdk:"expiration_time"`
+	ID                       types.String `tfsdk:"id"`
+	Name                     types.String `tfsdk:"name"`
+	Description              types.String `tfsdk:"description"`
+	EntityType               types.String `tfsdk:"entity_type"`
+	Triggering               types.Bool   `tfsdk:"triggering"`
+	Enabled                  types.Bool   `tfsdk:"enabled"`
+	Query                    types.String `tfsdk:"query"`
+	ExpirationTime           types.Int64  `tfsdk:"expiration_time"`
+	TransientEventEnabled    types.Bool   `tfsdk:"transient_event_enabled"`
+	TransientEventThreshold  types.Int64  `tfsdk:"transient_event_threshold"`
+	TransientEventAlertMuted types.Bool   `tfsdk:"transient_event_alert_muted"`
 }
 
 // NewCustomEventSpecificationDataSource creates a new data source for custom event specifications
@@ -74,6 +77,18 @@ func (d *customEventSpecificationDataSource) Schema(_ context.Context, _ datasou
 			},
 			CustomEventSpecificationFieldExpirationTime: schema.Int64Attribute{
 				Description: CustomEventSpecificationDescExpirationTime,
+				Computed:    true,
+			},
+			CustomEventSpecificationFieldTransientEventEnabled: schema.BoolAttribute{
+				Description: CustomEventSpecificationDescTransientEventEnabled,
+				Computed:    true,
+			},
+			CustomEventSpecificationFieldTransientEventThreshold: schema.Int64Attribute{
+				Description: CustomEventSpecificationDescTransientEventThreshold,
+				Computed:    true,
+			},
+			CustomEventSpecificationFieldTransientEventAlertMuted: schema.BoolAttribute{
+				Description: CustomEventSpecificationDescTransientEventAlertMuted,
 				Computed:    true,
 			},
 		},
@@ -153,6 +168,9 @@ func (d *customEventSpecificationDataSource) Read(ctx context.Context, req datas
 
 	data.Triggering = types.BoolValue(matchingSpec.Triggering)
 	data.Enabled = types.BoolValue(matchingSpec.Enabled)
+	data.TransientEventEnabled = types.BoolValue(matchingSpec.TransientEventEnabled)
+	data.TransientEventThreshold = types.Int64Value(matchingSpec.TransientEventThreshold)
+	data.TransientEventAlertMuted = types.BoolValue(matchingSpec.TransientEventAlertMuted)
 
 	// Set the data in the response
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

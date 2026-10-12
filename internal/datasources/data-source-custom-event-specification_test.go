@@ -47,6 +47,9 @@ func TestCustomEventSpecificationDataSourceSchema(t *testing.T) {
 	require.Contains(t, resp.Schema.Attributes, CustomEventSpecificationFieldEnabled)
 	require.Contains(t, resp.Schema.Attributes, CustomEventSpecificationFieldQuery)
 	require.Contains(t, resp.Schema.Attributes, CustomEventSpecificationFieldExpirationTime)
+	require.Contains(t, resp.Schema.Attributes, CustomEventSpecificationFieldTransientEventEnabled)
+	require.Contains(t, resp.Schema.Attributes, CustomEventSpecificationFieldTransientEventThreshold)
+	require.Contains(t, resp.Schema.Attributes, CustomEventSpecificationFieldTransientEventAlertMuted)
 
 	// Verify ID field is computed
 	idAttr := resp.Schema.Attributes[CustomEventSpecificationFieldID]
@@ -75,4 +78,13 @@ func TestCustomEventSpecificationDataSourceSchema(t *testing.T) {
 
 	expirationTimeAttr := resp.Schema.Attributes[CustomEventSpecificationFieldExpirationTime]
 	require.True(t, expirationTimeAttr.(schema.Int64Attribute).Computed)
+
+	transientEnabledAttr := resp.Schema.Attributes[CustomEventSpecificationFieldTransientEventEnabled]
+	require.True(t, transientEnabledAttr.(schema.BoolAttribute).Computed)
+
+	transientThresholdAttr := resp.Schema.Attributes[CustomEventSpecificationFieldTransientEventThreshold]
+	require.True(t, transientThresholdAttr.(schema.Int64Attribute).Computed)
+
+	transientAlertMutedAttr := resp.Schema.Attributes[CustomEventSpecificationFieldTransientEventAlertMuted]
+	require.True(t, transientAlertMutedAttr.(schema.BoolAttribute).Computed)
 }

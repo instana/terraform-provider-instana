@@ -41,20 +41,26 @@ const (
 	CustomEventSpecificationResourceDescMetricPatternPostfix     = "The postfix of the metric pattern"
 	CustomEventSpecificationResourceDescMetricPatternPlaceholder = "The placeholder of the metric pattern"
 	CustomEventSpecificationResourceDescMetricPatternOperator    = "The operator of the metric pattern"
+	CustomEventSpecificationResourceDescTransientEventEnabled    = "Indicates if transient event handling is enabled (default: true)"
+	CustomEventSpecificationResourceDescTransientEventThreshold  = "The threshold in milliseconds for transient events (default: 300000)"
+	CustomEventSpecificationResourceDescTransientEventAlertMuted = "Indicates if alerts for transient events are muted (default: false)"
 
 	// Error message constants
 
 	CustomEventSpecificationResourceErrParseTagFilter    = "Error parsing tag filter"
 	CustomEventSpecificationResourceErrParseTagFilterMsg = "Failed to parse tag filter: %s"
 
-	CustomEventSpecificationFieldID             = "id"
-	CustomEventSpecificationFieldName           = "name"
-	CustomEventSpecificationFieldEntityType     = "entity_type"
-	CustomEventSpecificationFieldQuery          = "query"
-	CustomEventSpecificationFieldTriggering     = "triggering"
-	CustomEventSpecificationFieldDescription    = "description"
-	CustomEventSpecificationFieldExpirationTime = "expiration_time"
-	CustomEventSpecificationFieldEnabled        = "enabled"
+	CustomEventSpecificationFieldID                    = "id"
+	CustomEventSpecificationFieldName                  = "name"
+	CustomEventSpecificationFieldEntityType            = "entity_type"
+	CustomEventSpecificationFieldQuery                 = "query"
+	CustomEventSpecificationFieldTriggering            = "triggering"
+	CustomEventSpecificationFieldDescription           = "description"
+	CustomEventSpecificationFieldExpirationTime        = "expiration_time"
+	CustomEventSpecificationFieldEnabled               = "enabled"
+	CustomEventSpecificationFieldTransientEventEnabled    = "transient_event_enabled"
+	CustomEventSpecificationFieldTransientEventThreshold  = "transient_event_threshold"
+	CustomEventSpecificationFieldTransientEventAlertMuted = "transient_event_alert_muted"
 
 	CustomEventSpecificationFieldRuleLogicalOperator         = "rule_logical_operator"
 	CustomEventSpecificationFieldRules                       = "rules"
@@ -105,4 +111,9 @@ const (
 
 	// Default values
 	CustomEventSpecificationDefaultEmptyString = ""
+
+	// Transient event default values
+	CustomEventSpecificationDefaultTransientEventEnabled    = true
+	CustomEventSpecificationDefaultTransientEventThreshold  = int64(300000)
+	CustomEventSpecificationDefaultTransientEventAlertMuted = false
 )

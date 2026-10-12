@@ -140,16 +140,19 @@ func TestMapStateToDataObject_BasicConfig(t *testing.T) {
 	resource := &customEventSpecificationResource{}
 
 	state := createMockState(t, CustomEventSpecificationModel{
-		ID:                  types.StringValue("test-id"),
-		Name:                types.StringValue("Test Event"),
-		EntityType:          types.StringValue("host"),
-		Query:               types.StringValue("entity.type:host"),
-		Triggering:          types.BoolValue(false),
-		Description:         types.StringValue("Test Description"),
-		ExpirationTime:      types.Int64Value(3600000),
-		Enabled:             types.BoolValue(true),
-		RuleLogicalOperator: types.StringValue("AND"),
-		Rules:               nil,
+		ID:                       types.StringValue("test-id"),
+		Name:                     types.StringValue("Test Event"),
+		EntityType:               types.StringValue("host"),
+		Query:                    types.StringValue("entity.type:host"),
+		Triggering:               types.BoolValue(false),
+		Description:              types.StringValue("Test Description"),
+		ExpirationTime:           types.Int64Value(3600000),
+		Enabled:                  types.BoolValue(true),
+		RuleLogicalOperator:      types.StringValue("AND"),
+		Rules:                    nil,
+		TransientEventEnabled:    types.BoolValue(true),
+		TransientEventThreshold:  types.Int64Value(300000),
+		TransientEventAlertMuted: types.BoolValue(false),
 	})
 
 	result, diags := resource.MapStateToDataObject(ctx, nil, state)
@@ -175,14 +178,17 @@ func TestMapStateToDataObject_WithEntityCountRule(t *testing.T) {
 	resource := &customEventSpecificationResource{}
 
 	state := createMockState(t, CustomEventSpecificationModel{
-		ID:                  types.StringValue("test-id"),
-		Name:                types.StringValue("Test Event"),
-		EntityType:          types.StringValue("host"),
-		Query:               types.StringValue(""),
-		Triggering:          types.BoolValue(false),
-		Description:         types.StringValue(""),
-		Enabled:             types.BoolValue(true),
-		RuleLogicalOperator: types.StringValue("AND"),
+		ID:                       types.StringValue("test-id"),
+		Name:                     types.StringValue("Test Event"),
+		EntityType:               types.StringValue("host"),
+		Query:                    types.StringValue(""),
+		Triggering:               types.BoolValue(false),
+		Description:              types.StringValue(""),
+		Enabled:                  types.BoolValue(true),
+		RuleLogicalOperator:      types.StringValue("AND"),
+		TransientEventEnabled:    types.BoolValue(true),
+		TransientEventThreshold:  types.Int64Value(300000),
+		TransientEventAlertMuted: types.BoolValue(false),
 		Rules: &RulesModel{
 			EntityCount: &EntityCountRuleModel{
 				Severity:          types.StringValue("warning"),
@@ -211,12 +217,15 @@ func TestMapStateToDataObject_WithEntityCountVerificationRule(t *testing.T) {
 	resource := &customEventSpecificationResource{}
 
 	state := createMockState(t, CustomEventSpecificationModel{
-		ID:                  types.StringValue("test-id"),
-		Name:                types.StringValue("Test Event"),
-		EntityType:          types.StringValue("host"),
-		Triggering:          types.BoolValue(false),
-		Enabled:             types.BoolValue(true),
-		RuleLogicalOperator: types.StringValue("AND"),
+		ID:                       types.StringValue("test-id"),
+		Name:                     types.StringValue("Test Event"),
+		EntityType:               types.StringValue("host"),
+		Triggering:               types.BoolValue(false),
+		Enabled:                  types.BoolValue(true),
+		RuleLogicalOperator:      types.StringValue("AND"),
+		TransientEventEnabled:    types.BoolValue(true),
+		TransientEventThreshold:  types.Int64Value(300000),
+		TransientEventAlertMuted: types.BoolValue(false),
 		Rules: &RulesModel{
 			EntityCountVerification: &EntityCountVerificationRuleModel{
 				Severity:            types.StringValue("critical"),
@@ -249,12 +258,15 @@ func TestMapStateToDataObject_WithEntityVerificationRule(t *testing.T) {
 	resource := &customEventSpecificationResource{}
 
 	state := createMockState(t, CustomEventSpecificationModel{
-		ID:                  types.StringValue("test-id"),
-		Name:                types.StringValue("Test Event"),
-		EntityType:          types.StringValue("host"),
-		Triggering:          types.BoolValue(false),
-		Enabled:             types.BoolValue(true),
-		RuleLogicalOperator: types.StringValue("AND"),
+		ID:                       types.StringValue("test-id"),
+		Name:                     types.StringValue("Test Event"),
+		EntityType:               types.StringValue("host"),
+		Triggering:               types.BoolValue(false),
+		Enabled:                  types.BoolValue(true),
+		RuleLogicalOperator:      types.StringValue("AND"),
+		TransientEventEnabled:    types.BoolValue(true),
+		TransientEventThreshold:  types.Int64Value(300000),
+		TransientEventAlertMuted: types.BoolValue(false),
 		Rules: &RulesModel{
 			EntityVerification: &EntityVerificationRuleModel{
 				Severity:            types.StringValue("warning"),
@@ -285,12 +297,15 @@ func TestMapStateToDataObject_WithHostAvailabilityRule(t *testing.T) {
 	resource := &customEventSpecificationResource{}
 
 	state := createMockState(t, CustomEventSpecificationModel{
-		ID:                  types.StringValue("test-id"),
-		Name:                types.StringValue("Test Event"),
-		EntityType:          types.StringValue("host"),
-		Triggering:          types.BoolValue(false),
-		Enabled:             types.BoolValue(true),
-		RuleLogicalOperator: types.StringValue("AND"),
+		ID:                       types.StringValue("test-id"),
+		Name:                     types.StringValue("Test Event"),
+		EntityType:               types.StringValue("host"),
+		Triggering:               types.BoolValue(false),
+		Enabled:                  types.BoolValue(true),
+		RuleLogicalOperator:      types.StringValue("AND"),
+		TransientEventEnabled:    types.BoolValue(true),
+		TransientEventThreshold:  types.Int64Value(300000),
+		TransientEventAlertMuted: types.BoolValue(false),
 		Rules: &RulesModel{
 			HostAvailability: &HostAvailabilityRuleModel{
 				Severity:        types.StringValue("critical"),
@@ -320,12 +335,15 @@ func TestMapStateToDataObject_WithHostAvailabilityRuleNoCloseAfter(t *testing.T)
 	resource := &customEventSpecificationResource{}
 
 	state := createMockState(t, CustomEventSpecificationModel{
-		ID:                  types.StringValue("test-id"),
-		Name:                types.StringValue("Test Event"),
-		EntityType:          types.StringValue("host"),
-		Triggering:          types.BoolValue(false),
-		Enabled:             types.BoolValue(true),
-		RuleLogicalOperator: types.StringValue("AND"),
+		ID:                       types.StringValue("test-id"),
+		Name:                     types.StringValue("Test Event"),
+		EntityType:               types.StringValue("host"),
+		Triggering:               types.BoolValue(false),
+		Enabled:                  types.BoolValue(true),
+		RuleLogicalOperator:      types.StringValue("AND"),
+		TransientEventEnabled:    types.BoolValue(true),
+		TransientEventThreshold:  types.Int64Value(300000),
+		TransientEventAlertMuted: types.BoolValue(false),
 		Rules: &RulesModel{
 			HostAvailability: &HostAvailabilityRuleModel{
 				Severity:        types.StringValue("warning"),
@@ -352,12 +370,15 @@ func TestMapStateToDataObject_WithInvalidTagFilter(t *testing.T) {
 	resource := &customEventSpecificationResource{}
 
 	state := createMockState(t, CustomEventSpecificationModel{
-		ID:                  types.StringValue("test-id"),
-		Name:                types.StringValue("Test Event"),
-		EntityType:          types.StringValue("host"),
-		Triggering:          types.BoolValue(false),
-		Enabled:             types.BoolValue(true),
-		RuleLogicalOperator: types.StringValue("AND"),
+		ID:                       types.StringValue("test-id"),
+		Name:                     types.StringValue("Test Event"),
+		EntityType:               types.StringValue("host"),
+		Triggering:               types.BoolValue(false),
+		Enabled:                  types.BoolValue(true),
+		RuleLogicalOperator:      types.StringValue("AND"),
+		TransientEventEnabled:    types.BoolValue(true),
+		TransientEventThreshold:  types.Int64Value(300000),
+		TransientEventAlertMuted: types.BoolValue(false),
 		Rules: &RulesModel{
 			HostAvailability: &HostAvailabilityRuleModel{
 				Severity:        types.StringValue("warning"),
@@ -376,12 +397,15 @@ func TestMapStateToDataObject_WithSystemRule(t *testing.T) {
 	resource := &customEventSpecificationResource{}
 
 	state := createMockState(t, CustomEventSpecificationModel{
-		ID:                  types.StringValue("test-id"),
-		Name:                types.StringValue("Test Event"),
-		EntityType:          types.StringValue("host"),
-		Triggering:          types.BoolValue(false),
-		Enabled:             types.BoolValue(true),
-		RuleLogicalOperator: types.StringValue("AND"),
+		ID:                       types.StringValue("test-id"),
+		Name:                     types.StringValue("Test Event"),
+		EntityType:               types.StringValue("host"),
+		Triggering:               types.BoolValue(false),
+		Enabled:                  types.BoolValue(true),
+		RuleLogicalOperator:      types.StringValue("AND"),
+		TransientEventEnabled:    types.BoolValue(true),
+		TransientEventThreshold:  types.Int64Value(300000),
+		TransientEventAlertMuted: types.BoolValue(false),
 		Rules: &RulesModel{
 			System: &SystemRuleModel{
 				Severity:     types.StringValue("critical"),
@@ -407,12 +431,15 @@ func TestMapStateToDataObject_WithThresholdRule(t *testing.T) {
 	resource := &customEventSpecificationResource{}
 
 	state := createMockState(t, CustomEventSpecificationModel{
-		ID:                  types.StringValue("test-id"),
-		Name:                types.StringValue("Test Event"),
-		EntityType:          types.StringValue("host"),
-		Triggering:          types.BoolValue(false),
-		Enabled:             types.BoolValue(true),
-		RuleLogicalOperator: types.StringValue("AND"),
+		ID:                       types.StringValue("test-id"),
+		Name:                     types.StringValue("Test Event"),
+		EntityType:               types.StringValue("host"),
+		Triggering:               types.BoolValue(false),
+		Enabled:                  types.BoolValue(true),
+		RuleLogicalOperator:      types.StringValue("AND"),
+		TransientEventEnabled:    types.BoolValue(true),
+		TransientEventThreshold:  types.Int64Value(300000),
+		TransientEventAlertMuted: types.BoolValue(false),
 		Rules: &RulesModel{
 			Threshold: &ThresholdRuleModel{
 				Severity:          types.StringValue("warning"),
@@ -448,12 +475,15 @@ func TestMapStateToDataObject_WithThresholdRuleAndMetricPattern(t *testing.T) {
 	resource := &customEventSpecificationResource{}
 
 	state := createMockState(t, CustomEventSpecificationModel{
-		ID:                  types.StringValue("test-id"),
-		Name:                types.StringValue("Test Event"),
-		EntityType:          types.StringValue("host"),
-		Triggering:          types.BoolValue(false),
-		Enabled:             types.BoolValue(true),
-		RuleLogicalOperator: types.StringValue("AND"),
+		ID:                       types.StringValue("test-id"),
+		Name:                     types.StringValue("Test Event"),
+		EntityType:               types.StringValue("host"),
+		Triggering:               types.BoolValue(false),
+		Enabled:                  types.BoolValue(true),
+		RuleLogicalOperator:      types.StringValue("AND"),
+		TransientEventEnabled:    types.BoolValue(true),
+		TransientEventThreshold:  types.Int64Value(300000),
+		TransientEventAlertMuted: types.BoolValue(false),
 		Rules: &RulesModel{
 			Threshold: &ThresholdRuleModel{
 				Severity:          types.StringValue("critical"),
@@ -494,12 +524,15 @@ func TestMapStateToDataObject_WithThresholdRuleAndEmptyMetricPattern(t *testing.
 	resource := &customEventSpecificationResource{}
 
 	state := createMockState(t, CustomEventSpecificationModel{
-		ID:                  types.StringValue("test-id"),
-		Name:                types.StringValue("Test Event"),
-		EntityType:          types.StringValue("host"),
-		Triggering:          types.BoolValue(false),
-		Enabled:             types.BoolValue(true),
-		RuleLogicalOperator: types.StringValue("AND"),
+		ID:                       types.StringValue("test-id"),
+		Name:                     types.StringValue("Test Event"),
+		EntityType:               types.StringValue("host"),
+		Triggering:               types.BoolValue(false),
+		Enabled:                  types.BoolValue(true),
+		RuleLogicalOperator:      types.StringValue("AND"),
+		TransientEventEnabled:    types.BoolValue(true),
+		TransientEventThreshold:  types.Int64Value(300000),
+		TransientEventAlertMuted: types.BoolValue(false),
 		Rules: &RulesModel{
 			Threshold: &ThresholdRuleModel{
 				Severity:          types.StringValue("warning"),
@@ -536,12 +569,15 @@ func TestMapStateToDataObject_WithMultipleRules(t *testing.T) {
 	resource := &customEventSpecificationResource{}
 
 	state := createMockState(t, CustomEventSpecificationModel{
-		ID:                  types.StringValue("test-id"),
-		Name:                types.StringValue("Test Event"),
-		EntityType:          types.StringValue("host"),
-		Triggering:          types.BoolValue(false),
-		Enabled:             types.BoolValue(true),
-		RuleLogicalOperator: types.StringValue("OR"),
+		ID:                       types.StringValue("test-id"),
+		Name:                     types.StringValue("Test Event"),
+		EntityType:               types.StringValue("host"),
+		Triggering:               types.BoolValue(false),
+		Enabled:                  types.BoolValue(true),
+		RuleLogicalOperator:      types.StringValue("OR"),
+		TransientEventEnabled:    types.BoolValue(true),
+		TransientEventThreshold:  types.Int64Value(300000),
+		TransientEventAlertMuted: types.BoolValue(false),
 		Rules: &RulesModel{
 			EntityCount: &EntityCountRuleModel{
 				Severity:          types.StringValue("warning"),
@@ -584,12 +620,15 @@ func TestMapStateToDataObject_FromPlan(t *testing.T) {
 	resource := &customEventSpecificationResource{}
 
 	plan := createMockPlan(t, CustomEventSpecificationModel{
-		ID:                  types.StringValue("test-id"),
-		Name:                types.StringValue("Test Event"),
-		EntityType:          types.StringValue("host"),
-		Triggering:          types.BoolValue(true),
-		Enabled:             types.BoolValue(true),
-		RuleLogicalOperator: types.StringValue("AND"),
+		ID:                       types.StringValue("test-id"),
+		Name:                     types.StringValue("Test Event"),
+		EntityType:               types.StringValue("host"),
+		Triggering:               types.BoolValue(true),
+		Enabled:                  types.BoolValue(true),
+		RuleLogicalOperator:      types.StringValue("AND"),
+		TransientEventEnabled:    types.BoolValue(true),
+		TransientEventThreshold:  types.Int64Value(300000),
+		TransientEventAlertMuted: types.BoolValue(false),
 	})
 
 	result, diags := resource.MapStateToDataObject(ctx, plan, nil)
@@ -604,16 +643,19 @@ func TestMapStateToDataObject_WithNullOptionalFields(t *testing.T) {
 	resource := &customEventSpecificationResource{}
 
 	state := createMockState(t, CustomEventSpecificationModel{
-		ID:                  types.StringNull(),
-		Name:                types.StringValue("Test Event"),
-		EntityType:          types.StringValue("host"),
-		Query:               types.StringNull(),
-		Triggering:          types.BoolValue(false),
-		Description:         types.StringNull(),
-		ExpirationTime:      types.Int64Null(),
-		Enabled:             types.BoolValue(true),
-		RuleLogicalOperator: types.StringValue("AND"),
-		Rules:               nil,
+		ID:                       types.StringNull(),
+		Name:                     types.StringValue("Test Event"),
+		EntityType:               types.StringValue("host"),
+		Query:                    types.StringNull(),
+		Triggering:               types.BoolValue(false),
+		Description:              types.StringNull(),
+		ExpirationTime:           types.Int64Null(),
+		Enabled:                  types.BoolValue(true),
+		RuleLogicalOperator:      types.StringValue("AND"),
+		Rules:                    nil,
+		TransientEventEnabled:    types.BoolValue(true),
+		TransientEventThreshold:  types.Int64Value(300000),
+		TransientEventAlertMuted: types.BoolValue(false),
 	})
 
 	result, diags := resource.MapStateToDataObject(ctx, nil, state)
@@ -1267,6 +1309,66 @@ func TestUpdateState_SkipsIncompleteRules(t *testing.T) {
 	}
 }
 
+func TestUpdateState_TransientEventFields(t *testing.T) {
+	ctx := context.Background()
+	resource := &customEventSpecificationResource{}
+
+	spec := &api.CustomEventSpecification{
+		ID:                       "test-id",
+		Name:                     "Test Event",
+		EntityType:               "host",
+		Triggering:               true,
+		Enabled:                  true,
+		RuleLogicalOperator:      "AND",
+		Rules:                    []api.RuleSpecification{},
+		TransientEventEnabled:    true,
+		TransientEventThreshold:  300000,
+		TransientEventAlertMuted: false,
+	}
+
+	state := &tfsdk.State{
+		Schema: getTestSchema(),
+	}
+	initializeEmptyState(t, ctx, state)
+
+	diags := resource.UpdateState(ctx, state, nil, spec)
+	require.False(t, diags.HasError())
+
+	var model CustomEventSpecificationModel
+	diags = state.Get(ctx, &model)
+	require.False(t, diags.HasError())
+
+	assert.True(t, model.TransientEventEnabled.ValueBool())
+	assert.Equal(t, int64(300000), model.TransientEventThreshold.ValueInt64())
+	assert.False(t, model.TransientEventAlertMuted.ValueBool())
+}
+
+func TestMapStateToDataObject_TransientEventFields(t *testing.T) {
+	ctx := context.Background()
+	resource := &customEventSpecificationResource{}
+
+	state := createMockState(t, CustomEventSpecificationModel{
+		ID:                       types.StringValue("test-id"),
+		Name:                     types.StringValue("Test Event"),
+		EntityType:               types.StringValue("host"),
+		Triggering:               types.BoolValue(true),
+		Enabled:                  types.BoolValue(true),
+		RuleLogicalOperator:      types.StringValue("AND"),
+		Rules:                    nil,
+		TransientEventEnabled:    types.BoolValue(true),
+		TransientEventThreshold:  types.Int64Value(300000),
+		TransientEventAlertMuted: types.BoolValue(false),
+	})
+
+	result, diags := resource.MapStateToDataObject(ctx, nil, state)
+	require.False(t, diags.HasError())
+	require.NotNil(t, result)
+
+	assert.True(t, result.TransientEventEnabled)
+	assert.Equal(t, int64(300000), result.TransientEventThreshold)
+	assert.False(t, result.TransientEventAlertMuted)
+}
+
 func TestSchemaValidation(t *testing.T) {
 	handle := NewCustomEventSpecificationResourceHandle()
 	schema := handle.MetaData().Schema
@@ -1282,6 +1384,9 @@ func TestSchemaValidation(t *testing.T) {
 		assert.Contains(t, schema.Attributes, "enabled")
 		assert.Contains(t, schema.Attributes, "rule_logical_operator")
 		assert.Contains(t, schema.Attributes, "rules")
+		assert.Contains(t, schema.Attributes, "transient_event_enabled")
+		assert.Contains(t, schema.Attributes, "transient_event_threshold")
+		assert.Contains(t, schema.Attributes, "transient_event_alert_muted")
 	})
 
 	t.Run("id is computed", func(t *testing.T) {
@@ -1332,16 +1437,19 @@ func getTestSchema() schema.Schema {
 // initializeEmptyState initializes the state with an empty CustomEventSpecificationModel
 func initializeEmptyState(t *testing.T, ctx context.Context, state *tfsdk.State) {
 	emptyModel := CustomEventSpecificationModel{
-		ID:                  types.StringNull(),
-		Name:                types.StringNull(),
-		EntityType:          types.StringNull(),
-		Query:               types.StringNull(),
-		Triggering:          types.BoolNull(),
-		Description:         types.StringNull(),
-		ExpirationTime:      types.Int64Null(),
-		Enabled:             types.BoolNull(),
-		RuleLogicalOperator: types.StringNull(),
-		Rules:               nil,
+		ID:                       types.StringNull(),
+		Name:                     types.StringNull(),
+		EntityType:               types.StringNull(),
+		Query:                    types.StringNull(),
+		Triggering:               types.BoolNull(),
+		Description:              types.StringNull(),
+		ExpirationTime:           types.Int64Null(),
+		Enabled:                  types.BoolNull(),
+		RuleLogicalOperator:      types.StringNull(),
+		Rules:                    nil,
+		TransientEventEnabled:    types.BoolNull(),
+		TransientEventThreshold:  types.Int64Null(),
+		TransientEventAlertMuted: types.BoolNull(),
 	}
 	diags := state.Set(ctx, emptyModel)
 	require.False(t, diags.HasError(), "Failed to initialize empty state")
