@@ -5,20 +5,73 @@ Management of Infrastructure alert configurations (Infrastructure Smart Alerts).
 API Documentation: <https://instana.github.io/openapi/#tag/Infrastructure-Alert-Configuration>
 
 
-## ⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)
+## ⚠️ BREAKING CHANGES
 
- **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
+### Multi-Rule Support (v7.10.0+)
 
+Starting with provider version **v7.10.0**, the `rules` attribute has transitioned from a **single nested object** to a **list of objects** (`ListNestedAttribute`) to support multiple alert rules (1–5 rules) combined with `rule_logical_operator` (`AND`/`OR`).
 
-## Migration Guide (v5 to v6)
+#### Upgrading Configurations to v7.10.0+
+
+If you are upgrading an existing configuration, wrap your `rules` definition in square brackets `[ ... ]`:
+
+##### Before (v6.0.0 – v7.8.1):
+```hcl
+rules = {
+  generic_rule = {
+    aggregation              = "MEAN"
+    cross_series_aggregation = "MEAN"
+    entity_type              = "kubernetesHorizontalPodAutoscaler"
+    metric_name              = "maxReplicas"
+    threshold_operator       = ">="
+    threshold = {
+      critical = {
+        static = {
+          value = 90
+        }
+      }
+    }
+  }
+}
+```
+
+##### After (v7.10.0+):
+```hcl
+rules = [
+  {
+    generic_rule = {
+      aggregation              = "MEAN"
+      cross_series_aggregation = "MEAN"
+      entity_type              = "kubernetesHorizontalPodAutoscaler"
+      metric_name              = "maxReplicas"
+      threshold_operator       = ">="
+      threshold = {
+        critical = {
+          static = {
+            value = 90
+          }
+        }
+      }
+    }
+  }
+]
+```
+
+> **State Migration Note**: Existing Terraform state files are automatically upgraded from schema version 2 to 3 via the provider's built-in state upgrader. Only your `.tf` configuration files need to be updated.
+
+---
+
+### Plugin Framework Migration (v6.0.0)
+
+**This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**. While the basic structure remains similar, there are important syntax changes for block structure.
 
 For detailed migration instructions and examples, see the [Plugin Framework Migration Guide](https://github.com/instana/terraform-provider-instana/blob/main/PLUGIN-FRAMEWORK-MIGRATION.md).
 
-### Syntax Changes Overview
+#### Syntax Changes Overview (v5 to v6)
 
 The main changes are in how nested blocks are defined. In v6, all nested configurations use attribute syntax instead of block syntax.
 
-#### OLD (v5.x) Syntax:
+##### OLD (v5.x) Syntax:
 ```hcl
 resource "instana_infra_alert_config" "example" {
   name = "test-alert"
@@ -63,7 +116,7 @@ resource "instana_infra_alert_config" "example" {
 }
 ```
 
-#### NEW (v6.x) Syntax:
+##### NEW (v6.x) Syntax:
 ```hcl
 resource "instana_infra_alert_config" "example" {
   name = "test-alert"
@@ -77,24 +130,22 @@ resource "instana_infra_alert_config" "example" {
   }
   tag_filter = "kubernetes.namespace.name@na EQUALS 'otel'"
 
-  rules = [
-    {
-      generic_rule = {
-        aggregation              = "MEAN"
-        cross_series_aggregation = "MEAN"
-        entity_type              = "kubernetesHorizontalPodAutoscaler"
-        metric_name              = "maxReplicas"
-        threshold = {
-          critical = {
-            static = {
-              value = 90
-            }
+  rules = {
+    generic_rule = {
+      aggregation              = "MEAN"
+      cross_series_aggregation = "MEAN"
+      entity_type              = "kubernetesHorizontalPodAutoscaler"
+      metric_name              = "maxReplicas"
+      threshold = {
+        critical = {
+          static = {
+            value = 90
           }
         }
-        threshold_operator = ">="
       }
+      threshold_operator = ">="
     }
-  ]
+  }
   
   time_threshold = {
     violations_in_sequence = {
@@ -115,10 +166,10 @@ resource "instana_infra_alert_config" "example" {
 }
 ```
 
-### Key Syntax Changes
+#### Key Syntax Changes (v5 to v6)
 
 1. **Alert Channels**: `alert_channels { }` → `alert_channels = { }`
-2. **Rules**: `rules { }` → `rules = [{ }]` (now a **list** of rule objects)
+2. **Rules**: `rules { }` → `rules = { }` *(Note: further updated to a list `rules = [{ }]` in v7.10.0+)*
 3. **Time Threshold**: `time_threshold { }` → `time_threshold = { }`
 4. **Custom Payload Fields**: Multiple `custom_payload_field { }` blocks → Single `custom_payload_field = [{ }, { }]` list
 5. **All nested objects**: Use `= { }` syntax
