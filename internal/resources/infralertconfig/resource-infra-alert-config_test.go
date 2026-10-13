@@ -1742,6 +1742,55 @@ func TestMapStateToDataObject_WithRulesButNoThresholds(t *testing.T) {
 	assert.Empty(t, result.Rules[0].Thresholds)
 }
 
+func TestMapMetricGroupByToModel(t *testing.T) {
+	r := &infraAlertConfigResource{}
+
+	t.Run("empty slice returns empty set", func(t *testing.T) {
+		result := r.mapMetricGroupByToModel([]string{})
+		assert.False(t, result.IsNull())
+		assert.Equal(t, 0, len(result.Elements()))
+	})
+
+	t.Run("nil slice returns empty set", func(t *testing.T) {
+		result := r.mapMetricGroupByToModel(nil)
+		assert.False(t, result.IsNull())
+		assert.Equal(t, 0, len(result.Elements()))
+	})
+
+	t.Run("populated slice returns set with values", func(t *testing.T) {
+		result := r.mapMetricGroupByToModel([]string{"host", "namespace"})
+		assert.False(t, result.IsNull())
+		assert.Equal(t, 2, len(result.Elements()))
+	})
+}
+
+func TestMapModelMetricGroupByToAPI(t *testing.T) {
+	r := &infraAlertConfigResource{}
+	ctx := context.Background()
+
+	t.Run("null set returns empty slice", func(t *testing.T) {
+		result, diags := r.mapModelMetricGroupByToAPI(ctx, types.SetNull(types.StringType))
+		assert.False(t, diags.HasError())
+		assert.Equal(t, []string{}, result)
+	})
+
+	t.Run("empty set returns empty slice", func(t *testing.T) {
+		emptySet := types.SetValueMust(types.StringType, []attr.Value{})
+		result, diags := r.mapModelMetricGroupByToAPI(ctx, emptySet)
+		assert.False(t, diags.HasError())
+		assert.Equal(t, []string{}, result)
+	})
+
+	t.Run("populated set returns elements", func(t *testing.T) {
+		set := types.SetValueMust(types.StringType, []attr.Value{
+			types.StringValue("host"),
+		})
+		result, diags := r.mapModelMetricGroupByToAPI(ctx, set)
+		assert.False(t, diags.HasError())
+		assert.Equal(t, []string{"host"}, result)
+	})
+}
+
 func getTestSchema() schema.Schema {
 	resource := NewInfraAlertConfigResourceHandle()
 	return resource.MetaData().Schema

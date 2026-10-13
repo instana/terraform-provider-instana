@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -171,7 +172,9 @@ func buildGenericRuleSchema() schema.SingleNestedAttribute {
 			InfraAlertConfigFieldMetricGroupBy: schema.SetAttribute{
 				Description: InfraAlertConfigDescMetricGroupBy,
 				Optional:    true,
+				Computed:    true,
 				ElementType: types.StringType,
+				Default:     setdefault.StaticValue(types.SetValueMust(types.StringType, []attr.Value{})),
 			},
 			InfraAlertConfigFieldMetricTagFilter: schema.SingleNestedAttribute{
 				Description: InfraAlertConfigDescMetricTagFilter,
@@ -463,10 +466,10 @@ func (r *infraAlertConfigResource) mapRulesToModel(ctx context.Context, rules []
 }
 
 // mapMetricGroupByToModel converts a []string metric group-by to a types.Set.
-// Both nil and empty slices map to null to match the plan when the user omits the field.
+// An empty or nil slice maps to an empty set to match the API default and schema default.
 func (r *infraAlertConfigResource) mapMetricGroupByToModel(metricGroupBy []string) types.Set {
 	if len(metricGroupBy) == 0 {
-		return types.SetNull(types.StringType)
+		return types.SetValueMust(types.StringType, []attr.Value{})
 	}
 	elements := make([]attr.Value, len(metricGroupBy))
 	for i, v := range metricGroupBy {
