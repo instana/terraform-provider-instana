@@ -8,7 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
@@ -51,17 +53,20 @@ func (r *syntheticAlertConfigResource) buildSchema() schema.Schema {
 // buildSchemaAttributes constructs the top-level schema attributes
 func (r *syntheticAlertConfigResource) buildSchemaAttributes() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
-		SyntheticAlertConfigFieldID:                 r.buildIDAttribute(),
-		SyntheticAlertConfigFieldName:               r.buildNameAttribute(),
-		SyntheticAlertConfigFieldDescription:        r.buildDescriptionAttribute(),
-		SyntheticAlertConfigFieldSyntheticTestIds:   r.buildSyntheticTestIdsAttribute(),
-		SyntheticAlertConfigFieldSeverity:           r.buildSeverityAttribute(),
-		SyntheticAlertConfigFieldTagFilter:          r.buildTagFilterAttribute(),
-		SyntheticAlertConfigFieldAlertChannelIds:    r.buildAlertChannelIdsAttribute(),
-		SyntheticAlertConfigFieldGracePeriod:        r.buildGracePeriodAttribute(),
-		SyntheticAlertConfigFieldCustomPayloadField: shared.GetCustomPayloadFieldsSchema(),
-		SyntheticAlertConfigFieldRule:               r.buildRuleAttribute(),
-		SyntheticAlertConfigFieldTimeThreshold:      r.buildTimeThresholdAttribute(),
+		SyntheticAlertConfigFieldID:                     r.buildIDAttribute(),
+		SyntheticAlertConfigFieldName:                   r.buildNameAttribute(),
+		SyntheticAlertConfigFieldDescription:            r.buildDescriptionAttribute(),
+		SyntheticAlertConfigFieldSyntheticTestIds:       r.buildSyntheticTestIdsAttribute(),
+		SyntheticAlertConfigFieldSeverity:               r.buildSeverityAttribute(),
+		SyntheticAlertConfigFieldTagFilter:              r.buildTagFilterAttribute(),
+		SyntheticAlertConfigFieldAlertChannelIds:        r.buildAlertChannelIdsAttribute(),
+		SyntheticAlertConfigFieldGracePeriod:            r.buildGracePeriodAttribute(),
+		SyntheticAlertConfigFieldCustomPayloadField:     shared.GetCustomPayloadFieldsSchema(),
+		SyntheticAlertConfigFieldRule:                   r.buildRuleAttribute(),
+		SyntheticAlertConfigFieldTimeThreshold:          r.buildTimeThresholdAttribute(),
+		SyntheticAlertConfigFieldIncludeOnDemand:        r.buildIncludeOnDemandAttribute(),
+		SyntheticAlertConfigFieldEvaluationType:         r.buildEvaluationTypeAttribute(),
+		SyntheticAlertConfigFieldAffectedLocationsCount: r.buildAffectedLocationsCountAttribute(),
 	}
 }
 
@@ -290,6 +295,54 @@ func (r *syntheticAlertConfigResource) buildTimeThresholdViolationsCountAttribut
 func (r *syntheticAlertConfigResource) buildTimeThresholdViolationsCountValidators() []validator.Int64 {
 	return []validator.Int64{
 		int64validator.Between(1, 12),
+	}
+}
+
+// buildIncludeOnDemandAttribute creates the include_on_demand attribute schema
+func (r *syntheticAlertConfigResource) buildIncludeOnDemandAttribute() schema.Attribute {
+	return schema.BoolAttribute{
+		Optional:    true,
+		Computed:    true,
+		Description: SyntheticAlertConfigDescIncludeOnDemand,
+		Default:     booldefault.StaticBool(SyntheticAlertConfigDefaultIncludeOnDemand),
+	}
+}
+
+// buildEvaluationTypeAttribute creates the evaluation_type attribute schema
+func (r *syntheticAlertConfigResource) buildEvaluationTypeAttribute() schema.Attribute {
+	return schema.StringAttribute{
+		Optional:    true,
+		Computed:    true,
+		Description: SyntheticAlertConfigDescEvaluationType,
+		Default:     stringdefault.StaticString(SyntheticAlertConfigDefaultEvaluationType),
+		Validators:  r.buildEvaluationTypeValidators(),
+	}
+}
+
+// buildEvaluationTypeValidators creates validators for the evaluation_type field
+func (r *syntheticAlertConfigResource) buildEvaluationTypeValidators() []validator.String {
+	return []validator.String{
+		stringvalidator.OneOf(
+			EvaluationTypePerLocation,
+			EvaluationTypePerSyntheticTest,
+		),
+	}
+}
+
+// buildAffectedLocationsCountAttribute creates the affected_locations_count attribute schema
+func (r *syntheticAlertConfigResource) buildAffectedLocationsCountAttribute() schema.Attribute {
+	return schema.Int64Attribute{
+		Optional:    true,
+		Computed:    true,
+		Description: SyntheticAlertConfigDescAffectedLocationsCount,
+		Validators:  r.buildAffectedLocationsCountValidators(),
+	}
+}
+
+// buildAffectedLocationsCountValidators creates validators for the affected_locations_count field
+func (r *syntheticAlertConfigResource) buildAffectedLocationsCountValidators() []validator.Int64 {
+	return []validator.Int64{
+		int64validator.AtLeast(1),
 	}
 }
 
@@ -531,6 +584,24 @@ func (r *syntheticAlertConfigResource) setOptionalFieldsOnAPIObject(apiObject *a
 	if !model.GracePeriod.IsNull() {
 		apiObject.GracePeriod = model.GracePeriod.ValueInt64()
 	}
+
+	if !model.IncludeOnDemand.IsNull() && !model.IncludeOnDemand.IsUnknown() {
+		apiObject.IncludeOnDemand = model.IncludeOnDemand.ValueBool()
+	} else {
+		apiObject.IncludeOnDemand = SyntheticAlertConfigDefaultIncludeOnDemand
+	}
+
+	if !model.EvaluationType.IsNull() && !model.EvaluationType.IsUnknown() {
+		apiObject.EvaluationType = model.EvaluationType.ValueString()
+	} else {
+		apiObject.EvaluationType = SyntheticAlertConfigDefaultEvaluationType
+	}
+
+	if !model.AffectedLocationsCount.IsNull() && !model.AffectedLocationsCount.IsUnknown() {
+		apiObject.AffectedLocationsCount = int(model.AffectedLocationsCount.ValueInt64())
+	} else if apiObject.EvaluationType == EvaluationTypePerSyntheticTest {
+		apiObject.AffectedLocationsCount = SyntheticAlertConfigDefaultAffectedLocationsCount
+	}
 }
 
 func (r *syntheticAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *api.SyntheticAlertConfig) diag.Diagnostics {
@@ -546,6 +617,19 @@ func (r *syntheticAlertConfigResource) UpdateState(ctx context.Context, state *t
 	model.Name = types.StringValue(apiObject.Name)
 	model.Description = types.StringValue(apiObject.Description)
 	model.Severity = types.Int64Value(int64(apiObject.Severity))
+	model.IncludeOnDemand = types.BoolValue(apiObject.IncludeOnDemand)
+
+	if apiObject.EvaluationType != "" {
+		model.EvaluationType = types.StringValue(apiObject.EvaluationType)
+	} else {
+		model.EvaluationType = types.StringValue(SyntheticAlertConfigDefaultEvaluationType)
+	}
+
+	if apiObject.AffectedLocationsCount > 0 {
+		model.AffectedLocationsCount = types.Int64Value(int64(apiObject.AffectedLocationsCount))
+	} else {
+		model.AffectedLocationsCount = types.Int64Null()
+	}
 
 	if model.GracePeriod.IsNull() || model.GracePeriod.IsUnknown() {
 		gracePeriodValue := r.mapGracePeriodToState(apiObject.GracePeriod)

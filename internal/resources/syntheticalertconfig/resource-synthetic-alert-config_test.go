@@ -44,6 +44,9 @@ func TestNewSyntheticAlertConfigResourceHandle(t *testing.T) {
 		assert.NotNil(t, schema.Attributes[SyntheticAlertConfigFieldTimeThreshold])
 		assert.NotNil(t, schema.Attributes[SyntheticAlertConfigFieldGracePeriod])
 		assert.NotNil(t, schema.Attributes[SyntheticAlertConfigFieldCustomPayloadField])
+		assert.NotNil(t, schema.Attributes[SyntheticAlertConfigFieldIncludeOnDemand])
+		assert.NotNil(t, schema.Attributes[SyntheticAlertConfigFieldEvaluationType])
+		assert.NotNil(t, schema.Attributes[SyntheticAlertConfigFieldAffectedLocationsCount])
 	})
 }
 
@@ -140,12 +143,15 @@ func TestMapStateToDataObject(t *testing.T) {
 
 	t.Run("should map complete model from state successfully", func(t *testing.T) {
 		model := SyntheticAlertConfigModel{
-			ID:          types.StringValue("test-id-123"),
-			Name:        types.StringValue("Test Alert"),
-			Description: types.StringValue("Test Description"),
-			Severity:    types.Int64Value(5),
-			TagFilter:   types.StringNull(),
-			GracePeriod: types.Int64Value(60000),
+			ID:                     types.StringValue("test-id-123"),
+			Name:                   types.StringValue("Test Alert"),
+			Description:            types.StringValue("Test Description"),
+			Severity:               types.Int64Value(5),
+			TagFilter:              types.StringNull(),
+			GracePeriod:            types.Int64Value(60000),
+			IncludeOnDemand:        types.BoolValue(true),
+			EvaluationType:         types.StringValue("PER_SYNTHETIC_TEST"),
+			AffectedLocationsCount: types.Int64Value(2),
 			Rule: &SyntheticAlertRuleModel{
 				AlertType:   types.StringValue("failure"),
 				MetricName:  types.StringValue("status"),
@@ -180,6 +186,9 @@ func TestMapStateToDataObject(t *testing.T) {
 		assert.Equal(t, "Test Description", result.Description)
 		assert.Equal(t, 5, result.Severity)
 		assert.Equal(t, int64(60000), result.GracePeriod)
+		assert.Equal(t, true, result.IncludeOnDemand)
+		assert.Equal(t, "PER_SYNTHETIC_TEST", result.EvaluationType)
+		assert.Equal(t, 2, result.AffectedLocationsCount)
 		assert.Equal(t, "failure", result.Rule.AlertType)
 		assert.Equal(t, "status", result.Rule.MetricName)
 		assert.Equal(t, "SUM", result.Rule.Aggregation)
@@ -230,6 +239,9 @@ func TestMapStateToDataObject(t *testing.T) {
 		assert.Equal(t, "Plan Alert", result.Name)
 		assert.Equal(t, 10, result.Severity)
 		assert.Equal(t, int64(0), result.GracePeriod)
+		assert.Equal(t, false, result.IncludeOnDemand)
+		assert.Equal(t, "PER_SYNTHETIC_TEST", result.EvaluationType)
+		assert.Equal(t, 1, result.AffectedLocationsCount)
 		assert.Equal(t, "", result.Rule.Aggregation)
 		assert.ElementsMatch(t, []string{"test-3"}, result.SyntheticTestIds)
 		assert.ElementsMatch(t, []string{"channel-2", "channel-3"}, result.AlertChannelIds)
@@ -428,8 +440,11 @@ func TestUpdateState(t *testing.T) {
 				Type:            "violationsInSequence",
 				ViolationsCount: 5,
 			},
-			GracePeriod:           120000,
-			CustomerPayloadFields: []common.CustomPayloadField[any]{},
+			GracePeriod:            120000,
+			IncludeOnDemand:        true,
+			EvaluationType:         "PER_SYNTHETIC_TEST",
+			AffectedLocationsCount: 2,
+			CustomerPayloadFields:  []common.CustomPayloadField[any]{},
 		}
 
 		state := &tfsdk.State{
@@ -452,6 +467,9 @@ func TestUpdateState(t *testing.T) {
 		assert.Equal(t, "API Description", model.Description.ValueString())
 		assert.Equal(t, int64(5), model.Severity.ValueInt64())
 		assert.Equal(t, int64(120000), model.GracePeriod.ValueInt64())
+		assert.True(t, model.IncludeOnDemand.ValueBool())
+		assert.Equal(t, "PER_SYNTHETIC_TEST", model.EvaluationType.ValueString())
+		assert.Equal(t, int64(2), model.AffectedLocationsCount.ValueInt64())
 		assert.Equal(t, "failure", model.Rule.AlertType.ValueString())
 		assert.Equal(t, "status", model.Rule.MetricName.ValueString())
 		assert.Equal(t, "MEAN", model.Rule.Aggregation.ValueString())
@@ -839,22 +857,147 @@ func TestAdditionalCoverage(t *testing.T) {
 		assert.NotNil(t, result)
 		assert.Equal(t, 12, result.TimeThreshold.ViolationsCount)
 	})
+
+	t.Run("should default optional fields in MapStateToDataObject when null", func(t *testing.T) {
+		model := SyntheticAlertConfigModel{
+			ID:                     types.StringValue("test-id"),
+			Name:                   types.StringValue("Test"),
+			Description:            types.StringValue("Desc"),
+			Severity:               types.Int64Null(),
+			TagFilter:              types.StringNull(),
+			GracePeriod:            types.Int64Null(),
+			IncludeOnDemand:        types.BoolNull(),
+			EvaluationType:         types.StringNull(),
+			AffectedLocationsCount: types.Int64Null(),
+			Rule: &SyntheticAlertRuleModel{
+				AlertType:  types.StringValue("failure"),
+				MetricName: types.StringValue("status"),
+			},
+			TimeThreshold: &SyntheticAlertTimeThresholdModel{
+				Type:            types.StringValue("violationsInSequence"),
+				ViolationsCount: types.Int64Value(1),
+			},
+			SyntheticTestIds:    types.SetNull(types.StringType),
+			AlertChannelIds:     types.SetNull(types.StringType),
+			CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
+		}
+
+		state := &tfsdk.State{
+			Schema: resource.metaData.Schema,
+		}
+		diags := state.Set(ctx, model)
+		require.False(t, diags.HasError())
+
+		result, resultDiags := resource.MapStateToDataObject(ctx, nil, state)
+
+		assert.False(t, resultDiags.HasError())
+		assert.NotNil(t, result)
+		assert.Equal(t, false, result.IncludeOnDemand)
+		assert.Equal(t, "PER_SYNTHETIC_TEST", result.EvaluationType)
+		assert.Equal(t, 1, result.AffectedLocationsCount)
+	})
+
+	t.Run("should not default affected locations count when evaluation type is PER_LOCATION", func(t *testing.T) {
+		model := SyntheticAlertConfigModel{
+			ID:                     types.StringValue("test-id"),
+			Name:                   types.StringValue("Test"),
+			Description:            types.StringValue("Desc"),
+			Severity:               types.Int64Null(),
+			TagFilter:              types.StringNull(),
+			GracePeriod:            types.Int64Null(),
+			IncludeOnDemand:        types.BoolNull(),
+			EvaluationType:         types.StringValue("PER_LOCATION"),
+			AffectedLocationsCount: types.Int64Null(),
+			Rule: &SyntheticAlertRuleModel{
+				AlertType:  types.StringValue("failure"),
+				MetricName: types.StringValue("status"),
+			},
+			TimeThreshold: &SyntheticAlertTimeThresholdModel{
+				Type:            types.StringValue("violationsInSequence"),
+				ViolationsCount: types.Int64Value(1),
+			},
+			SyntheticTestIds:    types.SetNull(types.StringType),
+			AlertChannelIds:     types.SetNull(types.StringType),
+			CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
+		}
+
+		state := &tfsdk.State{
+			Schema: resource.metaData.Schema,
+		}
+		diags := state.Set(ctx, model)
+		require.False(t, diags.HasError())
+
+		result, resultDiags := resource.MapStateToDataObject(ctx, nil, state)
+
+		assert.False(t, resultDiags.HasError())
+		assert.NotNil(t, result)
+		assert.Equal(t, "PER_LOCATION", result.EvaluationType)
+		assert.Equal(t, 0, result.AffectedLocationsCount)
+	})
+
+	t.Run("should handle empty evaluation type and zero affected locations in UpdateState", func(t *testing.T) {
+		apiObject := &api.SyntheticAlertConfig{
+			ID:                     "test-id",
+			Name:                   "Test",
+			Description:            "Desc",
+			Severity:               5,
+			IncludeOnDemand:        false,
+			EvaluationType:         "",
+			AffectedLocationsCount: 0,
+			Rule: api.SyntheticAlertRule{
+				AlertType:  "failure",
+				MetricName: "status",
+			},
+			TimeThreshold: api.SyntheticAlertTimeThreshold{
+				Type:            "violationsInSequence",
+				ViolationsCount: 1,
+			},
+			SyntheticTestIds:      []string{"test-1"},
+			AlertChannelIds:       []string{"chan-1"},
+			CustomerPayloadFields: []common.CustomPayloadField[any]{},
+		}
+
+		state := &tfsdk.State{
+			Schema: resource.metaData.Schema,
+		}
+		initializeEmptyState(t, ctx, state)
+
+		diags := resource.UpdateState(ctx, state, nil, apiObject)
+		assert.False(t, diags.HasError())
+
+		var model SyntheticAlertConfigModel
+		diags = state.Get(ctx, &model)
+		assert.False(t, diags.HasError())
+
+		assert.False(t, model.IncludeOnDemand.ValueBool())
+		assert.Equal(t, "PER_SYNTHETIC_TEST", model.EvaluationType.ValueString())
+		assert.True(t, model.AffectedLocationsCount.IsNull())
+	})
+
+	t.Run("should return state upgraders", func(t *testing.T) {
+		upgraders := resource.GetStateUpgraders(ctx)
+		assert.NotNil(t, upgraders)
+		assert.Contains(t, upgraders, int64(1))
+	})
 }
 
 // initializeEmptyState initializes the state with an empty model to ensure proper state initialization
 func initializeEmptyState(t *testing.T, ctx context.Context, state *tfsdk.State) {
 	emptyModel := SyntheticAlertConfigModel{
-		ID:                  types.StringNull(),
-		Name:                types.StringNull(),
-		Description:         types.StringNull(),
-		Severity:            types.Int64Null(),
-		TagFilter:           types.StringNull(),
-		GracePeriod:         types.Int64Null(),
-		SyntheticTestIds:    types.SetNull(types.StringType),
-		AlertChannelIds:     types.SetNull(types.StringType),
-		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
-		Rule:                nil,
-		TimeThreshold:       nil,
+		ID:                     types.StringNull(),
+		Name:                   types.StringNull(),
+		Description:            types.StringNull(),
+		Severity:               types.Int64Null(),
+		TagFilter:              types.StringNull(),
+		GracePeriod:            types.Int64Null(),
+		SyntheticTestIds:       types.SetNull(types.StringType),
+		AlertChannelIds:        types.SetNull(types.StringType),
+		CustomPayloadFields:    types.ListNull(shared.GetCustomPayloadFieldType()),
+		Rule:                   nil,
+		TimeThreshold:          nil,
+		IncludeOnDemand:        types.BoolNull(),
+		EvaluationType:         types.StringNull(),
+		AffectedLocationsCount: types.Int64Null(),
 	}
 	diags := state.Set(ctx, emptyModel)
 	require.False(t, diags.HasError(), "Failed to initialize empty state")

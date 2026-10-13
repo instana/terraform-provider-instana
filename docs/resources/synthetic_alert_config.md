@@ -124,6 +124,38 @@ resource "instana_synthetic_alert_config" "basic_failure" {
 }
 ```
 
+### Multi-Location Evaluation Alert (PER_SYNTHETIC_TEST)
+
+Monitor synthetic tests across multiple PoP locations and trigger alerts when failing locations reach a threshold:
+
+```hcl
+resource "instana_synthetic_alert_config" "multi_location_failure" {
+  name        = "Multi-Location Synthetic Test Failure Alert"
+  description = "Alert when synthetic test fails across at least 2 locations"
+
+  synthetic_test_ids = ["test-id-1"]
+  severity           = 5
+  grace_period       = 60000
+  include_on_demand  = true
+
+  evaluation_type          = "PER_SYNTHETIC_TEST"
+  affected_locations_count = 2
+
+  rule = {
+    alert_type  = "failure"
+    metric_name = "status"
+    aggregation = "SUM"
+  }
+
+  time_threshold = {
+    type             = "violationsInSequence"
+    violations_count = 3
+  }
+
+  alert_channel_ids = ["channel-id-1"]
+}
+```
+
 ## Generating Configuration from Existing Resources
 
 If you have already created a synthetic alert configuration in Instana and want to generate the Terraform configuration for it, you can use Terraform's import block feature with the `-generate-config-out` flag.
@@ -180,6 +212,9 @@ terraform apply
 * `time_threshold` - Required - Time threshold configuration [Details](#time-threshold-reference)
 * `grace_period` - Optional - Duration in milliseconds for which an alert remains open after conditions are no longer violated. The alert auto-closes once the grace period expires
 * `custom_payload_fields` - Optional - List of custom payload fields to include in alert notifications [Details](#custom-payload-fields-reference)
+* `include_on_demand` - Optional - Flag to toggle whether on-demand synthetic test executions trigger alert evaluations alongside scheduled runs. Default: `false`
+* `evaluation_type` - Optional - The evaluation type for the synthetic alert. Supported values: `PER_LOCATION`, `PER_SYNTHETIC_TEST`. Default: `PER_SYNTHETIC_TEST`
+* `affected_locations_count` - Optional - The threshold number of failing PoP locations (>= 1). Defaults to `1` when `evaluation_type` is `PER_SYNTHETIC_TEST`
 
 ### Rule Reference
 
