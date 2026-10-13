@@ -1,3 +1,24 @@
+## [v7.9.1](https://github.com/instana/terraform-provider-instana/tree/v7.9.1) (2026-10-13)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.9.0...v7.9.1)
+
+**Implemented enhancements:**
+
+- Added `transient_event_enabled`, `transient_event_threshold` and `transient_event_alert_muted` fields to the `instana_custom_event_specification` resource and data source to suppress short-lived event spikes
+- Bumped `instana-go-client` dependency from `v1.6.1` to `v1.6.2`
+- Updated documentation for `instana_custom_event_specification` (transient event fields with usage example) and `instana_custom_dashboard` (`widgets` is now optional and defaults to `[]`)
+
+**Fixed bugs:**
+
+- `instana_custom_dashboard`: differences in the order of `widgets` are now ignored, avoiding spurious diffs
+- `instana_custom_dashboard`: added validation that `related_id` is set in an `access_rule` unless `relation_type` is `GLOBAL`
+- `instana_custom_dashboard`: improved the error message shown when the API returns an empty ID, which can happen for a private (non-global) dashboard that does not belong to the API token's user
+
+**Merged pull requests:**
+
+- feat(custom-event-spec): add transient event fields to resource and data source [\#142](https://github.com/instana/terraform-provider-instana/pull/142) ([BlessyElza](https://github.com/BlessyElza))
+- fix(custom-dashboard): ignore widget order differences and access rule validation [\#144](https://github.com/instana/terraform-provider-instana/pull/144) ([georgekutty-1](https://github.com/georgekutty-1))
+
 ## [v7.9.0](https://github.com/instana/terraform-provider-instana/tree/v7.9.0) (2026-10-08)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.8.2...v7.9.0)
