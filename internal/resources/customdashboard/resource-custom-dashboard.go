@@ -65,6 +65,9 @@ func NewCustomDashboardResourceHandle() resourcehandle.ResourceHandle[*api.Custo
 						Description: CustomDashboardDescAccessRule,
 						Optional:    true,
 						NestedObject: schema.NestedAttributeObject{
+							Validators: []validator.Object{
+								relatedIDRequiredValidator{},
+							},
 							Attributes: map[string]schema.Attribute{
 								CustomDashboardFieldAccessRuleAccessType: schema.StringAttribute{
 									Required:    true,
