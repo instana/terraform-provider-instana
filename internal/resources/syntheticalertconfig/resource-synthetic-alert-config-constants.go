@@ -29,6 +29,12 @@ const (
 	SyntheticAlertConfigFieldID = "id"
 	// SyntheticAlertConfigFieldCustomPayloadField constant value for the schema field custom_payload_field
 	SyntheticAlertConfigFieldCustomPayloadField = "custom_payload_field"
+	// SyntheticAlertConfigFieldIncludeOnDemand constant value for the schema field include_on_demand
+	SyntheticAlertConfigFieldIncludeOnDemand = "include_on_demand"
+	// SyntheticAlertConfigFieldEvaluationType constant value for the schema field evaluation_type
+	SyntheticAlertConfigFieldEvaluationType = "evaluation_type"
+	// SyntheticAlertConfigFieldAffectedLocationsCount constant value for the schema field affected_locations_count
+	SyntheticAlertConfigFieldAffectedLocationsCount = "affected_locations_count"
 
 	// Rule field constants
 
@@ -80,6 +86,12 @@ const (
 	SyntheticAlertConfigDescTimeThresholdType = "The type of the time threshold (only violationsInSequence is supported)."
 	// SyntheticAlertConfigDescTimeThresholdViolationsCount description for the time threshold violations_count field
 	SyntheticAlertConfigDescTimeThresholdViolationsCount = "The number of violations required to trigger the alert (value between 1 and 12)."
+	// SyntheticAlertConfigDescIncludeOnDemand description for the include_on_demand field
+	SyntheticAlertConfigDescIncludeOnDemand = "Flag to toggle whether on-demand synthetic test executions trigger alert evaluations alongside scheduled runs."
+	// SyntheticAlertConfigDescEvaluationType description for the evaluation_type field
+	SyntheticAlertConfigDescEvaluationType = "The evaluation type for the synthetic alert. Supported values: PER_LOCATION, PER_SYNTHETIC_TEST."
+	// SyntheticAlertConfigDescAffectedLocationsCount description for the affected_locations_count field
+	SyntheticAlertConfigDescAffectedLocationsCount = "The threshold number of failing PoP locations (>= 1). Required when evaluation_type is PER_SYNTHETIC_TEST."
 
 	// Error message constants
 
@@ -125,4 +137,20 @@ const (
 	TagFilterTypeExpression = "EXPRESSION"
 	// TagFilterLogicalOperatorAnd logical operator value
 	TagFilterLogicalOperatorAnd = "AND"
+
+	// Evaluation type constants
+
+	// EvaluationTypePerLocation constant for PER_LOCATION evaluation type
+	EvaluationTypePerLocation = "PER_LOCATION"
+	// EvaluationTypePerSyntheticTest constant for PER_SYNTHETIC_TEST evaluation type
+	EvaluationTypePerSyntheticTest = "PER_SYNTHETIC_TEST"
+
+	// Default values
+
+	// SyntheticAlertConfigDefaultIncludeOnDemand default value for include_on_demand
+	SyntheticAlertConfigDefaultIncludeOnDemand = false
+	// SyntheticAlertConfigDefaultEvaluationType default value for evaluation_type
+	SyntheticAlertConfigDefaultEvaluationType = EvaluationTypePerSyntheticTest
+	// SyntheticAlertConfigDefaultAffectedLocationsCount default value for affected_locations_count
+	SyntheticAlertConfigDefaultAffectedLocationsCount = 1
 )

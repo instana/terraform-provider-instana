@@ -13,8 +13,11 @@ type SyntheticAlertConfigModel struct {
 	Rule                *SyntheticAlertRuleModel          `tfsdk:"rule"`
 	AlertChannelIds     types.Set                         `tfsdk:"alert_channel_ids"`
 	TimeThreshold       *SyntheticAlertTimeThresholdModel `tfsdk:"time_threshold"`
-	GracePeriod         types.Int64                       `tfsdk:"grace_period"`
-	CustomPayloadFields types.List                        `tfsdk:"custom_payload_field"`
+	GracePeriod            types.Int64                       `tfsdk:"grace_period"`
+	CustomPayloadFields    types.List                        `tfsdk:"custom_payload_field"`
+	IncludeOnDemand        types.Bool                        `tfsdk:"include_on_demand"`
+	EvaluationType         types.String                      `tfsdk:"evaluation_type"`
+	AffectedLocationsCount types.Int64                       `tfsdk:"affected_locations_count"`
 }
 
 // SyntheticAlertRuleModel represents the rule configuration for synthetic alerts
