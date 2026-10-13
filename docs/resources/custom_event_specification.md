@@ -37,18 +37,53 @@ resource "instana_custom_event_specification" "example" {
   name        = "threshold-alert"
   entity_type = "host"
   rules = {
-    threshold = {
-      severity             = "critical"
-      metric_name          = "cpu.usage"
-      "rollup"             = 0
-      "window"             = 60000
-      "aggregation"        = "avg"
-      "condition_operator" = ">"
-      "condition_value"    = 1.0,
-      "severity"           = "critical"
-    }
+    threshold = [
+      {
+        severity           = "critical"
+        metric_name        = "cpu.usage"
+        rollup             = 0
+        window             = 60000
+        aggregation        = "avg"
+        condition_operator = ">"
+        condition_value    = 1.0
+      }
+    ]
   }
   expiration_time = 600000
+}
+```
+
+In v6.x, `threshold` is a list of objects so that multiple threshold rules (up to 5) can be combined with `rule_logical_operator`, as with repeated `threshold` blocks in v5.x. Existing state of previous versions is upgraded automatically.
+
+### Multiple Threshold Rules
+
+```hcl
+resource "instana_custom_event_specification" "multi_threshold" {
+  name                  = "cpu-and-memory"
+  entity_type           = "host"
+  rule_logical_operator = "AND"
+  rules = {
+    threshold = [
+      {
+        severity           = "warning"
+        metric_name        = "cpu.used"
+        rollup             = 0
+        window             = 60000
+        aggregation        = "avg"
+        condition_operator = ">"
+        condition_value    = 80
+      },
+      {
+        severity           = "warning"
+        metric_name        = "memory.used"
+        rollup             = 0
+        window             = 60000
+        aggregation        = "avg"
+        condition_operator = ">"
+        condition_value    = 90
+      }
+    ]
+  }
 }
 ```
 
@@ -234,7 +269,7 @@ The `rules` attribute is a single nested object containing exactly one of the fo
 * `entity_verification` - Optional - Configuration of entity verification rules [Details](#entity-verification-rule)
 * `host_availability` - Optional - Configuration of host availability rules [Details](#host-availability-rule)
 * `system` - Optional - Configuration of system rules [Details](#system-rule)
-* `threshold` - Optional - Configuration of threshold rules [Details](#threshold-rule)
+* `threshold` - Optional - List of up to 5 threshold rules, combined using `rule_logical_operator` [Details](#threshold-rule)
 
 #### Entity Count Rule
 
@@ -283,7 +318,7 @@ Use built-in Instana system rules for monitoring.
 
 #### Threshold Rule
 
-Monitor metrics against defined thresholds.
+Monitor metrics against defined thresholds. `threshold` is a list of up to 5 objects. When more than one threshold rule is defined, the backend requires that all of them use the same `window`, `rollup` and `severity`, and that the entity type is not `application`, `service` or `endpoint`.
 
 * `severity` - Required - The severity of the rule. Allowed values: `warning`, `critical`
 * `metric_name` - Optional (required for Built-In and Custom Metrics only) - The name of the built-in or custom metric. Supported built-in metrics can be retrieved from the REST API using `/api/infrastructure-monitoring/catalog/metrics/{plugin}`. Conflicts with `metric_pattern` - exactly one must be provided
@@ -319,6 +354,7 @@ $ terraform import instana_custom_event_specification.example 60845e4e5e6b9cf8fc
 
 * The `default_name_prefix` and `default_name_suffix` features are **NOT** supported for this resource as they will be removed in future versions
 * For threshold rules, you can combine up to 5 rules using the `rule_logical_operator`
+* State created by previous provider versions (single `threshold` block or object) is upgraded automatically to the list representation
 * Tag filters support complex expressions with AND/OR logic and various comparison operators
 * Entity types and available metrics can be discovered using the Instana REST API
 * When `triggering` is set to `false`, the event will be created but won't trigger incidents

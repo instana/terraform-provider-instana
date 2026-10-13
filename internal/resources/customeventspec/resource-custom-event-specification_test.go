@@ -27,7 +27,7 @@ func TestNewCustomEventSpecificationResourceHandle(t *testing.T) {
 	metaData := resource.MetaData()
 	assert.Equal(t, ResourceInstanaCustomEventSpecification, metaData.ResourceName)
 	assert.NotNil(t, metaData.Schema)
-	assert.Equal(t, int64(1), metaData.SchemaVersion)
+	assert.Equal(t, int64(2), metaData.SchemaVersion)
 }
 
 func TestMetaData(t *testing.T) {
@@ -441,7 +441,7 @@ func TestMapStateToDataObject_WithThresholdRule(t *testing.T) {
 		TransientEventThreshold:  types.Int64Value(300000),
 		TransientEventAlertMuted: types.BoolValue(false),
 		Rules: &RulesModel{
-			Threshold: &ThresholdRuleModel{
+			Threshold: []ThresholdRuleModel{{
 				Severity:          types.StringValue("warning"),
 				MetricName:        types.StringValue("cpu.usage"),
 				Rollup:            types.Int64Value(60000),
@@ -449,7 +449,7 @@ func TestMapStateToDataObject_WithThresholdRule(t *testing.T) {
 				Aggregation:       types.StringValue("avg"),
 				ConditionOperator: types.StringValue(">"),
 				ConditionValue:    types.Float64Value(80.0),
-			},
+			}},
 		},
 	})
 
@@ -485,7 +485,7 @@ func TestMapStateToDataObject_WithThresholdRuleAndMetricPattern(t *testing.T) {
 		TransientEventThreshold:  types.Int64Value(300000),
 		TransientEventAlertMuted: types.BoolValue(false),
 		Rules: &RulesModel{
-			Threshold: &ThresholdRuleModel{
+			Threshold: []ThresholdRuleModel{{
 				Severity:          types.StringValue("critical"),
 				MetricName:        types.StringValue("memory.usage"),
 				Rollup:            types.Int64Value(60000),
@@ -499,7 +499,7 @@ func TestMapStateToDataObject_WithThresholdRuleAndMetricPattern(t *testing.T) {
 					Placeholder: types.StringValue("instance"),
 					Operator:    types.StringValue("EQUALS"),
 				},
-			},
+			}},
 		},
 	})
 
@@ -534,7 +534,7 @@ func TestMapStateToDataObject_WithThresholdRuleAndEmptyMetricPattern(t *testing.
 		TransientEventThreshold:  types.Int64Value(300000),
 		TransientEventAlertMuted: types.BoolValue(false),
 		Rules: &RulesModel{
-			Threshold: &ThresholdRuleModel{
+			Threshold: []ThresholdRuleModel{{
 				Severity:          types.StringValue("warning"),
 				MetricName:        types.StringValue("disk.usage"),
 				Rollup:            types.Int64Value(60000),
@@ -548,7 +548,7 @@ func TestMapStateToDataObject_WithThresholdRuleAndEmptyMetricPattern(t *testing.
 					Placeholder: types.StringValue(""),
 					Operator:    types.StringValue("STARTS_WITH"),
 				},
-			},
+			}},
 		},
 	})
 
@@ -588,7 +588,7 @@ func TestMapStateToDataObject_WithMultipleRules(t *testing.T) {
 				Severity:     types.StringValue("critical"),
 				SystemRuleID: types.StringValue("sys-123"),
 			},
-			Threshold: &ThresholdRuleModel{
+			Threshold: []ThresholdRuleModel{{
 				Severity:          types.StringValue("warning"),
 				MetricName:        types.StringValue("cpu.usage"),
 				Rollup:            types.Int64Value(60000),
@@ -596,7 +596,7 @@ func TestMapStateToDataObject_WithMultipleRules(t *testing.T) {
 				Aggregation:       types.StringValue("avg"),
 				ConditionOperator: types.StringValue(">"),
 				ConditionValue:    types.Float64Value(75.0),
-			},
+			}},
 		},
 	})
 
@@ -1048,14 +1048,14 @@ func TestUpdateState_WithThresholdRule(t *testing.T) {
 
 	require.NotNil(t, model.Rules)
 	require.NotNil(t, model.Rules.Threshold)
-	assert.Equal(t, "warning", model.Rules.Threshold.Severity.ValueString())
-	assert.Equal(t, "cpu.usage", model.Rules.Threshold.MetricName.ValueString())
-	assert.Equal(t, int64(60000), model.Rules.Threshold.Rollup.ValueInt64())
-	assert.Equal(t, int64(300000), model.Rules.Threshold.Window.ValueInt64())
-	assert.Equal(t, "avg", model.Rules.Threshold.Aggregation.ValueString())
-	assert.Equal(t, ">", model.Rules.Threshold.ConditionOperator.ValueString())
-	assert.Equal(t, 80.0, model.Rules.Threshold.ConditionValue.ValueFloat64())
-	assert.Nil(t, model.Rules.Threshold.MetricPattern)
+	assert.Equal(t, "warning", model.Rules.Threshold[0].Severity.ValueString())
+	assert.Equal(t, "cpu.usage", model.Rules.Threshold[0].MetricName.ValueString())
+	assert.Equal(t, int64(60000), model.Rules.Threshold[0].Rollup.ValueInt64())
+	assert.Equal(t, int64(300000), model.Rules.Threshold[0].Window.ValueInt64())
+	assert.Equal(t, "avg", model.Rules.Threshold[0].Aggregation.ValueString())
+	assert.Equal(t, ">", model.Rules.Threshold[0].ConditionOperator.ValueString())
+	assert.Equal(t, 80.0, model.Rules.Threshold[0].ConditionValue.ValueFloat64())
+	assert.Nil(t, model.Rules.Threshold[0].MetricPattern)
 }
 
 func TestUpdateState_WithThresholdRuleAndMetricPattern(t *testing.T) {
@@ -1114,11 +1114,11 @@ func TestUpdateState_WithThresholdRuleAndMetricPattern(t *testing.T) {
 
 	require.NotNil(t, model.Rules)
 	require.NotNil(t, model.Rules.Threshold)
-	require.NotNil(t, model.Rules.Threshold.MetricPattern)
-	assert.Equal(t, "jvm.", model.Rules.Threshold.MetricPattern.Prefix.ValueString())
-	assert.Equal(t, ".heap", model.Rules.Threshold.MetricPattern.Postfix.ValueString())
-	assert.Equal(t, "instance", model.Rules.Threshold.MetricPattern.Placeholder.ValueString())
-	assert.Equal(t, "EQUALS", model.Rules.Threshold.MetricPattern.Operator.ValueString())
+	require.NotNil(t, model.Rules.Threshold[0].MetricPattern)
+	assert.Equal(t, "jvm.", model.Rules.Threshold[0].MetricPattern.Prefix.ValueString())
+	assert.Equal(t, ".heap", model.Rules.Threshold[0].MetricPattern.Postfix.ValueString())
+	assert.Equal(t, "instance", model.Rules.Threshold[0].MetricPattern.Placeholder.ValueString())
+	assert.Equal(t, "EQUALS", model.Rules.Threshold[0].MetricPattern.Operator.ValueString())
 }
 
 func TestUpdateState_WithMultipleRules(t *testing.T) {

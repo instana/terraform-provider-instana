@@ -116,4 +116,6 @@ const (
 	CustomEventSpecificationDefaultTransientEventEnabled    = true
 	CustomEventSpecificationDefaultTransientEventThreshold  = int64(300000)
 	CustomEventSpecificationDefaultTransientEventAlertMuted = false
+	// CustomEventSpecificationMaxThresholdRules is the maximum number of threshold rules accepted by the backend
+	CustomEventSpecificationMaxThresholdRules = 5
 )
