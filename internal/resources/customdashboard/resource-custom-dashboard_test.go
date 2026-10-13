@@ -303,6 +303,64 @@ func TestUpdateState(t *testing.T) {
 		require.True(t, diags.HasError())
 	})
 
+	t.Run("nil dashboard returns error", func(t *testing.T) {
+		resource := &customDashboardResource{}
+		handle := NewCustomDashboardResourceHandle()
+		state := &tfsdk.State{
+			Schema: handle.MetaData().Schema,
+		}
+		initializeEmptyState(t, ctx, state)
+
+		diags := resource.UpdateState(ctx, state, nil, nil)
+		require.True(t, diags.HasError())
+		assert.Equal(t, CustomDashboardErrInvalidAPIResponse, diags.Errors()[0].Summary())
+		assert.Equal(t, CustomDashboardErrEmptyID, diags.Errors()[0].Detail())
+	})
+
+	t.Run("empty ID in dashboard returns error and preserves state", func(t *testing.T) {
+		resource := &customDashboardResource{}
+		handle := NewCustomDashboardResourceHandle()
+		state := &tfsdk.State{
+			Schema: handle.MetaData().Schema,
+		}
+
+		tagAttrTypes := map[string]attr.Type{
+			CustomDashboardFieldRbacTagID:          types.StringType,
+			CustomDashboardFieldRbacTagDisplayName: types.StringType,
+		}
+		emptyList, _ := types.ListValue(
+			types.ObjectType{AttrTypes: tagAttrTypes},
+			[]attr.Value{},
+		)
+
+		initialStateModel := CustomDashboardModel{
+			ID:          types.StringValue("dashboard-existing-123"),
+			Title:       types.StringValue("Original Dashboard Title"),
+			Widgets:     jsontypes.NewNormalizedValue(`[]`),
+			RbacTags:    emptyList,
+			AccessRules: nil,
+		}
+		diags := state.Set(ctx, initialStateModel)
+		require.False(t, diags.HasError())
+
+		emptyIDDashboard := &api.CustomDashboard{
+			ID:    "",
+			Title: "",
+		}
+
+		diags = resource.UpdateState(ctx, state, nil, emptyIDDashboard)
+		require.True(t, diags.HasError())
+		assert.Equal(t, CustomDashboardErrInvalidAPIResponse, diags.Errors()[0].Summary())
+		assert.Equal(t, CustomDashboardErrEmptyID, diags.Errors()[0].Detail())
+
+		// Verify state was not overwritten with empty values
+		var resultModel CustomDashboardModel
+		diags = state.Get(ctx, &resultModel)
+		require.False(t, diags.HasError())
+		assert.Equal(t, "dashboard-existing-123", resultModel.ID.ValueString())
+		assert.Equal(t, "Original Dashboard Title", resultModel.Title.ValueString())
+	})
+
 	t.Run("with plan - multiple access rules", func(t *testing.T) {
 		resource := &customDashboardResource{}
 

@@ -50,3 +50,5 @@ const CustomDashboardDescRbacTagID = "ID of the RBAC tag (team)."
 // Error messages
 const CustomDashboardErrMarshalWidgets = "Error marshaling widgets"
 const CustomDashboardErrMarshalWidgetsFailed = "Failed to marshal widgets: %s"
+const CustomDashboardErrInvalidAPIResponse = "Invalid API response"
+const CustomDashboardErrEmptyID = "Received an empty or invalid ID from Instana API for custom dashboard. If this is a private (non-global) dashboard, the API token's associated user ID must match the dashboard owner. Verify that the API token belongs to the user who owns the dashboard, or make the dashboard globally accessible from the UI."
