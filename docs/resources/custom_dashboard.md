@@ -174,7 +174,7 @@ terraform apply
 
 * `title` - Required - The name/title of the custom dashboard
 * `access_rule` - Required - Configuration of access rules (sharing/permissions) of the custom dashboard (list). [Details](#access-rule-argument-reference)
-* `widgets` - Required - JSON array of widget configurations. It is recommended to get this configuration via the `Edit as Json` feature of custom dashboards in Instana UI and to adopt the configuration afterwards
+* `widgets` - Optional, Computed - Defaults to `[]`. A difference in the order of the widgets is ignored. JSON array of widget configurations. It is recommended to get this configuration via the `Edit as Json` feature of custom dashboards in Instana UI and to adopt the configuration afterwards
 * `rbac_tags` - Optional, Computed - List of RBAC tags (teams) this custom dashboard is assigned to. [Details](#rbac-tags-argument-reference)
 
 ### Access Rule Argument Reference

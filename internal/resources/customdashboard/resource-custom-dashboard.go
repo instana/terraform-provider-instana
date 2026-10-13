@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
@@ -49,9 +50,16 @@ func NewCustomDashboardResourceHandle() resourcehandle.ResourceHandle[*api.Custo
 						Description: CustomDashboardDescTitle,
 					},
 					CustomDashboardFieldWidgets: schema.StringAttribute{
-						Required:    true,
+						// Optional+Computed so the plan modifier may keep the state value when the
+						// widgets only differ in order. The API does not return widgets in a stable order.
+						Optional:    true,
+						Computed:    true,
 						Description: CustomDashboardDescWidgets,
 						CustomType:  jsontypes.NormalizedType{},
+						Default:     stringdefault.StaticString("[]"),
+						PlanModifiers: []planmodifier.String{
+							widgetsKeepStatePlanModifier{},
+						},
 					},
 					CustomDashboardFieldAccessRule: schema.ListNestedAttribute{
 						Description: CustomDashboardDescAccessRule,
@@ -173,7 +181,10 @@ func (r *customDashboardResource) UpdateState(ctx context.Context, state *tfsdk.
 		return diags
 	}
 	json, _ := util.CanonicalizeJSON(string(widgetsBytes))
-	model.Widgets = jsontypes.NewNormalizedValue(json)
+	// Keep the existing value when it only differs from the API value in widget order
+	if model.Widgets.IsNull() || model.Widgets.IsUnknown() || !widgetsEquivalent(model.Widgets.ValueString(), json) {
+		model.Widgets = jsontypes.NewNormalizedValue(json)
+	}
 	// }
 	// else we keep the existing values
 
@@ -264,7 +275,7 @@ func (r *customDashboardResource) MapStateToDataObject(ctx context.Context, plan
 
 	// Map widgets - normalize the JSON
 	var widgets json.RawMessage
-	if !model.Widgets.IsNull() {
+	if !model.Widgets.IsNull() && !model.Widgets.IsUnknown() {
 		normalizedWidgets, _ := util.CanonicalizeJSON(model.Widgets.ValueString())
 		widgets = json.RawMessage(normalizedWidgets)
 	}
