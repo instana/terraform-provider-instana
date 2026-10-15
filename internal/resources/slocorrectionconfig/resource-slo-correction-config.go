@@ -176,6 +176,7 @@ func (r *sloCorrectionConfigResource) buildDurationUnitValidators() []validator.
 func (r *sloCorrectionConfigResource) buildRecurrentRuleAttribute() schema.Attribute {
 	return schema.StringAttribute{
 		Optional:    true,
+		Computed:    true,
 		Description: SloCorrectionConfigDescRecurrentRule,
 	}
 }
