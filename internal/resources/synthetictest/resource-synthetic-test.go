@@ -102,6 +102,7 @@ func buildCommonConfigAttributes() map[string]schema.Attribute {
 		},
 		SyntheticTestFieldTimeout: schema.StringAttribute{
 			Optional:    true,
+			Computed:    true,
 			Description: SyntheticTestDescTimeout,
 		},
 	}
