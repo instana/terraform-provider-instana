@@ -70,6 +70,7 @@ func buildLogAlertConfigSchema() schema.Schema {
 			},
 			LogAlertConfigFieldGracePeriod: schema.Int64Attribute{
 				Optional:    true,
+				Computed:    true,
 				Description: LogAlertConfigDescGracePeriod,
 			},
 			LogAlertConfigFieldGranularity: schema.Int64Attribute{
@@ -143,6 +144,7 @@ func buildGroupBySchema() schema.ListNestedAttribute {
 				},
 				LogAlertConfigFieldGroupByKey: schema.StringAttribute{
 					Optional:    true,
+					Computed:    true,
 					Description: LogAlertConfigDescGroupByKey,
 				},
 			},
