@@ -1,3 +1,15 @@
+## [v7.9.2](https://github.com/instana/terraform-provider-instana/tree/v7.9.2) (2026-10-16)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.9.1...v7.9.2)
+
+**Fixed bugs:**
+
+- Corrected empty string handling across multiple resource fields to prevent spurious state drift.
+
+**Merged pull requests:**
+
+- fix: correct empty string handling across multiple resource fields to prevent state drift [\#146](https://github.com/instana/terraform-provider-instana/pull/146) ([georgekutty-1](https://github.com/georgekutty-1))
+
 ## [v7.9.1](https://github.com/instana/terraform-provider-instana/tree/v7.9.1) (2026-10-13)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.9.0...v7.9.1)
