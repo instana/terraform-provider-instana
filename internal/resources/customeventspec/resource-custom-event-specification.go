@@ -280,11 +280,13 @@ func createCustomEventSpecificationSchema() schema.Schema {
 								},
 								CustomEventSpecificationThresholdRuleFieldMetricName: schema.StringAttribute{
 									Description: CustomEventSpecificationResourceDescMetricName,
-									Required:    true,
+									Optional:    true,
 								},
 								CustomEventSpecificationThresholdRuleFieldRollup: schema.Int64Attribute{
 									Description: CustomEventSpecificationResourceDescRollup,
-									Required:    true,
+									Optional:    true,
+									Default:     int64default.StaticInt64(0),
+									Computed:    true,
 								},
 								CustomEventSpecificationThresholdRuleFieldWindow: schema.Int64Attribute{
 									Description: CustomEventSpecificationResourceDescWindow,
