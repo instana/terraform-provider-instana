@@ -1,25 +1,27 @@
 package infralertconfig
 
 import (
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 )
 
 // InfraAlertConfigModel represents the data model for infrastructure alert configuration
 type InfraAlertConfigModel struct {
-	ID                 types.String             `tfsdk:"id"`
-	Name               types.String             `tfsdk:"name"`
-	Description        types.String             `tfsdk:"description"`
-	TagFilter          types.String             `tfsdk:"tag_filter"`
-	GroupBy            types.Set                `tfsdk:"group_by"`
-	AlertChannels      *InfraAlertChannelsModel `tfsdk:"alert_channels"`
-	Granularity        types.Int64              `tfsdk:"granularity"`
-	GracePeriod        types.Int64              `tfsdk:"grace_period"`
-	TimeThreshold      *InfraTimeThresholdModel `tfsdk:"time_threshold"`
-	CustomPayloadField types.List               `tfsdk:"custom_payload_field"`
-	Rules              *InfraRulesModel         `tfsdk:"rules"`
-	EvaluationType     types.String             `tfsdk:"evaluation_type"`
-	Triggering         types.Bool               `tfsdk:"triggering"`
+	ID                  types.String             `tfsdk:"id"`
+	Name                types.String             `tfsdk:"name"`
+	Description         types.String             `tfsdk:"description"`
+	TagFilter           types.String             `tfsdk:"tag_filter"`
+	GroupBy             types.Set                `tfsdk:"group_by"`
+	AlertChannels       *InfraAlertChannelsModel `tfsdk:"alert_channels"`
+	Granularity         types.Int64              `tfsdk:"granularity"`
+	GracePeriod         types.Int64              `tfsdk:"grace_period"`
+	TimeThreshold       *InfraTimeThresholdModel `tfsdk:"time_threshold"`
+	CustomPayloadField  types.List               `tfsdk:"custom_payload_field"`
+	Rules               []InfraRulesModel        `tfsdk:"rules"`
+	RuleLogicalOperator types.String             `tfsdk:"rule_logical_operator"`
+	EvaluationType      types.String             `tfsdk:"evaluation_type"`
+	Triggering          types.Bool               `tfsdk:"triggering"`
 }
 
 // InfraAlertChannelsModel represents the alert channels model
@@ -45,18 +47,25 @@ type InfraCustomPayloadFieldModel struct {
 	DynamicValue types.Object `tfsdk:"dynamic_value"`
 }
 
-// InfraRulesModel represents the rules model
+// InfraRulesModel represents a single rule entry in the rules list
 type InfraRulesModel struct {
 	GenericRule *InfraGenericRuleModel `tfsdk:"generic_rule"`
 }
 
 // InfraGenericRuleModel represents the generic rule model
 type InfraGenericRuleModel struct {
-	MetricName             types.String                 `tfsdk:"metric_name"`
-	EntityType             types.String                 `tfsdk:"entity_type"`
-	Aggregation            types.String                 `tfsdk:"aggregation"`
-	CrossSeriesAggregation types.String                 `tfsdk:"cross_series_aggregation"`
-	Regex                  types.Bool                   `tfsdk:"regex"`
-	ThresholdOperator      types.String                 `tfsdk:"threshold_operator"`
-	ThresholdRule          *shared.ThresholdPluginModel `tfsdk:"threshold"`
+	MetricName                types.String                 `tfsdk:"metric_name"`
+	EntityType                types.String                 `tfsdk:"entity_type"`
+	Aggregation               types.String                 `tfsdk:"aggregation"`
+	CrossSeriesAggregation    types.String                 `tfsdk:"cross_series_aggregation"`
+	Regex                     types.Bool                   `tfsdk:"regex"`
+	ThresholdOperator         types.String                 `tfsdk:"threshold_operator"`
+	ThresholdRule             *shared.ThresholdPluginModel `tfsdk:"threshold"`
+	MetricGroupBy             types.Set                    `tfsdk:"metric_group_by"`
+	MetricTagFilterExpression types.Object                 `tfsdk:"metric_tag_filter_expression"`
+}
+
+// metricTagFilterExprAttrTypes defines the attribute types for MetricTagFilterExpression object.
+var metricTagFilterExprAttrTypes = map[string]attr.Type{
+	InfraAlertConfigFieldMetricTagFilterLogicalOperator: types.StringType,
 }
