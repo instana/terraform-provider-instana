@@ -237,7 +237,7 @@ type numericPtr interface {
 }
 
 func SetStringPointerToState(i *string) types.String {
-	if i == nil || *i == "" {
+	if i == nil {
 		return types.StringNull()
 	} else {
 		return types.StringValue(*i)

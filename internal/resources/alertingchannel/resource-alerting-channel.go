@@ -112,10 +112,12 @@ func NewAlertingChannelResourceHandle() resourcehandle.ResourceHandle[*api.Alert
 							},
 							AlertingChannelSlackFieldIconURL: schema.StringAttribute{
 								Optional:    true,
+								Computed:    true,
 								Description: AlertingChannelDescSlackIconURL,
 							},
 							AlertingChannelSlackFieldChannel: schema.StringAttribute{
 								Optional:    true,
+								Computed:    true,
 								Description: AlertingChannelDescSlackChannel,
 							},
 						},
@@ -241,6 +243,7 @@ func NewAlertingChannelResourceHandle() resourcehandle.ResourceHandle[*api.Alert
 							},
 							AlertingChannelServiceNowFieldAutoCloseIncidents: schema.BoolAttribute{
 								Optional:    true,
+								Computed:    true,
 								Description: AlertingChannelDescServiceNowAutoClose,
 							},
 						},
@@ -275,34 +278,42 @@ func NewAlertingChannelResourceHandle() resourcehandle.ResourceHandle[*api.Alert
 							},
 							AlertingChannelServiceNowFieldAutoCloseIncidents: schema.BoolAttribute{
 								Optional:    true,
+								Computed:    true,
 								Description: AlertingChannelDescServiceNowAutoClose,
 							},
 							AlertingChannelServiceNowApplicationFieldInstanaURL: schema.StringAttribute{
 								Optional:    true,
+								Computed:    true,
 								Description: AlertingChannelDescServiceNowAppInstanaURL,
 							},
 							AlertingChannelServiceNowApplicationFieldEnableSendInstanaNotes: schema.BoolAttribute{
 								Optional:    true,
+								Computed:    true,
 								Description: AlertingChannelDescServiceNowAppSendNotes,
 							},
 							AlertingChannelServiceNowApplicationFieldEnableSendServiceNowActivities: schema.BoolAttribute{
 								Optional:    true,
+								Computed:    true,
 								Description: AlertingChannelDescServiceNowAppSendActivities,
 							},
 							AlertingChannelServiceNowApplicationFieldEnableSendServiceNowWorkNotes: schema.BoolAttribute{
 								Optional:    true,
+								Computed:    true,
 								Description: AlertingChannelDescServiceNowAppSendWorkNotes,
 							},
 							AlertingChannelServiceNowApplicationFieldManuallyClosedIncidents: schema.BoolAttribute{
 								Optional:    true,
+								Computed:    true,
 								Description: AlertingChannelDescServiceNowAppManualClose,
 							},
 							AlertingChannelServiceNowApplicationFieldResolutionOfIncident: schema.BoolAttribute{
 								Optional:    true,
+								Computed:    true,
 								Description: AlertingChannelDescServiceNowAppResolution,
 							},
 							AlertingChannelServiceNowApplicationFieldSnowStatusOnCloseEvent: schema.Int64Attribute{
 								Optional:    true,
+								Computed:    true,
 								Description: AlertingChannelDescServiceNowAppCloseStatus,
 							},
 						},
@@ -317,6 +328,7 @@ func NewAlertingChannelResourceHandle() resourcehandle.ResourceHandle[*api.Alert
 							},
 							AlertingChannelPrometheusWebhookFieldReceiver: schema.StringAttribute{
 								Optional:    true,
+								Computed:    true,
 								Description: AlertingChannelDescPrometheusWebhookReceiver,
 							},
 						},

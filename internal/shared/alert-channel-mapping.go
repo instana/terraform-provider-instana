@@ -253,7 +253,7 @@ func MapServiceNowChannelToState(ctx context.Context, channel *api.AlertingChann
 	}
 
 	// Use password from API response if available
-	if channel.Password != nil && *channel.Password != "" {
+	if channel.Password != nil {
 		model.Password = types.StringValue(*channel.Password)
 	} else {
 		model.Password = types.StringNull()
@@ -281,7 +281,7 @@ func MapServiceNowApplicationChannelToState(ctx context.Context, channel *api.Al
 	}
 
 	// Use password from API response if available
-	if channel.Password != nil && *channel.Password != "" {
+	if channel.Password != nil {
 		model.Password = types.StringValue(*channel.Password)
 	} else {
 		model.Password = types.StringNull()
@@ -325,7 +325,7 @@ func MapServiceNowApplicationChannelToState(ctx context.Context, channel *api.Al
 	}
 
 	// Add optional string field
-	if channel.InstanaURL != nil && *channel.InstanaURL != "" {
+	if channel.InstanaURL != nil {
 		model.InstanaURL = util.SetStringPointerToState(channel.InstanaURL)
 	} else {
 		model.InstanaURL = types.StringNull()
@@ -350,7 +350,7 @@ func MapPrometheusWebhookChannelToState(ctx context.Context, channel *api.Alerti
 	}
 
 	// Add optional receiver field
-	if channel.Receiver != nil && *channel.Receiver != "" {
+	if channel.Receiver != nil {
 		model.Receiver = util.SetStringPointerToState(channel.Receiver)
 	} else {
 		model.Receiver = types.StringNull()
@@ -436,13 +436,13 @@ func MapSlackChannelToState(ctx context.Context, channel *api.AlertingChannel) (
 	}
 
 	// Add optional fields if present
-	if channel.IconURL != nil && *channel.IconURL != "" {
+	if channel.IconURL != nil {
 		model.IconURL = util.SetStringPointerToState(channel.IconURL)
 	} else {
 		model.IconURL = types.StringNull()
 	}
 
-	if channel.Channel != nil && *channel.Channel != "" {
+	if channel.Channel != nil {
 		model.Channel = util.SetStringPointerToState(channel.Channel)
 	} else {
 		model.Channel = types.StringNull()

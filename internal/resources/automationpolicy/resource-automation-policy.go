@@ -70,10 +70,12 @@ func NewAutomationPolicyResourceHandle() resourcehandle.ResourceHandle[*api.Auto
 							},
 							shared.AutomationPolicyFieldName: schema.StringAttribute{
 								Optional:    true,
+								Computed:    true,
 								Description: AutomationPolicyDescTriggerName,
 							},
 							shared.AutomationPolicyFieldDescription: schema.StringAttribute{
 								Optional:    true,
+								Computed:    true,
 								Description: AutomationPolicyDescTriggerDescription,
 							},
 							AutomationPolicyFieldScheduling: schema.SingleNestedAttribute{
@@ -90,6 +92,7 @@ func NewAutomationPolicyResourceHandle() resourcehandle.ResourceHandle[*api.Auto
 									},
 									AutomationPolicyFieldDurationUnit: schema.StringAttribute{
 										Optional:    true,
+										Computed:    true,
 										Description: AutomationPolicyDescTriggerSchedulingDurationUnit,
 										Validators: []validator.String{
 											stringvalidator.OneOf(DurationUnitMinute, DurationUnitHour, DurationUnitDay),
@@ -97,10 +100,12 @@ func NewAutomationPolicyResourceHandle() resourcehandle.ResourceHandle[*api.Auto
 									},
 									AutomationPolicyFieldRecurrentRule: schema.StringAttribute{
 										Optional:    true,
+										Computed:    true,
 										Description: AutomationPolicyDescTriggerSchedulingRecurrentRule,
 									},
 									AutomationPolicyFieldRecurrent: schema.BoolAttribute{
 										Optional:    true,
+										Computed:    true,
 										Description: AutomationPolicyDescTriggerSchedulingRecurrent,
 									},
 								},

@@ -154,6 +154,7 @@ func (r *syntheticAlertConfigResource) buildAlertChannelIdsAttribute() schema.At
 func (r *syntheticAlertConfigResource) buildGracePeriodAttribute() schema.Attribute {
 	return schema.Int64Attribute{
 		Optional:    true,
+		Computed:    true,
 		Description: SyntheticAlertConfigDescGracePeriod,
 	}
 }
