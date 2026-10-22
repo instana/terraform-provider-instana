@@ -67,8 +67,6 @@ const (
 	InfraAlertConfigFieldMetricTagFilter = "metric_tag_filter_expression"
 	// InfraAlertConfigFieldMetricTagFilterLogicalOperator constant value for logical_operator within metric_tag_filter_expression
 	InfraAlertConfigFieldMetricTagFilterLogicalOperator = "logical_operator"
-	// InfraAlertConfigFieldRuleLogicalOperator constant value for rule_logical_operator
-	InfraAlertConfigFieldRuleLogicalOperator = "rule_logical_operator"
 )
 
 // Resource description constants
@@ -117,8 +115,6 @@ const (
 	InfraAlertConfigDescMetricTagFilter = "Optional metric-scoped tag filter expression. Defaults to an empty AND expression when omitted."
 	// InfraAlertConfigDescMetricTagFilterLogicalOperator description for the logical_operator field
 	InfraAlertConfigDescMetricTagFilterLogicalOperator = "The logical operator for combining filter elements. Supported values: AND, OR. Defaults to AND."
-	// InfraAlertConfigDescRuleLogicalOperator description for the rule_logical_operator field
-	InfraAlertConfigDescRuleLogicalOperator = "Logical operator used to combine multiple rules. Supported values: AND, OR. Defaults to AND."
 	// InfraAlertConfigDescTimeThreshold description for the time_threshold field
 	InfraAlertConfigDescTimeThreshold = "Indicates the type of violation of the defined threshold."
 	// InfraAlertConfigDescViolationsInSequence description for the violations_in_sequence field
@@ -155,6 +151,4 @@ const (
 	RuleLogicalOperatorAND = "AND"
 	// RuleLogicalOperatorOR represents the OR logical operator
 	RuleLogicalOperatorOR = "OR"
-	// MaxRulesCount maximum number of rules allowed
-	MaxRulesCount = 5
 )
