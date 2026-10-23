@@ -285,7 +285,7 @@ terraform apply
 * `description` - Required - The description text of the infrastructure alert config
 * `granularity` - Required - The evaluation granularity used for detection of violations of the defined threshold. In other words, it defines the size of the tumbling window used. Allowed values: `300000`, `600000`, `900000`, `1200000`, `1800000` (milliseconds)
 * `grace_period` - Optional - The duration in milliseconds for which an alert remains open after conditions are no longer violated. The alert automatically closes once the grace period expires.
-* `evaluation_type` - Required - The evaluation type of the infrastructure alert config. Allowed values:
+* `evaluation_type` - Optional - The evaluation type of the infrastructure alert config. Allowed values:
   * `CUSTOM` - Combine all metrics in scope into a single metric per group (default)
   * `PER_ENTITY` - Monitor each metric individually and trigger alerts for each individual entity
 * `triggering` - Optional - Indicates whether the alert should be triggered. Default: `false`
@@ -401,11 +401,24 @@ At least one of the elements below must be configured:
 
 ##### Threshold Argument Reference
 
-* `static` - Required - Static threshold definition [Details](#static-threshold-argument-reference)
+* `static` - Optional - Static threshold definition [Details](#static-threshold-argument-reference)
+* `adaptive_baseline` - Optional - Adaptive baseline threshold definition [Details](#adaptive-baseline-threshold-argument-reference)
 
 ###### Static Threshold Argument Reference
 
-* `value` - Required - The value of the static threshold
+* `value` - Optional - The point threshold value. Required for `>`, `>=`, `<`, `<=` operators. Must be omitted for `BETWEEN`/`OUTSIDE` operators.
+* `lower_bound` - Optional - The lower bound of the threshold range. Required for `BETWEEN` and `OUTSIDE` operators. Must be omitted for point-value operators.
+* `upper_bound` - Optional - The upper bound of the threshold range. Required for `BETWEEN` and `OUTSIDE` operators. Must be omitted for point-value operators.
+
+###### Adaptive Baseline Threshold Argument Reference
+
+* `deviation_factor` - Optional - The deviation factor for the adaptive baseline threshold
+* `adaptability` - Optional - The adaptability for the adaptive baseline threshold
+* `seasonality` - Optional - The seasonality for the adaptive baseline threshold
+
+#### Metric Tag Filter Expression Argument Reference
+
+* `logical_operator` - Optional/Computed - The logical operator for combining filter elements within the metric tag filter. Supported values: `AND`, `OR`. Default: `AND`
 
 ### Time Threshold Argument Reference
 

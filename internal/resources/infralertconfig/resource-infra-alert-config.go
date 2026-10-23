@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -144,9 +145,9 @@ func buildGenericRuleSchema() schema.SingleNestedAttribute {
 			InfraAlertConfigFieldThresholdOperator: schema.StringAttribute{
 				Optional:    true,
 				Computed:    true,
-				Description: "The operator to apply for threshold comparison",
+				Description: InfraAlertConfigDescThresholdOperator,
 				Validators: []validator.String{
-					stringvalidator.OneOf(">", ">=", "<", "<="),
+					stringvalidator.OneOf(">", ">=", "<", "<=", "OUTSIDE", "BETWEEN"),
 				},
 			},
 			InfraAlertConfigFieldThreshold: schema.SingleNestedAttribute{
@@ -155,6 +156,29 @@ func buildGenericRuleSchema() schema.SingleNestedAttribute {
 				Attributes: map[string]schema.Attribute{
 					ResourceFieldThresholdRuleWarningSeverity:  shared.StaticAndAdaptiveThresholdAttributeSchema(),
 					ResourceFieldThresholdRuleCriticalSeverity: shared.StaticAndAdaptiveThresholdAttributeSchema(),
+				},
+			},
+			InfraAlertConfigFieldMetricGroupBy: schema.SetAttribute{
+				Description: InfraAlertConfigDescMetricGroupBy,
+				Optional:    true,
+				Computed:    true,
+				ElementType: types.StringType,
+				Default:     setdefault.StaticValue(types.SetValueMust(types.StringType, []attr.Value{})),
+			},
+			InfraAlertConfigFieldMetricTagFilter: schema.SingleNestedAttribute{
+				Description: InfraAlertConfigDescMetricTagFilter,
+				Optional:    true,
+				Computed:    true,
+				Attributes: map[string]schema.Attribute{
+					InfraAlertConfigFieldMetricTagFilterLogicalOperator: schema.StringAttribute{
+						Description: InfraAlertConfigDescMetricTagFilterLogicalOperator,
+						Optional:    true,
+						Computed:    true,
+						Default:     stringdefault.StaticString(RuleLogicalOperatorAND),
+						Validators: []validator.String{
+							stringvalidator.OneOf(RuleLogicalOperatorAND, RuleLogicalOperatorOR),
+						},
+					},
 				},
 			},
 		},
@@ -256,7 +280,6 @@ func (r *infraAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk
 		diags.Append(tagFilterDiags...)
 		model.TagFilter = tagFilter
 	}
-	model.TagFilter = tagFilter
 
 	model.GroupBy = r.mapGroupByToModel(resource.GroupBy)
 
@@ -657,7 +680,30 @@ func (r *infraAlertConfigResource) mapModelRulesToAPI(ctx context.Context, rules
 	return []common.RuleWithThreshold[api.InfraAlertRule]{ruleWithThreshold}, diags
 }
 
-	return []common.RuleWithThreshold[api.InfraAlertRule]{ruleWithThreshold}, diags
+// mapModelMetricGroupByToAPI converts the metric_group_by set to a []string
+func (r *infraAlertConfigResource) mapModelMetricGroupByToAPI(ctx context.Context, metricGroupBy types.Set) ([]string, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	if metricGroupBy.IsNull() || metricGroupBy.IsUnknown() {
+		return []string{}, diags
+	}
+	var result []string
+	diags.Append(metricGroupBy.ElementsAs(ctx, &result, false)...)
+	if result == nil {
+		return []string{}, diags
+	}
+	return result, diags
+}
+
+// mapModelMetricTagFilterExprToAPI converts the metric_tag_filter_expression types.Object to an API TagFilter.
+func (r *infraAlertConfigResource) mapModelMetricTagFilterExprToAPI(obj types.Object) *tag.TagFilter {
+	if obj.IsNull() || obj.IsUnknown() {
+		return tag.NewLogicalAndTagFilter([]*tag.TagFilter{})
+	}
+	logicalOp, ok := obj.Attributes()[InfraAlertConfigFieldMetricTagFilterLogicalOperator].(types.String)
+	if !ok || logicalOp.IsNull() || logicalOp.IsUnknown() || logicalOp.ValueString() != RuleLogicalOperatorOR {
+		return tag.NewLogicalAndTagFilter([]*tag.TagFilter{})
+	}
+	return tag.NewLogicalOrTagFilter([]*tag.TagFilter{})
 }
 
 // mapModelThresholdsToAPI converts model thresholds to API representation
