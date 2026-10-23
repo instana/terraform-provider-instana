@@ -86,10 +86,12 @@ Read-Only:
 - `action_filter` (String) The action filter for the team
 - `log_filter` (String) The log filter for the team
 - `business_perspectives` (Set of String) The business perspective IDs accessible to the team
+- `logging_perspectives` (Set of String) The logging perspective IDs accessible to the team
+- `tag_ids` (Set of String) The tag IDs accessible to the team
 - `slo_ids` (Set of String) The SLO IDs accessible to the team
+- `apdex_ids` (Set of String) The Apdex configuration IDs accessible to the team
 - `synthetic_tests` (Set of String) The synthetic test IDs accessible to the team
 - `synthetic_credentials` (Set of String) The synthetic credential IDs accessible to the team
-- `tag_ids` (Set of String) The tag IDs accessible to the team
 - `restricted_application_filter` (Block, Optional) The restricted application filter configuration (see [below for nested schema](#nestedblock--scope--restricted_application_filter))
 
 <a id="nestedblock--scope--restricted_application_filter"></a>
