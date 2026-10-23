@@ -1,7 +1,6 @@
 package infralertconfig
 
 import (
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/instana/terraform-provider-instana/internal/shared"
 )
@@ -61,10 +60,5 @@ type InfraGenericRuleModel struct {
 	ThresholdOperator         types.String                 `tfsdk:"threshold_operator"`
 	ThresholdRule             *shared.ThresholdPluginModel `tfsdk:"threshold"`
 	MetricGroupBy             types.Set                    `tfsdk:"metric_group_by"`
-	MetricTagFilterExpression types.Object                 `tfsdk:"metric_tag_filter_expression"`
-}
-
-// metricTagFilterExprAttrTypes defines the attribute types for MetricTagFilterExpression object.
-var metricTagFilterExprAttrTypes = map[string]attr.Type{
-	InfraAlertConfigFieldMetricTagFilterLogicalOperator: types.StringType,
+	MetricTagFilterExpression types.String                 `tfsdk:"metric_tag_filter_expression"`
 }

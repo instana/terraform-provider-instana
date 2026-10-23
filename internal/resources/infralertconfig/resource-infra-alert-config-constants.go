@@ -65,8 +65,6 @@ const (
 	InfraAlertConfigFieldMetricGroupBy = "metric_group_by"
 	// InfraAlertConfigFieldMetricTagFilter constant value for metric_tag_filter_expression
 	InfraAlertConfigFieldMetricTagFilter = "metric_tag_filter_expression"
-	// InfraAlertConfigFieldMetricTagFilterLogicalOperator constant value for logical_operator within metric_tag_filter_expression
-	InfraAlertConfigFieldMetricTagFilterLogicalOperator = "logical_operator"
 )
 
 // Resource description constants
@@ -112,9 +110,7 @@ const (
 	// InfraAlertConfigDescMetricGroupBy description for the metric_group_by field
 	InfraAlertConfigDescMetricGroupBy = "Optional list of metric tags to group the metric by within the rule"
 	// InfraAlertConfigDescMetricTagFilter description for the metric_tag_filter_expression field
-	InfraAlertConfigDescMetricTagFilter = "Optional metric-scoped tag filter expression. Defaults to an empty AND expression when omitted."
-	// InfraAlertConfigDescMetricTagFilterLogicalOperator description for the logical_operator field
-	InfraAlertConfigDescMetricTagFilterLogicalOperator = "The logical operator for combining filter elements. Supported values: AND, OR. Defaults to AND."
+	InfraAlertConfigDescMetricTagFilter = "The metric-scoped tag filter expression for the generic rule"
 	// InfraAlertConfigDescTimeThreshold description for the time_threshold field
 	InfraAlertConfigDescTimeThreshold = "Indicates the type of violation of the defined threshold."
 	// InfraAlertConfigDescViolationsInSequence description for the violations_in_sequence field
@@ -147,8 +143,4 @@ const (
 	GenericRuleAlertType = "genericRule"
 	// EmptyString represents an empty string value
 	EmptyString = ""
-	// RuleLogicalOperatorAND represents the AND logical operator
-	RuleLogicalOperatorAND = "AND"
-	// RuleLogicalOperatorOR represents the OR logical operator
-	RuleLogicalOperatorOR = "OR"
 )

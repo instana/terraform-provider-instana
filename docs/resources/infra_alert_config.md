@@ -214,9 +214,7 @@ resource "instana_infra_alert_config" "grouped_alert" {
       metric_name              = "cpuUsageToLimitRatio"
       threshold_operator       = ">="
       metric_group_by          = ["namespace", "pod"]
-      metric_tag_filter_expression = {
-        logical_operator = "AND"
-      }
+      metric_tag_filter_expression = "kubernetes.namespace.name@na EQUALS 'production'"
       threshold = {
         critical = {
           static = {
@@ -390,7 +388,7 @@ tag_filter = "beacon.meta:'stage'@na EQUALS 'production'"
   * Use `BETWEEN` or `OUTSIDE` with `static.lower_bound` and `static.upper_bound`
 * `threshold` - Optional - Indicates the type of threshold associated with the given severity [Details](#threshold-rule-argument-reference)
 * `metric_group_by` - Optional/Computed - A set of metric tag names used to group the metric within this rule. Defaults to an empty set.
-* `metric_tag_filter_expression` - Optional/Computed - A metric-scoped tag filter expression to narrow which metric time series are evaluated by this rule. Defaults to an empty `AND` expression. [Details](#metric-tag-filter-expression-argument-reference)
+* `metric_tag_filter_expression` - Optional - The metric-scoped tag filter expression for the generic rule
 
 #### Threshold Rule Argument Reference
 
@@ -415,10 +413,6 @@ At least one of the elements below must be configured:
 * `deviation_factor` - Optional - The deviation factor for the adaptive baseline threshold
 * `adaptability` - Optional - The adaptability for the adaptive baseline threshold
 * `seasonality` - Optional - The seasonality for the adaptive baseline threshold
-
-#### Metric Tag Filter Expression Argument Reference
-
-* `logical_operator` - Optional/Computed - The logical operator for combining filter elements within the metric tag filter. Supported values: `AND`, `OR`. Default: `AND`
 
 ### Time Threshold Argument Reference
 
@@ -457,7 +451,7 @@ $ terraform import instana_infra_alert_config.example 60845e4e5e6b9cf8fc2868da
 * Use `CUSTOM` evaluation type to aggregate metrics across entities
 * Use `PER_ENTITY` evaluation type to monitor each entity individually
 * `metric_group_by` groups the metric time series within a rule before aggregation
-* `metric_tag_filter_expression` scopes a rule to specific metric tags; defaults to an empty `AND` expression when omitted
+* `metric_tag_filter_expression` scopes a rule to specific metric tags
 * Regex patterns in `metric_name` allow monitoring multiple related metrics with a single rule
 * Tag filters support complex expressions for precise entity selection
 * Custom payload fields can include both static values and dynamic tag values
