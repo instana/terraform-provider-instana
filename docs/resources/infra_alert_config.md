@@ -214,7 +214,7 @@ resource "instana_infra_alert_config" "grouped_alert" {
       metric_name              = "cpuUsageToLimitRatio"
       threshold_operator       = ">="
       metric_group_by          = ["namespace", "pod"]
-      metric_tag_filter_expression = "kubernetes.namespace.name@na EQUALS 'production'"
+      metric_tag_filter_expression = "metric.tag.status NOT_EQUAL 'succeeded'"
       threshold = {
         critical = {
           static = {
@@ -388,7 +388,7 @@ tag_filter = "beacon.meta:'stage'@na EQUALS 'production'"
   * Use `BETWEEN` or `OUTSIDE` with `static.lower_bound` and `static.upper_bound`
 * `threshold` - Optional - Indicates the type of threshold associated with the given severity [Details](#threshold-rule-argument-reference)
 * `metric_group_by` - Optional/Computed - A set of metric tag names used to group the metric within this rule. Defaults to an empty set.
-* `metric_tag_filter_expression` - Optional - The metric-scoped tag filter expression for the generic rule
+* `metric_tag_filter_expression` - Optional - The metric-scoped tag filter expression for the generic rule. Uses the same syntax as `tag_filter`, but only custom metric tags prefixed with `metric.tag.` are allowed.
 
 #### Threshold Rule Argument Reference
 
