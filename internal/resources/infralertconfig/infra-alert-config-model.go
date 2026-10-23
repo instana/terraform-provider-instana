@@ -52,11 +52,13 @@ type InfraRulesModel struct {
 
 // InfraGenericRuleModel represents the generic rule model
 type InfraGenericRuleModel struct {
-	MetricName             types.String                 `tfsdk:"metric_name"`
-	EntityType             types.String                 `tfsdk:"entity_type"`
-	Aggregation            types.String                 `tfsdk:"aggregation"`
-	CrossSeriesAggregation types.String                 `tfsdk:"cross_series_aggregation"`
-	Regex                  types.Bool                   `tfsdk:"regex"`
-	ThresholdOperator      types.String                 `tfsdk:"threshold_operator"`
-	ThresholdRule          *shared.ThresholdPluginModel `tfsdk:"threshold"`
+	MetricName                types.String                 `tfsdk:"metric_name"`
+	EntityType                types.String                 `tfsdk:"entity_type"`
+	Aggregation               types.String                 `tfsdk:"aggregation"`
+	CrossSeriesAggregation    types.String                 `tfsdk:"cross_series_aggregation"`
+	Regex                     types.Bool                   `tfsdk:"regex"`
+	ThresholdOperator         types.String                 `tfsdk:"threshold_operator"`
+	ThresholdRule             *shared.ThresholdPluginModel `tfsdk:"threshold"`
+	MetricGroupBy             types.Set                    `tfsdk:"metric_group_by"`
+	MetricTagFilterExpression types.String                 `tfsdk:"metric_tag_filter_expression"`
 }

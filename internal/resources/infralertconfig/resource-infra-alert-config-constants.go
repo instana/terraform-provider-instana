@@ -61,6 +61,10 @@ const (
 	InfraAlertConfigFieldThresholdOperator = "threshold_operator"
 	// InfraAlertConfigFieldThreshold constant value for threshold
 	InfraAlertConfigFieldThreshold = "threshold"
+	// InfraAlertConfigFieldMetricGroupBy constant value for metric_group_by
+	InfraAlertConfigFieldMetricGroupBy = "metric_group_by"
+	// InfraAlertConfigFieldMetricTagFilter constant value for metric_tag_filter_expression
+	InfraAlertConfigFieldMetricTagFilter = "metric_tag_filter_expression"
 )
 
 // Resource description constants
@@ -103,6 +107,10 @@ const (
 	InfraAlertConfigDescThresholdOperator = "The threshold operator for the generic rule"
 	// InfraAlertConfigDescThreshold description for the threshold field
 	InfraAlertConfigDescThreshold = "Threshold configuration for different severity levels"
+	// InfraAlertConfigDescMetricGroupBy description for the metric_group_by field
+	InfraAlertConfigDescMetricGroupBy = "Optional list of metric tags to group the metric by within the rule"
+	// InfraAlertConfigDescMetricTagFilter description for the metric_tag_filter_expression field
+	InfraAlertConfigDescMetricTagFilter = "The metric-scoped tag filter expression for the generic rule"
 	// InfraAlertConfigDescTimeThreshold description for the time_threshold field
 	InfraAlertConfigDescTimeThreshold = "Indicates the type of violation of the defined threshold."
 	// InfraAlertConfigDescViolationsInSequence description for the violations_in_sequence field
