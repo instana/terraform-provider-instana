@@ -1,3 +1,24 @@
+## [v7.9.3](https://github.com/instana/terraform-provider-instana/tree/v7.10.0) (2026-10-26)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.9.2...v7.10.0)
+
+**Implemented enhancements:**
+
+- Added `metric_group_by` and `metric_tag_filter_expression` fields to the generic rule of the `instana_infra_alert_config` resource to group metrics and scope rules to custom metric tags
+- Added support for `BETWEEN` and `OUTSIDE` threshold operators in `instana_infra_alert_config`, using the new `lower_bound` and `upper_bound` static threshold fields
+- Added `logging_perspectives` and `apdex_ids` scope fields to the `instana_rbac_team` resource and data source
+- Added `include_on_demand`, `evaluation_type` (`PER_LOCATION`, `PER_SYNTHETIC_TEST`) and `affected_locations_count` fields to the `instana_synthetic_alert_config` resource
+- Bumped `instana-go-client` dependency from `v1.6.2` to `v1.6.4`
+- Updated documentation for `instana_infra_alert_config` (range threshold and metric grouping examples, adaptive baseline threshold), `instana_rbac_team` (resource and data source) and `instana_synthetic_alert_config` (multi-location evaluation example)
+
+**Merged pull requests:**
+
+- Relax required fields in custom event spec and infra alert config [\#147](https://github.com/instana/terraform-provider-instana/pull/147) ([georgekutty-1](https://github.com/georgekutty-1))
+- feat(infra_alert_config): add metric grouping, metric tag filters, and BETWEEN/OUTSIDE range thresholds [\#148](https://github.com/instana/terraform-provider-instana/pull/148) ([BlessyElza](https://github.com/BlessyElza))
+- feat(rbac_team): add logging_perspectives and apdex_ids scope fields [\#149](https://github.com/instana/terraform-provider-instana/pull/149) ([BlessyElza](https://github.com/BlessyElza))
+- added IncludeOnDemand, EvaluationType, AffectedLocationsCount fields [\#150](https://github.com/instana/terraform-provider-instana/pull/150) ([BlessyElza](https://github.com/BlessyElza))
+
+
 ## [v7.9.2](https://github.com/instana/terraform-provider-instana/tree/v7.9.2) (2026-10-16)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.9.1...v7.9.2)
