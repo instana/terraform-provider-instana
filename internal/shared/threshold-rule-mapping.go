@@ -352,16 +352,25 @@ func MapThresholdRuleAllPluginFromState(ctx context.Context, thresholdObj *Thres
 
 	// Check for static threshold
 	if thresholdObj.Static != nil {
-
 		staticVal := thresholdObj.Static
-		//operator := util.SetStringPointerFromState(staticVal.Operator)
+
+		// Range operators (BETWEEN / OUTSIDE) use upper_bound + lower_bound; value must be nil.
+		if !staticVal.UpperBound.IsNull() && !staticVal.UpperBound.IsUnknown() {
+			upperBound := math.Round(staticVal.UpperBound.ValueFloat64()*100) / 100
+			lowerBound := math.Round(staticVal.LowerBound.ValueFloat64()*100) / 100
+			return &model.ThresholdRule{
+				Type:       "staticThreshold",
+				Value:      nil,
+				UpperBound: &upperBound,
+				LowerBound: &lowerBound,
+			}, diags
+		}
 
 		valueFloat := staticVal.Value.ValueFloat64()
 		rounded := math.Round(valueFloat*100) / 100
 		return &model.ThresholdRule{
 			Type:  "staticThreshold",
 			Value: &rounded,
-			//Operator: operator,
 		}, diags
 	}
 
