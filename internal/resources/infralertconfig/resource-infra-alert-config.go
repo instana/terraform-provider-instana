@@ -154,8 +154,8 @@ func buildGenericRuleSchema() schema.SingleNestedAttribute {
 				Description: InfraAlertConfigDescThreshold,
 				Optional:    true,
 				Attributes: map[string]schema.Attribute{
-					ResourceFieldThresholdRuleWarningSeverity:  shared.StaticAndAdaptiveThresholdAttributeSchema(),
-					ResourceFieldThresholdRuleCriticalSeverity: shared.StaticAndAdaptiveThresholdAttributeSchema(),
+					ResourceFieldThresholdRuleWarningSeverity:  shared.AllThresholdAttributeSchema(),
+					ResourceFieldThresholdRuleCriticalSeverity: shared.AllThresholdAttributeSchema(),
 				},
 			},
 			InfraAlertConfigFieldMetricGroupBy: schema.SetAttribute{
@@ -439,18 +439,14 @@ func (r *infraAlertConfigResource) mapMetricGroupByToModel(metricGroupBy []strin
 }
 
 // mapThresholdsToModel converts API thresholds to model representation
-func (r *infraAlertConfigResource) mapThresholdsToModel(ctx context.Context, thresholds map[common.AlertSeverity]common.ThresholdRule) *shared.ThresholdPluginModel {
-	thresholdRuleModel := &shared.ThresholdPluginModel{}
+func (r *infraAlertConfigResource) mapThresholdsToModel(ctx context.Context, thresholds map[common.AlertSeverity]common.ThresholdRule) *shared.ThresholdAllPluginModel {
+	warningThreshold, hasWarning := thresholds[common.WarningSeverity]
+	criticalThreshold, hasCritical := thresholds[common.CriticalSeverity]
 
-	if warningThreshold, hasWarning := thresholds[common.WarningSeverity]; hasWarning {
-		thresholdRuleModel.Warning = shared.MapThresholdPluginToState(ctx, &warningThreshold, true)
+	return &shared.ThresholdAllPluginModel{
+		Warning:  shared.MapAllThresholdPluginToState(ctx, &warningThreshold, hasWarning),
+		Critical: shared.MapAllThresholdPluginToState(ctx, &criticalThreshold, hasCritical),
 	}
-
-	if criticalThreshold, hasCritical := thresholds[common.CriticalSeverity]; hasCritical {
-		thresholdRuleModel.Critical = shared.MapThresholdPluginToState(ctx, &criticalThreshold, true)
-	}
-
-	return thresholdRuleModel
 }
 
 // MapStateToDataObject maps Terraform state/plan to API InfraAlertConfig object
@@ -677,31 +673,8 @@ func (r *infraAlertConfigResource) mapModelMetricGroupByToAPI(ctx context.Contex
 }
 
 // mapModelThresholdsToAPI converts model thresholds to API representation
-func (r *infraAlertConfigResource) mapModelThresholdsToAPI(ctx context.Context, thresholdRuleModel *shared.ThresholdPluginModel) (map[common.AlertSeverity]common.ThresholdRule, diag.Diagnostics) {
-	var diags diag.Diagnostics
-	thresholds := make(map[common.AlertSeverity]common.ThresholdRule)
-
-	if thresholdRuleModel == nil {
-		return thresholds, diags
-	}
-
-	if thresholdRuleModel.Warning != nil {
-		warningThreshold, warningDiags := shared.MapThresholdRulePluginFromState(ctx, thresholdRuleModel.Warning)
-		diags.Append(warningDiags...)
-		if warningThreshold != nil {
-			thresholds[common.WarningSeverity] = *warningThreshold
-		}
-	}
-
-	if thresholdRuleModel.Critical != nil {
-		criticalThreshold, criticalDiags := shared.MapThresholdRulePluginFromState(ctx, thresholdRuleModel.Critical)
-		diags.Append(criticalDiags...)
-		if criticalThreshold != nil {
-			thresholds[common.CriticalSeverity] = *criticalThreshold
-		}
-	}
-
-	return thresholds, diags
+func (r *infraAlertConfigResource) mapModelThresholdsToAPI(ctx context.Context, thresholdRuleModel *shared.ThresholdAllPluginModel) (map[common.AlertSeverity]common.ThresholdRule, diag.Diagnostics) {
+	return shared.MapThresholdsAllPluginFromState(ctx, thresholdRuleModel)
 }
 
 // GetStateUpgraders returns the state upgraders for this resource

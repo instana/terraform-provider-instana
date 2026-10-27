@@ -489,6 +489,73 @@ func TestUpdateState_WithRulesAndAdaptiveBaselineThreshold(t *testing.T) {
 	assert.Equal(t, "DAILY", adaptiveModel.Seasonality.ValueString())
 }
 
+func TestUpdateState_WithRulesAndHistoricBaselineThreshold(t *testing.T) {
+	ctx := context.Background()
+	resource := NewInfraAlertConfigResourceHandle()
+
+	deviationFactor := float32(1.5)
+	seasonality := common.ThresholdSeasonality("WEEKLY")
+	baseline := [][]float64{
+		{1000.0, 50.0, 5.0},
+		{2000.0, 60.0, 6.0},
+	}
+
+	data := &api.InfraAlertConfig{
+		ID:             "test-id",
+		Name:           "Test Infra Alert",
+		Description:    "Test Description",
+		Granularity:    600000,
+		EvaluationType: api.EvaluationTypePerEntity,
+		Rules: []common.RuleWithThreshold[api.InfraAlertRule]{
+			{
+				Rule: api.InfraAlertRule{
+					AlertType:              "genericRule",
+					MetricName:             "memory.usage",
+					EntityType:             "host",
+					Aggregation:            common.MeanAggregation,
+					CrossSeriesAggregation: common.MaxAggregation,
+					Regex:                  false,
+				},
+				ThresholdOperator: common.ThresholdOperatorGreaterThan,
+				Thresholds: map[common.AlertSeverity]common.ThresholdRule{
+					common.WarningSeverity: {
+						Type:            "historicBaseline",
+						DeviationFactor: &deviationFactor,
+						Seasonality:     &seasonality,
+						Baseline:        &baseline,
+					},
+				},
+			},
+		},
+		AlertChannels: map[common.AlertSeverity][]string{},
+	}
+
+	state := &tfsdk.State{
+		Schema: getTestSchema(),
+	}
+
+	initializeEmptyState(ctx, t, state)
+
+	diags := resource.UpdateState(ctx, state, nil, data)
+	require.False(t, diags.HasError())
+
+	var model InfraAlertConfigModel
+	diags = state.Get(ctx, &model)
+	require.False(t, diags.HasError())
+
+	require.NotNil(t, model.Rules)
+	require.NotNil(t, model.Rules.GenericRule)
+	require.NotNil(t, model.Rules.GenericRule.ThresholdRule)
+	require.NotNil(t, model.Rules.GenericRule.ThresholdRule.Warning)
+	require.NotNil(t, model.Rules.GenericRule.ThresholdRule.Warning.HistoricBaseline)
+
+	historicModel := model.Rules.GenericRule.ThresholdRule.Warning.HistoricBaseline
+	assert.Equal(t, float64(1.5), historicModel.Deviation.ValueFloat64())
+	assert.Equal(t, "WEEKLY", historicModel.Seasonality.ValueString())
+	assert.False(t, historicModel.Baseline.IsNull())
+	assert.Equal(t, 2, len(historicModel.Baseline.Elements()))
+}
+
 func TestMapStateToDataObject_BasicConfig(t *testing.T) {
 	ctx := context.Background()
 	resource := NewInfraAlertConfigResourceHandle()
@@ -710,8 +777,8 @@ func TestMapStateToDataObject_WithRulesAndStaticThreshold(t *testing.T) {
 				ThresholdOperator:         types.StringValue(string(common.ThresholdOperatorGreaterThan)),
 				MetricGroupBy:             types.SetValueMust(types.StringType, []attr.Value{}),
 				MetricTagFilterExpression: types.StringNull(),
-				ThresholdRule: &shared.ThresholdPluginModel{
-					Warning: &shared.ThresholdTypeModel{
+				ThresholdRule: &shared.ThresholdAllPluginModel{
+					Warning: &shared.ThresholdAllTypeModel{
 						Static: &shared.StaticTypeModel{
 							Value: types.Float64Value(100),
 						},
@@ -765,8 +832,8 @@ func TestMapStateToDataObject_WithRulesAndAdaptiveBaselineThreshold(t *testing.T
 				ThresholdOperator:         types.StringValue(string(common.ThresholdOperatorGreaterThan)),
 				MetricGroupBy:             types.SetValueMust(types.StringType, []attr.Value{}),
 				MetricTagFilterExpression: types.StringNull(),
-				ThresholdRule: &shared.ThresholdPluginModel{
-					Critical: &shared.ThresholdTypeModel{
+				ThresholdRule: &shared.ThresholdAllPluginModel{
+					Critical: &shared.ThresholdAllTypeModel{
 						AdaptiveBaseline: &shared.AdaptiveBaselineModel{
 							DeviationFactor: types.Float64Value(2.0),
 							Adaptability:    types.Float64Value(0.5),
@@ -818,13 +885,13 @@ func TestMapStateToDataObject_WithBothThresholds(t *testing.T) {
 				ThresholdOperator:         types.StringValue(string(common.ThresholdOperatorGreaterThan)),
 				MetricGroupBy:             types.SetValueMust(types.StringType, []attr.Value{}),
 				MetricTagFilterExpression: types.StringNull(),
-				ThresholdRule: &shared.ThresholdPluginModel{
-					Warning: &shared.ThresholdTypeModel{
+				ThresholdRule: &shared.ThresholdAllPluginModel{
+					Warning: &shared.ThresholdAllTypeModel{
 						Static: &shared.StaticTypeModel{
 							Value: types.Float64Value(80),
 						},
 					},
-					Critical: &shared.ThresholdTypeModel{
+					Critical: &shared.ThresholdAllTypeModel{
 						Static: &shared.StaticTypeModel{
 							Value: types.Float64Value(95),
 						},
@@ -846,6 +913,66 @@ func TestMapStateToDataObject_WithBothThresholds(t *testing.T) {
 
 	assert.Equal(t, float64(80), *rule.Thresholds[common.WarningSeverity].Value)
 	assert.Equal(t, float64(95), *rule.Thresholds[common.CriticalSeverity].Value)
+}
+
+func TestMapStateToDataObject_WithRulesAndHistoricBaselineThreshold(t *testing.T) {
+	ctx := context.Background()
+	resource := NewInfraAlertConfigResourceHandle()
+
+	innerList1, listDiags1 := types.ListValue(types.Float64Type, []attr.Value{types.Float64Value(1000.0), types.Float64Value(50.0), types.Float64Value(5.0)})
+	require.False(t, listDiags1.HasError())
+	innerList2, listDiags2 := types.ListValue(types.Float64Type, []attr.Value{types.Float64Value(2000.0), types.Float64Value(60.0), types.Float64Value(6.0)})
+	require.False(t, listDiags2.HasError())
+	baselineList, listDiags3 := types.ListValue(types.ListType{ElemType: types.Float64Type}, []attr.Value{innerList1, innerList2})
+	require.False(t, listDiags3.HasError())
+
+	state := createMockState(t, InfraAlertConfigModel{
+		ID:             types.StringValue("test-id"),
+		Name:           types.StringValue("Test Infra Alert"),
+		Description:    types.StringValue("Test Description"),
+		Granularity:    types.Int64Value(600000),
+		EvaluationType: types.StringValue(string(api.EvaluationTypePerEntity)),
+		TagFilter:      types.StringNull(),
+		GroupBy:        types.SetNull(types.StringType),
+		Rules: &InfraRulesModel{
+			GenericRule: &InfraGenericRuleModel{
+				MetricName:                types.StringValue("memory.usage"),
+				EntityType:                types.StringValue("host"),
+				Aggregation:               types.StringValue(string(common.MeanAggregation)),
+				CrossSeriesAggregation:    types.StringValue(string(common.MaxAggregation)),
+				Regex:                     types.BoolValue(false),
+				ThresholdOperator:         types.StringValue(string(common.ThresholdOperatorGreaterThan)),
+				MetricGroupBy:             types.SetValueMust(types.StringType, []attr.Value{}),
+				MetricTagFilterExpression: types.StringNull(),
+				ThresholdRule: &shared.ThresholdAllPluginModel{
+					Warning: &shared.ThresholdAllTypeModel{
+						HistoricBaseline: &shared.HistoricBaselineModel{
+							Deviation:   types.Float64Value(1.5),
+							Seasonality: types.StringValue("WEEKLY"),
+							Baseline:    baselineList,
+						},
+					},
+				},
+			},
+		},
+		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
+	})
+
+	result, diags := resource.MapStateToDataObject(ctx, nil, &state)
+	require.False(t, diags.HasError())
+	require.NotNil(t, result)
+	require.Len(t, result.Rules, 1)
+
+	rule := result.Rules[0]
+	require.Contains(t, rule.Thresholds, common.WarningSeverity)
+	threshold := rule.Thresholds[common.WarningSeverity]
+	assert.Equal(t, "historicBaseline", threshold.Type)
+	require.NotNil(t, threshold.DeviationFactor)
+	assert.Equal(t, float32(1.5), *threshold.DeviationFactor)
+	require.NotNil(t, threshold.Seasonality)
+	assert.Equal(t, common.ThresholdSeasonality("WEEKLY"), *threshold.Seasonality)
+	require.NotNil(t, threshold.Baseline)
+	assert.Len(t, *threshold.Baseline, 2)
 }
 
 func TestMapStateToDataObject_WithEmptyTagFilter(t *testing.T) {
