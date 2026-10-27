@@ -1288,3 +1288,128 @@ func TestMapRuleToState(t *testing.T) {
 		assert.True(t, result.Value.IsNull())
 	})
 }
+
+// TestMapStateToDataObject_WithBetweenThreshold verifies that upper_bound and lower_bound are correctly
+// mapped to the API model when the BETWEEN range operator is used.
+func TestMapStateToDataObject_WithBetweenThreshold(t *testing.T) {
+	ctx := context.Background()
+	resource := &mobileAlertConfigResource{}
+
+	state := createMockState(t, MobileAlertConfigModel{
+		ID:          types.StringValue("test-id"),
+		Name:        types.StringValue("Test Mobile Alert"),
+		Description: types.StringValue("Test Description"),
+		MobileAppID: types.StringValue("mobile-app-123"),
+		Triggering:  types.BoolValue(false),
+		Granularity: types.Int64Value(600000),
+
+		TagFilter:           types.StringNull(),
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
+		GracePeriod:         types.Int64Null(),
+		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
+		Rules: []MobileRuleWithThresholdModel{
+			{
+				Rule: &MobileAlertRuleModel{
+					AlertType:   types.StringValue("httpError"),
+					MetricName:  types.StringValue("errors"),
+					Aggregation: types.StringNull(),
+					Operator:    types.StringNull(),
+					Value:       types.StringNull(),
+				},
+				ThresholdOperator: types.StringValue("BETWEEN"),
+				Thresholds: &shared.ThresholdAllPluginModel{
+					Warning: &shared.ThresholdAllTypeModel{
+						Static: &shared.StaticTypeModel{
+							UpperBound: types.Float64Value(200),
+							LowerBound: types.Float64Value(100),
+						},
+					},
+				},
+			},
+		},
+		TimeThreshold: &MobileAlertTimeThresholdModel{
+			ViolationsInSequence: &MobileViolationsInSequenceModel{
+				TimeWindow: types.Int64Value(600000),
+			},
+		},
+	})
+
+	result, diags := resource.MapStateToDataObject(ctx, nil, state)
+	require.False(t, diags.HasError())
+	require.NotNil(t, result)
+	require.Len(t, result.Rules, 1)
+	assert.Equal(t, "BETWEEN", result.Rules[0].ThresholdOperator)
+	require.Contains(t, result.Rules[0].Thresholds, common.WarningSeverity)
+	threshold := result.Rules[0].Thresholds[common.WarningSeverity]
+	assert.Equal(t, "staticThreshold", threshold.Type)
+	assert.Nil(t, threshold.Value)
+	require.NotNil(t, threshold.UpperBound)
+	assert.Equal(t, float64(200), *threshold.UpperBound)
+	require.NotNil(t, threshold.LowerBound)
+	assert.Equal(t, float64(100), *threshold.LowerBound)
+}
+
+// TestUpdateState_WithBetweenThreshold verifies that upper_bound and lower_bound are correctly
+// mapped from the API model back to Terraform state when a range threshold is returned by the API.
+func TestUpdateState_WithBetweenThreshold(t *testing.T) {
+	ctx := context.Background()
+	resource := &mobileAlertConfigResource{}
+
+	upperBound := float64(200)
+	lowerBound := float64(100)
+	operatorLogical := common.LogicalOperatorType("AND")
+	data := &api.MobileAlertConfig{
+		ID:          "test-id",
+		Name:        "Test Mobile Alert",
+		Description: "Test Description",
+		MobileAppID: "mobile-app-123",
+		Triggering:  false,
+		Granularity: 600000,
+		TagFilterExpression: &tag.TagFilter{
+			Type:            "EXPRESSION",
+			LogicalOperator: &operatorLogical,
+			Elements:        []*tag.TagFilter{},
+		},
+		TimeThreshold: &api.MobileAppTimeThreshold{
+			Type:       MobileAlertConfigTimeThresholdTypeViolationsInSequence,
+			TimeWindow: ptr(int64(600000)),
+		},
+		CustomPayloadFields: []common.CustomPayloadField[any]{},
+		Rules: []api.MobileAppAlertRuleWithThresholds{
+			{
+				Rule: &api.MobileAppAlertRule{
+					AlertType:  "httpError",
+					MetricName: "errors",
+				},
+				ThresholdOperator: "BETWEEN",
+				Thresholds: map[common.AlertSeverity]common.ThresholdRule{
+					common.WarningSeverity: {
+						Type:       "staticThreshold",
+						UpperBound: &upperBound,
+						LowerBound: &lowerBound,
+					},
+				},
+			},
+		},
+	}
+
+	state := &tfsdk.State{
+		Schema: getTestSchema(),
+	}
+
+	diags := resource.UpdateState(ctx, state, nil, data)
+	require.False(t, diags.HasError())
+
+	var model MobileAlertConfigModel
+	diags = state.Get(ctx, &model)
+	require.False(t, diags.HasError())
+
+	require.Len(t, model.Rules, 1)
+	assert.Equal(t, "BETWEEN", model.Rules[0].ThresholdOperator.ValueString())
+	require.NotNil(t, model.Rules[0].Thresholds)
+	require.NotNil(t, model.Rules[0].Thresholds.Warning)
+	require.NotNil(t, model.Rules[0].Thresholds.Warning.Static)
+	assert.True(t, model.Rules[0].Thresholds.Warning.Static.Value.IsNull())
+	assert.Equal(t, float64(200), model.Rules[0].Thresholds.Warning.Static.UpperBound.ValueFloat64())
+	assert.Equal(t, float64(100), model.Rules[0].Thresholds.Warning.Static.LowerBound.ValueFloat64())
+}

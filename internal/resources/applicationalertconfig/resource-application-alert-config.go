@@ -128,7 +128,7 @@ func NewApplicationAlertConfigResourceHandle() resourcehandle.ResourceHandle[*ap
 									Computed:    true,
 									Description: "The operator to apply for threshold comparison",
 									Validators: []validator.String{
-										stringvalidator.OneOf(">", ">=", "<", "<="),
+										stringvalidator.OneOf(">", ">=", "<", "<=", "OUTSIDE", "BETWEEN"),
 									},
 								},
 								ApplicationAlertConfigFieldThreshold: schema.SingleNestedAttribute{
