@@ -2411,3 +2411,119 @@ func getTestSchema() schema.Schema {
 	resource := NewApplicationAlertConfigResourceHandle()
 	return resource.MetaData().Schema
 }
+
+// TestMapStateToDataObject_WithBetweenThreshold verifies that upper_bound and lower_bound are correctly
+// mapped to the API model when the BETWEEN range operator is used.
+func TestMapStateToDataObject_WithBetweenThreshold(t *testing.T) {
+	ctx := context.Background()
+	resource := &applicationAlertConfigResourceImpl{}
+
+	state := createMockState(t, ApplicationAlertConfigModel{
+		ID:               types.StringValue("test-id"),
+		Name:             types.StringValue("Test Alert"),
+		Description:      types.StringValue("Test Description"),
+		BoundaryScope:    types.StringValue("ALL"),
+		EvaluationType:   types.StringValue("PER_AP"),
+		Granularity:      types.Int64Value(int64(600000)),
+		IncludeInternal:  types.BoolValue(false),
+		IncludeSynthetic: types.BoolValue(false),
+		Triggering:       types.BoolValue(false),
+
+		AlertChannels:       types.MapNull(types.SetType{ElemType: types.StringType}),
+		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
+		Applications:        []ApplicationModel{},
+		Rules: []RuleWithThresholdModel{
+			{
+				Rule: &RuleModel{
+					ErrorRate: &RuleConfigModel{
+						MetricName:  types.StringValue("errors"),
+						Aggregation: types.StringValue("sum"),
+					},
+				},
+				ThresholdOperator: types.StringValue("BETWEEN"),
+				Thresholds: &ApplicationThresholdModel{
+					Warning: &ThresholdLevelModel{
+						Static: &shared.StaticTypeModel{
+							UpperBound: types.Float64Value(200),
+							LowerBound: types.Float64Value(100),
+						},
+					},
+				},
+			},
+		},
+	})
+
+	result, diags := resource.MapStateToDataObject(ctx, state)
+	require.False(t, diags.HasError())
+	require.NotNil(t, result)
+	require.Len(t, result.Rules, 1)
+	assert.Equal(t, "BETWEEN", result.Rules[0].ThresholdOperator)
+	require.Contains(t, result.Rules[0].Thresholds, common.WarningSeverity)
+	threshold := result.Rules[0].Thresholds[common.WarningSeverity]
+	assert.Equal(t, "staticThreshold", threshold.Type)
+	assert.Nil(t, threshold.Value)
+	require.NotNil(t, threshold.UpperBound)
+	assert.Equal(t, float64(200), *threshold.UpperBound)
+	require.NotNil(t, threshold.LowerBound)
+	assert.Equal(t, float64(100), *threshold.LowerBound)
+}
+
+// TestUpdateState_WithBetweenThreshold verifies that upper_bound and lower_bound are correctly
+// mapped from the API model back to Terraform state when a range threshold is returned by the API.
+func TestUpdateState_WithBetweenThreshold(t *testing.T) {
+	ctx := context.Background()
+	resource := &applicationAlertConfigResourceImpl{}
+
+	upperBound := float64(200)
+	lowerBound := float64(100)
+	data := &api.ApplicationAlertConfig{
+		ID:               "test-id",
+		Name:             "Test Alert",
+		Description:      "Test Description",
+		BoundaryScope:    "ALL",
+		EvaluationType:   "PER_AP",
+		Granularity:      600000,
+		IncludeInternal:  false,
+		IncludeSynthetic: false,
+		Triggering:       false,
+		AlertChannelIDs:  []string{},
+		Applications:     map[string]api.IncludedApplication{},
+		Rules: []api.ApplicationAlertRuleWithThresholds{
+			{
+				Rule: &api.ApplicationAlertRule{
+					AlertType:   ApplicationAlertConfigFieldRuleErrorRate,
+					MetricName:  "errors",
+					Aggregation: "sum",
+				},
+				ThresholdOperator: "BETWEEN",
+				Thresholds: map[common.AlertSeverity]common.ThresholdRule{
+					common.WarningSeverity: {
+						Type:       "staticThreshold",
+						UpperBound: &upperBound,
+						LowerBound: &lowerBound,
+					},
+				},
+			},
+		},
+	}
+
+	state := &tfsdk.State{
+		Schema: getTestSchema(),
+	}
+
+	diags := resource.UpdateState(ctx, state, nil, data)
+	require.False(t, diags.HasError())
+
+	var model ApplicationAlertConfigModel
+	diags = state.Get(ctx, &model)
+	require.False(t, diags.HasError())
+
+	require.Len(t, model.Rules, 1)
+	assert.Equal(t, "BETWEEN", model.Rules[0].ThresholdOperator.ValueString())
+	require.NotNil(t, model.Rules[0].Thresholds)
+	require.NotNil(t, model.Rules[0].Thresholds.Warning)
+	require.NotNil(t, model.Rules[0].Thresholds.Warning.Static)
+	assert.True(t, model.Rules[0].Thresholds.Warning.Static.Value.IsNull())
+	assert.Equal(t, float64(200), model.Rules[0].Thresholds.Warning.Static.UpperBound.ValueFloat64())
+	assert.Equal(t, float64(100), model.Rules[0].Thresholds.Warning.Static.LowerBound.ValueFloat64())
+}

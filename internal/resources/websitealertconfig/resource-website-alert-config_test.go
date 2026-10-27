@@ -1330,3 +1330,141 @@ func TestUpdateState_EnabledField(t *testing.T) {
 		})
 	}
 }
+
+// TestMapStateToDataObject_WithBetweenThreshold verifies that upper_bound and lower_bound are correctly
+// mapped to the API model when the BETWEEN range operator is used.
+func TestMapStateToDataObject_WithBetweenThreshold(t *testing.T) {
+	resource := &websiteAlertConfigResource{
+		metaData: resourcehandle.ResourceMetaData{
+			ResourceName:  ResourceInstanaWebsiteAlertConfig,
+			Schema:        NewWebsiteAlertConfigResourceHandle().MetaData().Schema,
+			SchemaVersion: 1,
+		},
+	}
+	ctx := context.Background()
+
+	model := WebsiteAlertConfigModel{
+		ID:          types.StringValue("test-id"),
+		Name:        types.StringValue("Test Alert"),
+		Description: types.StringValue("Test Description"),
+		Triggering:  types.BoolValue(false),
+		WebsiteID:   types.StringValue("website-1"),
+		TagFilter:   types.StringNull(),
+		Granularity: types.Int64Value(600000),
+		Rules: []RuleWithThresholdPluginModel{
+			{
+				Rule: &WebsiteAlertRuleModel{
+					Slowness: &WebsiteAlertRuleConfigModel{
+						MetricName:  types.StringValue("latency"),
+						Aggregation: types.StringValue("MEAN"),
+					},
+				},
+				ThresholdOperator: types.StringValue("BETWEEN"),
+				Thresholds: &shared.ThresholdAllPluginModel{
+					Warning: &shared.ThresholdAllTypeModel{
+						Static: &shared.StaticTypeModel{
+							UpperBound: types.Float64Value(200),
+							LowerBound: types.Float64Value(100),
+						},
+					},
+				},
+			},
+		},
+		TimeThreshold: &WebsiteTimeThresholdModel{
+			ViolationsInSequence: &WebsiteViolationsInSequenceModel{
+				TimeWindow: types.Int64Value(300000),
+			},
+		},
+	}
+	alertChannelIds, _ := types.SetValueFrom(ctx, types.StringType, []string{})
+	model.AlertChannelIDs = alertChannelIds
+	model.CustomPayloadFields = types.ListNull(shared.GetCustomPayloadFieldType())
+
+	state := &tfsdk.State{Schema: resource.metaData.Schema}
+	diags := state.Set(ctx, model)
+	require.False(t, diags.HasError())
+
+	result, resultDiags := resource.MapStateToDataObject(ctx, nil, state)
+	require.False(t, resultDiags.HasError())
+	require.NotNil(t, result)
+	require.Len(t, result.Rules, 1)
+	assert.Equal(t, "BETWEEN", result.Rules[0].ThresholdOperator)
+	require.Contains(t, result.Rules[0].Thresholds, common.WarningSeverity)
+	threshold := result.Rules[0].Thresholds[common.WarningSeverity]
+	assert.Equal(t, "staticThreshold", threshold.Type)
+	assert.Nil(t, threshold.Value)
+	require.NotNil(t, threshold.UpperBound)
+	assert.Equal(t, float64(200), *threshold.UpperBound)
+	require.NotNil(t, threshold.LowerBound)
+	assert.Equal(t, float64(100), *threshold.LowerBound)
+}
+
+// TestUpdateState_WithBetweenThreshold verifies that upper_bound and lower_bound are correctly
+// mapped from the API model back to Terraform state when a range threshold is returned by the API.
+func TestUpdateState_WithBetweenThreshold(t *testing.T) {
+	resource := &websiteAlertConfigResource{
+		metaData: resourcehandle.ResourceMetaData{
+			ResourceName:  ResourceInstanaWebsiteAlertConfig,
+			Schema:        NewWebsiteAlertConfigResourceHandle().MetaData().Schema,
+			SchemaVersion: 1,
+		},
+	}
+	ctx := context.Background()
+
+	severity := 5
+	aggregation := common.Aggregation("MEAN")
+	upperBound := float64(200)
+	lowerBound := float64(100)
+	apiObject := &api.WebsiteAlertConfig{
+		ID:                    "test-id",
+		Name:                  "Test Alert",
+		Description:           "Test Description",
+		Severity:              &severity,
+		Triggering:            false,
+		WebsiteID:             "website-1",
+		TagFilterExpression:   nil,
+		AlertChannelIDs:       []string{},
+		Granularity:           600000,
+		CustomerPayloadFields: []common.CustomPayloadField[any]{},
+		TimeThreshold: api.WebsiteTimeThreshold{
+			Type:       "violationsInSequence",
+			TimeWindow: func() *int64 { v := int64(300000); return &v }(),
+		},
+		Rules: []api.WebsiteAlertRuleWithThresholds{
+			{
+				Rule: &api.WebsiteAlertRule{
+					AlertType:   "slowness",
+					MetricName:  "latency",
+					Aggregation: &aggregation,
+				},
+				ThresholdOperator: "BETWEEN",
+				Thresholds: map[common.AlertSeverity]common.ThresholdRule{
+					common.WarningSeverity: {
+						Type:       "staticThreshold",
+						UpperBound: &upperBound,
+						LowerBound: &lowerBound,
+					},
+				},
+			},
+		},
+	}
+
+	state := &tfsdk.State{Schema: resource.metaData.Schema}
+	initializeEmptyState(t, ctx, state)
+
+	diags := resource.UpdateState(ctx, state, nil, apiObject)
+	require.False(t, diags.HasError())
+
+	var model WebsiteAlertConfigModel
+	diags = state.Get(ctx, &model)
+	require.False(t, diags.HasError())
+
+	require.Len(t, model.Rules, 1)
+	assert.Equal(t, "BETWEEN", model.Rules[0].ThresholdOperator.ValueString())
+	require.NotNil(t, model.Rules[0].Thresholds)
+	require.NotNil(t, model.Rules[0].Thresholds.Warning)
+	require.NotNil(t, model.Rules[0].Thresholds.Warning.Static)
+	assert.True(t, model.Rules[0].Thresholds.Warning.Static.Value.IsNull())
+	assert.Equal(t, float64(200), model.Rules[0].Thresholds.Warning.Static.UpperBound.ValueFloat64())
+	assert.Equal(t, float64(100), model.Rules[0].Thresholds.Warning.Static.LowerBound.ValueFloat64())
+}
