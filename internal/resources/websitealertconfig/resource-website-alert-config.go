@@ -204,7 +204,7 @@ func NewWebsiteAlertConfigResourceHandle() resourcehandle.ResourceHandle[*api.We
 									Computed:    true,
 									Description: "The operator to apply for threshold comparison",
 									Validators: []validator.String{
-										stringvalidator.OneOf(">", ">=", "<", "<="),
+										stringvalidator.OneOf(">", ">=", "<", "<=", "OUTSIDE", "BETWEEN"),
 									},
 								},
 								WebsiteAlertConfigFieldThreshold: schema.SingleNestedAttribute{

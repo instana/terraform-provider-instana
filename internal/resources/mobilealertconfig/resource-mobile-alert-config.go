@@ -159,7 +159,7 @@ func NewMobileAlertConfigResourceHandle() resourcehandle.ResourceHandle[*api.Mob
 									Computed:    true,
 									Description: MobileAlertConfigDescThresholdOperator,
 									Validators: []validator.String{
-										stringvalidator.OneOf(">", ">=", "<", "<="),
+										stringvalidator.OneOf(">", ">=", "<", "<=", "OUTSIDE", "BETWEEN"),
 									},
 								},
 								MobileAlertConfigFieldThreshold: schema.SingleNestedAttribute{
