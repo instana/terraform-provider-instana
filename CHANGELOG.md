@@ -1,3 +1,28 @@
+## [v7.9.3](https://github.com/instana/terraform-provider-instana/tree/v7.9.3) (2026-10-27)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.9.2...v7.9.3)
+
+**Implemented enhancements:**
+
+- Added `metric_group_by` and `metric_tag_filter_expression` fields to the generic rule of the `instana_infra_alert_config` resource, and added `BETWEEN` and `OUTSIDE` threshold operators with `lower_bound` and `upper_bound` static thresholds
+- Added `BETWEEN` and `OUTSIDE` range threshold operator support to the `instana_application_alert_config`, `instana_website_alert_config` and `instana_mobile_alert_config` resources
+- Added `include_on_demand`, `evaluation_type` and `affected_locations_count` fields to the `instana_synthetic_alert_config` resource to support multi-location evaluation
+- Added `logging_perspectives` and `apdex_ids` scope fields to the `instana_rbac_team` resource and data source
+- Bumped `instana-go-client` dependency from `v1.6.2` to `v1.6.4`
+- Updated documentation for `instana_infra_alert_config` (range thresholds, metric grouping and metric tag filter examples), `instana_synthetic_alert_config` (multi-location evaluation example) and `instana_rbac_team` (new scope fields)
+
+**Fixed bugs:**
+
+- `instana_custom_event_specification` and `instana_infra_alert_config`: relaxed required fields; `evaluation_type` in `instana_infra_alert_config` is now optional and defaults to `CUSTOM`
+
+**Merged pull requests:**
+
+- Relax required fields in custom event spec and infra alert config [\#147](https://github.com/instana/terraform-provider-instana/pull/147) ([georgekutty-1](https://github.com/georgekutty-1))
+- feat(infra_alert_config): add metric grouping, metric tag filters, and BETWEEN/OUTSIDE range thresholds [\#148](https://github.com/instana/terraform-provider-instana/pull/148) ([BlessyElza](https://github.com/BlessyElza))
+- feat(rbac_team): add logging_perspectives and apdex_ids scope fields [\#149](https://github.com/instana/terraform-provider-instana/pull/149) ([BlessyElza](https://github.com/BlessyElza))
+- added IncludeOnDemand, EvaluationType, AffectedLocationsCount fields [\#150](https://github.com/instana/terraform-provider-instana/pull/150) ([BlessyElza](https://github.com/BlessyElza))
+- fix: Add BETWEEN/OUTSIDE range operator support to application, website and mobile alert configs [\#152](https://github.com/instana/terraform-provider-instana/pull/152) ([BlessyElza](https://github.com/BlessyElza))
+
 ## [v7.9.2](https://github.com/instana/terraform-provider-instana/tree/v7.9.2) (2026-10-16)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.9.1...v7.9.2)
