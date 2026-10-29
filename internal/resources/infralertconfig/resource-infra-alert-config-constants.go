@@ -65,6 +65,8 @@ const (
 	InfraAlertConfigFieldMetricGroupBy = "metric_group_by"
 	// InfraAlertConfigFieldMetricTagFilter constant value for metric_tag_filter_expression
 	InfraAlertConfigFieldMetricTagFilter = "metric_tag_filter_expression"
+	// InfraAlertConfigFieldRuleLogicalOperator constant value for rule_logical_operator
+	InfraAlertConfigFieldRuleLogicalOperator = "rule_logical_operator"
 )
 
 // Resource description constants
@@ -104,13 +106,15 @@ const (
 	// InfraAlertConfigDescRegex description for the regex field
 	InfraAlertConfigDescRegex = "Whether regex is enabled for the generic rule"
 	// InfraAlertConfigDescThresholdOperator description for the threshold_operator field
-	InfraAlertConfigDescThresholdOperator = "The threshold operator for the generic rule"
+	InfraAlertConfigDescThresholdOperator = "The operator to apply for threshold comparison. Supported values: >, >=, <, <=, OUTSIDE (static+adaptive), BETWEEN (static only)."
 	// InfraAlertConfigDescThreshold description for the threshold field
 	InfraAlertConfigDescThreshold = "Threshold configuration for different severity levels"
 	// InfraAlertConfigDescMetricGroupBy description for the metric_group_by field
 	InfraAlertConfigDescMetricGroupBy = "Optional list of metric tags to group the metric by within the rule"
 	// InfraAlertConfigDescMetricTagFilter description for the metric_tag_filter_expression field
 	InfraAlertConfigDescMetricTagFilter = "The metric-scoped tag filter expression for the generic rule"
+	// InfraAlertConfigDescRuleLogicalOperator description for the rule_logical_operator field
+	InfraAlertConfigDescRuleLogicalOperator = "Logical operator used to combine multiple rules. Supported values: AND, OR. Defaults to AND."
 	// InfraAlertConfigDescTimeThreshold description for the time_threshold field
 	InfraAlertConfigDescTimeThreshold = "Indicates the type of violation of the defined threshold."
 	// InfraAlertConfigDescViolationsInSequence description for the violations_in_sequence field
@@ -143,4 +147,10 @@ const (
 	GenericRuleAlertType = "genericRule"
 	// EmptyString represents an empty string value
 	EmptyString = ""
+	// RuleLogicalOperatorAND represents the AND logical operator
+	RuleLogicalOperatorAND = "AND"
+	// RuleLogicalOperatorOR represents the OR logical operator
+	RuleLogicalOperatorOR = "OR"
+	// MaxRulesCount maximum number of rules allowed
+	MaxRulesCount = 5
 )
