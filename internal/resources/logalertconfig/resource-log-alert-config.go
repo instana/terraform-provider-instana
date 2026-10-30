@@ -509,21 +509,30 @@ func (r *logAlertConfigResource) createThresholdModel(threshold common.Threshold
 		}
 	}
 
-	// Default to static threshold
-	if threshold.Value == nil {
+	// Default to static threshold. Point-value operators carry value; range operators
+	// (BETWEEN / OUTSIDE) carry upper_bound + lower_bound and a nil value.
+	if threshold.Value == nil && threshold.UpperBound == nil && threshold.LowerBound == nil {
 		return nil
 	}
-	// Round to 2 decimal places to avoid floating-point precision issues
-	var roundedValue types.Float64
-	formatted := strconv.FormatFloat(*threshold.Value, 'f', 2, 64)
-	parsed, _ := strconv.ParseFloat(formatted, 64)
-	roundedValue = types.Float64Value(parsed)
 
 	return &shared.ThresholdTypeModel{
 		Static: &shared.StaticTypeModel{
-			Value: roundedValue,
+			Value:      roundFloat64Ptr(threshold.Value),
+			UpperBound: roundFloat64Ptr(threshold.UpperBound),
+			LowerBound: roundFloat64Ptr(threshold.LowerBound),
 		},
 	}
+}
+
+// roundFloat64Ptr converts a *float64 to types.Float64 rounded to 2 decimal places to avoid
+// floating-point precision issues. Returns null when the pointer is nil.
+func roundFloat64Ptr(v *float64) types.Float64 {
+	if v == nil {
+		return types.Float64Null()
+	}
+	formatted := strconv.FormatFloat(*v, 'f', 2, 64)
+	parsed, _ := strconv.ParseFloat(formatted, 64)
+	return types.Float64Value(parsed)
 }
 
 // MapStateToDataObject maps Terraform state/plan to API LogAlertConfig object
@@ -795,13 +804,27 @@ func (r *logAlertConfigResource) convertThresholdModelToAPI(threshold *shared.Th
 	}
 
 	// Handle static threshold
-	if threshold.Static != nil && !threshold.Static.Value.IsNull() {
-		valueFloat := threshold.Static.Value.ValueFloat64()
-		rounded := math.Round(valueFloat*100) / 100
-		return &common.ThresholdRule{
-			Type:  ThresholdTypeStatic,
-			Value: &rounded,
-		}, diags
+	if threshold.Static != nil {
+		static := threshold.Static
+
+		// Range operators (BETWEEN / OUTSIDE): upper_bound + lower_bound, value stays nil
+		if !static.UpperBound.IsNull() && !static.UpperBound.IsUnknown() {
+			upperBound := math.Round(static.UpperBound.ValueFloat64()*100) / 100
+			lowerBound := math.Round(static.LowerBound.ValueFloat64()*100) / 100
+			return &common.ThresholdRule{
+				Type:       ThresholdTypeStatic,
+				UpperBound: &upperBound,
+				LowerBound: &lowerBound,
+			}, diags
+		}
+
+		if !static.Value.IsNull() {
+			rounded := math.Round(static.Value.ValueFloat64()*100) / 100
+			return &common.ThresholdRule{
+				Type:  ThresholdTypeStatic,
+				Value: &rounded,
+			}, diags
+		}
 	}
 
 	// Handle adaptive baseline threshold
