@@ -381,6 +381,162 @@ func TestUpdateState_WithRulesAndThresholds(t *testing.T) {
 	require.NotNil(t, model.Rules.Threshold.Critical.Static)
 	assert.Equal(t, float64(200), model.Rules.Threshold.Critical.Static.Value.ValueFloat64())
 }
+func TestUpdateState_WithRangeThresholds(t *testing.T) {
+	float := func(v float64) *float64 { return &v }
+
+	tests := []struct {
+		name         string
+		operator     string
+		thresholds   map[common.AlertSeverity]common.ThresholdRule
+		wantWarning  [2]float64 // lower, upper
+		wantCritical *[2]float64
+	}{
+		{
+			name:     "OUTSIDE with warning and critical",
+			operator: "OUTSIDE",
+			thresholds: map[common.AlertSeverity]common.ThresholdRule{
+				common.WarningSeverity:  {Type: "staticThreshold", UpperBound: float(200), LowerBound: float(100)},
+				common.CriticalSeverity: {Type: "staticThreshold", UpperBound: float(201), LowerBound: float(99)},
+			},
+			wantWarning:  [2]float64{100, 200},
+			wantCritical: &[2]float64{99, 201},
+		},
+		{
+			name:     "BETWEEN with warning only",
+			operator: "BETWEEN",
+			thresholds: map[common.AlertSeverity]common.ThresholdRule{
+				common.WarningSeverity: {Type: "staticThreshold", UpperBound: float(300), LowerBound: float(100)},
+			},
+			wantWarning: [2]float64{100, 300},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := context.Background()
+			resource := NewLogAlertConfigResourceHandle()
+
+			data := &api.LogAlertConfig{
+				ID:          "test-id",
+				Name:        "Test Log Alert",
+				Description: "Test Description",
+				Granularity: 600000,
+				Rules: []common.RuleWithThreshold[api.LogAlertRule]{
+					{
+						Rule: api.LogAlertRule{
+							AlertType:   "logCount",
+							MetricName:  "logCount",
+							Aggregation: common.SumAggregation,
+						},
+						ThresholdOperator: common.ThresholdOperator(tt.operator),
+						Thresholds:        tt.thresholds,
+					},
+				},
+				AlertChannels: map[common.AlertSeverity][]string{},
+			}
+
+			state := &tfsdk.State{Schema: getTestSchema()}
+			initializeEmptyState(ctx, state)
+
+			diags := resource.UpdateState(ctx, state, nil, data)
+			require.False(t, diags.HasError(), "diags: %v", diags)
+
+			var model LogAlertConfigModel
+			diags = state.Get(ctx, &model)
+			require.False(t, diags.HasError(), "diags: %v", diags)
+
+			require.NotNil(t, model.Rules)
+			assert.Equal(t, tt.operator, model.Rules.ThresholdOperator.ValueString())
+			require.NotNil(t, model.Rules.Threshold)
+
+			require.NotNil(t, model.Rules.Threshold.Warning)
+			require.NotNil(t, model.Rules.Threshold.Warning.Static)
+			warning := model.Rules.Threshold.Warning.Static
+			assert.True(t, warning.Value.IsNull())
+			assert.Equal(t, tt.wantWarning[0], warning.LowerBound.ValueFloat64())
+			assert.Equal(t, tt.wantWarning[1], warning.UpperBound.ValueFloat64())
+
+			if tt.wantCritical == nil {
+				assert.Nil(t, model.Rules.Threshold.Critical)
+				return
+			}
+			require.NotNil(t, model.Rules.Threshold.Critical)
+			require.NotNil(t, model.Rules.Threshold.Critical.Static)
+			critical := model.Rules.Threshold.Critical.Static
+			assert.True(t, critical.Value.IsNull())
+			assert.Equal(t, tt.wantCritical[0], critical.LowerBound.ValueFloat64())
+			assert.Equal(t, tt.wantCritical[1], critical.UpperBound.ValueFloat64())
+		})
+	}
+}
+
+func TestMapStateToDataObject_WithRangeThresholds(t *testing.T) {
+	ctx := context.Background()
+	resource := NewLogAlertConfigResourceHandle()
+
+	state := createMockState(t, LogAlertConfigModel{
+		ID:          types.StringValue("test-id"),
+		Name:        types.StringValue("Test Log Alert"),
+		Description: types.StringValue("Test Description"),
+		Granularity: types.Int64Value(600000),
+		TagFilter:   types.StringValue("entity.type EQUALS 'log'"),
+		Rules: &LogAlertRuleModel{
+			MetricName:        types.StringValue("logCount"),
+			AlertType:         types.StringValue(LogAlertTypeLogCount),
+			Aggregation:       types.StringValue(string(common.SumAggregation)),
+			ThresholdOperator: types.StringValue("OUTSIDE"),
+			Threshold: &ThresholdModel{
+				Warning: &shared.ThresholdTypeModel{
+					Static: &shared.StaticTypeModel{
+						Value:      types.Float64Null(),
+						UpperBound: types.Float64Value(200),
+						LowerBound: types.Float64Value(100),
+					},
+				},
+				Critical: &shared.ThresholdTypeModel{
+					Static: &shared.StaticTypeModel{
+						Value:      types.Float64Null(),
+						UpperBound: types.Float64Value(201),
+						LowerBound: types.Float64Value(99),
+					},
+				},
+			},
+		},
+		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
+	})
+
+	result, diags := resource.MapStateToDataObject(ctx, nil, &state)
+	require.False(t, diags.HasError(), "diags: %v", diags)
+	require.NotNil(t, result)
+	require.Len(t, result.Rules, 1)
+
+	rule := result.Rules[0]
+	assert.Equal(t, common.ThresholdOperator("OUTSIDE"), rule.ThresholdOperator)
+
+	require.Contains(t, rule.Thresholds, common.WarningSeverity)
+	warning := rule.Thresholds[common.WarningSeverity]
+	assert.Equal(t, "staticThreshold", warning.Type)
+	assert.Nil(t, warning.Value)
+	require.NotNil(t, warning.UpperBound)
+	require.NotNil(t, warning.LowerBound)
+	assert.Equal(t, float64(200), *warning.UpperBound)
+	assert.Equal(t, float64(100), *warning.LowerBound)
+
+	require.Contains(t, rule.Thresholds, common.CriticalSeverity)
+	critical := rule.Thresholds[common.CriticalSeverity]
+	assert.Nil(t, critical.Value)
+	require.NotNil(t, critical.UpperBound)
+	require.NotNil(t, critical.LowerBound)
+	assert.Equal(t, float64(201), *critical.UpperBound)
+	assert.Equal(t, float64(99), *critical.LowerBound)
+}
+
+func TestCreateThresholdModel_NoValueOrBounds(t *testing.T) {
+	resource := &logAlertConfigResource{}
+
+	result := resource.createThresholdModel(common.ThresholdRule{Type: "staticThreshold"})
+	assert.Nil(t, result)
+}
 
 func TestUpdateState_WithCustomPayloadFields(t *testing.T) {
 	ctx := context.Background()
