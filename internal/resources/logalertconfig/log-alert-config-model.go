@@ -15,7 +15,7 @@ type LogAlertConfigModel struct {
 	GroupBy             []GroupByModel      `tfsdk:"group_by"`
 	Granularity         types.Int64         `tfsdk:"granularity"`
 	TagFilter           types.String        `tfsdk:"tag_filter"`
-	Rules               *LogAlertRuleModel  `tfsdk:"rules"`
+	Rules               []LogAlertRuleModel `tfsdk:"rules"`
 	TimeThreshold       *TimeThresholdModel `tfsdk:"time_threshold"`
 	CustomPayloadFields types.List          `tfsdk:"custom_payload_field"`
 }

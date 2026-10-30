@@ -37,7 +37,7 @@ func NewLogAlertConfigResourceHandle() resourcehandle.ResourceHandle[*api.LogAle
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:  ResourceInstanaLogAlertConfig,
 			Schema:        buildLogAlertConfigSchema(),
-			SchemaVersion: 1,
+			SchemaVersion: 2,
 		},
 	}
 }
@@ -152,49 +152,59 @@ func buildGroupBySchema() schema.ListNestedAttribute {
 	}
 }
 
+// buildRuleAttributes constructs the attributes of a single rule
+func buildRuleAttributes() map[string]schema.Attribute {
+	return map[string]schema.Attribute{
+		LogAlertConfigFieldMetricName: schema.StringAttribute{
+			Required:    true,
+			Description: LogAlertConfigDescMetricName,
+		},
+		LogAlertConfigFieldAlertType: schema.StringAttribute{
+			Optional:    true,
+			Computed:    true,
+			Default:     stringdefault.StaticString(LogAlertTypeLogCount),
+			Description: LogAlertConfigDescAlertType,
+			Validators: []validator.String{
+				stringvalidator.OneOf(LogAlertTypeLogCount),
+			},
+		},
+		LogAlertConfigFieldAggregation: schema.StringAttribute{
+			Optional:    true,
+			Computed:    true,
+			Description: LogAlertConfigDescAggregation,
+			Validators: []validator.String{
+				stringvalidator.OneOf(string(common.SumAggregation)),
+			},
+		},
+		LogAlertConfigFieldThresholdOperator: schema.StringAttribute{
+			Optional:    true,
+			Computed:    true,
+			Description: "The operator to apply for threshold comparison. Supported values: >, >=, <, <=, OUTSIDE (static+adaptive), BETWEEN (static only).",
+			Validators: []validator.String{
+				stringvalidator.OneOf(">", ">=", "<", "<=", "OUTSIDE", "BETWEEN"),
+			},
+		},
+		LogAlertConfigFieldThreshold: schema.SingleNestedAttribute{
+			Description: LogAlertConfigDescThreshold,
+			Optional:    true,
+			Attributes: map[string]schema.Attribute{
+				LogAlertConfigFieldWarning:  shared.StaticAndAdaptiveThresholdAttributeSchema(),
+				LogAlertConfigFieldCritical: shared.StaticAndAdaptiveThresholdAttributeSchema(),
+			},
+		},
+	}
+}
+
 // buildRulesSchema constructs the schema for rules configuration
-func buildRulesSchema() schema.SingleNestedAttribute {
-	return schema.SingleNestedAttribute{
+func buildRulesSchema() schema.ListNestedAttribute {
+	return schema.ListNestedAttribute{
 		Description: LogAlertConfigDescRules,
-		Optional:    true,
-		Attributes: map[string]schema.Attribute{
-			LogAlertConfigFieldMetricName: schema.StringAttribute{
-				Required:    true,
-				Description: LogAlertConfigDescMetricName,
-			},
-			LogAlertConfigFieldAlertType: schema.StringAttribute{
-				Optional:    true,
-				Computed:    true,
-				Default:     stringdefault.StaticString(LogAlertTypeLogCount),
-				Description: LogAlertConfigDescAlertType,
-				Validators: []validator.String{
-					stringvalidator.OneOf(LogAlertTypeLogCount),
-				},
-			},
-			LogAlertConfigFieldAggregation: schema.StringAttribute{
-				Optional:    true,
-				Computed:    true,
-				Description: LogAlertConfigDescAggregation,
-				Validators: []validator.String{
-					stringvalidator.OneOf(string(common.SumAggregation)),
-				},
-			},
-			LogAlertConfigFieldThresholdOperator: schema.StringAttribute{
-				Optional:    true,
-				Computed:    true,
-				Description: "The operator to apply for threshold comparison. Supported values: >, >=, <, <=, OUTSIDE (static+adaptive), BETWEEN (static only).",
-				Validators: []validator.String{
-					stringvalidator.OneOf(">", ">=", "<", "<=", "OUTSIDE", "BETWEEN"),
-				},
-			},
-			LogAlertConfigFieldThreshold: schema.SingleNestedAttribute{
-				Description: LogAlertConfigDescThreshold,
-				Optional:    true,
-				Attributes: map[string]schema.Attribute{
-					LogAlertConfigFieldWarning:  shared.StaticAndAdaptiveThresholdAttributeSchema(),
-					LogAlertConfigFieldCritical: shared.StaticAndAdaptiveThresholdAttributeSchema(),
-				},
-			},
+		Required:    true,
+		Validators: []validator.List{
+			listvalidator.SizeAtLeast(1),
+		},
+		NestedObject: schema.NestedAttributeObject{
+			Attributes: buildRuleAttributes(),
 		},
 	}
 }
@@ -443,26 +453,27 @@ func (r *logAlertConfigResource) mapTimeThresholdToModel(apiTimeThreshold *api.L
 	}
 }
 
-// mapRulesToModel converts API rules to model representation
-func (r *logAlertConfigResource) mapRulesToModel(rules []common.RuleWithThreshold[api.LogAlertRule]) (*LogAlertRuleModel, diag.Diagnostics) {
+// mapRulesToModel converts API rules to model representation, preserving the API order
+func (r *logAlertConfigResource) mapRulesToModel(rules []common.RuleWithThreshold[api.LogAlertRule]) ([]LogAlertRuleModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	if len(rules) == 0 {
 		return nil, diags
 	}
 
-	ruleWithThreshold := rules[0]
-	rule := ruleWithThreshold.Rule
-
-	ruleModel := &LogAlertRuleModel{
-		MetricName:        types.StringValue(rule.MetricName),
-		AlertType:         types.StringValue(r.convertAlertTypeToSchema(rule.AlertType)),
-		Aggregation:       r.mapAggregationToModel(rule.Aggregation),
-		ThresholdOperator: types.StringValue(string(ruleWithThreshold.ThresholdOperator)),
-		Threshold:         r.mapThresholdsToModel(ruleWithThreshold.Thresholds),
+	result := make([]LogAlertRuleModel, len(rules))
+	for i, ruleWithThreshold := range rules {
+		rule := ruleWithThreshold.Rule
+		result[i] = LogAlertRuleModel{
+			MetricName:        types.StringValue(rule.MetricName),
+			AlertType:         types.StringValue(r.convertAlertTypeToSchema(rule.AlertType)),
+			Aggregation:       r.mapAggregationToModel(rule.Aggregation),
+			ThresholdOperator: types.StringValue(string(ruleWithThreshold.ThresholdOperator)),
+			Threshold:         r.mapThresholdsToModel(ruleWithThreshold.Thresholds),
+		}
 	}
 
-	return ruleModel, diags
+	return result, diags
 }
 
 // convertAlertTypeToSchema converts API alert type to schema format
@@ -723,29 +734,26 @@ func (r *logAlertConfigResource) mapModelTimeThresholdToAPI(timeThresholdModel *
 }
 
 // mapModelRulesToAPI converts model rules to API representation
-func (r *logAlertConfigResource) mapModelRulesToAPI(ruleModel *LogAlertRuleModel) ([]common.RuleWithThreshold[api.LogAlertRule], diag.Diagnostics) {
+func (r *logAlertConfigResource) mapModelRulesToAPI(ruleModels []LogAlertRuleModel) ([]common.RuleWithThreshold[api.LogAlertRule], diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	if ruleModel == nil {
-		return []common.RuleWithThreshold[api.LogAlertRule]{}, diags
-	}
+	result := make([]common.RuleWithThreshold[api.LogAlertRule], 0, len(ruleModels))
+	for _, ruleModel := range ruleModels {
+		logAlertRule := api.LogAlertRule{
+			MetricName:  ruleModel.MetricName.ValueString(),
+			AlertType:   r.convertAlertTypeToAPI(ruleModel.AlertType.ValueString()),
+			Aggregation: r.extractAggregation(ruleModel.Aggregation),
+		}
 
-	logAlertRule := api.LogAlertRule{
-		MetricName:  ruleModel.MetricName.ValueString(),
-		AlertType:   r.convertAlertTypeToAPI(ruleModel.AlertType.ValueString()),
-		Aggregation: r.extractAggregation(ruleModel.Aggregation),
-	}
+		thresholdOperator := common.ThresholdOperator(ruleModel.ThresholdOperator.ValueString())
+		thresholdMap, thresholdDiags := r.mapModelThresholdsToAPI(ruleModel.Threshold)
+		diags.Append(thresholdDiags...)
 
-	thresholdOperator := common.ThresholdOperator(ruleModel.ThresholdOperator.ValueString())
-	thresholdMap, thresholdDiags := r.mapModelThresholdsToAPI(ruleModel.Threshold)
-	diags.Append(thresholdDiags...)
-
-	result := []common.RuleWithThreshold[api.LogAlertRule]{
-		{
+		result = append(result, common.RuleWithThreshold[api.LogAlertRule]{
 			ThresholdOperator: thresholdOperator,
 			Rule:              logAlertRule,
 			Thresholds:        thresholdMap,
-		},
+		})
 	}
 
 	return result, diags
@@ -853,9 +861,77 @@ func (r *logAlertConfigResource) convertThresholdModelToAPI(threshold *shared.Th
 	return nil, diags
 }
 
+// buildV1RulesSchema returns the v1 schema for the rules field (SingleNestedAttribute),
+// required as PriorSchema for the 1→2 state upgrader.
+func buildV1RulesSchema() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Description: LogAlertConfigDescRules,
+		Optional:    true,
+		Attributes:  buildRuleAttributes(),
+	}
+}
+
+// buildV1Schema returns the full v1 schema, used as PriorSchema in the 1→2 state upgrader
+// so the framework can decode existing state that has rules as a single nested object.
+func buildV1Schema() schema.Schema {
+	s := buildLogAlertConfigSchema()
+	s.Version = 1
+	s.Attributes[LogAlertConfigFieldRules] = buildV1RulesSchema()
+	return s
+}
+
+// logAlertConfigV1Model is the state model for schema version 1, where rules was a
+// SingleNestedAttribute (one object) rather than the v2 ListNestedAttribute (slice).
+type logAlertConfigV1Model struct {
+	ID                  types.String        `tfsdk:"id"`
+	Name                types.String        `tfsdk:"name"`
+	Description         types.String        `tfsdk:"description"`
+	AlertChannels       *AlertChannelsModel `tfsdk:"alert_channels"`
+	GracePeriod         types.Int64         `tfsdk:"grace_period"`
+	GroupBy             []GroupByModel      `tfsdk:"group_by"`
+	Granularity         types.Int64         `tfsdk:"granularity"`
+	TagFilter           types.String        `tfsdk:"tag_filter"`
+	Rules               *LogAlertRuleModel  `tfsdk:"rules"`
+	TimeThreshold       *TimeThresholdModel `tfsdk:"time_threshold"`
+	CustomPayloadFields types.List          `tfsdk:"custom_payload_field"`
+}
+
+// upgradeStateV1ToV2 wraps the single rules object into a one-element list.
+func upgradeStateV1ToV2(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+	var v1State logAlertConfigV1Model
+	resp.Diagnostics.Append(req.State.Get(ctx, &v1State)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	newState := LogAlertConfigModel{
+		ID:                  v1State.ID,
+		Name:                v1State.Name,
+		Description:         v1State.Description,
+		AlertChannels:       v1State.AlertChannels,
+		GracePeriod:         v1State.GracePeriod,
+		GroupBy:             v1State.GroupBy,
+		Granularity:         v1State.Granularity,
+		TagFilter:           v1State.TagFilter,
+		TimeThreshold:       v1State.TimeThreshold,
+		CustomPayloadFields: v1State.CustomPayloadFields,
+	}
+
+	// A null rules object stays null; otherwise wrap it in a one-element list.
+	if v1State.Rules != nil {
+		newState.Rules = []LogAlertRuleModel{*v1State.Rules}
+	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, newState)...)
+}
+
 // GetStateUpgraders returns the state upgraders for this resource
 func (r *logAlertConfigResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
 	return map[int64]resource.StateUpgrader{
 		0: resourcehandle.CreateStateUpgraderForVersion(0),
+		1: {
+			PriorSchema:   func() *schema.Schema { s := buildV1Schema(); return &s }(),
+			StateUpgrader: upgradeStateV1ToV2,
+		},
 	}
 }

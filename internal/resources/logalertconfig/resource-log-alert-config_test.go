@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
@@ -27,7 +28,7 @@ func TestNewLogAlertConfigResourceHandle(t *testing.T) {
 	metaData := resource.MetaData()
 	assert.Equal(t, ResourceInstanaLogAlertConfig, metaData.ResourceName)
 	assert.NotNil(t, metaData.Schema)
-	assert.Equal(t, int64(1), metaData.SchemaVersion)
+	assert.Equal(t, int64(2), metaData.SchemaVersion)
 }
 
 func TestMetaData(t *testing.T) {
@@ -367,19 +368,19 @@ func TestUpdateState_WithRulesAndThresholds(t *testing.T) {
 	require.False(t, diags.HasError())
 
 	require.NotNil(t, model.Rules)
-	assert.Equal(t, "log.count", model.Rules.MetricName.ValueString())
-	assert.Equal(t, LogAlertTypeLogCount, model.Rules.AlertType.ValueString())
-	assert.Equal(t, string(common.SumAggregation), model.Rules.Aggregation.ValueString())
-	assert.Equal(t, string(common.ThresholdOperatorGreaterThan), model.Rules.ThresholdOperator.ValueString())
+	assert.Equal(t, "log.count", model.Rules[0].MetricName.ValueString())
+	assert.Equal(t, LogAlertTypeLogCount, model.Rules[0].AlertType.ValueString())
+	assert.Equal(t, string(common.SumAggregation), model.Rules[0].Aggregation.ValueString())
+	assert.Equal(t, string(common.ThresholdOperatorGreaterThan), model.Rules[0].ThresholdOperator.ValueString())
 
-	require.NotNil(t, model.Rules.Threshold)
-	require.NotNil(t, model.Rules.Threshold.Warning)
-	require.NotNil(t, model.Rules.Threshold.Warning.Static)
-	assert.Equal(t, float64(100), model.Rules.Threshold.Warning.Static.Value.ValueFloat64())
+	require.NotNil(t, model.Rules[0].Threshold)
+	require.NotNil(t, model.Rules[0].Threshold.Warning)
+	require.NotNil(t, model.Rules[0].Threshold.Warning.Static)
+	assert.Equal(t, float64(100), model.Rules[0].Threshold.Warning.Static.Value.ValueFloat64())
 
-	require.NotNil(t, model.Rules.Threshold.Critical)
-	require.NotNil(t, model.Rules.Threshold.Critical.Static)
-	assert.Equal(t, float64(200), model.Rules.Threshold.Critical.Static.Value.ValueFloat64())
+	require.NotNil(t, model.Rules[0].Threshold.Critical)
+	require.NotNil(t, model.Rules[0].Threshold.Critical.Static)
+	assert.Equal(t, float64(200), model.Rules[0].Threshold.Critical.Static.Value.ValueFloat64())
 }
 func TestUpdateState_WithRangeThresholds(t *testing.T) {
 	float := func(v float64) *float64 { return &v }
@@ -773,7 +774,7 @@ func TestMapStateToDataObject_WithRules(t *testing.T) {
 		Description: types.StringValue("Test Description"),
 		Granularity: types.Int64Value(600000),
 		TagFilter:   types.StringValue("entity.type EQUALS 'log'"),
-		Rules: &LogAlertRuleModel{
+		Rules: []LogAlertRuleModel{{
 			MetricName:        types.StringValue("log.count"),
 			AlertType:         types.StringValue(LogAlertTypeLogCount),
 			Aggregation:       types.StringValue(string(common.SumAggregation)),
@@ -790,7 +791,7 @@ func TestMapStateToDataObject_WithRules(t *testing.T) {
 					},
 				},
 			},
-		},
+		}},
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
 
@@ -1259,7 +1260,7 @@ func TestUpdateState_WithEmptyRules(t *testing.T) {
 	diags = state.Get(ctx, &model)
 	require.False(t, diags.HasError())
 
-	assert.Nil(t, model.Rules)
+	assert.Empty(t, model.Rules)
 }
 
 func TestUpdateState_WithRulesWithoutAggregation(t *testing.T) {
@@ -1306,7 +1307,7 @@ func TestUpdateState_WithRulesWithoutAggregation(t *testing.T) {
 
 	require.NotNil(t, model.Rules)
 	// Should default to SUM
-	assert.Equal(t, string(common.SumAggregation), model.Rules.Aggregation.ValueString())
+	assert.Equal(t, string(common.SumAggregation), model.Rules[0].Aggregation.ValueString())
 }
 
 func TestMapStateToDataObject_WithEmptyAlertChannelLists(t *testing.T) {
@@ -1548,13 +1549,13 @@ func TestMapStateToDataObject_WithRulesWithoutThreshold(t *testing.T) {
 		Description: types.StringValue("Test Description"),
 		Granularity: types.Int64Value(600000),
 		TagFilter:   types.StringValue("entity.type EQUALS 'log'"),
-		Rules: &LogAlertRuleModel{
+		Rules: []LogAlertRuleModel{{
 			MetricName:        types.StringValue("log.count"),
 			AlertType:         types.StringValue(LogAlertTypeLogCount),
 			Aggregation:       types.StringValue(string(common.SumAggregation)),
 			ThresholdOperator: types.StringValue(string(common.ThresholdOperatorGreaterThan)),
 			Threshold:         nil,
-		},
+		}},
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
 
@@ -1575,7 +1576,7 @@ func TestMapStateToDataObject_WithRulesWithOnlyWarningThreshold(t *testing.T) {
 		Description: types.StringValue("Test Description"),
 		Granularity: types.Int64Value(600000),
 		TagFilter:   types.StringValue("entity.type EQUALS 'log'"),
-		Rules: &LogAlertRuleModel{
+		Rules: []LogAlertRuleModel{{
 			MetricName:        types.StringValue("log.count"),
 			AlertType:         types.StringValue(LogAlertTypeLogCount),
 			Aggregation:       types.StringValue(string(common.SumAggregation)),
@@ -1588,7 +1589,7 @@ func TestMapStateToDataObject_WithRulesWithOnlyWarningThreshold(t *testing.T) {
 				},
 				Critical: nil,
 			},
-		},
+		}},
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
 
@@ -1611,7 +1612,7 @@ func TestMapStateToDataObject_WithRulesWithOnlyCriticalThreshold(t *testing.T) {
 		Description: types.StringValue("Test Description"),
 		Granularity: types.Int64Value(600000),
 		TagFilter:   types.StringValue("entity.type EQUALS 'log'"),
-		Rules: &LogAlertRuleModel{
+		Rules: []LogAlertRuleModel{{
 			MetricName:        types.StringValue("log.count"),
 			AlertType:         types.StringValue(LogAlertTypeLogCount),
 			Aggregation:       types.StringValue(string(common.SumAggregation)),
@@ -1624,7 +1625,7 @@ func TestMapStateToDataObject_WithRulesWithOnlyCriticalThreshold(t *testing.T) {
 					},
 				},
 			},
-		},
+		}},
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
 
@@ -1647,7 +1648,7 @@ func TestMapStateToDataObject_WithRulesWithNullThresholdValues(t *testing.T) {
 		Description: types.StringValue("Test Description"),
 		Granularity: types.Int64Value(600000),
 		TagFilter:   types.StringValue("entity.type EQUALS 'log'"),
-		Rules: &LogAlertRuleModel{
+		Rules: []LogAlertRuleModel{{
 			MetricName:        types.StringValue("log.count"),
 			AlertType:         types.StringValue(LogAlertTypeLogCount),
 			Aggregation:       types.StringValue(string(common.SumAggregation)),
@@ -1664,7 +1665,7 @@ func TestMapStateToDataObject_WithRulesWithNullThresholdValues(t *testing.T) {
 					},
 				},
 			},
-		},
+		}},
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
 
@@ -1718,9 +1719,9 @@ func TestUpdateState_WithRulesWithOnlyWarningThreshold(t *testing.T) {
 	require.False(t, diags.HasError())
 
 	require.NotNil(t, model.Rules)
-	require.NotNil(t, model.Rules.Threshold)
-	require.NotNil(t, model.Rules.Threshold.Warning)
-	assert.Nil(t, model.Rules.Threshold.Critical)
+	require.NotNil(t, model.Rules[0].Threshold)
+	require.NotNil(t, model.Rules[0].Threshold.Warning)
+	assert.Nil(t, model.Rules[0].Threshold.Critical)
 }
 
 func TestUpdateState_WithRulesWithOnlyCriticalThreshold(t *testing.T) {
@@ -1766,9 +1767,9 @@ func TestUpdateState_WithRulesWithOnlyCriticalThreshold(t *testing.T) {
 	require.False(t, diags.HasError())
 
 	require.NotNil(t, model.Rules)
-	require.NotNil(t, model.Rules.Threshold)
-	assert.Nil(t, model.Rules.Threshold.Warning)
-	require.NotNil(t, model.Rules.Threshold.Critical)
+	require.NotNil(t, model.Rules[0].Threshold)
+	assert.Nil(t, model.Rules[0].Threshold.Warning)
+	require.NotNil(t, model.Rules[0].Threshold.Critical)
 }
 
 func TestMapStateToDataObject_WithNullAggregation(t *testing.T) {
@@ -1781,7 +1782,7 @@ func TestMapStateToDataObject_WithNullAggregation(t *testing.T) {
 		Description: types.StringValue("Test Description"),
 		Granularity: types.Int64Value(600000),
 		TagFilter:   types.StringValue("entity.type EQUALS 'log'"),
-		Rules: &LogAlertRuleModel{
+		Rules: []LogAlertRuleModel{{
 			MetricName:        types.StringValue("log.count"),
 			AlertType:         types.StringValue(LogAlertTypeLogCount),
 			Aggregation:       types.StringNull(),
@@ -1793,7 +1794,7 @@ func TestMapStateToDataObject_WithNullAggregation(t *testing.T) {
 					},
 				},
 			},
-		},
+		}},
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
 
@@ -1936,7 +1937,6 @@ func TestUpdateState_WithMultipleRules(t *testing.T) {
 					},
 				},
 			},
-			// Second rule should be ignored since we only support single rule
 			{
 				Rule: api.LogAlertRule{
 					AlertType:   "logCount",
@@ -1968,8 +1968,9 @@ func TestUpdateState_WithMultipleRules(t *testing.T) {
 	require.False(t, diags.HasError())
 
 	require.NotNil(t, model.Rules)
-	// Should only map the first rule
-	assert.Equal(t, "log.count", model.Rules.MetricName.ValueString())
+	require.Len(t, model.Rules, 2)
+	assert.Equal(t, "log.count", model.Rules[0].MetricName.ValueString())
+	assert.Equal(t, "log.count2", model.Rules[1].MetricName.ValueString())
 }
 
 func TestUpdateState_WithEmptyAlertChannelsMap(t *testing.T) {
@@ -2161,4 +2162,112 @@ func createMockState(t *testing.T, model LogAlertConfigModel) tfsdk.State {
 func getTestSchema() schema.Schema {
 	resource := NewLogAlertConfigResourceHandle()
 	return resource.MetaData().Schema
+}
+
+func TestStateUpgrader_V1ToV2_WrapsRulesInList(t *testing.T) {
+	ctx := context.Background()
+	resource := NewLogAlertConfigResourceHandle()
+
+	upgrader, ok := resource.GetStateUpgraders(ctx)[1]
+	require.True(t, ok)
+	require.NotNil(t, upgrader.PriorSchema)
+
+	priorState := tfsdk.State{Schema: *upgrader.PriorSchema}
+	diags := priorState.Set(ctx, logAlertConfigV1Model{
+		ID:          types.StringValue("test-id"),
+		Name:        types.StringValue("Test Log Alert"),
+		Description: types.StringValue("Test Description"),
+		Granularity: types.Int64Value(600000),
+		TagFilter:   types.StringNull(),
+		GracePeriod: types.Int64Null(),
+		Rules: &LogAlertRuleModel{
+			MetricName:        types.StringValue("logCount"),
+			AlertType:         types.StringValue(LogAlertTypeLogCount),
+			Aggregation:       types.StringValue(string(common.SumAggregation)),
+			ThresholdOperator: types.StringValue(string(common.ThresholdOperatorGreaterThanOrEqual)),
+			Threshold: &ThresholdModel{
+				Critical: &shared.ThresholdTypeModel{
+					Static: &shared.StaticTypeModel{Value: types.Float64Value(2)},
+				},
+			},
+		},
+		TimeThreshold:       &TimeThresholdModel{ViolationsInSequence: &ViolationsInSequenceModel{TimeWindow: types.Int64Value(600000)}},
+		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
+	})
+	require.False(t, diags.HasError(), "%v", diags)
+
+	req := resourceUpgradeRequest(&priorState)
+	resp := resourceUpgradeResponse(getTestSchema())
+	upgrader.StateUpgrader(ctx, req, resp)
+	require.False(t, resp.Diagnostics.HasError(), "%v", resp.Diagnostics)
+
+	var upgraded LogAlertConfigModel
+	require.False(t, resp.State.Get(ctx, &upgraded).HasError())
+	assert.Equal(t, "test-id", upgraded.ID.ValueString())
+	require.Len(t, upgraded.Rules, 1)
+	assert.Equal(t, "logCount", upgraded.Rules[0].MetricName.ValueString())
+	assert.Equal(t, float64(2), upgraded.Rules[0].Threshold.Critical.Static.Value.ValueFloat64())
+}
+
+func TestStateUpgrader_V1ToV2_KeepsNullRulesNull(t *testing.T) {
+	ctx := context.Background()
+	resource := NewLogAlertConfigResourceHandle()
+	upgrader := resource.GetStateUpgraders(ctx)[1]
+
+	priorState := tfsdk.State{Schema: *upgrader.PriorSchema}
+	diags := priorState.Set(ctx, logAlertConfigV1Model{
+		ID:                  types.StringValue("test-id"),
+		Name:                types.StringValue("Test Log Alert"),
+		Description:         types.StringValue("Test Description"),
+		Granularity:         types.Int64Value(600000),
+		TagFilter:           types.StringNull(),
+		GracePeriod:         types.Int64Null(),
+		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
+	})
+	require.False(t, diags.HasError(), "%v", diags)
+
+	resp := resourceUpgradeResponse(getTestSchema())
+	upgrader.StateUpgrader(ctx, resourceUpgradeRequest(&priorState), resp)
+	require.False(t, resp.Diagnostics.HasError(), "%v", resp.Diagnostics)
+
+	var raw types.List
+	require.False(t, resp.State.GetAttribute(ctx, path.Root(LogAlertConfigFieldRules), &raw).HasError())
+	assert.True(t, raw.IsNull())
+}
+
+func TestMapStateToDataObject_WithMultipleRules(t *testing.T) {
+	ctx := context.Background()
+	resource := NewLogAlertConfigResourceHandle()
+
+	newRule := func(metric string) LogAlertRuleModel {
+		return LogAlertRuleModel{
+			MetricName:        types.StringValue(metric),
+			AlertType:         types.StringValue(LogAlertTypeLogCount),
+			Aggregation:       types.StringValue(string(common.SumAggregation)),
+			ThresholdOperator: types.StringValue(string(common.ThresholdOperatorGreaterThan)),
+		}
+	}
+
+	state := createMockState(t, LogAlertConfigModel{
+		ID:                  types.StringValue("test-id"),
+		Name:                types.StringValue("Test Log Alert"),
+		Description:         types.StringValue("Test Description"),
+		Granularity:         types.Int64Value(600000),
+		Rules:               []LogAlertRuleModel{newRule("first"), newRule("second")},
+		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
+	})
+
+	result, diags := resource.MapStateToDataObject(ctx, nil, &state)
+	require.False(t, diags.HasError())
+	require.Len(t, result.Rules, 2)
+	assert.Equal(t, "first", result.Rules[0].Rule.MetricName)
+	assert.Equal(t, "second", result.Rules[1].Rule.MetricName)
+}
+
+func resourceUpgradeRequest(prior *tfsdk.State) resource.UpgradeStateRequest {
+	return resource.UpgradeStateRequest{State: prior}
+}
+
+func resourceUpgradeResponse(s schema.Schema) *resource.UpgradeStateResponse {
+	return &resource.UpgradeStateResponse{State: tfsdk.State{Schema: s}}
 }

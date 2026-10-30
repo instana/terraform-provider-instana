@@ -4,20 +4,70 @@ This resource manages log alert configurations in Instana. Log alerts monitor lo
 
 API Documentation: <https://instana.github.io/openapi/#tag/Log-Alert-Configuration>
 
-## ⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)
 
- **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
+## ⚠️ BREAKING CHANGES
 
+### Multi-Rule Support (v7.10.0+)
 
-## Migration Guide (v5 to v6)
+Starting with provider version **v7.10.0**, the `rules` attribute has transitioned from a **single nested object** to a **list of objects** (`ListNestedAttribute`). At least one rule is required.
+
+> **Note:** The Instana API currently accepts exactly one rule per log alert configuration (`minItems: 1`, `maxItems: 1`). Configuring more than one rule is rejected by the API at apply time until the backend lifts this limit.
+
+#### Upgrading Configurations to v7.10.0+
+
+If you are upgrading an existing configuration, wrap your `rules` definition in square brackets `[ ... ]`:
+
+##### Before (v6.0.0 – v7.9.3):
+```hcl
+rules = {
+  metric_name        = "logCount"
+  alert_type         = "log.count"
+  aggregation        = "SUM"
+  threshold_operator = ">="
+  threshold = {
+    critical = {
+      static = {
+        value = 2
+      }
+    }
+  }
+}
+```
+
+##### After (v7.10.0+):
+```hcl
+rules = [
+  {
+    metric_name        = "logCount"
+    alert_type         = "log.count"
+    aggregation        = "SUM"
+    threshold_operator = ">="
+    threshold = {
+      critical = {
+        static = {
+          value = 2
+        }
+      }
+    }
+  }
+]
+```
+
+> **State Migration Note**: Existing Terraform state files are automatically upgraded from schema version 1 to 2 via the provider's built-in state upgrader. Only your `.tf` configuration files need to be updated.
+
+---
+
+### Plugin Framework Migration (v6.0.0)
+
+**This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**. While the basic structure remains similar, there are important syntax changes for block structure.
 
 For detailed migration instructions and examples, see the [Plugin Framework Migration Guide](https://github.com/instana/terraform-provider-instana/blob/main/PLUGIN-FRAMEWORK-MIGRATION.md).
 
-### Syntax Changes Overview
+#### Syntax Changes Overview (v5 to v6)
 
 The main changes are in how nested blocks are defined. In v6, all nested configurations use attribute syntax instead of block syntax.
 
-#### OLD (v5.x) Syntax:
+##### OLD (v5.x) Syntax:
 ```hcl
 resource "instana_log_alert_config" "example" {
   name = "Log Alert"
@@ -58,7 +108,7 @@ resource "instana_log_alert_config" "example" {
 }
 ```
 
-#### NEW (v6.x) Syntax:
+##### NEW (v6.x) Syntax:
 ```hcl
 resource "instana_log_alert_config" "example" {
   name = "Log Alert"
@@ -104,11 +154,11 @@ resource "instana_log_alert_config" "example" {
 }
 ```
 
-### Key Syntax Changes
+#### Key Syntax Changes (v5 to v6)
 
 1. **Alert Channels**: `alert_channels { }` → `alert_channels = { }`
 2. **Group By**: Multiple `group_by { }` blocks → Single `group_by = [{ }]` list
-3. **Rules**: `rules { }` → `rules = { }`
+3. **Rules**: `rules { }` → `rules = { }` *(Note: further updated to a list `rules = [{ }]` in v7.10.0+)*
 4. **Time Threshold**: `time_threshold { }` → `time_threshold = { }`
 5. **Custom Payload Fields**: Multiple `custom_payload_field { }` blocks → Single `custom_payload_field = [{ }]` list
 6. **All nested objects**: Use `= { }` syntax
@@ -127,24 +177,26 @@ resource "instana_log_alert_config" "error_logs" {
     critical = ["ops-team-channel"] # replace with actual channel Ids
     warning = ["dev-team-channel"]
   }
-  rules = {
-    aggregation = "SUM"
-    alert_type  = "log.count"
-    metric_name = "logCount"
-    threshold = {
-      critical = {
-        static = {
-          value = 2
+  rules = [
+    {
+      aggregation = "SUM"
+      alert_type  = "log.count"
+      metric_name = "logCount"
+      threshold = {
+        critical = {
+          static = {
+            value = 2
+          }
+        }
+        warning = {
+          static = {
+            value = 1
+          }
         }
       }
-      warning = {
-        static = {
-          value = 1
-        }
-      }
+      threshold_operator = ">="
     }
-    threshold_operator = ">="
-  }
+  ]
   tag_filter = "log.exception.type@na EQUALS 'error'"
   group_by = [
     {
@@ -220,7 +272,7 @@ terraform apply
 * `grace_period` - Optional - The duration in milliseconds for which an alert remains open after conditions are no longer violated. The alert auto-closes once the grace period expires
 * `alert_channels` - Optional - Configuration for alert notification channels [Details](#alert-channels-reference)
 * `group_by` - Optional - List of tags to group results by [Details](#group-by-reference)
-* `rules` - Required - Configuration for alert rules [Details](#rules-reference)
+* `rules` - Required - List of alert rules, at least one [Details](#rules-reference). The API currently accepts exactly one rule
 * `time_threshold` - Required - Configuration for time threshold [Details](#time-threshold-reference)
 * `custom_payload_field` - Optional - List of custom payload fields in alert notifications [Details](#custom-payload-field-reference)
 
