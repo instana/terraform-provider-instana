@@ -437,24 +437,24 @@ func TestUpdateState_WithRangeThresholds(t *testing.T) {
 			diags = state.Get(ctx, &model)
 			require.False(t, diags.HasError(), "diags: %v", diags)
 
-			require.NotNil(t, model.Rules)
-			assert.Equal(t, tt.operator, model.Rules.ThresholdOperator.ValueString())
-			require.NotNil(t, model.Rules.Threshold)
+			require.Len(t, model.Rules, 1)
+			assert.Equal(t, tt.operator, model.Rules[0].ThresholdOperator.ValueString())
+			require.NotNil(t, model.Rules[0].Threshold)
 
-			require.NotNil(t, model.Rules.Threshold.Warning)
-			require.NotNil(t, model.Rules.Threshold.Warning.Static)
-			warning := model.Rules.Threshold.Warning.Static
+			require.NotNil(t, model.Rules[0].Threshold.Warning)
+			require.NotNil(t, model.Rules[0].Threshold.Warning.Static)
+			warning := model.Rules[0].Threshold.Warning.Static
 			assert.True(t, warning.Value.IsNull())
 			assert.Equal(t, tt.wantWarning[0], warning.LowerBound.ValueFloat64())
 			assert.Equal(t, tt.wantWarning[1], warning.UpperBound.ValueFloat64())
 
 			if tt.wantCritical == nil {
-				assert.Nil(t, model.Rules.Threshold.Critical)
+				assert.Nil(t, model.Rules[0].Threshold.Critical)
 				return
 			}
-			require.NotNil(t, model.Rules.Threshold.Critical)
-			require.NotNil(t, model.Rules.Threshold.Critical.Static)
-			critical := model.Rules.Threshold.Critical.Static
+			require.NotNil(t, model.Rules[0].Threshold.Critical)
+			require.NotNil(t, model.Rules[0].Threshold.Critical.Static)
+			critical := model.Rules[0].Threshold.Critical.Static
 			assert.True(t, critical.Value.IsNull())
 			assert.Equal(t, tt.wantCritical[0], critical.LowerBound.ValueFloat64())
 			assert.Equal(t, tt.wantCritical[1], critical.UpperBound.ValueFloat64())
@@ -472,7 +472,7 @@ func TestMapStateToDataObject_WithRangeThresholds(t *testing.T) {
 		Description: types.StringValue("Test Description"),
 		Granularity: types.Int64Value(600000),
 		TagFilter:   types.StringValue("entity.type EQUALS 'log'"),
-		Rules: &LogAlertRuleModel{
+		Rules: []LogAlertRuleModel{{
 			MetricName:        types.StringValue("logCount"),
 			AlertType:         types.StringValue(LogAlertTypeLogCount),
 			Aggregation:       types.StringValue(string(common.SumAggregation)),
@@ -493,7 +493,7 @@ func TestMapStateToDataObject_WithRangeThresholds(t *testing.T) {
 					},
 				},
 			},
-		},
+		}},
 		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
 
@@ -2261,4 +2261,37 @@ func resourceUpgradeRequest(prior *tfsdk.State) resource.UpgradeStateRequest {
 
 func resourceUpgradeResponse(s schema.Schema) *resource.UpgradeStateResponse {
 	return &resource.UpgradeStateResponse{State: tfsdk.State{Schema: s}}
+}
+
+func TestRulesSchema_SizeBetweenOneAndOne(t *testing.T) {
+	ctx := context.Background()
+	rulesAttr, ok := NewLogAlertConfigResourceHandle().MetaData().Schema.Attributes[LogAlertConfigFieldRules].(schema.ListNestedAttribute)
+	require.True(t, ok)
+	require.Len(t, rulesAttr.Validators, 1)
+
+	ruleObjType := rulesAttr.NestedObject.Type()
+	rule := func() attr.Value {
+		return types.ObjectNull(ruleObjType.(types.ObjectType).AttrTypes)
+	}
+
+	tests := []struct {
+		name      string
+		rules     []attr.Value
+		wantError bool
+	}{
+		{"zero rules is rejected", []attr.Value{}, true},
+		{"one rule is accepted", []attr.Value{rule()}, false},
+		{"two rules is rejected", []attr.Value{rule(), rule()}, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			resp := validator.ListResponse{}
+			rulesAttr.Validators[0].ValidateList(ctx, validator.ListRequest{
+				Path:        path.Root(LogAlertConfigFieldRules),
+				ConfigValue: types.ListValueMust(ruleObjType, tt.rules),
+			}, &resp)
+			assert.Equal(t, tt.wantError, resp.Diagnostics.HasError())
+		})
+	}
 }

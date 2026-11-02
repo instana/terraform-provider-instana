@@ -71,6 +71,10 @@ const (
 	EmptyString = ""
 	// DefaultGranularity represents the default granularity value
 	DefaultGranularity = int64(common.Granularity600000)
+	// LogAlertConfigMinRules minimum number of rules accepted by the Instana API
+	LogAlertConfigMinRules = 1
+	// LogAlertConfigMaxRules maximum number of rules accepted by the Instana API
+	LogAlertConfigMaxRules = 1
 )
 
 // Resource description constants
