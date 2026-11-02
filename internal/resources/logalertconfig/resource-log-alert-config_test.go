@@ -208,18 +208,9 @@ func TestUpdateState_WithGroupBy(t *testing.T) {
 	state := &tfsdk.State{
 		Schema: getTestSchema(),
 	}
-	// Initialize state with non-empty GroupBy so UpdateState will update it
-	initialModel := LogAlertConfigModel{
-		GroupBy:             []GroupByModel{{}}, // Non-empty slice to trigger update
-		CustomPayloadFields: types.ListNull(shared.GetCustomPayloadFieldType()),
-	}
-	diags := state.Set(ctx, initialModel)
-	if diags.HasError() {
-		t.Logf("state.Set errors: %v", diags)
-	}
-	require.False(t, diags.HasError())
+	initializeEmptyState(ctx, state)
 
-	diags = resource.UpdateState(ctx, state, nil, data)
+	diags := resource.UpdateState(ctx, state, nil, data)
 	require.False(t, diags.HasError())
 
 	var model LogAlertConfigModel
