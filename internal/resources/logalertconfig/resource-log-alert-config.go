@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -207,7 +208,7 @@ func buildRulesSchema() schema.ListNestedAttribute {
 		Description: LogAlertConfigDescRules,
 		Required:    true,
 		Validators: []validator.List{
-			listvalidator.SizeAtLeast(1),
+			listvalidator.SizeBetween(LogAlertConfigMinRules, LogAlertConfigMaxRules),
 		},
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: buildRuleAttributes(),
