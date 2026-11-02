@@ -6,14 +6,15 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -130,12 +131,17 @@ func buildAlertChannelsSchema() schema.SingleNestedAttribute {
 
 // buildGroupBySchema constructs the schema for group by configuration
 func buildGroupBySchema() schema.ListNestedAttribute {
+	groupByObjectType := types.ObjectType{AttrTypes: map[string]attr.Type{
+		LogAlertConfigFieldGroupByTagName: types.StringType,
+		LogAlertConfigFieldGroupByKey:     types.StringType,
+	}}
 	return schema.ListNestedAttribute{
 		Description: LogAlertConfigDescGroupBy,
 		Optional:    true,
-		Validators: []validator.List{
-			listvalidator.SizeAtLeast(1),
-		},
+		Computed:    true,
+		// An omitted group_by, group_by = [] and an API response without group by are all
+		// represented as an empty list, so they never produce a plan difference.
+		Default: listdefault.StaticValue(types.ListValueMust(groupByObjectType, []attr.Value{})),
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: map[string]schema.Attribute{
 				LogAlertConfigFieldGroupByTagName: schema.StringAttribute{
@@ -307,12 +313,9 @@ func (r *logAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.S
 		model.TagFilter = tagFilter
 	}
 
-	// to preserve the existing value in plan/state to handle the value drift
-	if len(model.GroupBy) != 0 {
-		groupBy, groupByDiags := r.mapGroupByToModel(config.GroupBy)
-		diags.Append(groupByDiags...)
-		model.GroupBy = groupBy
-	}
+	groupBy, groupByDiags := r.mapGroupByToModel(config.GroupBy)
+	diags.Append(groupByDiags...)
+	model.GroupBy = groupBy
 
 	alertChannels, alertChannelsDiags := r.mapAlertChannelsToModel(ctx, config.AlertChannels)
 	diags.Append(alertChannelsDiags...)
