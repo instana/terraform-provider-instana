@@ -30,6 +30,11 @@ func (m *MockInstanaAPI) ApplicationConfigs() rest.RestResource[*api.Application
 	return nil
 }
 
+// BusinessPerspectives mock implementation
+func (m *MockInstanaAPI) BusinessPerspectives() rest.RestResource[*api.BusinessPerspectiveConfig] {
+	return nil
+}
+
 // ApplicationAlertConfigs mock implementation
 func (m *MockInstanaAPI) ApplicationAlertConfigs() rest.RestResource[*api.ApplicationAlertConfig] {
 	return nil

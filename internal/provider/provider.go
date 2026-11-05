@@ -20,7 +20,6 @@ import (
 
 	"github.com/instana/instana-go-client/config"
 	"github.com/instana/terraform-provider-instana/internal/datasources"
-	"github.com/instana/terraform-provider-instana/internal/util"
 	"github.com/instana/terraform-provider-instana/internal/resourcehandle"
 	"github.com/instana/terraform-provider-instana/internal/resources/alertingchannel"
 	"github.com/instana/terraform-provider-instana/internal/resources/alertingconfig"
@@ -30,6 +29,7 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/resources/applicationconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/automationaction"
 	"github.com/instana/terraform-provider-instana/internal/resources/automationpolicy"
+	"github.com/instana/terraform-provider-instana/internal/resources/businessperspectiveconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/customdashboard"
 	"github.com/instana/terraform-provider-instana/internal/resources/customeventspec"
 	"github.com/instana/terraform-provider-instana/internal/resources/group"
@@ -40,20 +40,21 @@ import (
 	"github.com/instana/terraform-provider-instana/internal/resources/maintenancewindowconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/mobilealertconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/mobileappconfig"
+	"github.com/instana/terraform-provider-instana/internal/resources/release"
 	"github.com/instana/terraform-provider-instana/internal/resources/roles"
+	"github.com/instana/terraform-provider-instana/internal/resources/sessionsettings"
 	"github.com/instana/terraform-provider-instana/internal/resources/sliconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/sloalertconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/sloconfig"
-	"github.com/instana/terraform-provider-instana/internal/resources/release"
 	"github.com/instana/terraform-provider-instana/internal/resources/slocorrectionconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/syntheticalertconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/syntheticcredential"
-	"github.com/instana/terraform-provider-instana/internal/resources/sessionsettings"
 	"github.com/instana/terraform-provider-instana/internal/resources/synthetictest"
 	"github.com/instana/terraform-provider-instana/internal/resources/team"
 	"github.com/instana/terraform-provider-instana/internal/resources/websitealertconfig"
 	"github.com/instana/terraform-provider-instana/internal/resources/websitemonitoringconfig"
 	"github.com/instana/terraform-provider-instana/internal/shared"
+	"github.com/instana/terraform-provider-instana/internal/util"
 )
 
 // Ensure the implementation satisfies the expected interfaces
@@ -368,6 +369,7 @@ func (p *InstanaProvider) Resources(_ context.Context) []func() resource.Resourc
 		addResouceHandle(applicationalertconfig.NewGlobalApplicationAlertConfigResourceHandle),
 		addResouceHandle(applicationconfig.NewApplicationConfigResourceHandle),
 		addResouceHandle(automationaction.NewAutomationActionResourceHandle),
+		addResouceHandle(businessperspectiveconfig.NewBusinessPerspectiveConfigResourceHandle),
 		addResouceHandle(automationpolicy.NewAutomationPolicyResourceHandle),
 		addResouceHandle(customdashboard.NewCustomDashboardResourceHandle),
 		addResouceHandle(customeventspec.NewCustomEventSpecificationResourceHandle),
