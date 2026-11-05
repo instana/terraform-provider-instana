@@ -333,7 +333,16 @@ func createCustomEventSpecificationSchema() schema.Schema {
 										Description: CustomEventSpecificationResourceDescMetricPatternOperator,
 										Optional:    true,
 										Computed:    true,
-										Default:     stringdefault.StaticString(CustomEventSpecificationMetricPatternOperatorEquals),
+										Default:     stringdefault.StaticString(CustomEventSpecificationMetricPatternOperatorIs),
+										Validators: []validator.String{
+											stringvalidator.OneOf(
+												CustomEventSpecificationMetricPatternOperatorIs,
+												CustomEventSpecificationMetricPatternOperatorContains,
+												CustomEventSpecificationMetricPatternOperatorStartsWith,
+												CustomEventSpecificationMetricPatternOperatorEndsWith,
+												CustomEventSpecificationMetricPatternOperatorAny,
+											),
+										},
 									},
 								},
 							},
@@ -469,7 +478,8 @@ func (r *customEventSpecificationResource) isValidSystemRule(rule *api.RuleSpeci
 }
 
 func (r *customEventSpecificationResource) isValidThresholdRule(rule *api.RuleSpecification) bool {
-	return rule.MetricName != nil && rule.Rollup != nil && rule.Window != nil &&
+	// A threshold rule is defined either by a metric name or by a metric pattern (dynamic built-in metrics)
+	return (rule.MetricName != nil || rule.MetricPattern != nil) && rule.Rollup != nil && rule.Window != nil &&
 		rule.Aggregation != nil && rule.ConditionOperator != nil && rule.ConditionValue != nil
 }
 
@@ -812,7 +822,11 @@ func (r *customEventSpecificationResource) buildSystemRuleSpec(rule *SystemRuleM
 
 // buildThresholdRuleSpec creates a threshold rule specification
 func (r *customEventSpecificationResource) buildThresholdRuleSpec(rule *ThresholdRuleModel) api.RuleSpecification {
-	metricName := rule.MetricName.ValueString()
+	var metricName *string
+	if !rule.MetricName.IsNull() && !rule.MetricName.IsUnknown() {
+		v := rule.MetricName.ValueString()
+		metricName = &v
+	}
 	rollup := int(rule.Rollup.ValueInt64())
 	window := int(rule.Window.ValueInt64())
 	aggregation := rule.Aggregation.ValueString()
@@ -822,7 +836,7 @@ func (r *customEventSpecificationResource) buildThresholdRuleSpec(rule *Threshol
 	return api.RuleSpecification{
 		DType:             api.ThresholdRuleType,
 		Severity:          mapSeverityToInt(rule.Severity.ValueString()),
-		MetricName:        &metricName,
+		MetricName:        metricName,
 		Rollup:            &rollup,
 		Window:            &window,
 		Aggregation:       &aggregation,
