@@ -333,7 +333,16 @@ func createCustomEventSpecificationSchema() schema.Schema {
 										Description: CustomEventSpecificationResourceDescMetricPatternOperator,
 										Optional:    true,
 										Computed:    true,
-										Default:     stringdefault.StaticString(CustomEventSpecificationMetricPatternOperatorEquals),
+										Default:     stringdefault.StaticString(CustomEventSpecificationMetricPatternOperatorIs),
+										Validators: []validator.String{
+											stringvalidator.OneOf(
+												CustomEventSpecificationMetricPatternOperatorIs,
+												CustomEventSpecificationMetricPatternOperatorContains,
+												CustomEventSpecificationMetricPatternOperatorStartsWith,
+												CustomEventSpecificationMetricPatternOperatorEndsWith,
+												CustomEventSpecificationMetricPatternOperatorAny,
+											),
+										},
 									},
 								},
 							},
@@ -383,8 +392,10 @@ func (r *customEventSpecificationResource) UpdateState(ctx context.Context, stat
 	model.TransientEventThreshold = types.Int64Value(spec.TransientEventThreshold)
 	model.TransientEventAlertMuted = types.BoolValue(spec.TransientEventAlertMuted)
 
-	// Process rules if present (preserve the value from plan/model to handle the value drift)
-	if model.Rules == nil {
+	// On create/update (plan != nil) preserve the planned rules to avoid value drift after apply.
+	// On read/import (plan == nil) always rebuild rules from the API so that changes made outside
+	// of Terraform (e.g. via the UI) are detected.
+	if plan == nil || model.Rules == nil {
 		model.Rules = r.buildRulesModel(spec.Rules, &diags)
 	}
 
@@ -469,7 +480,8 @@ func (r *customEventSpecificationResource) isValidSystemRule(rule *api.RuleSpeci
 }
 
 func (r *customEventSpecificationResource) isValidThresholdRule(rule *api.RuleSpecification) bool {
-	return rule.MetricName != nil && rule.Rollup != nil && rule.Window != nil &&
+	// A threshold rule is defined either by a metric name or by a metric pattern (dynamic built-in metrics)
+	return (rule.MetricName != nil || rule.MetricPattern != nil) && rule.Rollup != nil && rule.Window != nil &&
 		rule.Aggregation != nil && rule.ConditionOperator != nil && rule.ConditionValue != nil
 }
 
@@ -545,13 +557,15 @@ func (r *customEventSpecificationResource) buildThresholdRule(rule *api.RuleSpec
 		ConditionValue:    util.SetFloat64PointerToState(rule.ConditionValue),
 	}
 
-	// Handle metric pattern if present
+	// Handle metric pattern if present.
+	// Postfix/placeholder: the API returns null when unset, state uses "" (the schema default),
+	// so null and "" are treated as equal and produce no diff.
 	if rule.MetricPattern != nil {
 		model.MetricPattern = &MetricPatternModel{
 			Prefix:      types.StringValue(rule.MetricPattern.Prefix),
 			Operator:    types.StringValue(rule.MetricPattern.Operator),
-			Postfix:     util.SetStringPointerToState(rule.MetricPattern.Postfix),
-			Placeholder: util.SetStringPointerToState(rule.MetricPattern.Placeholder),
+			Postfix:     stringPointerToStateOrEmpty(rule.MetricPattern.Postfix),
+			Placeholder: stringPointerToStateOrEmpty(rule.MetricPattern.Placeholder),
 		}
 	}
 
@@ -561,6 +575,14 @@ func (r *customEventSpecificationResource) buildThresholdRule(rule *api.RuleSpec
 // ============================================================================
 // Helper Methods
 // ============================================================================
+
+// stringPointerToStateOrEmpty maps a nil string pointer to an empty string instead of null
+func stringPointerToStateOrEmpty(value *string) types.String {
+	if value == nil {
+		return types.StringValue(CustomEventSpecificationDefaultEmptyString)
+	}
+	return types.StringValue(*value)
+}
 
 // mapIntToSeverityString maps the severity integer to a string value
 func mapIntToSeverityString(severity int) types.String {
@@ -812,7 +834,11 @@ func (r *customEventSpecificationResource) buildSystemRuleSpec(rule *SystemRuleM
 
 // buildThresholdRuleSpec creates a threshold rule specification
 func (r *customEventSpecificationResource) buildThresholdRuleSpec(rule *ThresholdRuleModel) api.RuleSpecification {
-	metricName := rule.MetricName.ValueString()
+	var metricName *string
+	if !rule.MetricName.IsNull() && !rule.MetricName.IsUnknown() {
+		v := rule.MetricName.ValueString()
+		metricName = &v
+	}
 	rollup := int(rule.Rollup.ValueInt64())
 	window := int(rule.Window.ValueInt64())
 	aggregation := rule.Aggregation.ValueString()
@@ -822,7 +848,7 @@ func (r *customEventSpecificationResource) buildThresholdRuleSpec(rule *Threshol
 	return api.RuleSpecification{
 		DType:             api.ThresholdRuleType,
 		Severity:          mapSeverityToInt(rule.Severity.ValueString()),
-		MetricName:        &metricName,
+		MetricName:        metricName,
 		Rollup:            &rollup,
 		Window:            &window,
 		Aggregation:       &aggregation,

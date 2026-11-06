@@ -301,7 +301,7 @@ For dynamic built-in metrics, define a pattern to match multiple metrics.
 * `prefix` - Required - The prefix of the built-in dynamic metric
 * `postfix` - Optional - The postfix of the built-in dynamic metric (default: empty string)
 * `placeholder` - Optional - The placeholder string of the dynamic metric (default: empty string)
-* `operator` - Optional - The operation used to check for matching placeholder string. Allowed values: `is`, `contains`, `any`, `startsWith`, `endsWith`. Default: `EQUALS`
+* `operator` - Optional - The operation used to check for matching placeholder string. Allowed values: `is`, `contains`, `any`, `startsWith`, `endsWith`. Default: `is`
 
 ## Attributes Reference
 

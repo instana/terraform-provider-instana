@@ -99,7 +99,11 @@ const (
 	CustomEventSpecificationLogicalOperatorOr  = "OR"
 
 	// Metric pattern operator constants
-	CustomEventSpecificationMetricPatternOperatorEquals = "EQUALS"
+	CustomEventSpecificationMetricPatternOperatorIs         = "is"
+	CustomEventSpecificationMetricPatternOperatorContains   = "contains"
+	CustomEventSpecificationMetricPatternOperatorStartsWith = "startsWith"
+	CustomEventSpecificationMetricPatternOperatorEndsWith   = "endsWith"
+	CustomEventSpecificationMetricPatternOperatorAny        = "any"
 
 	// Aggregation type constants
 	CustomEventSpecificationAggregationSum     = "sum"
