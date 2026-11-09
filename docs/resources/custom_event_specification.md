@@ -37,16 +37,17 @@ resource "instana_custom_event_specification" "example" {
   name        = "threshold-alert"
   entity_type = "host"
   rules = {
-    threshold = {
-      severity             = "critical"
-      metric_name          = "cpu.usage"
-      "rollup"             = 0
-      "window"             = 60000
-      "aggregation"        = "avg"
-      "condition_operator" = ">"
-      "condition_value"    = 1.0,
-      "severity"           = "critical"
-    }
+    threshold = [
+      {
+        severity           = "critical"
+        metric_name        = "cpu.usage"
+        rollup             = 0
+        window             = 60000
+        aggregation        = "avg"
+        condition_operator = ">"
+        condition_value    = 1.0
+      }
+    ]
   }
   expiration_time = 600000
 }
@@ -95,15 +96,55 @@ resource "instana_custom_event_specification" "threshold_with_transient" {
   transient_event_alert_muted = false
 
   rules = {
-    threshold = {
-      severity           = "warning"
-      metric_name        = "metrics.contentionCount"
-      rollup             = 0
-      window             = 60000
-      aggregation        = "avg"
-      condition_operator = "<"
-      condition_value    = 100
-    }
+    threshold = [
+      {
+        severity           = "warning"
+        metric_name        = "metrics.contentionCount"
+        rollup             = 0
+        window             = 60000
+        aggregation        = "avg"
+        condition_operator = "<"
+        condition_value    = 100
+      }
+    ]
+  }
+}
+```
+
+### Multiple Threshold Rules with Logical Operator
+
+Define multiple threshold rules combined with a logical operator:
+
+```hcl
+resource "instana_custom_event_specification" "multi_threshold" {
+  name                  = "High Resource Utilization"
+  description           = "Alert when CPU and memory thresholds are breached"
+  enabled               = true
+  entity_type           = "host"
+  expiration_time       = 600000
+  rule_logical_operator = "AND"
+
+  rules = {
+    threshold = [
+      {
+        severity           = "warning"
+        metric_name        = "cpu.used"
+        rollup             = 0
+        window             = 60000
+        aggregation        = "avg"
+        condition_operator = ">"
+        condition_value    = 80.0
+      },
+      {
+        severity           = "warning"
+        metric_name        = "memory.used"
+        rollup             = 0
+        window             = 60000
+        aggregation        = "avg"
+        condition_operator = ">"
+        condition_value    = 90.0
+      }
+    ]
   }
 }
 ```
@@ -234,7 +275,7 @@ The `rules` attribute is a single nested object containing exactly one of the fo
 * `entity_verification` - Optional - Configuration of entity verification rules [Details](#entity-verification-rule)
 * `host_availability` - Optional - Configuration of host availability rules [Details](#host-availability-rule)
 * `system` - Optional - Configuration of system rules [Details](#system-rule)
-* `threshold` - Optional - Configuration of threshold rules [Details](#threshold-rule)
+* `threshold` - Optional - Configuration of threshold rules (list of 1 to 5 threshold rules) [Details](#threshold-rule)
 
 #### Entity Count Rule
 
@@ -283,7 +324,10 @@ Use built-in Instana system rules for monitoring.
 
 #### Threshold Rule
 
-Monitor metrics against defined thresholds.
+Monitor metrics against defined thresholds. `threshold` is a list of 1 to 5 threshold rules (`threshold = [ { ... } ]`). When configuring multiple threshold rules:
+* All threshold rules must share the same `severity`, `window`, and `rollup`.
+* Multiple threshold rules cannot be combined with other rule types.
+* Entity types `application`, `service`, and `endpoint` do not support multiple rules.
 
 * `severity` - Required - The severity of the rule. Allowed values: `warning`, `critical`
 * `metric_name` - Optional (required for Built-In and Custom Metrics only) - The name of the built-in or custom metric. Supported built-in metrics can be retrieved from the REST API using `/api/infrastructure-monitoring/catalog/metrics/{plugin}`. Conflicts with `metric_pattern` - exactly one must be provided
