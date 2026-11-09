@@ -26,7 +26,7 @@ type RulesModel struct {
 	EntityVerification      *EntityVerificationRuleModel      `tfsdk:"entity_verification"`
 	HostAvailability        *HostAvailabilityRuleModel        `tfsdk:"host_availability"`
 	System                  *SystemRuleModel                  `tfsdk:"system"`
-	Threshold               *ThresholdRuleModel               `tfsdk:"threshold"`
+	Threshold               []ThresholdRuleModel              `tfsdk:"threshold"`
 }
 
 // EntityCountRuleModel represents an entity count rule
