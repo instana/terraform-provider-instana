@@ -1,3 +1,21 @@
+## [v7.9.4](https://github.com/instana/terraform-provider-instana/tree/v7.9.4) (2026-11-10)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.9.3...v7.9.4)
+
+**Fixed bugs:**
+
+- `instana_log_alert_config`: added `BETWEEN` and `OUTSIDE` range threshold operator support
+- `instana_log_alert_config`: `group_by` is now populated on import, and an empty `group_by` list is treated as null to prevent spurious diffs
+- `instana_custom_event_specification`: added support for threshold rules that only set `metric_pattern`, and imported threshold rules without a `metric_name` now send a null `metricName` instead of an empty string
+- `instana_custom_event_specification`: the `metric_pattern.operator` default is now `is`, with validation for `is`, `contains`, `startsWith`, `endsWith` and `any`
+- `instana_custom_event_specification`: rule drift is now detected on refresh
+
+**Merged pull requests:**
+
+- fix: Add BETWEEN/OUTSIDE range operator support to log alert config [\#153](https://github.com/instana/terraform-provider-instana/pull/153) ([BlessyElza](https://github.com/BlessyElza))
+- populate group_by on import and treat [] as null [\#154](https://github.com/instana/terraform-provider-instana/pull/154) ([BlessyElza](https://github.com/BlessyElza))
+- fix(custom_event_specification): support metric_pattern-only threshold rules and detect rule drift on refresh [\#155](https://github.com/instana/terraform-provider-instana/pull/155) ([BlessyElza](https://github.com/BlessyElza))
+
 ## [v7.9.3](https://github.com/instana/terraform-provider-instana/tree/v7.9.3) (2026-10-27)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.9.2...v7.9.3)
