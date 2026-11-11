@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -27,7 +28,7 @@ func TestNewCustomEventSpecificationResourceHandle(t *testing.T) {
 	metaData := resource.MetaData()
 	assert.Equal(t, ResourceInstanaCustomEventSpecification, metaData.ResourceName)
 	assert.NotNil(t, metaData.Schema)
-	assert.Equal(t, int64(1), metaData.SchemaVersion)
+	assert.Equal(t, int64(2), metaData.SchemaVersion)
 }
 
 func TestMetaData(t *testing.T) {
@@ -441,14 +442,16 @@ func TestMapStateToDataObject_WithThresholdRule(t *testing.T) {
 		TransientEventThreshold:  types.Int64Value(300000),
 		TransientEventAlertMuted: types.BoolValue(false),
 		Rules: &RulesModel{
-			Threshold: &ThresholdRuleModel{
-				Severity:          types.StringValue("warning"),
-				MetricName:        types.StringValue("cpu.usage"),
-				Rollup:            types.Int64Value(60000),
-				Window:            types.Int64Value(300000),
-				Aggregation:       types.StringValue("avg"),
-				ConditionOperator: types.StringValue(">"),
-				ConditionValue:    types.Float64Value(80.0),
+			Threshold: []ThresholdRuleModel{
+				{
+					Severity:          types.StringValue("warning"),
+					MetricName:        types.StringValue("cpu.usage"),
+					Rollup:            types.Int64Value(60000),
+					Window:            types.Int64Value(300000),
+					Aggregation:       types.StringValue("avg"),
+					ConditionOperator: types.StringValue(">"),
+					ConditionValue:    types.Float64Value(80.0),
+				},
 			},
 		},
 	})
@@ -485,19 +488,21 @@ func TestMapStateToDataObject_WithThresholdRuleAndMetricPattern(t *testing.T) {
 		TransientEventThreshold:  types.Int64Value(300000),
 		TransientEventAlertMuted: types.BoolValue(false),
 		Rules: &RulesModel{
-			Threshold: &ThresholdRuleModel{
-				Severity:          types.StringValue("critical"),
-				MetricName:        types.StringValue("memory.usage"),
-				Rollup:            types.Int64Value(60000),
-				Window:            types.Int64Value(300000),
-				Aggregation:       types.StringValue("sum"),
-				ConditionOperator: types.StringValue(">="),
-				ConditionValue:    types.Float64Value(90.0),
-				MetricPattern: &MetricPatternModel{
-					Prefix:      types.StringValue("jvm."),
-					Postfix:     types.StringValue(".heap"),
-					Placeholder: types.StringValue("instance"),
-					Operator:    types.StringValue("is"),
+			Threshold: []ThresholdRuleModel{
+				{
+					Severity:          types.StringValue("critical"),
+					MetricName:        types.StringValue("memory.usage"),
+					Rollup:            types.Int64Value(60000),
+					Window:            types.Int64Value(300000),
+					Aggregation:       types.StringValue("sum"),
+					ConditionOperator: types.StringValue(">="),
+					ConditionValue:    types.Float64Value(90.0),
+					MetricPattern: &MetricPatternModel{
+						Prefix:      types.StringValue("jvm."),
+						Postfix:     types.StringValue(".heap"),
+						Placeholder: types.StringValue("instance"),
+						Operator:    types.StringValue("is"),
+					},
 				},
 			},
 		},
@@ -534,19 +539,21 @@ func TestMapStateToDataObject_WithThresholdRuleAndEmptyMetricPattern(t *testing.
 		TransientEventThreshold:  types.Int64Value(300000),
 		TransientEventAlertMuted: types.BoolValue(false),
 		Rules: &RulesModel{
-			Threshold: &ThresholdRuleModel{
-				Severity:          types.StringValue("warning"),
-				MetricName:        types.StringValue("disk.usage"),
-				Rollup:            types.Int64Value(60000),
-				Window:            types.Int64Value(300000),
-				Aggregation:       types.StringValue("max"),
-				ConditionOperator: types.StringValue("<"),
-				ConditionValue:    types.Float64Value(20.0),
-				MetricPattern: &MetricPatternModel{
-					Prefix:      types.StringValue("disk."),
-					Postfix:     types.StringValue(""),
-					Placeholder: types.StringValue(""),
-					Operator:    types.StringValue("startsWith"),
+			Threshold: []ThresholdRuleModel{
+				{
+					Severity:          types.StringValue("warning"),
+					MetricName:        types.StringValue("disk.usage"),
+					Rollup:            types.Int64Value(60000),
+					Window:            types.Int64Value(300000),
+					Aggregation:       types.StringValue("max"),
+					ConditionOperator: types.StringValue("<"),
+					ConditionValue:    types.Float64Value(20.0),
+					MetricPattern: &MetricPatternModel{
+						Prefix:      types.StringValue("disk."),
+						Postfix:     types.StringValue(""),
+						Placeholder: types.StringValue(""),
+						Operator:    types.StringValue("startsWith"),
+					},
 				},
 			},
 		},
@@ -588,14 +595,16 @@ func TestMapStateToDataObject_WithMultipleRules(t *testing.T) {
 				Severity:     types.StringValue("critical"),
 				SystemRuleID: types.StringValue("sys-123"),
 			},
-			Threshold: &ThresholdRuleModel{
-				Severity:          types.StringValue("warning"),
-				MetricName:        types.StringValue("cpu.usage"),
-				Rollup:            types.Int64Value(60000),
-				Window:            types.Int64Value(300000),
-				Aggregation:       types.StringValue("avg"),
-				ConditionOperator: types.StringValue(">"),
-				ConditionValue:    types.Float64Value(75.0),
+			Threshold: []ThresholdRuleModel{
+				{
+					Severity:          types.StringValue("warning"),
+					MetricName:        types.StringValue("cpu.usage"),
+					Rollup:            types.Int64Value(60000),
+					Window:            types.Int64Value(300000),
+					Aggregation:       types.StringValue("avg"),
+					ConditionOperator: types.StringValue(">"),
+					ConditionValue:    types.Float64Value(75.0),
+				},
 			},
 		},
 	})
@@ -1047,15 +1056,15 @@ func TestUpdateState_WithThresholdRule(t *testing.T) {
 	require.False(t, diags.HasError())
 
 	require.NotNil(t, model.Rules)
-	require.NotNil(t, model.Rules.Threshold)
-	assert.Equal(t, "warning", model.Rules.Threshold.Severity.ValueString())
-	assert.Equal(t, "cpu.usage", model.Rules.Threshold.MetricName.ValueString())
-	assert.Equal(t, int64(60000), model.Rules.Threshold.Rollup.ValueInt64())
-	assert.Equal(t, int64(300000), model.Rules.Threshold.Window.ValueInt64())
-	assert.Equal(t, "avg", model.Rules.Threshold.Aggregation.ValueString())
-	assert.Equal(t, ">", model.Rules.Threshold.ConditionOperator.ValueString())
-	assert.Equal(t, 80.0, model.Rules.Threshold.ConditionValue.ValueFloat64())
-	assert.Nil(t, model.Rules.Threshold.MetricPattern)
+	require.Len(t, model.Rules.Threshold, 1)
+	assert.Equal(t, "warning", model.Rules.Threshold[0].Severity.ValueString())
+	assert.Equal(t, "cpu.usage", model.Rules.Threshold[0].MetricName.ValueString())
+	assert.Equal(t, int64(60000), model.Rules.Threshold[0].Rollup.ValueInt64())
+	assert.Equal(t, int64(300000), model.Rules.Threshold[0].Window.ValueInt64())
+	assert.Equal(t, "avg", model.Rules.Threshold[0].Aggregation.ValueString())
+	assert.Equal(t, ">", model.Rules.Threshold[0].ConditionOperator.ValueString())
+	assert.Equal(t, 80.0, model.Rules.Threshold[0].ConditionValue.ValueFloat64())
+	assert.Nil(t, model.Rules.Threshold[0].MetricPattern)
 }
 
 func TestUpdateState_WithThresholdRuleAndMetricPattern(t *testing.T) {
@@ -1113,114 +1122,12 @@ func TestUpdateState_WithThresholdRuleAndMetricPattern(t *testing.T) {
 	require.False(t, diags.HasError())
 
 	require.NotNil(t, model.Rules)
-	require.NotNil(t, model.Rules.Threshold)
-	require.NotNil(t, model.Rules.Threshold.MetricPattern)
-	assert.Equal(t, "jvm.", model.Rules.Threshold.MetricPattern.Prefix.ValueString())
-	assert.Equal(t, ".heap", model.Rules.Threshold.MetricPattern.Postfix.ValueString())
-	assert.Equal(t, "instance", model.Rules.Threshold.MetricPattern.Placeholder.ValueString())
-	assert.Equal(t, "is", model.Rules.Threshold.MetricPattern.Operator.ValueString())
-}
-func TestUpdateState_WithThresholdRuleMetricPatternOnly(t *testing.T) {
-	ctx := context.Background()
-	resource := &customEventSpecificationResource{}
-
-	rollup := 0
-	window := 5000
-	aggregation := "sum"
-	conditionOp := ">="
-	conditionVal := 0.01
-	postfix := "totalCost"
-	placeholder := "0"
-
-	spec := &api.CustomEventSpecification{
-		ID:                  "test-id",
-		Name:                "Test Event",
-		EntityType:          "kubernetesCluster",
-		Triggering:          false,
-		Enabled:             false,
-		RuleLogicalOperator: "AND",
-		Rules: []api.RuleSpecification{
-			{
-				DType:             api.ThresholdRuleType,
-				Severity:          5,
-				MetricName:        nil,
-				Rollup:            &rollup,
-				Window:            &window,
-				Aggregation:       &aggregation,
-				ConditionOperator: &conditionOp,
-				ConditionValue:    &conditionVal,
-				MetricPattern: &api.MetricPattern{
-					Prefix:      "namespaceCostGraph",
-					Postfix:     &postfix,
-					Placeholder: &placeholder,
-					Operator:    "is",
-				},
-			},
-		},
-	}
-
-	state := &tfsdk.State{
-		Schema: getTestSchema(),
-	}
-	initializeEmptyState(t, ctx, state)
-
-	diags := resource.UpdateState(ctx, state, nil, spec)
-	require.False(t, diags.HasError())
-
-	var model CustomEventSpecificationModel
-	diags = state.Get(ctx, &model)
-	require.False(t, diags.HasError())
-
-	require.NotNil(t, model.Rules)
-	require.NotNil(t, model.Rules.Threshold)
-	assert.True(t, model.Rules.Threshold.MetricName.IsNull())
-	require.NotNil(t, model.Rules.Threshold.MetricPattern)
-	assert.Equal(t, "namespaceCostGraph", model.Rules.Threshold.MetricPattern.Prefix.ValueString())
-	assert.Equal(t, "totalCost", model.Rules.Threshold.MetricPattern.Postfix.ValueString())
-}
-
-func TestMapStateToDataObject_WithThresholdRuleMetricPatternOnly(t *testing.T) {
-	ctx := context.Background()
-	resource := &customEventSpecificationResource{}
-
-	state := createMockState(t, CustomEventSpecificationModel{
-		ID:                       types.StringValue("test-id"),
-		Name:                     types.StringValue("Test Event"),
-		EntityType:               types.StringValue("kubernetesCluster"),
-		Triggering:               types.BoolValue(false),
-		Enabled:                  types.BoolValue(true),
-		RuleLogicalOperator:      types.StringValue("AND"),
-		TransientEventEnabled:    types.BoolValue(true),
-		TransientEventThreshold:  types.Int64Value(300000),
-		TransientEventAlertMuted: types.BoolValue(false),
-		Rules: &RulesModel{
-			Threshold: &ThresholdRuleModel{
-				Severity:          types.StringValue("warning"),
-				MetricName:        types.StringNull(),
-				Rollup:            types.Int64Value(0),
-				Window:            types.Int64Value(5000),
-				Aggregation:       types.StringValue("sum"),
-				ConditionOperator: types.StringValue(">="),
-				ConditionValue:    types.Float64Value(0.01),
-				MetricPattern: &MetricPatternModel{
-					Prefix:      types.StringValue("namespaceCostGraph"),
-					Postfix:     types.StringValue("totalCost"),
-					Placeholder: types.StringValue("0"),
-					Operator:    types.StringValue("is"),
-				},
-			},
-		},
-	})
-
-	result, diags := resource.MapStateToDataObject(ctx, nil, state)
-	require.False(t, diags.HasError())
-	require.NotNil(t, result)
-	require.Len(t, result.Rules, 1)
-
-	rule := result.Rules[0]
-	assert.Nil(t, rule.MetricName)
-	require.NotNil(t, rule.MetricPattern)
-	assert.Equal(t, "namespaceCostGraph", rule.MetricPattern.Prefix)
+	require.Len(t, model.Rules.Threshold, 1)
+	require.NotNil(t, model.Rules.Threshold[0].MetricPattern)
+	assert.Equal(t, "jvm.", model.Rules.Threshold[0].MetricPattern.Prefix.ValueString())
+	assert.Equal(t, ".heap", model.Rules.Threshold[0].MetricPattern.Postfix.ValueString())
+	assert.Equal(t, "instance", model.Rules.Threshold[0].MetricPattern.Placeholder.ValueString())
+	assert.Equal(t, "is", model.Rules.Threshold[0].MetricPattern.Operator.ValueString())
 }
 
 func TestUpdateState_WithMultipleRules(t *testing.T) {
@@ -1286,7 +1193,7 @@ func TestUpdateState_WithMultipleRules(t *testing.T) {
 	require.NotNil(t, model.Rules)
 	assert.NotNil(t, model.Rules.EntityCount)
 	assert.NotNil(t, model.Rules.System)
-	assert.NotNil(t, model.Rules.Threshold)
+	assert.NotEmpty(t, model.Rules.Threshold)
 }
 
 func TestUpdateState_WithNoRules(t *testing.T) {
@@ -1324,7 +1231,7 @@ func TestUpdateState_WithNoRules(t *testing.T) {
 	assert.Nil(t, model.Rules.EntityVerification)
 	assert.Nil(t, model.Rules.HostAvailability)
 	assert.Nil(t, model.Rules.System)
-	assert.Nil(t, model.Rules.Threshold)
+	assert.Empty(t, model.Rules.Threshold)
 }
 
 func TestUpdateState_WithNullOptionalFields(t *testing.T) {
@@ -1407,7 +1314,7 @@ func TestUpdateState_SkipsIncompleteRules(t *testing.T) {
 		assert.Nil(t, model.Rules.EntityVerification)
 		assert.Nil(t, model.Rules.HostAvailability)
 		assert.Nil(t, model.Rules.System)
-		assert.Nil(t, model.Rules.Threshold)
+		assert.Empty(t, model.Rules.Threshold)
 	}
 }
 
@@ -1557,6 +1464,653 @@ func initializeEmptyState(t *testing.T, ctx context.Context, state *tfsdk.State)
 	require.False(t, diags.HasError(), "Failed to initialize empty state")
 }
 
+func resourceUpgradeRequest(prior *tfsdk.State) resource.UpgradeStateRequest {
+	return resource.UpgradeStateRequest{State: prior}
+}
+
+func resourceUpgradeResponse(s schema.Schema) *resource.UpgradeStateResponse {
+	return &resource.UpgradeStateResponse{State: tfsdk.State{Schema: s}}
+}
+
+func TestMapStateToDataObject_WithMultipleThresholdRules(t *testing.T) {
+	ctx := context.Background()
+	resource := &customEventSpecificationResource{}
+
+	state := createMockState(t, CustomEventSpecificationModel{
+		ID:                       types.StringValue("test-id"),
+		Name:                     types.StringValue("Multi Threshold Event"),
+		EntityType:               types.StringValue("host"),
+		Triggering:               types.BoolValue(false),
+		Enabled:                  types.BoolValue(true),
+		RuleLogicalOperator:      types.StringValue("AND"),
+		TransientEventEnabled:    types.BoolValue(true),
+		TransientEventThreshold:  types.Int64Value(300000),
+		TransientEventAlertMuted: types.BoolValue(false),
+		Rules: &RulesModel{
+			Threshold: []ThresholdRuleModel{
+				{
+					Severity:          types.StringValue("warning"),
+					MetricName:        types.StringValue("cpu.used"),
+					Rollup:            types.Int64Value(60000),
+					Window:            types.Int64Value(300000),
+					Aggregation:       types.StringValue("avg"),
+					ConditionOperator: types.StringValue(">"),
+					ConditionValue:    types.Float64Value(80.0),
+				},
+				{
+					Severity:          types.StringValue("warning"),
+					MetricName:        types.StringValue("memory.used"),
+					Rollup:            types.Int64Value(60000),
+					Window:            types.Int64Value(300000),
+					Aggregation:       types.StringValue("avg"),
+					ConditionOperator: types.StringValue(">"),
+					ConditionValue:    types.Float64Value(90.0),
+				},
+			},
+		},
+	})
+
+	result, diags := resource.MapStateToDataObject(ctx, nil, state)
+	require.False(t, diags.HasError())
+	require.NotNil(t, result)
+	require.Len(t, result.Rules, 2)
+
+	assert.Equal(t, api.ThresholdRuleType, result.Rules[0].DType)
+	assert.Equal(t, "cpu.used", *result.Rules[0].MetricName)
+	assert.Equal(t, 80.0, *result.Rules[0].ConditionValue)
+
+	assert.Equal(t, api.ThresholdRuleType, result.Rules[1].DType)
+	assert.Equal(t, "memory.used", *result.Rules[1].MetricName)
+	assert.Equal(t, 90.0, *result.Rules[1].ConditionValue)
+}
+
+func TestMapStateToDataObject_ValidationErrors(t *testing.T) {
+	ctx := context.Background()
+	resource := &customEventSpecificationResource{}
+
+	t.Run("multiple threshold rules combined with entity count rule", func(t *testing.T) {
+		state := createMockState(t, CustomEventSpecificationModel{
+			ID:                       types.StringValue("test-id"),
+			Name:                     types.StringValue("Invalid Config"),
+			EntityType:               types.StringValue("host"),
+			Triggering:               types.BoolValue(false),
+			Enabled:                  types.BoolValue(true),
+			RuleLogicalOperator:      types.StringValue("AND"),
+			TransientEventEnabled:    types.BoolValue(true),
+			TransientEventThreshold:  types.Int64Value(300000),
+			TransientEventAlertMuted: types.BoolValue(false),
+			Rules: &RulesModel{
+				EntityCount: &EntityCountRuleModel{
+					Severity:          types.StringValue("warning"),
+					ConditionOperator: types.StringValue(">"),
+					ConditionValue:    types.Float64Value(5.0),
+				},
+				Threshold: []ThresholdRuleModel{
+					{
+						Severity:          types.StringValue("warning"),
+						MetricName:        types.StringValue("cpu.used"),
+						Rollup:            types.Int64Value(0),
+						Window:            types.Int64Value(60000),
+						Aggregation:       types.StringValue("avg"),
+						ConditionOperator: types.StringValue(">"),
+						ConditionValue:    types.Float64Value(80.0),
+					},
+					{
+						Severity:          types.StringValue("warning"),
+						MetricName:        types.StringValue("memory.used"),
+						Rollup:            types.Int64Value(0),
+						Window:            types.Int64Value(60000),
+						Aggregation:       types.StringValue("avg"),
+						ConditionOperator: types.StringValue(">"),
+						ConditionValue:    types.Float64Value(90.0),
+					},
+				},
+			},
+		})
+
+		_, diags := resource.MapStateToDataObject(ctx, nil, state)
+		assert.True(t, diags.HasError())
+		assert.Contains(t, diags.Errors()[0].Summary(), "Invalid Rules Configuration")
+	})
+
+	t.Run("multiple threshold rules with mismatched severity", func(t *testing.T) {
+		state := createMockState(t, CustomEventSpecificationModel{
+			ID:                       types.StringValue("test-id"),
+			Name:                     types.StringValue("Mismatched Severity"),
+			EntityType:               types.StringValue("host"),
+			Triggering:               types.BoolValue(false),
+			Enabled:                  types.BoolValue(true),
+			RuleLogicalOperator:      types.StringValue("AND"),
+			TransientEventEnabled:    types.BoolValue(true),
+			TransientEventThreshold:  types.Int64Value(300000),
+			TransientEventAlertMuted: types.BoolValue(false),
+			Rules: &RulesModel{
+				Threshold: []ThresholdRuleModel{
+					{
+						Severity:          types.StringValue("warning"),
+						MetricName:        types.StringValue("cpu.used"),
+						Rollup:            types.Int64Value(0),
+						Window:            types.Int64Value(60000),
+						Aggregation:       types.StringValue("avg"),
+						ConditionOperator: types.StringValue(">"),
+						ConditionValue:    types.Float64Value(80.0),
+					},
+					{
+						Severity:          types.StringValue("critical"),
+						MetricName:        types.StringValue("memory.used"),
+						Rollup:            types.Int64Value(0),
+						Window:            types.Int64Value(60000),
+						Aggregation:       types.StringValue("avg"),
+						ConditionOperator: types.StringValue(">"),
+						ConditionValue:    types.Float64Value(90.0),
+					},
+				},
+			},
+		})
+
+		_, diags := resource.MapStateToDataObject(ctx, nil, state)
+		assert.True(t, diags.HasError())
+		assert.Contains(t, diags.Errors()[0].Summary(), "Invalid Threshold Rules Configuration")
+	})
+
+	t.Run("multiple threshold rules with mismatched window", func(t *testing.T) {
+		state := createMockState(t, CustomEventSpecificationModel{
+			ID:                       types.StringValue("test-id"),
+			Name:                     types.StringValue("Mismatched Window"),
+			EntityType:               types.StringValue("host"),
+			Triggering:               types.BoolValue(false),
+			Enabled:                  types.BoolValue(true),
+			RuleLogicalOperator:      types.StringValue("AND"),
+			TransientEventEnabled:    types.BoolValue(true),
+			TransientEventThreshold:  types.Int64Value(300000),
+			TransientEventAlertMuted: types.BoolValue(false),
+			Rules: &RulesModel{
+				Threshold: []ThresholdRuleModel{
+					{
+						Severity:          types.StringValue("warning"),
+						MetricName:        types.StringValue("cpu.used"),
+						Rollup:            types.Int64Value(0),
+						Window:            types.Int64Value(60000),
+						Aggregation:       types.StringValue("avg"),
+						ConditionOperator: types.StringValue(">"),
+						ConditionValue:    types.Float64Value(80.0),
+					},
+					{
+						Severity:          types.StringValue("warning"),
+						MetricName:        types.StringValue("memory.used"),
+						Rollup:            types.Int64Value(0),
+						Window:            types.Int64Value(120000),
+						Aggregation:       types.StringValue("avg"),
+						ConditionOperator: types.StringValue(">"),
+						ConditionValue:    types.Float64Value(90.0),
+					},
+				},
+			},
+		})
+
+		_, diags := resource.MapStateToDataObject(ctx, nil, state)
+		assert.True(t, diags.HasError())
+		assert.Contains(t, diags.Errors()[0].Summary(), "Invalid Threshold Rules Configuration")
+	})
+
+	t.Run("multiple threshold rules with mismatched rollup", func(t *testing.T) {
+		state := createMockState(t, CustomEventSpecificationModel{
+			ID:                       types.StringValue("test-id"),
+			Name:                     types.StringValue("Mismatched Rollup"),
+			EntityType:               types.StringValue("host"),
+			Triggering:               types.BoolValue(false),
+			Enabled:                  types.BoolValue(true),
+			RuleLogicalOperator:      types.StringValue("AND"),
+			TransientEventEnabled:    types.BoolValue(true),
+			TransientEventThreshold:  types.Int64Value(300000),
+			TransientEventAlertMuted: types.BoolValue(false),
+			Rules: &RulesModel{
+				Threshold: []ThresholdRuleModel{
+					{
+						Severity:          types.StringValue("warning"),
+						MetricName:        types.StringValue("cpu.used"),
+						Rollup:            types.Int64Value(0),
+						Window:            types.Int64Value(60000),
+						Aggregation:       types.StringValue("avg"),
+						ConditionOperator: types.StringValue(">"),
+						ConditionValue:    types.Float64Value(80.0),
+					},
+					{
+						Severity:          types.StringValue("warning"),
+						MetricName:        types.StringValue("memory.used"),
+						Rollup:            types.Int64Value(1000),
+						Window:            types.Int64Value(60000),
+						Aggregation:       types.StringValue("avg"),
+						ConditionOperator: types.StringValue(">"),
+						ConditionValue:    types.Float64Value(90.0),
+					},
+				},
+			},
+		})
+
+		_, diags := resource.MapStateToDataObject(ctx, nil, state)
+		assert.True(t, diags.HasError())
+		assert.Contains(t, diags.Errors()[0].Summary(), "Invalid Threshold Rules Configuration")
+	})
+
+	t.Run("multiple threshold rules with invalid entity type application", func(t *testing.T) {
+		state := createMockState(t, CustomEventSpecificationModel{
+			ID:                       types.StringValue("test-id"),
+			Name:                     types.StringValue("App Entity Type"),
+			EntityType:               types.StringValue("application"),
+			Triggering:               types.BoolValue(false),
+			Enabled:                  types.BoolValue(true),
+			RuleLogicalOperator:      types.StringValue("AND"),
+			TransientEventEnabled:    types.BoolValue(true),
+			TransientEventThreshold:  types.Int64Value(300000),
+			TransientEventAlertMuted: types.BoolValue(false),
+			Rules: &RulesModel{
+				Threshold: []ThresholdRuleModel{
+					{
+						Severity:          types.StringValue("warning"),
+						MetricName:        types.StringValue("calls"),
+						Rollup:            types.Int64Value(0),
+						Window:            types.Int64Value(60000),
+						Aggregation:       types.StringValue("avg"),
+						ConditionOperator: types.StringValue(">"),
+						ConditionValue:    types.Float64Value(100.0),
+					},
+					{
+						Severity:          types.StringValue("warning"),
+						MetricName:        types.StringValue("erroneousCalls"),
+						Rollup:            types.Int64Value(0),
+						Window:            types.Int64Value(60000),
+						Aggregation:       types.StringValue("avg"),
+						ConditionOperator: types.StringValue(">"),
+						ConditionValue:    types.Float64Value(10.0),
+					},
+				},
+			},
+		})
+
+		_, diags := resource.MapStateToDataObject(ctx, nil, state)
+		assert.True(t, diags.HasError())
+		assert.Contains(t, diags.Errors()[0].Summary(), "Invalid Entity Type for Multiple Rules")
+	})
+
+	t.Run("multiple threshold rules with invalid entity type service", func(t *testing.T) {
+		state := createMockState(t, CustomEventSpecificationModel{
+			ID:                       types.StringValue("test-id"),
+			Name:                     types.StringValue("Service Entity Type"),
+			EntityType:               types.StringValue("service"),
+			Triggering:               types.BoolValue(false),
+			Enabled:                  types.BoolValue(true),
+			RuleLogicalOperator:      types.StringValue("AND"),
+			TransientEventEnabled:    types.BoolValue(true),
+			TransientEventThreshold:  types.Int64Value(300000),
+			TransientEventAlertMuted: types.BoolValue(false),
+			Rules: &RulesModel{
+				Threshold: []ThresholdRuleModel{
+					{
+						Severity:          types.StringValue("warning"),
+						MetricName:        types.StringValue("calls"),
+						Rollup:            types.Int64Value(0),
+						Window:            types.Int64Value(60000),
+						Aggregation:       types.StringValue("avg"),
+						ConditionOperator: types.StringValue(">"),
+						ConditionValue:    types.Float64Value(100.0),
+					},
+					{
+						Severity:          types.StringValue("warning"),
+						MetricName:        types.StringValue("erroneousCalls"),
+						Rollup:            types.Int64Value(0),
+						Window:            types.Int64Value(60000),
+						Aggregation:       types.StringValue("avg"),
+						ConditionOperator: types.StringValue(">"),
+						ConditionValue:    types.Float64Value(10.0),
+					},
+				},
+			},
+		})
+
+		_, diags := resource.MapStateToDataObject(ctx, nil, state)
+		assert.True(t, diags.HasError())
+		assert.Contains(t, diags.Errors()[0].Summary(), "Invalid Entity Type for Multiple Rules")
+	})
+
+	t.Run("multiple threshold rules with invalid entity type endpoint", func(t *testing.T) {
+		state := createMockState(t, CustomEventSpecificationModel{
+			ID:                       types.StringValue("test-id"),
+			Name:                     types.StringValue("Endpoint Entity Type"),
+			EntityType:               types.StringValue("endpoint"),
+			Triggering:               types.BoolValue(false),
+			Enabled:                  types.BoolValue(true),
+			RuleLogicalOperator:      types.StringValue("AND"),
+			TransientEventEnabled:    types.BoolValue(true),
+			TransientEventThreshold:  types.Int64Value(300000),
+			TransientEventAlertMuted: types.BoolValue(false),
+			Rules: &RulesModel{
+				Threshold: []ThresholdRuleModel{
+					{
+						Severity:          types.StringValue("warning"),
+						MetricName:        types.StringValue("calls"),
+						Rollup:            types.Int64Value(0),
+						Window:            types.Int64Value(60000),
+						Aggregation:       types.StringValue("avg"),
+						ConditionOperator: types.StringValue(">"),
+						ConditionValue:    types.Float64Value(100.0),
+					},
+					{
+						Severity:          types.StringValue("warning"),
+						MetricName:        types.StringValue("erroneousCalls"),
+						Rollup:            types.Int64Value(0),
+						Window:            types.Int64Value(60000),
+						Aggregation:       types.StringValue("avg"),
+						ConditionOperator: types.StringValue(">"),
+						ConditionValue:    types.Float64Value(10.0),
+					},
+				},
+			},
+		})
+
+		_, diags := resource.MapStateToDataObject(ctx, nil, state)
+		assert.True(t, diags.HasError())
+		assert.Contains(t, diags.Errors()[0].Summary(), "Invalid Entity Type for Multiple Rules")
+	})
+}
+
+func TestUpdateState_WithMultipleThresholdRules(t *testing.T) {
+	ctx := context.Background()
+	resource := &customEventSpecificationResource{}
+
+	metricName1 := "cpu.used"
+	rollup1 := 0
+	window1 := 60000
+	aggregation1 := "avg"
+	conditionOp1 := ">"
+	conditionVal1 := 80.0
+
+	metricName2 := "memory.used"
+	rollup2 := 0
+	window2 := 60000
+	aggregation2 := "avg"
+	conditionOp2 := ">"
+	conditionVal2 := 90.0
+
+	spec := &api.CustomEventSpecification{
+		ID:                  "test-id",
+		Name:                "Multi Threshold Event",
+		EntityType:          "host",
+		Triggering:          false,
+		Enabled:             true,
+		RuleLogicalOperator: "AND",
+		Rules: []api.RuleSpecification{
+			{
+				DType:             api.ThresholdRuleType,
+				Severity:          5,
+				MetricName:        &metricName1,
+				Rollup:            &rollup1,
+				Window:            &window1,
+				Aggregation:       &aggregation1,
+				ConditionOperator: &conditionOp1,
+				ConditionValue:    &conditionVal1,
+			},
+			{
+				DType:             api.ThresholdRuleType,
+				Severity:          5,
+				MetricName:        &metricName2,
+				Rollup:            &rollup2,
+				Window:            &window2,
+				Aggregation:       &aggregation2,
+				ConditionOperator: &conditionOp2,
+				ConditionValue:    &conditionVal2,
+			},
+		},
+	}
+
+	state := &tfsdk.State{
+		Schema: getTestSchema(),
+	}
+
+	initializeEmptyState(t, ctx, state)
+
+	diags := resource.UpdateState(ctx, state, nil, spec)
+	require.False(t, diags.HasError())
+
+	var model CustomEventSpecificationModel
+	diags = state.Get(ctx, &model)
+	require.False(t, diags.HasError())
+
+	require.NotNil(t, model.Rules)
+	require.Len(t, model.Rules.Threshold, 2)
+	assert.Equal(t, "cpu.used", model.Rules.Threshold[0].MetricName.ValueString())
+	assert.Equal(t, 80.0, model.Rules.Threshold[0].ConditionValue.ValueFloat64())
+	assert.Equal(t, "memory.used", model.Rules.Threshold[1].MetricName.ValueString())
+	assert.Equal(t, 90.0, model.Rules.Threshold[1].ConditionValue.ValueFloat64())
+}
+
+func TestStateUpgrader_V1ToV2_WrapsThresholdInList(t *testing.T) {
+	ctx := context.Background()
+	resource := NewCustomEventSpecificationResourceHandle()
+
+	upgrader, ok := resource.GetStateUpgraders(ctx)[1]
+	require.True(t, ok)
+	require.NotNil(t, upgrader.PriorSchema)
+
+	priorState := tfsdk.State{Schema: *upgrader.PriorSchema}
+	diags := priorState.Set(ctx, customEventSpecificationV1Model{
+		ID:                       types.StringValue("test-id"),
+		Name:                     types.StringValue("Test Event"),
+		EntityType:               types.StringValue("host"),
+		Triggering:               types.BoolValue(false),
+		Enabled:                  types.BoolValue(true),
+		RuleLogicalOperator:      types.StringValue("AND"),
+		TransientEventEnabled:    types.BoolValue(true),
+		TransientEventThreshold:  types.Int64Value(300000),
+		TransientEventAlertMuted: types.BoolValue(false),
+		Rules: &rulesV1Model{
+			Threshold: &ThresholdRuleModel{
+				Severity:          types.StringValue("warning"),
+				MetricName:        types.StringValue("cpu.used"),
+				Rollup:            types.Int64Value(0),
+				Window:            types.Int64Value(60000),
+				Aggregation:       types.StringValue("avg"),
+				ConditionOperator: types.StringValue(">"),
+				ConditionValue:    types.Float64Value(80.0),
+			},
+		},
+	})
+	require.False(t, diags.HasError(), "%v", diags)
+
+	req := resourceUpgradeRequest(&priorState)
+	resp := resourceUpgradeResponse(getTestSchema())
+	upgrader.StateUpgrader(ctx, req, resp)
+	require.False(t, resp.Diagnostics.HasError(), "%v", resp.Diagnostics)
+
+	var upgraded CustomEventSpecificationModel
+	require.False(t, resp.State.Get(ctx, &upgraded).HasError())
+	assert.Equal(t, "test-id", upgraded.ID.ValueString())
+	require.NotNil(t, upgraded.Rules)
+	require.Len(t, upgraded.Rules.Threshold, 1)
+	assert.Equal(t, "cpu.used", upgraded.Rules.Threshold[0].MetricName.ValueString())
+	assert.Equal(t, 80.0, upgraded.Rules.Threshold[0].ConditionValue.ValueFloat64())
+}
+
+func TestStateUpgrader_V1ToV2_KeepsNullRulesNull(t *testing.T) {
+	ctx := context.Background()
+	resource := NewCustomEventSpecificationResourceHandle()
+	upgrader := resource.GetStateUpgraders(ctx)[1]
+
+	priorState := tfsdk.State{Schema: *upgrader.PriorSchema}
+	diags := priorState.Set(ctx, customEventSpecificationV1Model{
+		ID:                       types.StringValue("test-id"),
+		Name:                     types.StringValue("Test Event"),
+		EntityType:               types.StringValue("host"),
+		Triggering:               types.BoolValue(false),
+		Enabled:                  types.BoolValue(true),
+		RuleLogicalOperator:      types.StringValue("AND"),
+		TransientEventEnabled:    types.BoolValue(true),
+		TransientEventThreshold:  types.Int64Value(300000),
+		TransientEventAlertMuted: types.BoolValue(false),
+		Rules:                    nil,
+	})
+	require.False(t, diags.HasError(), "%v", diags)
+
+	resp := resourceUpgradeResponse(getTestSchema())
+	upgrader.StateUpgrader(ctx, resourceUpgradeRequest(&priorState), resp)
+	require.False(t, resp.Diagnostics.HasError(), "%v", resp.Diagnostics)
+
+	var upgraded CustomEventSpecificationModel
+	require.False(t, resp.State.Get(ctx, &upgraded).HasError())
+	assert.Nil(t, upgraded.Rules)
+}
+
+func TestStateUpgrader_V1ToV2_WithOtherRuleTypes(t *testing.T) {
+	ctx := context.Background()
+	resource := NewCustomEventSpecificationResourceHandle()
+	upgrader := resource.GetStateUpgraders(ctx)[1]
+
+	priorState := tfsdk.State{Schema: *upgrader.PriorSchema}
+	diags := priorState.Set(ctx, customEventSpecificationV1Model{
+		ID:                       types.StringValue("test-id"),
+		Name:                     types.StringValue("Test Event"),
+		EntityType:               types.StringValue("host"),
+		Triggering:               types.BoolValue(false),
+		Enabled:                  types.BoolValue(true),
+		RuleLogicalOperator:      types.StringValue("AND"),
+		TransientEventEnabled:    types.BoolValue(true),
+		TransientEventThreshold:  types.Int64Value(300000),
+		TransientEventAlertMuted: types.BoolValue(false),
+		Rules: &rulesV1Model{
+			EntityCount: &EntityCountRuleModel{
+				Severity:          types.StringValue("warning"),
+				ConditionOperator: types.StringValue(">"),
+				ConditionValue:    types.Float64Value(10.0),
+			},
+		},
+	})
+	require.False(t, diags.HasError(), "%v", diags)
+
+	resp := resourceUpgradeResponse(getTestSchema())
+	upgrader.StateUpgrader(ctx, resourceUpgradeRequest(&priorState), resp)
+	require.False(t, resp.Diagnostics.HasError(), "%v", resp.Diagnostics)
+
+	var upgraded CustomEventSpecificationModel
+	require.False(t, resp.State.Get(ctx, &upgraded).HasError())
+	require.NotNil(t, upgraded.Rules)
+	assert.NotNil(t, upgraded.Rules.EntityCount)
+	assert.Nil(t, upgraded.Rules.Threshold)
+}
+
+func TestGetStateUpgraders(t *testing.T) {
+	ctx := context.Background()
+	resource := NewCustomEventSpecificationResourceHandle()
+	upgraders := resource.GetStateUpgraders(ctx)
+
+	assert.Contains(t, upgraders, int64(0))
+	assert.Contains(t, upgraders, int64(1))
+}
+
+func TestUpdateState_WithThresholdRuleMetricPatternOnly(t *testing.T) {
+	ctx := context.Background()
+	resource := &customEventSpecificationResource{}
+
+	rollup := 0
+	window := 5000
+	aggregation := "sum"
+	conditionOp := ">="
+	conditionVal := 0.01
+	postfix := "totalCost"
+	placeholder := "0"
+
+	spec := &api.CustomEventSpecification{
+		ID:                  "test-id",
+		Name:                "Test Event",
+		EntityType:          "kubernetesCluster",
+		Triggering:          false,
+		Enabled:             false,
+		RuleLogicalOperator: "AND",
+		Rules: []api.RuleSpecification{
+			{
+				DType:             api.ThresholdRuleType,
+				Severity:          5,
+				MetricName:        nil,
+				Rollup:            &rollup,
+				Window:            &window,
+				Aggregation:       &aggregation,
+				ConditionOperator: &conditionOp,
+				ConditionValue:    &conditionVal,
+				MetricPattern: &api.MetricPattern{
+					Prefix:      "namespaceCostGraph",
+					Postfix:     &postfix,
+					Placeholder: &placeholder,
+					Operator:    "is",
+				},
+			},
+		},
+	}
+
+	state := &tfsdk.State{
+		Schema: getTestSchema(),
+	}
+	initializeEmptyState(t, ctx, state)
+
+	diags := resource.UpdateState(ctx, state, nil, spec)
+	require.False(t, diags.HasError())
+
+	var model CustomEventSpecificationModel
+	diags = state.Get(ctx, &model)
+	require.False(t, diags.HasError())
+
+	require.NotNil(t, model.Rules)
+	require.Len(t, model.Rules.Threshold, 1)
+	assert.True(t, model.Rules.Threshold[0].MetricName.IsNull())
+	require.NotNil(t, model.Rules.Threshold[0].MetricPattern)
+	assert.Equal(t, "namespaceCostGraph", model.Rules.Threshold[0].MetricPattern.Prefix.ValueString())
+	assert.Equal(t, "totalCost", model.Rules.Threshold[0].MetricPattern.Postfix.ValueString())
+}
+
+func TestMapStateToDataObject_WithThresholdRuleMetricPatternOnly(t *testing.T) {
+	ctx := context.Background()
+	resource := &customEventSpecificationResource{}
+
+	state := createMockState(t, CustomEventSpecificationModel{
+		ID:                       types.StringValue("test-id"),
+		Name:                     types.StringValue("Test Event"),
+		EntityType:               types.StringValue("kubernetesCluster"),
+		Triggering:               types.BoolValue(false),
+		Enabled:                  types.BoolValue(true),
+		RuleLogicalOperator:      types.StringValue("AND"),
+		TransientEventEnabled:    types.BoolValue(true),
+		TransientEventThreshold:  types.Int64Value(300000),
+		TransientEventAlertMuted: types.BoolValue(false),
+		Rules: &RulesModel{
+			Threshold: []ThresholdRuleModel{
+				{
+					Severity:          types.StringValue("warning"),
+					MetricName:        types.StringNull(),
+					Rollup:            types.Int64Value(0),
+					Window:            types.Int64Value(5000),
+					Aggregation:       types.StringValue("sum"),
+					ConditionOperator: types.StringValue(">="),
+					ConditionValue:    types.Float64Value(0.01),
+					MetricPattern: &MetricPatternModel{
+						Prefix:      types.StringValue("namespaceCostGraph"),
+						Postfix:     types.StringValue("totalCost"),
+						Placeholder: types.StringValue("0"),
+						Operator:    types.StringValue("is"),
+					},
+				},
+			},
+		},
+	})
+
+	result, diags := resource.MapStateToDataObject(ctx, nil, state)
+	require.False(t, diags.HasError())
+	require.NotNil(t, result)
+	require.Len(t, result.Rules, 1)
+
+	rule := result.Rules[0]
+	assert.Nil(t, rule.MetricName)
+	require.NotNil(t, rule.MetricPattern)
+	assert.Equal(t, "namespaceCostGraph", rule.MetricPattern.Prefix)
+}
+
 func newThresholdSpecForRefresh(conditionOp string, postfix *string) *api.CustomEventSpecification {
 	metricName := "cpu.usage"
 	rollup := 0
@@ -1601,14 +2155,16 @@ func newThresholdStateModel(conditionOp string) CustomEventSpecificationModel {
 		TransientEventThreshold:  types.Int64Value(300000),
 		TransientEventAlertMuted: types.BoolValue(false),
 		Rules: &RulesModel{
-			Threshold: &ThresholdRuleModel{
-				Severity:          types.StringValue("warning"),
-				MetricName:        types.StringValue("cpu.usage"),
-				Rollup:            types.Int64Value(0),
-				Window:            types.Int64Value(5000),
-				Aggregation:       types.StringValue("avg"),
-				ConditionOperator: types.StringValue(conditionOp),
-				ConditionValue:    types.Float64Value(0.5),
+			Threshold: []ThresholdRuleModel{
+				{
+					Severity:          types.StringValue("warning"),
+					MetricName:        types.StringValue("cpu.usage"),
+					Rollup:            types.Int64Value(0),
+					Window:            types.Int64Value(5000),
+					Aggregation:       types.StringValue("avg"),
+					ConditionOperator: types.StringValue(conditionOp),
+					ConditionValue:    types.Float64Value(0.5),
+				},
 			},
 		},
 	}
@@ -1628,8 +2184,8 @@ func TestUpdateState_RefreshDetectsRuleChangesMadeOutsideTerraform(t *testing.T)
 	var model CustomEventSpecificationModel
 	require.False(t, state.Get(ctx, &model).HasError())
 	require.NotNil(t, model.Rules)
-	require.NotNil(t, model.Rules.Threshold)
-	assert.Equal(t, ">=", model.Rules.Threshold.ConditionOperator.ValueString())
+	require.Len(t, model.Rules.Threshold, 1)
+	assert.Equal(t, ">=", model.Rules.Threshold[0].ConditionOperator.ValueString())
 }
 
 func TestUpdateState_PlanPreservesPlannedRules(t *testing.T) {
@@ -1646,8 +2202,9 @@ func TestUpdateState_PlanPreservesPlannedRules(t *testing.T) {
 
 	var model CustomEventSpecificationModel
 	require.False(t, state.Get(ctx, &model).HasError())
-	require.NotNil(t, model.Rules.Threshold)
-	assert.Equal(t, ">", model.Rules.Threshold.ConditionOperator.ValueString())
+	require.NotNil(t, model.Rules)
+	require.Len(t, model.Rules.Threshold, 1)
+	assert.Equal(t, ">", model.Rules.Threshold[0].ConditionOperator.ValueString())
 }
 
 func TestUpdateState_MetricPatternNullPostfixAndPlaceholderMapToEmptyString(t *testing.T) {
@@ -1662,9 +2219,11 @@ func TestUpdateState_MetricPatternNullPostfixAndPlaceholderMapToEmptyString(t *t
 
 	var model CustomEventSpecificationModel
 	require.False(t, state.Get(ctx, &model).HasError())
-	require.NotNil(t, model.Rules.Threshold.MetricPattern)
-	assert.Equal(t, "", model.Rules.Threshold.MetricPattern.Postfix.ValueString())
-	assert.False(t, model.Rules.Threshold.MetricPattern.Postfix.IsNull())
-	assert.Equal(t, "", model.Rules.Threshold.MetricPattern.Placeholder.ValueString())
-	assert.False(t, model.Rules.Threshold.MetricPattern.Placeholder.IsNull())
+	require.NotNil(t, model.Rules)
+	require.Len(t, model.Rules.Threshold, 1)
+	require.NotNil(t, model.Rules.Threshold[0].MetricPattern)
+	assert.Equal(t, "", model.Rules.Threshold[0].MetricPattern.Postfix.ValueString())
+	assert.False(t, model.Rules.Threshold[0].MetricPattern.Postfix.IsNull())
+	assert.Equal(t, "", model.Rules.Threshold[0].MetricPattern.Placeholder.ValueString())
+	assert.False(t, model.Rules.Threshold[0].MetricPattern.Placeholder.IsNull())
 }

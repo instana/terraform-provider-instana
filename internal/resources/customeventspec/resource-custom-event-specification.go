@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -35,7 +36,7 @@ func NewCustomEventSpecificationResourceHandle() resourcehandle.ResourceHandle[*
 		metaData: resourcehandle.ResourceMetaData{
 			ResourceName:  ResourceInstanaCustomEventSpecification,
 			Schema:        createCustomEventSpecificationSchema(),
-			SchemaVersion: 1,
+			SchemaVersion: 2,
 		},
 	}
 }
@@ -262,86 +263,91 @@ func createCustomEventSpecificationSchema() schema.Schema {
 							},
 						},
 					},
-					CustomEventSpecificationFieldThresholdRule: schema.SingleNestedAttribute{
+					CustomEventSpecificationFieldThresholdRule: schema.ListNestedAttribute{
 						Description: CustomEventSpecificationResourceDescThresholdRules,
 						Optional:    true,
-						Attributes: map[string]schema.Attribute{
-							CustomEventSpecificationRuleFieldSeverity: schema.StringAttribute{
-								Description: CustomEventSpecificationResourceDescSeverity,
-								Required:    true,
-								Validators: []validator.String{
-									stringvalidator.OneOf(CustomEventSpecificationSeverityWarning, CustomEventSpecificationSeverityCritical),
+						Validators: []validator.List{
+							listvalidator.SizeBetween(1, 5),
+						},
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								CustomEventSpecificationRuleFieldSeverity: schema.StringAttribute{
+									Description: CustomEventSpecificationResourceDescSeverity,
+									Required:    true,
+									Validators: []validator.String{
+										stringvalidator.OneOf(CustomEventSpecificationSeverityWarning, CustomEventSpecificationSeverityCritical),
+									},
 								},
-							},
-							CustomEventSpecificationThresholdRuleFieldMetricName: schema.StringAttribute{
-								Description: CustomEventSpecificationResourceDescMetricName,
-								Optional:    true,
-							},
-							CustomEventSpecificationThresholdRuleFieldRollup: schema.Int64Attribute{
-								Description: CustomEventSpecificationResourceDescRollup,
-								Optional:    true,
-								Default:     int64default.StaticInt64(0),
-								Computed:    true,
-							},
-							CustomEventSpecificationThresholdRuleFieldWindow: schema.Int64Attribute{
-								Description: CustomEventSpecificationResourceDescWindow,
-								Required:    true,
-							},
-							CustomEventSpecificationThresholdRuleFieldAggregation: schema.StringAttribute{
-								Description: CustomEventSpecificationResourceDescAggregation,
-								Required:    true,
-								Validators: []validator.String{
-									stringvalidator.OneOf(
-										CustomEventSpecificationAggregationSum,
-										CustomEventSpecificationAggregationAvg,
-										CustomEventSpecificationAggregationMin,
-										CustomEventSpecificationAggregationMax,
-										CustomEventSpecificationAggregationAbsDiff,
-										CustomEventSpecificationAggregationRelDiff,
-									),
+								CustomEventSpecificationThresholdRuleFieldMetricName: schema.StringAttribute{
+									Description: CustomEventSpecificationResourceDescMetricName,
+									Optional:    true,
 								},
-							},
-							CustomEventSpecificationRuleFieldConditionOperator: schema.StringAttribute{
-								Description: CustomEventSpecificationResourceDescConditionOperator,
-								Required:    true,
-							},
-							CustomEventSpecificationRuleFieldConditionValue: schema.Float64Attribute{
-								Description: CustomEventSpecificationResourceDescConditionValue,
-								Optional:    true,
-							},
-							CustomEventSpecificationThresholdRuleFieldMetricPattern: schema.SingleNestedAttribute{
-								Description: CustomEventSpecificationResourceDescMetricPattern,
-								Optional:    true,
-								Attributes: map[string]schema.Attribute{
-									CustomEventSpecificationThresholdRuleFieldMetricPatternPrefix: schema.StringAttribute{
-										Description: CustomEventSpecificationResourceDescMetricPatternPrefix,
-										Required:    true,
+								CustomEventSpecificationThresholdRuleFieldRollup: schema.Int64Attribute{
+									Description: CustomEventSpecificationResourceDescRollup,
+									Optional:    true,
+									Default:     int64default.StaticInt64(0),
+									Computed:    true,
+								},
+								CustomEventSpecificationThresholdRuleFieldWindow: schema.Int64Attribute{
+									Description: CustomEventSpecificationResourceDescWindow,
+									Required:    true,
+								},
+								CustomEventSpecificationThresholdRuleFieldAggregation: schema.StringAttribute{
+									Description: CustomEventSpecificationResourceDescAggregation,
+									Required:    true,
+									Validators: []validator.String{
+										stringvalidator.OneOf(
+											CustomEventSpecificationAggregationSum,
+											CustomEventSpecificationAggregationAvg,
+											CustomEventSpecificationAggregationMin,
+											CustomEventSpecificationAggregationMax,
+											CustomEventSpecificationAggregationAbsDiff,
+											CustomEventSpecificationAggregationRelDiff,
+										),
 									},
-									CustomEventSpecificationThresholdRuleFieldMetricPatternPostfix: schema.StringAttribute{
-										Description: CustomEventSpecificationResourceDescMetricPatternPostfix,
-										Optional:    true,
-										Computed:    true,
-										Default:     stringdefault.StaticString(CustomEventSpecificationDefaultEmptyString),
-									},
-									CustomEventSpecificationThresholdRuleFieldMetricPatternPlaceholder: schema.StringAttribute{
-										Description: CustomEventSpecificationResourceDescMetricPatternPlaceholder,
-										Optional:    true,
-										Computed:    true,
-										Default:     stringdefault.StaticString(CustomEventSpecificationDefaultEmptyString),
-									},
-									CustomEventSpecificationThresholdRuleFieldMetricPatternOperator: schema.StringAttribute{
-										Description: CustomEventSpecificationResourceDescMetricPatternOperator,
-										Optional:    true,
-										Computed:    true,
-										Default:     stringdefault.StaticString(CustomEventSpecificationMetricPatternOperatorIs),
-										Validators: []validator.String{
-											stringvalidator.OneOf(
-												CustomEventSpecificationMetricPatternOperatorIs,
-												CustomEventSpecificationMetricPatternOperatorContains,
-												CustomEventSpecificationMetricPatternOperatorStartsWith,
-												CustomEventSpecificationMetricPatternOperatorEndsWith,
-												CustomEventSpecificationMetricPatternOperatorAny,
-											),
+								},
+								CustomEventSpecificationRuleFieldConditionOperator: schema.StringAttribute{
+									Description: CustomEventSpecificationResourceDescConditionOperator,
+									Required:    true,
+								},
+								CustomEventSpecificationRuleFieldConditionValue: schema.Float64Attribute{
+									Description: CustomEventSpecificationResourceDescConditionValue,
+									Optional:    true,
+								},
+								CustomEventSpecificationThresholdRuleFieldMetricPattern: schema.SingleNestedAttribute{
+									Description: CustomEventSpecificationResourceDescMetricPattern,
+									Optional:    true,
+									Attributes: map[string]schema.Attribute{
+										CustomEventSpecificationThresholdRuleFieldMetricPatternPrefix: schema.StringAttribute{
+											Description: CustomEventSpecificationResourceDescMetricPatternPrefix,
+											Required:    true,
+										},
+										CustomEventSpecificationThresholdRuleFieldMetricPatternPostfix: schema.StringAttribute{
+											Description: CustomEventSpecificationResourceDescMetricPatternPostfix,
+											Optional:    true,
+											Computed:    true,
+											Default:     stringdefault.StaticString(CustomEventSpecificationDefaultEmptyString),
+										},
+										CustomEventSpecificationThresholdRuleFieldMetricPatternPlaceholder: schema.StringAttribute{
+											Description: CustomEventSpecificationResourceDescMetricPatternPlaceholder,
+											Optional:    true,
+											Computed:    true,
+											Default:     stringdefault.StaticString(CustomEventSpecificationDefaultEmptyString),
+										},
+										CustomEventSpecificationThresholdRuleFieldMetricPatternOperator: schema.StringAttribute{
+											Description: CustomEventSpecificationResourceDescMetricPatternOperator,
+											Optional:    true,
+											Computed:    true,
+											Default:     stringdefault.StaticString(CustomEventSpecificationMetricPatternOperatorIs),
+											Validators: []validator.String{
+												stringvalidator.OneOf(
+													CustomEventSpecificationMetricPatternOperatorIs,
+													CustomEventSpecificationMetricPatternOperatorContains,
+													CustomEventSpecificationMetricPatternOperatorStartsWith,
+													CustomEventSpecificationMetricPatternOperatorEndsWith,
+													CustomEventSpecificationMetricPatternOperatorAny,
+												),
+											},
 										},
 									},
 								},
@@ -408,46 +414,40 @@ func (r *customEventSpecificationResource) UpdateState(ctx context.Context, stat
 func (r *customEventSpecificationResource) buildRulesModel(rules []api.RuleSpecification, diags *diag.Diagnostics) *RulesModel {
 	rulesModel := &RulesModel{}
 
-	// Use a map for O(1) lookup to process only the first occurrence of each rule type
-	processedTypes := make(map[string]bool, 6)
+	// Use a map for O(1) lookup to process only the first occurrence of non-threshold rule types
+	processedTypes := make(map[string]bool, 5)
 
 	for i := range rules {
 		rule := &rules[i]
 
-		// Skip if this rule type was already processed
-		if processedTypes[rule.DType] {
-			continue
-		}
-
 		switch rule.DType {
+		case api.ThresholdRuleType:
+			if r.isValidThresholdRule(rule) {
+				rulesModel.Threshold = append(rulesModel.Threshold, *r.buildThresholdRule(rule))
+			}
 		case api.EntityCountRuleType:
-			if r.isValidEntityCountRule(rule) {
+			if !processedTypes[rule.DType] && r.isValidEntityCountRule(rule) {
 				rulesModel.EntityCount = r.buildEntityCountRule(rule)
 				processedTypes[rule.DType] = true
 			}
 		case api.EntityCountVerificationRuleType:
-			if r.isValidEntityCountVerificationRule(rule) {
+			if !processedTypes[rule.DType] && r.isValidEntityCountVerificationRule(rule) {
 				rulesModel.EntityCountVerification = r.buildEntityCountVerificationRule(rule)
 				processedTypes[rule.DType] = true
 			}
 		case api.EntityVerificationRuleType:
-			if r.isValidEntityVerificationRule(rule) {
+			if !processedTypes[rule.DType] && r.isValidEntityVerificationRule(rule) {
 				rulesModel.EntityVerification = r.buildEntityVerificationRule(rule)
 				processedTypes[rule.DType] = true
 			}
 		case api.HostAvailabilityRuleType:
-			if r.isValidHostAvailabilityRule(rule) {
+			if !processedTypes[rule.DType] && r.isValidHostAvailabilityRule(rule) {
 				rulesModel.HostAvailability = r.buildHostAvailabilityRule(rule, diags)
 				processedTypes[rule.DType] = true
 			}
 		case api.SystemRuleType:
-			if r.isValidSystemRule(rule) {
+			if !processedTypes[rule.DType] && r.isValidSystemRule(rule) {
 				rulesModel.System = r.buildSystemRule(rule)
-				processedTypes[rule.DType] = true
-			}
-		case api.ThresholdRuleType:
-			if r.isValidThresholdRule(rule) {
-				rulesModel.Threshold = r.buildThresholdRule(rule)
 				processedTypes[rule.DType] = true
 			}
 		}
@@ -611,6 +611,12 @@ func (r *customEventSpecificationResource) MapStateToDataObject(ctx context.Cont
 		return nil, diags
 	}
 
+	// Validate model business rules
+	r.validateModel(model, &diags)
+	if diags.HasError() {
+		return nil, diags
+	}
+
 	// Build API specification from model
 	spec := r.buildAPISpecification(model, &diags)
 	if diags.HasError() {
@@ -618,6 +624,56 @@ func (r *customEventSpecificationResource) MapStateToDataObject(ctx context.Cont
 	}
 
 	return spec, diags
+}
+
+// validateModel validates business rules for CustomEventSpecification
+func (r *customEventSpecificationResource) validateModel(model *CustomEventSpecificationModel, diags *diag.Diagnostics) {
+	if model.Rules == nil {
+		return
+	}
+
+	hasOtherRules := model.Rules.EntityCount != nil ||
+		model.Rules.EntityCountVerification != nil ||
+		model.Rules.EntityVerification != nil ||
+		model.Rules.HostAvailability != nil ||
+		model.Rules.System != nil
+
+	thresholdCount := len(model.Rules.Threshold)
+
+	// Validation 1: Multiple rules are allowed only for threshold rules and cannot be combined with other rule types
+	if thresholdCount > 1 && hasOtherRules {
+		diags.AddError(
+			"Invalid Rules Configuration",
+			"Multiple rules are only supported for threshold rules and cannot be combined with other rule types.",
+		)
+	}
+
+	// Validation 2: When multiple threshold rules are present:
+	if thresholdCount > 1 {
+		// Entity types 'application', 'service', and 'endpoint' are not allowed with multiple rules
+		entityType := model.EntityType.ValueString()
+		if entityType == "application" || entityType == "service" || entityType == "endpoint" {
+			diags.AddError(
+				"Invalid Entity Type for Multiple Rules",
+				fmt.Sprintf("Multiple rules are not allowed for entity type '%s'.", entityType),
+			)
+		}
+
+		// All threshold rules must share the same severity, window, and rollup
+		firstThreshold := model.Rules.Threshold[0]
+		for i := 1; i < thresholdCount; i++ {
+			t := model.Rules.Threshold[i]
+			if t.Severity.ValueString() != firstThreshold.Severity.ValueString() ||
+				t.Window.ValueInt64() != firstThreshold.Window.ValueInt64() ||
+				t.Rollup.ValueInt64() != firstThreshold.Rollup.ValueInt64() {
+				diags.AddError(
+					"Invalid Threshold Rules Configuration",
+					"All threshold rules must have the same severity, window, and rollup.",
+				)
+				break
+			}
+		}
+	}
 }
 
 // extractModel retrieves the model from plan or state with proper validation
@@ -725,8 +781,10 @@ func (r *customEventSpecificationResource) buildRulesFromModel(rulesModel *Rules
 		rules = append(rules, r.buildSystemRuleSpec(rulesModel.System))
 	}
 
-	if rulesModel.Threshold != nil {
-		rules = append(rules, r.buildThresholdRuleSpec(rulesModel.Threshold))
+	if len(rulesModel.Threshold) > 0 {
+		for i := range rulesModel.Threshold {
+			rules = append(rules, r.buildThresholdRuleSpec(&rulesModel.Threshold[i]))
+		}
 	}
 
 	return rules
@@ -884,9 +942,304 @@ func mapSeverityToInt(severity string) int {
 	}
 }
 
+// buildV1ThresholdRuleSchema returns the v1 schema for threshold rule (SingleNestedAttribute)
+func buildV1ThresholdRuleSchema() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Description: CustomEventSpecificationResourceDescThresholdRules,
+		Optional:    true,
+		Attributes: map[string]schema.Attribute{
+			CustomEventSpecificationRuleFieldSeverity: schema.StringAttribute{
+				Description: CustomEventSpecificationResourceDescSeverity,
+				Required:    true,
+				Validators: []validator.String{
+					stringvalidator.OneOf(CustomEventSpecificationSeverityWarning, CustomEventSpecificationSeverityCritical),
+				},
+			},
+			CustomEventSpecificationThresholdRuleFieldMetricName: schema.StringAttribute{
+				Description: CustomEventSpecificationResourceDescMetricName,
+				Optional:    true,
+			},
+			CustomEventSpecificationThresholdRuleFieldRollup: schema.Int64Attribute{
+				Description: CustomEventSpecificationResourceDescRollup,
+				Optional:    true,
+				Default:     int64default.StaticInt64(0),
+				Computed:    true,
+			},
+			CustomEventSpecificationThresholdRuleFieldWindow: schema.Int64Attribute{
+				Description: CustomEventSpecificationResourceDescWindow,
+				Required:    true,
+			},
+			CustomEventSpecificationThresholdRuleFieldAggregation: schema.StringAttribute{
+				Description: CustomEventSpecificationResourceDescAggregation,
+				Required:    true,
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						CustomEventSpecificationAggregationSum,
+						CustomEventSpecificationAggregationAvg,
+						CustomEventSpecificationAggregationMin,
+						CustomEventSpecificationAggregationMax,
+						CustomEventSpecificationAggregationAbsDiff,
+						CustomEventSpecificationAggregationRelDiff,
+					),
+				},
+			},
+			CustomEventSpecificationRuleFieldConditionOperator: schema.StringAttribute{
+				Description: CustomEventSpecificationResourceDescConditionOperator,
+				Required:    true,
+			},
+			CustomEventSpecificationRuleFieldConditionValue: schema.Float64Attribute{
+				Description: CustomEventSpecificationResourceDescConditionValue,
+				Optional:    true,
+			},
+			CustomEventSpecificationThresholdRuleFieldMetricPattern: schema.SingleNestedAttribute{
+				Description: CustomEventSpecificationResourceDescMetricPattern,
+				Optional:    true,
+				Attributes: map[string]schema.Attribute{
+					CustomEventSpecificationThresholdRuleFieldMetricPatternPrefix: schema.StringAttribute{
+						Description: CustomEventSpecificationResourceDescMetricPatternPrefix,
+						Required:    true,
+					},
+					CustomEventSpecificationThresholdRuleFieldMetricPatternPostfix: schema.StringAttribute{
+						Description: CustomEventSpecificationResourceDescMetricPatternPostfix,
+						Optional:    true,
+						Computed:    true,
+						Default:     stringdefault.StaticString(CustomEventSpecificationDefaultEmptyString),
+					},
+					CustomEventSpecificationThresholdRuleFieldMetricPatternPlaceholder: schema.StringAttribute{
+						Description: CustomEventSpecificationResourceDescMetricPatternPlaceholder,
+						Optional:    true,
+						Computed:    true,
+						Default:     stringdefault.StaticString(CustomEventSpecificationDefaultEmptyString),
+					},
+					CustomEventSpecificationThresholdRuleFieldMetricPatternOperator: schema.StringAttribute{
+						Description: CustomEventSpecificationResourceDescMetricPatternOperator,
+						Optional:    true,
+						Computed:    true,
+						Default:     stringdefault.StaticString(CustomEventSpecificationMetricPatternOperatorIs),
+					},
+				},
+			},
+		},
+	}
+}
+
+// buildV1RulesSchema returns the v1 rules schema where threshold is a SingleNestedAttribute
+func buildV1RulesSchema() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Description: CustomEventSpecificationResourceDescRules,
+		Optional:    true,
+		Attributes: map[string]schema.Attribute{
+			CustomEventSpecificationFieldEntityCountRule: schema.SingleNestedAttribute{
+				Description: CustomEventSpecificationResourceDescEntityCountRules,
+				Optional:    true,
+				Attributes: map[string]schema.Attribute{
+					CustomEventSpecificationRuleFieldSeverity: schema.StringAttribute{
+						Description: CustomEventSpecificationResourceDescSeverity,
+						Required:    true,
+						Validators: []validator.String{
+							stringvalidator.OneOf(CustomEventSpecificationSeverityWarning, CustomEventSpecificationSeverityCritical),
+						},
+					},
+					CustomEventSpecificationRuleFieldConditionOperator: schema.StringAttribute{
+						Description: CustomEventSpecificationResourceDescConditionOperator,
+						Required:    true,
+					},
+					CustomEventSpecificationRuleFieldConditionValue: schema.Float64Attribute{
+						Description: CustomEventSpecificationResourceDescConditionValue,
+						Required:    true,
+					},
+				},
+			},
+			CustomEventSpecificationFieldEntityCountVerificationRule: schema.SingleNestedAttribute{
+				Description: CustomEventSpecificationResourceDescEntityCountVerification,
+				Optional:    true,
+				Attributes: map[string]schema.Attribute{
+					CustomEventSpecificationRuleFieldSeverity: schema.StringAttribute{
+						Description: CustomEventSpecificationResourceDescSeverity,
+						Required:    true,
+						Validators: []validator.String{
+							stringvalidator.OneOf(CustomEventSpecificationSeverityWarning, CustomEventSpecificationSeverityCritical),
+						},
+					},
+					CustomEventSpecificationRuleFieldConditionOperator: schema.StringAttribute{
+						Description: CustomEventSpecificationResourceDescConditionOperator,
+						Required:    true,
+					},
+					CustomEventSpecificationRuleFieldConditionValue: schema.Float64Attribute{
+						Description: CustomEventSpecificationResourceDescConditionValue,
+						Required:    true,
+					},
+					CustomEventSpecificationRuleFieldMatchingEntityType: schema.StringAttribute{
+						Description: CustomEventSpecificationResourceDescMatchingEntityType,
+						Required:    true,
+					},
+					CustomEventSpecificationRuleFieldMatchingOperator: schema.StringAttribute{
+						Description: CustomEventSpecificationResourceDescMatchingOperator,
+						Required:    true,
+					},
+					CustomEventSpecificationRuleFieldMatchingEntityLabel: schema.StringAttribute{
+						Description: CustomEventSpecificationResourceDescMatchingEntityLabel,
+						Required:    true,
+					},
+				},
+			},
+			CustomEventSpecificationFieldEntityVerificationRule: schema.SingleNestedAttribute{
+				Description: CustomEventSpecificationResourceDescEntityVerification,
+				Optional:    true,
+				Attributes: map[string]schema.Attribute{
+					CustomEventSpecificationRuleFieldSeverity: schema.StringAttribute{
+						Description: CustomEventSpecificationResourceDescSeverity,
+						Required:    true,
+						Validators: []validator.String{
+							stringvalidator.OneOf(CustomEventSpecificationSeverityWarning, CustomEventSpecificationSeverityCritical),
+						},
+					},
+					CustomEventSpecificationRuleFieldMatchingEntityType: schema.StringAttribute{
+						Description: CustomEventSpecificationResourceDescMatchingEntityType,
+						Required:    true,
+					},
+					CustomEventSpecificationRuleFieldMatchingOperator: schema.StringAttribute{
+						Description: CustomEventSpecificationResourceDescMatchingOperator,
+						Required:    true,
+					},
+					CustomEventSpecificationRuleFieldMatchingEntityLabel: schema.StringAttribute{
+						Description: CustomEventSpecificationResourceDescMatchingEntityLabel,
+						Required:    true,
+					},
+					CustomEventSpecificationRuleFieldOfflineDuration: schema.Int64Attribute{
+						Description: CustomEventSpecificationResourceDescOfflineDuration,
+						Required:    true,
+					},
+				},
+			},
+			CustomEventSpecificationFieldHostAvailabilityRule: schema.SingleNestedAttribute{
+				Description: CustomEventSpecificationResourceDescHostAvailability,
+				Optional:    true,
+				Attributes: map[string]schema.Attribute{
+					CustomEventSpecificationRuleFieldSeverity: schema.StringAttribute{
+						Description: CustomEventSpecificationResourceDescSeverity,
+						Required:    true,
+						Validators: []validator.String{
+							stringvalidator.OneOf(CustomEventSpecificationSeverityWarning, CustomEventSpecificationSeverityCritical),
+						},
+					},
+					CustomEventSpecificationRuleFieldOfflineDuration: schema.Int64Attribute{
+						Description: CustomEventSpecificationResourceDescOfflineDuration,
+						Required:    true,
+					},
+					CustomEventSpecificationHostAvailabilityRuleFieldMetricCloseAfter: schema.Int64Attribute{
+						Description: CustomEventSpecificationResourceDescCloseAfter,
+						Optional:    true,
+					},
+					CustomEventSpecificationHostAvailabilityRuleFieldTagFilter: schema.StringAttribute{
+						Description: CustomEventSpecificationResourceDescTagFilter,
+						Optional:    true,
+					},
+				},
+			},
+			CustomEventSpecificationFieldSystemRule: schema.SingleNestedAttribute{
+				Description: CustomEventSpecificationResourceDescSystemRules,
+				Optional:    true,
+				Attributes: map[string]schema.Attribute{
+					CustomEventSpecificationRuleFieldSeverity: schema.StringAttribute{
+						Description: CustomEventSpecificationResourceDescSeverity,
+						Required:    true,
+						Validators: []validator.String{
+							stringvalidator.OneOf(CustomEventSpecificationSeverityWarning, CustomEventSpecificationSeverityCritical),
+						},
+					},
+					CustomEventSpecificationSystemRuleFieldSystemRuleId: schema.StringAttribute{
+						Description: CustomEventSpecificationResourceDescSystemRuleID,
+						Required:    true,
+					},
+				},
+			},
+			CustomEventSpecificationFieldThresholdRule: buildV1ThresholdRuleSchema(),
+		},
+	}
+}
+
+// buildV1Schema returns the full v1 schema, used as PriorSchema in the 1->2 state upgrader
+func buildV1Schema() schema.Schema {
+	s := createCustomEventSpecificationSchema()
+	s.Version = 1
+	s.Attributes[CustomEventSpecificationFieldRules] = buildV1RulesSchema()
+	return s
+}
+
+// customEventSpecificationV1Model represents the state model for schema version 1
+type customEventSpecificationV1Model struct {
+	ID                       types.String  `tfsdk:"id"`
+	Name                     types.String  `tfsdk:"name"`
+	EntityType               types.String  `tfsdk:"entity_type"`
+	Query                    types.String  `tfsdk:"query"`
+	Triggering               types.Bool    `tfsdk:"triggering"`
+	Description              types.String  `tfsdk:"description"`
+	ExpirationTime           types.Int64   `tfsdk:"expiration_time"`
+	Enabled                  types.Bool    `tfsdk:"enabled"`
+	RuleLogicalOperator      types.String  `tfsdk:"rule_logical_operator"`
+	Rules                    *rulesV1Model `tfsdk:"rules"`
+	TransientEventEnabled    types.Bool    `tfsdk:"transient_event_enabled"`
+	TransientEventThreshold  types.Int64   `tfsdk:"transient_event_threshold"`
+	TransientEventAlertMuted types.Bool    `tfsdk:"transient_event_alert_muted"`
+}
+
+type rulesV1Model struct {
+	EntityCount             *EntityCountRuleModel             `tfsdk:"entity_count"`
+	EntityCountVerification *EntityCountVerificationRuleModel `tfsdk:"entity_count_verification"`
+	EntityVerification      *EntityVerificationRuleModel      `tfsdk:"entity_verification"`
+	HostAvailability        *HostAvailabilityRuleModel        `tfsdk:"host_availability"`
+	System                  *SystemRuleModel                  `tfsdk:"system"`
+	Threshold               *ThresholdRuleModel               `tfsdk:"threshold"`
+}
+
+// upgradeCustomEventSpecStateV1ToV2 wraps the single threshold rule object into a one-element list.
+func upgradeCustomEventSpecStateV1ToV2(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+	var v1State customEventSpecificationV1Model
+	resp.Diagnostics.Append(req.State.Get(ctx, &v1State)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	newState := CustomEventSpecificationModel{
+		ID:                       v1State.ID,
+		Name:                     v1State.Name,
+		EntityType:               v1State.EntityType,
+		Query:                    v1State.Query,
+		Triggering:               v1State.Triggering,
+		Description:              v1State.Description,
+		ExpirationTime:           v1State.ExpirationTime,
+		Enabled:                  v1State.Enabled,
+		RuleLogicalOperator:      v1State.RuleLogicalOperator,
+		TransientEventEnabled:    v1State.TransientEventEnabled,
+		TransientEventThreshold:  v1State.TransientEventThreshold,
+		TransientEventAlertMuted: v1State.TransientEventAlertMuted,
+	}
+
+	if v1State.Rules != nil {
+		newRules := &RulesModel{
+			EntityCount:             v1State.Rules.EntityCount,
+			EntityCountVerification: v1State.Rules.EntityCountVerification,
+			EntityVerification:      v1State.Rules.EntityVerification,
+			HostAvailability:        v1State.Rules.HostAvailability,
+			System:                  v1State.Rules.System,
+		}
+		if v1State.Rules.Threshold != nil {
+			newRules.Threshold = []ThresholdRuleModel{*v1State.Rules.Threshold}
+		}
+		newState.Rules = newRules
+	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, newState)...)
+}
+
 // GetStateUpgraders returns the state upgraders for this resource
 func (r *customEventSpecificationResource) GetStateUpgraders(ctx context.Context) map[int64]resource.StateUpgrader {
 	return map[int64]resource.StateUpgrader{
 		0: resourcehandle.CreateStateUpgraderForVersion(0),
+		1: {
+			PriorSchema:   func() *schema.Schema { s := buildV1Schema(); return &s }(),
+			StateUpgrader: upgradeCustomEventSpecStateV1ToV2,
+		},
 	}
 }
