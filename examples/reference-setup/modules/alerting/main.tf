@@ -182,24 +182,26 @@ resource "instana_log_alert_config" "logs" {
 
   tag_filter = var.log_query
 
-  rules = {
-    metric_name = "logCount"
-    alert_type  = "log.count"
-    aggregation = "SUM"
-    threshold = {
-      warning = var.log_threshold_warning != null ? {
-        static = {
-          value = var.log_threshold_warning
-        }
-      } : null
-      critical = var.log_threshold_critical != null ? {
-        static = {
-          value = var.log_threshold_critical
-        }
-      } : null
+  rules = [
+    {
+      metric_name = "logCount"
+      alert_type  = "log.count"
+      aggregation = "SUM"
+      threshold = {
+        warning = var.log_threshold_warning != null ? {
+          static = {
+            value = var.log_threshold_warning
+          }
+        } : null
+        critical = var.log_threshold_critical != null ? {
+          static = {
+            value = var.log_threshold_critical
+          }
+        } : null
+      }
+      threshold_operator = ">="
     }
-    threshold_operator = ">="
-  }
+  ]
 
   time_threshold = {
     violations_in_sequence = {
