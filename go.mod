@@ -62,4 +62,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/instana/instana-go-client => ../instana-go-client
+// replace github.com/instana/instana-go-client => ../instana-go-client
+
+replace github.com/instana/instana-go-client => github.com/instana/instana-go-client v1.6.5-0.20261112035033-c8cf5ffb3d4b
