@@ -287,6 +287,7 @@ terraform apply
   * `CUSTOM` - Combine all metrics in scope into a single metric per group (default)
   * `PER_ENTITY` - Monitor each metric individually and trigger alerts for each individual entity
 * `triggering` - Optional - Indicates whether the alert should be triggered. Default: `false`
+* `enabled` - Optional - Flag to enable or disable the alert configuration. Default: `true`. Changing this value calls the dedicated `enable`/`disable` endpoint of the alert configuration after the create/update request.
 * `alert_channels` - Optional - Set of alert channel IDs associated with the severity [Details](#alert-channels-reference)
 * `group_by` - Optional - List of grouping tags used to group the metric results
 * `tag_filter` - Optional - The tag filter of the infrastructure alert config [Details](#tag-filter-argument-reference)

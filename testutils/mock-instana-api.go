@@ -222,3 +222,8 @@ func (m *MockInstanaAPI) IPFiltering() api.IPFilteringRestResource {
 func (m *MockInstanaAPI) Releases() rest.RestResource[*api.ReleaseWithMetadata] {
 	return nil
 }
+
+// ResourceActions mock implementation
+func (m *MockInstanaAPI) ResourceActions(basePath string) rest.ActionRestResource {
+	return nil
+}

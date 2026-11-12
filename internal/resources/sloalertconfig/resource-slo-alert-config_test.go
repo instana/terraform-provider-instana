@@ -25,7 +25,7 @@ func TestUpdateState_StatusAlertType(t *testing.T) {
 		Description: "Test Description",
 		Severity:    5,
 		Triggering:  true,
-		Enabled:     true,
+		Enabled:     boolPtr(true),
 		Rule: api.SloAlertRule{
 			AlertType: "SERVICE_LEVELS_OBJECTIVE",
 			Metric:    "STATUS",
@@ -84,7 +84,7 @@ func TestUpdateState_ThresholdHighPrecisionDecimal(t *testing.T) {
 		Description: "Precision Test Description",
 		Severity:    5,
 		Triggering:  false,
-		Enabled:     true,
+		Enabled:     boolPtr(true),
 		Rule: api.SloAlertRule{
 			AlertType: "SERVICE_LEVELS_OBJECTIVE",
 			Metric:    "STATUS",
@@ -120,8 +120,6 @@ func TestUpdateState_ThresholdHighPrecisionDecimal(t *testing.T) {
 	assert.Equal(t, 0.9995, model.Threshold.Value.ValueFloat64(), "threshold value must not be rounded")
 }
 
-
-
 func TestUpdateState_ErrorBudgetAlertType(t *testing.T) {
 	ctx := context.Background()
 	resource := NewSloAlertConfigResourceHandle()
@@ -132,7 +130,7 @@ func TestUpdateState_ErrorBudgetAlertType(t *testing.T) {
 		Description: "Error Budget Description",
 		Severity:    8,
 		Triggering:  false,
-		Enabled:     true,
+		Enabled:     boolPtr(true),
 		Rule: api.SloAlertRule{
 			AlertType: "ERROR_BUDGET",
 			Metric:    "BURNED_PERCENTAGE",
@@ -205,7 +203,7 @@ func TestUpdateState_BurnRateV2AlertType(t *testing.T) {
 		Description: "Burn Rate Description",
 		Severity:    10,
 		Triggering:  true,
-		Enabled:     true,
+		Enabled:     boolPtr(true),
 		Rule: api.SloAlertRule{
 			AlertType: "ERROR_BUDGET",
 			Metric:    "BURN_RATE_V2",
@@ -276,7 +274,7 @@ func TestUpdateState_WithCustomPayloadFields(t *testing.T) {
 		Description: "Custom Payload Description",
 		Severity:    7,
 		Triggering:  false,
-		Enabled:     true,
+		Enabled:     boolPtr(true),
 		Rule: api.SloAlertRule{
 			AlertType: "SERVICE_LEVELS_OBJECTIVE",
 			Metric:    "STATUS",
@@ -322,7 +320,7 @@ func TestUpdateState_WithNullThreshold(t *testing.T) {
 		Description: "No Threshold Description",
 		Severity:    6,
 		Triggering:  true,
-		Enabled:     false,
+		Enabled:     boolPtr(false),
 		Rule: api.SloAlertRule{
 			AlertType: "ERROR_BUDGET",
 			Metric:    "BURN_RATE_V2",
@@ -364,7 +362,7 @@ func TestUpdateState_WithEmptyBurnRateConfigs(t *testing.T) {
 		Description: "Empty Burn Rate Description",
 		Severity:    5,
 		Triggering:  false,
-		Enabled:     true,
+		Enabled:     boolPtr(true),
 		Rule: api.SloAlertRule{
 			AlertType: "SERVICE_LEVELS_OBJECTIVE",
 			Metric:    "STATUS",
@@ -410,7 +408,7 @@ func TestUpdateState_WithMultipleSloIds(t *testing.T) {
 		Description: "Multiple SLOs",
 		Severity:    9,
 		Triggering:  true,
-		Enabled:     true,
+		Enabled:     boolPtr(true),
 		Rule: api.SloAlertRule{
 			AlertType: "SERVICE_LEVELS_OBJECTIVE",
 			Metric:    "STATUS",
@@ -491,7 +489,7 @@ func TestMapStateToDataObject_StatusAlertType(t *testing.T) {
 	assert.Equal(t, "Test Description", apiConfig.Description)
 	assert.Equal(t, 5, apiConfig.Severity)
 	assert.True(t, apiConfig.Triggering)
-	assert.True(t, apiConfig.Enabled)
+	assert.Nil(t, apiConfig.Enabled, "enabled must not be part of the create/update payload")
 	assert.Equal(t, "SERVICE_LEVELS_OBJECTIVE", apiConfig.Rule.AlertType)
 	assert.Equal(t, "STATUS", apiConfig.Rule.Metric)
 	assert.NotNil(t, apiConfig.Threshold)
@@ -698,7 +696,7 @@ func TestMapStateToDataObject_WithNormalizedAlertTypes(t *testing.T) {
 				}),
 				CustomPayload: types.ListNull(shared.GetCustomPayloadFieldType()),
 			}
-	
+
 			if tc.inputAlertType != "burn_rate_v2" && tc.inputAlertType != "burnRateV2" && tc.inputAlertType != "BurnRateV2" {
 				model.Threshold = &SloAlertThresholdModel{
 					Type:     types.StringValue("staticThreshold"),
@@ -1036,13 +1034,13 @@ func TestMapStateToDataObject_WithDifferentOperators(t *testing.T) {
 				}),
 				CustomPayload: types.ListNull(shared.GetCustomPayloadFieldType()),
 			}
-	
+
 			state := createMockState(t, model)
-	
+
 			apiConfig, diags := resource.MapStateToDataObject(ctx, nil, &state)
 			require.False(t, diags.HasError())
 			require.NotNil(t, apiConfig)
-	
+
 			assert.Equal(t, operator, apiConfig.Threshold.Operator)
 		})
 	}
@@ -1091,7 +1089,7 @@ func TestUpdateState_ApdexScoreAlertType(t *testing.T) {
 		Description: "Apdex Score Description",
 		Severity:    5,
 		Triggering:  false,
-		Enabled:     true,
+		Enabled:     boolPtr(true),
 		Rule: api.SloAlertRule{
 			AlertType: "APDEX",
 			Metric:    "SCORE",
@@ -1282,3 +1280,5 @@ func getTestSchema() schema.Schema {
 	resource := NewSloAlertConfigResourceHandle()
 	return resource.MetaData().Schema
 }
+
+func boolPtr(b bool) *bool { return &b }

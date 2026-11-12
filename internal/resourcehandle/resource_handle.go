@@ -109,3 +109,27 @@ type PostCreateUpdater[T client.InstanaDataObject] interface {
 	// correct resource.
 	ApplyCreatedID(original T, created T) T
 }
+
+// Operation identifies the kind of write operation a PostWriteHook is invoked for.
+type Operation string
+
+const (
+	// OperationCreate is passed to PostWriteHook.PostWrite after a successful Create API call
+	OperationCreate = Operation("create")
+	// OperationUpdate is passed to PostWriteHook.PostWrite after a successful Update API call
+	OperationUpdate = Operation("update")
+)
+
+// PostWriteHook is an optional interface that a ResourceHandle can implement to call
+// additional Instana API endpoints right after the main Create or Update API call and
+// before the state is written. This is required for settings that are not part of the
+// create/update payload but have to be changed through dedicated endpoints
+// (e.g. enabling or disabling an alert configuration via {id}/enable and {id}/disable).
+//
+// PostWrite receives the object returned by the main API call and returns the object
+// which is used to write the Terraform state. On error the generic operation still
+// writes the returned object to the state (so a created resource is tracked) and then
+// reports the error.
+type PostWriteHook[T client.InstanaDataObject] interface {
+	PostWrite(ctx context.Context, api client.InstanaAPI, op Operation, plan *tfsdk.Plan, priorState *tfsdk.State, written T) (T, diag.Diagnostics)
+}

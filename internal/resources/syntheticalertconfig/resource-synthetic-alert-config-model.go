@@ -4,17 +4,18 @@ import "github.com/hashicorp/terraform-plugin-framework/types"
 
 // SyntheticAlertConfigModel represents the data model for the Synthetic Alert Config resource
 type SyntheticAlertConfigModel struct {
-	ID                  types.String                      `tfsdk:"id"`
-	Name                types.String                      `tfsdk:"name"`
-	Description         types.String                      `tfsdk:"description"`
-	SyntheticTestIds    types.Set                         `tfsdk:"synthetic_test_ids"`
-	Severity            types.Int64                       `tfsdk:"severity"`
-	TagFilter           types.String                      `tfsdk:"tag_filter"`
-	Rule                *SyntheticAlertRuleModel          `tfsdk:"rule"`
-	AlertChannelIds     types.Set                         `tfsdk:"alert_channel_ids"`
-	TimeThreshold       *SyntheticAlertTimeThresholdModel `tfsdk:"time_threshold"`
+	ID                     types.String                      `tfsdk:"id"`
+	Name                   types.String                      `tfsdk:"name"`
+	Description            types.String                      `tfsdk:"description"`
+	SyntheticTestIds       types.Set                         `tfsdk:"synthetic_test_ids"`
+	Severity               types.Int64                       `tfsdk:"severity"`
+	TagFilter              types.String                      `tfsdk:"tag_filter"`
+	Rule                   *SyntheticAlertRuleModel          `tfsdk:"rule"`
+	AlertChannelIds        types.Set                         `tfsdk:"alert_channel_ids"`
+	TimeThreshold          *SyntheticAlertTimeThresholdModel `tfsdk:"time_threshold"`
 	GracePeriod            types.Int64                       `tfsdk:"grace_period"`
 	CustomPayloadFields    types.List                        `tfsdk:"custom_payload_field"`
+	Enabled                types.Bool                        `tfsdk:"enabled"`
 	IncludeOnDemand        types.Bool                        `tfsdk:"include_on_demand"`
 	EvaluationType         types.String                      `tfsdk:"evaluation_type"`
 	AffectedLocationsCount types.Int64                       `tfsdk:"affected_locations_count"`

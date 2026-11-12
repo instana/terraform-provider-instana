@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -73,6 +74,12 @@ func buildLogAlertConfigSchema() schema.Schema {
 				Optional:    true,
 				Computed:    true,
 				Description: LogAlertConfigDescGracePeriod,
+			},
+			LogAlertConfigFieldEnabled: schema.BoolAttribute{
+				Optional:    true,
+				Computed:    true,
+				Default:     booldefault.StaticBool(shared.EnabledDefaultValue),
+				Description: LogAlertConfigDescEnabled,
 			},
 			LogAlertConfigFieldGranularity: schema.Int64Attribute{
 				Optional:    true,
@@ -289,6 +296,24 @@ func (r *logAlertConfigResource) SetComputedFields(_ context.Context, _ *tfsdk.P
 	return nil
 }
 
+// PostWrite implements resourcehandle.PostWriteHook. The enabled flag is not part of the create/update
+// payload of the log alert config API, therefore the dedicated {id}/enable or {id}/disable endpoint
+// is called after create/update whenever the desired value differs from the current value.
+func (r *logAlertConfigResource) PostWrite(ctx context.Context, apiClient client.InstanaAPI, op resourcehandle.Operation, plan *tfsdk.Plan, priorState *tfsdk.State, written *api.LogAlertConfig) (*api.LogAlertConfig, diag.Diagnostics) {
+	enabled, diags := shared.SyncEnabled(ctx, shared.EnabledSyncParams{
+		APIClient:  apiClient,
+		BasePath:   api.LogAlertConfigResourcePath,
+		ID:         written.ID,
+		Label:      "log alert config",
+		Operation:  string(op),
+		Plan:       plan,
+		PriorState: priorState,
+		APIValue:   written.Enabled,
+	})
+	written.Enabled = &enabled
+	return written, diags
+}
+
 // UpdateState updates the Terraform state with data from the API response
 func (r *logAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, config *api.LogAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
@@ -305,6 +330,7 @@ func (r *logAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.S
 	model.Description = types.StringValue(config.Description)
 	model.Granularity = types.Int64Value(int64(config.Granularity))
 	model.GracePeriod = r.mapGracePeriodToModel(config.GracePeriod)
+	model.Enabled = shared.EnabledToModel(config.Enabled, model.Enabled)
 
 	// to preserve the existing value in plan/state to handle the value drift
 	if model.TagFilter.IsNull() || model.TagFilter.IsUnknown() {

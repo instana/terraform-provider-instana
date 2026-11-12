@@ -218,6 +218,7 @@ terraform apply
 * `tag_filter` - Required - The tag filter expression used to scope the alert [Details](#tag-filter-argument-reference)
 * `granularity` - Optional - The evaluation granularity in milliseconds. Default: `600000` (10 minutes). Possible values: `60000` (1 minute), `300000` (5 minutes), `600000` (10 minutes), `900000` (15 minutes), `1200000` (20 minutes), `1800000` (30 minutes)
 * `grace_period` - Optional - The duration in milliseconds for which an alert remains open after conditions are no longer violated. The alert auto-closes once the grace period expires
+* `enabled` - Optional - Flag to enable or disable the alert configuration. Default: `true`. Changing this value calls the dedicated `enable`/`disable` endpoint of the alert configuration after the create/update request.
 * `alert_channels` - Optional - Configuration for alert notification channels [Details](#alert-channels-reference)
 * `group_by` - Optional - List of tags to group results by [Details](#group-by-reference)
 * `rules` - Required - Configuration for alert rules [Details](#rules-reference)

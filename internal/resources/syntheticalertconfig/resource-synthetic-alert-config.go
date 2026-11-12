@@ -64,6 +64,7 @@ func (r *syntheticAlertConfigResource) buildSchemaAttributes() map[string]schema
 		SyntheticAlertConfigFieldCustomPayloadField:     shared.GetCustomPayloadFieldsSchema(),
 		SyntheticAlertConfigFieldRule:                   r.buildRuleAttribute(),
 		SyntheticAlertConfigFieldTimeThreshold:          r.buildTimeThresholdAttribute(),
+		SyntheticAlertConfigFieldEnabled:                r.buildEnabledAttribute(),
 		SyntheticAlertConfigFieldIncludeOnDemand:        r.buildIncludeOnDemandAttribute(),
 		SyntheticAlertConfigFieldEvaluationType:         r.buildEvaluationTypeAttribute(),
 		SyntheticAlertConfigFieldAffectedLocationsCount: r.buildAffectedLocationsCountAttribute(),
@@ -295,6 +296,16 @@ func (r *syntheticAlertConfigResource) buildTimeThresholdViolationsCountAttribut
 func (r *syntheticAlertConfigResource) buildTimeThresholdViolationsCountValidators() []validator.Int64 {
 	return []validator.Int64{
 		int64validator.Between(1, 12),
+	}
+}
+
+// buildEnabledAttribute creates the enabled attribute schema
+func (r *syntheticAlertConfigResource) buildEnabledAttribute() schema.Attribute {
+	return schema.BoolAttribute{
+		Optional:    true,
+		Computed:    true,
+		Default:     booldefault.StaticBool(shared.EnabledDefaultValue),
+		Description: SyntheticAlertConfigDescEnabled,
 	}
 }
 
@@ -604,6 +615,24 @@ func (r *syntheticAlertConfigResource) setOptionalFieldsOnAPIObject(apiObject *a
 	}
 }
 
+// PostWrite implements resourcehandle.PostWriteHook. The enabled flag is not part of the create/update
+// payload of the synthetic alert config API, therefore the dedicated {id}/enable or {id}/disable endpoint
+// is called after create/update whenever the desired value differs from the current value.
+func (r *syntheticAlertConfigResource) PostWrite(ctx context.Context, apiClient client.InstanaAPI, op resourcehandle.Operation, plan *tfsdk.Plan, priorState *tfsdk.State, written *api.SyntheticAlertConfig) (*api.SyntheticAlertConfig, diag.Diagnostics) {
+	enabled, diags := shared.SyncEnabled(ctx, shared.EnabledSyncParams{
+		APIClient:  apiClient,
+		BasePath:   api.SyntheticAlertConfigsResourcePath,
+		ID:         written.ID,
+		Label:      "synthetic alert config",
+		Operation:  string(op),
+		Plan:       plan,
+		PriorState: priorState,
+		APIValue:   written.Enabled,
+	})
+	written.Enabled = &enabled
+	return written, diags
+}
+
 func (r *syntheticAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, apiObject *api.SyntheticAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var model SyntheticAlertConfigModel
@@ -618,6 +647,7 @@ func (r *syntheticAlertConfigResource) UpdateState(ctx context.Context, state *t
 	model.Description = types.StringValue(apiObject.Description)
 	model.Severity = types.Int64Value(int64(apiObject.Severity))
 	model.IncludeOnDemand = types.BoolValue(apiObject.IncludeOnDemand)
+	model.Enabled = shared.EnabledToModel(apiObject.Enabled, model.Enabled)
 
 	if apiObject.EvaluationType != "" {
 		model.EvaluationType = types.StringValue(apiObject.EvaluationType)

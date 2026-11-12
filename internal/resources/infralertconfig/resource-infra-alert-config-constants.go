@@ -3,6 +3,9 @@ package infralertconfig
 // ResourceInstanaInfraAlertConfig the name of the terraform-provider-instana resource to manage infrastructure alert configurations
 const ResourceInstanaInfraAlertConfig = "infra_alert_config"
 
+// InfraAlertConfigDefaultEnabled is the default value of the enabled field
+const InfraAlertConfigDefaultEnabled = true
+
 // Schema field names
 const (
 	// InfraAlertConfigFieldID constant value for the schema field id
@@ -23,6 +26,8 @@ const (
 	InfraAlertConfigFieldEvaluationType = "evaluation_type"
 	// InfraAlertConfigFieldTriggering constant value for the schema field triggering
 	InfraAlertConfigFieldTriggering = "triggering"
+	// InfraAlertConfigFieldEnabled constant value for the schema field enabled
+	InfraAlertConfigFieldEnabled = "enabled"
 	// InfraAlertConfigFieldCustomPayloadField constant value for the schema field custom_payload_field
 	InfraAlertConfigFieldCustomPayloadField = "custom_payload_field"
 	// InfraAlertConfigFieldAlertChannels constant value for the schema field alert_channels
@@ -89,6 +94,8 @@ const (
 	InfraAlertConfigDescEvaluationType = "The evaluation type of the infrastructure alert configuration"
 	// InfraAlertConfigDescTriggering description for the triggering field
 	InfraAlertConfigDescTriggering = "Indicates whether the alert should be triggered"
+	// InfraAlertConfigDescEnabled description for the enabled field
+	InfraAlertConfigDescEnabled = "Flag to enable or disable the alert configuration. The alert configuration is enabled by default."
 	// InfraAlertConfigDescRules description for the rules field
 	InfraAlertConfigDescRules = "The rules configuration"
 	// InfraAlertConfigDescGenericRule description for the generic_rule field

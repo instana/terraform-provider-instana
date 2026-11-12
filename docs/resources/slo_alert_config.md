@@ -247,6 +247,7 @@ terraform apply
 * `apdex_ids` - Optional - A set of Apdex configuration IDs to monitor. Mutually exclusive with `slo_ids`. Optional when `alert_type` is `apdex_score`
 * `alert_channel_ids` - Required - A set of alert channel IDs to send notifications to
 * `triggering` - Optional - Flag to indicate whether to trigger an incident. Default: `false`
+* `enabled` - Optional - Flag to enable or disable the alert configuration. Default: `true`. Changing this value calls the dedicated `enable`/`disable` endpoint of the alert configuration after the create/update request.
 * `threshold` - Optional - Configuration block defining the threshold for the alert condition. Required for `status`, `error_budget`, and `apdex_score` alert types [Details](#threshold-reference)
 * `time_threshold` - Required - Configuration block defining the time threshold for triggering and suppressing alerts [Details](#time-threshold-reference)
 * `burn_rate_config` - Optional - List of burn rate configurations and alerting windows. Required for `alert_type` set to `burn_rate_v2`. Not applicable for `apdex_score` [Details](#burn-rate-config-reference)

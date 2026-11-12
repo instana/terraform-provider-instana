@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -47,6 +48,7 @@ func buildSloAlertConfigSchema() schema.Schema {
 			SchemaFieldDescription:         buildDescriptionAttribute(),
 			SchemaFieldSeverity:            buildSeverityAttribute(),
 			SchemaFieldTriggering:          buildTriggeringAttribute(),
+			SchemaFieldEnabled:             buildEnabledAttribute(),
 			SchemaFieldAlertType:           buildAlertTypeAttribute(),
 			SchemaFieldSloIds:              buildSloIdsAttribute(),
 			SchemaFieldApdexIds:            buildApdexIdsAttribute(),
@@ -103,6 +105,16 @@ func buildTriggeringAttribute() schema.BoolAttribute {
 		Optional:    true,
 		Computed:    true,
 		Description: SloAlertConfigDescTriggering,
+	}
+}
+
+// buildEnabledAttribute creates the enabled field schema attribute
+func buildEnabledAttribute() schema.BoolAttribute {
+	return schema.BoolAttribute{
+		Optional:    true,
+		Computed:    true,
+		Default:     booldefault.StaticBool(shared.EnabledDefaultValue),
+		Description: SloAlertConfigDescEnabled,
 	}
 }
 
@@ -307,6 +319,24 @@ func (r *sloAlertConfigResource) SetComputedFields(_ context.Context, _ *tfsdk.P
 	return nil
 }
 
+// PostWrite implements resourcehandle.PostWriteHook. The enabled flag is not part of the create/update
+// payload of the slo alert config API, therefore the dedicated {id}/enable or {id}/disable endpoint
+// is called after create/update whenever the desired value differs from the current value.
+func (r *sloAlertConfigResource) PostWrite(ctx context.Context, apiClient client.InstanaAPI, op resourcehandle.Operation, plan *tfsdk.Plan, priorState *tfsdk.State, written *api.SloAlertConfig) (*api.SloAlertConfig, diag.Diagnostics) {
+	enabled, diags := shared.SyncEnabled(ctx, shared.EnabledSyncParams{
+		APIClient:  apiClient,
+		BasePath:   api.SloAlertConfigResourcePath,
+		ID:         written.ID,
+		Label:      "slo alert config",
+		Operation:  string(op),
+		Plan:       plan,
+		PriorState: priorState,
+		APIValue:   written.Enabled,
+	})
+	written.Enabled = &enabled
+	return written, diags
+}
+
 func (r *sloAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, sloAlertConfig *api.SloAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var model SloAlertConfigModel
@@ -323,6 +353,7 @@ func (r *sloAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.S
 	model.Description = types.StringValue(sloAlertConfig.Description)
 	model.Severity = types.Int64Value(int64(sloAlertConfig.Severity))
 	model.Triggering = types.BoolValue(sloAlertConfig.Triggering)
+	model.Enabled = shared.EnabledToModel(sloAlertConfig.Enabled, model.Enabled)
 
 	terraformAlertType := r.mapAPIAlertTypeToTerraform(sloAlertConfig.Rule)
 	model.AlertType = types.StringValue(terraformAlertType)
@@ -488,7 +519,6 @@ func (r *sloAlertConfigResource) MapStateToDataObject(ctx context.Context, plan 
 		Description:           model.Description.ValueString(),
 		Severity:              int(model.Severity.ValueInt64()),
 		Triggering:            model.Triggering.ValueBool(),
-		Enabled:               true,
 		Rule:                  rule,
 		Threshold:             threshold,
 		TimeThreshold:         timeThreshold,

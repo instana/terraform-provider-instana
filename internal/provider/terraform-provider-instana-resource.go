@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/instana/instana-go-client/client"
@@ -160,8 +162,12 @@ func (r *terraformResourceImpl[T]) Create(ctx context.Context, req resource.Crea
 		finalObject = updatedObject
 	}
 
-	// Update state with created object
+	// Run optional resource specific follow-up API calls (e.g. enable/disable endpoints)
+	finalObject, postWriteDiags := r.runPostWrite(ctx, resourcehandle.OperationCreate, &req.Plan, nil, finalObject)
+
+	// Update state with created object (also when the follow-up failed, so the created resource is tracked)
 	diags = r.resourceHandle.UpdateState(ctx, &resp.State, &req.Plan, finalObject)
+	resp.Diagnostics.Append(postWriteDiags...)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		tflog.Error(ctx, "Failed to update state after creation", map[string]interface{}{
@@ -309,8 +315,12 @@ func (r *terraformResourceImpl[T]) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	// Update state with updated object
+	// Run optional resource specific follow-up API calls (e.g. enable/disable endpoints)
+	updatedObject, postWriteDiags := r.runPostWrite(ctx, resourcehandle.OperationUpdate, &req.Plan, &req.State, updatedObject)
+
+	// Update state with updated object (also when the follow-up failed, so the new remote state is tracked)
 	diags = r.resourceHandle.UpdateState(ctx, &resp.State, &req.Plan, updatedObject)
+	resp.Diagnostics.Append(postWriteDiags...)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		tflog.Error(ctx, "Failed to update state after update", map[string]interface{}{
@@ -324,6 +334,27 @@ func (r *terraformResourceImpl[T]) Update(ctx context.Context, req resource.Upda
 		"resource_id":    updatedObject.GetIDForResourcePath(),
 		"correlation_id": correlationID,
 	})
+}
+
+// runPostWrite calls the optional PostWriteHook of the resource handle after a successful create or update API call.
+// It returns the object which has to be used to write the state.
+func (r *terraformResourceImpl[T]) runPostWrite(ctx context.Context, op resourcehandle.Operation, plan *tfsdk.Plan, priorState *tfsdk.State, written T) (T, diag.Diagnostics) {
+	hook, ok := any(r.resourceHandle).(resourcehandle.PostWriteHook[T])
+	if !ok {
+		return written, nil
+	}
+	tflog.Debug(ctx, "Running post write hook", map[string]interface{}{
+		"resource_id": written.GetIDForResourcePath(),
+		"operation":   string(op),
+	})
+	result, diags := hook.PostWrite(ctx, r.providerMeta.InstanaAPI, op, plan, priorState, written)
+	if diags.HasError() {
+		tflog.Error(ctx, "Post write hook failed", map[string]interface{}{
+			"resource_id": written.GetIDForResourcePath(),
+			"operation":   string(op),
+		})
+	}
+	return result, diags
 }
 
 // Delete defines the delete operation for the terraform resource
@@ -485,7 +516,7 @@ func (r *terraformSingletonResourceImpl[T]) Create(ctx context.Context, req reso
 		return
 	}
 
- 	finalObj, ok := r.applyPostUpsertVerification(&resp.Diagnostics, upserted)
+	finalObj, ok := r.applyPostUpsertVerification(&resp.Diagnostics, upserted)
 	if !ok {
 		return
 	}
@@ -624,4 +655,3 @@ func (r *terraformSingletonResourceImpl[T]) UpgradeState(ctx context.Context) ma
 
 const providerNotConfiguredDetail = "The provider hasn't been configured before apply, " +
 	"likely because it depends on an unknown value from another resource."
-

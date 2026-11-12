@@ -96,6 +96,12 @@ func buildInfraAlertConfigSchema() schema.Schema {
 				Computed:    true,
 				Default:     booldefault.StaticBool(false),
 			},
+			InfraAlertConfigFieldEnabled: schema.BoolAttribute{
+				Description: InfraAlertConfigDescEnabled,
+				Optional:    true,
+				Computed:    true,
+				Default:     booldefault.StaticBool(InfraAlertConfigDefaultEnabled),
+			},
 			InfraAlertConfigFieldCustomPayloadField: shared.GetCustomPayloadFieldsSchema(),
 			InfraAlertConfigFieldRules:              buildRulesSchema(),
 			InfraAlertConfigFieldAlertChannels:      buildAlertChannelsSchema(),
@@ -237,6 +243,24 @@ func (r *infraAlertConfigResource) SetComputedFields(_ context.Context, _ *tfsdk
 	return nil
 }
 
+// PostWrite implements resourcehandle.PostWriteHook. The enabled flag is not part of the create/update
+// payload of the infra alert config API, therefore the dedicated {id}/enable or {id}/disable endpoint
+// is called after create/update whenever the desired value differs from the current value.
+func (r *infraAlertConfigResource) PostWrite(ctx context.Context, apiClient client.InstanaAPI, op resourcehandle.Operation, plan *tfsdk.Plan, priorState *tfsdk.State, written *api.InfraAlertConfig) (*api.InfraAlertConfig, diag.Diagnostics) {
+	enabled, diags := shared.SyncEnabled(ctx, shared.EnabledSyncParams{
+		APIClient:  apiClient,
+		BasePath:   api.InfraAlertConfigResourcePath,
+		ID:         written.ID,
+		Label:      "infra alert config",
+		Operation:  string(op),
+		Plan:       plan,
+		PriorState: priorState,
+		APIValue:   written.Enabled,
+	})
+	written.Enabled = &enabled
+	return written, diags
+}
+
 // UpdateState updates the Terraform state with data from the API response
 func (r *infraAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk.State, plan *tfsdk.Plan, resource *api.InfraAlertConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
@@ -261,6 +285,10 @@ func (r *infraAlertConfigResource) UpdateState(ctx context.Context, state *tfsdk
 
 	model.EvaluationType = types.StringValue(string(resource.EvaluationType))
 	model.Triggering = types.BoolValue(resource.Triggering)
+
+	// enabled is returned by the API but only changed through the enable/disable endpoints.
+	// If the API does not return it, preserve the planned/stored value (default: enabled).
+	model.Enabled = shared.EnabledToModel(resource.Enabled, model.Enabled)
 
 	// to preserve the existing value in plan/state to handle the value drift
 	if model.TagFilter.IsNull() || model.TagFilter.IsUnknown() {

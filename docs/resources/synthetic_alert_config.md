@@ -213,6 +213,7 @@ terraform apply
 * `grace_period` - Optional - Duration in milliseconds for which an alert remains open after conditions are no longer violated. The alert auto-closes once the grace period expires
 * `custom_payload_fields` - Optional - List of custom payload fields to include in alert notifications [Details](#custom-payload-fields-reference)
 * `include_on_demand` - Optional - Flag to toggle whether on-demand synthetic test executions trigger alert evaluations alongside scheduled runs. Default: `false`
+* `enabled` - Optional - Flag to enable or disable the alert configuration. Default: `true`. Changing this value calls the dedicated `enable`/`disable` endpoint of the alert configuration after the create/update request.
 * `evaluation_type` - Optional - The evaluation type for the synthetic alert. Supported values: `PER_LOCATION`, `PER_SYNTHETIC_TEST`. Default: `PER_SYNTHETIC_TEST`
 * `affected_locations_count` - Optional - The threshold number of failing PoP locations (>= 1). Defaults to `1` when `evaluation_type` is `PER_SYNTHETIC_TEST`
 

@@ -20,6 +20,7 @@ type InfraAlertConfigModel struct {
 	Rules              *InfraRulesModel         `tfsdk:"rules"`
 	EvaluationType     types.String             `tfsdk:"evaluation_type"`
 	Triggering         types.Bool               `tfsdk:"triggering"`
+	Enabled            types.Bool               `tfsdk:"enabled"`
 }
 
 // InfraAlertChannelsModel represents the alert channels model

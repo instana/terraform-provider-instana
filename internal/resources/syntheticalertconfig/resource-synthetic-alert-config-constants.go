@@ -29,6 +29,8 @@ const (
 	SyntheticAlertConfigFieldID = "id"
 	// SyntheticAlertConfigFieldCustomPayloadField constant value for the schema field custom_payload_field
 	SyntheticAlertConfigFieldCustomPayloadField = "custom_payload_field"
+	// SyntheticAlertConfigFieldEnabled constant value for the schema field enabled
+	SyntheticAlertConfigFieldEnabled = "enabled"
 	// SyntheticAlertConfigFieldIncludeOnDemand constant value for the schema field include_on_demand
 	SyntheticAlertConfigFieldIncludeOnDemand = "include_on_demand"
 	// SyntheticAlertConfigFieldEvaluationType constant value for the schema field evaluation_type
@@ -86,6 +88,8 @@ const (
 	SyntheticAlertConfigDescTimeThresholdType = "The type of the time threshold (only violationsInSequence is supported)."
 	// SyntheticAlertConfigDescTimeThresholdViolationsCount description for the time threshold violations_count field
 	SyntheticAlertConfigDescTimeThresholdViolationsCount = "The number of violations required to trigger the alert (value between 1 and 12)."
+	// SyntheticAlertConfigDescEnabled description for the enabled field
+	SyntheticAlertConfigDescEnabled = "Flag to enable or disable the alert configuration. The alert configuration is enabled by default."
 	// SyntheticAlertConfigDescIncludeOnDemand description for the include_on_demand field
 	SyntheticAlertConfigDescIncludeOnDemand = "Flag to toggle whether on-demand synthetic test executions trigger alert evaluations alongside scheduled runs."
 	// SyntheticAlertConfigDescEvaluationType description for the evaluation_type field

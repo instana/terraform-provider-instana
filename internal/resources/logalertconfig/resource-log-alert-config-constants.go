@@ -15,6 +15,8 @@ const (
 	LogAlertConfigFieldDescription = "description"
 	// LogAlertConfigFieldAlertChannels constant value for the schema field alert_channels
 	LogAlertConfigFieldAlertChannels = "alert_channels"
+	// LogAlertConfigFieldEnabled constant value for the schema field enabled
+	LogAlertConfigFieldEnabled = "enabled"
 	// LogAlertConfigFieldGracePeriod constant value for the schema field grace_period
 	LogAlertConfigFieldGracePeriod = "grace_period"
 	// LogAlertConfigFieldGroupBy constant value for the schema field group_by
@@ -83,6 +85,8 @@ const (
 	LogAlertConfigDescName = "Name for the Log alert configuration"
 	// LogAlertConfigDescDescription description for the description field
 	LogAlertConfigDescDescription = "The description text of the Log alert config"
+	// LogAlertConfigDescEnabled description for the enabled field
+	LogAlertConfigDescEnabled = "Flag to enable or disable the alert configuration. The alert configuration is enabled by default."
 	// LogAlertConfigDescGracePeriod description for the grace_period field
 	LogAlertConfigDescGracePeriod = "The duration in milliseconds for which an alert remains open after conditions are no longer violated, with the alert auto-closing once the grace period expires."
 	// LogAlertConfigDescGranularity description for the granularity field

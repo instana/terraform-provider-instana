@@ -46,6 +46,8 @@ const (
 	SloAlertConfigDescDescription = "The description of the SLO Alert config"
 	// SloAlertConfigDescSeverity is the description for the severity field
 	SloAlertConfigDescSeverity = "The severity of the alert when triggered"
+	// SloAlertConfigDescEnabled is the description for the enabled field
+	SloAlertConfigDescEnabled = "Flag to enable or disable the alert configuration. The alert configuration is enabled by default."
 	// SloAlertConfigDescTriggering is the description for the triggering field
 	SloAlertConfigDescTriggering = "Optional flag to indicate whether also an Incident is triggered or not. The default is false"
 	// SloAlertConfigDescAlertType is the description for the alert_type field
@@ -151,6 +153,8 @@ const (
 	SchemaFieldSeverity = "severity"
 	// SchemaFieldTriggering represents the triggering field identifier
 	SchemaFieldTriggering = "triggering"
+	// SchemaFieldEnabled represents the enabled field identifier
+	SchemaFieldEnabled = "enabled"
 	// SchemaFieldAlertType represents the alert_type field identifier
 	SchemaFieldAlertType = "alert_type"
 	// SchemaFieldSloIds represents the slo_ids field identifier
