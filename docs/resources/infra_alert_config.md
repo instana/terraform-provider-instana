@@ -395,7 +395,7 @@ terraform apply
 * `description` - Required - The description text of the infrastructure alert config
 * `granularity` - Required - The evaluation granularity used for detection of violations of the defined threshold. In other words, it defines the size of the tumbling window used. Allowed values: `300000`, `600000`, `900000`, `1200000`, `1800000` (milliseconds)
 * `grace_period` - Optional - The duration in milliseconds for which an alert remains open after conditions are no longer violated. The alert automatically closes once the grace period expires.
-* `evaluation_type` - Required - The evaluation type of the infrastructure alert config. Allowed values:
+* `evaluation_type` - Optional - The evaluation type of the infrastructure alert config. Allowed values:
   * `CUSTOM` - Combine all metrics in scope into a single metric per group (default)
   * `PER_ENTITY` - Monitor each metric individually and trigger alerts for each individual entity
 * `triggering` - Optional - Indicates whether the alert should be triggered. Default: `false`
@@ -491,7 +491,7 @@ tag_filter = "beacon.meta:'stage'@na EQUALS 'production'"
 
 Each list item contains:
 
-* `generic_rule` - Optional - A generic rule based on a custom aggregated metric [Details](#generic-rule-argument-reference)
+* `generic_rule` - Required - A generic rule based on a custom aggregated metric [Details](#generic-rule-argument-reference)
 
 #### Generic Rule Argument Reference 
 

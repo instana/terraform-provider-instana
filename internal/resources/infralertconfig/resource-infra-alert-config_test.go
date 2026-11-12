@@ -29,6 +29,19 @@ func TestNewInfraAlertConfigResourceHandle(t *testing.T) {
 	assert.Equal(t, int64(3), metaData.SchemaVersion)
 }
 
+func TestRulesSchema_GenericRuleIsRequired(t *testing.T) {
+	genericRule, exists := buildRulesSchema().NestedObject.Attributes[InfraAlertConfigFieldGenericRule]
+	require.True(t, exists)
+	assert.True(t, genericRule.IsRequired(), "generic_rule must be required so rules = [{}] is rejected at validation time")
+	assert.False(t, genericRule.IsOptional())
+}
+
+func TestV2RulesSchema_GenericRuleRemainsOptional(t *testing.T) {
+	genericRule, exists := buildV2RulesSchema().Attributes[InfraAlertConfigFieldGenericRule]
+	require.True(t, exists)
+	assert.True(t, genericRule.IsOptional(), "v2 prior schema must stay unchanged for the state upgrader")
+}
+
 func TestMetaData(t *testing.T) {
 	resource := &infraAlertConfigResource{
 		metaData: resourcehandle.ResourceMetaData{
