@@ -84,7 +84,12 @@ func buildInfraAlertConfigSchema() schema.Schema {
 			},
 			InfraAlertConfigFieldEvaluationType: schema.StringAttribute{
 				Description: InfraAlertConfigDescEvaluationType,
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
+				Default:     stringdefault.StaticString(string(api.EvaluationTypeCustom)),
+				Validators: []validator.String{
+					stringvalidator.OneOf(api.SupportedInfraAlertEvaluationTypes.ToStringSlice()...),
+				},
 			},
 			InfraAlertConfigFieldTriggering: schema.BoolAttribute{
 				Description: InfraAlertConfigDescTriggering,
@@ -111,6 +116,14 @@ func buildInfraAlertConfigSchema() schema.Schema {
 
 // buildRulesSchema constructs the schema for rules configuration as a list (max 5 items)
 func buildRulesSchema() schema.ListNestedAttribute {
+	// genericRule is the only rule type supported by the Instana backend for Infrastructure
+	// Smart Alerts, so every list entry must set it. Otherwise an empty entry (rules = [{}])
+	// would be dropped when mapping to the API and cause an inconsistent result after apply.
+	// The shared schema is Optional because the v2 prior schema reuses it.
+	genericRule := buildGenericRuleSchema()
+	genericRule.Required = true
+	genericRule.Optional = false
+
 	return schema.ListNestedAttribute{
 		Description: InfraAlertConfigDescRules,
 		Optional:    true,
@@ -119,7 +132,7 @@ func buildRulesSchema() schema.ListNestedAttribute {
 		},
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: map[string]schema.Attribute{
-				InfraAlertConfigFieldGenericRule: buildGenericRuleSchema(),
+				InfraAlertConfigFieldGenericRule: genericRule,
 			},
 		},
 	}
