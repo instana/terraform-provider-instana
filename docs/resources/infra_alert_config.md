@@ -15,7 +15,7 @@ Starting with provider version **v7.10.0**, the `rules` attribute has transition
 
 If you are upgrading an existing configuration, wrap your `rules` definition in square brackets `[ ... ]`:
 
-##### Before (v6.0.0 – v7.8.1):
+##### Before (v6.0.0 – v7.9.4):
 ```hcl
 rules = {
   generic_rule = {
