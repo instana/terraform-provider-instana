@@ -4,24 +4,68 @@ Configuration of custom event specifications for monitoring infrastructure and a
 
 API Documentation: <https://instana.github.io/openapi/#operation/putCustomEventSpecification>
 
-## ⚠️ BREAKING CHANGES - Plugin Framework Migration (v6.0.0)
+## ⚠️ BREAKING CHANGES
 
- **This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**.While the basic structure remains similar, there are important syntax changes for block structure.
+### Multi-Rule Support (v7.10.0+)
 
-## Migration Guide (v5 to v6)
+Starting with provider version **v7.10.0**, the `threshold` rule inside `rules` has transitioned from a **single nested object** to a **list of objects** (`ListNestedAttribute`) to support multiple threshold rules (1–5 rules) combined with `rule_logical_operator` (`AND`/`OR`). The other rule types (`entity_count`, `entity_count_verification`, `entity_verification`, `host_availability`, `system`) are unchanged.
+
+#### Upgrading Configurations to v7.10.0+
+
+If you are upgrading an existing configuration that uses a `threshold` rule, wrap your `threshold` definition in square brackets `[ ... ]`:
+
+##### Before (v6.0.0 – v7.9.4):
+```hcl
+rules = {
+  threshold = {
+    severity           = "critical"
+    metric_name        = "cpu.usage"
+    rollup             = 0
+    window             = 60000
+    aggregation        = "avg"
+    condition_operator = ">"
+    condition_value    = 1.0
+  }
+}
+```
+
+##### After (v7.10.0+):
+```hcl
+rules = {
+  threshold = [
+    {
+      severity           = "critical"
+      metric_name        = "cpu.usage"
+      rollup             = 0
+      window             = 60000
+      aggregation        = "avg"
+      condition_operator = ">"
+      condition_value    = 1.0
+    }
+  ]
+}
+```
+
+> **State Migration Note**: Existing Terraform state files are automatically upgraded from schema version 1 to 2 via the provider's built-in state upgrader. Only your `.tf` configuration files need to be updated.
+
+---
+
+### Plugin Framework Migration (v6.0.0)
+
+**This resource has been migrated from Terraform SDK v2 to the Terraform Plugin Framework**. The schema has transitioned from **block structure to attribute format**. While the basic structure remains similar, there are important syntax changes for block structure.
 
 For detailed migration instructions and examples, see the [Plugin Framework Migration Guide](https://github.com/instana/terraform-provider-instana/blob/main/PLUGIN-FRAMEWORK-MIGRATION.md).
 
-### Syntax Changes Overview
+#### Syntax Changes Overview (v5 to v6)
 
 The main change is in how the `rules` block is defined. In v6, nested rule configurations use attribute syntax instead of block syntax.
 
-#### OLD (v5.x) Syntax:
+##### OLD (v5.x) Syntax:
 ```hcl
 resource "instana_custom_event_specification" "example" {
   name = "threshold-alert"
   
-  rules {  
+  rules {
     threshold {
       severity = "critical"
       metric_name = "cpu.usage"
@@ -31,27 +75,31 @@ resource "instana_custom_event_specification" "example" {
 }
 ```
 
-#### NEW (v6.x) Syntax:
+##### NEW (v6.x) Syntax:
 ```hcl
 resource "instana_custom_event_specification" "example" {
   name        = "threshold-alert"
   entity_type = "host"
   rules = {
-    threshold = [
-      {
-        severity           = "critical"
-        metric_name        = "cpu.usage"
-        rollup             = 0
-        window             = 60000
-        aggregation        = "avg"
-        condition_operator = ">"
-        condition_value    = 1.0
-      }
-    ]
+    threshold = {
+      severity           = "critical"
+      metric_name        = "cpu.usage"
+      rollup             = 0
+      window             = 60000
+      aggregation        = "avg"
+      condition_operator = ">"
+      condition_value    = 1.0
+    }
   }
   expiration_time = 600000
 }
 ```
+
+#### Key Syntax Changes (v5 to v6)
+
+1. **Rules**: `rules { }` → `rules = { }`
+2. **Threshold rule**: `threshold { }` → `threshold = { }` *(Note: further updated to a list `threshold = [{ }]` in v7.10.0+)*
+3. **All nested objects**: Use `= { }` syntax
 
 ## Example Usage
 
