@@ -586,15 +586,6 @@ func TestMapStateToDataObject_WithMultipleRules(t *testing.T) {
 		TransientEventThreshold:  types.Int64Value(300000),
 		TransientEventAlertMuted: types.BoolValue(false),
 		Rules: &RulesModel{
-			EntityCount: &EntityCountRuleModel{
-				Severity:          types.StringValue("warning"),
-				ConditionOperator: types.StringValue(">"),
-				ConditionValue:    types.Float64Value(5.0),
-			},
-			System: &SystemRuleModel{
-				Severity:     types.StringValue("critical"),
-				SystemRuleID: types.StringValue("sys-123"),
-			},
 			Threshold: []ThresholdRuleModel{
 				{
 					Severity:          types.StringValue("warning"),
@@ -605,6 +596,15 @@ func TestMapStateToDataObject_WithMultipleRules(t *testing.T) {
 					ConditionOperator: types.StringValue(">"),
 					ConditionValue:    types.Float64Value(75.0),
 				},
+				{
+					Severity:          types.StringValue("warning"),
+					MetricName:        types.StringValue("memory.used"),
+					Rollup:            types.Int64Value(60000),
+					Window:            types.Int64Value(300000),
+					Aggregation:       types.StringValue("avg"),
+					ConditionOperator: types.StringValue(">"),
+					ConditionValue:    types.Float64Value(80.0),
+				},
 			},
 		},
 	})
@@ -612,16 +612,12 @@ func TestMapStateToDataObject_WithMultipleRules(t *testing.T) {
 	result, diags := resource.MapStateToDataObject(ctx, nil, state)
 	require.False(t, diags.HasError())
 	require.NotNil(t, result)
-	require.Len(t, result.Rules, 3)
+	require.Len(t, result.Rules, 2)
 
-	// Verify all rule types are present
-	ruleTypes := make(map[string]bool)
+	// Only threshold rules are allowed when defining multiple rules
 	for _, rule := range result.Rules {
-		ruleTypes[rule.DType] = true
+		assert.Equal(t, api.ThresholdRuleType, rule.DType)
 	}
-	assert.True(t, ruleTypes[api.EntityCountRuleType])
-	assert.True(t, ruleTypes[api.SystemRuleType])
-	assert.True(t, ruleTypes[api.ThresholdRuleType])
 }
 
 func TestMapStateToDataObject_FromPlan(t *testing.T) {
@@ -1564,6 +1560,72 @@ func TestMapStateToDataObject_ValidationErrors(t *testing.T) {
 						ConditionOperator: types.StringValue(">"),
 						ConditionValue:    types.Float64Value(90.0),
 					},
+				},
+			},
+		})
+
+		_, diags := resource.MapStateToDataObject(ctx, nil, state)
+		assert.True(t, diags.HasError())
+		assert.Contains(t, diags.Errors()[0].Summary(), "Invalid Rules Configuration")
+	})
+
+	t.Run("single threshold rule combined with host availability rule", func(t *testing.T) {
+		state := createMockState(t, CustomEventSpecificationModel{
+			ID:                       types.StringValue("test-id"),
+			Name:                     types.StringValue("Invalid Config"),
+			EntityType:               types.StringValue("host"),
+			Triggering:               types.BoolValue(false),
+			Enabled:                  types.BoolValue(true),
+			RuleLogicalOperator:      types.StringValue("AND"),
+			TransientEventEnabled:    types.BoolValue(true),
+			TransientEventThreshold:  types.Int64Value(300000),
+			TransientEventAlertMuted: types.BoolValue(false),
+			Rules: &RulesModel{
+				HostAvailability: &HostAvailabilityRuleModel{
+					Severity:        types.StringValue("warning"),
+					OfflineDuration: types.Int64Value(60000),
+					CloseAfter:      types.Int64Value(60000),
+				},
+				Threshold: []ThresholdRuleModel{
+					{
+						Severity:          types.StringValue("warning"),
+						MetricName:        types.StringValue("cpu.used"),
+						Rollup:            types.Int64Value(0),
+						Window:            types.Int64Value(60000),
+						Aggregation:       types.StringValue("avg"),
+						ConditionOperator: types.StringValue(">"),
+						ConditionValue:    types.Float64Value(80.0),
+					},
+				},
+			},
+		})
+
+		_, diags := resource.MapStateToDataObject(ctx, nil, state)
+		assert.True(t, diags.HasError())
+		assert.Contains(t, diags.Errors()[0].Summary(), "Invalid Rules Configuration")
+	})
+
+	t.Run("multiple non-threshold rule types", func(t *testing.T) {
+		state := createMockState(t, CustomEventSpecificationModel{
+			ID:                       types.StringValue("test-id"),
+			Name:                     types.StringValue("Invalid Config"),
+			EntityType:               types.StringValue("host"),
+			Triggering:               types.BoolValue(false),
+			Enabled:                  types.BoolValue(true),
+			RuleLogicalOperator:      types.StringValue("AND"),
+			TransientEventEnabled:    types.BoolValue(true),
+			TransientEventThreshold:  types.Int64Value(300000),
+			TransientEventAlertMuted: types.BoolValue(false),
+			Rules: &RulesModel{
+				EntityCount: &EntityCountRuleModel{
+					Severity:          types.StringValue("warning"),
+					ConditionOperator: types.StringValue(">"),
+					ConditionValue:    types.Float64Value(5.0),
+				},
+				HostAvailability: &HostAvailabilityRuleModel{
+					Severity:        types.StringValue("warning"),
+					OfflineDuration: types.Int64Value(60000),
+					CloseAfter:      types.Int64Value(60000),
 				},
 			},
 		})

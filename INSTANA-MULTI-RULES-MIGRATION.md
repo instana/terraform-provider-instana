@@ -279,7 +279,7 @@ resource "instana_infra_alert_config" "multi_rule_alert" {
 See [Multiple Threshold Rules with Logical Operator](docs/resources/custom_event_specification.md) in the resource documentation for a full example. When configuring multiple threshold rules:
 
 - All threshold rules must share the same `severity`, `window` and `rollup`.
-- Multiple threshold rules cannot be combined with other rule types.
+- Threshold rules cannot be combined with other rule types. Only one rule in total is allowed unless all rules are of type `threshold`.
 - Entity types `application`, `service` and `endpoint` do not support multiple rules.
 - Combine them with `rule_logical_operator` (`AND` by default, or `OR`).
 

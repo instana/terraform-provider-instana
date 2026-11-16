@@ -632,16 +632,23 @@ func (r *customEventSpecificationResource) validateModel(model *CustomEventSpeci
 		return
 	}
 
-	hasOtherRules := model.Rules.EntityCount != nil ||
-		model.Rules.EntityCountVerification != nil ||
-		model.Rules.EntityVerification != nil ||
-		model.Rules.HostAvailability != nil ||
-		model.Rules.System != nil
+	otherRulesCount := 0
+	for _, present := range []bool{
+		model.Rules.EntityCount != nil,
+		model.Rules.EntityCountVerification != nil,
+		model.Rules.EntityVerification != nil,
+		model.Rules.HostAvailability != nil,
+		model.Rules.System != nil,
+	} {
+		if present {
+			otherRulesCount++
+		}
+	}
 
 	thresholdCount := len(model.Rules.Threshold)
 
 	// Validation 1: Multiple rules are allowed only for threshold rules and cannot be combined with other rule types
-	if thresholdCount > 1 && hasOtherRules {
+	if otherRulesCount > 0 && thresholdCount+otherRulesCount > 1 {
 		diags.AddError(
 			"Invalid Rules Configuration",
 			"Multiple rules are only supported for threshold rules and cannot be combined with other rule types.",

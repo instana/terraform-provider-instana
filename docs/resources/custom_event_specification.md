@@ -374,7 +374,7 @@ Use built-in Instana system rules for monitoring.
 
 Monitor metrics against defined thresholds. `threshold` is a list of 1 to 5 threshold rules (`threshold = [ { ... } ]`). When configuring multiple threshold rules:
 * All threshold rules must share the same `severity`, `window`, and `rollup`.
-* Multiple threshold rules cannot be combined with other rule types.
+* Threshold rules cannot be combined with other rule types (`entity_count`, `entity_count_verification`, `entity_verification`, `host_availability`, `system`). Only one rule in total is allowed unless all rules are of type `threshold`.
 * Entity types `application`, `service`, and `endpoint` do not support multiple rules.
 
 * `severity` - Required - The severity of the rule. Allowed values: `warning`, `critical`
