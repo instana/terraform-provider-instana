@@ -2,12 +2,16 @@ package infralertconfig
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/instana/instana-go-client/api"
 	"github.com/instana/instana-go-client/shared/rest"
 	tag "github.com/instana/instana-go-client/shared/tagfilter"
@@ -1923,3 +1927,211 @@ func TestUpdateState_WithMetricTagFilterExpression(t *testing.T) {
 	require.NotNil(t, model.Rules[0].GenericRule)
 	assert.False(t, model.Rules[0].GenericRule.MetricTagFilterExpression.IsNull())
 }
+
+const v2StateJSONTemplate = `{
+  "id": "abc",
+  "name": "n",
+  "description": "d",
+  "tag_filter": null,
+  "group_by": null,
+  "alert_channels": null,
+  "granularity": 600000,
+  "grace_period": null,
+  "time_threshold": {"violations_in_sequence": {"time_window": 600000}},
+  "custom_payload_field": [],
+  "rules": %RULES%,
+  "evaluation_type": "CUSTOM",
+  "triggering": false
+}`
+
+const v2RuleJSON = `{"generic_rule": {
+  "metric_name": "m", "entity_type": "host", "aggregation": "MEAN", "cross_series_aggregation": "MEAN",
+  "regex": false, "threshold_operator": ">=",
+  "threshold": {"warning": null, "critical": {"static": {"value": 90}, "adaptive_baseline": null}},
+  "metric_group_by": [], "metric_tag_filter_expression": null}}`
+
+func runV2Upgrade(t *testing.T, rulesJSON string) (InfraAlertConfigModel, *resource.UpgradeStateResponse) {
+	t.Helper()
+	ctx := context.Background()
+	r := &infraAlertConfigResource{}
+	upgrader, ok := r.GetStateUpgraders(ctx)[2]
+	require.True(t, ok, "a state upgrader for schema version 2 must be registered")
+	require.NotNil(t, upgrader.PriorSchema)
+
+	// v2 state never contained rule_logical_operator
+	_, hasOperator := upgrader.PriorSchema.Attributes[InfraAlertConfigFieldRuleLogicalOperator]
+	require.False(t, hasOperator, "v2 prior schema must not contain rule_logical_operator")
+
+	js := []byte(strings.Replace(v2StateJSONTemplate, "%RULES%", rulesJSON, 1))
+	raw := tfprotov6.RawState{JSON: js}
+	val, err := raw.UnmarshalWithOpts(upgrader.PriorSchema.Type().TerraformType(ctx), tfprotov6.UnmarshalOpts{})
+	require.NoError(t, err)
+
+	current := buildInfraAlertConfigSchema()
+	req := resource.UpgradeStateRequest{State: &tfsdk.State{Schema: *upgrader.PriorSchema, Raw: val}}
+	resp := &resource.UpgradeStateResponse{State: tfsdk.State{
+		Schema: current,
+		Raw:    tftypes.NewValue(current.Type().TerraformType(ctx), nil),
+	}}
+	upgrader.StateUpgrader(ctx, req, resp)
+
+	var model InfraAlertConfigModel
+	if !resp.Diagnostics.HasError() {
+		diags := resp.State.Get(ctx, &model)
+		require.False(t, diags.HasError(), "upgraded state must be readable with the v3 model: %v", diags)
+	}
+	return model, resp
+}
+
+func TestStateUpgraderV2_WrapsSingleRuleAndDefaultsOperator(t *testing.T) {
+	model, resp := runV2Upgrade(t, v2RuleJSON)
+	require.False(t, resp.Diagnostics.HasError(), "%v", resp.Diagnostics)
+
+	require.Len(t, model.Rules, 1)
+	require.NotNil(t, model.Rules[0].GenericRule)
+	assert.Equal(t, "m", model.Rules[0].GenericRule.MetricName.ValueString())
+	assert.Equal(t, "host", model.Rules[0].GenericRule.EntityType.ValueString())
+
+	assert.False(t, model.RuleLogicalOperator.IsNull(), "rule_logical_operator must not be null after upgrade")
+	assert.Equal(t, RuleLogicalOperatorAND, model.RuleLogicalOperator.ValueString())
+	assert.Equal(t, "abc", model.ID.ValueString())
+	assert.Equal(t, "CUSTOM", model.EvaluationType.ValueString())
+}
+
+func TestStateUpgraderV2_NullRulesBecomeEmptyList(t *testing.T) {
+	model, resp := runV2Upgrade(t, "null")
+	require.False(t, resp.Diagnostics.HasError(), "%v", resp.Diagnostics)
+
+	assert.NotNil(t, model.Rules)
+	assert.Empty(t, model.Rules)
+	assert.Equal(t, RuleLogicalOperatorAND, model.RuleLogicalOperator.ValueString())
+}
+
+func newGenericRuleModel(metricName string, tagFilter types.String) InfraRulesModel {
+	return InfraRulesModel{
+		GenericRule: &InfraGenericRuleModel{
+			MetricName:                types.StringValue(metricName),
+			EntityType:                types.StringValue("host"),
+			Aggregation:               types.StringValue(string(common.MeanAggregation)),
+			CrossSeriesAggregation:    types.StringValue(string(common.MeanAggregation)),
+			Regex:                     types.BoolValue(false),
+			ThresholdOperator:         types.StringValue(string(common.ThresholdOperatorGreaterThan)),
+			MetricGroupBy:             types.SetNull(types.StringType),
+			MetricTagFilterExpression: tagFilter,
+			ThresholdRule: &shared.ThresholdPluginModel{
+				Critical: &shared.ThresholdTypeModel{
+					Static: &shared.StaticTypeModel{Value: types.Float64Value(90)},
+				},
+			},
+		},
+	}
+}
+
+func newBaseModel(rules []InfraRulesModel, operator types.String) InfraAlertConfigModel {
+	return InfraAlertConfigModel{
+		ID:                  types.StringValue("test-id"),
+		Name:                types.StringValue("Test Infra Alert"),
+		Description:         types.StringValue("Test Description"),
+		Granularity:         types.Int64Value(600000),
+		EvaluationType:      types.StringValue(string(api.EvaluationTypePerEntity)),
+		TagFilter:           types.StringNull(),
+		GroupBy:             types.SetNull(types.StringType),
+		Rules:               rules,
+		RuleLogicalOperator: operator,
+		CustomPayloadField:  types.ListNull(shared.GetCustomPayloadFieldType()),
+	}
+}
+
+func TestMapStateToDataObject_RuleWithoutGenericRuleReturnsError(t *testing.T) {
+	ctx := context.Background()
+	resource := NewInfraAlertConfigResourceHandle()
+
+	state := createMockState(t, newBaseModel([]InfraRulesModel{
+		newGenericRuleModel("cpu.usage", types.StringNull()),
+		{GenericRule: nil},
+	}, types.StringValue(RuleLogicalOperatorAND)))
+
+	_, diags := resource.MapStateToDataObject(ctx, nil, &state)
+	require.True(t, diags.HasError(), "a rules entry without generic_rule must not be silently dropped")
+	assert.Contains(t, diags.Errors()[0].Detail(), "rules[1]")
+}
+
+// apiRuleWithFilter builds an API rule whose metric tag filter is parsed from the given expression.
+func apiRuleWithFilter(t *testing.T, r *infraAlertConfigResource, metricName, filter string) common.RuleWithThreshold[api.InfraAlertRule] {
+	t.Helper()
+	rule := common.RuleWithThreshold[api.InfraAlertRule]{
+		ThresholdOperator: common.ThresholdOperatorGreaterThan,
+		Rule: api.InfraAlertRule{
+			AlertType:              GenericRuleAlertType,
+			MetricName:             metricName,
+			EntityType:             "host",
+			Aggregation:            common.MeanAggregation,
+			CrossSeriesAggregation: common.MeanAggregation,
+		},
+		Thresholds: map[common.AlertSeverity]common.ThresholdRule{},
+	}
+	if filter != "" {
+		parsed, diags := r.mapModelTagFilterToAPI(types.StringValue(filter))
+		require.False(t, diags.HasError(), "%v", diags)
+		rule.Rule.MetricTagFilterExpression = parsed
+	}
+	return rule
+}
+
+func TestMapRulesToModel_MultipleRules(t *testing.T) {
+	ctx := context.Background()
+	r := &infraAlertConfigResource{}
+
+	apiRules := []common.RuleWithThreshold[api.InfraAlertRule]{
+		apiRuleWithFilter(t, r, "cpu.usage", ""),
+		apiRuleWithFilter(t, r, "memory.usage", ""),
+	}
+
+	result, diags := r.mapRulesToModel(ctx, apiRules, nil)
+	require.False(t, diags.HasError(), "%v", diags)
+	require.Len(t, result, 2)
+	assert.Equal(t, "cpu.usage", result[0].GenericRule.MetricName.ValueString())
+	assert.Equal(t, "memory.usage", result[1].GenericRule.MetricName.ValueString())
+}
+
+func TestMapRulesToModel_DoesNotSwapTagFilterWhenRulesReordered(t *testing.T) {
+	ctx := context.Background()
+	r := &infraAlertConfigResource{}
+
+	// The configuration declared [cpu (host filter), memory (pod filter)] but the API returns
+	// the rules in the opposite order.
+	existing := []InfraRulesModel{
+		newGenericRuleModel("cpu.usage", types.StringValue("entity.type EQUALS 'host'")),
+		newGenericRuleModel("memory.usage", types.StringValue("entity.type EQUALS 'pod'")),
+	}
+	apiRules := []common.RuleWithThreshold[api.InfraAlertRule]{
+		apiRuleWithFilter(t, r, "memory.usage", "entity.type EQUALS 'pod'"),
+		apiRuleWithFilter(t, r, "cpu.usage", "entity.type EQUALS 'host'"),
+	}
+
+	result, diags := r.mapRulesToModel(ctx, apiRules, existing)
+	require.False(t, diags.HasError(), "%v", diags)
+	require.Len(t, result, 2)
+
+	// Each filter must stay attached to the rule it belongs to, not to the rule at the same index.
+	assert.Equal(t, "memory.usage", result[0].GenericRule.MetricName.ValueString())
+	assert.Contains(t, result[0].GenericRule.MetricTagFilterExpression.ValueString(), "pod")
+	assert.Equal(t, "cpu.usage", result[1].GenericRule.MetricName.ValueString())
+	assert.Contains(t, result[1].GenericRule.MetricTagFilterExpression.ValueString(), "host")
+}
+
+func TestMapRulesToModel_RemoteTagFilterChangeIsDetected(t *testing.T) {
+	ctx := context.Background()
+	r := &infraAlertConfigResource{}
+
+	existing := []InfraRulesModel{newGenericRuleModel("cpu.usage", types.StringValue("entity.type EQUALS 'host'"))}
+	apiRules := []common.RuleWithThreshold[api.InfraAlertRule]{
+		apiRuleWithFilter(t, r, "cpu.usage", "entity.type EQUALS 'pod'"),
+	}
+
+	result, diags := r.mapRulesToModel(ctx, apiRules, existing)
+	require.False(t, diags.HasError(), "%v", diags)
+	require.Len(t, result, 1)
+	assert.Contains(t, result[0].GenericRule.MetricTagFilterExpression.ValueString(), "pod")
+}
+
