@@ -133,6 +133,11 @@ const (
 	InfraAlertConfigErrMappingTagFilter = "Error mapping tag filter"
 	// InfraAlertConfigErrMappingTagFilterMsg error message template for tag filter mapping failures
 	InfraAlertConfigErrMappingTagFilterMsg = "Failed to map tag filter: %s"
+	// InfraAlertConfigErrMissingGenericRule error title for a rules entry without generic_rule
+	InfraAlertConfigErrMissingGenericRule = "Missing generic_rule in rules"
+	// InfraAlertConfigErrMissingGenericRuleMsg error message template for a rules entry without generic_rule
+	InfraAlertConfigErrMissingGenericRuleMsg = "rules[%d] does not define generic_rule, which is required for every rule entry."
+
 	// InfraAlertConfigErrParsingTagFilter error title for tag filter parsing failures
 	InfraAlertConfigErrParsingTagFilter = "Error parsing tag filter"
 	// InfraAlertConfigErrParsingTagFilterMsg error message template for tag filter parsing failures
