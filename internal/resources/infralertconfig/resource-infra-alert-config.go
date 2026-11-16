@@ -69,10 +69,9 @@ func buildInfraAlertConfigSchema() schema.Schema {
 			InfraAlertConfigFieldGroupBy: schema.SetAttribute{
 				Description: InfraAlertConfigDescGroupBy,
 				Optional:    true,
+				Computed:    true,
 				ElementType: types.StringType,
-				Validators: []validator.Set{
-					setvalidator.SizeAtLeast(1),
-				},
+				Default:     setdefault.StaticValue(types.SetValueMust(types.StringType, []attr.Value{})),
 			},
 			InfraAlertConfigFieldGranularity: schema.Int64Attribute{
 				Description: InfraAlertConfigDescGranularity,
@@ -343,10 +342,11 @@ func (r *infraAlertConfigResource) mapTagFilterToModel(tagFilterExpression *tag.
 	return util.SetStringPointerToState(tagFilterString), diags
 }
 
-// mapGroupByToModel converts API group by slice to model representation
+// mapGroupByToModel converts API group by slice to model representation.
+// An empty or nil slice maps to an empty set to match the API default and schema default.
 func (r *infraAlertConfigResource) mapGroupByToModel(groupBy []string) types.Set {
 	if len(groupBy) == 0 {
-		return types.SetNull(types.StringType)
+		return types.SetValueMust(types.StringType, []attr.Value{})
 	}
 
 	groupByElements := make([]attr.Value, len(groupBy))
@@ -614,14 +614,12 @@ func (r *infraAlertConfigResource) mapModelTagFilterToAPI(tagFilter types.String
 
 // mapModelGroupByToAPI converts model group by to API representation
 func (r *infraAlertConfigResource) mapModelGroupByToAPI(ctx context.Context, groupBy types.Set) ([]string, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
 	if groupBy.IsNull() || groupBy.IsUnknown() {
-		return nil, diags
+		return []string{}, nil
 	}
 
 	var groupBySlice []string
-	diags.Append(groupBy.ElementsAs(ctx, &groupBySlice, false)...)
+	diags := groupBy.ElementsAs(ctx, &groupBySlice, false)
 	return groupBySlice, diags
 }
 
@@ -843,7 +841,12 @@ func (r *infraAlertConfigResource) GetStateUpgraders(ctx context.Context) map[in
 					Name:               v2State.Name,
 					Description:        v2State.Description,
 					TagFilter:          v2State.TagFilter,
-					GroupBy:            v2State.GroupBy,
+					GroupBy: func() types.Set {
+						if v2State.GroupBy.IsNull() || v2State.GroupBy.IsUnknown() {
+							return types.SetValueMust(types.StringType, []attr.Value{})
+						}
+						return v2State.GroupBy
+					}(),
 					AlertChannels:      v2State.AlertChannels,
 					Granularity:        v2State.Granularity,
 					GracePeriod:        v2State.GracePeriod,

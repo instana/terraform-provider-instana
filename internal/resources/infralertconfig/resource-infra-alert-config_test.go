@@ -1031,7 +1031,8 @@ func TestUpdateState_WithEmptyGroupBy(t *testing.T) {
 	diags = state.Get(ctx, &model)
 	require.False(t, diags.HasError())
 
-	assert.True(t, model.GroupBy.IsNull())
+	assert.False(t, model.GroupBy.IsNull())
+	assert.Empty(t, model.GroupBy.Elements())
 }
 
 func TestUpdateState_WithNullTimeThreshold(t *testing.T) {
@@ -1654,7 +1655,8 @@ func TestUpdateState_WithEmptyGroupByList(t *testing.T) {
 	diags = state.Get(ctx, &model)
 	require.False(t, diags.HasError())
 
-	assert.True(t, model.GroupBy.IsNull())
+	assert.False(t, model.GroupBy.IsNull())
+	assert.Empty(t, model.GroupBy.Elements())
 }
 
 func TestMapStateToDataObject_WithNullTimeWindowInTimeThreshold(t *testing.T) {
@@ -1757,6 +1759,55 @@ func TestMapStateToDataObject_WithRulesButNoThresholds(t *testing.T) {
 
 	// Rules without thresholds should have empty threshold map
 	assert.Empty(t, result.Rules[0].Thresholds)
+}
+
+func TestMapGroupByToModel(t *testing.T) {
+	r := &infraAlertConfigResource{}
+
+	t.Run("empty slice returns empty set", func(t *testing.T) {
+		result := r.mapGroupByToModel([]string{})
+		assert.False(t, result.IsNull())
+		assert.Equal(t, 0, len(result.Elements()))
+	})
+
+	t.Run("nil slice returns empty set", func(t *testing.T) {
+		result := r.mapGroupByToModel(nil)
+		assert.False(t, result.IsNull())
+		assert.Equal(t, 0, len(result.Elements()))
+	})
+
+	t.Run("populated slice returns set with values", func(t *testing.T) {
+		result := r.mapGroupByToModel([]string{"host.name", "zone"})
+		assert.False(t, result.IsNull())
+		assert.Equal(t, 2, len(result.Elements()))
+	})
+}
+
+func TestMapModelGroupByToAPI(t *testing.T) {
+	r := &infraAlertConfigResource{}
+	ctx := context.Background()
+
+	t.Run("null set returns empty slice", func(t *testing.T) {
+		result, diags := r.mapModelGroupByToAPI(ctx, types.SetNull(types.StringType))
+		assert.False(t, diags.HasError())
+		assert.Equal(t, []string{}, result)
+	})
+
+	t.Run("empty set returns empty slice", func(t *testing.T) {
+		emptySet := types.SetValueMust(types.StringType, []attr.Value{})
+		result, diags := r.mapModelGroupByToAPI(ctx, emptySet)
+		assert.False(t, diags.HasError())
+		assert.Equal(t, []string{}, result)
+	})
+
+	t.Run("populated set returns elements", func(t *testing.T) {
+		set := types.SetValueMust(types.StringType, []attr.Value{
+			types.StringValue("host.name"),
+		})
+		result, diags := r.mapModelGroupByToAPI(ctx, set)
+		assert.False(t, diags.HasError())
+		assert.Equal(t, []string{"host.name"}, result)
+	})
 }
 
 func TestMapMetricGroupByToModel(t *testing.T) {
