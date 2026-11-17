@@ -837,10 +837,10 @@ func (r *infraAlertConfigResource) GetStateUpgraders(ctx context.Context) map[in
 				}
 
 				newState := InfraAlertConfigModel{
-					ID:                 v2State.ID,
-					Name:               v2State.Name,
-					Description:        v2State.Description,
-					TagFilter:          v2State.TagFilter,
+					ID:          v2State.ID,
+					Name:        v2State.Name,
+					Description: v2State.Description,
+					TagFilter:   v2State.TagFilter,
 					GroupBy: func() types.Set {
 						if v2State.GroupBy.IsNull() || v2State.GroupBy.IsUnknown() {
 							return types.SetValueMust(types.StringType, []attr.Value{})

@@ -720,10 +720,10 @@ func TestMapStateToDataObject_WithRulesAndStaticThreshold(t *testing.T) {
 		Rules: []InfraRulesModel{
 			{
 				GenericRule: &InfraGenericRuleModel{
-					MetricName:             types.StringValue("cpu.usage"),
-					EntityType:             types.StringValue("host"),
-					Aggregation:            types.StringValue(string(common.SumAggregation)),
-					CrossSeriesAggregation: types.StringValue(string(common.MeanAggregation)),
+					MetricName:                types.StringValue("cpu.usage"),
+					EntityType:                types.StringValue("host"),
+					Aggregation:               types.StringValue(string(common.SumAggregation)),
+					CrossSeriesAggregation:    types.StringValue(string(common.MeanAggregation)),
 					Regex:                     types.BoolValue(false),
 					ThresholdOperator:         types.StringValue(string(common.ThresholdOperatorGreaterThan)),
 					MetricGroupBy:             types.SetNull(types.StringType),
@@ -777,10 +777,10 @@ func TestMapStateToDataObject_WithRulesAndAdaptiveBaselineThreshold(t *testing.T
 		Rules: []InfraRulesModel{
 			{
 				GenericRule: &InfraGenericRuleModel{
-					MetricName:             types.StringValue("memory.usage"),
-					EntityType:             types.StringValue("host"),
-					Aggregation:            types.StringValue(string(common.MeanAggregation)),
-					CrossSeriesAggregation: types.StringValue(string(common.MaxAggregation)),
+					MetricName:                types.StringValue("memory.usage"),
+					EntityType:                types.StringValue("host"),
+					Aggregation:               types.StringValue(string(common.MeanAggregation)),
+					CrossSeriesAggregation:    types.StringValue(string(common.MaxAggregation)),
 					Regex:                     types.BoolValue(true),
 					ThresholdOperator:         types.StringValue(string(common.ThresholdOperatorGreaterThan)),
 					MetricGroupBy:             types.SetNull(types.StringType),
@@ -832,10 +832,10 @@ func TestMapStateToDataObject_WithBothThresholds(t *testing.T) {
 		Rules: []InfraRulesModel{
 			{
 				GenericRule: &InfraGenericRuleModel{
-					MetricName:             types.StringValue("disk.usage"),
-					EntityType:             types.StringValue("host"),
-					Aggregation:            types.StringValue(string(common.SumAggregation)),
-					CrossSeriesAggregation: types.StringValue(string(common.SumAggregation)),
+					MetricName:                types.StringValue("disk.usage"),
+					EntityType:                types.StringValue("host"),
+					Aggregation:               types.StringValue(string(common.SumAggregation)),
+					CrossSeriesAggregation:    types.StringValue(string(common.SumAggregation)),
 					Regex:                     types.BoolValue(false),
 					ThresholdOperator:         types.StringValue(string(common.ThresholdOperatorGreaterThan)),
 					MetricGroupBy:             types.SetNull(types.StringType),
@@ -1150,16 +1150,16 @@ func TestMapStateToDataObject_WithNullRules(t *testing.T) {
 	resource := NewInfraAlertConfigResourceHandle()
 
 	state := createMockState(t, InfraAlertConfigModel{
-		ID:                 types.StringValue("test-id"),
-		Name:               types.StringValue("Test Infra Alert"),
-		Description:        types.StringValue("Test Description"),
-		Granularity:        types.Int64Value(600000),
-		EvaluationType:     types.StringValue(string(api.EvaluationTypePerEntity)),
-		TagFilter:          types.StringNull(),
-		GroupBy:            types.SetNull(types.StringType),
-		Rules:              nil,
+		ID:                  types.StringValue("test-id"),
+		Name:                types.StringValue("Test Infra Alert"),
+		Description:         types.StringValue("Test Description"),
+		Granularity:         types.Int64Value(600000),
+		EvaluationType:      types.StringValue(string(api.EvaluationTypePerEntity)),
+		TagFilter:           types.StringNull(),
+		GroupBy:             types.SetNull(types.StringType),
+		Rules:               nil,
 		RuleLogicalOperator: types.StringNull(),
-		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
+		CustomPayloadField:  types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
 
 	result, diags := resource.MapStateToDataObject(ctx, nil, &state)
@@ -1737,10 +1737,10 @@ func TestMapStateToDataObject_WithRulesButNoThresholds(t *testing.T) {
 		Rules: []InfraRulesModel{
 			{
 				GenericRule: &InfraGenericRuleModel{
-					MetricName:             types.StringValue("cpu.usage"),
-					EntityType:             types.StringValue("host"),
-					Aggregation:            types.StringValue(string(common.SumAggregation)),
-					CrossSeriesAggregation: types.StringValue(string(common.MeanAggregation)),
+					MetricName:                types.StringValue("cpu.usage"),
+					EntityType:                types.StringValue("host"),
+					Aggregation:               types.StringValue(string(common.SumAggregation)),
+					CrossSeriesAggregation:    types.StringValue(string(common.MeanAggregation)),
 					Regex:                     types.BoolValue(false),
 					ThresholdOperator:         types.StringValue(string(common.ThresholdOperatorGreaterThan)),
 					MetricGroupBy:             types.SetNull(types.StringType),
@@ -2185,4 +2185,3 @@ func TestMapRulesToModel_RemoteTagFilterChangeIsDetected(t *testing.T) {
 	require.Len(t, result, 1)
 	assert.Contains(t, result[0].GenericRule.MetricTagFilterExpression.ValueString(), "pod")
 }
-
