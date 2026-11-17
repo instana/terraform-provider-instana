@@ -1,3 +1,36 @@
+## [v8.0.0](https://github.com/instana/terraform-provider-instana/tree/v8.0.0) (2026-11-17)
+
+[Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.9.4...v8.0.0)
+
+**Breaking changes:**
+
+Three resources now support multiple rules in a single configuration. To enable this, `rules` (or the `threshold` rule inside `rules`) changed from a single nested object to a list of objects. **Existing `.tf` configurations must be updated by wrapping the affected definition in `[ ... ]`.** Attribute values do not change. See the [migration guide](INSTANA-MULTI-RULES-MIGRATION.md) for before/after examples.
+
+- `instana_infra_alert_config`: `rules = { ... }` is now `rules = [ { ... } ]`. A configuration can have 1-5 rules.
+- `instana_log_alert_config`: `rules = { ... }` is now `rules = [ { ... } ]`. At least one rule is required. The Instana API currently accepts exactly one rule, so configuring more than one is rejected at apply time.
+- `instana_custom_event_specification`: `rules = { threshold = { ... } }` is now `rules = { threshold = [ { ... } ] }`. A configuration can have 1-5 threshold rules. Other rule types (`entity_count`, `entity_count_verification`, `entity_verification`, `host_availability`, `system`) are unchanged.
+
+**State migration:**
+
+No manual state changes are needed. Built-in state upgraders run automatically the first time Terraform reads existing state with v8.0.0:
+
+- `instana_infra_alert_config`: schema version 2 → 3
+- `instana_log_alert_config`: schema version 1 → 2
+- `instana_custom_event_specification`: schema version 1 → 2
+
+Each upgrader wraps the existing single rule into a one-element list. After updating your `.tf` files, `terraform plan` should show no changes for the migrated resources.
+
+**Implemented enhancements:**
+
+- Multiple rules are combined with the top-level `rule_logical_operator` (`AND` or `OR`, default `AND`).
+- `instana_custom_event_specification`: when using multiple threshold rules, all rules must share the same `severity`, `window` and `rollup`. Threshold rules cannot be combined with other rule types, and the `application`, `service` and `endpoint` entity types do not support multiple rules.
+- Updated documentation for `instana_infra_alert_config`, `instana_log_alert_config` and `instana_custom_event_specification`, and updated the reference setup example to the new list syntax.
+
+**Merged pull requests:**
+
+- feat!: support multiple rules in infra_alert_config, log_alert_config and custom_event_specification [\#159](https://github.com/instana/terraform-provider-instana/pull/159) ([BlessyElza](https://github.com/BlessyElza))
+
+
 ## [v7.9.4](https://github.com/instana/terraform-provider-instana/tree/v7.9.4) (2026-11-10)
 
 [Full Changelog](https://github.com/instana/terraform-provider-instana/compare/v7.9.3...v7.9.4)
