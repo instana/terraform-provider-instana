@@ -2,7 +2,7 @@
 
 ## Overview
 
-Starting with provider version **v7.10.0**, three resources support **multiple rules** in a single configuration. To enable this, the `rules` attribute (or the `threshold` rule inside `rules`) changed from a **single nested object** to a **list of objects** (`ListNestedAttribute`). This is a **breaking change for your `.tf` files**. This guide walks you through how to **safely upgrade** your existing configurations.
+Starting with provider version **v8.0.0**, three resources support **multiple rules** in a single configuration. To enable this, the `rules` attribute (or the `threshold` rule inside `rules`) changed from a **single nested object** to a **list of objects** (`ListNestedAttribute`). This is a **breaking change for your `.tf` files**. This guide walks you through how to **safely upgrade** your existing configurations.
 
 | Resource | What changed | Rule limit | State schema version |
 |----------|--------------|------------|----------------------|
@@ -66,7 +66,7 @@ rules = {
 }
 ```
 
-##### After (v7.10.0+):
+##### After (v8.0.0+):
 ```hcl
 rules = [
   {
@@ -107,7 +107,7 @@ rules = {
 }
 ```
 
-##### After (v7.10.0+):
+##### After (v8.0.0+):
 ```hcl
 rules = [
   {
@@ -147,7 +147,7 @@ rules = {
 }
 ```
 
-##### After (v7.10.0+):
+##### After (v8.0.0+):
 ```hcl
 rules = {
   threshold = [
@@ -173,7 +173,7 @@ terraform {
   required_providers {
     instana = {
       source  = "instana/instana"
-      version = ">= 7.10.0"
+      version = ">= 8.0.0"
     }
   }
 }
@@ -204,7 +204,7 @@ terraform apply
 
 ## 💾 State Migration
 
-You **do not** need to edit or migrate your state manually. The provider's built-in state upgrader runs automatically the first time Terraform reads your state with v7.10.0+:
+You **do not** need to edit or migrate your state manually. The provider's built-in state upgrader runs automatically the first time Terraform reads your state with v8.0.0+:
 
 | Resource | Schema version upgrade | What the upgrader does |
 |----------|------------------------|------------------------|

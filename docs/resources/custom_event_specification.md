@@ -6,11 +6,11 @@ API Documentation: <https://instana.github.io/openapi/#operation/putCustomEventS
 
 ## ⚠️ BREAKING CHANGES
 
-### Multi-Rule Support (v7.10.0+)
+### Multi-Rule Support (v8.0.0+)
 
-Starting with provider version **v7.10.0**, the `threshold` rule inside `rules` has transitioned from a **single nested object** to a **list of objects** (`ListNestedAttribute`) to support multiple threshold rules (1–5 rules) combined with `rule_logical_operator` (`AND`/`OR`). The other rule types (`entity_count`, `entity_count_verification`, `entity_verification`, `host_availability`, `system`) are unchanged.
+Starting with provider version **v8.0.0**, the `threshold` rule inside `rules` has transitioned from a **single nested object** to a **list of objects** (`ListNestedAttribute`) to support multiple threshold rules (1–5 rules) combined with `rule_logical_operator` (`AND`/`OR`). The other rule types (`entity_count`, `entity_count_verification`, `entity_verification`, `host_availability`, `system`) are unchanged.
 
-#### Upgrading Configurations to v7.10.0+
+#### Upgrading Configurations to v8.0.0+
 
 If you are upgrading an existing configuration that uses a `threshold` rule, wrap your `threshold` definition in square brackets `[ ... ]`:
 
@@ -29,7 +29,7 @@ rules = {
 }
 ```
 
-##### After (v7.10.0+):
+##### After (v8.0.0+):
 ```hcl
 rules = {
   threshold = [
@@ -98,7 +98,7 @@ resource "instana_custom_event_specification" "example" {
 #### Key Syntax Changes (v5 to v6)
 
 1. **Rules**: `rules { }` → `rules = { }`
-2. **Threshold rule**: `threshold { }` → `threshold = { }` *(Note: further updated to a list `threshold = [{ }]` in v7.10.0+)*
+2. **Threshold rule**: `threshold { }` → `threshold = { }` *(Note: further updated to a list `threshold = [{ }]` in v8.0.0+)*
 3. **All nested objects**: Use `= { }` syntax
 
 ## Example Usage

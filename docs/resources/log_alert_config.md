@@ -7,13 +7,13 @@ API Documentation: <https://instana.github.io/openapi/#tag/Log-Alert-Configurati
 
 ## ⚠️ BREAKING CHANGES
 
-### Multi-Rule Support (v7.10.0+)
+### Multi-Rule Support (v8.0.0+)
 
-Starting with provider version **v7.10.0**, the `rules` attribute has transitioned from a **single nested object** to a **list of objects** (`ListNestedAttribute`). At least one rule is required.
+Starting with provider version **v8.0.0**, the `rules` attribute has transitioned from a **single nested object** to a **list of objects** (`ListNestedAttribute`). At least one rule is required.
 
 > **Note:** The Instana API currently accepts exactly one rule per log alert configuration (`minItems: 1`, `maxItems: 1`). Configuring more than one rule is rejected by the API at apply time until the backend lifts this limit.
 
-#### Upgrading Configurations to v7.10.0+
+#### Upgrading Configurations to v8.0.0+
 
 If you are upgrading an existing configuration, wrap your `rules` definition in square brackets `[ ... ]`:
 
@@ -34,7 +34,7 @@ rules = {
 }
 ```
 
-##### After (v7.10.0+):
+##### After (v8.0.0+):
 ```hcl
 rules = [
   {
@@ -158,7 +158,7 @@ resource "instana_log_alert_config" "example" {
 
 1. **Alert Channels**: `alert_channels { }` → `alert_channels = { }`
 2. **Group By**: Multiple `group_by { }` blocks → Single `group_by = [{ }]` list
-3. **Rules**: `rules { }` → `rules = { }` *(Note: further updated to a list `rules = [{ }]` in v7.10.0+)*
+3. **Rules**: `rules { }` → `rules = { }` *(Note: further updated to a list `rules = [{ }]` in v8.0.0+)*
 4. **Time Threshold**: `time_threshold { }` → `time_threshold = { }`
 5. **Custom Payload Fields**: Multiple `custom_payload_field { }` blocks → Single `custom_payload_field = [{ }]` list
 6. **All nested objects**: Use `= { }` syntax
