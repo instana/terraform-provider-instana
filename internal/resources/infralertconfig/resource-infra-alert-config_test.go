@@ -2,12 +2,16 @@ package infralertconfig
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/instana/instana-go-client/api"
 	"github.com/instana/instana-go-client/shared/rest"
 	tag "github.com/instana/instana-go-client/shared/tagfilter"
@@ -26,7 +30,20 @@ func TestNewInfraAlertConfigResourceHandle(t *testing.T) {
 	metaData := resource.MetaData()
 	assert.Equal(t, ResourceInstanaInfraAlertConfig, metaData.ResourceName)
 	assert.NotNil(t, metaData.Schema)
-	assert.Equal(t, int64(2), metaData.SchemaVersion)
+	assert.Equal(t, int64(3), metaData.SchemaVersion)
+}
+
+func TestRulesSchema_GenericRuleIsRequired(t *testing.T) {
+	genericRule, exists := buildRulesSchema().NestedObject.Attributes[InfraAlertConfigFieldGenericRule]
+	require.True(t, exists)
+	assert.True(t, genericRule.IsRequired(), "generic_rule must be required so rules = [{}] is rejected at validation time")
+	assert.False(t, genericRule.IsOptional())
+}
+
+func TestV2RulesSchema_GenericRuleRemainsOptional(t *testing.T) {
+	genericRule, exists := buildV2RulesSchema().Attributes[InfraAlertConfigFieldGenericRule]
+	require.True(t, exists)
+	assert.True(t, genericRule.IsOptional(), "v2 prior schema must stay unchanged for the state upgrader")
 }
 
 func TestMetaData(t *testing.T) {
@@ -411,19 +428,19 @@ func TestUpdateState_WithRulesAndStaticThreshold(t *testing.T) {
 	diags = state.Get(ctx, &model)
 	require.False(t, diags.HasError())
 
-	require.NotNil(t, model.Rules)
-	require.NotNil(t, model.Rules.GenericRule)
-	assert.Equal(t, "cpu.usage", model.Rules.GenericRule.MetricName.ValueString())
-	assert.Equal(t, "host", model.Rules.GenericRule.EntityType.ValueString())
-	assert.Equal(t, string(common.SumAggregation), model.Rules.GenericRule.Aggregation.ValueString())
-	assert.Equal(t, string(common.MeanAggregation), model.Rules.GenericRule.CrossSeriesAggregation.ValueString())
-	assert.False(t, model.Rules.GenericRule.Regex.ValueBool())
-	assert.Equal(t, string(common.ThresholdOperatorGreaterThan), model.Rules.GenericRule.ThresholdOperator.ValueString())
+	require.Len(t, model.Rules, 1)
+	require.NotNil(t, model.Rules[0].GenericRule)
+	assert.Equal(t, "cpu.usage", model.Rules[0].GenericRule.MetricName.ValueString())
+	assert.Equal(t, "host", model.Rules[0].GenericRule.EntityType.ValueString())
+	assert.Equal(t, string(common.SumAggregation), model.Rules[0].GenericRule.Aggregation.ValueString())
+	assert.Equal(t, string(common.MeanAggregation), model.Rules[0].GenericRule.CrossSeriesAggregation.ValueString())
+	assert.False(t, model.Rules[0].GenericRule.Regex.ValueBool())
+	assert.Equal(t, string(common.ThresholdOperatorGreaterThan), model.Rules[0].GenericRule.ThresholdOperator.ValueString())
 
-	require.NotNil(t, model.Rules.GenericRule.ThresholdRule)
-	require.NotNil(t, model.Rules.GenericRule.ThresholdRule.Warning)
-	require.NotNil(t, model.Rules.GenericRule.ThresholdRule.Warning.Static)
-	assert.Equal(t, float64(100), model.Rules.GenericRule.ThresholdRule.Warning.Static.Value.ValueFloat64())
+	require.NotNil(t, model.Rules[0].GenericRule.ThresholdRule)
+	require.NotNil(t, model.Rules[0].GenericRule.ThresholdRule.Warning)
+	require.NotNil(t, model.Rules[0].GenericRule.ThresholdRule.Warning.Static)
+	assert.Equal(t, float64(100), model.Rules[0].GenericRule.ThresholdRule.Warning.Static.Value.ValueFloat64())
 }
 
 func TestUpdateState_WithRulesAndAdaptiveBaselineThreshold(t *testing.T) {
@@ -477,13 +494,13 @@ func TestUpdateState_WithRulesAndAdaptiveBaselineThreshold(t *testing.T) {
 	diags = state.Get(ctx, &model)
 	require.False(t, diags.HasError())
 
-	require.NotNil(t, model.Rules)
-	require.NotNil(t, model.Rules.GenericRule)
-	require.NotNil(t, model.Rules.GenericRule.ThresholdRule)
-	require.NotNil(t, model.Rules.GenericRule.ThresholdRule.Critical)
-	require.NotNil(t, model.Rules.GenericRule.ThresholdRule.Critical.AdaptiveBaseline)
+	require.Len(t, model.Rules, 1)
+	require.NotNil(t, model.Rules[0].GenericRule)
+	require.NotNil(t, model.Rules[0].GenericRule.ThresholdRule)
+	require.NotNil(t, model.Rules[0].GenericRule.ThresholdRule.Critical)
+	require.NotNil(t, model.Rules[0].GenericRule.ThresholdRule.Critical.AdaptiveBaseline)
 
-	adaptiveModel := model.Rules.GenericRule.ThresholdRule.Critical.AdaptiveBaseline
+	adaptiveModel := model.Rules[0].GenericRule.ThresholdRule.Critical.AdaptiveBaseline
 	assert.Equal(t, float64(2.0), adaptiveModel.DeviationFactor.ValueFloat64())
 	assert.Equal(t, float64(0.5), adaptiveModel.Adaptability.ValueFloat64())
 	assert.Equal(t, "DAILY", adaptiveModel.Seasonality.ValueString())
@@ -700,20 +717,22 @@ func TestMapStateToDataObject_WithRulesAndStaticThreshold(t *testing.T) {
 		EvaluationType: types.StringValue(string(api.EvaluationTypePerEntity)),
 		TagFilter:      types.StringNull(),
 		GroupBy:        types.SetNull(types.StringType),
-		Rules: &InfraRulesModel{
-			GenericRule: &InfraGenericRuleModel{
-				MetricName:                types.StringValue("cpu.usage"),
-				EntityType:                types.StringValue("host"),
-				Aggregation:               types.StringValue(string(common.SumAggregation)),
-				CrossSeriesAggregation:    types.StringValue(string(common.MeanAggregation)),
-				Regex:                     types.BoolValue(false),
-				ThresholdOperator:         types.StringValue(string(common.ThresholdOperatorGreaterThan)),
-				MetricGroupBy:             types.SetValueMust(types.StringType, []attr.Value{}),
-				MetricTagFilterExpression: types.StringNull(),
-				ThresholdRule: &shared.ThresholdPluginModel{
-					Warning: &shared.ThresholdTypeModel{
-						Static: &shared.StaticTypeModel{
-							Value: types.Float64Value(100),
+		Rules: []InfraRulesModel{
+			{
+				GenericRule: &InfraGenericRuleModel{
+					MetricName:                types.StringValue("cpu.usage"),
+					EntityType:                types.StringValue("host"),
+					Aggregation:               types.StringValue(string(common.SumAggregation)),
+					CrossSeriesAggregation:    types.StringValue(string(common.MeanAggregation)),
+					Regex:                     types.BoolValue(false),
+					ThresholdOperator:         types.StringValue(string(common.ThresholdOperatorGreaterThan)),
+					MetricGroupBy:             types.SetNull(types.StringType),
+					MetricTagFilterExpression: types.StringNull(),
+					ThresholdRule: &shared.ThresholdPluginModel{
+						Warning: &shared.ThresholdTypeModel{
+							Static: &shared.StaticTypeModel{
+								Value: types.Float64Value(100),
+							},
 						},
 					},
 				},
@@ -755,22 +774,24 @@ func TestMapStateToDataObject_WithRulesAndAdaptiveBaselineThreshold(t *testing.T
 		EvaluationType: types.StringValue(string(api.EvaluationTypeCustom)),
 		TagFilter:      types.StringNull(),
 		GroupBy:        types.SetNull(types.StringType),
-		Rules: &InfraRulesModel{
-			GenericRule: &InfraGenericRuleModel{
-				MetricName:                types.StringValue("memory.usage"),
-				EntityType:                types.StringValue("host"),
-				Aggregation:               types.StringValue(string(common.MeanAggregation)),
-				CrossSeriesAggregation:    types.StringValue(string(common.MaxAggregation)),
-				Regex:                     types.BoolValue(true),
-				ThresholdOperator:         types.StringValue(string(common.ThresholdOperatorGreaterThan)),
-				MetricGroupBy:             types.SetValueMust(types.StringType, []attr.Value{}),
-				MetricTagFilterExpression: types.StringNull(),
-				ThresholdRule: &shared.ThresholdPluginModel{
-					Critical: &shared.ThresholdTypeModel{
-						AdaptiveBaseline: &shared.AdaptiveBaselineModel{
-							DeviationFactor: types.Float64Value(2.0),
-							Adaptability:    types.Float64Value(0.5),
-							Seasonality:     types.StringValue("DAILY"),
+		Rules: []InfraRulesModel{
+			{
+				GenericRule: &InfraGenericRuleModel{
+					MetricName:                types.StringValue("memory.usage"),
+					EntityType:                types.StringValue("host"),
+					Aggregation:               types.StringValue(string(common.MeanAggregation)),
+					CrossSeriesAggregation:    types.StringValue(string(common.MaxAggregation)),
+					Regex:                     types.BoolValue(true),
+					ThresholdOperator:         types.StringValue(string(common.ThresholdOperatorGreaterThan)),
+					MetricGroupBy:             types.SetNull(types.StringType),
+					MetricTagFilterExpression: types.StringNull(),
+					ThresholdRule: &shared.ThresholdPluginModel{
+						Critical: &shared.ThresholdTypeModel{
+							AdaptiveBaseline: &shared.AdaptiveBaselineModel{
+								DeviationFactor: types.Float64Value(2.0),
+								Adaptability:    types.Float64Value(0.5),
+								Seasonality:     types.StringValue("DAILY"),
+							},
 						},
 					},
 				},
@@ -808,25 +829,27 @@ func TestMapStateToDataObject_WithBothThresholds(t *testing.T) {
 		EvaluationType: types.StringValue(string(api.EvaluationTypePerEntity)),
 		TagFilter:      types.StringNull(),
 		GroupBy:        types.SetNull(types.StringType),
-		Rules: &InfraRulesModel{
-			GenericRule: &InfraGenericRuleModel{
-				MetricName:                types.StringValue("disk.usage"),
-				EntityType:                types.StringValue("host"),
-				Aggregation:               types.StringValue(string(common.SumAggregation)),
-				CrossSeriesAggregation:    types.StringValue(string(common.SumAggregation)),
-				Regex:                     types.BoolValue(false),
-				ThresholdOperator:         types.StringValue(string(common.ThresholdOperatorGreaterThan)),
-				MetricGroupBy:             types.SetValueMust(types.StringType, []attr.Value{}),
-				MetricTagFilterExpression: types.StringNull(),
-				ThresholdRule: &shared.ThresholdPluginModel{
-					Warning: &shared.ThresholdTypeModel{
-						Static: &shared.StaticTypeModel{
-							Value: types.Float64Value(80),
+		Rules: []InfraRulesModel{
+			{
+				GenericRule: &InfraGenericRuleModel{
+					MetricName:                types.StringValue("disk.usage"),
+					EntityType:                types.StringValue("host"),
+					Aggregation:               types.StringValue(string(common.SumAggregation)),
+					CrossSeriesAggregation:    types.StringValue(string(common.SumAggregation)),
+					Regex:                     types.BoolValue(false),
+					ThresholdOperator:         types.StringValue(string(common.ThresholdOperatorGreaterThan)),
+					MetricGroupBy:             types.SetNull(types.StringType),
+					MetricTagFilterExpression: types.StringNull(),
+					ThresholdRule: &shared.ThresholdPluginModel{
+						Warning: &shared.ThresholdTypeModel{
+							Static: &shared.StaticTypeModel{
+								Value: types.Float64Value(80),
+							},
 						},
-					},
-					Critical: &shared.ThresholdTypeModel{
-						Static: &shared.StaticTypeModel{
-							Value: types.Float64Value(95),
+						Critical: &shared.ThresholdTypeModel{
+							Static: &shared.StaticTypeModel{
+								Value: types.Float64Value(95),
+							},
 						},
 					},
 				},
@@ -1008,7 +1031,8 @@ func TestUpdateState_WithEmptyGroupBy(t *testing.T) {
 	diags = state.Get(ctx, &model)
 	require.False(t, diags.HasError())
 
-	assert.True(t, model.GroupBy.IsNull())
+	assert.False(t, model.GroupBy.IsNull())
+	assert.Empty(t, model.GroupBy.Elements())
 }
 
 func TestUpdateState_WithNullTimeThreshold(t *testing.T) {
@@ -1126,15 +1150,16 @@ func TestMapStateToDataObject_WithNullRules(t *testing.T) {
 	resource := NewInfraAlertConfigResourceHandle()
 
 	state := createMockState(t, InfraAlertConfigModel{
-		ID:                 types.StringValue("test-id"),
-		Name:               types.StringValue("Test Infra Alert"),
-		Description:        types.StringValue("Test Description"),
-		Granularity:        types.Int64Value(600000),
-		EvaluationType:     types.StringValue(string(api.EvaluationTypePerEntity)),
-		TagFilter:          types.StringNull(),
-		GroupBy:            types.SetNull(types.StringType),
-		Rules:              nil,
-		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
+		ID:                  types.StringValue("test-id"),
+		Name:                types.StringValue("Test Infra Alert"),
+		Description:         types.StringValue("Test Description"),
+		Granularity:         types.Int64Value(600000),
+		EvaluationType:      types.StringValue(string(api.EvaluationTypePerEntity)),
+		TagFilter:           types.StringNull(),
+		GroupBy:             types.SetNull(types.StringType),
+		Rules:               nil,
+		RuleLogicalOperator: types.StringNull(),
+		CustomPayloadField:  types.ListNull(shared.GetCustomPayloadFieldType()),
 	})
 
 	result, diags := resource.MapStateToDataObject(ctx, nil, &state)
@@ -1363,7 +1388,7 @@ func TestUpdateState_WithEmptyRules(t *testing.T) {
 	diags = state.Get(ctx, &model)
 	require.False(t, diags.HasError())
 
-	assert.Nil(t, model.Rules)
+	assert.Empty(t, model.Rules)
 }
 
 func TestUpdateState_WithBothThresholds(t *testing.T) {
@@ -1417,11 +1442,11 @@ func TestUpdateState_WithBothThresholds(t *testing.T) {
 	diags = state.Get(ctx, &model)
 	require.False(t, diags.HasError())
 
-	require.NotNil(t, model.Rules)
-	require.NotNil(t, model.Rules.GenericRule)
-	require.NotNil(t, model.Rules.GenericRule.ThresholdRule)
-	require.NotNil(t, model.Rules.GenericRule.ThresholdRule.Warning)
-	require.NotNil(t, model.Rules.GenericRule.ThresholdRule.Critical)
+	require.Len(t, model.Rules, 1)
+	require.NotNil(t, model.Rules[0].GenericRule)
+	require.NotNil(t, model.Rules[0].GenericRule.ThresholdRule)
+	require.NotNil(t, model.Rules[0].GenericRule.ThresholdRule.Warning)
+	require.NotNil(t, model.Rules[0].GenericRule.ThresholdRule.Critical)
 }
 
 func TestMapStateToDataObject_WithEmptyCustomPayloadFields(t *testing.T) {
@@ -1630,7 +1655,8 @@ func TestUpdateState_WithEmptyGroupByList(t *testing.T) {
 	diags = state.Get(ctx, &model)
 	require.False(t, diags.HasError())
 
-	assert.True(t, model.GroupBy.IsNull())
+	assert.False(t, model.GroupBy.IsNull())
+	assert.Empty(t, model.GroupBy.Elements())
 }
 
 func TestMapStateToDataObject_WithNullTimeWindowInTimeThreshold(t *testing.T) {
@@ -1708,17 +1734,19 @@ func TestMapStateToDataObject_WithRulesButNoThresholds(t *testing.T) {
 		EvaluationType: types.StringValue(string(api.EvaluationTypePerEntity)),
 		TagFilter:      types.StringNull(),
 		GroupBy:        types.SetNull(types.StringType),
-		Rules: &InfraRulesModel{
-			GenericRule: &InfraGenericRuleModel{
-				MetricName:                types.StringValue("cpu.usage"),
-				EntityType:                types.StringValue("host"),
-				Aggregation:               types.StringValue(string(common.SumAggregation)),
-				CrossSeriesAggregation:    types.StringValue(string(common.MeanAggregation)),
-				Regex:                     types.BoolValue(false),
-				ThresholdOperator:         types.StringValue(string(common.ThresholdOperatorGreaterThan)),
-				MetricGroupBy:             types.SetValueMust(types.StringType, []attr.Value{}),
-				MetricTagFilterExpression: types.StringNull(),
-				ThresholdRule:             nil,
+		Rules: []InfraRulesModel{
+			{
+				GenericRule: &InfraGenericRuleModel{
+					MetricName:                types.StringValue("cpu.usage"),
+					EntityType:                types.StringValue("host"),
+					Aggregation:               types.StringValue(string(common.SumAggregation)),
+					CrossSeriesAggregation:    types.StringValue(string(common.MeanAggregation)),
+					Regex:                     types.BoolValue(false),
+					ThresholdOperator:         types.StringValue(string(common.ThresholdOperatorGreaterThan)),
+					MetricGroupBy:             types.SetNull(types.StringType),
+					MetricTagFilterExpression: types.StringNull(),
+					ThresholdRule:             nil,
+				},
 			},
 		},
 		CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
@@ -1733,9 +1761,53 @@ func TestMapStateToDataObject_WithRulesButNoThresholds(t *testing.T) {
 	assert.Empty(t, result.Rules[0].Thresholds)
 }
 
-func getTestSchema() schema.Schema {
-	resource := NewInfraAlertConfigResourceHandle()
-	return resource.MetaData().Schema
+func TestMapGroupByToModel(t *testing.T) {
+	r := &infraAlertConfigResource{}
+
+	t.Run("empty slice returns empty set", func(t *testing.T) {
+		result := r.mapGroupByToModel([]string{})
+		assert.False(t, result.IsNull())
+		assert.Equal(t, 0, len(result.Elements()))
+	})
+
+	t.Run("nil slice returns empty set", func(t *testing.T) {
+		result := r.mapGroupByToModel(nil)
+		assert.False(t, result.IsNull())
+		assert.Equal(t, 0, len(result.Elements()))
+	})
+
+	t.Run("populated slice returns set with values", func(t *testing.T) {
+		result := r.mapGroupByToModel([]string{"host.name", "zone"})
+		assert.False(t, result.IsNull())
+		assert.Equal(t, 2, len(result.Elements()))
+	})
+}
+
+func TestMapModelGroupByToAPI(t *testing.T) {
+	r := &infraAlertConfigResource{}
+	ctx := context.Background()
+
+	t.Run("null set returns empty slice", func(t *testing.T) {
+		result, diags := r.mapModelGroupByToAPI(ctx, types.SetNull(types.StringType))
+		assert.False(t, diags.HasError())
+		assert.Equal(t, []string{}, result)
+	})
+
+	t.Run("empty set returns empty slice", func(t *testing.T) {
+		emptySet := types.SetValueMust(types.StringType, []attr.Value{})
+		result, diags := r.mapModelGroupByToAPI(ctx, emptySet)
+		assert.False(t, diags.HasError())
+		assert.Equal(t, []string{}, result)
+	})
+
+	t.Run("populated set returns elements", func(t *testing.T) {
+		set := types.SetValueMust(types.StringType, []attr.Value{
+			types.StringValue("host.name"),
+		})
+		result, diags := r.mapModelGroupByToAPI(ctx, set)
+		assert.False(t, diags.HasError())
+		assert.Equal(t, []string{"host.name"}, result)
+	})
 }
 
 func TestMapMetricGroupByToModel(t *testing.T) {
@@ -1787,6 +1859,10 @@ func TestMapModelMetricGroupByToAPI(t *testing.T) {
 	})
 }
 
+func getTestSchema() schema.Schema {
+	resource := NewInfraAlertConfigResourceHandle()
+	return resource.MetaData().Schema
+}
 func TestMapStateToDataObject_WithMetricTagFilterExpression(t *testing.T) {
 	ctx := context.Background()
 	resource := NewInfraAlertConfigResourceHandle()
@@ -1800,17 +1876,19 @@ func TestMapStateToDataObject_WithMetricTagFilterExpression(t *testing.T) {
 			EvaluationType: types.StringValue(string(api.EvaluationTypePerEntity)),
 			TagFilter:      types.StringNull(),
 			GroupBy:        types.SetNull(types.StringType),
-			Rules: &InfraRulesModel{
-				GenericRule: &InfraGenericRuleModel{
-					MetricName:                types.StringValue("cpu.usage"),
-					EntityType:                types.StringValue("host"),
-					Aggregation:               types.StringValue(string(common.SumAggregation)),
-					CrossSeriesAggregation:    types.StringValue(string(common.MeanAggregation)),
-					Regex:                     types.BoolValue(false),
-					ThresholdOperator:         types.StringValue(string(common.ThresholdOperatorGreaterThan)),
-					MetricGroupBy:             types.SetValueMust(types.StringType, []attr.Value{}),
-					MetricTagFilterExpression: types.StringValue("entity.type EQUALS 'host'"),
-					ThresholdRule:             nil,
+			Rules: []InfraRulesModel{
+				{
+					GenericRule: &InfraGenericRuleModel{
+						MetricName:                types.StringValue("cpu.usage"),
+						EntityType:                types.StringValue("host"),
+						Aggregation:               types.StringValue(string(common.SumAggregation)),
+						CrossSeriesAggregation:    types.StringValue(string(common.MeanAggregation)),
+						Regex:                     types.BoolValue(false),
+						ThresholdOperator:         types.StringValue(string(common.ThresholdOperatorGreaterThan)),
+						MetricGroupBy:             types.SetValueMust(types.StringType, []attr.Value{}),
+						MetricTagFilterExpression: types.StringValue("entity.type EQUALS 'host'"),
+						ThresholdRule:             nil,
+					},
 				},
 			},
 			CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
@@ -1832,17 +1910,19 @@ func TestMapStateToDataObject_WithMetricTagFilterExpression(t *testing.T) {
 			EvaluationType: types.StringValue(string(api.EvaluationTypePerEntity)),
 			TagFilter:      types.StringNull(),
 			GroupBy:        types.SetNull(types.StringType),
-			Rules: &InfraRulesModel{
-				GenericRule: &InfraGenericRuleModel{
-					MetricName:                types.StringValue("cpu.usage"),
-					EntityType:                types.StringValue("host"),
-					Aggregation:               types.StringValue(string(common.SumAggregation)),
-					CrossSeriesAggregation:    types.StringValue(string(common.MeanAggregation)),
-					Regex:                     types.BoolValue(false),
-					ThresholdOperator:         types.StringValue(string(common.ThresholdOperatorGreaterThan)),
-					MetricGroupBy:             types.SetValueMust(types.StringType, []attr.Value{}),
-					MetricTagFilterExpression: types.StringValue("invalid filter expression @@@"),
-					ThresholdRule:             nil,
+			Rules: []InfraRulesModel{
+				{
+					GenericRule: &InfraGenericRuleModel{
+						MetricName:                types.StringValue("cpu.usage"),
+						EntityType:                types.StringValue("host"),
+						Aggregation:               types.StringValue(string(common.SumAggregation)),
+						CrossSeriesAggregation:    types.StringValue(string(common.MeanAggregation)),
+						Regex:                     types.BoolValue(false),
+						ThresholdOperator:         types.StringValue(string(common.ThresholdOperatorGreaterThan)),
+						MetricGroupBy:             types.SetValueMust(types.StringType, []attr.Value{}),
+						MetricTagFilterExpression: types.StringValue("invalid filter expression @@@"),
+						ThresholdRule:             nil,
+					},
 				},
 			},
 			CustomPayloadField: types.ListNull(shared.GetCustomPayloadFieldType()),
@@ -1894,7 +1974,214 @@ func TestUpdateState_WithMetricTagFilterExpression(t *testing.T) {
 	diags = state.Get(ctx, &model)
 	require.False(t, diags.HasError())
 
-	require.NotNil(t, model.Rules)
-	require.NotNil(t, model.Rules.GenericRule)
-	assert.False(t, model.Rules.GenericRule.MetricTagFilterExpression.IsNull())
+	require.Len(t, model.Rules, 1)
+	require.NotNil(t, model.Rules[0].GenericRule)
+	assert.False(t, model.Rules[0].GenericRule.MetricTagFilterExpression.IsNull())
+}
+
+const v2StateJSONTemplate = `{
+  "id": "abc",
+  "name": "n",
+  "description": "d",
+  "tag_filter": null,
+  "group_by": null,
+  "alert_channels": null,
+  "granularity": 600000,
+  "grace_period": null,
+  "time_threshold": {"violations_in_sequence": {"time_window": 600000}},
+  "custom_payload_field": [],
+  "rules": %RULES%,
+  "evaluation_type": "CUSTOM",
+  "triggering": false
+}`
+
+const v2RuleJSON = `{"generic_rule": {
+  "metric_name": "m", "entity_type": "host", "aggregation": "MEAN", "cross_series_aggregation": "MEAN",
+  "regex": false, "threshold_operator": ">=",
+  "threshold": {"warning": null, "critical": {"static": {"value": 90}, "adaptive_baseline": null}},
+  "metric_group_by": [], "metric_tag_filter_expression": null}}`
+
+func runV2Upgrade(t *testing.T, rulesJSON string) (InfraAlertConfigModel, *resource.UpgradeStateResponse) {
+	t.Helper()
+	ctx := context.Background()
+	r := &infraAlertConfigResource{}
+	upgrader, ok := r.GetStateUpgraders(ctx)[2]
+	require.True(t, ok, "a state upgrader for schema version 2 must be registered")
+	require.NotNil(t, upgrader.PriorSchema)
+
+	// v2 state never contained rule_logical_operator
+	_, hasOperator := upgrader.PriorSchema.Attributes[InfraAlertConfigFieldRuleLogicalOperator]
+	require.False(t, hasOperator, "v2 prior schema must not contain rule_logical_operator")
+
+	js := []byte(strings.Replace(v2StateJSONTemplate, "%RULES%", rulesJSON, 1))
+	raw := tfprotov6.RawState{JSON: js}
+	val, err := raw.UnmarshalWithOpts(upgrader.PriorSchema.Type().TerraformType(ctx), tfprotov6.UnmarshalOpts{})
+	require.NoError(t, err)
+
+	current := buildInfraAlertConfigSchema()
+	req := resource.UpgradeStateRequest{State: &tfsdk.State{Schema: *upgrader.PriorSchema, Raw: val}}
+	resp := &resource.UpgradeStateResponse{State: tfsdk.State{
+		Schema: current,
+		Raw:    tftypes.NewValue(current.Type().TerraformType(ctx), nil),
+	}}
+	upgrader.StateUpgrader(ctx, req, resp)
+
+	var model InfraAlertConfigModel
+	if !resp.Diagnostics.HasError() {
+		diags := resp.State.Get(ctx, &model)
+		require.False(t, diags.HasError(), "upgraded state must be readable with the v3 model: %v", diags)
+	}
+	return model, resp
+}
+
+func TestStateUpgraderV2_WrapsSingleRuleAndDefaultsOperator(t *testing.T) {
+	model, resp := runV2Upgrade(t, v2RuleJSON)
+	require.False(t, resp.Diagnostics.HasError(), "%v", resp.Diagnostics)
+
+	require.Len(t, model.Rules, 1)
+	require.NotNil(t, model.Rules[0].GenericRule)
+	assert.Equal(t, "m", model.Rules[0].GenericRule.MetricName.ValueString())
+	assert.Equal(t, "host", model.Rules[0].GenericRule.EntityType.ValueString())
+
+	assert.False(t, model.RuleLogicalOperator.IsNull(), "rule_logical_operator must not be null after upgrade")
+	assert.Equal(t, RuleLogicalOperatorAND, model.RuleLogicalOperator.ValueString())
+	assert.Equal(t, "abc", model.ID.ValueString())
+	assert.Equal(t, "CUSTOM", model.EvaluationType.ValueString())
+}
+
+func TestStateUpgraderV2_NullRulesBecomeEmptyList(t *testing.T) {
+	model, resp := runV2Upgrade(t, "null")
+	require.False(t, resp.Diagnostics.HasError(), "%v", resp.Diagnostics)
+
+	assert.NotNil(t, model.Rules)
+	assert.Empty(t, model.Rules)
+	assert.Equal(t, RuleLogicalOperatorAND, model.RuleLogicalOperator.ValueString())
+}
+
+func newGenericRuleModel(metricName string, tagFilter types.String) InfraRulesModel {
+	return InfraRulesModel{
+		GenericRule: &InfraGenericRuleModel{
+			MetricName:                types.StringValue(metricName),
+			EntityType:                types.StringValue("host"),
+			Aggregation:               types.StringValue(string(common.MeanAggregation)),
+			CrossSeriesAggregation:    types.StringValue(string(common.MeanAggregation)),
+			Regex:                     types.BoolValue(false),
+			ThresholdOperator:         types.StringValue(string(common.ThresholdOperatorGreaterThan)),
+			MetricGroupBy:             types.SetNull(types.StringType),
+			MetricTagFilterExpression: tagFilter,
+			ThresholdRule: &shared.ThresholdPluginModel{
+				Critical: &shared.ThresholdTypeModel{
+					Static: &shared.StaticTypeModel{Value: types.Float64Value(90)},
+				},
+			},
+		},
+	}
+}
+
+func newBaseModel(rules []InfraRulesModel, operator types.String) InfraAlertConfigModel {
+	return InfraAlertConfigModel{
+		ID:                  types.StringValue("test-id"),
+		Name:                types.StringValue("Test Infra Alert"),
+		Description:         types.StringValue("Test Description"),
+		Granularity:         types.Int64Value(600000),
+		EvaluationType:      types.StringValue(string(api.EvaluationTypePerEntity)),
+		TagFilter:           types.StringNull(),
+		GroupBy:             types.SetNull(types.StringType),
+		Rules:               rules,
+		RuleLogicalOperator: operator,
+		CustomPayloadField:  types.ListNull(shared.GetCustomPayloadFieldType()),
+	}
+}
+
+func TestMapStateToDataObject_RuleWithoutGenericRuleReturnsError(t *testing.T) {
+	ctx := context.Background()
+	resource := NewInfraAlertConfigResourceHandle()
+
+	state := createMockState(t, newBaseModel([]InfraRulesModel{
+		newGenericRuleModel("cpu.usage", types.StringNull()),
+		{GenericRule: nil},
+	}, types.StringValue(RuleLogicalOperatorAND)))
+
+	_, diags := resource.MapStateToDataObject(ctx, nil, &state)
+	require.True(t, diags.HasError(), "a rules entry without generic_rule must not be silently dropped")
+	assert.Contains(t, diags.Errors()[0].Detail(), "rules[1]")
+}
+
+// apiRuleWithFilter builds an API rule whose metric tag filter is parsed from the given expression.
+func apiRuleWithFilter(t *testing.T, r *infraAlertConfigResource, metricName, filter string) common.RuleWithThreshold[api.InfraAlertRule] {
+	t.Helper()
+	rule := common.RuleWithThreshold[api.InfraAlertRule]{
+		ThresholdOperator: common.ThresholdOperatorGreaterThan,
+		Rule: api.InfraAlertRule{
+			AlertType:              GenericRuleAlertType,
+			MetricName:             metricName,
+			EntityType:             "host",
+			Aggregation:            common.MeanAggregation,
+			CrossSeriesAggregation: common.MeanAggregation,
+		},
+		Thresholds: map[common.AlertSeverity]common.ThresholdRule{},
+	}
+	if filter != "" {
+		parsed, diags := r.mapModelTagFilterToAPI(types.StringValue(filter))
+		require.False(t, diags.HasError(), "%v", diags)
+		rule.Rule.MetricTagFilterExpression = parsed
+	}
+	return rule
+}
+
+func TestMapRulesToModel_MultipleRules(t *testing.T) {
+	ctx := context.Background()
+	r := &infraAlertConfigResource{}
+
+	apiRules := []common.RuleWithThreshold[api.InfraAlertRule]{
+		apiRuleWithFilter(t, r, "cpu.usage", ""),
+		apiRuleWithFilter(t, r, "memory.usage", ""),
+	}
+
+	result, diags := r.mapRulesToModel(ctx, apiRules, nil)
+	require.False(t, diags.HasError(), "%v", diags)
+	require.Len(t, result, 2)
+	assert.Equal(t, "cpu.usage", result[0].GenericRule.MetricName.ValueString())
+	assert.Equal(t, "memory.usage", result[1].GenericRule.MetricName.ValueString())
+}
+
+func TestMapRulesToModel_DoesNotSwapTagFilterWhenRulesReordered(t *testing.T) {
+	ctx := context.Background()
+	r := &infraAlertConfigResource{}
+
+	// The configuration declared [cpu (host filter), memory (pod filter)] but the API returns
+	// the rules in the opposite order.
+	existing := []InfraRulesModel{
+		newGenericRuleModel("cpu.usage", types.StringValue("entity.type EQUALS 'host'")),
+		newGenericRuleModel("memory.usage", types.StringValue("entity.type EQUALS 'pod'")),
+	}
+	apiRules := []common.RuleWithThreshold[api.InfraAlertRule]{
+		apiRuleWithFilter(t, r, "memory.usage", "entity.type EQUALS 'pod'"),
+		apiRuleWithFilter(t, r, "cpu.usage", "entity.type EQUALS 'host'"),
+	}
+
+	result, diags := r.mapRulesToModel(ctx, apiRules, existing)
+	require.False(t, diags.HasError(), "%v", diags)
+	require.Len(t, result, 2)
+
+	// Each filter must stay attached to the rule it belongs to, not to the rule at the same index.
+	assert.Equal(t, "memory.usage", result[0].GenericRule.MetricName.ValueString())
+	assert.Contains(t, result[0].GenericRule.MetricTagFilterExpression.ValueString(), "pod")
+	assert.Equal(t, "cpu.usage", result[1].GenericRule.MetricName.ValueString())
+	assert.Contains(t, result[1].GenericRule.MetricTagFilterExpression.ValueString(), "host")
+}
+
+func TestMapRulesToModel_RemoteTagFilterChangeIsDetected(t *testing.T) {
+	ctx := context.Background()
+	r := &infraAlertConfigResource{}
+
+	existing := []InfraRulesModel{newGenericRuleModel("cpu.usage", types.StringValue("entity.type EQUALS 'host'"))}
+	apiRules := []common.RuleWithThreshold[api.InfraAlertRule]{
+		apiRuleWithFilter(t, r, "cpu.usage", "entity.type EQUALS 'pod'"),
+	}
+
+	result, diags := r.mapRulesToModel(ctx, apiRules, existing)
+	require.False(t, diags.HasError(), "%v", diags)
+	require.Len(t, result, 1)
+	assert.Contains(t, result[0].GenericRule.MetricTagFilterExpression.ValueString(), "pod")
 }
